@@ -1,0 +1,3298 @@
+{
+  "status": "ok",
+  "message-type": "work-list",
+  "message-version": "1.0.0",
+  "message": {
+    "facets": {},
+    "total-results": 166981,
+    "items": [
+      {
+        "indexed": {
+          "date-parts": [
+            [
+              2026,
+              1,
+              8
+            ]
+          ],
+          "date-time": "2026-01-08T20:53:32Z",
+          "timestamp": 1767905612721,
+          "version": "3.49.0"
+        },
+        "reference-count": 21,
+        "publisher": "Virtus Interpress",
+        "issue": "4-2",
+        "license": [
+          {
+            "start": {
+              "date-parts": [
+                [
+                  2018,
+                  9,
+                  5
+                ]
+              ],
+              "date-time": "2018-09-05T00:00:00Z",
+              "timestamp": 1536105600000
+            },
+            "content-version": "vor",
+            "delay-in-days": 2439,
+            "URL": "https://creativecommons.org/licenses/by-nc/4.0"
+          },
+          {
+            "start": {
+              "date-parts": [
+                [
+                  2018,
+                  9,
+                  5
+                ]
+              ],
+              "date-time": "2018-09-05T00:00:00Z",
+              "timestamp": 1536105600000
+            },
+            "content-version": "tdm",
+            "delay-in-days": 2439,
+            "URL": "https://creativecommons.org/licenses/by-nc/4.0"
+          }
+        ],
+        "content-domain": {
+          "domain": [],
+          "crossmark-restriction": false
+        },
+        "short-container-title": [
+          "COC"
+        ],
+        "published-print": {
+          "date-parts": [
+            [
+              2012
+            ]
+          ]
+        },
+        "abstract": "<jats:p>We use cross sectional data from the World Bank enterprise surveys gathered in 2007 in South Africa’s four cities (Johannesburg, Cape Town, Durban and Port Elizabeth) to assess the impact of business related crimes on firm performance proxied using firm sales. Using Ordinary Least Squares (OLS) and Tobit model, we find that crime in the form of theft, robbery, arson and vandalism has a negative effect on sales and hence firm performance. However the impact of domestic shipment crime is mixed and varies from city to city depending on the magnitude of losses incurred by firms in each city. Results also show that crime is regressive in nature because crime related losses are relatively higher among small firms than large firms. The prevalence of crime amongst small firms and its negative effect on firm performance suggest the need for government and the business community to come together and develop security systems that are effective and affordable to small businesses. This is because, supporting small businesses is important for growth and employment creation</jats:p>",
+        "DOI": "10.22495/cocv9i4c2art5",
+        "type": "journal-article",
+        "created": {
+          "date-parts": [
+            [
+              2017,
+              2,
+              5
+            ]
+          ],
+          "date-time": "2017-02-05T21:56:13Z",
+          "timestamp": 1486331773000
+        },
+        "page": "241-252",
+        "source": "Crossref",
+        "is-referenced-by-count": 6,
+        "title": [
+          "Crime, security and firm performance in South Africa"
+        ],
+        "prefix": "10.22495",
+        "volume": "9",
+        "author": [
+          {
+            "ORCID": "https://orcid.org/0000-0002-5194-2343",
+            "authenticated-orcid": false,
+            "given": "Busani",
+            "family": "Moyo",
+            "sequence": "first",
+            "affiliation": []
+          }
+        ],
+        "member": "9787",
+        "published-online": {
+          "date-parts": [
+            [
+              2012
+            ]
+          ]
+        },
+        "reference": [
+          {
+            "key": "ref0",
+            "unstructured": "Amin M (2009a): Crime Security and firms in Latin America. World Bank enterprise Note number 2."
+          },
+          {
+            "key": "ref1",
+            "unstructured": "Amin M (2009b): Crime Security and firms in Eastern Europe and Central Asia. World Bank enterprise Note number 15"
+          },
+          {
+            "key": "ref2",
+            "doi-asserted-by": "crossref",
+            "unstructured": "Becker G (1968): Crime and Punishment: An Economic Approach. Journal of Political Economy Vol 76",
+            "DOI": "10.1007/978-1-349-62853-7_2"
+          },
+          {
+            "key": "ref3",
+            "unstructured": "Bourguignon F, Nunez J and Sanchez F (2002): What part of the income distribution does matter for explaining crime? The case of Colombia"
+          },
+          {
+            "key": "ref4",
+            "unstructured": "Clarke G, Eifert B, Habyarimana J, Ingram M, Kaplan D, Ramachandran V (2005): South Africa Investment Climate Assessments.  World Bank report."
+          },
+          {
+            "key": "ref5",
+            "doi-asserted-by": "crossref",
+            "unstructured": "Detotto C and Otranto E (2010); Does Crime affect Economic Growth. International Review for Social Science",
+            "DOI": "10.1111/j.1467-6435.2010.00477.x"
+          },
+          {
+            "key": "ref6",
+            "unstructured": "Daniele V and Marani U (2008); Organised Crime and Foreign Direct Investment: The Italian Case. CESifo Working Paper series No 2416"
+          },
+          {
+            "key": "ref7",
+            "unstructured": "Eiden G (1997): The economics of Crime. Survey and Bibliography. Working paper in Law and Economics, University of Oslo"
+          },
+          {
+            "key": "ref8",
+            "unstructured": "Ehrlich I (1973): Participation in illegitimate activities. A theoretical and empirical investigation. Journal of Political economy 81"
+          },
+          {
+            "key": "ref9",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Elbadawi I, Mengistae T and Zeufack A (2007): Market access, supplier access and Africa’s manufactured exports. An analysis of the role of geography and institutions. World Bank Working paper series, WPS 3942.",
+            "DOI": "10.1596/1813-9450-3942"
+          },
+          {
+            "key": "ref10",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Freeman R (1996): Why do so many young American commit crime and what must we o about it. Journal of Economic Perspectives 10",
+            "DOI": "10.3386/w5451"
+          },
+          {
+            "key": "ref11",
+            "unstructured": "Frye T and Shleifer (1997): The invisible and the Grabbing hand. The American Economic Review Vol 87"
+          },
+          {
+            "key": "ref12",
+            "doi-asserted-by": "crossref",
+            "unstructured": "Frye T and Zhuravskaya (2000): Rackets, regulation and the rule of law. Journal of Law, Economics and Organisation Vol 16",
+            "DOI": "10.1093/jleo/16.2.478"
+          },
+          {
+            "key": "ref13",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Gaviria A (2002):  Assessing the effects of corruption and crime on firm performance: Evidence from Latin America. Emerging Markets Review 3, 245 -268",
+            "DOI": "10.1016/s1566-0141(02)00024-9"
+          },
+          {
+            "key": "ref14",
+            "unstructured": "Gaviria A and Pages C (2000): Patterns of Crime Victimisation in Latin American cities. Mimeo Inter American Development Bank, Washington DC."
+          },
+          {
+            "key": "ref15",
+            "doi-asserted-by": "crossref",
+            "unstructured": "Glaeser E and Sacerdote B (1999) Why is there more Crime in cities: Journal of Political Economyy Vol 107",
+            "DOI": "10.1086/250109"
+          },
+          {
+            "key": "ref16",
+            "unstructured": "Hay J and Shleifer (1998): Private enfi=orcement of public laws. A theory of legal reforms. American Economic Review Vol 88"
+          },
+          {
+            "key": "ref17",
+            "unstructured": "Krkoska L and Robeck K (2006); The impact of crime on the enterprise sector. Transistion versus non transition countries.European Bank for Reconstruction and Development, Working paper series number 97"
+          },
+          {
+            "key": "ref18",
+            "unstructured": "Schönteich &  Louw (2001): Crime in South Africa: A country and cities profile.  Occasional Paper No 49, Institute for Security studies"
+          },
+          {
+            "key": "ref19",
+            "unstructured": "PricewaterhouseCoopers (2007 and 2009): Global Economic Crime Survey."
+          },
+          {
+            "key": "ref20",
+            "unstructured": "World Bank (2003): Jamaica: the road to sustained growth. World Bank Country Economic Memorandum Report No 26088"
+          }
+        ],
+        "container-title": [
+          "Corporate Ownership and Control"
+        ],
+        "language": "en",
+        "link": [
+          {
+            "URL": "https://virtusinterpress.org/IMG/pdf/10-22495_cocv9i4c2art5.pdf",
+            "content-type": "application/pdf",
+            "content-version": "vor",
+            "intended-application": "text-mining"
+          },
+          {
+            "URL": "https://virtusinterpress.org/IMG/pdf/10-22495_cocv9i4c2art5.pdf",
+            "content-type": "unspecified",
+            "content-version": "vor",
+            "intended-application": "similarity-checking"
+          }
+        ],
+        "deposited": {
+          "date-parts": [
+            [
+              2020,
+              7,
+              11
+            ]
+          ],
+          "date-time": "2020-07-11T10:37:34Z",
+          "timestamp": 1594463854000
+        },
+        "score": 46.67049,
+        "resource": {
+          "primary": {
+            "URL": "https://virtusinterpress.org/CRIME-SECURITY-AND-FIRM.html"
+          }
+        },
+        "issued": {
+          "date-parts": [
+            [
+              2012
+            ]
+          ]
+        },
+        "references-count": 21,
+        "journal-issue": {
+          "issue": "4-2",
+          "published-online": {
+            "date-parts": [
+              [
+                2012
+              ]
+            ]
+          },
+          "published-print": {
+            "date-parts": [
+              [
+                2012
+              ]
+            ]
+          }
+        },
+        "URL": "https://doi.org/10.22495/cocv9i4c2art5",
+        "archive": [
+          "Portico",
+          "Portico"
+        ],
+        "ISSN": [
+          "1810-3057",
+          "1727-9232"
+        ],
+        "issn-type": [
+          {
+            "value": "1810-3057",
+            "type": "electronic"
+          },
+          {
+            "value": "1727-9232",
+            "type": "print"
+          }
+        ],
+        "published": {
+          "date-parts": [
+            [
+              2012
+            ]
+          ]
+        }
+      },
+      {
+        "indexed": {
+          "date-parts": [
+            [
+              2026,
+              4,
+              21
+            ]
+          ],
+          "date-time": "2026-04-21T06:59:55Z",
+          "timestamp": 1776754795600,
+          "version": "3.51.2"
+        },
+        "reference-count": 50,
+        "publisher": "Virtus Interpress",
+        "issue": "4",
+        "license": [
+          {
+            "start": {
+              "date-parts": [
+                [
+                  2018,
+                  8,
+                  7
+                ]
+              ],
+              "date-time": "2018-08-07T00:00:00Z",
+              "timestamp": 1533600000000
+            },
+            "content-version": "vor",
+            "delay-in-days": 218,
+            "URL": "https://creativecommons.org/licenses/by-nc/4.0"
+          },
+          {
+            "start": {
+              "date-parts": [
+                [
+                  2018,
+                  8,
+                  7
+                ]
+              ],
+              "date-time": "2018-08-07T00:00:00Z",
+              "timestamp": 1533600000000
+            },
+            "content-version": "tdm",
+            "delay-in-days": 218,
+            "URL": "https://creativecommons.org/licenses/by-nc/4.0"
+          }
+        ],
+        "content-domain": {
+          "domain": [],
+          "crossmark-restriction": false
+        },
+        "short-container-title": [
+          "COC"
+        ],
+        "published-print": {
+          "date-parts": [
+            [
+              2018
+            ]
+          ]
+        },
+        "abstract": "<jats:p>In this paper, authors consider ownership networks to quantify the ease with which a company can be controlled due to the shareholding relationships in which it is involved. These networks have been usually considered in a descriptive perspective, either to quantify the control exerted by an ultimate shareholder, especially in presence of complex patterns of indirect control, or as a subject of topological analysis. Recently, a new stream of literature arose, solving optimization problems on ownership networks. Among these tools, authors explicitly refer to the Indirect Control Problem (IC) (Martins &amp; Neves, 2017), which determines the minimum cost control strategy of a set of Target company, namely a strategy to build a robust investment fund which includes the corporate control on one or more companies. In this paper, we combine the descriptive and the optimization approach, introducing a linear programming model, namely Cheapest Control Problem (CCP), contributing on both the descriptive and the optimization approach. In particular, authors propose CCP overcome some of the IC main limitations, i.e. the overestimation of control in presence of mutual cross-shareholdings. Furthermore, CCP solutions allow computing three indexes that measure the ease with which a company can be controlled depending on its ownership relationships. Finally, a case study is incorporated to compare IC and CCP solutions, discussing the informative power of the indices introduced.</jats:p>",
+        "DOI": "10.22495/cocv15i4art8",
+        "type": "journal-article",
+        "created": {
+          "date-parts": [
+            [
+              2018,
+              8,
+              7
+            ]
+          ],
+          "date-time": "2018-08-07T09:21:08Z",
+          "timestamp": 1533633668000
+        },
+        "page": "86-95",
+        "source": "Crossref",
+        "is-referenced-by-count": 6,
+        "title": [
+          "Corporate control and ownership networks"
+        ],
+        "prefix": "10.22495",
+        "volume": "15",
+        "author": [
+          {
+            "ORCID": "https://orcid.org/0000-0002-9025-2740",
+            "authenticated-orcid": false,
+            "given": "Mirko",
+            "family": "Di Giacomo",
+            "sequence": "first",
+            "affiliation": []
+          },
+          {
+            "ORCID": "https://orcid.org/0000-0002-8256-6475",
+            "authenticated-orcid": false,
+            "given": "Marisa",
+            "family": "Cenci",
+            "sequence": "additional",
+            "affiliation": []
+          }
+        ],
+        "member": "9787",
+        "published-online": {
+          "date-parts": [
+            [
+              2018,
+              8,
+              7
+            ]
+          ]
+        },
+        "reference": [
+          {
+            "key": "ref0",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Almeida, H. V., & Wolfenzon, D. (2006). A theory of pyramidal ownership and family business groups. The Journal of Finance, 61(6), 2637-2680. http://doi.wiley.com/10.1111/j.1540-6261.2006.01001.x.",
+            "DOI": "10.1111/j.1540-6261.2006.01001.x"
+          },
+          {
+            "key": "ref1",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Aminadav, G., Bachrach, Y., Konstantin, K., Rosenschein, J.S., & Wilf, Y. (2011). Rebuilding the great pyramids: A method for identifying control relations in complex ownership structures. Retrieved from the World Wide Web: http://papers.ssrn.com/sol3/papers.cfm?abstract_id=1903941.",
+            "DOI": "10.2139/ssrn.1903941"
+          },
+          {
+            "key": "ref2",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Bardoscia, M., Battiston, S., Caccioli, F., & Caldarelli G. (2017). Pathways towards instability in financial networks. Nature Communications, 8, 1-7. https://doi.org/10.1038/ncomms14416",
+            "DOI": "10.1038/ncomms14416"
+          },
+          {
+            "key": "ref3",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Battiston, S. (2004). Inner structure of capital control networks. Physica A: Statistical Mechanics and its Applications, 338(1-2), 107-112. https://doi.org/10.1016/j.physa.2004.02.031",
+            "DOI": "10.1016/j.physa.2004.02.031"
+          },
+          {
+            "key": "ref4",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Battiston, S., Bonabeau, E.,& Weisbuch, G. (2003). Decision making dynamics in corporate boards. Physica A: Statistical Mechanics and its Applications, 322(May), 567-582. https://doi.org/10.1016/S0378-4371(02)01930-1",
+            "DOI": "10.1016/s0378-4371(02)01930-1"
+          },
+          {
+            "key": "ref5",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Ben-Nasr, H., Boubaker, S., & Rouatbi, W. (2015). Ownership structure, control contestability, and corporate debt maturity. Journal of Corporate Finance, 35(December), 265-285. https://doi.org/10.1016/j.jcorpfin.2015.10.001",
+            "DOI": "10.1016/j.jcorpfin.2015.10.001"
+          },
+          {
+            "key": "ref6",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Bertoni, F., & Randone, P. A. (2006). The small-world of Italian finance: Ownership interconnections and board interlocks amongst Italian listed companies. Retrieved from the World Wide Web: http://www.ssrn.com/ abstract=917587.",
+            "DOI": "10.2139/ssrn.917587"
+          },
+          {
+            "key": "ref7",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Brancaccio, E., Giammetti, R., Lopreite, M., & Puliga, M. (2018). Centralization of capital and financial crisis: a global network analysis. Structural Change and Economic Dynamics, 45(June), 94-104. https://doi.org/10.1016/j.strueco.2018.03.001",
+            "DOI": "10.1016/j.strueco.2018.03.001"
+          },
+          {
+            "key": "ref8",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Chang, X., & Wang, H. (2017). Corrigendum to \"Cross-shareholdings structural characteristic and evolution analysis based on complex network\". Discrete Dynamics in Nature and Society, 2017(February), 1-7. https://doi.org/10.1155/2017/5391013",
+            "DOI": "10.1155/2017/5391013"
+          },
+          {
+            "key": "ref9",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Chapelle, A., & Szafarz, A. (2005). Controlling firms through the majority voting rule. Physica A: Statistical Mechanics and its Applications, 355(2-4), 509-529. https://doi.org/10.1016/j.physa.2005.03.026",
+            "DOI": "10.1016/j.physa.2005.03.026"
+          },
+          {
+            "key": "ref10",
+            "doi-asserted-by": "crossref",
+            "unstructured": "Christiano Silva, T., & Zhao, L. (2016). Machine learning in complex networks. Cham: Springer International Publishing. https://doi.org/10.1007/978-3-319-17290-3",
+            "DOI": "10.1007/978-3-319-17290-3"
+          },
+          {
+            "key": "ref11",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Claessens, S., Djankov, S., & Lang, L. H. P. (2000). The separation of ownership and control in East Asian Corporations. Journal of Financial Economics, 58(1-2), 81-112. https://doi.org/10.1016/S0304-405X(00)00067-2",
+            "DOI": "10.1016/s0304-405x(00)00067-2"
+          },
+          {
+            "key": "ref12",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Corrado, R., & Zollo, M. (2006). Small worlds evolving: governance reforms, privatizations, and ownership networks in Italy. Industrial and Corporate Change, 15(2), 319-352. http://dx.doi.org/10.1093/icc/dtj018.",
+            "DOI": "10.1093/icc/dtj018"
+          },
+          {
+            "key": "ref13",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Crama, Y., & Leruth, L. (2013). Power indices and the measurement of control in corporate structures. International Game Theory Review, 15(03). https://doi.org/10.1142/S0219198913400173",
+            "DOI": "10.1142/s0219198913400173"
+          },
+          {
+            "key": "ref14",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Dastkhan, H., & Gharneh, N. S. (2017). Simulation of contagion in the stock markets using cross-shareholding networks: A case from an emerging market. Computational Economics, 1-31. https://doi.org/10.1007/ s10614-017-9781-6",
+            "DOI": "10.1007/s10614-017-9781-6"
+          },
+          {
+            "key": "ref15",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Dastkhan, H., & Gharneh, N. S. (2018). How the ownership structures cause epidemics in financial markets: A network-based simulation model. Physica A: Statistical Mechanics and its Applications, 492(February), 324-342. https://doi.org/10.1016/j.physa.2017.09.089",
+            "DOI": "10.1016/j.physa.2017.09.089"
+          },
+          {
+            "key": "ref16",
+            "unstructured": "Davallou, M., Soltaninejad, M., Tahmasebi, A.(2015). Analyzing the aspects of cross sharing ownership. Journal of Money and Economy, 10(1), 83-106. Retrieved from the World Wide Web: http://jme.mbri.ac.ir/article-1-189-en.html"
+          },
+          {
+            "key": "ref17",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Dietzenbacher, E., & Temurshoev, U. (2008). Ownership relations in the presence of cross-shareholding. Journal of Economics, 95(3), 189-212. https://doi.org/10.1007/s00712-008-0018-y",
+            "DOI": "10.1007/s00712-008-0018-y"
+          },
+          {
+            "key": "ref18",
+            "doi-asserted-by": "crossref",
+            "unstructured": "Dorofeenko, V., Lang, L. H. P., Ritzberger, K., & Shorish, J. (2007). Who controls Allianz? Annals of Finance, 4(1), 75-103. https://doi.org/10.1007/s10436-006-0069-4",
+            "DOI": "10.1007/s10436-006-0069-4"
+          },
+          {
+            "key": "ref19",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Edwards, J. S. S., & Weichenrieder, A. J. (2009). Control rights, pyramids, and the measurement of ownership concentration. Journal of Economic Behavior & Organization, 72(1), 489-508. https://doi.org/10.1016/ j.jebo.2009.05.016",
+            "DOI": "10.1016/j.jebo.2009.05.016"
+          },
+          {
+            "key": "ref20",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Elliott. M., Golub B., & Jackson, M. O. (2014). Financial networks and contagion. American Economic Review, 104(10), 3115-3153. https://doi.org/10.1257/aer.104.10.3115",
+            "DOI": "10.1257/aer.104.10.3115"
+          },
+          {
+            "key": "ref21",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Esposito De Falco, S., Cucari, N., & Di Franco, F. (2018). Interlocking directorates and different power forms: An explorative analysis in the Italian context. Corporate Board: role, duties and composition, 14(2), 7-19. http://doi.org/10.22495/cbv14i2art1",
+            "DOI": "10.22495/cbv14i2art1"
+          },
+          {
+            "key": "ref22",
+            "unstructured": "Eurostat. (2010). Business registers: Recommendations manual. Luxembourg: Publications Office of the European Union. Retrieved from the World Wide Web: http://ec.europa.eu/eurostat/ramon/statmanuals/ files/KS-32-10-216-EN-C-EN.pdf"
+          },
+          {
+            "key": "ref23",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Flood, M. D., Kennet, D. Y., Lumsdaine, R. L., & Simon, J. K. (2017). The complexity of bank holding companies: A topological approach (NBER Working Paper No. 23755, Pre-Conference Workshop 28 June 2017).",
+            "DOI": "10.3386/w23755"
+          },
+          {
+            "key": "ref24",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Glattfelder, J. B., & Battiston, S. (2009). Backbone of complex networks of corporations: The flow of control. Physical Review E, 80(3), 1-24. https://doi.org/10.1103/PhysRevE.80.036104",
+            "DOI": "10.1103/physreve.80.036104"
+          },
+          {
+            "key": "ref25",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Karos, D., & Peters, H. (2015). Indirect control and power in mutual control structures. Games and Economic Behavior, 92(July), 150-165. https://doi.org/10.1016/j.geb.2015.06.003",
+            "DOI": "10.1016/j.geb.2015.06.003"
+          },
+          {
+            "key": "ref26",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Kogut, B., & Walker, G. (2001). The small world of Germany and the durability of national networks. American Sociological Review, 66(3), 317-335. https://doi.org/10.2307/3088882",
+            "DOI": "10.2307/3088882"
+          },
+          {
+            "key": "ref27",
+            "doi-asserted-by": "publisher",
+            "unstructured": "La Porta, R., Lopez-de-Silanes, F., Shleifer, A., & Vishny, R. (2000). Investor protection and corporate governance. Journal of Financial Economics, 58(1-2), 3-27. https://doi.org/10.1016/S0304-405X(00)00065-9",
+            "DOI": "10.1016/s0304-405x(00)00065-9"
+          },
+          {
+            "key": "ref28",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Laeven, L., & Levine, R. (2008). Complex ownership structures and corporate valuations. Review of Financial Studies, 21(2), 579-604. https://doi.org/10.1093/rfs/hhm068",
+            "DOI": "10.1093/rfs/hhm068"
+          },
+          {
+            "key": "ref29",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Lemma, T. T., & Negash, M. (2016). Corporate ownership patterns in developing countries. Corporate Ownership and Control, 13(2), 101-112. https://doi.org/10.22495/cocv13i2p11",
+            "DOI": "10.22495/cocv13i2p11"
+          },
+          {
+            "key": "ref30",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Levy, M. (2009). Control in pyramidal structures. Corporate Governance: An International Review, 17(1), 77-89. https://doi.org/10.1111/j.1467-8683.2008.00719.x",
+            "DOI": "10.1111/j.1467-8683.2008.00719.x"
+          },
+          {
+            "key": "ref31",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Levy, M., Szafarz, A. (2016). Cross-ownership: A device for management entrenchment? Review of Finance, 21(4), 1675-1699. https://doi.org/10.1093/rof/rfw009",
+            "DOI": "10.1093/rof/rfw009"
+          },
+          {
+            "key": "ref32",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Li, H., An, H., Gao, X., Huang, J., & Xu, Q. (2014). On the topological properties of the cross-shareholding networks of listed companies in China: Taking shareholders’ cross-shareholding relationships into account. Physica A: Statistical Mechanics and its Applications, 406(July), 80-88. https://doi.org/10.1016/ j.physa.2014.03.041",
+            "DOI": "10.1016/j.physa.2014.03.041"
+          },
+          {
+            "key": "ref33",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Lingmin, X. (2016). Ultimate ownership structure and capital structure: Evidence from Chinese listed companies. Corporate Ownership & Control, 13(4-2), 297-306. http://doi.org/10.22495/cocv13i4c2p3",
+            "DOI": "10.22495/cocv13i4c2p3"
+          },
+          {
+            "key": "ref34",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Martins, P., & Neves, E. (2017). Corporates’ control strategies using network optimization. International Transactions in Operational Research, 24(5), 1041-1059. https://doi.org/10.1111/itor.12288",
+            "DOI": "10.1111/itor.12288"
+          },
+          {
+            "key": "ref35",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Milaković, M., Alfarano, S., & Lux, T. (2010). The small core of the German corporate board network. Computational and Mathematical Organization Theory, 16(2), 201-215. https://doi.org/10.1007/s10588-010-9072-4",
+            "DOI": "10.1007/s10588-010-9072-4"
+          },
+          {
+            "key": "ref36",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Napoli, F. (2018). Corporate governance and firm networks: An empirical research based on Italy. Corporate Ownership & Control, 15(2-1), 231-247. http://doi.org/10.22495/cocv15i2c1p9",
+            "DOI": "10.22495/cocv15i2c1p9"
+          },
+          {
+            "key": "ref37",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Paligorova, T., & Xu, Z. (2012). Complex ownership and capital structure. Journal of Corporate Finance, 18(4), 701-716. https://doi.org/10.1016/j.jcorpfin.2012.05.001",
+            "DOI": "10.1016/j.jcorpfin.2012.05.001"
+          },
+          {
+            "key": "ref38",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Pecora, N., & Spelta, A. (2015). Shareholding relationships in the Euro Area banking market: A network perspective. Physica A: Statistical Mechanics and its Applications, 434(September), 1-12. https://doi.org/10.1016/j.physa.2015.04.011",
+            "DOI": "10.1016/j.physa.2015.04.011"
+          },
+          {
+            "key": "ref39",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Robins, G. L., & Alexander, M. (2004). Small Worlds among interlocking directors: Network structure and distance in bipartite graphs. Computational & Mathematical Organization Theory, 10(1), 69-94. https://doi.org/10.1023/B:CMOT.0000032580.12184.c0",
+            "DOI": "10.1023/b:cmot.0000032580.12184.c0"
+          },
+          {
+            "key": "ref40",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Romei, A., Ruggieri, S., & Turini, F. (2015). The layered structure of company share networks. Paper presented at the IEEE International Conference on Data Science and Advanced Analytics (DSAA), Paris, France, October 19-21. https://doi.org/10.1109/DSAA.2015.7344809",
+            "DOI": "10.1109/dsaa.2015.7344809"
+          },
+          {
+            "key": "ref41",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Rotundo, G., & D’Arcangelis, A. M. (2014). Network of companies: An analysis of market concentration in the Italian stock market. Quality and Quantity, 48(4), 1893-1910. https://doi.org/10.1007/s11135-013-9858-9",
+            "DOI": "10.1007/s11135-013-9858-9"
+          },
+          {
+            "key": "ref42",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Rungi, A., Morrison, G., & Pammolli, F. (2017). Global ownership and corporate control networks (IMT Lucca EIC WP Series 07/2017). Retrieved from the World Wide Web: https://www.ssrn.com/abstract=3031955.",
+            "DOI": "10.2139/ssrn.3031955"
+          },
+          {
+            "key": "ref43",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Sacristán-Navarro, M., & Gómez-Ansón, S. (2007). Family ownership and pyramids in the Spanish market. Family Business Review, 20(3), 247-265. https://doi.org/10.1111/j.1741-6248.2007.00100.x",
+            "DOI": "10.1111/j.1741-6248.2007.00100.x"
+          },
+          {
+            "key": "ref44",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Saghi-Zedek, N. (2016). Product diversification and bank performance: Does ownership structure matter? Journal of Banking and Finance, 71(October), 154-167. https://doi.org/10.1016/j.jbankfin.2016.05.003",
+            "DOI": "10.1016/j.jbankfin.2016.05.003"
+          },
+          {
+            "key": "ref45",
+            "doi-asserted-by": "crossref",
+            "unstructured": "Sapinski, J. P., & Carroll, W. K. (2017). Interlocking directorates and corporate networks. https://doi.org/10.31235/osf.io/7t8c9",
+            "DOI": "10.31235/osf.io/7t8c9"
+          },
+          {
+            "key": "ref46",
+            "unstructured": "Souma, W., Fujiwara, Y., & Aoyama, H. (2005). Change of ownership networks in Japan. Retrieved from the World Wide Web: http://arxiv.org/abs/physics/0504045."
+          },
+          {
+            "key": "ref47",
+            "doi-asserted-by": "crossref",
+            "unstructured": "Takes, F. W., & Heemskerk, E. M. (2016). Centrality in the global network of corporate control. Social Network Analysis and Mining, 6(1), 1-18. Retrieved from the World Wide Web: https://link.springer.com/ article/10.1007/s13278-016-0402-5",
+            "DOI": "10.1007/s13278-016-0402-5"
+          },
+          {
+            "key": "ref48",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Vitali, S., Glattfelder, J. B., & Battiston, S. (2011). The network of global corporate control. PLoS ONE, 6(10), 1-6. https://doi.org/10.1371/journal.pone.0025995",
+            "DOI": "10.1371/journal.pone.0025995"
+          },
+          {
+            "key": "ref49",
+            "unstructured": "Wolfenzon, D. (1999). A theory of pyramidal ownership. Retrieved from the World Wide Web: http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.198.3874&rep=rep1&type=pdf"
+          }
+        ],
+        "container-title": [
+          "Corporate Ownership and Control"
+        ],
+        "language": "en",
+        "link": [
+          {
+            "URL": "https://virtusinterpress.org/IMG/pdf/cocv15i4art8.pdf",
+            "content-type": "application/pdf",
+            "content-version": "vor",
+            "intended-application": "text-mining"
+          },
+          {
+            "URL": "https://virtusinterpress.org/IMG/pdf/cocv15i4art8.pdf",
+            "content-type": "application/pdf",
+            "content-version": "vor",
+            "intended-application": "text-mining"
+          },
+          {
+            "URL": "https://virtusinterpress.org/IMG/pdf/cocv15i4art8.pdf",
+            "content-type": "unspecified",
+            "content-version": "vor",
+            "intended-application": "similarity-checking"
+          }
+        ],
+        "deposited": {
+          "date-parts": [
+            [
+              2020,
+              2,
+              23
+            ]
+          ],
+          "date-time": "2020-02-23T15:57:21Z",
+          "timestamp": 1582473441000
+        },
+        "score": 46.01783,
+        "resource": {
+          "primary": {
+            "URL": "https://www.virtusinterpress.org/CORPORATE-CONTROL-AND-OWNERSHIP-NETWORKS.html?var_mode=calcul"
+          }
+        },
+        "issued": {
+          "date-parts": [
+            [
+              2018
+            ]
+          ]
+        },
+        "references-count": 50,
+        "journal-issue": {
+          "issue": "4",
+          "published-online": {
+            "date-parts": [
+              [
+                2018
+              ]
+            ]
+          },
+          "published-print": {
+            "date-parts": [
+              [
+                2018
+              ]
+            ]
+          }
+        },
+        "URL": "https://doi.org/10.22495/cocv15i4art8",
+        "archive": [
+          "Portico",
+          "Portico"
+        ],
+        "ISSN": [
+          "1810-3057",
+          "1727-9232"
+        ],
+        "issn-type": [
+          {
+            "value": "1810-3057",
+            "type": "electronic"
+          },
+          {
+            "value": "1727-9232",
+            "type": "print"
+          }
+        ],
+        "published": {
+          "date-parts": [
+            [
+              2018
+            ]
+          ]
+        }
+      },
+      {
+        "indexed": {
+          "date-parts": [
+            [
+              2025,
+              5,
+              14
+            ]
+          ],
+          "date-time": "2025-05-14T07:44:23Z",
+          "timestamp": 1747208663910,
+          "version": "3.40.5"
+        },
+        "reference-count": 147,
+        "publisher": "Virtus Interpress",
+        "issue": "1",
+        "license": [
+          {
+            "start": {
+              "date-parts": [
+                [
+                  2018,
+                  9,
+                  5
+                ]
+              ],
+              "date-time": "2018-09-05T00:00:00Z",
+              "timestamp": 1536105600000
+            },
+            "content-version": "vor",
+            "delay-in-days": 3169,
+            "URL": "https://creativecommons.org/licenses/by-nc/4.0"
+          },
+          {
+            "start": {
+              "date-parts": [
+                [
+                  2018,
+                  9,
+                  5
+                ]
+              ],
+              "date-time": "2018-09-05T00:00:00Z",
+              "timestamp": 1536105600000
+            },
+            "content-version": "tdm",
+            "delay-in-days": 3169,
+            "URL": "https://creativecommons.org/licenses/by-nc/4.0"
+          }
+        ],
+        "content-domain": {
+          "domain": [],
+          "crossmark-restriction": false
+        },
+        "short-container-title": [
+          "COC"
+        ],
+        "published-print": {
+          "date-parts": [
+            [
+              2010
+            ]
+          ]
+        },
+        "abstract": "<jats:p>The study investigates the relationship of corporate governance mechanisms, ownership structure and the Egyptian firm performance. This study utilizes a sample of 50 firms using the accounting and market data available for the period 2004-2006. The sample firms are all listed in either the Cairo or Alexandria Stock. The cross-sectional regression analysis is employed to test the hypotheses of the study. The results indicate a positive significant relationship between firm performance and the percentage of outside directors in boards and the existence of institutional representatives in boards. Furthermore, a significant negative relationship exists between firm performance and board size, role duality and the existence of firm’s website. The results also reveal a significant, positive relationship between firm performance measures and the percentage of women members in boards of directors in Egyptian firms. Our results support previous literature and show consistency with the agency theory.</jats:p>",
+        "DOI": "10.22495/cocv8i1c5p5",
+        "type": "journal-article",
+        "created": {
+          "date-parts": [
+            [
+              2017,
+              1,
+              24
+            ]
+          ],
+          "date-time": "2017-01-24T20:41:06Z",
+          "timestamp": 1485290466000
+        },
+        "page": "535-551",
+        "source": "Crossref",
+        "is-referenced-by-count": 3,
+        "title": [
+          "Corporate governance, ownership structure and firm performance of Egyptian listed companies"
+        ],
+        "prefix": "10.22495",
+        "volume": "8",
+        "author": [
+          {
+            "ORCID": "https://orcid.org/0000-0001-6058-2469",
+            "authenticated-orcid": false,
+            "given": "Ahmed",
+            "family": "El-Masry",
+            "sequence": "first",
+            "affiliation": []
+          }
+        ],
+        "member": "9787",
+        "published-online": {
+          "date-parts": [
+            [
+              2010
+            ]
+          ]
+        },
+        "reference": [
+          {
+            "key": "ref0",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Abdel-Shahid, S. (2001). „Corporate governance is becoming a global pursuit: what could be done in Egypt‟, Working Paper, Cairo and Alexandria Stock Exchange, Egypt. Available at www.egyptse.com, and ssrn.com, DOI 10.2139/ssrn.286875.",
+            "DOI": "10.2139/ssrn.286875"
+          },
+          {
+            "key": "ref1",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Abdel-Shahid, S. (2003). „Does ownership structure affect firm value? Evidence from the Egyptian stock market‟, Working Paper, Cairo and Alexandria Stock Exchange, Egypt. Available at www.egyptse.com; and ssrn.com, DOI 10.2139/ssrn.378580.",
+            "DOI": "10.2139/ssrn.378580"
+          },
+          {
+            "key": "ref2",
+            "doi-asserted-by": "crossref",
+            "unstructured": "Abdullah, S.N. (2004). „Performance among Malaysian listed companies‟. Corporate Governance, 4, pp. 47-61.",
+            "DOI": "10.1108/14720700410558871"
+          },
+          {
+            "key": "ref3",
+            "unstructured": "Adler, R.D. (2001). „Women in the executive suit correlate to high profits‟, Harvard Business Review, 79, pp. 3-18."
+          },
+          {
+            "key": "ref4",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Agrawal, A. and Knoeber, C.R. (1996). „Firm performance and mechanisms to control agency problems between managers and shareholder‟, Journal of Financial and Quantitative Analysis, 31, pp. 377- 397",
+            "DOI": "10.2307/2331397"
+          },
+          {
+            "key": "ref5",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Ahmed, K., Hossain, M. and Adams, M. (2006). „The effects of board composition and board size on the informative of annual accounting earnings‟, Corporate Governance: An International Review, 14, pp. 418- 431.",
+            "DOI": "10.1111/j.1467-8683.2006.00515.x"
+          },
+          {
+            "key": "ref6",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Alexander, J.A., Fennell, M.L. and Halpem, M.T. (1993). „Leadership instability in hospitals: The influence of board-CEO relations and organizational growth and decline‟, Administrative Science Quarterly, 38, 74-99.",
+            "DOI": "10.2307/2393255"
+          },
+          {
+            "key": "ref7",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Al-Farooque, O., van Zijl, T. Dunstan, K. and Karim, A.K.M.W. (2007). „Corporate governance in Bangladesh: link between ownership and financial performance‟, Corporate Governance: An International Review, 15, pp. 1453–1468.",
+            "DOI": "10.1111/j.1467-8683.2007.00657.x"
+          },
+          {
+            "key": "ref8",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Aljifri, K. and Mousafa, M. (2007). „The impact of corporate governance mechanisms on the performance of UAE firms: an empirical analysis‟ Journal of Economic and Administrative Sciences, 23, pp.71-93.",
+            "DOI": "10.1108/10264116200700008"
+          },
+          {
+            "key": "ref9",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Al-Khouri, R. (2005). „Corporate governance and firm value in emerging markets: the case of Jordan‟, Advances in Financial Economies, 11, pp. 31-50.",
+            "DOI": "10.1016/s1569-3732(04)11002-5"
+          },
+          {
+            "key": "ref10",
+            "unstructured": "Amit, R. and Zott, C. (2001). „Value creation in ebusiness‟, Strategic Management Journal, Vol. 22, pp. 493-520."
+          },
+          {
+            "key": "ref11",
+            "unstructured": "Bahgat, S. and Black, B. (1997). „Do independent directors matter?‟, working paper, New York: Columbia University."
+          },
+          {
+            "key": "ref12",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Baliga, B.R., Moyer, R.C. and Rao, R.S. (1996). „CEO duality and firm performance: what‟s the fuss?‟, Strategic Management Journal, 17, pp. 41–53.",
+            "DOI": "10.1002/(sici)1097-0266(199601)17:1<41::aid-smj784>3.0.co;2-#"
+          },
+          {
+            "key": "ref13",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Barney, J. (1991). „Firm resources and sustained competitive advantage‟, Journal of Management, 17, pp. 99-120.",
+            "DOI": "10.1177/014920639101700108"
+          },
+          {
+            "key": "ref14",
+            "unstructured": "Barney, J. (1995). „Looking inside for competitive advantage‟, Academy of Management Executive, 9, pp. 49-61."
+          },
+          {
+            "key": "ref15",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Basu, S., Hwang. L., Mitsudome, T., and Weintrop, J. (2007). „Corporate governance, top executive compensation and firm performance in Japan‟. PacificBasin Finance Journal, 15 (1), 56-79.",
+            "DOI": "10.1016/j.pacfin.2006.05.002"
+          },
+          {
+            "key": "ref16",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Bathala, C.T. and Rao, R.P. (1995). „The determinants of board composition: an agency theory perspective‟, Management and Decision Economics, 16, pp. 59-69.",
+            "DOI": "10.1002/mde.4090160108"
+          },
+          {
+            "key": "ref17",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Baysinger, R.D. and Butler, H.N. (1985). „Corporate governance and the board of directors: performance effects of changes in board composition‟, Journal of Law, Economics and Organization, 1, pp. 101-124.",
+            "DOI": "10.1093/oxfordjournals.jleo.a036883"
+          },
+          {
+            "key": "ref18",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Baysinger, R.D. and Hoskisson, R.E. (1990). „The composition of boards of directors and strategic control‟, Academy of Management Review, 15, pp. 72- 87.",
+            "DOI": "10.5465/amr.1990.4308231"
+          },
+          {
+            "key": "ref19",
+            "doi-asserted-by": "crossref",
+            "unstructured": "Bell, L.A. (2005). „Women-led firms and the gender gap in top executive jobs‟, IZA discussion paper, IZA, Bonn",
+            "DOI": "10.2139/ssrn.773964"
+          },
+          {
+            "key": "ref20",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Ben-Amar, W. and Andre, P. (2006). „Separation of ownership from control and acquiring firm performance: The case of family ownership in Canada‟, Journal of Business Finance & Accounting, 33, pp. 517-543.",
+            "DOI": "10.1111/j.1468-5957.2006.00613.x"
+          },
+          {
+            "key": "ref21",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Bennedsen, Morten and Daniel Wolfenzon, 2000, “The balance of power in closely-held corporations,” Journal of Financial Economics, 58(1-2), 113-139.",
+            "DOI": "10.1016/s0304-405x(00)00068-4"
+          },
+          {
+            "key": "ref22",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Berg, A. and Capaul, M. (2004). „Report on the observance of standards and codes (ROSC) corporate governance country assessment: Egypt‟, World Bank and the IMF.",
+            "DOI": "10.1596/8763"
+          },
+          {
+            "key": "ref23",
+            "unstructured": "Berg, S.V. and Smith, S.K. (1978). „CEO board chairman: a quantitative study of dual versus unitary leadership‟, Directors and Boards, 3, pp. 9-34."
+          },
+          {
+            "key": "ref24",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Bharadwaj, A.S. (2000). „A resource-based perspective on information technology capability and firm performance‟, MIS Quarterly, 24, pp. 169-198.",
+            "DOI": "10.2307/3250983"
+          },
+          {
+            "key": "ref25",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Black, B.S., Jang, H. and Kim, W. (2006). „Does corporate governance predict firms‟ market values? Evidence from Korea‟, Journal of Law, Economics and Organization, 22, pp. 366–413.",
+            "DOI": "10.1093/jleo/ewj018"
+          },
+          {
+            "key": "ref26",
+            "unstructured": "Bloch, Francis and Ulrich Hege, 2001, “Multiple Large Shareholders and Control Contests,” mimeo, HEC."
+          },
+          {
+            "key": "ref27",
+            "unstructured": "Bohren, O., and Odegaard, B. (2003). „Governance and performance revisited‟. ECGI working paper No. 28."
+          },
+          {
+            "key": "ref28",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Boyd, B.K. (1995). „CEO duality and firm performance: a contingency model‟, Strategic Management Journal, 16, pp. 301–312.",
+            "DOI": "10.1002/smj.4250160404"
+          },
+          {
+            "key": "ref29",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Bozec, R. (2005). Board of directors, market discipline and firm performance, Journal of Business Finance and Accounting, 12(9,10), pp. 1921-1960.",
+            "DOI": "10.1111/j.0306-686x.2005.00652.x"
+          },
+          {
+            "key": "ref30",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Bozec, R., Dia, M. and Bozec, Y. (2010). „Governance-performance relationship: a reexamination using technical efficiency measures‟, British Journal of Management, 21, pp. 684–700.",
+            "DOI": "10.1111/j.1467-8551.2008.00624.x"
+          },
+          {
+            "key": "ref31",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Brickley, J.A., Coles, J.L. and Jarrell, C. (1997). „Leadership structure: separating the CEO and chairman of the board‟, Journal of Corporate Finance, 3, pp.189-220.",
+            "DOI": "10.1016/s0929-1199(96)00013-2"
+          },
+          {
+            "key": "ref32",
+            "unstructured": "Bruque, S., Vargas, A. and Hernández, M.J. (2002). „Influence of the internet use on firm performance: An application to the pharmaceutical distribution industry in Spain‟, ECIS 2002, June 6–8, Gdańsk, Poland."
+          },
+          {
+            "key": "ref33",
+            "unstructured": "Brynjolfsson, E. and Hitt, L. (2001). „Beyond computation: Information technology, organizational transformation and business performance‟, Unpublished PhD Thesis, MIT, Cambridge, Ma."
+          },
+          {
+            "key": "ref34",
+            "unstructured": "Brynjolfsson, E., Hitt, L. and Yang, S. (2000). „Intangible assets: How the interaction of computers and organizational structure affects stock market valuations‟, Mass. Institute of Technology Working Paper, http://ecommerce.mit.edu/erik/index.html, 30th November 2000."
+          },
+          {
+            "key": "ref35",
+            "unstructured": "Buckland, R. (2001). „UK IPO board structures and post-issue performance‟, Aberdeen Papers in Accountancy, Finance & Management No. 01-05."
+          },
+          {
+            "key": "ref36",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Burke, R.J. and McKeen, C.A. (1996). „Do women at the top make a difference? Gender proportions and experiences of managerial and professional women‟, Human Relationships, 49, pp. 1093-1104",
+            "DOI": "10.1177/001872679604900804"
+          },
+          {
+            "key": "ref37",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Byrd, J.W. and Hickman, K.A. (1992). „Do outside directors monitor managers? Evidence from tender offer bids‟, Journal of Financial Economics, 32, pp. 195-222.",
+            "DOI": "10.1016/0304-405x(92)90018-s"
+          },
+          {
+            "key": "ref38",
+            "unstructured": "Catalyst (2004). „The bottom line: connecting corporate performance and gender diversity‟, available at www.catalystwomen.org."
+          },
+          {
+            "key": "ref39",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Chaganti, R.S., Mahajan, V. and Sharma, S. (1985). „Corporate board size, composition and corporate failure in retailing industry‟, Journal of Management Studies, 22, pp. 400–417.",
+            "DOI": "10.1111/j.1467-6486.1985.tb00005.x"
+          },
+          {
+            "key": "ref40",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Cheung, Y.-L., Raub, P.R. and Stouraitis, A. (2006). „Tunneling, propping, and expropriation: evidence from connected party transactions in Hong Kong‟, Journal of Financial Economics, 82, pp. 343–386.",
+            "DOI": "10.1016/j.jfineco.2004.08.012"
+          },
+          {
+            "key": "ref41",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Cornett, M.M., Marcus, A.J. and Tehranian, H. (2008). „Corporate governance and pay-for-performance: the impact of earnings management‟, Journal of Financial Economics, 87, pp. 357–373.",
+            "DOI": "10.1016/j.jfineco.2007.03.003"
+          },
+          {
+            "key": "ref42",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Cornett, M.M., Marcus, A.J., Saunders, A. and Tehranian, H. (2007). „The impact of institutional ownership on corporate operating performance‟, Journal of Banking and Finance, 31, pp. 1771-1794.",
+            "DOI": "10.1016/j.jbankfin.2006.08.006"
+          },
+          {
+            "key": "ref43",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Dahya, J., Lonie, A.A. and Power, D.M. (1996). The case for separating the role of chairman and CEO: an analysis of stock market and accounting data, Corporate Governance: An International Review, 4, pp. 71-77.",
+            "DOI": "10.1111/j.1467-8683.1996.tb00136.x"
+          },
+          {
+            "key": "ref44",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Daily, C.M. and Dalton, D.R. (1992). „The relationship between governance structure and corporate performance in entrepreneurial firms‟, Journal of Business Venturing, 7, pp. 375–386.",
+            "DOI": "10.1016/0883-9026(92)90014-i"
+          },
+          {
+            "key": "ref45",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Daily, C.M. and Dalton, D.R. (1993). „Board of directors leadership and structure: control and performance implications‟, Entrepreneurship Theory and Practice, 17, pp. 65–81.",
+            "DOI": "10.1177/104225879301700305"
+          },
+          {
+            "key": "ref46",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Dalton, D.R, Daily, C.M., Ellstrand, A.E. and Johnson, J.L. (1998). „Meta-analytic reviews of board composition, leadership structure and financial performance‟, Strategic Management Journal, 19, pp. 269–290.",
+            "DOI": "10.1002/(sici)1097-0266(199803)19:3<269::aid-smj950>3.0.co;2-k"
+          },
+          {
+            "key": "ref47",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Davis, J.H., Schoorman, F.D. and Donaldson, L. (1997). „Toward a stewardship theory of management‟, Academy of Management Review, 22, pp. 20-47.",
+            "DOI": "10.2307/259223"
+          },
+          {
+            "key": "ref48",
+            "doi-asserted-by": "crossref",
+            "unstructured": "Demsetz, H. (1983). „The structure of the ownership and the theory of the Firm‟. Journal of Law and Economics, June, pp. 375- 390.",
+            "DOI": "10.1086/467041"
+          },
+          {
+            "key": "ref49",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Demsetz, H. and Lehn, K. (1985). „The structure of corporate ownership: causes and consequences‟, Journal of Political Economy, 93, pp. 1155-1177.",
+            "DOI": "10.1086/261354"
+          },
+          {
+            "key": "ref50",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Demsetz, H. and Villalonga, B. (2001) „Ownership Structure and Corporate Performance‟, Journal of Corporate Finance, 7, 209–233.",
+            "DOI": "10.1016/s0929-1199(01)00020-7"
+          },
+          {
+            "key": "ref51",
+            "doi-asserted-by": "crossref",
+            "unstructured": "Denis, D.J. and Sarin, A. (1998). „Ownership and board structures in publicly traded corporations‟, working paper.",
+            "DOI": "10.2139/ssrn.114590"
+          },
+          {
+            "key": "ref52",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Donaldson, L. and. Davis, J.H. (1991). „Stewardship theory or agency theory: CEO governance and shareholder returns‟, Australian Journal of Management, 16, pp. 49–64.",
+            "DOI": "10.1177/031289629101600103"
+          },
+          {
+            "key": "ref53",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Earle, J.S., Kucsera, C. and Telegdy, A. (2005). „Ownership Concentration and Corporate Performance on the Budapest Stock Exchange: do too many cooks spoil the goulash?‟, Corporate Governance: An International Review,13(2), pp. 254-264.",
+            "DOI": "10.1111/j.1467-8683.2005.00420.x"
+          },
+          {
+            "key": "ref54",
+            "unstructured": "Egyptian Stock Exchange, (2008). Can be accessed at www.egyptse.com."
+          },
+          {
+            "key": "ref55",
+            "unstructured": "Eisenberg, T., Sundgrn, S. and Wells, M. (1998). „Larger board size and decreasing firm value in small firms‟, Journal of Financial Economics, 48, pp. 35-54."
+          },
+          {
+            "key": "ref56",
+            "unstructured": "Eisenhardt, K.M. (1989). „Agency theory: an assessment and review‟, Academy of Management Review, 14, pp. 57-74."
+          },
+          {
+            "key": "ref57",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Elsayed, A.N.E., El-Masry, A. A., Elbeltagi, I. M. (2010). Corporate governance, firm characteristics and internet financial reporting: evidence from Egyptian listed companies. Corporate Ownership & Control, 7(4-4), 397-426. http://doi.org/10.22495/cocv7i4c4p1",
+            "DOI": "10.22495/cocv7i4c4p1"
+          },
+          {
+            "key": "ref58",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Elsayed, K. (2007). „Does CEO duality really affect corporate performance?‟, Corporate Governance: An International Review, 15, pp. 1203–1214.",
+            "DOI": "10.1111/j.1467-8683.2007.00641.x"
+          },
+          {
+            "key": "ref59",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Elsayed, K. (2010). „A Multi-theory perspective of board leadership structure: what does the Egyptian corporate governance context tell us?‟, British Journal of Management, 21, pp. 80–99.",
+            "DOI": "10.1111/j.1467-8551.2009.00632.x"
+          },
+          {
+            "key": "ref60",
+            "unstructured": "Ely, R. (1990). „The role of men in relationships among professional women‟, Academy of Management Best Paper Proceedings, pp. 64-368."
+          },
+          {
+            "key": "ref61",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Ezat, A. and El-Masry, A. (2008). „The impact of corporate governance on the timeliness of corporate internet reporting by Egyptian listed companies‟, Managerial Finance, 34, pp. 848-867.",
+            "DOI": "10.1108/03074350810915815"
+          },
+          {
+            "key": "ref62",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Fama, E.F. and French, K.R. (1995). „Size and book to market factors in earnings and returns‟, Journal of Finance, 50, pp. 131-155.",
+            "DOI": "10.1111/j.1540-6261.1995.tb05169.x"
+          },
+          {
+            "key": "ref63",
+            "unstructured": "Fama, E.F. and M.C. Jensen (1983). „Separation of ownership and control‟, Journal of Law and Economics, 26, pp. 301–325."
+          },
+          {
+            "key": "ref64",
+            "doi-asserted-by": "crossref",
+            "unstructured": "Fawzy, S. (2003). „Assessment of corporate governance in Egypt‟, Egyptian Centre for Economic Studies, 83.",
+            "DOI": "10.1111/1467-8683.00304"
+          },
+          {
+            "key": "ref65",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Fernández, C., & Gómez-Ansón, S. (2006). Does ownership structure affect firm performance? Evidence from a continental-type governance system. Corporate Ownership & Control, 3(2), 74-89. http://doi.org/10.22495/cocv3i2p9",
+            "DOI": "10.22495/cocv3i2p9"
+          },
+          {
+            "key": "ref66",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Finkelstein, S. and D‟Aveni, R.A. (1994). „CEO duality is double edged sword: how boards of directors balance entrenchment avoidance and unity command‟, Academy of Management Journal, 37, pp. 1079-1108.",
+            "DOI": "10.5465/256667"
+          },
+          {
+            "key": "ref67",
+            "unstructured": "Firstenberg, P.B and Malkiel, B.G. (1980). „Why corporate boards need independent directors‟, Management Review, April, pp. 26-38."
+          },
+          {
+            "key": "ref68",
+            "unstructured": "Fortich, R., Gutierrez, L. and Pombo, C. (2008). „Cross-shares, board structure and firm performance in emerging markets‟, GCGF Workshop-Leading Issues on Corporate Governance in Emerging Markets, Millstein Center, Yale University."
+          },
+          {
+            "key": "ref69",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Füerst, O., & Kang, S. H. (2003). Corporate governance, expected operating performance, and pricing. Corporate Ownership & Control, 1(2), 13-30. http://doi.org/10.22495/cocv1i2p1",
+            "DOI": "10.22495/cocv1i2p1"
+          },
+          {
+            "key": "ref70",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Gedajlovic, E. and Shapiro, D.M. (2002). „Ownership structure and firm profitability in Japan‟, Academy of Management Journal, 45, pp. 565-575.",
+            "DOI": "10.2307/3069381"
+          },
+          {
+            "key": "ref71",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Goodstein, J., Gautum, K. and Boeker, W. (1994). „The effect of board size and diversity on strategic change‟, Strategic Management Journal, 15, pp. 241- 250.",
+            "DOI": "10.1002/smj.4250150305"
+          },
+          {
+            "key": "ref72",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Goodstein, J., Gautum, K., & Boeker, W. (1994). „The effect of Board size and Diversity on Strategic Change‟. Strategic Management Journal, 15, 3, 241- 250.",
+            "DOI": "10.1002/smj.4250150305"
+          },
+          {
+            "key": "ref73",
+            "unstructured": "Grossman, S. and Hart, O. (1982). „Corporate financial structure and managerial incentives‟, University of Chicago Press."
+          },
+          {
+            "key": "ref74",
+            "unstructured": "Gujarati, D. (2004). „Basic econometrics’, Singapore, McGraw-Hill."
+          },
+          {
+            "key": "ref75",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Hambrick, D.C., Cho, T.S. and Chen, M.J. (1996). „The influence of top management team heterogeneity on firm‟s competitive moves‟, Administrative Science Quarterly, 41, pp. 659-684.",
+            "DOI": "10.2307/2393871"
+          },
+          {
+            "key": "ref76",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Haniffa, R. and Hudaib, M. (2006). „Corporate governance structure and performance of Malaysian listed companies‟, Journal of Business Finance and Accounting, 33, pp. 1034-1062.",
+            "DOI": "10.1111/j.1468-5957.2006.00594.x"
+          },
+          {
+            "key": "ref77",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Helland, E. and Sykuta, M. (2005). „Who‟s monitoring the monitor? do outside directors protect shareholders‟ interests?‟ Financial Review, 40, pp. 155-172.",
+            "DOI": "10.1111/j.1540-6288.2005.00098.x"
+          },
+          {
+            "key": "ref78",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Heracleous, L. (2001). „What is the impact of corporate governance on organizational performance?‟ Corporate Governance: an International Review, 9, pp. 165-173.",
+            "DOI": "10.1111/1467-8683.00244"
+          },
+          {
+            "key": "ref79",
+            "unstructured": "Hermalin, B and Weisbach, M (1998). „Endogenously chosen boards of directors and their monitoring of the CEO‟. American Economic Review: American Economic Association, 88, pp. 96-118."
+          },
+          {
+            "key": "ref80",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Hermalin, B and Weisbach, M. (2003) „Boards of directors as an endogenously determined institution: a survey of the economic literature‟, Economic Policy Review, Federal Reserve Bank of New York, April, 7- 26",
+            "DOI": "10.3386/w8161"
+          },
+          {
+            "key": "ref81",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Hermalin, H and Weisbach, M. (1991). The effect of board composition and direct incentives on firm performance, Financial Management, Winter, pp. 101- 112",
+            "DOI": "10.2307/3665716"
+          },
+          {
+            "key": "ref82",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Huang, C. (2010). „Board, ownership and performance of banks with a dual board system: Evidence from Taiwan‟, Journal of Management & Organization, 16, pp. 219-234. Doi: 10.5172/jmo.16.2.219.",
+            "DOI": "10.5172/jmo.16.2.219"
+          },
+          {
+            "key": "ref83",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Huther, J. (1997). „An empirical test of the effect of board size on firm efficiency‟, Economics Letters, 54, pp. 259-264.",
+            "DOI": "10.1016/s0165-1765(97)00035-9"
+          },
+          {
+            "key": "ref84",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Jensen, M.C. (1993). „The modern industrial revolution, exit and the failure of internal control systems‟, Journal of Finance, 48, pp. 831-880.",
+            "DOI": "10.1111/j.1540-6261.1993.tb04022.x"
+          },
+          {
+            "key": "ref85",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Jensen, M.C. and Meckling, W.H. (1976). „Theory of the firm: managerial behaviour, agency costs and ownership structure‟, Journal of Financial Economics, 3, pp. 305-360.",
+            "DOI": "10.1016/0304-405x(76)90026-x"
+          },
+          {
+            "key": "ref86",
+            "unstructured": "Jensen, M.C. and Ruback, R.S. (1983). „The market of corporate control: the scientific evidence‟. Journal of Finance, 11, pp. 5-50."
+          },
+          {
+            "key": "ref87",
+            "doi-asserted-by": "publisher",
+            "unstructured": "John, K. and Senbet, L.W. (1998). „Corporate governance and board effectiveness‟, Journal of Banking and Finance, 22, pp. 371-403.",
+            "DOI": "10.1016/s0378-4266(98)00005-3"
+          },
+          {
+            "key": "ref88",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Kamran, A., Mahmud, H. and Mike, A. (2006). „The effects of board composition and board size on the informativeness of annual accounting earning‟s. Corporate Governance: An International Review, 14, 418-431.",
+            "DOI": "10.1111/j.1467-8683.2006.00515.x"
+          },
+          {
+            "key": "ref89",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Kesner, I.F. and Dalton, D.R. (1986). „Boards of directors and the checks and (im)balances of corporate governance‟. Business Horizons, 29(5), 17-23.",
+            "DOI": "10.1016/0007-6813(86)90046-7"
+          },
+          {
+            "key": "ref90",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Kesner, I.F., B. Victor and B. Lamont (1986). „Board composition and the commission of illegal acts: an investigation of Fortune 500 companies‟, Academy of Management Journal, 29, pp. 789–799.",
+            "DOI": "10.2307/255945"
+          },
+          {
+            "key": "ref91",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Kholeif, A. (2009). „CEO duality and accounting-based performance in Egyptian listed companies: A reexamination of agency theory predictions‟, in M. Tsamenyi and S. Uddin (eds.) Corporate Governance in Less Developed and Emerging Economies (Research in Accounting in Emerging Economies, Volume 8), Emerald Group Publishing Limited, pp.65-96.",
+            "DOI": "10.1016/s1479-3563(08)08003-1"
+          },
+          {
+            "key": "ref92",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Kiel, G.C. and Nicholson, G.J. (2003). „Board composition and corporate performance: how the Australian experience informs contrasting theories of corporate governance‟, Corporate Governance: An International Review, 11, pp. 189–205.",
+            "DOI": "10.1111/1467-8683.00318"
+          },
+          {
+            "key": "ref93",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Klapper, L. and Love, I. (2003). „Corporate governance, Investor protection and performance in emerging markets‟, Journal of Corporate Finance, 195, pp. 1-26.",
+            "DOI": "10.1016/s0929-1199(03)00046-4"
+          },
+          {
+            "key": "ref94",
+            "doi-asserted-by": "crossref",
+            "unstructured": "Klein, A. (1998). „Firm performance and board committee structure‟, Journal of Law and Economics, 41, 137-165.",
+            "DOI": "10.1086/467391"
+          },
+          {
+            "key": "ref95",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Kula, V. (2005). „The impact of the roles, structure and process of boards on firm performance: evidence from Turkey‟. Corporate Governance: An International Review, 13, pp. 265-276.",
+            "DOI": "10.1111/j.1467-8683.2005.00421.x"
+          },
+          {
+            "key": "ref96",
+            "doi-asserted-by": "crossref",
+            "unstructured": "Kumar, J. (2004). „Does ownership structure influence firm value?: Evidence from India‟, EFMA 2004 Basel Meetings.",
+            "DOI": "10.2139/ssrn.464521"
+          },
+          {
+            "key": "ref97",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Laing, D. and Weir, C.M. (1999). „Governance structures, size and corporate performance in UK firms‟, Management Decision, 37(5), pp. 457-464.",
+            "DOI": "10.1108/00251749910274234"
+          },
+          {
+            "key": "ref98",
+            "unstructured": "Lanser, R. (1969). „Visible traits of boards of directors‟. Unpublished doctoral dissertation. Stanford University."
+          },
+          {
+            "key": "ref99",
+            "doi-asserted-by": "publisher",
+            "unstructured": "La-Porta, R., De-Silanes, F.L. and Shleifer, A. (1999). „Corporate ownership around the world‟, Journal of Finance, 54, pp. 471-517",
+            "DOI": "10.1111/0022-1082.00115"
+          },
+          {
+            "key": "ref100",
+            "unstructured": "Larcker, D., Richardson, S. and Tuna, I. (2004). „How important is corporate governance?‟, SSRN, working paper, series No. 595821."
+          },
+          {
+            "key": "ref101",
+            "unstructured": "Lauenstein, M. (1981). „The board of directors: the need for a strategic concept‟, Journal of Business Strategy, 2, pp. 66-68."
+          },
+          {
+            "key": "ref102",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Leland, H. and D.H. Pyle (1977). „Information asymmetric, financial structure and financial intermediation‟, Journal of Finance, 32, pp. 371-388.",
+            "DOI": "10.2307/2326770"
+          },
+          {
+            "key": "ref103",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Leng, A.C.A. (2004). „The impact of corporate governance practices on firms‟ financial performance: evidence from Malaysian companies‟, ASEAN Economic Bulletin, 21, pp. 308–318.",
+            "DOI": "10.1355/ae21-3d"
+          },
+          {
+            "key": "ref104",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Lins, K.V. (2003). „Equity ownership and firm value in emerging markets‟, Journal of Financial and Quantitative Analysis, 38, pp. 159-184.",
+            "DOI": "10.2307/4126768"
+          },
+          {
+            "key": "ref105",
+            "unstructured": "Lipton, M. and Lorsch, J.W. (1992). „A model proposal for improved corporate governance‟, Business Lawyer, 48, pp. 59-77."
+          },
+          {
+            "key": "ref106",
+            "unstructured": "Mace, M.L. (1971). „Directors, myth and reality’. Boston: Harvard Business School Press Malaysian Code of Corporate Governance (March 2000)"
+          },
+          {
+            "key": "ref107",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Mak, Y.T. and Roush, M.L. (2000). „Factors affecting the characteristics of boards of directors: an empirical study of New Zealand initial public offering firms‟, Journal of Business Research, 47, pp. 147-159.",
+            "DOI": "10.1016/s0148-2963(98)00040-x"
+          },
+          {
+            "key": "ref108",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Maury, B. and Pajuste, A. (2005). „Multiple large shareholders and firm value‟, Journal of Banking & Finance, 29, pp. 1813-1834.",
+            "DOI": "10.1016/j.jbankfin.2004.07.002"
+          },
+          {
+            "key": "ref109",
+            "unstructured": "McCune, J. (1998). „The productivity paradox‟, HR Focus, 75, pp. 1-4."
+          },
+          {
+            "key": "ref110",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Mecagni, M. and Sourial, M.S. (1999). „The Egyptian stock market: efficiency tests and volatility effects‟, Working Paper, WP/99/48, International Monetary Fund, Washington, DC.",
+            "DOI": "10.5089/9781451846720.001"
+          },
+          {
+            "key": "ref111",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Mehran, H. (1995). „Executive compensation structure, ownership and firm performance‟, Journal of Financial Economics, 38, pp. 163-184.",
+            "DOI": "10.1016/0304-405x(94)00809-f"
+          },
+          {
+            "key": "ref112",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Milliken, F. and Martins, S.L. (1996). „Searching for common threads, understanding the multiple effects of diversity in organizational groups‟, Academy of Management Review, 21, pp. 402-433.",
+            "DOI": "10.5465/amr.1996.9605060217"
+          },
+          {
+            "key": "ref113",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Morck, R., Shleifer, A. and Vishny, R. (1988). „Management ownership and market valuation: an empirical analysis‟, Journal of Financial Economics, 20, pp. 293-315.",
+            "DOI": "10.1016/0304-405x(88)90048-7"
+          },
+          {
+            "key": "ref114",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Musteen, M., Datta, D.K. and Kemmerer, B. (2010). „Corporate reputation: do board characteristics matter?‟, British Journal of Management, 21, pp. 498– 510.",
+            "DOI": "10.1111/j.1467-8551.2009.00676.x"
+          },
+          {
+            "key": "ref115",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Omran, M.M., Bolbol, A. and Fatheldin, A. (2008). „Corporate governance and firm performance in Arab equity markets: Does ownership concentration matter?‟, International Review of Law and Economics, 28, pp. 32–45.",
+            "DOI": "10.1016/j.irle.2007.12.001"
+          },
+          {
+            "key": "ref116",
+            "unstructured": "Othman, R., Ponirin, H. and Ghani, E.K. (2009). „The effect of board structure on shareholders‟ wealth in small listed companies in Malaysia‟, Management Science and Engineering, 3, pp. 1-15."
+          },
+          {
+            "key": "ref117",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Pearce, J.H. and Zahra, S.A. (1992). „Board composition from a strategic contingency perspective‟, Journal of Management Studies, 29, 411-438.",
+            "DOI": "10.1111/j.1467-6486.1992.tb00672.x"
+          },
+          {
+            "key": "ref118",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Peng, M.W; Buck, T and Filatotchev, I. (2003). „Do outside directors and new managers help improve firm performance?: An exploratory study in Russian privatisation‟. Journal of World Business, 38(4), 348- 360",
+            "DOI": "10.1016/j.jwb.2003.08.020"
+          },
+          {
+            "key": "ref119",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Pi, L. and S.G. Timme (1993). „Corporate control and bank efficiency‟, Journal of Banking and Finance, 17, pp. 515–530.",
+            "DOI": "10.1016/0378-4266(93)90050-n"
+          },
+          {
+            "key": "ref120",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Pound, J. (1988). „Proxy contests and the efficiency of shareholders oversight‟. Journal of Financial Economics, 20, 237-265.",
+            "DOI": "10.1016/0304-405x(88)90046-3"
+          },
+          {
+            "key": "ref121",
+            "unstructured": "Preffer, J. (1972). „Size and composition of corporate board of directors: The organisation and its environment‟. Administrative Science Quarterly. Singapore: Prentice Hall."
+          },
+          {
+            "key": "ref122",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Ramdani, D. and Witteloostuijn, A. (2010). „The impact of board independence and CEO duality on firm performance: A quantile regression analysis for Indonesia, Malaysia, South Korea and Thailand‟, British Journal of Management, Vol. 21, 607–626.",
+            "DOI": "10.1111/j.1467-8551.2010.00708.x"
+          },
+          {
+            "key": "ref123",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Rechner, L. and Dalton, D. (1991). „CEO duality and organizational performance: a longitudinal study‟, Strategic Management Journal, 12, pp. 155–160.",
+            "DOI": "10.1002/smj.4250120206"
+          },
+          {
+            "key": "ref124",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Rosenstein, S. and Wyatt, J.G. (1990). „Outside directors board independence and shareholders‟ wealth‟, Journal of Financial Economics, 26, pp. 175- 191.",
+            "DOI": "10.1016/0304-405x(90)90002-h"
+          },
+          {
+            "key": "ref125",
+            "unstructured": "Shen, M.J., Hsu, C.C. and Chen, M.C. (2006). „A study of ownership structure and firm value under corporate governance- the case of listed and OTC companies in Taiwan‟s finance industry‟, Journal of American Academy of Business, 8, pp. 184-191."
+          },
+          {
+            "key": "ref126",
+            "unstructured": "Shleifer, A. and Vishny, R. (1997). „A survey of corporate governance‟, Journal of Finance, 52, pp. 737-83."
+          },
+          {
+            "key": "ref127",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Shleifer, A., and R. Vishny (1986). Large shareholders and corporate control, Journal of Political Economy 94(3): 461-88.",
+            "DOI": "10.1086/261385"
+          },
+          {
+            "key": "ref128",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Singh, V. and Vinnicombe, S. (2004). „Why so few women directors in top UK board rooms? Evidence and theoretical explanation‟, Corporate Governance: An International Review, 12, pp. 479-488.",
+            "DOI": "10.1111/j.1467-8683.2004.00388.x"
+          },
+          {
+            "key": "ref129",
+            "unstructured": "Smith, N., Smith, V. and Verner, M. (2006). „Women in top management and firm performance‟, IZA Discussion Paper No. 1708, the Institute for the Study of Labour (IZA), Bonn. Retrieved from http://ftp.iza.org/dp1708.pdf"
+          },
+          {
+            "key": "ref130",
+            "unstructured": "Stewart, R. (1991). „Chairman and chief executives: an exploration of their relationships‟, Journal of Management Studies, 28, pp. 511–528."
+          },
+          {
+            "key": "ref131",
+            "unstructured": "Strassmann, P.A. (1998). „Of men and machines: productivity declines‟, Forbes, 11st June."
+          },
+          {
+            "key": "ref132",
+            "unstructured": "Strassmann, P.A. (1999). „Numbers indicate that firms overspend on information management‟, InfoWorld, 22nd March."
+          },
+          {
+            "key": "ref133",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Stulz, R. (1988). „Managerial control of voting rights: financing policies and the market for corporate control‟, Journal of Financial Economics, 20, pp. 25- 54.",
+            "DOI": "10.1016/0304-405x(88)90039-6"
+          },
+          {
+            "key": "ref134",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Sun, Q., Tong, W., & Tong, J. (2002). „How does government ownership affect firm performance? Evidence from China‟s privatization experience‟, Journal of Business Finance and Accounting, 29 (1/2), 1-27.",
+            "DOI": "10.1111/1468-5957.00422"
+          },
+          {
+            "key": "ref135",
+            "unstructured": "Uadiale, O.M. (2010). „The impact of board structure on corporate financial performance in Nigeria‟, International Journal of Business and Management, 5, pp. 155-168."
+          },
+          {
+            "key": "ref136",
+            "unstructured": "Ullmann, K.D. and Voss, C.A. (2000). „Bridges and motorways. Exploring the strategic impact of using SAP R/3 in manufacturing businesses‟, Proceedings of the I World Congress on Production and Operations Management, POM 2000, Sevilla."
+          },
+          {
+            "key": "ref137",
+            "unstructured": "Van Ees, H; Postma, T and Sterken, E (2003). „Board characteristics and corporate performance in the Netherlands‟. Eastern Economic Journal, Winter, 1, 41-58"
+          },
+          {
+            "key": "ref138",
+            "unstructured": "Vancil, R (1987). „Passing in baton: Managing the process of CEO succession’. Boston: Harvard School Press."
+          },
+          {
+            "key": "ref139",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Wang, C. (2005). „Ownership and operating performance of Chinese IPOs‟. Journal of Banking & Finance 29(7), pp. 1835-1856.",
+            "DOI": "10.1016/j.jbankfin.2004.07.003"
+          },
+          {
+            "key": "ref140",
+            "unstructured": "Wang, H., Jin, L. and Xiaozhou, X. (2008). „Stock ownership concentration and firm performance- an empirical study based on IPO companies in China‟, International Management Review, 4, pp. 37-47."
+          },
+          {
+            "key": "ref141",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Weir, C. and Laing, D. (2001). „Governance structures, director independence and corporate performance in the UK‟, European Business Review, 13, pp. 86-94.",
+            "DOI": "10.1108/09555340110385254"
+          },
+          {
+            "key": "ref142",
+            "doi-asserted-by": "publisher",
+            "unstructured": "143. Weisback, M.S. (1988). „Outside directors and CEO turnover‟, Journal of Financial Economics, 20, pp. 431-460.",
+            "DOI": "10.1016/0304-405x(88)90053-0"
+          },
+          {
+            "key": "ref143",
+            "unstructured": "Wernelfelt, B. (1984). „A resource based view of the firm‟, Strategic Management Journal, 5, pp. 171-180."
+          },
+          {
+            "key": "ref144",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Xu, X. and Wang, Y. (1999). „Ownership structure and corporate governance in Chinese stock companies‟, China Economic Review, 10 (1)",
+            "DOI": "10.1016/s1043-951x(99)00006-1"
+          },
+          {
+            "key": "ref145",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Yermack, D. (1996). „Higher valuation of companies with a small board of directors‟, Journal of Financial Economics, 40, pp. 185-212.",
+            "DOI": "10.1016/0304-405x(95)00844-5"
+          },
+          {
+            "key": "ref146",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Zahra, S., and Pearce, J. (1989). „Boards of directors and corporate financial performance: A review and integrative model‟. Journal of Management, 15, 291- 334",
+            "DOI": "10.1177/014920638901500208"
+          }
+        ],
+        "container-title": [
+          "Corporate Ownership and Control"
+        ],
+        "language": "en",
+        "link": [
+          {
+            "URL": "https://virtusinterpress.org/IMG/pdf/10-22495_cocv8i1c5p5.pdf",
+            "content-type": "application/pdf",
+            "content-version": "vor",
+            "intended-application": "text-mining"
+          },
+          {
+            "URL": "https://virtusinterpress.org/IMG/pdf/10-22495_cocv8i1c5p5.pdf",
+            "content-type": "unspecified",
+            "content-version": "vor",
+            "intended-application": "similarity-checking"
+          }
+        ],
+        "deposited": {
+          "date-parts": [
+            [
+              2022,
+              7,
+              22
+            ]
+          ],
+          "date-time": "2022-07-22T17:59:02Z",
+          "timestamp": 1658512742000
+        },
+        "score": 45.574898,
+        "resource": {
+          "primary": {
+            "URL": "http://virtusinterpress.org/CORPORATE-GOVERNANCE-OWNERSHIP,1874.html"
+          }
+        },
+        "issued": {
+          "date-parts": [
+            [
+              2010
+            ]
+          ]
+        },
+        "references-count": 147,
+        "journal-issue": {
+          "issue": "1",
+          "published-online": {
+            "date-parts": [
+              [
+                2010
+              ]
+            ]
+          },
+          "published-print": {
+            "date-parts": [
+              [
+                2010
+              ]
+            ]
+          }
+        },
+        "URL": "https://doi.org/10.22495/cocv8i1c5p5",
+        "archive": [
+          "Portico",
+          "Portico"
+        ],
+        "ISSN": [
+          "1810-3057",
+          "1727-9232"
+        ],
+        "issn-type": [
+          {
+            "type": "electronic",
+            "value": "1810-3057"
+          },
+          {
+            "type": "print",
+            "value": "1727-9232"
+          }
+        ],
+        "published": {
+          "date-parts": [
+            [
+              2010
+            ]
+          ]
+        }
+      },
+      {
+        "indexed": {
+          "date-parts": [
+            [
+              2025,
+              2,
+              21
+            ]
+          ],
+          "date-time": "2025-02-21T22:51:12Z",
+          "timestamp": 1740178272521,
+          "version": "3.37.3"
+        },
+        "reference-count": 55,
+        "publisher": "Virtus Interpress",
+        "issue": "2",
+        "license": [
+          {
+            "start": {
+              "date-parts": [
+                [
+                  2018,
+                  9,
+                  5
+                ]
+              ],
+              "date-time": "2018-09-05T00:00:00Z",
+              "timestamp": 1536105600000
+            },
+            "content-version": "vor",
+            "delay-in-days": 2439,
+            "URL": "https://creativecommons.org/licenses/by-nc/4.0"
+          },
+          {
+            "start": {
+              "date-parts": [
+                [
+                  2018,
+                  9,
+                  5
+                ]
+              ],
+              "date-time": "2018-09-05T00:00:00Z",
+              "timestamp": 1536105600000
+            },
+            "content-version": "tdm",
+            "delay-in-days": 2439,
+            "URL": "https://creativecommons.org/licenses/by-nc/4.0"
+          }
+        ],
+        "content-domain": {
+          "domain": [],
+          "crossmark-restriction": false
+        },
+        "short-container-title": [
+          "COC"
+        ],
+        "published-print": {
+          "date-parts": [
+            [
+              2012
+            ]
+          ]
+        },
+        "abstract": "<jats:p>The main purpose of this study is to ascertain whether alternative corporate ownership and control structures give rise to significant differential firm performance in light of Nigeria’s conflicting polices regarding the ownership structure of the state owned enterprises. The data obtained from a sample of 73 companies listed on the Nigerian Stock Exchange is analyzed through the Wilcoxon ranks tests for two independent samples. The evidence obtained suggests that firms with foreign ownership and control outperform their indigenous counterparts. However, firms controlled by single shareholders do not perform better than those controlled by multiple shareholders. The study recommends that foreign ownership and control of Nigerian firms be encouraged due to their affirmative features, while single shareholder control of firms, embedded in the core investor mode of ownership, is reconsidered.</jats:p>",
+        "DOI": "10.22495/cocv9i2art8",
+        "type": "journal-article",
+        "created": {
+          "date-parts": [
+            [
+              2017,
+              2,
+              3
+            ]
+          ],
+          "date-time": "2017-02-03T09:48:03Z",
+          "timestamp": 1486115283000
+        },
+        "page": "94-105",
+        "source": "Crossref",
+        "is-referenced-by-count": 0,
+        "title": [
+          "Impact of corporate ownership and control on firm performance: The Nigerian experience"
+        ],
+        "prefix": "10.22495",
+        "volume": "9",
+        "author": [
+          {
+            "given": "Ioraver Nyenger",
+            "family": "Tsegba",
+            "sequence": "first",
+            "affiliation": []
+          },
+          {
+            "given": "John Iorpenda",
+            "family": "Sar",
+            "sequence": "additional",
+            "affiliation": []
+          }
+        ],
+        "member": "9787",
+        "published-online": {
+          "date-parts": [
+            [
+              2012
+            ]
+          ]
+        },
+        "reference": [
+          {
+            "key": "ref0",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Abdullah, S.-N. (2007). Board composition, audit committee and timeliness of corporate financial reports in Malaysia. Corporate Ownership & Control, 4(2), 33-45. http://dx.doi.org/10.22495/cocv4i2p3",
+            "DOI": "10.22495/cocv4i2p3"
+          },
+          {
+            "key": "ref1",
+            "unstructured": "Adenikinju, O. and Ayorinde, F. (2001), “Ownership Structure, Corporate Governance and Corporate Performance: The Case of Nigerian Quoted Companies”, Report presented at the AERC biannual research workshop, Nairobi, May."
+          },
+          {
+            "key": "ref2",
+            "unstructured": "Bai, C., Liu, Q., Lu, J., Song, F. M., and Zhang, J. (2005), “An Empirical Study of Corporate Governance and Market Valuation in China”, Economic Research Journal, Vol. 2, pp.84-110."
+          },
+          {
+            "key": "ref3",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Barako, D. G., & Tower, G. (2007). Corporate governance and bank performance: Does ownership matter? Evidence from the Kenyan banking sector. Corporate Ownership & Control, 4(2), 133-144. http://dx.doi.org/10.22495/cocv4i2p13",
+            "DOI": "10.22495/cocv4i2p13"
+          },
+          {
+            "key": "ref4",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Bebchuk, L. A. and Roe, M. J. (1999), “A Theory of Path Dependence in Corporate Ownership and Governance”, Stanford Law Review, Vol. 52 No.1, pp. 127- 155.",
+            "DOI": "10.2307/1229459"
+          },
+          {
+            "key": "ref5",
+            "unstructured": "Berle, A. A. and Means, G. C. (1932), The Modern Corporation and Private Property, Macmillan, New York."
+          },
+          {
+            "key": "ref6",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Chu, E. Y., & Cheah, K. G. (2006). Does ownership structure matter? Evidence from Malaysian equity market. Corporate Ownership & Control, 4(1), 77-90. http://dx.doi.org/10.22495/cocv4i1p6",
+            "DOI": "10.22495/cocv4i1p6"
+          },
+          {
+            "key": "ref7",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Cohen, J. R. and Holder-Webb, L. L. (2006), “Rethinking the Influence of Agency Theory in the Accounting Academy”, Issues in Accounting Education, Vol. 21 No. 1, pp. 17-39.",
+            "DOI": "10.2308/iace.2006.21.1.17"
+          },
+          {
+            "key": "ref8",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Connelly, B. L., Hoskisson , R. E., Tihanyi, L. and Certo, S. T. (2010), “Ownership as a Form of Corporate Governance”, Journal of Management Studies, Vol. 47, pp. 1561-1589.",
+            "DOI": "10.1111/j.1467-6486.2010.00929.x"
+          },
+          {
+            "key": "ref9",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Deakin, S. and Konzelmann, S. J. (2004), “Learning from Enron”, Corporate Governance, Vol. 12 No. 2, pp. 134-142.",
+            "DOI": "10.1111/j.1467-8683.2004.00352.x"
+          },
+          {
+            "key": "ref10",
+            "doi-asserted-by": "crossref",
+            "unstructured": "Demsetz, H. (1983), “The Structure of Ownership and the Theory of the Firm”, Journal of Law and Economics, Vol. 26, pp. 375-390.",
+            "DOI": "10.1086/467041"
+          },
+          {
+            "key": "ref11",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Demsetz, H. and Lehn, K. (1985), “The Structure of Corporate Ownership: Causes and Consequences”, Journal of Political Economy, Vol. 93, pp. 1155-1177.",
+            "DOI": "10.1086/261354"
+          },
+          {
+            "key": "ref12",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Demsetz, H. and Villalonga, B. ((2001), “Ownership Structure and Corporate Performance”, Journal of Corporate Finance, Vol. 7, pp. 209-233.",
+            "DOI": "10.1016/s0929-1199(01)00020-7"
+          },
+          {
+            "key": "ref13",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Detomasi, D. (2002), “International Institutions and the Case for Corporate Governance: Toward a Distributive Governance Framework?” Global Governance, Vol. 8 No. 4, pp. 421- 435.",
+            "DOI": "10.1163/19426720-00804004"
+          },
+          {
+            "key": "ref14",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Dockery, E., Herbert, W. E. and Taylor, K. ((2000), “Corporate Governance, Managerial Strategies and Shareholder Wealth Maximization: A Study of Large European Companies”, Managerial Finance, Vol. 26 No. 9, pp. 21- 35.",
+            "DOI": "10.1108/03074350010766855"
+          },
+          {
+            "key": "ref15",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Estrin, S., Konings, J, Zolkiewski, Z., and Angelucci, M. (2001), “The Effect of Ownership and Competitive Pressure on Firm Performance in Transition Countries: Micro Evidence from Bulgaria, Romania and Poland”, Paper presented at LICOS, K. U. Leuven; a Phare Ace Workshop on Competition Policy in Romania, 7 August.",
+            "DOI": "10.2139/ssrn.307088"
+          },
+          {
+            "key": "ref16",
+            "doi-asserted-by": "crossref",
+            "unstructured": "Fama, E. F. and Jensen, M. C. (1983), “Separation of Ownership and Control”, Journal of Law and Economics, Vol. 26, pp. 301 – 325.",
+            "DOI": "10.1086/467037"
+          },
+          {
+            "key": "ref17",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Farooque, O. A., Zijl, T. V., Dunstan, K. and Karim, A. W. (2007), “Ownership Structure and Corporate Performance: Evidence from Bangladesh”, Asian Journal of Accounting and Economics, Vol. 14, p.127-150.",
+            "DOI": "10.1080/16081625.2007.9720792"
+          },
+          {
+            "key": "ref18",
+            "unstructured": "Federal Government of Nigeria (1972), Indigenization Decree, Government Press, Lagos."
+          },
+          {
+            "key": "ref19",
+            "unstructured": "_________ (1999) Public Enterprises (Privatization and Commercialization) Decree, A1121 1999 No.28."
+          },
+          {
+            "key": "ref20",
+            "unstructured": "Fort, T. L. and Schipani, C. A. (2003), “Adapting Corporate Governance for Sustainable Peace”, Vanderbilt Journal of Transnational Law, Vol. 36 No. 2, pp. 377-411."
+          },
+          {
+            "key": "ref21",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Filatotchev, I. and Wright, M. (2011), “Agency Perspectives on Corporate Governance of Multinational Enterprises”, Journal of Management Studies Vol.48, pp. 471-486.",
+            "DOI": "10.1111/j.1467-6486.2010.00921.x"
+          },
+          {
+            "key": "ref22",
+            "unstructured": "Herbert, W. E. (1995), Alternative Strategies to Foreign Investment, MI Press, UMI, Ann Arbor."
+          },
+          {
+            "key": "ref23",
+            "unstructured": "____________.(2001), “The Relations between Corporate Governance, Managerial Strategies and Shareholder Value Creation: An International Analysis”, Accountancy Frontier, Vol. 3 No. 1, pp. 1 – 24."
+          },
+          {
+            "key": "ref24",
+            "unstructured": "Javed, Y. and Iqbal, R. (2007), “Relationship between Corporate Governance Indicators and Firm Value: A Case Study of Karachi Stock Exchange”, hhtp://mpra.ub.uni-muenchen.de/2225"
+          },
+          {
+            "key": "ref25",
+            "unstructured": "Jensen, M. C. (1986), “Agency Costs of Free Cash Flow, Corporate Finance Takeovers”, American Economic Review, Vol. 76, pp. 323-329."
+          },
+          {
+            "key": "ref26",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Jensen, M. C. and Meckling, W. H. (1976), “Theory of the Firm: Managerial Behaviour, Agency Costs, and Ownership Structure”, Journal of Financial Economics, Vol. 3, pp. 305-360.",
+            "DOI": "10.1016/0304-405x(76)90026-x"
+          },
+          {
+            "key": "ref27",
+            "unstructured": "Jerome, A. (2008), “Privatization and Enterprise Performance in Nigeria: Case Study of Some Privatized Enterprises”, AERC Research Paper 175, African Economic Research Consortium, Nairobi."
+          },
+          {
+            "key": "ref28",
+            "doi-asserted-by": "publisher",
+            "unstructured": "John, K. and Senbet, L. W. (1998), “Corporate Governance and Board Effectiveness”, Journal of Banking and Finance, Vol. 22, pp. 371-403.",
+            "DOI": "10.1016/s0378-4266(98)00005-3"
+          },
+          {
+            "key": "ref29",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Johnson, S., La Porta, R., Lopez-de-Silanes, F. and Shleifer, A. (2000), “Tunneling”, American Economic Review, Vol. 90, pp. 22-27.",
+            "DOI": "10.1257/aer.90.2.22"
+          },
+          {
+            "key": "ref30",
+            "doi-asserted-by": "crossref",
+            "unstructured": "Kang, D. L. and Sorensen, A. B. (1999), “Ownership Organization and Firm Performance”, Annual Review of Sociology, pp. 121-139.",
+            "DOI": "10.1146/annurev.soc.25.1.121"
+          },
+          {
+            "key": "ref31",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Kyereboah-Coleman, A., & Biekpe, N. (2006). Do boards and CEOs matter for bank performance? A comparative analysis of banks in Ghana. Corporate Ownership & Control, 4(1), 119-126. http://dx.doi.org/10.22495/cocv4i1p10 Kyereboah-Coleman, A., & Biekpe, N. (2007). The relationship between board size, board composition, CEO duality and firm performance: Experience from Ghana. Corporate Ownership & Control, 4(2), 114-122. http://dx.doi.org/10.22495/cocv4i2p11",
+            "DOI": "10.22495/cocv4i2p11"
+          },
+          {
+            "key": "ref32",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Laing, D. and Weir, C. M. (1999), “Governance Structures, Size and Corporate Performance in UK Firms”, Management Decision, Vol. 37, pp. 457-464",
+            "DOI": "10.1108/00251749910274234"
+          },
+          {
+            "key": "ref33",
+            "doi-asserted-by": "publisher",
+            "unstructured": "La Porta, R., Lopez-de-Silanes, F., Shleifer, A. and Vishny, R (2000), “Investor Protection and Corporate Governance”, Journal of Financial Economics, Vol. 58, pp. 3-27.",
+            "DOI": "10.1016/s0304-405x(00)00065-9"
+          },
+          {
+            "key": "ref34",
+            "doi-asserted-by": "crossref",
+            "unstructured": "_____(2002), “Investor Protection and Corporate Valuation”, Journal of Finance, Vol. 57, pp.1147-1170.",
+            "DOI": "10.1111/1540-6261.00457"
+          },
+          {
+            "key": "ref35",
+            "unstructured": "Marx, K. (1867), Capital, The Modern Library, New York."
+          },
+          {
+            "key": "ref36",
+            "doi-asserted-by": "publisher",
+            "unstructured": "McConnel, J. J. and Servaes, H. (1990), “Additional Evidence on Equity Ownership and Corporate Value”, Journal of Financial Economics, Vol. 27 No. 2, pp. 595-613.",
+            "DOI": "10.1016/0304-405x(90)90069-c"
+          },
+          {
+            "key": "ref37",
+            "unstructured": "Monks, R. A. G. and Minow, N. (1995), Corporate Governance, Blackwell, Cambridge."
+          },
+          {
+            "key": "ref38",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Morck, R., Shleifer, A. and Vishny, R. W. (1988), “Management Ownership and Market Valuation: An Empirical Analysis”, Journal of Financial Economics, Vol. 20, pp. 293-315.",
+            "DOI": "10.1016/0304-405x(88)90048-7"
+          },
+          {
+            "key": "ref39",
+            "unstructured": "National Council on Privatization (2000), Privatization Handbook.: Spectrum Books, Ibadan"
+          },
+          {
+            "key": "ref40",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Nguyen, H., & Faff, R. (2007). Impact of board size and board diversity on firm value: Australian evidence. Corporate Ownership & Control, 4(2), 24-32. http://dx.doi.org/10.22495/cocv4i2p2",
+            "DOI": "10.22495/cocv4i2p2"
+          },
+          {
+            "key": "ref41",
+            "doi-asserted-by": "crossref",
+            "unstructured": "Pedersen, T. and Themsen, S. (1999), “Business Systems and Corporate Governance”, International Studies of Management and Organization, Vol. 29 No. 2, pp. 43 – 54.",
+            "DOI": "10.1080/00208825.1999.11656762"
+          },
+          {
+            "key": "ref42",
+            "doi-asserted-by": "crossref",
+            "unstructured": "Pivovarsky, A. (2003), “Ownership Concentration and Performance in Ukraine’s Privatized Enterprises”, IMF Staff Papers, Vol. 50 No. 1, pp. 10 – 42.",
+            "DOI": "10.2307/4149946"
+          },
+          {
+            "key": "ref43",
+            "unstructured": "Pound, J. (1993), “The Rise of the Political Model of Corporate Governance and Corporate Control”, New York University Law Review, Vol. 68 No. 5, pp. 1003-1071."
+          },
+          {
+            "key": "ref44",
+            "unstructured": "Sanda, A., Mikailu, A. S., and Garba, T. (2005), “Corporate Governance Mechanisms and Firm Financial Performance in Nigeria”, AERC Research Paper 149, African Economic Research Consortium, Nairobi."
+          },
+          {
+            "key": "ref45",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Shleifer, A. and Vishny, R. W. (1986), “Large Shareholders and Corporate Control”, Journal of Political Economy, Vol. 94, pp. 461-468.",
+            "DOI": "10.1086/261385"
+          },
+          {
+            "key": "ref46",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Shleifer, A. and Vishny, R. W. (1997), “A Survey of Corporate Governance”, Journal of Finance, Vol. 52, pp. 737-783.",
+            "DOI": "10.1111/j.1540-6261.1997.tb04820.x"
+          },
+          {
+            "key": "ref47",
+            "doi-asserted-by": "crossref",
+            "unstructured": "Smith, A. (1776). An Inquiry into the Nature and Causes of the Wealth of Nations. http://www.socserve2.socsg:mo",
+            "DOI": "10.1093/oseo/instance.00043218"
+          },
+          {
+            "key": "ref48",
+            "doi-asserted-by": "crossref",
+            "unstructured": "Tannenbaum, A. S. (1962), Control in Organizations.: McGraw-Hill, New York.",
+            "DOI": "10.2307/2390955"
+          },
+          {
+            "key": "ref49",
+            "unstructured": "Tsegba, I. N. and Herbert, W. E. (2011), “The Relationship between Ownership Structure and Firm Performance: Evidence from Nigerian Listed Companies”, African Journal of Accounting, Economics, Finance and Banking Research, Vol. 7 No. 7, pp. 51-62."
+          },
+          {
+            "key": "ref50",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Turnbull, S. (1997), “Corporate Governance: Its Scope, Concerns and Theories”, Corporate Governance: An International Review, Vol. 5 No. 4, pp. 180-205.",
+            "DOI": "10.1111/1467-8683.00061"
+          },
+          {
+            "key": "ref51",
+            "doi-asserted-by": "publisher",
+            "unstructured": "van Slyke, D. M. (2007), “Agents or Stewards: Using Theory to Understand the Government- Nonprofit Social Service Contracting Relationship”, Journal of Public Administration Research and Theory, Vol. 17 No. 2, pp. 157 – 206.",
+            "DOI": "10.1093/jopart/mul012"
+          },
+          {
+            "key": "ref52",
+            "unstructured": "Veblen, T. (1924). The Engineers and the Price System, Viking, New York."
+          },
+          {
+            "key": "ref53",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Welch, E. (2003), “The Relationship between Ownership Structure and Performance in Listed Australian Companies”, Australian Journal of Management, Vol. 28 No. 3, pp. 287 – 305.",
+            "DOI": "10.1177/031289620302800304"
+          },
+          {
+            "key": "ref54",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Yakasai, G. A. (2001), “Corporate Governance in a Third World Country with Particular Reference to Nigeria”, Corporate Governance, Vol. 9 No. 3, pp. 238-253.",
+            "DOI": "10.1111/1467-8683.00251"
+          }
+        ],
+        "container-title": [
+          "Corporate Ownership and Control"
+        ],
+        "language": "en",
+        "link": [
+          {
+            "URL": "https://virtusinterpress.org/IMG/pdf/10-22495_cocv9i2art8.pdf",
+            "content-type": "application/pdf",
+            "content-version": "vor",
+            "intended-application": "text-mining"
+          },
+          {
+            "URL": "https://virtusinterpress.org/IMG/pdf/10-22495_cocv9i2art8.pdf",
+            "content-type": "unspecified",
+            "content-version": "vor",
+            "intended-application": "similarity-checking"
+          }
+        ],
+        "deposited": {
+          "date-parts": [
+            [
+              2024,
+              6,
+              22
+            ]
+          ],
+          "date-time": "2024-06-22T07:25:29Z",
+          "timestamp": 1719041129000
+        },
+        "score": 45.430405,
+        "resource": {
+          "primary": {
+            "URL": "http://www.virtusinterpress.org/IMPACT-OF-CORPORATE-OWNERSHIP-AND.html"
+          }
+        },
+        "issued": {
+          "date-parts": [
+            [
+              2012
+            ]
+          ]
+        },
+        "references-count": 55,
+        "journal-issue": {
+          "issue": "2",
+          "published-online": {
+            "date-parts": [
+              [
+                2012
+              ]
+            ]
+          },
+          "published-print": {
+            "date-parts": [
+              [
+                2012
+              ]
+            ]
+          }
+        },
+        "URL": "https://doi.org/10.22495/cocv9i2art8",
+        "archive": [
+          "Portico",
+          "Portico"
+        ],
+        "ISSN": [
+          "1810-3057",
+          "1727-9232"
+        ],
+        "issn-type": [
+          {
+            "type": "electronic",
+            "value": "1810-3057"
+          },
+          {
+            "type": "print",
+            "value": "1727-9232"
+          }
+        ],
+        "published": {
+          "date-parts": [
+            [
+              2012
+            ]
+          ]
+        }
+      },
+      {
+        "indexed": {
+          "date-parts": [
+            [
+              2025,
+              8,
+              2
+            ]
+          ],
+          "date-time": "2025-08-02T19:29:51Z",
+          "timestamp": 1754162991561,
+          "version": "3.41.2"
+        },
+        "reference-count": 144,
+        "publisher": "Virtus Interpress",
+        "issue": "2-1",
+        "license": [
+          {
+            "start": {
+              "date-parts": [
+                [
+                  2018,
+                  3,
+                  2
+                ]
+              ],
+              "date-time": "2018-03-02T00:00:00Z",
+              "timestamp": 1519948800000
+            },
+            "content-version": "vor",
+            "delay-in-days": 60,
+            "URL": "https://creativecommons.org/licenses/by-nc/4.0"
+          },
+          {
+            "start": {
+              "date-parts": [
+                [
+                  2018,
+                  3,
+                  2
+                ]
+              ],
+              "date-time": "2018-03-02T00:00:00Z",
+              "timestamp": 1519948800000
+            },
+            "content-version": "tdm",
+            "delay-in-days": 60,
+            "URL": "https://creativecommons.org/licenses/by-nc/4.0"
+          }
+        ],
+        "content-domain": {
+          "domain": [],
+          "crossmark-restriction": false
+        },
+        "short-container-title": [
+          "COC"
+        ],
+        "published-print": {
+          "date-parts": [
+            [
+              2018
+            ]
+          ]
+        },
+        "abstract": "<jats:p>We examine problems of strategic change and innovation in Italian firms which develop cooperative relationships with other firms. The inter-firm network phenomenon has taken on such importance in Italy that, in 2009, the State issued a law (Decreto Legge 5/2009) specifically to regulate the concluding of cooperative contracts for the formation of inter-firm networks. This law offers firms that wish to keep their groups of owners separate the possibility to establish a multiplicity of inter-firm relationships through the signing of just one single contract, named “Contratto di rete”, which, in this paper, we will refer to as a “network contract”. For historical reasons, all firms in Italy, even those quoted on the stock market (Milan Stock Exchange), exhibit a high level of ownership concentration. The largest class of blockholders is that of families who are active in the family firm. As regards the size of firms that maintain cooperative relationships, data on network contracts show that 95% of the firms stipulating these contracts are small- or medium-sized enterprises (SMEs), so categorised because they have fewer than 50 employees. Through strategic alliances and collaborative relationships, Italian family firms have been able to develop business ideas that, as a consequence of the companies’ small dimensions, would have been impossible otherwise. On the basis of this premise, we considered it convenient to analyse small- or medium-sized family ﬁrms that developed relationships of cooperation regulated by network contracts in the period between 1/1/2013 and 31/12/2016. With reference to this category of firm, we analysed data on strategic change and innovation for a sample of 391 firms that accepted to be interviewed by us. Some of these firms had opened their top management teams (TMT) and/or their Boards of Directors to the participation of individuals from outside the dominant family, while others had not. The results of this research show that the firm that extends participation in the board or the Top Management Team by involving individuals from outside the dominant family, so as to gain better access to critical resources controlled by partners, creates a more favourable context for strategic change and innovation.</jats:p>",
+        "DOI": "10.22495/cocv15i2c1p9",
+        "type": "journal-article",
+        "created": {
+          "date-parts": [
+            [
+              2018,
+              3,
+              2
+            ]
+          ],
+          "date-time": "2018-03-02T06:16:07Z",
+          "timestamp": 1519971367000
+        },
+        "page": "231-247",
+        "source": "Crossref",
+        "is-referenced-by-count": 3,
+        "title": [
+          "Corporate governance and firm networks: An empirical research based on Italy"
+        ],
+        "prefix": "10.22495",
+        "volume": "15",
+        "author": [
+          {
+            "ORCID": "https://orcid.org/0000-0001-8177-4240",
+            "authenticated-orcid": false,
+            "given": "Francesco",
+            "family": "Napoli",
+            "sequence": "first",
+            "affiliation": []
+          }
+        ],
+        "member": "9787",
+        "published-online": {
+          "date-parts": [
+            [
+              2018,
+              3,
+              2
+            ]
+          ]
+        },
+        "reference": [
+          {
+            "key": "ref0",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Al Hares, A., Ntim, C. G., & King, D. (2018). Block ownership and companies’ R&D intensity: The moderating effect of culture. Corporate Ownership & Control, 15(2), 19-32. https://doi.org/10.22495/cocv15i2art2",
+            "DOI": "10.22495/cocv15i2art2"
+          },
+          {
+            "key": "ref1",
+            "unstructured": "Allen T. (1984). Managing the flow of technology. Cambridge, MA: MIT Press."
+          },
+          {
+            "key": "ref2",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Altuwaijri, B., & Kalyanaraman, L. (2017). Top management team pay, firm size and performance relationship in Saudi Arabian firms. Corporate Board: role, duties and composition, 13(1), 21-27. https://doi.org/10.22495/cbv13i1p2",
+            "DOI": "10.22495/cbv13i1p2"
+          },
+          {
+            "key": "ref3",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Amason, A. C. (1996). Distinguishing the effects of functional and dysfunctional conflict on strategic decision making: Resolving a paradox for top management teams. Academy of Management Journal, 39(1), 123-148. https://doi.org/10.2307/256633",
+            "DOI": "10.5465/256633"
+          },
+          {
+            "key": "ref4",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Amason, A. C., & Sapienza, H. J. (1997). The effects of top management team size and interaction norms on cognitive and affective conflict. Journal of Management, 23(4), 495-516. https://doi.org/10.1177/014920639702300401",
+            "DOI": "10.1177/014920639702300401"
+          },
+          {
+            "key": "ref5",
+            "doi-asserted-by": "crossref",
+            "unstructured": "Anderson, R. C., & Reeb, D. (2004). Board composition: Balancing family influence in S&P 500 firms. Administrative Science Quarterly, 49, 209-237.",
+            "DOI": "10.2307/4131472"
+          },
+          {
+            "key": "ref6",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Anderson, R. C., Mansi, S. A., & Reeb, D. M. (2003), Family founding ownership and the agency cost of debt. Journal of Financial Economics, 68, 263-285. https://doi.org/10.1016/S0304-405X(03)00067-9",
+            "DOI": "10.1016/s0304-405x(03)00067-9"
+          },
+          {
+            "key": "ref7",
+            "unstructured": "Ansof, I. (1965). Corporate strategy. New York: McGraw-Hill."
+          },
+          {
+            "key": "ref8",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Aronoﬀ, C. E., & Ward, J. L. (1997). Preparing your family business for strategic change. Family Business Leadership Series, 9. Marietta, GA: Business Owner Resources.",
+            "DOI": "10.1057/9780230116191_4"
+          },
+          {
+            "key": "ref9",
+            "unstructured": "Barach, J. A. (1984). Is there a cure for the paralyzed family board? Sloan Management Review, 26(1), 3-12."
+          },
+          {
+            "key": "ref10",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Barney, J. (1991), Firm resources and sustained competitive advantage. Journal of Management, 17(1), 99-120. https://doi.org/10.1177/014920639101700108",
+            "DOI": "10.1177/014920639101700108"
+          },
+          {
+            "key": "ref11",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Baysinger, B., Kosnik, R. D., & Turk, T. A. (1991). Effects of board and ownership structure on corporate R&D strategy. Academy of Management Journal, 34(1), 205-214. https://doi.org/10.2307/256308",
+            "DOI": "10.5465/256308"
+          },
+          {
+            "key": "ref12",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Beatty, R., & Zajac, E. (1994). Managerial incentives, monitoring, and risk bearing: A study of executive compensation, ownership, and board structure in initial public offerings. Administrative Science Quarterly, 39(2), 313-335. https://doi.org/10.2307/2393238",
+            "DOI": "10.2307/2393238"
+          },
+          {
+            "key": "ref13",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Bethel, J. E., Liebeskind, J. (1993). The effects of ownership structure on corporate restructuring. Strategic Management Journal, 14 (special issue), 15-31. https://doi.org/10.1002/smj.4250140904",
+            "DOI": "10.1002/smj.4250140904"
+          },
+          {
+            "key": "ref14",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Boeker, W. (1989). Strategic change: The effects of founding and history. Academy of Management Journal, 32(3), 489-515. https://doi.org/10.2307/256432",
+            "DOI": "10.5465/256432"
+          },
+          {
+            "key": "ref15",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Borch, O. J., & Huse, M. (1993). Informal strategic networks and the board of directors. Entrepreneurship Theory and Practice, 18(1), 23–36. https://doi.org/10.1177/104225879301800102",
+            "DOI": "10.1177/104225879301800102"
+          },
+          {
+            "key": "ref16",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Brunninge, O., & Nordqvist, M. (2004). Ownership structure, board composition and entrepreneurship: evidence from family firms and venture-capital backed firms. International Journal of Entrepreneurial Behaviour and Research, 10(1-2), 85-105. https://doi.org/10.1108/13552550410521399",
+            "DOI": "10.1108/13552550410521399"
+          },
+          {
+            "key": "ref17",
+            "unstructured": "Bruno, A. (1999). L’impresa minore nel processo di internazionalizzazione dei mercati. Torino: Giappichelli."
+          },
+          {
+            "key": "ref18",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Bubolz, M. (2001). Family as a source, user and builder of social capital. Journal of Socio-Economics, 30(2), 129-131. https://doi.org/10.1016/S1053-5357(00)00091-3",
+            "DOI": "10.1016/s1053-5357(00)00091-3"
+          },
+          {
+            "key": "ref19",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Cabrera-Suárez, K., De Saá-Pérez, P., & Garcia-Almeida, D. (2001). The succession process from a resource and knowledge-based view of the family firm. Family Business Review, 14(1), 37-46. https://doi.org/10.1111/j.1741-6248.2001.00037.x",
+            "DOI": "10.1111/j.1741-6248.2001.00037.x"
+          },
+          {
+            "key": "ref20",
+            "unstructured": "Cannella, A. A., & Holcomb, T. R. (2005). A multilevel analysis of the upper-echelons model. In Dansereau A., & Yammarino F. J. (Eds.), Research in multi-level issues (pp. 197-237). Oxford: Elsevier."
+          },
+          {
+            "key": "ref21",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Carney, M. (2005). Corporate governance and competitive advantage in family-controlled firms. Entrepreneurship Theory & Practice, 29(3), 249-265. https://doi.org/10.1111/j.1540-6520.2005.00081.x",
+            "DOI": "10.1111/j.1540-6520.2005.00081.x"
+          },
+          {
+            "key": "ref22",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Carney, M., Van Essen, M., Gedajlovic, E. R., & Heugens, P. P. (2015). What do we know about private family firms? A meta‐analytical review. Entrepreneurship Theory and Practice, 39(3), 513-544. https://doi.org/10.1111/etap.12054",
+            "DOI": "10.1111/etap.12054"
+          },
+          {
+            "key": "ref23",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Cascino, S., Pugliese, A., Mussolino, D., & Sansone, C. (2010). The influence of family ownership on the quality of accounting information. Family Business Review, 23(3), 246-265. https://doi.org/10.1177/0894486510374302",
+            "DOI": "10.1177/0894486510374302"
+          },
+          {
+            "key": "ref24",
+            "doi-asserted-by": "crossref",
+            "unstructured": "Chandler, A. D. (1990). Scale and scope. The dynamics of industrial capitalism. Cambridge, MA: The Belknap Press.",
+            "DOI": "10.4159/9780674029385"
+          },
+          {
+            "key": "ref25",
+            "unstructured": "Chandler, A. D. (1977). The visible hand: The managerial revolution in American business. Cambridge, MA: Belknap Press."
+          },
+          {
+            "key": "ref26",
+            "doi-asserted-by": "crossref",
+            "unstructured": "Chandler, A. D. (1990). Scale and scope: The dynamics of industrial competition. Cambridge, MA: Harvard University Press.",
+            "DOI": "10.4159/9780674029385"
+          },
+          {
+            "key": "ref27",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Cho, H. J., & Pucik, V. (2005). Relationship between innovativeness, quality, growth, profitability, and market value. Strategic Management Journal, 26(6), 555–575. https://doi.org/10.1002/smj.461",
+            "DOI": "10.1002/smj.461"
+          },
+          {
+            "key": "ref28",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Chrisman, J. J., Chua, J. H., & Sharma, P. (2005). Trends and directions in the development of a strategic management theory of the family firm. Entrepreneurship Theory and Practice, 29(5), 555–575. https://doi.org/10.1111/j.1540-6520.2005.00098.x",
+            "DOI": "10.1111/j.1540-6520.2005.00098.x"
+          },
+          {
+            "key": "ref29",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Chua, J. H., Chrisman, J. J., & Sharma P. (1999). Defining family business by behaviour. Entrepreneurship Theory and Practise, 23(4), 19-39.",
+            "DOI": "10.1177/104225879902300402"
+          },
+          {
+            "key": "ref30",
+            "unstructured": "Cohen, J., & Cohen, P. (1983). Applied multiple regression/correlation analysis for the behavioural sciences. Hillsdale, NJ: Lawrence Erlbaum Associates."
+          },
+          {
+            "key": "ref31",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Cohen, W., & Levinthal, D. (1989). Innovation and learning: The two faces of R&D. Economic Journal, 99(397), 569-596. https://doi.org/10.2307/2233763",
+            "DOI": "10.2307/2233763"
+          },
+          {
+            "key": "ref32",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Cohen, W. S., & Levinthal, D. (1990). Absorptive capacity: A new perspective on learning and innovation. Administrative Science Quarterly, 35(1), 128-152. https://doi.org/10.2307/2393553",
+            "DOI": "10.2307/2393553"
+          },
+          {
+            "key": "ref33",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Cooper, A. C., Gimeno-Gascon, F. J., & Woo, C. Y. (1994). Initial human and financial capital as predictors of new venture performance. Journal of Business Venturing, 9(5), 371-396. https://doi.org/10.1016/0883-9026(94)90013-2",
+            "DOI": "10.1016/0883-9026(94)90013-2"
+          },
+          {
+            "key": "ref34",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Corbetta, G., & Salvato, C. (2004). Self-serving of selfactualizing? Models of man and agency costs in different types of family firms: A commentary on “Comparing the agency costs of family and nonfamily firms: Conceptual issues and exploratory evidence”. Entrepreneurship Theory and Practice, 28(4), 355-362. https://doi.org/10.1111/j.1540-6520.2004.00050.x",
+            "DOI": "10.1111/j.1540-6520.2004.00050.x"
+          },
+          {
+            "key": "ref35",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Corbetta, G., & Minichilli, A. (2005). Il governo delle imprese italiane quotate a controllo familiare: I risultati di una ricerca esplorativa. Economia & Management, 6, 59-77.",
+            "DOI": "10.2139/ssrn.3045884"
+          },
+          {
+            "key": "ref36",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Covin, J. G., & Slevin, D. P. (1989). Strategic management of small firms in hostile and benign environments. Strategic Management Journal, 10(1), 75-87.",
+            "DOI": "10.1002/smj.4250100107"
+          },
+          {
+            "key": "ref37",
+            "unstructured": "Covin, J. G., & Slevin, D. P. (1986). The development and testing of an organizational-level entrepreneurship scale. In Ronstadt, R., Hornaday, J. A., Vesper K. H., & Peterson, R. (Eds.), Frontiers of Entrepreneurship Research (pp. 628-639). Wellesley, MA: Babson College."
+          },
+          {
+            "key": "ref38",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Cowling, M. (2003). Productivity and corporate governance in smaller firms. Small Business Economics, 20(4), 335-344. https://doi.org/10.1023/A:1022931020438",
+            "DOI": "10.1023/A:1022931020438"
+          },
+          {
+            "key": "ref39",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Dalton, D. R., & Dalton, C. R. (2005). Upper echelons perspective and multi-level analysis: A case of the cart before the horse? In Dansereau A., Yammarino F. J. (Eds.), Research in Multi-Level Issues (pp.249-261). Oxford: Elsevier. https://doi.org/10.1016/S1475-9144(05)04011-7",
+            "DOI": "10.1016/s1475-9144(05)04011-7"
+          },
+          {
+            "key": "ref40",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Davenport, T. H., & Prusak, L. (1998). Working knowledge: How organizations manage what they know. Boston: Harvard Business School Press.",
+            "DOI": "10.1108/nlw.2000.101.6.282.4"
+          },
+          {
+            "key": "ref41",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Davis J., Schoorman R., & Donaldson L. (1997). Towards a stewardship theory of management. Academy of Management Review, 22(1), 20-47. https://doi.org/10.2307/259223",
+            "DOI": "10.2307/259223"
+          },
+          {
+            "key": "ref42",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Denis, D. J., Denis, D. K., & Sarin A. (1997). Agency problems, equity ownership, and corporate diversification. Journal of Finance, 52(1), 135-160. https://doi.org/10.1111/j.1540-6261.1997.tb03811.x",
+            "DOI": "10.1111/j.1540-6261.1997.tb03811.x"
+          },
+          {
+            "key": "ref43",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Dierickx, I., & Cool, K. (1991). Asset stock accumulation and sustainability of competitive advantage. Management Science, 35(12), 1504-1511. https://doi.org/10.1287/mnsc.35.12.1504",
+            "DOI": "10.1287/mnsc.35.12.1504"
+          },
+          {
+            "key": "ref44",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Donaldson, L., & Davis, J. (1991). Stewardship theory or agency theory. Australian Journal of management, 16(1), 49-64. https://doi.org/10.1177/031289629101600103",
+            "DOI": "10.1177/031289629101600103"
+          },
+          {
+            "key": "ref45",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Duncan, G., & Hill, D. H. (1985). An investigation of the extent and consequences of measurement error in labor-economic survey data. Journal of Labor Economics, 3(4), 508-532. https://doi.org/10.1086/298067",
+            "DOI": "10.1086/298067"
+          },
+          {
+            "key": "ref46",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Dyck, A., & Zingales, L. (2004). The private benefits of control: An international comparison. Journal of Finance, 59(2), 537-600. https://doi.org/10.1111/j.1540-6261.2004.00642.x",
+            "DOI": "10.1111/j.1540-6261.2004.00642.x"
+          },
+          {
+            "key": "ref47",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Eisenhardt, K. M. (1989), Agency theory: An assessment and review. Academy of Management Review, 14(1), 57-74. https://doi.org/10.2307/258191",
+            "DOI": "10.2307/258191"
+          },
+          {
+            "key": "ref48",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Eisenhardt, K. M., & Martin, J. A. (2000). Dynamic capabilities: What are they? Strategic Management Journal, 21(10-11), 1105-1121. https://doi.org/10.1002/1097-0266(200010/11)21:10/11<1105::AID-SMJ133>3.0.CO;2-E",
+            "DOI": "10.1002/1097-0266(200010/11)21:10/11<1105::aid-smj133>3.0.co;2-e"
+          },
+          {
+            "key": "ref49",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Ensley, M. D., & Pearson, A. W. (2005). An exploratory comparison of the behavioral dynamics of top management teams in family and nonfamily new ventures: cohesion, conflict, potency, and consensus. Entrepreneurship: Theory and Practice, 29(3), 267–284.",
+            "DOI": "10.1111/j.1540-6520.2005.00082.x"
+          },
+          {
+            "key": "ref50",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Essen, M., Carney, M., Gedajlovic, E. R., & Heugens, P. P. (2015). How does family control influence firm strategy and performance? A meta‐analysis of US publicly listed firms. Corporate Governance: An International Review, 23, 3-24",
+            "DOI": "10.1111/corg.12080"
+          },
+          {
+            "key": "ref51",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Fama, E. F. (1980), Agency problems and the theory of the firm. Journal of Political Economy, 88(2), 288-307. https://doi.org/10.1086/260866",
+            "DOI": "10.1086/260866"
+          },
+          {
+            "key": "ref52",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Fama, E. F., & Jensen, M. C. (1983). Separation of ownership and control. Journal of Law and Economics, 26(2), 301-325. https://doi.org/10.1086/467037",
+            "DOI": "10.1086/467037"
+          },
+          {
+            "key": "ref53",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Fiegener, M. K. (2005). Determinants of board participation in the strategic decisions of small corporations. Entrepreneurship Theory and Practice, 29(5), 627-650. https://doi.org/10.1111/j.1540-6520.2005.00101.x",
+            "DOI": "10.1111/j.1540-6520.2005.00101.x"
+          },
+          {
+            "key": "ref54",
+            "unstructured": "Finkelstein, S., & Hambrick, D. C. (1996). Strategic leadership. Top executives and their effects on organizations. St Paul, MN: West Publishing Company."
+          },
+          {
+            "key": "ref55",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Forbes, D. P., & Milliken, F. J. (1999). Cognition and corporate governance: understanding boards of directors as strategic decision-making groups. Academy of Management Review, 24(3), 489-505. https://doi.org/10.2307/259138",
+            "DOI": "10.5465/amr.1999.2202133"
+          },
+          {
+            "key": "ref56",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Ford, R. H. (1988). Outside directors and the privately-owned firm: Are they necessary? Entrepreneurship: Theory and Practice, 13(1), 49-57. https://doi.org/10.1177/104225878801300106",
+            "DOI": "10.1177/104225878801300106"
+          },
+          {
+            "key": "ref57",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Gabrielsson, J., & Huse, M. (2005). “Outside” directors in SME boards: A call for theoretical reflections. Corporate Board: role, duties and composition, 1(1), 28-37. http://doi.org/10.22495/cbv1i1art3",
+            "DOI": "10.22495/cbv1i1art3"
+          },
+          {
+            "key": "ref58",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Gales, L., & Kesner, I (1994). An analysis on board of director size and composition in bankrupt organizations. Journal of Business Research, 30(3), 271-282. https://doi.org/10.1016/0148-2963(94)90057-4",
+            "DOI": "10.1016/0148-2963(94)90057-4"
+          },
+          {
+            "key": "ref59",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Gedajlovic, E., & Carney, M. (2010). Markets, hierarchies, and families: Toward a transaction cost theory of the family firm. Entrepreneurship Theory and Practice, 34(6), 1145-1172. https://doi.org/10.1111/j.1540-6520.2010.00418.x",
+            "DOI": "10.1111/j.1540-6520.2010.00418.x"
+          },
+          {
+            "key": "ref60",
+            "doi-asserted-by": "publisher",
+            "unstructured": "George, G., Wiklund, J., & Zahra, S. A. (2005). Ownership and the internationalization of the small firm. Journal of Management, 31(2), 210-233. https://doi.org/10.1177/0149206304271760",
+            "DOI": "10.1177/0149206304271760"
+          },
+          {
+            "key": "ref61",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Golden, B. R., & Zajac, E. J. (2001). When boards influence strategy? Inclination × Power = strategic change. Strategic Management Journal, 22(12), 1087-1111. https://doi.org/10.1002/smj.202",
+            "DOI": "10.1002/smj.202"
+          },
+          {
+            "key": "ref62",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Gonzales-Bustos, J. P., Hernández-Lara, A. B., & Li, X. (2017). Board composition in family and non-family innovative businesses. Corporate Ownership & Control, 15(1-2), 459-466. https://doi.org/10.22495/cocv15i1c2p14",
+            "DOI": "10.22495/cocv15i1c2p14"
+          },
+          {
+            "key": "ref63",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Goodstein, J. G., & Boeker, W. B. (1991). Turbulence at the Top: A new perspective on governance structure changes and strategic change. Academy of Management Journal, 34(2), 306-330. https://doi.org/10.2307/256444",
+            "DOI": "10.5465/256444"
+          },
+          {
+            "key": "ref64",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Goodstein, J. G., & Gautam, G. K., & Boeker, W. B. (1994). The effects of board size and diversity on strategic change. Strategic Management Journal, 15(3), 241–250. https://doi.org/10.1002/smj.4250150305",
+            "DOI": "10.1002/smj.4250150305"
+          },
+          {
+            "key": "ref65",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Govender, P., & Parumasur, S. B. (2016). Organizational diagnosis, the stepping stone to organizational effectiveness. Corporate Board: role, duties and composition, 12(2-1), 65-76. https://doi.org/10.22495/cbv12i2c1art1",
+            "DOI": "10.22495/cbv12i2c1art1"
+          },
+          {
+            "key": "ref66",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Grant, R. M. (1996). Toward a knowledge based theory of the firm. Strategic Management Journal, 17(S2), 109-122. https://doi.org/10.1002/smj.4250171110",
+            "DOI": "10.1002/smj.4250171110"
+          },
+          {
+            "key": "ref67",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Haleblian, J., & Finkelstein, S. (1993). Top management team size, CEO dominance, and firm performance the moderating roles of environmental turbulence and discretion. Academy of Management Journal, 36(4), 844-863. https://doi.org/10.2307/256761",
+            "DOI": "10.5465/256761"
+          },
+          {
+            "key": "ref68",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Hambrick, D. C., & Mason, P. A. (1984). Upper echelons: The organization as a reflection of its top managers. Academy of Management Review, 9(2), 193-206. https://doi.org/10.2307/258434",
+            "DOI": "10.5465/amr.1984.4277628"
+          },
+          {
+            "key": "ref69",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Herron, L., & Robinson, R. (1993). A structural model of the effects of entrepreneurial characteristics on venture performance, Journal of Business Venturing, 8(3), 281-294. https://doi.org/10.1016/0883-9026(93)90032-Z",
+            "DOI": "10.1016/0883-9026(93)90032-z"
+          },
+          {
+            "key": "ref70",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Hill, C. W. L., & Snell, S. A. (1988). External control, corporate strategy and firm performance in research-intensive industries. Strategic Management Journal, 9(6), 577-590. https://doi.org/10.1002/smj.4250090605",
+            "DOI": "10.1002/smj.4250090605"
+          },
+          {
+            "key": "ref71",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Hitt, M. A., & Hoskisson, R. E., & Johnson, R. A., & Moesel, D. D. (1996). The market for corporate control and firm innovation. Academy of Management Journal, 39(5), 1084-1119. https://doi.org/10.2307/256993",
+            "DOI": "10.5465/256993"
+          },
+          {
+            "key": "ref72",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Hitt, M. A., Hoskisson, R. E., & Kim, H. (1997). International diversification: Effects on innovation and firm performance in product-diversified firms. Academy of Management Journal, 40(4), 767-798. https://doi.org/10.2307/256948",
+            "DOI": "10.5465/256948"
+          },
+          {
+            "key": "ref73",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Hoskisson, R. E., Hitt, M. A., Johnson, R. A., & Grossman, W. (2000). Conflicting voices: The effects of institutional ownership heterogeneity and internal governance on corporate innovation strategies. Academy of Management Journal, 45(4), 697–716. https://doi.org/10.2307/3069305",
+            "DOI": "10.5465/3069305"
+          },
+          {
+            "key": "ref74",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Hung, H. (1998). A typology of the theories of the roles of governing boards. Corporate Governance: An International Review, 6(2), 101-111.",
+            "DOI": "10.1111/1467-8683.00089"
+          },
+          {
+            "key": "ref75",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Huse, M. (2000). Boards of directors in SMEs: A review and research agenda. Entrepreneurship and Regional Development, 12(4), 271-290. https://doi.org/10.1080/08985620050177912",
+            "DOI": "10.1080/08985620050177912"
+          },
+          {
+            "key": "ref76",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Huse, M. (2005). Accountability and creating accountability: a framework for exploring behavioural perspectives of corporate governance. British Journal of Management, 16(s1), 65-79. https://doi.org/10.1111/j.1467-8551.2005.00448.x",
+            "DOI": "10.1111/j.1467-8551.2005.00448.x"
+          },
+          {
+            "key": "ref77",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Jensen, M. C., & Meckling, W. H. (1976). Theory of the firm: managerial behaviour, agency costs and ownership structure. Journal of Financial Economics, 3(4), 305-360. https://doi.org/10.1016/0304-405X(76)90026-X",
+            "DOI": "10.1016/0304-405x(76)90026-x"
+          },
+          {
+            "key": "ref78",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Johannisson, B., & Huse, M. (2000). Recruiting outside board members in the small family business: An ideological challenge. Entrepreneurship and Regional Development, 12(4), 353-378. https://doi.org/10.1080/08985620050177958",
+            "DOI": "10.1080/08985620050177958"
+          },
+          {
+            "key": "ref79",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Johnson, G. (1988) Rethinking incrementalism. Strategic Management Journal 9(1), 75-91. https://doi.org/10.1002/smj.4250090107",
+            "DOI": "10.1002/smj.4250090107"
+          },
+          {
+            "key": "ref80",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Ju Ahmad, N. B., Rashid, A., & Gow, J. (2017). Board meeting frequency and corporate social responsibility (CSR) reporting: Evidence from Malaysia. Corporate Board: role, duties and composition, 13(1-1), 87-99. https://doi.org/10.22495/cbv13i1c1art3",
+            "DOI": "10.22495/cbv13i1c1art3"
+          },
+          {
+            "key": "ref81",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Judge, W. Q., & Dobbins, G. H. (1995). Antecedents and effects of outside director’s awareness of CEO decision style. Journal of Management, 21(1), 43-64. https://doi.org/10.1177/014920639502100103",
+            "DOI": "10.1177/014920639502100103"
+          },
+          {
+            "key": "ref82",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Kalyanaraman, L. (2015). Do family CEOs impact firm value? An empirical analysis of Indian family firms. Corporate Board: role, duties and composition, 11(1), 59-70. http://doi.org/10.22495/cbv11i1art6",
+            "DOI": "10.22495/cbv11i1art6"
+          },
+          {
+            "key": "ref83",
+            "unstructured": "Kang, D. (2000). Family ownership and performance in public corporations: A study of the U.S. Fortune 500, 1982–1994. (Working Paper 00-0051, Harvard Business School)."
+          },
+          {
+            "key": "ref84",
+            "unstructured": "Kanter, R. M. (1988). When a thousand flowers bloom: structural, collective, and social conditions for innovation in organizational. In Straw, B. M., & Cummings, L. L. (Eds.), Research in Organizational Behavior, 10, 169-211. Greenwich: CT JAI Press."
+          },
+          {
+            "key": "ref85",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Keck, S. L. (1997). Top management team structure: Differential effects by environmental context. Organization Science, 8(2), 143-156. https://doi.org/10.1287/orsc.8.2.143",
+            "DOI": "10.1287/orsc.8.2.143"
+          },
+          {
+            "key": "ref86",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Kets de Vries, M. F. R. (1993). The dynamics of family controlled firms: The good and the bad news. Organisational Dynamics, 21(3), 59-71. https://doi.org/10.1016/0090-2616(93)90071-8",
+            "DOI": "10.1016/0090-2616(93)90071-8"
+          },
+          {
+            "key": "ref87",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Kogut, B., & Zander, U. (1992). Knowledge of the firm, combinative capabilities, and the replication of technology. Organization Science, 3(3), 383-397. https://doi.org/10.1287/orsc.3.3.383",
+            "DOI": "10.1287/orsc.3.3.383"
+          },
+          {
+            "key": "ref88",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Kogut, B., & Zander, U. (1996). What do firms do? Coordination, identity and learning. Organization Science, 7, 502-518. https://doi.org/10.1287/orsc.7.5.502",
+            "DOI": "10.1287/orsc.7.5.502"
+          },
+          {
+            "key": "ref89",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Kouki, M., & Dabboussi, M. (2016). Does management entrenchment explain agency costs of equity: Evidence from French firms. Corporate Board: role, duties and composition, 12(3), 51-60. https://doi.org/10.22495/cbv12i3art6",
+            "DOI": "10.22495/cbv12i3art6"
+          },
+          {
+            "key": "ref90",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Leonard, D., & Sensiper, S. (1998). The role of tacit knowledge in group innovation. California Management Review, 40(3), 112-132. https://doi.org/10.2307/41165946",
+            "DOI": "10.2307/41165946"
+          },
+          {
+            "key": "ref91",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Lester, R. H., & Cannella, A. A. Jr. (2006). Interorganizational familiness: How family firms use interlocking directorates to build community-level social capital. Entrepreneurship Theory and Practice, 30(6), 755–775. https://doi.org/10.1111/j.1540-6520.2006.00149.x",
+            "DOI": "10.1111/j.1540-6520.2006.00149.x"
+          },
+          {
+            "key": "ref92",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Lumpkin, T. G., & Dess, G. G. (1996). Clarifying the entrepreneurial orientation construct and linking it to performance. Academy of Management Review, 21(1), 135-172. https://doi.org/10.2307/258632",
+            "DOI": "10.5465/amr.1996.9602161568"
+          },
+          {
+            "key": "ref93",
+            "unstructured": "Mace, M. L. (1986). Directors: Myth and reality. Boston: Harvard Business School Press."
+          },
+          {
+            "key": "ref94",
+            "unstructured": "Malhotra, N. K. (1997). Marketing research: An applied orientation. New York: Prentice-Hall."
+          },
+          {
+            "key": "ref95",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Marchini, P. L., Medioli, A., Tibiletti, V., & Triani, S. (2017). Board of directors and board of statutory auditors’ diversity and earnings management: Evidence from Italy. Corporate Board: role, duties and composition, 13(3), 42-51. https://doi.org/10.22495/cbv13i3art5",
+            "DOI": "10.22495/cbv13i3art5"
+          },
+          {
+            "key": "ref96",
+            "unstructured": "Melin, L., & Hellgren, B. (1994). Patterns of strategic processes: Two change typologies. In Thomas H., O’Neal, D. E., White, R., & Hurst, D. (Eds.), Building the strategically- responsive organisation. Chichester: Wiley."
+          },
+          {
+            "key": "ref97",
+            "unstructured": "Meyer, M. W., & Zucker, L. G. (1989). Permanently failing organizations. Newbury Park: Sage;"
+          },
+          {
+            "key": "ref98",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Miller, D. (2003). An asymmetry-based view of competitive advantage. Strategic Management Journal, 24(10), 961-976. https://doi.org/10.1002/smj.316",
+            "DOI": "10.1002/smj.316"
+          },
+          {
+            "key": "ref99",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Miller, D., & Le Breton-Miller, I. (2006a). Family governance and firm performance: Agency, stewardship, and capabilities. Family Business Review, 19(1), 73-87. https://doi.org/10.1111/j.1741-6248.2006.00063.x",
+            "DOI": "10.1111/j.1741-6248.2006.00063.x"
+          },
+          {
+            "key": "ref100",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Miller, D., & Le Breton-Miller, I. (2006b). Why do some family businesses out-compete? Governance, long-term orientations, and sustainable capability. Entrepreneurship Theory and Practice, 30(6), 731-746. https://doi.org/10.1111/j.1540-6520.2006.00147.x",
+            "DOI": "10.1111/j.1540-6520.2006.00147.x"
+          },
+          {
+            "key": "ref101",
+            "unstructured": "Miller, D., Le Breton-Miller, I., & Lester, R. H. (2005). Family involvement, agency and performance in the Fortune 1000. Paper presented at the Academy of Management Annual Meetings, August, Honolulu, HI."
+          },
+          {
+            "key": "ref102",
+            "unstructured": "Mintzberg, H., Ahlstrand, B., & Lampel, J. (1998). Strategy safari: A guided tour through the wilds of strategic management. New York: Free Press;"
+          },
+          {
+            "key": "ref103",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Mishra, C. S., & McConaughy, D. L. (1999). Founding family control and capital structure: The risk of loss of control and the aversion to debt. Entrepreneurship Theory and Practice, 23(4), 53-65. https://doi.org/10.1177/104225879902300404",
+            "DOI": "10.1177/104225879902300404"
+          },
+          {
+            "key": "ref104",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Moran, P., & Ghoshal, S. (1996). Value creation by firms. In Keys, J. B. & Dosier, L. N. (Eds.), Academy of Management Best Paper Proceedings, (pp. 41-45).",
+            "DOI": "10.5465/ambpp.1996.4978175"
+          },
+          {
+            "key": "ref105",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Mustakallio, M., Autio, E., & Zahra, S. A. (2002). Relational and contractual governance in family firms: Effects on strategic decision making. Family Business Review, 15(3), 205-222. https://doi.org/10.1111/j.1741-6248.2002.00205.x",
+            "DOI": "10.1111/j.1741-6248.2002.00205.x"
+          },
+          {
+            "key": "ref106",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Nfawor, A. O. (2016). Examining the concept of de facto director in corporate governance. Corporate Board: role, duties and composition, 12(2), 12-21.",
+            "DOI": "10.22495/cbv12i2art2"
+          },
+          {
+            "key": "ref107",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Nohria, N., & Gulati, R. (1996). Is slack good or bad for innovation? Academy of Management Journal, 39(5), 1245–1264. https://doi.org/10.2307/256998",
+            "DOI": "10.5465/256998"
+          },
+          {
+            "key": "ref108",
+            "unstructured": "Nordqvist, M., & Melin, L. (2002). The dynamics of family firms: An institutional perspective on corporate governance and strategic change. In Fletcher, D. (Ed.), Understanding the small, family firm. London: Routledge."
+          },
+          {
+            "key": "ref109",
+            "unstructured": "Nunnally J. C., (1978). Psychometric theory. New York: McGraw-Hill."
+          },
+          {
+            "key": "ref110",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Pagano, M., Panetta, F., & Zingales, L. (1998). Why do companies go public? An empirical analysis. Journal of Finance, 53(1), 27-64. https://doi.org/10.1111/0022-1082.25448",
+            "DOI": "10.1111/0022-1082.25448"
+          },
+          {
+            "key": "ref111",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Peng, M. W., Ahlstrom, D., Bruton, G., & Jiang, Y. (2008). Corporate governance in emerging economies: A review of the principal-principal perspective. Journal of Management Studies, 45(1), 196-220. https://doi.org/10.1111/j.1467-6486.2007.00752.x",
+            "DOI": "10.1111/j.1467-6486.2007.00752.x"
+          },
+          {
+            "key": "ref112",
+            "unstructured": "Pettigrew, A., & Whipp, R. (1991). Managing change for competitive success. London: Blackwell."
+          },
+          {
+            "key": "ref113",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Pfeﬀer, J. (1972). Size and composition of corporate boards of directors: The organization and its environment. Administrative Science Quarterly, 17(2), 218–228. https://doi.org/10.2307/2393956",
+            "DOI": "10.2307/2393956"
+          },
+          {
+            "key": "ref114",
+            "unstructured": "Pfeﬀer, J., & Salancik, G. R. (1978). The external control of organizations: A resource dependence perspective. New York: Harper and Row."
+          },
+          {
+            "key": "ref115",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Pingying, Z. (2010). Board information and strategic tasks performance. Corporate Governance: An International Review, 18(5), 473-487.",
+            "DOI": "10.1111/j.1467-8683.2010.00816.x"
+          },
+          {
+            "key": "ref116",
+            "unstructured": "Pollak, R. E. (1985). A transactions cost approach to families and households. Journal of Economic Literature, 23(2), 581–608."
+          },
+          {
+            "key": "ref117",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Porter, M. E. (1990). The competitive advantage of nations. New York: The Free Press. https://doi.org/10.1007/978-1-349-11336-1",
+            "DOI": "10.1007/978-1-349-11336-1"
+          },
+          {
+            "key": "ref118",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Poutziouris, P. Z., Steier, L. P., & Smyrnios, K. X. (2004). Guest editorial: A commentary on family business entrepreneurial developments. International Journal of Entrepreneurial Behaviour and Research, 10(1-2), 7–11. https://doi.org/10.1108/13552550410521344",
+            "DOI": "10.1108/13552550410521344"
+          },
+          {
+            "key": "ref119",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Pugliese, A., Bezemer, P. J., Zattoni, A., Huse, M., Van den Bosch, F. A., & Volberda, H. W. (2009). Boards of directors’ contribution to strategy: a literature review and research agenda. Corporate Governance: An International Review, 17, 292-306.",
+            "DOI": "10.1111/j.1467-8683.2009.00740.x"
+          },
+          {
+            "key": "ref120",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Raff, D. M. (2000). Superstores and the evolution of firm capabilities in American bookselling. Strategic Management Journal, 21(10-11), 1043-1060. https://doi.org/10.1002/1097-0266(200010/11)21:10/11<1043::AID-SMJ137>3.0.CO;2-7",
+            "DOI": "10.1002/1097-0266(200010/11)21:10/11<1043::aid-smj137>3.0.co;2-7"
+          },
+          {
+            "key": "ref121",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Rindova, V. (1999). What corporate boards have to do with strategy: A cognitive perspective. Journal of Management Studies, 36(7), 953-975. https://doi.org/10.1111/1467-6486.00165",
+            "DOI": "10.1111/1467-6486.00165"
+          },
+          {
+            "key": "ref122",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Robbins, K. D., & Pearce, J. A. (1992). Turnaround: Retrenchment and recovery. Strategic Management Journal, 13(4), 287-309. https://doi.org/10.1002/smj.4250130404",
+            "DOI": "10.1002/smj.4250130404"
+          },
+          {
+            "key": "ref123",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Saravia, J. A., & Saravia-Matus, S. (2016). Corporate governance and transaction cost economics: A study of the equity governance structure. Corporate Board: role, duties and composition, 12(1), 33-44. https://doi.org/10.22495/cbv12i1art4",
+            "DOI": "10.22495/cbv12i1art4"
+          },
+          {
+            "key": "ref124",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Scafarto, V., Ricci, F., Della Corte, G., & De Luca, P. (2017). Board structure, ownership concentration and corporate performance: Italian evidence. Corporate Ownership & Control, 15(1-2), 347-359. https://doi.org/10.22495/cocv15i1c2p4",
+            "DOI": "10.22495/cocv15i1c2p4"
+          },
+          {
+            "key": "ref125",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Schulze, W. S., Lubatkin, M. H., & Dino, R. N. (2002). Altruism, agency and the competitiveness of family firms. Managerial and Decision Economics, 23(4-5), 247-259. https://doi.org/10.1002/mde.1064",
+            "DOI": "10.1002/mde.1064"
+          },
+          {
+            "key": "ref126",
+            "unstructured": "Schumpeter, J. A. (1934). (Reprinted in1962). The theory of economic development: An inquiry into profits, capital credit, interest and the business cycle. Cambridge, MA: Harvard University Press."
+          },
+          {
+            "key": "ref127",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Sharma P., Chrisman J. J., & Chua J. H. (1997). Strategic management of the family business: past research and future challenges. Family Business Review, 10(1), 1–35. https://doi.org/10.1111/j.1741-6248.1997.00001.x",
+            "DOI": "10.1111/j.1741-6248.1997.00001.x"
+          },
+          {
+            "key": "ref128",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Sirmon, D. G., & Hitt, M. A. (2003). Managing resources: Linking unique resources, management, and wealth creation in family firms. Entrepreneurship Theory and Practice, 27(4), 339-358. https://doi.org/10.1111/1540-8520.t01-1-00013",
+            "DOI": "10.1111/1540-8520.t01-1-00013"
+          },
+          {
+            "key": "ref129",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Soana, M. G., & Crisci, G. (2017). Board evaluation process in Italy: How far is it from the UK standard? Corporate Board: role, duties and composition, 13(3), 6-18. http://doi.org/10.22495/cbv13i3art1",
+            "DOI": "10.22495/cbv13i3art1"
+          },
+          {
+            "key": "ref130",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Teece, D., Pisano, G., & Shuen, A. (1997). Dynamic capabilities and strategic management, Strategic Management Journal, 18(7), 509-533. https://doi.org/10.1002/(SICI)1097-0266(199708)18:7<509::AID-SMJ882>3.0.CO;2-Z",
+            "DOI": "10.1002/(sici)1097-0266(199708)18:7<509::aid-smj882>3.0.co;2-z"
+          },
+          {
+            "key": "ref131",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Thakur, S. P. (1999). Size of investment, opportunity choice, and human resources in new venture growth: Some typologies. Journal of Business Venturing, 14(3), 283-309. https://doi.org/10.1016/S0883-9026(98)00002-0",
+            "DOI": "10.1016/s0883-9026(98)00002-0"
+          },
+          {
+            "key": "ref132",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Tsai, W., & Ghoshal, S. (1998). Social capital and value creation: The role of intrafirm networks. Academy of Management Journal, 41(4), 464-476. https://doi.org/10.2307/257085",
+            "DOI": "10.5465/257085"
+          },
+          {
+            "key": "ref133",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Van Doorn, S., Heyden, M. L. M., & Volberda, H. W. (2017). Enhancing entrepreneurial orientation in dynamic environments: The interplay between top management team advice-seeking and absorptive capacity. Long Range Planning, 50(2), 134-144. https://doi.org/10.1016/j.lrp.2016.06.003",
+            "DOI": "10.1016/j.lrp.2016.06.003"
+          },
+          {
+            "key": "ref134",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Vinding, A. L. (2006). Absorptive capacity and innovative performance: A human capital approach. Economic Innovation New Technology, 15(4-5), 507-517. https://doi.org/10.1080/10438590500513057",
+            "DOI": "10.1080/10438590500513057"
+          },
+          {
+            "key": "ref135",
+            "unstructured": "Weber, M. (1947). The theory of social and economic organization. New York: NY, Free Press;"
+          },
+          {
+            "key": "ref136",
+            "unstructured": "Williamson, P. J. (1997). Asia’s new competitive game. Harvard Business Review, 75(5), 55-67."
+          },
+          {
+            "key": "ref137",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Wu, S., Levitas, E., & Priem, R. L. (2005). CEO tenure and company invention under differing levels of technological dynamism. Academy of Management Journal, 48(5), 859–873. https://doi.org/10.5465/AMJ.2005.18803927",
+            "DOI": "10.5465/amj.2005.18803927"
+          },
+          {
+            "key": "ref138",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Zahra, S. A. (1990). Increasing the board’s involvement in strategy. Long Range Planning, 23(6) 109-117. https://doi.org/10.1016/0024-6301(90)90108-G",
+            "DOI": "10.1016/0024-6301(90)90108-g"
+          },
+          {
+            "key": "ref139",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Zahra, S. A., & George, G. (2002). Absorptive capacity: A review, reconceptualisation, and extension. Academy of Management Review, 27(2), 185-203. https://doi.org/10.2307/4134351",
+            "DOI": "10.2307/4134351"
+          },
+          {
+            "key": "ref140",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Zahra, S. A., & Pearce, J. A. III (1989).Board of directors and corporate financial performance: A review and integrative model. Journal of Management, 15(2), 291-334. https://doi.org/10.1177/014920638901500208",
+            "DOI": "10.1177/014920638901500208"
+          },
+          {
+            "key": "ref141",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Zajac, E., & Westphal, J. D. (1994). The costs and beneﬁts of managerial incentives and monitoring in large U.S. corporations: When is more not better? Strategic Management Journal, 15(s1), 121-143. https://doi.org/10.1002/smj.4250150909",
+            "DOI": "10.1002/smj.4250150909"
+          },
+          {
+            "key": "ref142",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Zona, F., Gomez-Mejia, L. R., & Withers, M. C. (2018). Board interlocks and firm performance: toward a combined agency–resource dependence perspective. Journal of Management, 44(2), 589-618. https://doi.org/10.1177/0149206315579512",
+            "DOI": "10.1177/0149206315579512"
+          },
+          {
+            "key": "ref143",
+            "doi-asserted-by": "publisher",
+            "unstructured": "Zott, C. (2003). Dynamic capabilities and the emergence of intraindustry differential firm performance: Insights from a simulation study. Strategic Management Journal, 24(2), 97-125. https://doi.org/10.1002/smj.288",
+            "DOI": "10.1002/smj.288"
+          }
+        ],
+        "container-title": [
+          "Corporate Ownership and Control"
+        ],
+        "link": [
+          {
+            "URL": "https://virtusinterpress.org/IMG/pdf/cocv15i2c1p9.pdf",
+            "content-type": "application/pdf",
+            "content-version": "vor",
+            "intended-application": "text-mining"
+          },
+          {
+            "URL": "https://virtusinterpress.org/IMG/pdf/cocv15i2c1p9.pdf",
+            "content-type": "application/pdf",
+            "content-version": "vor",
+            "intended-application": "text-mining"
+          },
+          {
+            "URL": "https://virtusinterpress.org/IMG/pdf/cocv15i2c1p9.pdf",
+            "content-type": "unspecified",
+            "content-version": "vor",
+            "intended-application": "similarity-checking"
+          }
+        ],
+        "deposited": {
+          "date-parts": [
+            [
+              2025,
+              7,
+              30
+            ]
+          ],
+          "date-time": "2025-07-30T21:15:24Z",
+          "timestamp": 1753910124000
+        },
+        "score": 45.000072,
+        "resource": {
+          "primary": {
+            "URL": "https://virtusinterpress.org/CORPORATE-GOVERNANCE-AND-FIRM,5228.html"
+          }
+        },
+        "issued": {
+          "date-parts": [
+            [
+              2018
+            ]
+          ]
+        },
+        "references-count": 144,
+        "journal-issue": {
+          "issue": "2-1",
+          "published-online": {
+            "date-parts": [
+              [
+                2018
+              ]
+            ]
+          },
+          "published-print": {
+            "date-parts": [
+              [
+                2018
+              ]
+            ]
+          }
+        },
+        "URL": "https://doi.org/10.22495/cocv15i2c1p9",
+        "ISSN": [
+          "1727-9232",
+          "1810-3057"
+        ],
+        "issn-type": [
+          {
+            "type": "print",
+            "value": "1727-9232"
+          },
+          {
+            "type": "electronic",
+            "value": "1810-3057"
+          }
+        ],
+        "published": {
+          "date-parts": [
+            [
+              2018
+            ]
+          ]
+        }
+      }
+    ],
+    "items-per-page": 5,
+    "query": {
+      "start-index": 0,
+      "search-terms": "(\\organized crime\\\" OR mafia) AND (\\\"beneficial ownership\\\" OR \\\"corporate control\\\" OR \\\"ownership networks\\\") AND (company OR firm)\""
+    }
+  }
+}

@@ -1,0 +1,645 @@
+{
+  "status": "ok",
+  "message-type": "work-list",
+  "message-version": "1.0.0",
+  "message": {
+    "facets": {},
+    "total-results": 96499,
+    "items": [
+      {
+        "indexed": {
+          "date-parts": [
+            [
+              2026,
+              2,
+              28
+            ]
+          ],
+          "date-time": "2026-02-28T01:18:09Z",
+          "timestamp": 1772241489179,
+          "version": "3.50.1"
+        },
+        "reference-count": 0,
+        "publisher": "Bristol University Press",
+        "isbn-type": [
+          {
+            "value": "9781529247145",
+            "type": "electronic"
+          },
+          {
+            "value": "1529247144",
+            "type": "electronic"
+          }
+        ],
+        "content-domain": {
+          "domain": [],
+          "crossmark-restriction": false
+        },
+        "published-print": {
+          "date-parts": [
+            [
+              2025,
+              8,
+              21
+            ]
+          ]
+        },
+        "DOI": "10.2307/jj.26193012.12",
+        "type": "book-chapter",
+        "created": {
+          "date-parts": [
+            [
+              2025,
+              7,
+              21
+            ]
+          ],
+          "date-time": "2025-07-21T20:18:18Z",
+          "timestamp": 1753129098000
+        },
+        "page": "111-124",
+        "source": "Crossref",
+        "is-referenced-by-count": 0,
+        "title": [
+          "Beyond Mafia:"
+        ],
+        "prefix": "10.2307",
+        "author": [
+          {
+            "given": "Giovanni",
+            "family": "Nicolazzo",
+            "sequence": "first",
+            "affiliation": []
+          }
+        ],
+        "member": "1121",
+        "container-title": [
+          "White-Collar and Organizational Crime"
+        ],
+        "deposited": {
+          "date-parts": [
+            [
+              2025,
+              7,
+              21
+            ]
+          ],
+          "date-time": "2025-07-21T20:18:21Z",
+          "timestamp": 1753129101000
+        },
+        "score": 63.073147,
+        "resource": {
+          "primary": {
+            "URL": "http://www.jstor.org/stable/10.2307/jj.26193012.12"
+          }
+        },
+        "subtitle": [
+          "Considerations on Criminal Infiltration in the Legal Economy"
+        ],
+        "issued": {
+          "date-parts": [
+            [
+              2025,
+              8,
+              21
+            ]
+          ]
+        },
+        "ISBN": [
+          "9781529247145",
+          "1529247144"
+        ],
+        "references-count": 0,
+        "URL": "https://doi.org/10.2307/jj.26193012.12",
+        "relation": {
+          "is-identical-to": [
+            {
+              "id-type": "doi",
+              "id": "10.51952/9781529247145.ch007",
+              "asserted-by": "object"
+            }
+          ]
+        },
+        "published": {
+          "date-parts": [
+            [
+              2025,
+              8,
+              21
+            ]
+          ]
+        }
+      },
+      {
+        "indexed": {
+          "date-parts": [
+            [
+              2026,
+              2,
+              7
+            ]
+          ],
+          "date-time": "2026-02-07T07:53:02Z",
+          "timestamp": 1770450782610,
+          "version": "3.49.0"
+        },
+        "reference-count": 0,
+        "publisher": "Bristol University Press",
+        "isbn-type": [
+          {
+            "value": "9781529247145",
+            "type": "electronic"
+          }
+        ],
+        "license": [
+          {
+            "start": {
+              "date-parts": [
+                [
+                  2025,
+                  8,
+                  21
+                ]
+              ],
+              "date-time": "2025-08-21T00:00:00Z",
+              "timestamp": 1755734400000
+            },
+            "content-version": "unspecified",
+            "delay-in-days": 0,
+            "URL": "http://creativecommons.org/licenses/by-nc-nd/4.0"
+          }
+        ],
+        "content-domain": {
+          "domain": [],
+          "crossmark-restriction": false
+        },
+        "published-print": {
+          "date-parts": [
+            [
+              2025,
+              8,
+              21
+            ]
+          ]
+        },
+        "DOI": "10.56687/9781529247145-010",
+        "type": "book-chapter",
+        "created": {
+          "date-parts": [
+            [
+              2025,
+              8,
+              14
+            ]
+          ],
+          "date-time": "2025-08-14T09:22:37Z",
+          "timestamp": 1755163357000
+        },
+        "page": "111-124",
+        "source": "Crossref",
+        "is-referenced-by-count": 0,
+        "title": [
+          "7 Beyond Mafia: Considerations on Criminal Infiltration in the Legal Economy"
+        ],
+        "prefix": "10.56687",
+        "author": [
+          {
+            "given": "Giovanni",
+            "family": "Nicolazzo",
+            "sequence": "first",
+            "affiliation": []
+          }
+        ],
+        "member": "165",
+        "container-title": [
+          "White-Collar and Organizational Crime"
+        ],
+        "link": [
+          {
+            "URL": "https://www.degruyterbrill.com/document/doi/10.56687/9781529247145-010/xml",
+            "content-type": "application/xml",
+            "content-version": "vor",
+            "intended-application": "text-mining"
+          },
+          {
+            "URL": "https://www.degruyterbrill.com/document/doi/10.56687/9781529247145-010/pdf",
+            "content-type": "unspecified",
+            "content-version": "vor",
+            "intended-application": "similarity-checking"
+          }
+        ],
+        "deposited": {
+          "date-parts": [
+            [
+              2025,
+              8,
+              14
+            ]
+          ],
+          "date-time": "2025-08-14T09:29:17Z",
+          "timestamp": 1755163757000
+        },
+        "score": 60.915493,
+        "resource": {
+          "primary": {
+            "URL": "https://www.degruyterbrill.com/document/doi/10.56687/9781529247145-010/html"
+          }
+        },
+        "issued": {
+          "date-parts": [
+            [
+              2025,
+              8,
+              21
+            ]
+          ]
+        },
+        "ISBN": [
+          "9781529247145"
+        ],
+        "references-count": 0,
+        "alternative-id": [
+          "10.56687/9781529247145-010",
+          "10.56687/9781529247145"
+        ],
+        "URL": "https://doi.org/10.56687/9781529247145-010",
+        "published": {
+          "date-parts": [
+            [
+              2025,
+              8,
+              21
+            ]
+          ]
+        }
+      },
+      {
+        "indexed": {
+          "date-parts": [
+            [
+              2025,
+              10,
+              7
+            ]
+          ],
+          "date-time": "2025-10-07T01:11:55Z",
+          "timestamp": 1759799515717,
+          "version": "build-2065373602"
+        },
+        "reference-count": 0,
+        "publisher": "Bristol University Press",
+        "isbn-type": [
+          {
+            "type": "electronic",
+            "value": "9781529247145"
+          },
+          {
+            "type": "print",
+            "value": "9781529247121"
+          },
+          {
+            "type": "electronic",
+            "value": "9781529247121"
+          },
+          {
+            "type": "electronic",
+            "value": "9781529247138"
+          },
+          {
+            "type": "electronic",
+            "value": "9781529247145"
+          }
+        ],
+        "license": [
+          {
+            "start": {
+              "date-parts": [
+                [
+                  2025,
+                  8,
+                  21
+                ]
+              ],
+              "date-time": "2025-08-21T00:00:00Z",
+              "timestamp": 1755734400000
+            },
+            "content-version": "unspecified",
+            "delay-in-days": 0,
+            "URL": "http://creativecommons.org/licenses/by-nc-nd/4.0/"
+          }
+        ],
+        "content-domain": {
+          "domain": [],
+          "crossmark-restriction": false
+        },
+        "published-print": {
+          "date-parts": [
+            [
+              2025,
+              8,
+              21
+            ]
+          ]
+        },
+        "DOI": "10.51952/9781529247145.ch007",
+        "type": "book-chapter",
+        "created": {
+          "date-parts": [
+            [
+              2025,
+              8,
+              21
+            ]
+          ],
+          "date-time": "2025-08-21T22:00:33Z",
+          "timestamp": 1755813633000
+        },
+        "page": "111-124",
+        "source": "Crossref",
+        "is-referenced-by-count": 0,
+        "title": [
+          "Beyond Mafia: Considerations on Criminal Infiltration in the Legal Economy"
+        ],
+        "prefix": "10.51952",
+        "author": [
+          {
+            "given": "Giovanni",
+            "family": "Nicolazzo",
+            "sequence": "first",
+            "affiliation": []
+          }
+        ],
+        "member": "165",
+        "container-title": [
+          "White-Collar and Organizational Crime"
+        ],
+        "link": [
+          {
+            "URL": "https://bristoluniversitypressdigital.com/view/book/9781529247145/ch007.xml",
+            "content-type": "text/html",
+            "content-version": "vor",
+            "intended-application": "text-mining"
+          },
+          {
+            "URL": "https://bristoluniversitypressdigital.com/downloadpdf/book/9781529247145/9781529247145.xml",
+            "content-type": "text/html",
+            "content-version": "vor",
+            "intended-application": "syndication"
+          }
+        ],
+        "deposited": {
+          "date-parts": [
+            [
+              2025,
+              10,
+              6
+            ]
+          ],
+          "date-time": "2025-10-06T22:05:43Z",
+          "timestamp": 1759788343000
+        },
+        "score": 60.654358,
+        "resource": {
+          "primary": {
+            "URL": "https://bristoluniversitypressdigital.com/view/book/9781529247145/ch007.xml"
+          }
+        },
+        "issued": {
+          "date-parts": [
+            [
+              2025,
+              8,
+              21
+            ]
+          ]
+        },
+        "ISBN": [
+          "9781529247145",
+          "9781529247121",
+          "9781529247121",
+          "9781529247138",
+          "9781529247145"
+        ],
+        "references-count": 0,
+        "URL": "https://doi.org/10.51952/9781529247145.ch007",
+        "relation": {
+          "is-identical-to": [
+            {
+              "id-type": "doi",
+              "id": "10.2307/jj.26193012.12",
+              "asserted-by": "subject"
+            }
+          ]
+        },
+        "published": {
+          "date-parts": [
+            [
+              2025,
+              8,
+              21
+            ]
+          ]
+        }
+      },
+      {
+        "indexed": {
+          "date-parts": [
+            [
+              2024,
+              3,
+              12
+            ]
+          ],
+          "date-time": "2024-03-12T02:02:43Z",
+          "timestamp": 1710208963344
+        },
+        "reference-count": 0,
+        "publisher": "Oxford University Press",
+        "content-domain": {
+          "domain": [],
+          "crossmark-restriction": false
+        },
+        "published-print": {
+          "date-parts": [
+            [
+              2017,
+              1,
+              19
+            ]
+          ]
+        },
+        "DOI": "10.1093/acprof:oso/9780198758402.003.0004",
+        "type": "book-chapter",
+        "created": {
+          "date-parts": [
+            [
+              2017,
+              3,
+              23
+            ]
+          ],
+          "date-time": "2017-03-23T09:59:56Z",
+          "timestamp": 1490263196000
+        },
+        "page": "97-124",
+        "source": "Crossref",
+        "is-referenced-by-count": 1,
+        "title": [
+          "The Black Mafia"
+        ],
+        "prefix": "10.1093",
+        "author": [
+          {
+            "given": "Peng",
+            "family": "Wang",
+            "sequence": "first",
+            "affiliation": []
+          }
+        ],
+        "member": "286",
+        "container-title": [
+          "The Chinese Mafia"
+        ],
+        "deposited": {
+          "date-parts": [
+            [
+              2022,
+              8,
+              3
+            ]
+          ],
+          "date-time": "2022-08-03T02:22:26Z",
+          "timestamp": 1659493346000
+        },
+        "score": 52.10575,
+        "resource": {
+          "primary": {
+            "URL": "https://academic.oup.com/book/25594/chapter/192937697"
+          }
+        },
+        "issued": {
+          "date-parts": [
+            [
+              2017,
+              1,
+              19
+            ]
+          ]
+        },
+        "references-count": 0,
+        "URL": "https://doi.org/10.1093/acprof:oso/9780198758402.003.0004",
+        "published": {
+          "date-parts": [
+            [
+              2017,
+              1,
+              19
+            ]
+          ]
+        }
+      },
+      {
+        "indexed": {
+          "date-parts": [
+            [
+              2022,
+              8,
+              3
+            ]
+          ],
+          "date-time": "2022-08-03T04:08:17Z",
+          "timestamp": 1659499697332
+        },
+        "reference-count": 0,
+        "publisher": "Oxford University Press",
+        "content-domain": {
+          "domain": [],
+          "crossmark-restriction": false
+        },
+        "published-print": {
+          "date-parts": [
+            [
+              2017,
+              1,
+              19
+            ]
+          ]
+        },
+        "DOI": "10.1093/acprof:oso/9780198758402.003.0005",
+        "type": "book-chapter",
+        "created": {
+          "date-parts": [
+            [
+              2017,
+              3,
+              23
+            ]
+          ],
+          "date-time": "2017-03-23T09:59:56Z",
+          "timestamp": 1490263196000
+        },
+        "page": "125-142",
+        "source": "Crossref",
+        "is-referenced-by-count": 0,
+        "title": [
+          "The Red Mafia"
+        ],
+        "prefix": "10.1093",
+        "author": [
+          {
+            "given": "Peng",
+            "family": "Wang",
+            "sequence": "first",
+            "affiliation": []
+          }
+        ],
+        "member": "286",
+        "container-title": [
+          "The Chinese Mafia"
+        ],
+        "deposited": {
+          "date-parts": [
+            [
+              2022,
+              8,
+              3
+            ]
+          ],
+          "date-time": "2022-08-03T02:22:27Z",
+          "timestamp": 1659493347000
+        },
+        "score": 52.030552,
+        "resource": {
+          "primary": {
+            "URL": "https://academic.oup.com/book/25594/chapter/192938269"
+          }
+        },
+        "issued": {
+          "date-parts": [
+            [
+              2017,
+              1,
+              19
+            ]
+          ]
+        },
+        "references-count": 0,
+        "URL": "https://doi.org/10.1093/acprof:oso/9780198758402.003.0005",
+        "published": {
+          "date-parts": [
+            [
+              2017,
+              1,
+              19
+            ]
+          ]
+        }
+      }
+    ],
+    "items-per-page": 5,
+    "query": {
+      "start-index": 0,
+      "search-terms": "(mafia OR \\organized crime\\\" OR \\\"criminal organization\\\") AND (\\\"legal economy\\\" OR \\\"legitimate economy\\\" OR \\\"legal business\\\" OR firm OR company) AND (infiltration OR control OR ownership)\""
+    }
+  }
+}
