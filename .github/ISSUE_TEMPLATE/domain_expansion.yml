@@ -1,0 +1,25 @@
+name: Domain Expansion Request
+about: Propose a new domain for retrieval/enrichment
+labels: [domain-approval-required]
+title: "Domain request: "
+body:
+  - type: input
+    id: domain
+    attributes:
+      label: Domain
+      placeholder: example.org
+    validations:
+      required: true
+  - type: textarea
+    id: rationale
+    attributes:
+      label: Why needed
+    validations:
+      required: true
+  - type: textarea
+    id: risk
+    attributes:
+      label: Risk and automation mode
+      description: classify source and whether automated/assisted/manual.
+    validations:
+      required: true

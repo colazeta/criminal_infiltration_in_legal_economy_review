@@ -1,0 +1,25 @@
+name: E2 Backward Snowballing
+about: Run E2 backward citation snowballing
+labels: [execution-E2]
+title: "E2R?: backward snowballing"
+body:
+  - type: input
+    id: execution_id
+    attributes:
+      label: Execution ID
+      placeholder: E2R1
+    validations:
+      required: true
+  - type: textarea
+    id: source_papers
+    attributes:
+      label: Source paper IDs
+    validations:
+      required: true
+  - type: textarea
+    id: protocol_link
+    attributes:
+      label: Protocol reference
+      description: Reference docs/snowballing_execution_protocol.md section(s).
+    validations:
+      required: true
