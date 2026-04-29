@@ -1,0 +1,48 @@
+name: E1 Execution
+about: Run E1 database/API discovery from official E0-ready seeds
+labels: [execution-E1]
+title: "E1R?: database/API discovery from official E0-ready seeds"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template only after governance prerequisites are merged (#14, #15, #16).
+  - type: input
+    id: execution_id
+    attributes:
+      label: Execution ID
+      placeholder: E1R1
+    validations:
+      required: true
+  - type: textarea
+    id: objective
+    attributes:
+      label: Objective
+      description: Define retrieval objective and expected outputs.
+    validations:
+      required: true
+  - type: textarea
+    id: seed_state
+    attributes:
+      label: Official E0 seed state
+      description: Confirm official E0 import status in registries.
+    validations:
+      required: true
+  - type: textarea
+    id: allowed_domains
+    attributes:
+      label: Domains to use
+      description: Must be subset of docs/domain_allowlist_registry.md
+    validations:
+      required: true
+  - type: checkboxes
+    id: prerequisites
+    attributes:
+      label: Prerequisites
+      options:
+        - label: AGENTS.md exists and reviewed
+          required: true
+        - label: Validation workflow exists and green
+          required: true
+        - label: No unapproved domain expansion requested
+          required: true

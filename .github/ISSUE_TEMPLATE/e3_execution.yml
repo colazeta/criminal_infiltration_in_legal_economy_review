@@ -1,0 +1,24 @@
+name: E3 Forward Snowballing
+about: Run E3 forward citation snowballing
+labels: [execution-E3]
+title: "E3R?: forward snowballing"
+body:
+  - type: input
+    id: execution_id
+    attributes:
+      label: Execution ID
+      placeholder: E3R1
+    validations:
+      required: true
+  - type: textarea
+    id: source_papers
+    attributes:
+      label: Source paper IDs
+    validations:
+      required: true
+  - type: textarea
+    id: feeds
+    attributes:
+      label: Feeds/APIs used
+    validations:
+      required: true
