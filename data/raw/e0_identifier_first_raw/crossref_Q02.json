@@ -1,0 +1,510 @@
+{
+  "status": "ok",
+  "message-type": "work-list",
+  "message-version": "1.0.0",
+  "message": {
+    "facets": {},
+    "total-results": 1720808,
+    "items": [
+      {
+        "indexed": {
+          "date-parts": [
+            [
+              2022,
+              8,
+              3
+            ]
+          ],
+          "date-time": "2022-08-03T04:09:10Z",
+          "timestamp": 1659499750858
+        },
+        "reference-count": 0,
+        "publisher": "Oxford University Press",
+        "content-domain": {
+          "domain": [],
+          "crossmark-restriction": false
+        },
+        "published-print": {
+          "date-parts": [
+            [
+              2017,
+              1,
+              19
+            ]
+          ]
+        },
+        "DOI": "10.1093/acprof:oso/9780198758402.003.0006",
+        "type": "book-chapter",
+        "created": {
+          "date-parts": [
+            [
+              2017,
+              3,
+              23
+            ]
+          ],
+          "date-time": "2017-03-23T09:59:56Z",
+          "timestamp": 1490263196000
+        },
+        "page": "143-170",
+        "source": "Crossref",
+        "is-referenced-by-count": 0,
+        "title": [
+          "The Red–Black Collusion"
+        ],
+        "prefix": "10.1093",
+        "author": [
+          {
+            "given": "Peng",
+            "family": "Wang",
+            "sequence": "first",
+            "affiliation": []
+          }
+        ],
+        "member": "286",
+        "container-title": [
+          "The Chinese Mafia"
+        ],
+        "deposited": {
+          "date-parts": [
+            [
+              2022,
+              8,
+              3
+            ]
+          ],
+          "date-time": "2022-08-03T02:22:26Z",
+          "timestamp": 1659493346000
+        },
+        "score": 56.133068,
+        "resource": {
+          "primary": {
+            "URL": "https://academic.oup.com/book/25594/chapter/192938603"
+          }
+        },
+        "issued": {
+          "date-parts": [
+            [
+              2017,
+              1,
+              19
+            ]
+          ]
+        },
+        "references-count": 0,
+        "URL": "https://doi.org/10.1093/acprof:oso/9780198758402.003.0006",
+        "published": {
+          "date-parts": [
+            [
+              2017,
+              1,
+              19
+            ]
+          ]
+        }
+      },
+      {
+        "indexed": {
+          "date-parts": [
+            [
+              2024,
+              3,
+              12
+            ]
+          ],
+          "date-time": "2024-03-12T02:02:43Z",
+          "timestamp": 1710208963344
+        },
+        "reference-count": 0,
+        "publisher": "Oxford University Press",
+        "content-domain": {
+          "domain": [],
+          "crossmark-restriction": false
+        },
+        "published-print": {
+          "date-parts": [
+            [
+              2017,
+              1,
+              19
+            ]
+          ]
+        },
+        "DOI": "10.1093/acprof:oso/9780198758402.003.0004",
+        "type": "book-chapter",
+        "created": {
+          "date-parts": [
+            [
+              2017,
+              3,
+              23
+            ]
+          ],
+          "date-time": "2017-03-23T09:59:56Z",
+          "timestamp": 1490263196000
+        },
+        "page": "97-124",
+        "source": "Crossref",
+        "is-referenced-by-count": 1,
+        "title": [
+          "The Black Mafia"
+        ],
+        "prefix": "10.1093",
+        "author": [
+          {
+            "given": "Peng",
+            "family": "Wang",
+            "sequence": "first",
+            "affiliation": []
+          }
+        ],
+        "member": "286",
+        "container-title": [
+          "The Chinese Mafia"
+        ],
+        "deposited": {
+          "date-parts": [
+            [
+              2022,
+              8,
+              3
+            ]
+          ],
+          "date-time": "2022-08-03T02:22:26Z",
+          "timestamp": 1659493346000
+        },
+        "score": 47.34433,
+        "resource": {
+          "primary": {
+            "URL": "https://academic.oup.com/book/25594/chapter/192937697"
+          }
+        },
+        "issued": {
+          "date-parts": [
+            [
+              2017,
+              1,
+              19
+            ]
+          ]
+        },
+        "references-count": 0,
+        "URL": "https://doi.org/10.1093/acprof:oso/9780198758402.003.0004",
+        "published": {
+          "date-parts": [
+            [
+              2017,
+              1,
+              19
+            ]
+          ]
+        }
+      },
+      {
+        "indexed": {
+          "date-parts": [
+            [
+              2022,
+              8,
+              3
+            ]
+          ],
+          "date-time": "2022-08-03T04:08:17Z",
+          "timestamp": 1659499697332
+        },
+        "reference-count": 0,
+        "publisher": "Oxford University Press",
+        "content-domain": {
+          "domain": [],
+          "crossmark-restriction": false
+        },
+        "published-print": {
+          "date-parts": [
+            [
+              2017,
+              1,
+              19
+            ]
+          ]
+        },
+        "DOI": "10.1093/acprof:oso/9780198758402.003.0005",
+        "type": "book-chapter",
+        "created": {
+          "date-parts": [
+            [
+              2017,
+              3,
+              23
+            ]
+          ],
+          "date-time": "2017-03-23T09:59:56Z",
+          "timestamp": 1490263196000
+        },
+        "page": "125-142",
+        "source": "Crossref",
+        "is-referenced-by-count": 0,
+        "title": [
+          "The Red Mafia"
+        ],
+        "prefix": "10.1093",
+        "author": [
+          {
+            "given": "Peng",
+            "family": "Wang",
+            "sequence": "first",
+            "affiliation": []
+          }
+        ],
+        "member": "286",
+        "container-title": [
+          "The Chinese Mafia"
+        ],
+        "deposited": {
+          "date-parts": [
+            [
+              2022,
+              8,
+              3
+            ]
+          ],
+          "date-time": "2022-08-03T02:22:27Z",
+          "timestamp": 1659493347000
+        },
+        "score": 47.317486,
+        "resource": {
+          "primary": {
+            "URL": "https://academic.oup.com/book/25594/chapter/192938269"
+          }
+        },
+        "issued": {
+          "date-parts": [
+            [
+              2017,
+              1,
+              19
+            ]
+          ]
+        },
+        "references-count": 0,
+        "URL": "https://doi.org/10.1093/acprof:oso/9780198758402.003.0005",
+        "published": {
+          "date-parts": [
+            [
+              2017,
+              1,
+              19
+            ]
+          ]
+        }
+      },
+      {
+        "indexed": {
+          "date-parts": [
+            [
+              2026,
+              4,
+              4
+            ]
+          ],
+          "date-time": "2026-04-04T07:55:23Z",
+          "timestamp": 1775289323149,
+          "version": "3.50.1"
+        },
+        "reference-count": 0,
+        "publisher": "Oxford University Press",
+        "isbn-type": [
+          {
+            "value": "9780198758402",
+            "type": "electronic"
+          }
+        ],
+        "content-domain": {
+          "domain": [],
+          "crossmark-restriction": false
+        },
+        "published-print": {
+          "date-parts": [
+            [
+              2017,
+              1,
+              19
+            ]
+          ]
+        },
+        "DOI": "10.1093/acprof:oso/9780198758402.001.0001",
+        "type": "monograph",
+        "created": {
+          "date-parts": [
+            [
+              2017,
+              3,
+              23
+            ]
+          ],
+          "date-time": "2017-03-23T09:59:56Z",
+          "timestamp": 1490263196000
+        },
+        "source": "Crossref",
+        "is-referenced-by-count": 45,
+        "title": [
+          "The Chinese Mafia"
+        ],
+        "prefix": "10.1093",
+        "author": [
+          {
+            "given": "Peng",
+            "family": "Wang",
+            "sequence": "first",
+            "affiliation": []
+          }
+        ],
+        "member": "286",
+        "deposited": {
+          "date-parts": [
+            [
+              2022,
+              8,
+              3
+            ]
+          ],
+          "date-time": "2022-08-03T02:22:24Z",
+          "timestamp": 1659493344000
+        },
+        "score": 46.13967,
+        "resource": {
+          "primary": {
+            "URL": "https://academic.oup.com/book/25594"
+          }
+        },
+        "subtitle": [
+          "Organized Crime, Corruption, and Extra-Legal Protection"
+        ],
+        "issued": {
+          "date-parts": [
+            [
+              2017,
+              1,
+              19
+            ]
+          ]
+        },
+        "ISBN": [
+          "9780198758402"
+        ],
+        "references-count": 0,
+        "URL": "https://doi.org/10.1093/acprof:oso/9780198758402.001.0001",
+        "published": {
+          "date-parts": [
+            [
+              2017,
+              1,
+              19
+            ]
+          ]
+        }
+      },
+      {
+        "indexed": {
+          "date-parts": [
+            [
+              2022,
+              8,
+              3
+            ]
+          ],
+          "date-time": "2022-08-03T04:08:16Z",
+          "timestamp": 1659499696080
+        },
+        "reference-count": 0,
+        "publisher": "Oxford University Press",
+        "content-domain": {
+          "domain": [],
+          "crossmark-restriction": false
+        },
+        "published-print": {
+          "date-parts": [
+            [
+              2017,
+              1,
+              19
+            ]
+          ]
+        },
+        "DOI": "10.1093/acprof:oso/9780198758402.003.0007",
+        "type": "book-chapter",
+        "created": {
+          "date-parts": [
+            [
+              2017,
+              3,
+              23
+            ]
+          ],
+          "date-time": "2017-03-23T09:59:56Z",
+          "timestamp": 1490263196000
+        },
+        "page": "173-184",
+        "source": "Crossref",
+        "is-referenced-by-count": 0,
+        "title": [
+          "The Mafia and the State"
+        ],
+        "prefix": "10.1093",
+        "author": [
+          {
+            "given": "Peng",
+            "family": "Wang",
+            "sequence": "first",
+            "affiliation": []
+          }
+        ],
+        "member": "286",
+        "container-title": [
+          "The Chinese Mafia"
+        ],
+        "deposited": {
+          "date-parts": [
+            [
+              2022,
+              8,
+              3
+            ]
+          ],
+          "date-time": "2022-08-03T02:22:26Z",
+          "timestamp": 1659493346000
+        },
+        "score": 45.907944,
+        "resource": {
+          "primary": {
+            "URL": "https://academic.oup.com/book/25594/chapter/192939699"
+          }
+        },
+        "issued": {
+          "date-parts": [
+            [
+              2017,
+              1,
+              19
+            ]
+          ]
+        },
+        "references-count": 0,
+        "URL": "https://doi.org/10.1093/acprof:oso/9780198758402.003.0007",
+        "published": {
+          "date-parts": [
+            [
+              2017,
+              1,
+              19
+            ]
+          ]
+        }
+      }
+    ],
+    "items-per-page": 5,
+    "query": {
+      "start-index": 0,
+      "search-terms": "(mafia OR \\organized crime\\\") AND (business OR firms OR enterprise) AND (infiltration OR collusion OR corruption)\""
+    }
+  }
+}

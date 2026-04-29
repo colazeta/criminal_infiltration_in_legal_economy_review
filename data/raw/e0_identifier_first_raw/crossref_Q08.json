@@ -1,0 +1,694 @@
+{
+  "status": "ok",
+  "message-type": "work-list",
+  "message-version": "1.0.0",
+  "message": {
+    "facets": {},
+    "total-results": 3919234,
+    "items": [
+      {
+        "indexed": {
+          "date-parts": [
+            [
+              2026,
+              2,
+              10
+            ]
+          ],
+          "date-time": "2026-02-10T19:59:57Z",
+          "timestamp": 1770753597844,
+          "version": "3.50.0"
+        },
+        "publisher-location": "New York",
+        "reference-count": 15,
+        "publisher": "Palgrave Macmillan US",
+        "isbn-type": [
+          {
+            "value": "9781349384433",
+            "type": "print"
+          },
+          {
+            "value": "9780230110038",
+            "type": "electronic"
+          }
+        ],
+        "license": [
+          {
+            "start": {
+              "date-parts": [
+                [
+                  2010,
+                  1,
+                  1
+                ]
+              ],
+              "date-time": "2010-01-01T00:00:00Z",
+              "timestamp": 1262304000000
+            },
+            "content-version": "unspecified",
+            "delay-in-days": 0,
+            "URL": "http://www.springer.com/tdm"
+          }
+        ],
+        "content-domain": {
+          "domain": [],
+          "crossmark-restriction": false
+        },
+        "published-print": {
+          "date-parts": [
+            [
+              2010
+            ]
+          ]
+        },
+        "DOI": "10.1057/9780230110038_8",
+        "type": "book-chapter",
+        "created": {
+          "date-parts": [
+            [
+              2016,
+              5,
+              19
+            ]
+          ],
+          "date-time": "2016-05-19T05:13:16Z",
+          "timestamp": 1463634796000
+        },
+        "page": "173-196",
+        "source": "Crossref",
+        "is-referenced-by-count": 5,
+        "title": [
+          "Mafia and Civil Society: Economico-criminal Collusion and Territorial Control in Calabria"
+        ],
+        "prefix": "10.1057",
+        "author": [
+          {
+            "given": "Rocco",
+            "family": "Sciarrone",
+            "sequence": "first",
+            "affiliation": []
+          }
+        ],
+        "member": "297",
+        "reference": [
+          {
+            "key": "8_CR1",
+            "first-page": "214",
+            "volume-title": "Interveni e proposte",
+            "author": "G Falcone",
+            "year": "1994",
+            "unstructured": "Giovanni Falcone. Interveni e proposte(Florence: Sansoni, 1994), 214."
+          },
+          {
+            "key": "8_CR2",
+            "first-page": "95",
+            "volume-title": "Ragazzi di mafia",
+            "author": "V Macri",
+            "year": "1993",
+            "unstructured": "Vincenzo Macri, “La ’ndrangheta in Calabria,” in Franco Occhiogrosso (ed.). Ragazzi di mafia(Milan: Franco Angeli, 1993), 95–108."
+          },
+          {
+            "key": "8_CR3",
+            "volume-title": "Men of respect; A Social History of the Sicilian Mafia",
+            "author": "R Catanzaro",
+            "year": "1992",
+            "unstructured": "Catanzaro, Raimondo. Men of respect; A Social History of the Sicilian Mafia(New York: Free Press, 1992)."
+          },
+          {
+            "key": "8_CR4",
+            "volume-title": "Sviluppo senza autonomia. Effetti perversi delle politiche nel Mezzogiorno",
+            "author": "C Trigilia",
+            "year": "1992",
+            "unstructured": "Carlo Trigilia. Sviluppo senza autonomia. Effetti perversi delle politiche nel Mezzogiorno(Bologna: Il Mulino, 1992)."
+          },
+          {
+            "key": "8_CR5",
+            "first-page": "3",
+            "volume-title": "Trust. Making and Breaking Cooperative Relations",
+            "author": "B Williams",
+            "year": "1988",
+            "unstructured": "Bernard Williams, “Formal Structures and Social Reality,” in Diego Gambetta (ed.). Trust. Making and Breaking Cooperative Relations(Oxford: Basil Blackwell, 1988), 3–13."
+          },
+          {
+            "key": "8_CR6",
+            "volume-title": "Le pouvoir et la règle. Dynamiques de l’action organisée",
+            "author": "E Friedberg",
+            "year": "1993",
+            "unstructured": "Erhard Friedberg, Le pouvoir et la règle. Dynamiques de l’action organisée(Paris: Seuil, 1993)."
+          },
+          {
+            "key": "8_CR7",
+            "first-page": "79",
+            "volume-title": "Sociologia délia vita economica",
+            "author": "E Mingione",
+            "year": "1997",
+            "unstructured": "Enzo Mingione. Sociologia délia vita economica(Rome: La Nuova Italia scientifica, 1997), 79–80."
+          },
+          {
+            "key": "8_CR8",
+            "volume-title": "Ordinanza di rinvio a giudizio contre De Stefano P. + 59",
+            "author": "RC Tribunal",
+            "year": "1978",
+            "unstructured": "Reggio Calabria Tribunal, Ordinanza di rinvio a giudizio contre De Stefano P. + 59, 1978."
+          },
+          {
+            "issue": "2",
+            "key": "8_CR9",
+            "first-page": "261",
+            "volume": "1",
+            "author": "R Catanzaro",
+            "year": "1987",
+            "unstructured": "Raimondo Catanzaro, “Imprenditori délia violenza e mediatori sociali. Un’ipotesi di inter-pretazione délia mafia,” Polis1(2) (1987): 261–282.",
+            "journal-title": "Polis"
+          },
+          {
+            "key": "8_CR10",
+            "volume-title": "Exit, Voice, and Loyalty: Responses to Decline in Firms, Organizations, and States",
+            "author": "AO Hirschman",
+            "year": "1970",
+            "unstructured": "Albert O. Hirschman. Exit, Voice, and Loyalty: Responses to Decline in Firms, Organizations, and States(Cambridge: Harvard University Press, 1970)."
+          },
+          {
+            "key": "8_CR11",
+            "first-page": "209",
+            "volume-title": "Economie sporche. L’impresa criminale in Europa",
+            "author": "V Ruggiero",
+            "year": "1996",
+            "unstructured": "Vincenzo Ruggiero. Economie sporche. L’impresa criminale in Europa(Turin: Bollati Boringhieri, 1996), 209."
+          },
+          {
+            "key": "8_CR12",
+            "volume-title": "Ordinanza di rinvio agiudizio contre De Stefano P. + 59",
+            "author": "RC Tribunal",
+            "year": "1978",
+            "unstructured": "Reggio Calabria Tribunal, Ordinanza di rinvio agiudizio contre De Stefano P. + 59, 1978."
+          },
+          {
+            "key": "8_CR13",
+            "first-page": "369",
+            "volume": "3",
+            "author": "R Sciarrone",
+            "year": "2006",
+            "unstructured": "Rocco Sciarrone, “Mafia e potere: processi di legittimazione e costruzione del consenso,” Stato e mercato3 (2006): 369–401.",
+            "journal-title": "Stato e mercato"
+          },
+          {
+            "key": "8_CR14",
+            "first-page": "213",
+            "volume-title": "Trust. Making and Breaking Cooperative Relations",
+            "author": "D Gambetta",
+            "year": "1988",
+            "unstructured": "Diego Gambetta, “Can We Can Trust Trust?” in Diego Gambetta (ed.). Trust. Making and Breaking Cooperative Relations(Oxford: Basil Blackwell, 1988), 213–237."
+          },
+          {
+            "key": "8_CR15",
+            "first-page": "271",
+            "volume": "2",
+            "author": "R Sciarrone",
+            "year": "2000",
+            "unstructured": "Rocco Sciarrone, “I sentieri dello sviluppo all’incrocio delle reti mafiose,” Stato e mercato 2(2000): 271–302.",
+            "journal-title": "Stato e mercato"
+          }
+        ],
+        "container-title": [
+          "Organized Crime and States"
+        ],
+        "language": "en",
+        "link": [
+          {
+            "URL": "http://link.springer.com/content/pdf/10.1057/9780230110038_8",
+            "content-type": "unspecified",
+            "content-version": "vor",
+            "intended-application": "similarity-checking"
+          }
+        ],
+        "deposited": {
+          "date-parts": [
+            [
+              2019,
+              5,
+              31
+            ]
+          ],
+          "date-time": "2019-05-31T18:50:02Z",
+          "timestamp": 1559328602000
+        },
+        "score": 47.751526,
+        "resource": {
+          "primary": {
+            "URL": "http://link.springer.com/10.1057/9780230110038_8"
+          }
+        },
+        "issued": {
+          "date-parts": [
+            [
+              2010
+            ]
+          ]
+        },
+        "ISBN": [
+          "9781349384433",
+          "9780230110038"
+        ],
+        "references-count": 15,
+        "URL": "https://doi.org/10.1057/9780230110038_8",
+        "published": {
+          "date-parts": [
+            [
+              2010
+            ]
+          ]
+        }
+      },
+      {
+        "indexed": {
+          "date-parts": [
+            [
+              2022,
+              8,
+              3
+            ]
+          ],
+          "date-time": "2022-08-03T04:09:10Z",
+          "timestamp": 1659499750858
+        },
+        "reference-count": 0,
+        "publisher": "Oxford University Press",
+        "content-domain": {
+          "domain": [],
+          "crossmark-restriction": false
+        },
+        "published-print": {
+          "date-parts": [
+            [
+              2017,
+              1,
+              19
+            ]
+          ]
+        },
+        "DOI": "10.1093/acprof:oso/9780198758402.003.0006",
+        "type": "book-chapter",
+        "created": {
+          "date-parts": [
+            [
+              2017,
+              3,
+              23
+            ]
+          ],
+          "date-time": "2017-03-23T09:59:56Z",
+          "timestamp": 1490263196000
+        },
+        "page": "143-170",
+        "source": "Crossref",
+        "is-referenced-by-count": 0,
+        "title": [
+          "The Red–Black Collusion"
+        ],
+        "prefix": "10.1093",
+        "author": [
+          {
+            "given": "Peng",
+            "family": "Wang",
+            "sequence": "first",
+            "affiliation": []
+          }
+        ],
+        "member": "286",
+        "container-title": [
+          "The Chinese Mafia"
+        ],
+        "deposited": {
+          "date-parts": [
+            [
+              2022,
+              8,
+              3
+            ]
+          ],
+          "date-time": "2022-08-03T02:22:26Z",
+          "timestamp": 1659493346000
+        },
+        "score": 45.805332,
+        "resource": {
+          "primary": {
+            "URL": "https://academic.oup.com/book/25594/chapter/192938603"
+          }
+        },
+        "issued": {
+          "date-parts": [
+            [
+              2017,
+              1,
+              19
+            ]
+          ]
+        },
+        "references-count": 0,
+        "URL": "https://doi.org/10.1093/acprof:oso/9780198758402.003.0006",
+        "published": {
+          "date-parts": [
+            [
+              2017,
+              1,
+              19
+            ]
+          ]
+        }
+      },
+      {
+        "indexed": {
+          "date-parts": [
+            [
+              2022,
+              4,
+              1
+            ]
+          ],
+          "date-time": "2022-04-01T22:12:30Z",
+          "timestamp": 1648851150346
+        },
+        "reference-count": 0,
+        "publisher": "Harvard University Press",
+        "content-domain": {
+          "domain": [],
+          "crossmark-restriction": false
+        },
+        "published-print": {
+          "date-parts": [
+            [
+              2016,
+              12,
+              31
+            ]
+          ]
+        },
+        "DOI": "10.4159/9780674974340-007",
+        "type": "book-chapter",
+        "created": {
+          "date-parts": [
+            [
+              2017,
+              4,
+              5
+            ]
+          ],
+          "date-time": "2017-04-05T10:07:26Z",
+          "timestamp": 1491386846000
+        },
+        "page": "183-215",
+        "source": "Crossref",
+        "is-referenced-by-count": 0,
+        "title": [
+          "6. In Bed with the Mafia: Collusion between Law Enforcement and Organized Crime"
+        ],
+        "prefix": "10.4159",
+        "member": "2652",
+        "container-title": [
+          "China’s Crony Capitalism"
+        ],
+        "link": [
+          {
+            "URL": "https://hup.degruyter.com/view/book/9780674974340/10.4159/9780674974340-007.xml",
+            "content-type": "text/html",
+            "content-version": "vor",
+            "intended-application": "text-mining"
+          },
+          {
+            "URL": "https://www.degruyter.com/document/doi/10.4159/9780674974340-007/pdf",
+            "content-type": "unspecified",
+            "content-version": "vor",
+            "intended-application": "similarity-checking"
+          }
+        ],
+        "deposited": {
+          "date-parts": [
+            [
+              2021,
+              4,
+              22
+            ]
+          ],
+          "date-time": "2021-04-22T23:13:15Z",
+          "timestamp": 1619133195000
+        },
+        "score": 42.831608,
+        "resource": {
+          "primary": {
+            "URL": "https://www.degruyter.com/document/doi/10.4159/9780674974340-007/html"
+          }
+        },
+        "issued": {
+          "date-parts": [
+            [
+              2016,
+              12,
+              31
+            ]
+          ]
+        },
+        "references-count": 0,
+        "URL": "https://doi.org/10.4159/9780674974340-007",
+        "published": {
+          "date-parts": [
+            [
+              2016,
+              12,
+              31
+            ]
+          ]
+        }
+      },
+      {
+        "indexed": {
+          "date-parts": [
+            [
+              2025,
+              6,
+              23
+            ]
+          ],
+          "date-time": "2025-06-23T12:40:09Z",
+          "timestamp": 1750682409304,
+          "version": "3.41.0"
+        },
+        "edition-number": "1",
+        "reference-count": 0,
+        "publisher": "Lexington Books",
+        "isbn-type": [
+          {
+            "value": "9781978748965",
+            "type": "electronic"
+          },
+          {
+            "value": "9781666967135",
+            "type": "print"
+          }
+        ],
+        "content-domain": {
+          "domain": [],
+          "crossmark-restriction": false
+        },
+        "published-print": {
+          "date-parts": [
+            [
+              2025
+            ]
+          ]
+        },
+        "DOI": "10.5040/9781978748965.ch-001",
+        "type": "other",
+        "created": {
+          "date-parts": [
+            [
+              2025,
+              6,
+              23
+            ]
+          ],
+          "date-time": "2025-06-23T12:01:43Z",
+          "timestamp": 1750680103000
+        },
+        "page": "3-16",
+        "source": "Crossref",
+        "is-referenced-by-count": 0,
+        "title": [
+          "What Is Mafia-Type Organized Crime?"
+        ],
+        "prefix": "10.5040",
+        "member": "2984",
+        "container-title": [
+          "Challenging the Mafia of Calabria"
+        ],
+        "deposited": {
+          "date-parts": [
+            [
+              2025,
+              6,
+              23
+            ]
+          ],
+          "date-time": "2025-06-23T12:04:13Z",
+          "timestamp": 1750680253000
+        },
+        "score": 41.305523,
+        "resource": {
+          "primary": {
+            "URL": "https://www.bloomsburycollections.com/monograph-detail?docid=b-9781978748965&tocid=b-9781978748965-chapter1"
+          }
+        },
+        "issued": {
+          "date-parts": [
+            [
+              2025
+            ]
+          ]
+        },
+        "ISBN": [
+          "9781978748965",
+          "9781666967135"
+        ],
+        "references-count": 0,
+        "URL": "https://doi.org/10.5040/9781978748965.ch-001",
+        "published": {
+          "date-parts": [
+            [
+              2025
+            ]
+          ]
+        }
+      },
+      {
+        "indexed": {
+          "date-parts": [
+            [
+              2024,
+              5,
+              23
+            ]
+          ],
+          "date-time": "2024-05-23T19:57:41Z",
+          "timestamp": 1716494261302
+        },
+        "edition-number": "1",
+        "reference-count": 0,
+        "publisher": "University of Illinois Press",
+        "isbn-type": [
+          {
+            "value": "9780252037306",
+            "type": "print"
+          },
+          {
+            "value": "9780252094484",
+            "type": "electronic"
+          }
+        ],
+        "content-domain": {
+          "domain": [],
+          "crossmark-restriction": false
+        },
+        "published-print": {
+          "date-parts": [
+            [
+              2012,
+              12,
+              15
+            ]
+          ]
+        },
+        "abstract": "<p>This book provides a comprehensive sociological explanation for the emergence and continuation of organized crime in Chicago. Tracing the roots of political corruption that afforded protection to gambling, prostitution, and other vice activity in Chicago and other large American cities, the book challenges the dominant belief that organized crime in America is a descendent of the Sicilian Mafia. According to this widespread “alien conspiracy” theory, organized crime evolved in a linear fashion beginning with the Mafia in Sicily, emerging in the form of the Black Hand in America's immigrant colonies, and culminating in the development of the Cosa Nostra in America's urban centers. Looking beyond this Mafia paradigm, this volume argues that the development of organized crime in Chicago and other large American cities was rooted in the social structure of American society. Specifically, the book ties organized crime to the emergence of machine politics in America's urban centers. It contends that Chicago's criminal underworld could not have existed without the blessing of those who controlled municipal, county, and state government. These practices were not imported from Sicily, the book contends, but were bred in the socially disorganized slums of America where elected officials routinely franchised vice and crime in exchange for money and votes. The book also traces the history of the African American community's participation in traditional organized crime in Chicago and offers new perspectives on the organizational structure of the Chicago Outfit, the traditional organized crime group in Chicago.</p>",
+        "DOI": "10.5406/illinois/9780252037306.001.0001",
+        "type": "monograph",
+        "created": {
+          "date-parts": [
+            [
+              2017,
+              5,
+              5
+            ]
+          ],
+          "date-time": "2017-05-05T08:57:15Z",
+          "timestamp": 1493974635000
+        },
+        "source": "Crossref",
+        "is-referenced-by-count": 6,
+        "title": [
+          "Organized Crime in Chicago"
+        ],
+        "prefix": "10.5406",
+        "author": [
+          {
+            "given": "Robert M.",
+            "family": "Lombardo",
+            "sequence": "first",
+            "affiliation": []
+          }
+        ],
+        "member": "3673",
+        "published-online": {
+          "date-parts": [
+            [
+              2017,
+              4,
+              20
+            ]
+          ]
+        },
+        "original-title": [
+          "Organized Crime in Chicago"
+        ],
+        "language": "en",
+        "deposited": {
+          "date-parts": [
+            [
+              2018,
+              12,
+              20
+            ]
+          ],
+          "date-time": "2018-12-20T11:58:39Z",
+          "timestamp": 1545307119000
+        },
+        "score": 40.82197,
+        "resource": {
+          "primary": {
+            "URL": "http://illinois.universitypressscholarship.com/view/10.5406/illinois/9780252037306.001.0001/upso-9780252037306"
+          }
+        },
+        "subtitle": [
+          "Beyond the Mafia"
+        ],
+        "issued": {
+          "date-parts": [
+            [
+              2012,
+              12,
+              15
+            ]
+          ]
+        },
+        "ISBN": [
+          "9780252037306",
+          "9780252094484"
+        ],
+        "references-count": 0,
+        "URL": "https://doi.org/10.5406/illinois/9780252037306.001.0001",
+        "published": {
+          "date-parts": [
+            [
+              2012,
+              12,
+              15
+            ]
+          ]
+        }
+      }
+    ],
+    "items-per-page": 5,
+    "query": {
+      "start-index": 0,
+      "search-terms": "(\\organized crime\\\" OR mafia) AND (logistics OR transport OR hospitality) AND (control OR collusion OR infiltration)\""
+    }
+  }
+}
