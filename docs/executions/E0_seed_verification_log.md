@@ -36,3 +36,11 @@ The following remain unresolved and should not be promoted yet:
 
 ## Notes
 This pass is intentionally conservative and prioritizes bibliographic integrity over volume. A second targeted disambiguation pass (OpenAlex + Semantic Scholar IDs) is recommended before official promotion.
+
+
+## Bibliographic contamination finding
+The initial E0 draft contains a substantial number of records that are not yet stable bibliographic entities (paraphrased titles, topic labels, or unresolved identities). These records must **not** be imported into official registries until exact paper-level identity is confirmed via authorized metadata sources.
+
+Operational consequence:
+- only high/medium-confidence, stable-identity records should move into clean seed draft;
+- low-confidence, ambiguous, and unresolved entries must be diverted to search leads for re-identification.
