@@ -1,1 +1,2 @@
 execution_id,execution_date,unique_candidates_before,new_unique_candidates,unique_candidates_after,eligible_before,new_eligible,eligible_after,candidate_novelty_rate,eligible_increment_rate,eligible_share_added_on_updated_total,screening_yield,new_theme_codes,new_sector_codes,new_mechanism_codes,new_method_codes,saturation_status,saturation_comment
+E0,2026-04-29,,,,0,,,,,,,,,,,not_applicable_seed_execution,"E0 establishes the initial seed corpus and is not used to assess saturation."
