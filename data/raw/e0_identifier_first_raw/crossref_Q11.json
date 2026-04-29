@@ -1,0 +1,666 @@
+{
+  "status": "ok",
+  "message-type": "work-list",
+  "message-version": "1.0.0",
+  "message": {
+    "facets": {},
+    "total-results": 7831472,
+    "items": [
+      {
+        "indexed": {
+          "date-parts": [
+            [
+              2024,
+              5,
+              6
+            ]
+          ],
+          "date-time": "2024-05-06T05:43:49Z",
+          "timestamp": 1714974229521
+        },
+        "edition-number": "1",
+        "reference-count": 0,
+        "publisher": "Wiley",
+        "isbn-type": [
+          {
+            "value": "9781119078951",
+            "type": "print"
+          },
+          {
+            "value": "9781119125389",
+            "type": "electronic"
+          }
+        ],
+        "content-domain": {
+          "domain": [],
+          "crossmark-restriction": false
+        },
+        "published-print": {
+          "date-parts": [
+            [
+              2015,
+              11,
+              16
+            ]
+          ]
+        },
+        "DOI": "10.1002/9781119125389.ch8",
+        "type": "other",
+        "created": {
+          "date-parts": [
+            [
+              2015,
+              10,
+              29
+            ]
+          ],
+          "date-time": "2015-10-29T13:23:19Z",
+          "timestamp": 1446124999000
+        },
+        "page": "125-144",
+        "source": "Crossref",
+        "is-referenced-by-count": 0,
+        "title": [
+          "More Schemes and Facilitators"
+        ],
+        "prefix": "10.1002",
+        "member": "311",
+        "published-online": {
+          "date-parts": [
+            [
+              2015,
+              10,
+              29
+            ]
+          ]
+        },
+        "container-title": [
+          "Trade‐Based Money Laundering"
+        ],
+        "language": "en",
+        "link": [
+          {
+            "URL": "http://api.wiley.com/onlinelibrary/tdm/v1/articles/10.1002%2F9781119125389.ch8",
+            "content-type": "application/pdf",
+            "content-version": "vor",
+            "intended-application": "text-mining"
+          },
+          {
+            "URL": "https://onlinelibrary.wiley.com/doi/pdf/10.1002/9781119125389.ch8",
+            "content-type": "unspecified",
+            "content-version": "vor",
+            "intended-application": "similarity-checking"
+          }
+        ],
+        "deposited": {
+          "date-parts": [
+            [
+              2023,
+              9,
+              3
+            ]
+          ],
+          "date-time": "2023-09-03T14:25:16Z",
+          "timestamp": 1693751116000
+        },
+        "score": 47.314137,
+        "resource": {
+          "primary": {
+            "URL": "https://onlinelibrary.wiley.com/doi/10.1002/9781119125389.ch8"
+          }
+        },
+        "issued": {
+          "date-parts": [
+            [
+              2015,
+              10,
+              29
+            ]
+          ]
+        },
+        "ISBN": [
+          "9781119078951",
+          "9781119125389"
+        ],
+        "references-count": 0,
+        "alternative-id": [
+          "10.1002/9781119125389.ch8",
+          "10.1002/9781119125389"
+        ],
+        "URL": "https://doi.org/10.1002/9781119125389.ch8",
+        "archive": [
+          "Portico"
+        ],
+        "published": {
+          "date-parts": [
+            [
+              2015,
+              10,
+              29
+            ]
+          ]
+        }
+      },
+      {
+        "indexed": {
+          "date-parts": [
+            [
+              2024,
+              5,
+              6
+            ]
+          ],
+          "date-time": "2024-05-06T05:43:59Z",
+          "timestamp": 1714974239751
+        },
+        "edition-number": "1",
+        "reference-count": 0,
+        "publisher": "Wiley",
+        "isbn-type": [
+          {
+            "value": "9781119078951",
+            "type": "print"
+          },
+          {
+            "value": "9781119125389",
+            "type": "electronic"
+          }
+        ],
+        "content-domain": {
+          "domain": [],
+          "crossmark-restriction": false
+        },
+        "published-print": {
+          "date-parts": [
+            [
+              2015,
+              11,
+              16
+            ]
+          ]
+        },
+        "DOI": "10.1002/9781119125389.ch2",
+        "type": "other",
+        "created": {
+          "date-parts": [
+            [
+              2015,
+              10,
+              29
+            ]
+          ],
+          "date-time": "2015-10-29T13:23:19Z",
+          "timestamp": 1446124999000
+        },
+        "page": "13-32",
+        "source": "Crossref",
+        "is-referenced-by-count": 0,
+        "title": [
+          "Trade‐Based Money Laundering Techniques: Invoice Fraud"
+        ],
+        "prefix": "10.1002",
+        "member": "311",
+        "published-online": {
+          "date-parts": [
+            [
+              2015,
+              10,
+              29
+            ]
+          ]
+        },
+        "container-title": [
+          "Trade‐Based Money Laundering"
+        ],
+        "language": "en",
+        "link": [
+          {
+            "URL": "http://api.wiley.com/onlinelibrary/tdm/v1/articles/10.1002%2F9781119125389.ch2",
+            "content-type": "application/pdf",
+            "content-version": "vor",
+            "intended-application": "text-mining"
+          },
+          {
+            "URL": "https://onlinelibrary.wiley.com/doi/pdf/10.1002/9781119125389.ch2",
+            "content-type": "unspecified",
+            "content-version": "vor",
+            "intended-application": "similarity-checking"
+          }
+        ],
+        "deposited": {
+          "date-parts": [
+            [
+              2023,
+              9,
+              3
+            ]
+          ],
+          "date-time": "2023-09-03T14:25:05Z",
+          "timestamp": 1693751105000
+        },
+        "score": 42.341972,
+        "resource": {
+          "primary": {
+            "URL": "https://onlinelibrary.wiley.com/doi/10.1002/9781119125389.ch2"
+          }
+        },
+        "issued": {
+          "date-parts": [
+            [
+              2015,
+              10,
+              29
+            ]
+          ]
+        },
+        "ISBN": [
+          "9781119078951",
+          "9781119125389"
+        ],
+        "references-count": 0,
+        "alternative-id": [
+          "10.1002/9781119125389.ch2",
+          "10.1002/9781119125389"
+        ],
+        "URL": "https://doi.org/10.1002/9781119125389.ch2",
+        "archive": [
+          "Portico"
+        ],
+        "published": {
+          "date-parts": [
+            [
+              2015,
+              10,
+              29
+            ]
+          ]
+        }
+      },
+      {
+        "indexed": {
+          "date-parts": [
+            [
+              2026,
+              1,
+              23
+            ]
+          ],
+          "date-time": "2026-01-23T17:33:38Z",
+          "timestamp": 1769189618361,
+          "version": "3.49.0"
+        },
+        "publisher-location": "London",
+        "edition-number": "1",
+        "reference-count": 0,
+        "publisher": "Routledge",
+        "isbn-type": [
+          {
+            "value": "9781003533429",
+            "type": "electronic"
+          }
+        ],
+        "content-domain": {
+          "domain": [],
+          "crossmark-restriction": false
+        },
+        "published-print": {
+          "date-parts": [
+            [
+              2026,
+              1,
+              23
+            ]
+          ]
+        },
+        "DOI": "10.4324/9781003533429-2",
+        "type": "book-chapter",
+        "created": {
+          "date-parts": [
+            [
+              2026,
+              1,
+              23
+            ]
+          ],
+          "date-time": "2026-01-23T15:35:54Z",
+          "timestamp": 1769182554000
+        },
+        "page": "8-32",
+        "source": "Crossref",
+        "is-referenced-by-count": 0,
+        "title": [
+          "The Trade-Based Money Laundering Concept"
+        ],
+        "prefix": "10.4324",
+        "author": [
+          {
+            "ORCID": "https://orcid.org/0000-0002-1454-774X",
+            "authenticated-orcid": false,
+            "given": "Mariola",
+            "family": "Marzouk",
+            "sequence": "first",
+            "affiliation": []
+          },
+          {
+            "ORCID": "https://orcid.org/0000-0003-1123-1309",
+            "authenticated-orcid": false,
+            "given": "Branislav",
+            "family": "Hock",
+            "sequence": "additional",
+            "affiliation": []
+          }
+        ],
+        "member": "301",
+        "container-title": [
+          "Trade-Based Money Laundering"
+        ],
+        "language": "en",
+        "deposited": {
+          "date-parts": [
+            [
+              2026,
+              1,
+              23
+            ]
+          ],
+          "date-time": "2026-01-23T15:35:55Z",
+          "timestamp": 1769182555000
+        },
+        "score": 41.11605,
+        "resource": {
+          "primary": {
+            "URL": "https://www.taylorfrancis.com/books/9781003533429/chapters/10.4324/9781003533429-2"
+          }
+        },
+        "issued": {
+          "date-parts": [
+            [
+              2026,
+              1,
+              23
+            ]
+          ]
+        },
+        "ISBN": [
+          "9781003533429"
+        ],
+        "references-count": 0,
+        "URL": "https://doi.org/10.4324/9781003533429-2",
+        "published": {
+          "date-parts": [
+            [
+              2026,
+              1,
+              23
+            ]
+          ]
+        }
+      },
+      {
+        "indexed": {
+          "date-parts": [
+            [
+              2025,
+              11,
+              25
+            ]
+          ],
+          "date-time": "2025-11-25T17:00:48Z",
+          "timestamp": 1764090048409,
+          "version": "3.45.0"
+        },
+        "reference-count": 0,
+        "publisher": "Edward Elgar Publishing",
+        "isbn-type": [
+          {
+            "type": "electronic",
+            "value": "9780857934000"
+          },
+          {
+            "type": "print",
+            "value": "9780857933997"
+          }
+        ],
+        "content-domain": {
+          "domain": [],
+          "crossmark-restriction": false
+        },
+        "published-print": {
+          "date-parts": [
+            [
+              2013,
+              8,
+              30
+            ]
+          ]
+        },
+        "DOI": "10.4337/9780857934000.00031",
+        "type": "book-chapter",
+        "created": {
+          "date-parts": [
+            [
+              2013,
+              9,
+              12
+            ]
+          ],
+          "date-time": "2013-09-12T10:05:43Z",
+          "timestamp": 1378980343000
+        },
+        "source": "Crossref",
+        "is-referenced-by-count": 0,
+        "title": [
+          "International trade mispricing: trade-based money laundering and tax evasion"
+        ],
+        "prefix": "10.4337",
+        "author": [
+          {
+            "given": "John S.",
+            "family": "Zdanowicz",
+            "sequence": "first",
+            "affiliation": []
+          }
+        ],
+        "member": "2918",
+        "container-title": [
+          "Research Handbook on Money Laundering"
+        ],
+        "link": [
+          {
+            "URL": "https://china.elgaronline.com/view/edcoll/9780857933997/9780857933997.00031.xml",
+            "content-type": "text/html",
+            "content-version": "vor",
+            "intended-application": "text-mining"
+          },
+          {
+            "URL": "https://china.elgaronline.com/view/edcoll/9780857933997/9780857933997.xml",
+            "content-type": "text/html",
+            "content-version": "vor",
+            "intended-application": "syndication"
+          }
+        ],
+        "deposited": {
+          "date-parts": [
+            [
+              2025,
+              11,
+              25
+            ]
+          ],
+          "date-time": "2025-11-25T16:55:38Z",
+          "timestamp": 1764089738000
+        },
+        "score": 40.635323,
+        "resource": {
+          "primary": {
+            "URL": "https://elgaronline.com/view/edcoll/9780857933997/9780857933997.00031.xml"
+          }
+        },
+        "issued": {
+          "date-parts": [
+            [
+              2013,
+              8,
+              30
+            ]
+          ]
+        },
+        "ISBN": [
+          "9780857934000",
+          "9780857933997"
+        ],
+        "references-count": 0,
+        "URL": "https://doi.org/10.4337/9780857934000.00031",
+        "published": {
+          "date-parts": [
+            [
+              2013,
+              8,
+              30
+            ]
+          ]
+        }
+      },
+      {
+        "indexed": {
+          "date-parts": [
+            [
+              2024,
+              5,
+              6
+            ]
+          ],
+          "date-time": "2024-05-06T05:43:59Z",
+          "timestamp": 1714974239313
+        },
+        "edition-number": "1",
+        "reference-count": 0,
+        "publisher": "Wiley",
+        "isbn-type": [
+          {
+            "value": "9781119078951",
+            "type": "print"
+          },
+          {
+            "value": "9781119125389",
+            "type": "electronic"
+          }
+        ],
+        "content-domain": {
+          "domain": [],
+          "crossmark-restriction": false
+        },
+        "published-print": {
+          "date-parts": [
+            [
+              2015,
+              11,
+              16
+            ]
+          ]
+        },
+        "DOI": "10.1002/9781119125389.app1",
+        "type": "other",
+        "created": {
+          "date-parts": [
+            [
+              2015,
+              10,
+              29
+            ]
+          ],
+          "date-time": "2015-10-29T13:23:19Z",
+          "timestamp": 1446124999000
+        },
+        "page": "195-206",
+        "source": "Crossref",
+        "is-referenced-by-count": 1,
+        "title": [
+          "Money‐Laundering Primer"
+        ],
+        "prefix": "10.1002",
+        "member": "311",
+        "published-online": {
+          "date-parts": [
+            [
+              2015,
+              10,
+              29
+            ]
+          ]
+        },
+        "container-title": [
+          "Trade‐Based Money Laundering"
+        ],
+        "language": "en",
+        "link": [
+          {
+            "URL": "http://api.wiley.com/onlinelibrary/tdm/v1/articles/10.1002%2F9781119125389.app1",
+            "content-type": "application/pdf",
+            "content-version": "vor",
+            "intended-application": "text-mining"
+          },
+          {
+            "URL": "https://onlinelibrary.wiley.com/doi/pdf/10.1002/9781119125389.app1",
+            "content-type": "unspecified",
+            "content-version": "vor",
+            "intended-application": "similarity-checking"
+          }
+        ],
+        "deposited": {
+          "date-parts": [
+            [
+              2023,
+              9,
+              3
+            ]
+          ],
+          "date-time": "2023-09-03T14:25:32Z",
+          "timestamp": 1693751132000
+        },
+        "score": 40.07461,
+        "resource": {
+          "primary": {
+            "URL": "https://onlinelibrary.wiley.com/doi/10.1002/9781119125389.app1"
+          }
+        },
+        "issued": {
+          "date-parts": [
+            [
+              2015,
+              10,
+              29
+            ]
+          ]
+        },
+        "ISBN": [
+          "9781119078951",
+          "9781119125389"
+        ],
+        "references-count": 0,
+        "alternative-id": [
+          "10.1002/9781119125389.app1",
+          "10.1002/9781119125389"
+        ],
+        "URL": "https://doi.org/10.1002/9781119125389.app1",
+        "archive": [
+          "Portico"
+        ],
+        "published": {
+          "date-parts": [
+            [
+              2015,
+              10,
+              29
+            ]
+          ]
+        }
+      }
+    ],
+    "items-per-page": 5,
+    "query": {
+      "start-index": 0,
+      "search-terms": "(\\trade-based money laundering\\\" OR \\\"professional facilitators\\\") AND (corporate OR firm OR company)\""
+    }
+  }
+}
