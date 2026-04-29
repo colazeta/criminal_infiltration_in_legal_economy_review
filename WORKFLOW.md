@@ -3,14 +3,17 @@
 # This file is setup-only and does NOT start autonomous execution by itself.
 tracker:
   kind: linear
-  project_slug: REPLACE_ME_LINEAR_PROJECT_SLUG
+  project_slug: criminal-infiltration-review-orchestrator-23ae33cee32b
   api_key: $LINEAR_API_KEY
 
-active_states:
-  - codex-ready
-terminal_states:
-  - human-review
-  - done
+  active_states:
+    - Todo
+    - In Progress
+  terminal_states:
+    - In Review
+    - Done
+    - Canceled
+    - Duplicate
 
 polling:
   interval_ms: 30000
@@ -31,7 +34,7 @@ hooks:
   after_run: |
     echo "Run completed for Linear issue {{ issue.identifier }}"
 
-timeout_ms: 3600000
+  timeout_ms: 60000
 
 agent:
   max_concurrent_agents: 1
