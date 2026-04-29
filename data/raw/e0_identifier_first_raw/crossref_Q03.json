@@ -1,0 +1,629 @@
+{
+  "status": "ok",
+  "message-type": "work-list",
+  "message-version": "1.0.0",
+  "message": {
+    "facets": {},
+    "total-results": 267641,
+    "items": [
+      {
+        "indexed": {
+          "date-parts": [
+            [
+              2023,
+              9,
+              30
+            ]
+          ],
+          "date-time": "2023-09-30T18:40:26Z",
+          "timestamp": 1696099226466
+        },
+        "reference-count": 0,
+        "publisher": "Edward Elgar Publishing",
+        "isbn-type": [
+          {
+            "value": "9781848447332",
+            "type": "electronic"
+          },
+          {
+            "value": "9781848443167",
+            "type": "print"
+          }
+        ],
+        "content-domain": {
+          "domain": [],
+          "crossmark-restriction": false
+        },
+        "published-print": {
+          "date-parts": [
+            [
+              2009,
+              4,
+              30
+            ]
+          ]
+        },
+        "DOI": "10.4337/9781848447332.00006",
+        "type": "book-chapter",
+        "created": {
+          "date-parts": [
+            [
+              2013,
+              9,
+              26
+            ]
+          ],
+          "date-time": "2013-09-26T12:40:11Z",
+          "timestamp": 1380199211000
+        },
+        "source": "Crossref",
+        "is-referenced-by-count": 0,
+        "title": [
+          "Stage Models for Criminal Entrepreneurs"
+        ],
+        "prefix": "10.4337",
+        "author": [
+          {
+            "given": "Petter",
+            "family": "Gottschalk",
+            "sequence": "first",
+            "affiliation": []
+          }
+        ],
+        "member": "2918",
+        "container-title": [
+          "Entrepreneurship and Organised Crime"
+        ],
+        "link": [
+          {
+            "URL": "https://www.elgaronline.com/view/9781848443167.00006.xml",
+            "content-type": "text/html",
+            "content-version": "vor",
+            "intended-application": "text-mining"
+          },
+          {
+            "URL": "https://www.elgaronline.com/view/9781848443167.xml",
+            "content-type": "text/html",
+            "content-version": "vor",
+            "intended-application": "syndication"
+          }
+        ],
+        "deposited": {
+          "date-parts": [
+            [
+              2023,
+              9,
+              30
+            ]
+          ],
+          "date-time": "2023-09-30T18:19:34Z",
+          "timestamp": 1696097974000
+        },
+        "score": 51.293903,
+        "resource": {
+          "primary": {
+            "URL": "https://www.elgaronline.com/view/9781848443167.00006.xml"
+          }
+        },
+        "issued": {
+          "date-parts": [
+            [
+              2009,
+              4,
+              30
+            ]
+          ]
+        },
+        "ISBN": [
+          "9781848447332",
+          "9781848443167"
+        ],
+        "references-count": 0,
+        "URL": "https://doi.org/10.4337/9781848447332.00006",
+        "published": {
+          "date-parts": [
+            [
+              2009,
+              4,
+              30
+            ]
+          ]
+        }
+      },
+      {
+        "indexed": {
+          "date-parts": [
+            [
+              2023,
+              9,
+              30
+            ]
+          ],
+          "date-time": "2023-09-30T18:40:32Z",
+          "timestamp": 1696099232205
+        },
+        "reference-count": 0,
+        "publisher": "Edward Elgar Publishing",
+        "isbn-type": [
+          {
+            "value": "9781848447332",
+            "type": "electronic"
+          },
+          {
+            "value": "9781848443167",
+            "type": "print"
+          }
+        ],
+        "content-domain": {
+          "domain": [],
+          "crossmark-restriction": false
+        },
+        "published-print": {
+          "date-parts": [
+            [
+              2009,
+              4,
+              30
+            ]
+          ]
+        },
+        "DOI": "10.4337/9781848447332.00011",
+        "type": "book-chapter",
+        "created": {
+          "date-parts": [
+            [
+              2013,
+              9,
+              26
+            ]
+          ],
+          "date-time": "2013-09-26T12:40:11Z",
+          "timestamp": 1380199211000
+        },
+        "source": "Crossref",
+        "is-referenced-by-count": 0,
+        "title": [
+          "Strategic Planning for Criminal Entrepreneurship"
+        ],
+        "prefix": "10.4337",
+        "author": [
+          {
+            "given": "Petter",
+            "family": "Gottschalk",
+            "sequence": "first",
+            "affiliation": []
+          }
+        ],
+        "member": "2918",
+        "container-title": [
+          "Entrepreneurship and Organised Crime"
+        ],
+        "link": [
+          {
+            "URL": "https://www.elgaronline.com/view/9781848443167.00011.xml",
+            "content-type": "text/html",
+            "content-version": "vor",
+            "intended-application": "text-mining"
+          },
+          {
+            "URL": "https://www.elgaronline.com/view/9781848443167.xml",
+            "content-type": "text/html",
+            "content-version": "vor",
+            "intended-application": "syndication"
+          }
+        ],
+        "deposited": {
+          "date-parts": [
+            [
+              2023,
+              9,
+              30
+            ]
+          ],
+          "date-time": "2023-09-30T18:19:32Z",
+          "timestamp": 1696097972000
+        },
+        "score": 50.734734,
+        "resource": {
+          "primary": {
+            "URL": "https://www.elgaronline.com/view/9781848443167.00011.xml"
+          }
+        },
+        "issued": {
+          "date-parts": [
+            [
+              2009,
+              4,
+              30
+            ]
+          ]
+        },
+        "ISBN": [
+          "9781848447332",
+          "9781848443167"
+        ],
+        "references-count": 0,
+        "URL": "https://doi.org/10.4337/9781848447332.00011",
+        "published": {
+          "date-parts": [
+            [
+              2009,
+              4,
+              30
+            ]
+          ]
+        }
+      },
+      {
+        "indexed": {
+          "date-parts": [
+            [
+              2023,
+              9,
+              30
+            ]
+          ],
+          "date-time": "2023-09-30T18:40:22Z",
+          "timestamp": 1696099222451
+        },
+        "reference-count": 0,
+        "publisher": "Edward Elgar Publishing",
+        "isbn-type": [
+          {
+            "value": "9781848447332",
+            "type": "electronic"
+          },
+          {
+            "value": "9781848443167",
+            "type": "print"
+          }
+        ],
+        "content-domain": {
+          "domain": [],
+          "crossmark-restriction": false
+        },
+        "published-print": {
+          "date-parts": [
+            [
+              2009,
+              4,
+              30
+            ]
+          ]
+        },
+        "DOI": "10.4337/9781848447332.00012",
+        "type": "book-chapter",
+        "created": {
+          "date-parts": [
+            [
+              2013,
+              9,
+              26
+            ]
+          ],
+          "date-time": "2013-09-26T12:40:11Z",
+          "timestamp": 1380199211000
+        },
+        "source": "Crossref",
+        "is-referenced-by-count": 0,
+        "title": [
+          "Knowledge Management in Criminal Entrepreneurship"
+        ],
+        "prefix": "10.4337",
+        "author": [
+          {
+            "given": "Petter",
+            "family": "Gottschalk",
+            "sequence": "first",
+            "affiliation": []
+          }
+        ],
+        "member": "2918",
+        "container-title": [
+          "Entrepreneurship and Organised Crime"
+        ],
+        "link": [
+          {
+            "URL": "https://www.elgaronline.com/view/9781848443167.00012.xml",
+            "content-type": "text/html",
+            "content-version": "vor",
+            "intended-application": "text-mining"
+          },
+          {
+            "URL": "https://www.elgaronline.com/view/9781848443167.xml",
+            "content-type": "text/html",
+            "content-version": "vor",
+            "intended-application": "syndication"
+          }
+        ],
+        "deposited": {
+          "date-parts": [
+            [
+              2023,
+              9,
+              30
+            ]
+          ],
+          "date-time": "2023-09-30T18:19:33Z",
+          "timestamp": 1696097973000
+        },
+        "score": 50.60845,
+        "resource": {
+          "primary": {
+            "URL": "https://www.elgaronline.com/view/9781848443167.00012.xml"
+          }
+        },
+        "issued": {
+          "date-parts": [
+            [
+              2009,
+              4,
+              30
+            ]
+          ]
+        },
+        "ISBN": [
+          "9781848447332",
+          "9781848443167"
+        ],
+        "references-count": 0,
+        "URL": "https://doi.org/10.4337/9781848447332.00012",
+        "published": {
+          "date-parts": [
+            [
+              2009,
+              4,
+              30
+            ]
+          ]
+        }
+      },
+      {
+        "indexed": {
+          "date-parts": [
+            [
+              2023,
+              9,
+              30
+            ]
+          ],
+          "date-time": "2023-09-30T18:40:18Z",
+          "timestamp": 1696099218708
+        },
+        "reference-count": 0,
+        "publisher": "Edward Elgar Publishing",
+        "isbn-type": [
+          {
+            "value": "9781848447332",
+            "type": "electronic"
+          },
+          {
+            "value": "9781848443167",
+            "type": "print"
+          }
+        ],
+        "content-domain": {
+          "domain": [],
+          "crossmark-restriction": false
+        },
+        "published-print": {
+          "date-parts": [
+            [
+              2009,
+              4,
+              30
+            ]
+          ]
+        },
+        "DOI": "10.4337/9781848447332.00008",
+        "type": "book-chapter",
+        "created": {
+          "date-parts": [
+            [
+              2013,
+              9,
+              26
+            ]
+          ],
+          "date-time": "2013-09-26T12:40:11Z",
+          "timestamp": 1380199211000
+        },
+        "source": "Crossref",
+        "is-referenced-by-count": 0,
+        "title": [
+          "Value Configurations in Criminal Entrepreneurship"
+        ],
+        "prefix": "10.4337",
+        "author": [
+          {
+            "given": "Petter",
+            "family": "Gottschalk",
+            "sequence": "first",
+            "affiliation": []
+          }
+        ],
+        "member": "2918",
+        "container-title": [
+          "Entrepreneurship and Organised Crime"
+        ],
+        "link": [
+          {
+            "URL": "https://www.elgaronline.com/view/9781848443167.00008.xml",
+            "content-type": "text/html",
+            "content-version": "vor",
+            "intended-application": "text-mining"
+          },
+          {
+            "URL": "https://www.elgaronline.com/view/9781848443167.xml",
+            "content-type": "text/html",
+            "content-version": "vor",
+            "intended-application": "syndication"
+          }
+        ],
+        "deposited": {
+          "date-parts": [
+            [
+              2023,
+              9,
+              30
+            ]
+          ],
+          "date-time": "2023-09-30T18:19:30Z",
+          "timestamp": 1696097970000
+        },
+        "score": 50.468475,
+        "resource": {
+          "primary": {
+            "URL": "https://www.elgaronline.com/view/9781848443167.00008.xml"
+          }
+        },
+        "issued": {
+          "date-parts": [
+            [
+              2009,
+              4,
+              30
+            ]
+          ]
+        },
+        "ISBN": [
+          "9781848447332",
+          "9781848443167"
+        ],
+        "references-count": 0,
+        "URL": "https://doi.org/10.4337/9781848447332.00008",
+        "published": {
+          "date-parts": [
+            [
+              2009,
+              4,
+              30
+            ]
+          ]
+        }
+      },
+      {
+        "indexed": {
+          "date-parts": [
+            [
+              2025,
+              5,
+              19
+            ]
+          ],
+          "date-time": "2025-05-19T19:10:07Z",
+          "timestamp": 1747681807922,
+          "version": "3.40.5"
+        },
+        "reference-count": 0,
+        "publisher": "Izdatelstvo Prospekt LLC",
+        "content-domain": {
+          "domain": [],
+          "crossmark-restriction": false
+        },
+        "short-container-title": [
+          "UCC"
+        ],
+        "published-print": {
+          "date-parts": [
+            [
+              2025
+            ]
+          ]
+        },
+        "DOI": "10.31085/2949-138x-2025-2-224-133-140",
+        "type": "journal-article",
+        "created": {
+          "date-parts": [
+            [
+              2025,
+              5,
+              19
+            ]
+          ],
+          "date-time": "2025-05-19T18:34:23Z",
+          "timestamp": 1747679663000
+        },
+        "page": "133-140",
+        "source": "Crossref",
+        "is-referenced-by-count": 0,
+        "title": [
+          "TO THE ISSUE ON CRIMINAL WRONGFULNESS OF ILLEGAL ENTREPRENEURSHIP"
+        ],
+        "prefix": "10.31085",
+        "volume": "2",
+        "author": [
+          {
+            "given": "Yu.G.",
+            "family": "Starovoitova",
+            "sequence": "first",
+            "affiliation": []
+          }
+        ],
+        "member": "15996",
+        "published-online": {
+          "date-parts": [
+            [
+              2025
+            ]
+          ]
+        },
+        "container-title": [
+          "Criminal law: development strategy in the 21st century"
+        ],
+        "deposited": {
+          "date-parts": [
+            [
+              2025,
+              5,
+              19
+            ]
+          ],
+          "date-time": "2025-05-19T18:34:29Z",
+          "timestamp": 1747679669000
+        },
+        "score": 43.637596,
+        "resource": {
+          "primary": {
+            "URL": "https://litgid.com/catalog/yuridicheskaya/49502/"
+          }
+        },
+        "issued": {
+          "date-parts": [
+            [
+              2025
+            ]
+          ]
+        },
+        "references-count": 0,
+        "URL": "https://doi.org/10.31085/2949-138x-2025-2-224-133-140",
+        "ISSN": [
+          "2949-138X",
+          "2949-138X"
+        ],
+        "issn-type": [
+          {
+            "value": "2949-138X",
+            "type": "print"
+          },
+          {
+            "value": "2949-138X",
+            "type": "electronic"
+          }
+        ],
+        "published": {
+          "date-parts": [
+            [
+              2025
+            ]
+          ]
+        }
+      }
+    ],
+    "items-per-page": 5,
+    "query": {
+      "start-index": 0,
+      "search-terms": "(\\criminal entrepreneurship\\\" OR \\\"criminal firms\\\" OR \\\"illegal entrepreneurs\\\") AND (firm OR company OR market) AND (governance OR strategy)\""
+    }
+  }
+}

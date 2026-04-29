@@ -1,0 +1,1216 @@
+{
+  "status": "ok",
+  "message-type": "work-list",
+  "message-version": "1.0.0",
+  "message": {
+    "facets": {},
+    "total-results": 946910,
+    "items": [
+      {
+        "indexed": {
+          "date-parts": [
+            [
+              2025,
+              8,
+              30
+            ]
+          ],
+          "date-time": "2025-08-30T17:10:20Z",
+          "timestamp": 1756573820327,
+          "version": "3.44.0"
+        },
+        "posted": {
+          "date-parts": [
+            [
+              2025,
+              8,
+              30
+            ]
+          ]
+        },
+        "group-title": "A META-ANALYSIS OF ORGANIZED CRIME: GOVERNMENT VS MAFIA",
+        "reference-count": 0,
+        "publisher": "DeSci Labs AG",
+        "content-domain": {
+          "domain": [],
+          "crossmark-restriction": false
+        },
+        "accepted": {
+          "date-parts": [
+            [
+              2025,
+              8,
+              30
+            ]
+          ]
+        },
+        "DOI": "10.62891/9fd60110",
+        "type": "posted-content",
+        "created": {
+          "date-parts": [
+            [
+              2025,
+              8,
+              30
+            ]
+          ],
+          "date-time": "2025-08-30T16:54:41Z",
+          "timestamp": 1756572881000
+        },
+        "source": "Crossref",
+        "is-referenced-by-count": 0,
+        "title": [
+          "A META-ANALYSIS OF ORGANIZED CRIME: GOVERNMENT VS MAFIA"
+        ],
+        "prefix": "10.62891",
+        "author": [
+          {
+            "ORCID": "https://orcid.org/0009-0000-1700-4997",
+            "authenticated-orcid": true,
+            "given": "Kai",
+            "family": "Hermann Kayser",
+            "sequence": "first",
+            "affiliation": []
+          }
+        ],
+        "member": "49317",
+        "deposited": {
+          "date-parts": [
+            [
+              2025,
+              8,
+              30
+            ]
+          ],
+          "date-time": "2025-08-30T16:54:41Z",
+          "timestamp": 1756572881000
+        },
+        "score": 45.48085,
+        "resource": {
+          "primary": {
+            "URL": "https://beta.dpid.org/619"
+          }
+        },
+        "issued": {
+          "date-parts": [
+            [
+              2025,
+              8,
+              30
+            ]
+          ]
+        },
+        "references-count": 0,
+        "URL": "https://doi.org/10.62891/9fd60110",
+        "published": {
+          "date-parts": [
+            [
+              2025,
+              8,
+              30
+            ]
+          ]
+        },
+        "subtype": "other"
+      },
+      {
+        "indexed": {
+          "date-parts": [
+            [
+              2025,
+              6,
+              23
+            ]
+          ],
+          "date-time": "2025-06-23T12:40:09Z",
+          "timestamp": 1750682409304,
+          "version": "3.41.0"
+        },
+        "edition-number": "1",
+        "reference-count": 0,
+        "publisher": "Lexington Books",
+        "isbn-type": [
+          {
+            "value": "9781978748965",
+            "type": "electronic"
+          },
+          {
+            "value": "9781666967135",
+            "type": "print"
+          }
+        ],
+        "content-domain": {
+          "domain": [],
+          "crossmark-restriction": false
+        },
+        "published-print": {
+          "date-parts": [
+            [
+              2025
+            ]
+          ]
+        },
+        "DOI": "10.5040/9781978748965.ch-001",
+        "type": "other",
+        "created": {
+          "date-parts": [
+            [
+              2025,
+              6,
+              23
+            ]
+          ],
+          "date-time": "2025-06-23T12:01:43Z",
+          "timestamp": 1750680103000
+        },
+        "page": "3-16",
+        "source": "Crossref",
+        "is-referenced-by-count": 0,
+        "title": [
+          "What Is Mafia-Type Organized Crime?"
+        ],
+        "prefix": "10.5040",
+        "member": "2984",
+        "container-title": [
+          "Challenging the Mafia of Calabria"
+        ],
+        "deposited": {
+          "date-parts": [
+            [
+              2025,
+              6,
+              23
+            ]
+          ],
+          "date-time": "2025-06-23T12:04:13Z",
+          "timestamp": 1750680253000
+        },
+        "score": 41.308147,
+        "resource": {
+          "primary": {
+            "URL": "https://www.bloomsburycollections.com/monograph-detail?docid=b-9781978748965&tocid=b-9781978748965-chapter1"
+          }
+        },
+        "issued": {
+          "date-parts": [
+            [
+              2025
+            ]
+          ]
+        },
+        "ISBN": [
+          "9781978748965",
+          "9781666967135"
+        ],
+        "references-count": 0,
+        "URL": "https://doi.org/10.5040/9781978748965.ch-001",
+        "published": {
+          "date-parts": [
+            [
+              2025
+            ]
+          ]
+        }
+      },
+      {
+        "indexed": {
+          "date-parts": [
+            [
+              2024,
+              5,
+              23
+            ]
+          ],
+          "date-time": "2024-05-23T19:57:41Z",
+          "timestamp": 1716494261302
+        },
+        "edition-number": "1",
+        "reference-count": 0,
+        "publisher": "University of Illinois Press",
+        "isbn-type": [
+          {
+            "value": "9780252037306",
+            "type": "print"
+          },
+          {
+            "value": "9780252094484",
+            "type": "electronic"
+          }
+        ],
+        "content-domain": {
+          "domain": [],
+          "crossmark-restriction": false
+        },
+        "published-print": {
+          "date-parts": [
+            [
+              2012,
+              12,
+              15
+            ]
+          ]
+        },
+        "abstract": "<p>This book provides a comprehensive sociological explanation for the emergence and continuation of organized crime in Chicago. Tracing the roots of political corruption that afforded protection to gambling, prostitution, and other vice activity in Chicago and other large American cities, the book challenges the dominant belief that organized crime in America is a descendent of the Sicilian Mafia. According to this widespread “alien conspiracy” theory, organized crime evolved in a linear fashion beginning with the Mafia in Sicily, emerging in the form of the Black Hand in America's immigrant colonies, and culminating in the development of the Cosa Nostra in America's urban centers. Looking beyond this Mafia paradigm, this volume argues that the development of organized crime in Chicago and other large American cities was rooted in the social structure of American society. Specifically, the book ties organized crime to the emergence of machine politics in America's urban centers. It contends that Chicago's criminal underworld could not have existed without the blessing of those who controlled municipal, county, and state government. These practices were not imported from Sicily, the book contends, but were bred in the socially disorganized slums of America where elected officials routinely franchised vice and crime in exchange for money and votes. The book also traces the history of the African American community's participation in traditional organized crime in Chicago and offers new perspectives on the organizational structure of the Chicago Outfit, the traditional organized crime group in Chicago.</p>",
+        "DOI": "10.5406/illinois/9780252037306.001.0001",
+        "type": "monograph",
+        "created": {
+          "date-parts": [
+            [
+              2017,
+              5,
+              5
+            ]
+          ],
+          "date-time": "2017-05-05T08:57:15Z",
+          "timestamp": 1493974635000
+        },
+        "source": "Crossref",
+        "is-referenced-by-count": 6,
+        "title": [
+          "Organized Crime in Chicago"
+        ],
+        "prefix": "10.5406",
+        "author": [
+          {
+            "given": "Robert M.",
+            "family": "Lombardo",
+            "sequence": "first",
+            "affiliation": []
+          }
+        ],
+        "member": "3673",
+        "published-online": {
+          "date-parts": [
+            [
+              2017,
+              4,
+              20
+            ]
+          ]
+        },
+        "original-title": [
+          "Organized Crime in Chicago"
+        ],
+        "language": "en",
+        "deposited": {
+          "date-parts": [
+            [
+              2018,
+              12,
+              20
+            ]
+          ],
+          "date-time": "2018-12-20T11:58:39Z",
+          "timestamp": 1545307119000
+        },
+        "score": 40.780678,
+        "resource": {
+          "primary": {
+            "URL": "http://illinois.universitypressscholarship.com/view/10.5406/illinois/9780252037306.001.0001/upso-9780252037306"
+          }
+        },
+        "subtitle": [
+          "Beyond the Mafia"
+        ],
+        "issued": {
+          "date-parts": [
+            [
+              2012,
+              12,
+              15
+            ]
+          ]
+        },
+        "ISBN": [
+          "9780252037306",
+          "9780252094484"
+        ],
+        "references-count": 0,
+        "URL": "https://doi.org/10.5406/illinois/9780252037306.001.0001",
+        "published": {
+          "date-parts": [
+            [
+              2012,
+              12,
+              15
+            ]
+          ]
+        }
+      },
+      {
+        "indexed": {
+          "date-parts": [
+            [
+              2024,
+              9,
+              4
+            ]
+          ],
+          "date-time": "2024-09-04T13:30:28Z",
+          "timestamp": 1725456628297
+        },
+        "publisher-location": "Dordrecht",
+        "reference-count": 88,
+        "publisher": "Kluwer Academic Publishers",
+        "isbn-type": [
+          {
+            "type": "print",
+            "value": "1402013116"
+          }
+        ],
+        "content-domain": {
+          "domain": [],
+          "crossmark-restriction": false
+        },
+        "DOI": "10.1007/0-306-48132-4_9",
+        "type": "book-chapter",
+        "created": {
+          "date-parts": [
+            [
+              2005,
+              12,
+              7
+            ]
+          ],
+          "date-time": "2005-12-07T11:40:19Z",
+          "timestamp": 1133955619000
+        },
+        "page": "137-156",
+        "source": "Crossref",
+        "is-referenced-by-count": 0,
+        "title": [
+          "Discussion: Contemporary Academic Perspectives on the Black Mafia and African-American Organized Crime"
+        ],
+        "prefix": "10.1007",
+        "member": "297",
+        "reference": [
+          {
+            "key": "9_CR1",
+            "unstructured": "This narrative is adapted from Sean Patrick Griffin, “Philadelphia’s ‘Black Mafia’: Assessing and Advancing Current Interpretations”, Crime, Law and Social Change, forthcoming 2003."
+          },
+          {
+            "key": "9_CR2",
+            "doi-asserted-by": "crossref",
+            "first-page": "455",
+            "DOI": "10.1177/089124167800600404",
+            "volume": "6",
+            "author": "A. A. Block",
+            "year": "1978",
+            "unstructured": "See Alan A. Block, “History and the Study of Organized Crime”, Urban Life: A Journal of Ethnographic Research, vol. 6 (January 1978), pp. 455–474, “Organized Crime: History and Historiography”; James D. Calder, “Al Capone and the Internal Revenue Service: State-sanctioned Criminology of Organized Crime”, Crime, Law and Social Change, vol. 17, no. 1 (1992), pp. 1–23; John F. Galliher and James A. Cain, “Citation Support for the Mafia Myth in Criminology Textbooks”, American Sociologist, vol. 9 (May 1974), pp. 68–74; Gordon Hawkins, “God and the Mafia”, The Public Interest, vol. 14 (1969), pp. 24-51; James A. Inciardi, Alan A. Block and Lyle A. Hallowell, Historical Approaches to Crime: Research Strategies and Issues (Beverly Hills, CA: Sage, 1977); William H. Moore, The Kefauver Committee and the Politics of Crime (Columbia, MO: University of Missouri Press, 1974); Jonathan Rubenstein and PeterReuter, “Fact, Fancy and Organized Crime”, Public Interest, vol. 53 (1978), pp. 45–67; and Dwight C. Smith, The Mafia Mystique (New York: Basic Books, 1975).",
+            "journal-title": "Urban Life: A Journal of Ethnographic Research"
+          },
+          {
+            "key": "9_CR3",
+            "volume-title": "Organized Crime",
+            "author": "H. Abadinsky",
+            "year": "2000",
+            "unstructured": "See, for example, Howard Abadinsky, Organized Crime sixth edition (Belmont, CA: Wadsworth, 2000); Frank E. Hagan, Introduction to Criminology: Theories, Methods, and Criminal Behavior (Belmont, CA: Wadsworth, 2002); Philip Jenkins and Gary Potter, “The Politics and Mythology of Organized Crime: A Philadelphia Case Study”, Journal of Criminal Justice, vol. 15 (1987), pp. 473–484; William Kleinknecht, The New Ethnic Mobs: The Changing Face of Organized Crime in America (New York: The Free Press, 1996); Don Liddick, The Mob’s Daily Number: Organized Crime and the Numbers Gambling Industry (Lanham, MD: University Press of America, 1999); Michael D. Lyman and Gary W. Potter, Organized Crime second edition (Upper Saddle River, NJ: Prentice-Hall, 2000); Gary W. Potter and Philip Jenkins, The City and the Syndicate: Organizing Crime in Philadelphia (Lexington, MA: Ginn Custom Publishers, 1985); Gary W. Potter, Criminal Organizations: Vice Racketeering, and Politics in an American City (Prospect Heights, IL: Waveland Press, 1994); and Rufus Schatzberg and Robert J. Kelly, African American Organized Crime: A Social History (New York: Garland, 1996).",
+            "edition": "sixth edition"
+          },
+          {
+            "key": "9_CR4",
+            "volume-title": "Criminal Justice in America",
+            "author": "G. F. Cole",
+            "year": "2002",
+            "unstructured": "I have not taken the time to examine “second generation” articles and books that are based upon works relying on the Commission reports. For example, George F. Cole and Christopher E. Smith, Criminal Justice in America third edition (Belmont, CA: Wadsworth, 2002), discuss organized crime among various ethnic groups based on Kleinknecht’s The New Ethnic Mobs, and the Commission’s reports are not mentioned or cited. Thus, the Commission’s findings are likely more widely utilized than I have illustrated.",
+            "edition": "third edition"
+          },
+          {
+            "key": "#cr-split#-9_CR5.1",
+            "unstructured": "Pennsylvania Crime Commission (PCC), A Decade of Organized Crime in Pennsylvania: 1980 Report; Annual Report (1988);"
+          },
+          {
+            "key": "#cr-split#-9_CR5.2",
+            "unstructured": "Organized Crime in Pennsylvania: 1990 Report; Annual Report (1991), Conshohocken, PA: PCC."
+          },
+          {
+            "key": "9_CR6",
+            "unstructured": "Pennsylvania Crime Commission, A Decade of Organized Crime in Pennsylvania, p. 18."
+          },
+          {
+            "key": "9_CR7",
+            "unstructured": "Pennsylvania Crime Commission, Annual Report (1988), p. 15."
+          },
+          {
+            "key": "9_CR8",
+            "unstructured": "Pennsylvania Crime Commission, Organized Crime in Pennsylvania, pp. 228–229."
+          },
+          {
+            "key": "9_CR9",
+            "unstructured": "Pennsylvania Crime Commission, Annual Report (1991), p. 28."
+          },
+          {
+            "issue": "2",
+            "key": "9_CR10",
+            "doi-asserted-by": "publisher",
+            "first-page": "410",
+            "DOI": "10.1080/07418829900094191",
+            "volume": "16",
+            "author": "D. Liddick",
+            "year": "1999",
+            "unstructured": "Don Liddick, “The Enterprise ‘Model’ of Organized Crime: Assessing Theoretical Propositions”, Justice Quarterly, vol. 16, no. 2, 1999, p. 410",
+            "journal-title": "Justice Quarterly"
+          },
+          {
+            "key": "9_CR11",
+            "first-page": "182",
+            "volume-title": "Organized Crime in America",
+            "author": "J. S. Albanese",
+            "year": "1996",
+            "unstructured": "Jay S. Albanese, Organized Crime in America third edition (Cincinnati: Anderson, 1996), pp. 182–183. On the Pennsylvania Crime Commission, and on crime commissions in general, see Charles H. Rogovin and Frederick T. Martens, “The Role of Crime Commissions in Organized Crime Control”, in Robert J. Kelly, Ko-Lin Chin, and Rufus Schatzberg (eds.) The Handbook of Organized Crime in the United States (Westport, CT: Greenwood, 1994), pp. 389–400.",
+            "edition": "third edition"
+          },
+          {
+            "key": "9_CR12",
+            "first-page": "182",
+            "volume-title": "Organized Crime in America",
+            "author": "J. S. Albanese",
+            "year": "1996",
+            "unstructured": "Ibid. 12. On the demise of the Commission, see George Anastasia, “Pa. Crime Commission Ready to Cap Its Poisoned, Pithy Pen”, The Philadelphia Inquirer, December 19, 1993, p. C01.",
+            "edition": "third edition"
+          },
+          {
+            "key": "9_CR13",
+            "unstructured": "Pennsylvania Crime Commission, A Decade of Organized Crime in Pennsylvania, p. 19."
+          },
+          {
+            "key": "9_CR14",
+            "first-page": "144",
+            "volume-title": "Disorganized Crime:The Economics of the Invisible Hand",
+            "author": "P. Reuter",
+            "year": "1983",
+            "unstructured": "There is not much debate as to the detrimental impact of recurring violence on an organized crime group. For an analysis of this phenomenon, see Peter Reuter, Disorganized Crime:The Economics of the Invisible Hand (Cambridge, MA: MIT Press, 1983), pp. 144–145."
+          },
+          {
+            "key": "9_CR15",
+            "unstructured": "Pennsylvania Crime Commission, Organized Crime in Pennsylvania, p. 229."
+          },
+          {
+            "key": "9_CR16",
+            "unstructured": "This narrative isadapted from Sean Patrick Griffin, “‘Emerging’ Organized Crime Hypotheses in Criminology Textbooks”, Journal of Criminal Justice Education (forthcoming 2003)."
+          },
+          {
+            "key": "9_CR17",
+            "unstructured": "See Appendix J for a complete listing of textbooks reviewed."
+          },
+          {
+            "key": "9_CR18",
+            "volume-title": "Criminology: Crime and Criminality",
+            "author": "L. Yablonsky",
+            "year": "1990",
+            "unstructured": "Lewis Yablonsky, Criminology: Crime and Criminality fourth edition (New York: Harper & Row, 1990); Freda Adler, Gerhard O.W. Mueller and William S. Laufer, Criminology (New York: McGraw-Hill, 1992); C.J. Larson and G.R. Garrett, Crime, Justice, and Society second ed. (Dix Hills, NY: General Hall, 1996); S.T. Reid, Crime and Criminology eighth ed. (Madison, WS: Brown and Benchmark, 1997); Freda Adler, Gerhard O.W. Mueller and William S. Laufer, Criminal Justice: An Introduction second edition (Boston: McGraw-Hill, 2000); Hugh D. Barlow and David Kauzlarich, Introduction to Criminology eighth edition (Upper Saddle River, NJ: Prentice-Hall, 2002); George F. Cole and Christopher E. Smith, Criminal Justice in America third edition (Belmont, CA: Wadsworth, 2002).",
+            "edition": "fourth edition"
+          },
+          {
+            "key": "9_CR19",
+            "first-page": "357",
+            "volume-title": "Criminology",
+            "author": "J. E. Conklin",
+            "year": "1995",
+            "unstructured": "John E. Conklin, Criminology fifth edition (Boston: Allyn & Bacon, 1995), p. 357.",
+            "edition": "fifth edition"
+          },
+          {
+            "key": "9_CR20",
+            "first-page": "74",
+            "volume-title": "The American System of Criminal Justice",
+            "author": "G. F. Cole",
+            "year": "1992",
+            "unstructured": "George F. Cole, The American System of Criminal Justice sixth edition (Pacific Grove, CA: Brooks/Cole, 1992), p. 74.",
+            "edition": "sixth edition"
+          },
+          {
+            "key": "9_CR21",
+            "first-page": "415",
+            "volume-title": "Criminology",
+            "author": "Larry. J. Siegel",
+            "year": "2000",
+            "unstructured": "Larry. J. Siegel, Criminology seventh edition (Belmont, CA: Wadsworth, 2000), p. 415.",
+            "edition": "seventh edition"
+          },
+          {
+            "key": "9_CR22",
+            "first-page": "485",
+            "volume-title": "Criminology: Explaining Crime and Its Context",
+            "author": "S. E. Brown",
+            "year": "2001",
+            "unstructured": "Stephen E. Brown, Finn-Aage Esbensenand Gilbert Geis, Criminology: Explaining Crime and Its Context fourth edition (Cincinnati: Anderson, 2001), p. 485.",
+            "edition": "fourth edition"
+          },
+          {
+            "key": "9_CR23",
+            "first-page": "70",
+            "volume-title": "Criminal Justice Today: An Introductory Text for the 21st Century",
+            "author": "F. Schmalleger",
+            "year": "2001",
+            "unstructured": "Frank Schmalleger, Criminal Justice Today: An Introductory Text for the 21st Century (Upper Saddle River, NJ: Prentice-Hall, 2001), p. 70."
+          },
+          {
+            "key": "9_CR24",
+            "volume-title": "Introduction to Criminal Justice",
+            "author": "R. D. Pursley",
+            "year": "1991",
+            "unstructured": "See, for example, Robert D. Pursley, Introduction to Criminal Justice fifth edition (New York: Macmillan, 1991); Gennaro F. Vito and Ronald M. Holmes, Criminology: Theory, Research, and Policy (Belmont, CA: Wadsworth, 1994); Jay Livingston, Crime and Criminology second edition (Upper Saddle River, NJ: Prentice-Hall, 1996); Clemens Bartollas and Michael Braswell, American Criminal Justice: An Introduction second edition (Cincinnati: Anderson, 1997); and Dean J. Champion, Criminal Justice in the United States second edition (Chicago: Nelson-Hall, 1998).",
+            "edition": "fifth edition"
+          },
+          {
+            "key": "9_CR25",
+            "volume-title": "Crime and Justice: An Introduction",
+            "author": "H. Abadinsky",
+            "year": "1987",
+            "unstructured": "See, for example, Howard Abadinsky, Crime and Justice: An Introduction (Chicago: Nelson-Hall, 1987); Joseph J. Senna and Larry J. Siegel, Introduction to Criminal Justice sixth edition (Minneapolis-St.Paul: West, 1993); Lydia Voigt, William E. Thornton Jr., Leo Barrile and Jerrol M. Seaman, Criminology and Justice (New York: McGraw-Hill, 1994); Leonard Glick, Criminology (Boston: Allyn & Bacon, 1995); and Leonard Territo, James B. Halsted and Max L. Bromley, Crime and Justice in America: A Human Perspective fifth edition (Boston: Oxford, 1998)."
+          },
+          {
+            "key": "9_CR26",
+            "first-page": "90",
+            "volume-title": "Criminal Justice",
+            "author": "J. A. Inciardi",
+            "year": "2002",
+            "unstructured": "James A. Inciardi, Criminal Justice seventh edition (Orlando: Harcourt Brace, 2002), p. 90.",
+            "edition": "seventh edition"
+          },
+          {
+            "key": "9_CR27",
+            "unstructured": "Ronald J. Berger, Marvin Free and Patricia Searles, Crime, Justice and Society: Criminology and the Sociological Imagination (New York: %McGraw-Hill, 2001), p. 319."
+          },
+          {
+            "key": "9_CR28",
+            "first-page": "9",
+            "volume-title": "Criminal Justice in Action",
+            "author": "L. K. Gaines",
+            "year": "2003",
+            "unstructured": "Larry K. Gaines and Roger LeRoy Miller, Criminal Justice in Action (Belmont, CA: Wadsworth, 2003), p. 9."
+          },
+          {
+            "key": "9_CR29",
+            "first-page": "448",
+            "volume-title": "Introduction to Criminology: Theories, Methods, and Criminal Behavior",
+            "author": "F. E. Hagan",
+            "year": "2002",
+            "unstructured": "Frank E. Hagan, Introduction to Criminology: Theories, Methods, and Criminal Behavior (Belmont, CA: Wadsworth, 2002), p. 448."
+          },
+          {
+            "key": "9_CR30",
+            "first-page": "448",
+            "volume-title": "Introduction to Criminology: Theories, Methods, and Criminal Behavior",
+            "author": "F. E. Hagan",
+            "year": "2002",
+            "unstructured": "Ibid., p. 448."
+          },
+          {
+            "key": "9_CR31",
+            "volume-title": "Contemporary Criminology",
+            "author": "W. S. Kerseredy De",
+            "year": "1996",
+            "unstructured": "See, for example, Walter S. DeKerseredy and Martin D. Schwartz, Contemporary Criminology (Belmont, CA: Wadsworth, 1996); Piers Beirne and James Messerschmidt, Criminology third edition (Boulder, CO: Westview, 2000); Joseph F. Sheley (ed.), Criminology third edition (Belmont, CA: Wadsworth, 2000); and Steven M. Coxand John E. Wade, The Criminal Justice Network: An Introduction fourth edition (New York: McGraw-Hill, 2002)."
+          },
+          {
+            "key": "9_CR32",
+            "first-page": "430",
+            "volume-title": "Criminology: A Sociological Understanding",
+            "author": "S. E. Barkan",
+            "year": "2001",
+            "unstructured": "Steve E. Barkan, Criminology: A Sociological Understanding second edition (Upper Saddle River, NJ: Prentice-Hall, 2001), p. 430.",
+            "edition": "second edition"
+          },
+          {
+            "issue": "1",
+            "key": "9_CR33",
+            "doi-asserted-by": "publisher",
+            "first-page": "29",
+            "DOI": "10.1080/07418829700093211",
+            "volume": "14",
+            "author": "J. S. McIllwain",
+            "year": "1997",
+            "unstructured": "Jeffrey Scott McIllwain, “From Tong War to Organized Crime: Revising the Historical Perception of Violence in Chinatown”, Justice Quarterly, vol. 14, no. 1 (March 1997), p. 29. McIllwain (p. 52) amalgamated two existing lists of organized crime characteristics, each one a previously-collated effort, resulting in his comprehensive list of eleven organized crime attributes: nonideological; organized hierarchy and/or continuing enterprise; violence; restricted membership; rational profit through illegal activities; public demand, corruption and/or immunity; monopoly; specialization; code of secrecy; and extensive planning. See Albanese, Organized Crime in America, and Dennis J. Kenney and James O. Finckenauer, Organized Crime in America (Belmont, CA: Wadsworth Publishing, 1995). The lists compiled information from the following sources in chronological order: 1950/1951 — Senate Special Committee to Investigate Organized Crime in Interstate Commerce, Senator Estes Kefauver, Chair; 1963—Senate Permanent Subcommittee on Investigations (PSI), Senator John L. McClellan, Chair; 1966—New York State Oyster Bay Conferences (as cited in Smith, The Mafia Mystique); 1967—Task Force on Organized Crime, President Lyndon B. Johnson’s Commission on Law Enforcement and Administration of Justice; 1968—Omnibus Crime and Safe Streets Act (Public Law 90–351); 1969—Donald R. Cressey, Theft of the Nation: The Structures and Operation of Organized Crime (New York: Harper & Row); 1975—Smith, The Mafia Mystique; 1976—Task Force on Organized Crime, National Advisory Committee on Criminal Justice Standards and Goals; 1976—Joseph L. Albini, “Syndicated Crime: Its Structure, Function, and Modus Operandi,” in Francis A.J. Ianni and Elizabeth Reuss-Ianni (eds.), The Crime Society: Organized Crime and Corruption in America (New York: Times-Mirror), pp. 24—41; and 1983—President Ronald Reagan’s Commissionon Organized Crime.",
+            "journal-title": "Justice Quarterly"
+          },
+          {
+            "key": "9_CR34",
+            "doi-asserted-by": "crossref",
+            "first-page": "338",
+            "DOI": "10.1177/001112877602200306",
+            "volume": "22",
+            "author": "M. D. Maltz",
+            "year": "1976",
+            "unstructured": "See, for example, Michael D. Maltz, “On Defining ‘Organized Crime’,” Crime and Delinquency, vol. 22 (1976), pp. 338–346; Mark H. Haller, “Illegal Enterprise: A Theoretical and Historical Interpretation,” Criminology, vol. 28, no. 2 (May 1990), pp. 207–235; Petrus C. Van Duyne, “Organized Crime and Business Crime-Enterprises in the Netherlands, “ Crime, Law and Social Change, vol. 19, no. 2 (1993), pp. 103–142; R.T. Naylor, “Mafias, Myths, and Markets: On the Theory and Practice of Enterprise Crime,” Transnational Organized Crime, vol. 3, no. 3 (Autumn 1997), pp.1–45.",
+            "journal-title": "Crime and Delinquency"
+          },
+          {
+            "key": "9_CR35",
+            "unstructured": "See, for example, Jenkins and Potter, and Frederick T. Martens, “African-American Organized Crime, An Ignored Phenomenon,” Federal Probation, vol. 54, no. 4 (1990)."
+          },
+          {
+            "issue": "4",
+            "key": "9_CR36",
+            "first-page": "44",
+            "volume": "54",
+            "author": "Potter",
+            "year": "1990",
+            "unstructured": "Potter, and Frederick T. Martens, “African-American Organized Crime, An Ignored Phenomenon,” Federal Probation, vol. 54, no. 4 (1990) Martens, p. 44.",
+            "journal-title": "Federal Probation"
+          },
+          {
+            "key": "9_CR37",
+            "first-page": "79",
+            "volume-title": "The Impact: Organized Crime Today",
+            "author": "The President",
+            "year": "1986",
+            "unstructured": "The President’s Commission on Organized Crime, The Impact: Organized Crime Today (Washington, D.C.: U.S. Government Printing Office, April, 1986), pp. 79, 177."
+          },
+          {
+            "key": "9_CR38",
+            "doi-asserted-by": "publisher",
+            "first-page": "483",
+            "DOI": "10.1016/0047-2352(87)90003-1",
+            "volume": "15",
+            "author": "P. Jenkins",
+            "year": "1987",
+            "unstructured": "Philip Jenkins and Gary Potter, “The Politics and Mythology of Organized Crime: A Philadelphia Case Study,” Journal of Criminal Justice, vol. 15 (1987), p. 483.",
+            "journal-title": "Journal of Criminal Justice"
+          },
+          {
+            "issue": "1",
+            "key": "9_CR39",
+            "doi-asserted-by": "publisher",
+            "first-page": "1",
+            "DOI": "10.1007/BF00190169",
+            "volume": "17",
+            "author": "J. D. Calder",
+            "year": "1992",
+            "unstructured": "See, for example, James D. Calder, “Al Capone and the Internal Revenue Service: State-sanctioned Criminology of Organized Crime,” Crime, Law and Social Change, vol. 17, no. 1 (1992), pp. 1–23.",
+            "journal-title": "Crime, Law and Social Change"
+          },
+          {
+            "key": "9_CR40",
+            "unstructured": "Cressey, Theft of the Nation, p. 21."
+          },
+          {
+            "key": "9_CR41",
+            "first-page": "112",
+            "volume": "4",
+            "author": "F. Bovenkerk",
+            "year": "1998",
+            "unstructured": "Frank Bovenkerk, “Organized Crime and Ethnic Minorities: Is Therea Link?” Transnational Organized Crime vol. 4 (1998), p. 112.",
+            "journal-title": "Transnational Organized Crime"
+          },
+          {
+            "key": "9_CR42",
+            "unstructured": "I have not included several works that essentially summarized previous research. For example, see Rufus Schatzberg, “African American Organized Crime,” in Kelly et al, The Handbook of Organized Crime in the United States, pp. 189–212; Rufus Schatzberg and Robert J. Kelly, African American Organized Crime: A Social History (New York: Garland, 1996); and Robert J. Kelly, “African-American Organized Crime: Racial Servitude and Mutiny,” in Stanley Einstein and Menachem Amir (eds.), Organized Crime: Uncertainties and Dilemmas (Chicago: Office of International Criminal Justice, 1999), pp. 271–290."
+          },
+          {
+            "key": "9_CR43",
+            "doi-asserted-by": "crossref",
+            "first-page": "378",
+            "DOI": "10.9783/9780812201802",
+            "volume-title": "The Philadelphia Negro",
+            "author": "W.E.B. Bois Du",
+            "year": "1996",
+            "unstructured": "W.E.B. Du Bois, The Philadelphia Negro (Philadelphia: University of Pennsylvania Press, 1996 [1899]), pp. 378–379. For a discussion of DuBois and his work on “organized crime,” see Shaun Gabbidon, “W.E.B. DuBois and the ‘Atlanta School’ of Social Scientific Research, 1897–1913,” Journal of Criminal Justice Research, vol. 10, no. 1 (Spring 1999), pp. 26–27."
+          },
+          {
+            "key": "9_CR44",
+            "doi-asserted-by": "crossref",
+            "first-page": "265",
+            "DOI": "10.9783/9780812201802",
+            "volume-title": "The Philadelphia Negro",
+            "author": "W.E.B. Bois Du",
+            "year": "1996",
+            "unstructured": "Ibid., pp. 265–267."
+          },
+          {
+            "key": "9_CR45",
+            "first-page": "76",
+            "volume-title": "Black Chicago: The Making of a Negro Ghetto, 1890–1920",
+            "author": "A. H. Spear",
+            "year": "1967",
+            "unstructured": "Allan H. Spear, Black Chicago: The Making of a Negro Ghetto, 1890–1920 (Chicago: University of Chicago Press, 1967), pp. 76–77."
+          },
+          {
+            "key": "9_CR46",
+            "first-page": "187",
+            "volume-title": "Black Chicago: The Making of a Negro Ghetto, 1890–1920",
+            "author": "A. H. Spear",
+            "year": "1967",
+            "unstructured": "Ibid., pp. 187–189."
+          },
+          {
+            "key": "9_CR47",
+            "doi-asserted-by": "crossref",
+            "unstructured": "Mark H. Haller, “Organized Crime in Urban Society: Chicago in the Twentieth Century,” Journal of Social History, Winter 1971–1972, p. 221. In a related article, Haller cites a study that identified the “108 directors of the Chicago underworld”, of which 12 percent were African-Americans. Mark H. Haller, “Urban Crime and Criminal Justice: The Chicago Case,” The Journal of American History, vol. 57, no. 3 (December 1970), p. 620, summarizing William F. Ogburn and Clark Tibbits. “A Memorandum on the Nativity of Certain Criminal Classes Engaged in Organized Crime, and of Certain Related Criminal and Non-Criminal Groups in Chicago,” July 30, 1930, Charles E. Merriam Papers (University of Chicago Library).",
+            "DOI": "10.2307/1917978"
+          },
+          {
+            "key": "9_CR48",
+            "doi-asserted-by": "crossref",
+            "first-page": "719",
+            "DOI": "10.1353/jsh/24.4.719",
+            "volume": "24",
+            "author": "Haller",
+            "year": "1991",
+            "unstructured": "Haller, “Policy Gambling, Entertainment, and the Emergence of Black Politics: Chicago from 1900 to 1940,” Journal of Social History vol. 24 (Summer 1991), pp. 719–739.",
+            "journal-title": "Journal of Social History"
+          },
+          {
+            "key": "9_CR49",
+            "volume-title": "Black Organized Crime in Harlem: 1920–1930",
+            "author": "R. Schatzberg",
+            "year": "1993",
+            "unstructured": "Rufus Schatzberg, Black Organized Crime in Harlem: 1920–1930 (New York: Garland Press, 1993)."
+          },
+          {
+            "key": "9_CR50",
+            "first-page": "137",
+            "volume-title": "Black Organized Crime in Harlem: 1920–1930",
+            "author": "R. Schatzberg",
+            "year": "1993",
+            "unstructured": "Ibid., p. 137."
+          },
+          {
+            "key": "9_CR51",
+            "first-page": "138",
+            "volume-title": "Black Organized Crime in Harlem: 1920–1930",
+            "author": "R. Schatzberg",
+            "year": "1993",
+            "unstructured": "Ibid., p. 138."
+          },
+          {
+            "key": "9_CR52",
+            "first-page": "330",
+            "volume-title": "An American Dilemma: Volume II The Negro Problem and Modern Democracy",
+            "author": "G. Myrdal",
+            "year": "1997",
+            "unstructured": "Gunnar Myrdal, An American Dilemma: Volume II The Negro Problem and Modern Democracy (New Brunswick, NJ: Transaction Publishers, 1997 [1944]), pp. 330–333."
+          },
+          {
+            "key": "9_CR53",
+            "first-page": "940",
+            "volume-title": "An American Dilemma: Volume II The Negro Problem and Modern Democracy",
+            "author": "G. Myrdal",
+            "year": "1997",
+            "unstructured": "Ibid., p. 940."
+          },
+          {
+            "key": "9_CR54",
+            "volume-title": "Black Metropolis: A Study of Negro Life in a Northern City",
+            "author": "St. C. Drake",
+            "year": "1993",
+            "unstructured": "St. Clair Drake and Horace R. Cayton, Black Metropolis: A Study of Negro Life in a Northern City (Chicago: University of Chicago Press, 1993 [1945])."
+          },
+          {
+            "key": "9_CR55",
+            "first-page": "470",
+            "volume-title": "Black Metropolis: A Study of Negro Life in a Northern City",
+            "author": "St. C. Drake",
+            "year": "1993",
+            "unstructured": "Horace R. Cayton, Black Metropolis: A Study of Negro Life in a Northern City (Chicago: University of Chicago Press, 1993 [1945]) Ibid., pp. 470–494. On numbers gambling among African-Americans in Detroit circa 1940, see Gustav G. Carlson, Numbers Gambling: A Study of a Culture Complex (University of Michigan, Ann Arbor, MI: Doctoral dissertation, 1940)."
+          },
+          {
+            "key": "9_CR56",
+            "first-page": "481",
+            "volume-title": "Black Metropolis: A Study of Negro Life in a Northern City",
+            "author": "St. C. Drake",
+            "year": "1993",
+            "unstructured": "Horace R. Cayton, Black Metropolis: A Study of Negro Life in a Northern City (Chicago: University of Chicago Press, 1993 [1945]) Ibid., pp. 481–484."
+          },
+          {
+            "key": "9_CR57",
+            "first-page": "484",
+            "volume-title": "Black Metropolis: A Study of Negro Life in a Northern City",
+            "author": "St. C. Drake",
+            "year": "1993",
+            "unstructured": "Horace R. Cayton, Black Metropolis: A Study of Negro Life in a Northern City (Chicago: University of Chicago Press, 1993 [1945]) Ibid., p. 484."
+          },
+          {
+            "key": "9_CR58",
+            "volume-title": "The Impact of Organized Crime onan Inner-City Community",
+            "author": "H. D. Lasswell",
+            "year": "1972",
+            "unstructured": "Harold D. Lasswell and Jeremiah B. McKenna, The Impact of Organized Crime onan Inner-City Community (New York: Policy Sciences Center, 1972)."
+          },
+          {
+            "key": "9_CR59",
+            "first-page": "120",
+            "volume-title": "The Mob’s Daily Number: Organized Crime and the Numbers Gambling Industry",
+            "author": "D. Liddick",
+            "year": "1999",
+            "unstructured": "Don Liddick, The Mob’s Daily Number: Organized Crime and the Numbers Gambling Industry (Lanham, MD: University Press of America, 1999). Liddick deconstructed numbers workers into the following groups: bankers, controllers, collectors, pickup persons and clerks (pp. 120–121)."
+          },
+          {
+            "key": "9_CR60",
+            "first-page": "151",
+            "volume-title": "The Mob’s Daily Number: Organized Crime and the Numbers Gambling Industry",
+            "author": "D. Liddick",
+            "year": "1999",
+            "unstructured": "Ibid., pp. 151–168."
+          },
+          {
+            "key": "9_CR61",
+            "unstructured": "I should note that the Pennsylvania Crime Commission has documented several African-American gambling syndicates. See Pennsylvania Crime Commission (PCC), A Decade of Organized Crime in Pennsylvania: 1980 Report; and Organized Crime in Pennsylvania: 1990 Report. These were not included in my formal review because they are not “studies” per se."
+          },
+          {
+            "key": "9_CR62",
+            "doi-asserted-by": "crossref",
+            "first-page": "892",
+            "DOI": "10.2307/2094575",
+            "volume": "42",
+            "author": "I. Light",
+            "year": "1977",
+            "unstructured": "Ivan Light, “Numbers Gambling Among Blacks: A Financial Institution,” American Sociological Review, vol. 42 (December 1977), pp. 892–904; and “The Ethnic Vice Industry, 1880–1944,” American Journal of Sociology vol. 42 (June 1977), pp. 464–79.",
+            "journal-title": "American Sociological Review"
+          },
+          {
+            "key": "9_CR63",
+            "doi-asserted-by": "crossref",
+            "unstructured": "Light, “Numbers Gambling Among Blacks: A Financial Institution,” p. 892.",
+            "DOI": "10.2307/2094575"
+          },
+          {
+            "key": "9_CR64",
+            "volume-title": "Life Under Bruno: The Economics of an Organized Crime Family",
+            "author": "M. H. Haller",
+            "year": "1991",
+            "unstructured": "Mark H. Haller, “Organized Crime in Urban Society,” and Life Under Bruno: The Economics of an Organized Crime Family (Conshohocken, PA: Pennsylvania Crime Commission, 1991)."
+          },
+          {
+            "key": "9_CR65",
+            "first-page": "285",
+            "volume-title": "The Peoples of Philadelphia: A History of Ethnic Groups and Lower-Class Life, 1790–1940",
+            "author": "M. H. Haller",
+            "year": "1973",
+            "unstructured": "Mark H. Haller, “Recurring Themes,” in Allen F. Davis and Mark H. Haller (eds.), The Peoples of Philadelphia: A History of Ethnic Groups and Lower-Class Life, 1790–1940 (Philadelphia: Temple University Press, 1973), p. 285."
+          },
+          {
+            "key": "9_CR66",
+            "first-page": "44",
+            "volume-title": "Uneasy Virtue: The Politics of Prostitution and the American Reform Tradition",
+            "author": "B. M. Hobson",
+            "year": "1987",
+            "unstructured": "Barbara Meil Hobson, Uneasy Virtue: The Politics of Prostitution and the American Reform Tradition (New York: Basic Books, 1987), p. 44."
+          },
+          {
+            "key": "9_CR67",
+            "doi-asserted-by": "crossref",
+            "first-page": "75",
+            "DOI": "10.1111/j.1745-9125.1979.tb01277.x",
+            "volume": "17",
+            "author": "A. A. Block",
+            "year": "1979",
+            "unstructured": "Alan A. Block, “The Snowman Cometh: Coke in Progressive New York,” Criminology vol. 17 (May 1979), pp. 75–96.",
+            "journal-title": "Criminology"
+          },
+          {
+            "key": "9_CR68",
+            "first-page": "263",
+            "volume-title": "Drug Traffic: Narcotics and Organized Crime in Australia",
+            "author": "A. W. McCoy",
+            "year": "1980",
+            "unstructured": "Alfred W. McCoy, Drug Traffic: Narcotics and Organized Crime in Australia (Artarmon, NSW [Australia]: Harper & Row, 1980), p. 263."
+          },
+          {
+            "key": "9_CR69",
+            "volume-title": "Easy Money",
+            "author": "D. Goddard",
+            "year": "1978",
+            "unstructured": "Donald Goddard, Easy Money (New York: Farrar, Straus and Giroux, 1978)."
+          },
+          {
+            "key": "9_CR70",
+            "volume-title": "The Heroin Trail",
+            "author": "Newsday",
+            "year": "1974",
+            "unstructured": "Newsday, The Heroin Trail (New York: Holt, Rinehart and Winston, 1974)."
+          },
+          {
+            "key": "9_CR71",
+            "first-page": "204",
+            "volume-title": "The Heroin Trail",
+            "author": "Newsday",
+            "year": "1974",
+            "unstructured": "Ibid., pp. 204–207."
+          },
+          {
+            "key": "9_CR72",
+            "first-page": "52",
+            "volume-title": "Financial Investigation of Crime: A Tool of the Integral Law Enforcement Approach",
+            "author": "P. C. Duyne Van",
+            "year": "2001",
+            "unstructured": "While these “defining characteristics” of organized crime are commonly cited among scholars, this should not be interpreted as settling the issue. For instance, there is no consensus regarding what constitutes “continuity”. Continuity of a group, of a conspiracy, of a crime pattern? What duration of time, regardless of which factor is chosen? Similarly, regarding “multiple enterprises”, how many and how would this be operationally defined? For example, an organization may be grounded on narcotics trafficking while by necessity evades taxes and launders money. Furthermore, it can be argued that violence and corruption are merely “management tools” and that criminal enterprises may indeed thrive without the necessity of these tools (e.g. if law enforcement is ignorant to the problem). Petrus C. Van Duyne, Marcel Pheijffer, Hans G. Kuijl, Arthur Th.H. van Dijk and Gerard J.C.M. Bakker, Financial Investigation of Crime: A Tool of the Integral Law Enforcement Approach (The Hague, The Netherlands: Koninklijke Vermande, 2001), p. 52."
+          },
+          {
+            "key": "9_CR73",
+            "first-page": "4",
+            "volume-title": "The Impaet of Organized Crime on an Inner-Cüy Community",
+            "author": "H. D. Lasswell",
+            "year": "1972",
+            "unstructured": "Jeremiah B, McKenna The Impaet of Organized Crime on an Inner-Cüy Community (New York: Policyt Sciences Center, 1972). Lasswell and McKenna, p. 4."
+          },
+          {
+            "key": "9_CR74",
+            "volume-title": "Black Mafia: Ethnic Succession in Organized Crime",
+            "author": "F. A. J. Ianni",
+            "year": "1974",
+            "unstructured": "Francis A. J. Ianni, Black Mafia: Ethnic Succession in Organized Crime (New York: Simon and Schuster, 1974)."
+          },
+          {
+            "key": "9_CR75",
+            "volume-title": "Family Business: Kinship and Social Control in Organized Crime",
+            "author": "F. A.J. Ianni",
+            "year": "1972",
+            "unstructured": "Francis A.J. Ianni and Elizabeth Reuss-Ianni, Family Business: Kinship and Social Control in Organized Crime (New York: Russell Sage Foundation, 1972)."
+          },
+          {
+            "key": "9_CR76",
+            "first-page": "213",
+            "volume-title": "Family Business: Kinship and Social Control in Organized Crime",
+            "author": "F. A.J. Ianni",
+            "year": "1972",
+            "unstructured": "Elizabeth Reuss-Ianni, Family Business: Kinship and Social Control in Organized Crime (New York: Russell Sage Foundation, 1972) Ibid., p. 213."
+          },
+          {
+            "key": "9_CR77",
+            "first-page": "214",
+            "volume-title": "Family Business: Kinship and Social Control in Organized Crime",
+            "author": "F. A.J. Ianni",
+            "year": "1972",
+            "unstructured": "Elizabeth Reuss-Ianni, Family Business: Kinship and Social Control in Organized Crime (New York: Russell Sage Foundation, 1972) Ibid., p. 214."
+          },
+          {
+            "key": "9_CR78",
+            "unstructured": "See, for example, Kenney and Finckenauer, p. 23."
+          },
+          {
+            "key": "9_CR79",
+            "unstructured": "United States Court of Appeals for the Third Circuit, United States of America v. Larry Starks, Clarence Starks, Alonzo Robinson, Donald Everett, Abney Merrill, 515 F.2d 112; 1975 U.S. App."
+          },
+          {
+            "key": "9_CR80",
+            "unstructured": "Insights into these networks can be gleaned from a variety of sources,including the Philadelphia Police Department Organized Crime Unit’s “Black Mafia” files. Also see Metropolitan Police Department (DC), Intelligence Division, “Criminal Profile of John Brown,” January 31, 1986; and New York City Police Department, Intelligence Division, “The Black Narcotic System: A Brief History,” May 1972."
+          },
+          {
+            "key": "9_CR81",
+            "volume-title": "Busting the Mob: United States v. Cosa Nostra",
+            "author": "J. B. Jacobs",
+            "year": "1994",
+            "unstructured": "See, for example, James B. Jacobs, Busting the Mob: United States v. Cosa Nostra (New York: New York University Press, 1994)."
+          },
+          {
+            "key": "9_CR82",
+            "first-page": "265",
+            "volume-title": "Organized Crime in America",
+            "author": "J. Albanese",
+            "year": "1996",
+            "unstructured": "On this point, see for example Jay Albanese, Organized Crime in America, third edition (Cincinnati: Anderson Publishing, 1996) and “The Mafia Mystique: Organized Crime,” in Joseph F. Sheley (ed.), Criminology third edition (Belmont, CA: Wadsworth, 2000), pp. 265–285.",
+            "edition": "third edition"
+          },
+          {
+            "key": "9_CR83",
+            "unstructured": "For example, union membership in the United States as of 2001 was 13.5% of the workforce, compared with 20.1% in 1983, the first year for which comparable data are available. Nancy Cleeland, “Union membership remains at 13.5%,” Los Angeles Times, January 19, 2002, summarizing a 2001 Bureau of Labor Statistics report. In 2001, more of the union membership consisted of white-collar workers than previously as “labor’s traditional blue-collar base has eroded over the past twenty years.” Thomas Lee, “Joining Forces,” Anderson Independent-Mail (SC), October 29, 2001. Thus, with respect to organized crime, these figures are significant because they demonstrate why criminals in the traditional extortion rackets involving blue-collar enterprises have had their opportunities greatly reduced. The future for organized crime predicated on union strength is not bright. As a financial commentator stated, “Unions are most effective in situations where competition is minimal, capital is entrenched and technology can not replace humans... Labor, capital and technology are just too mobile (and plentiful) in a world of six billion people and instant telecommunications. It’s [not reasonable] to think you can make a cartel of some segment of the work force, raise the cost of doing business and prevent the kinds of economic changes you consider detrimental to your membership.” Daniel Akst, “A New Idea for Unions: Forget the Past,” The New York Times, December 5, 1999."
+          },
+          {
+            "key": "9_CR84",
+            "first-page": "99",
+            "volume-title": "The Crooked Ladder: Gangsters, Ethnicity, and the American Dream",
+            "author": "J. M. O",
+            "year": "1992",
+            "unstructured": "James M. O’Kane, The Crooked Ladder: Gangsters, Ethnicity, and the American Dream (New Brunswick, NJ: Transaction Publishers, 1992), p. 99."
+          },
+          {
+            "key": "9_CR85",
+            "unstructured": "For a detailed discussion of organized crime prosecutions in Philadelphia (though applicable in other areas), see Kitty Caparella, “The Straight Dope — Drugs in Philadelphia: Federal Enforcement — A New Drug War Pays Off in Court,” (sidebar to the first of six parts) Philadelphia Daily News, October 22, 1984, Local, p. 53. Caparella chronicles the changes in philosophy of law enforcement agencies, specifically the greater coordination of local and federal authorities, additional manpower and funding for related initiatives and increased use of several legal tools."
+          },
+          {
+            "issue": "1",
+            "key": "9_CR86",
+            "doi-asserted-by": "crossref",
+            "first-page": "25",
+            "DOI": "10.1080/07418829700093211",
+            "volume": "14",
+            "author": "J. Scott McIllwain",
+            "year": "1997",
+            "unstructured": "McIllwain, p. 25.",
+            "journal-title": "Justice Quarterfy"
+          },
+          {
+            "key": "9_CR87",
+            "doi-asserted-by": "crossref",
+            "unstructured": "Robert M. Lombardo, “The Black Mafia: African-American organized crime in Chicago, 1890–1960,” Crime, Law and Social Change vol. 38, no. 1 (2002), pp. 33–65.",
+            "DOI": "10.1023/A:1019885114062"
+          }
+        ],
+        "container-title": [
+          "Studies of Organized Crime",
+          "Philadelphia’s Black Mafia"
+        ],
+        "language": "en",
+        "link": [
+          {
+            "URL": "http://link.springer.com/content/pdf/10.1007/0-306-48132-4_9.pdf",
+            "content-type": "unspecified",
+            "content-version": "vor",
+            "intended-application": "similarity-checking"
+          }
+        ],
+        "deposited": {
+          "date-parts": [
+            [
+              2021,
+              7,
+              20
+            ]
+          ],
+          "date-time": "2021-07-20T22:57:56Z",
+          "timestamp": 1626821876000
+        },
+        "score": 40.76865,
+        "resource": {
+          "primary": {
+            "URL": "http://link.springer.com/10.1007/0-306-48132-4_9"
+          }
+        },
+        "issued": {
+          "date-parts": [
+            [
+              null
+            ]
+          ]
+        },
+        "ISBN": [
+          "1402013116"
+        ],
+        "references-count": 88,
+        "URL": "https://doi.org/10.1007/0-306-48132-4_9"
+      },
+      {
+        "indexed": {
+          "date-parts": [
+            [
+              2026,
+              1,
+              22
+            ]
+          ],
+          "date-time": "2026-01-22T07:03:25Z",
+          "timestamp": 1769065405396,
+          "version": "3.49.0"
+        },
+        "reference-count": 0,
+        "publisher": "Walter de Gruyter GmbH",
+        "issue": "3",
+        "content-domain": {
+          "domain": [],
+          "crossmark-restriction": false
+        },
+        "published-print": {
+          "date-parts": [
+            [
+              2012,
+              1,
+              14
+            ]
+          ]
+        },
+        "DOI": "10.1515/1446-9022.1324",
+        "type": "journal-article",
+        "created": {
+          "date-parts": [
+            [
+              2012,
+              9,
+              19
+            ]
+          ],
+          "date-time": "2012-09-19T07:18:01Z",
+          "timestamp": 1348039081000
+        },
+        "source": "Crossref",
+        "is-referenced-by-count": 58,
+        "title": [
+          "Organized Crime Networks: an Application of Network Analysis Techniques to the American Mafia"
+        ],
+        "prefix": "10.1515",
+        "volume": "11",
+        "author": [
+          {
+            "given": "Giovanni",
+            "family": "Mastrobuoni",
+            "sequence": "first",
+            "affiliation": []
+          },
+          {
+            "given": "Eleonora",
+            "family": "Patacchini",
+            "sequence": "additional",
+            "affiliation": []
+          }
+        ],
+        "member": "374",
+        "container-title": [
+          "Review of Network Economics"
+        ],
+        "link": [
+          {
+            "URL": "https://www.degruyter.com/view/j/rne.2012.11.issue-3/1446-9022.1324/1446-9022.1324.pdf",
+            "content-type": "unspecified",
+            "content-version": "vor",
+            "intended-application": "similarity-checking"
+          }
+        ],
+        "deposited": {
+          "date-parts": [
+            [
+              2021,
+              2,
+              26
+            ]
+          ],
+          "date-time": "2021-02-26T22:50:00Z",
+          "timestamp": 1614379800000
+        },
+        "score": 40.531452,
+        "resource": {
+          "primary": {
+            "URL": "https://www.degruyter.com/document/doi/10.1515/1446-9022.1324/html"
+          }
+        },
+        "issued": {
+          "date-parts": [
+            [
+              2012,
+              1,
+              14
+            ]
+          ]
+        },
+        "references-count": 0,
+        "journal-issue": {
+          "issue": "3"
+        },
+        "URL": "https://doi.org/10.1515/1446-9022.1324",
+        "ISSN": [
+          "1446-9022"
+        ],
+        "issn-type": [
+          {
+            "value": "1446-9022",
+            "type": "electronic"
+          }
+        ],
+        "published": {
+          "date-parts": [
+            [
+              2012,
+              1,
+              14
+            ]
+          ]
+        }
+      }
+    ],
+    "items-per-page": 5,
+    "query": {
+      "start-index": 0,
+      "search-terms": "(\\organized crime\\\" OR mafia) AND (\\\"company data\\\" OR \\\"judicial records\\\" OR \\\"network analysis\\\" OR \\\"mixed methods\\\")\""
+    }
+  }
+}
