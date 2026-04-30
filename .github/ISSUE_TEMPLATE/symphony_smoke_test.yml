@@ -1,0 +1,35 @@
+name: Symphony smoke test
+about: Dry-run a non-production orchestration path and verify durable artifacts.
+title: "SMOKE: <issue-id> orchestration dry-run"
+labels: ["execution", "smoke-test"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template to verify Symphony/Codex non-interactive orchestration behavior.
+        Do not run E1/E2/E3 and do not call external bibliographic APIs.
+
+  - type: input
+    id: issue_id
+    attributes:
+      label: Issue identifier
+      description: Tracker issue id used in branch naming.
+      placeholder: OLT-57
+    validations:
+      required: true
+
+  - type: textarea
+    id: protocol
+    attributes:
+      label: Dry-run protocol
+      description: Complete each step and report outputs in PR or PR_DRAFT.md.
+      value: |
+        1) Create and checkout branch `codex/<issue-id>-<short-slug>` before edits.
+        2) Create one harmless file under `docs/executions/` (example: `docs/executions/<issue_id>_smoke_test.md`).
+        3) Commit the file on the branch.
+        4) Open a draft PR.
+        5) If PR creation is unavailable, create `PR_DRAFT.md` with title/body content.
+        6) If committing is unavailable, create `docs/executions/<issue_id>_handoff.md` documenting blocker, attempted commands, and required human actions.
+        7) Confirm no elicitation/clarification prompts were used and no infinite loop occurred.
+    validations:
+      required: true

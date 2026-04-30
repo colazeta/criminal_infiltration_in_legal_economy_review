@@ -56,6 +56,26 @@ server:
 ## Scope
 Execute only the assigned issue/task. Do not branch into unrelated repository improvements.
 
+## Mandatory run mode (non-interactive)
+1. Automated runs must be non-interactive: do not request elicitation and do not ask clarification questions.
+2. If a decision is ambiguous, choose the conservative option and document the decision in the PR body or handoff note.
+3. Never loop indefinitely on the same issue. If progress is blocked, terminate with a durable fallback artifact.
+
+## Branching contract
+1. Before making any file change, create and checkout a branch named:
+   - `codex/<issue-id>-<short-slug>`
+2. Branch creation is mandatory for every automated run.
+
+## Durable final state contract
+Every run must finish in one of these auditable states:
+1. a pushed PR; or
+2. a local commit plus `PR_DRAFT.md`; or
+3. `docs/executions/<issue_id>_handoff.md` that explains the blocker when committing is unavailable.
+
+Fallback expectations:
+- If PR creation is unavailable, create a local branch, commit local changes, and write `PR_DRAFT.md`.
+- If committing is unavailable, write `docs/executions/<issue_id>_handoff.md` with blocker details, attempted commands, and required human actions.
+
 ## Governance
 1. Follow `AGENTS.md` if present.
 2. Validate every domain against `docs/domain_allowlist_registry.md` before retrieval.
@@ -68,9 +88,11 @@ Execute only the assigned issue/task. Do not branch into unrelated repository im
 - Counts of records touched (added/updated/rejected/staged).
 - Validation commands run with outcomes.
 - Explicit unresolved decisions and required human action.
+- Explicit statement if no external retrieval was performed.
 
 ## Run checklist
 1. Restate task and touched files.
-2. Apply minimal patch set.
-3. Run relevant checks.
-4. Open PR summary with counts, validations, unresolved decisions.
+2. Create and checkout `codex/<issue-id>-<short-slug>` before edits.
+3. Apply minimal patch set.
+4. Run relevant checks.
+5. End in a durable state (PR, or local commit + `PR_DRAFT.md`, or handoff file).
