@@ -1,5 +1,5 @@
 name: E3 Forward Snowballing
-about: Run E3 forward citation snowballing
+description: Run E3 forward citation snowballing
 labels: [execution-E3]
 title: "E3R?: forward snowballing"
 body:

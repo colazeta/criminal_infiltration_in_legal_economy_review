@@ -1,5 +1,5 @@
 name: E1 Execution
-about: Run E1 database/API discovery from official E0-ready seeds
+description: Run E1 database/API discovery from official E0-ready seeds
 labels: [execution-E1]
 title: "E1R?: database/API discovery from official E0-ready seeds"
 body:

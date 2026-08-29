@@ -1,22 +1,32 @@
 # Saturation Metrics
 
 ## Metrics per execution
+
 - `candidate_novelty_rate = new_unique_candidates / unique_candidates_before`
 - `eligible_increment_rate = new_eligible / eligible_before`
 - `eligible_share_added_on_updated_total = new_eligible / eligible_after`
 - `screening_yield = new_eligible / unique_candidates_screened`
-- `new thematic codes` (count newly observed themes)
-- `new mechanism codes` (count newly observed mechanisms)
-- `new sector codes` (count newly observed sectors)
-- `new method codes` (count newly observed methods)
+- counts of newly observed mechanism, sector, method, geography and outcome codes.
 
-## Baseline handling
-If denominators are zero in early executions, record metric as `NA` and report absolute counts.
+When a denominator is zero, record `NA` and report the absolute count. Do not
+replace an undefined rate with zero.
 
-## Cautious saturation rule
-Saturation can be claimed only after at least **two consecutive executions** where:
-- `eligible_increment_rate < 2%`
-- `screening_yield < 1–2%`
-- no new thematic/mechanism/sector/method codes are added.
+## Assessment unit
 
-Set `saturation_status` accordingly and justify in `saturation_comment`.
+E0 is excluded. A saturation assessment cycle must include the planned database
+update plus completed backward and forward snowballing over the eligible frontier,
+with all new unique candidates screened.
+
+## Cautious stop rule
+
+Saturation may be considered only after **three consecutive completed cycles**
+where all conditions hold:
+
+- `eligible_increment_rate < 2%`;
+- `screening_yield < 2%`;
+- no new mechanism, sector, method, geography or outcome codes are added;
+- no unresolved retrieval failure could plausibly conceal a material source of
+  records.
+
+The decision remains a documented reviewer judgement. Report per-cycle counts and
+rates; never infer saturation from a single execution or E0.

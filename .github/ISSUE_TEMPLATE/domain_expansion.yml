@@ -1,5 +1,5 @@
 name: Domain Expansion Request
-about: Propose a new domain for retrieval/enrichment
+description: Propose a new domain for retrieval/enrichment
 labels: [domain-approval-required]
 title: "Domain request: "
 body:

@@ -1,1 +1,3 @@
 event_id,paper_id,execution_id,feed_type,source_name,source_paper_id,query_string,retrieved_at,notes
+EV000001,P000001,E0,manual_seed,pre-E0 curated set,E0-D001,,2026-04-29,Canonical import from audited E0 seed staging.
+EV000002,P000002,E0R1,bibliographic_api,Crossref,E0R1-C002,Q01,2026-04-29,Canonical import from audited E0R1 identifier-first discovery.

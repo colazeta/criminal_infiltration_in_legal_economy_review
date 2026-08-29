@@ -1,5 +1,5 @@
 name: Audit Task
-about: Audit integrity, traceability, or reproducibility artifacts
+description: Audit integrity, traceability, or reproducibility artifacts
 labels: [audit-needed]
 title: "Audit: "
 body:

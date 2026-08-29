@@ -4,6 +4,7 @@ This file governs all automated and semi-automated work in this repository.
 
 ## Mission boundary
 - Preserve scientific traceability and reproducibility.
+- Maintain the public literature archive as the primary repository product.
 - Prefer conservative actions over fast actions when evidence quality is uncertain.
 
 ## Hard prohibitions
@@ -12,6 +13,7 @@ This file governs all automated and semi-automated work in this repository.
 3. Never access non-authorised domains for discovery or enrichment.
 4. Never commit secrets (`LINEAR_API_KEY`, `GITHUB_TOKEN`, `OPENAI_API_KEY`, etc.).
 5. Never run production bibliographic discovery tasks unless explicitly requested by issue scope.
+6. Never publish draft, pending, rejected, duplicate, or unresolved records as included literature.
 
 ## Scope discipline
 - Execute only the assigned issue/task.
@@ -24,6 +26,9 @@ This file governs all automated and semi-automated work in this repository.
 - `docs/SYMPHONY_SETUP.md`
 - `docs/snowballing_execution_protocol.md`
 - `docs/domain_allowlist_registry.md`
+- `docs/literature_review_protocol.md`
+- `docs/eligibility_codebook.md`
+- `docs/archive_data_model.md`
 
 ## Domain policy
 - Allowed domains are defined in `docs/domain_allowlist_registry.md`.
@@ -33,6 +38,12 @@ This file governs all automated and semi-automated work in this repository.
 - Do not modify `data/registry/*.csv` unless issue explicitly requires registry updates.
 - Do not run bibliographic API pulls for governance/documentation issues.
 - Stage uncertainties in logs/notes; require human review for final inclusion decisions.
+
+## Public archive policy
+- The website and public exports must be generated from `data/registry/` only.
+- Every public work requires at least one discovery event and exactly one current eligible decision.
+- Public builds must run `scripts/build_archive.py` and `scripts/validation/validate_archive.py`.
+- Do not expose reviewer identities, internal notes, excluded-record metadata, evidence quotations, or copyrighted full text.
 
 ## Pull request minimums
 Every PR opened by an agent must include:

@@ -1,5 +1,5 @@
 name: E2 Backward Snowballing
-about: Run E2 backward citation snowballing
+description: Run E2 backward citation snowballing
 labels: [execution-E2]
 title: "E2R?: backward snowballing"
 body:

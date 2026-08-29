@@ -19,3 +19,25 @@ jobs:
 
       - name: Run governance validation
         run: python scripts/validation/validate_repo_governance.py
+
+      - name: Reconcile audited E0 imports
+        run: python scripts/01_seed_registry.py
+
+      - name: Check canonical duplicates
+        run: python scripts/02_deduplicate_papers.py
+
+      - name: Build public archive
+        run: python scripts/build_archive.py
+
+      - name: Validate archive and site
+        run: |
+          python scripts/validation/validate_archive.py
+          python scripts/validation/validate_site.py
+          node --check site/app.js
+
+      - name: Verify deterministic public output
+        run: |
+          sha256sum site/data/archive.json site/data/archive.csv > /tmp/archive-before.sha256
+          python scripts/build_archive.py
+          sha256sum site/data/archive.json site/data/archive.csv > /tmp/archive-after.sha256
+          diff -u /tmp/archive-before.sha256 /tmp/archive-after.sha256

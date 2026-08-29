@@ -1,5 +1,9 @@
 # Symphony setup guide (for this repository)
 
+> **Optional infrastructure.** Symphony can orchestrate approved issues, but it
+> is not required to build the archive and is not the project's current
+> scientific next step. See `docs/NEXT_ACTION.md` for the review priorities.
+
 ## Important framing
 Symphony is an external orchestrator service. It polls a tracker, creates an isolated workspace per issue, runs Codex in app-server mode, and expects Codex to produce a PR.
 

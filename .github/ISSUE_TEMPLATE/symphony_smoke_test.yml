@@ -1,5 +1,5 @@
 name: Symphony smoke test
-about: Dry-run a non-production orchestration path and verify durable artifacts.
+description: Dry-run a non-production orchestration path and verify durable artifacts.
 title: "SMOKE: <issue-id> orchestration dry-run"
 labels: ["execution", "smoke-test"]
 body:

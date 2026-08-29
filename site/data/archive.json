@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "sourceSnapshot": "2026-04-29",
+  "methodology": {
+    "includedDefinition": "Canonical E0 record imported after the pre-import audit. This is a seed inclusion, not a completed full-review judgement.",
+    "editorialDefinition": "Candidate and excluded records remain in non-public editorial files until a governed inclusion decision is recorded.",
+    "rejectedRecordsOmitted": 19
+  },
+  "counts": {
+    "records": 2,
+    "included": 2,
+    "editorialQueue": 36,
+    "metadataFix": 2,
+    "manualReview": 9,
+    "abstractReview": 25,
+    "rejectedOmitted": 19
+  },
+  "records": [
+    {
+      "id": "P000002",
+      "sourceId": "E0R1-C002",
+      "section": "included",
+      "status": "included",
+      "statusLabel": "Included seed",
+      "statusDescription": "Canonical E0 record imported after the pre-import audit. This is a seed inclusion, not a completed full-review judgement.",
+      "title": "7 Beyond Mafia: Considerations on Criminal Infiltration in the Legal Economy",
+      "authors": "Nicolazzo Giovanni",
+      "year": 2025,
+      "venue": "White-Collar and Organizational Crime",
+      "documentType": "book_chapter",
+      "language": "",
+      "abstractAvailable": false,
+      "doi": "10.56687/9781529247145-010",
+      "openalexId": "",
+      "links": {
+        "doi": "https://doi.org/10.56687/9781529247145-010"
+      },
+      "topicCode": "mafia_legal_business",
+      "topicLabel": "Mafia and legal business",
+      "scopeFit": "direct",
+      "metadataConfidence": "high",
+      "reason": "Direct title-level evidence of criminal infiltration in legal economy; keep canonical chapter form.",
+      "screeningDecision": "eligible_core",
+      "sourceBasis": "E0R1 identifier-first discovery + E0R1 candidate quality review"
+    },
+    {
+      "id": "P000001",
+      "sourceId": "E0-D001",
+      "section": "included",
+      "status": "included",
+      "statusLabel": "Included seed",
+      "statusDescription": "Canonical E0 record imported after the pre-import audit. This is a seed inclusion, not a completed full-review judgement.",
+      "title": "How Mafias Migrate: The Case of the `Ndrangheta in Northern Italy",
+      "authors": "Varese, Federico",
+      "year": 2006,
+      "venue": "Governance",
+      "documentType": "journal_article",
+      "language": "",
+      "abstractAvailable": false,
+      "doi": "10.1111/j.1540-5893.2006.00260.x",
+      "openalexId": "",
+      "links": {
+        "doi": "https://doi.org/10.1111/j.1540-5893.2006.00260.x"
+      },
+      "topicCode": "conceptual_theoretical",
+      "topicLabel": "Conceptual foundations",
+      "scopeFit": "direct",
+      "metadataConfidence": "high",
+      "reason": "Crossref title-year-author alignment; strong direct fit.",
+      "screeningDecision": "eligible_core",
+      "sourceBasis": "clean pre-E0 draft (bibliographic integrity audit)"
+    }
+  ]
+}
