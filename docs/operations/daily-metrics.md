@@ -35,6 +35,9 @@ Il [ledger GitHub #30](https://github.com/colazeta/criminal_infiltration_in_lega
 contiene un commento strutturato per ogni batch `ACADEMIC-YYYY-MM-DD`. La
 pubblicazione giornaliera accetta soltanto commenti dell'autore autorizzato e
 conformi a [`schema/surveillance-run.schema.json`](../../schema/surveillance-run.schema.json).
+Ogni commento usa un involucro canonico composto da una sola riga tecnica,
+marker e oggetto JSON: testo aggiuntivo non viene accettato, così il ledger non
+diventa accidentalmente una seconda copia dei metadati dei candidati.
 
 ## L'unità di osservazione
 
@@ -149,10 +152,15 @@ sono accettati. Anche valutazioni intake e attribuzione alle fonti vengono
 riconciliate con i conteggi aggregati. Le tre salvaguardie dell'issue devono
 essere tutte spuntate. Il workflow verifica inoltre che il commit dichiarato
 esista nel repository e appartenga alla storia di `main`, così la versione del
-registro usata per la deduplicazione resta auditabile. Il JSON pubblico
+registro usata per la deduplicazione resta auditabile. Il log delle query nella
+issue di intake è un secondo manifest JSON: il numero di query per fonte deve
+coincidere con quelle pianificate e ogni `query_id` citato da un candidato deve
+esistere e appartenere alla fonte dichiarata. L'issue deve essere stata creata
+durante la finestra e il commento nel ledger dopo la sua chiusura, sempre nello
+stesso giorno di Roma. Il JSON pubblico
 espone soltanto conteggi, stato tecnico, data e
 l'informazione che una issue è stata creata; non ne pubblica il collegamento.
-Nessuno dei due contiene:
+Né il ledger né il JSON pubblico contengono:
 
 - titoli, autori, DOI o abstract dei candidati;
 - query complete;

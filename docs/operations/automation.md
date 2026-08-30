@@ -45,6 +45,12 @@ technical provenance only, never candidate metadata.
   the exact `batch_id` and a `candidates` array. Use a unique ID of the form
   `CAND-ACADEMIC-YYYY-MM-DD-NNN` for every record and the governed fields shown
   in the issue template. The array length must equal `intake_candidates`.
+- Write `Search and provenance log` as one fenced JSON object with
+  `schema_version`, `batch_id`, `repository_commit` and exactly one source
+  object for Consensus and Exa. Each source contains its complete planned query
+  list as `{query_id, query_text}` objects. Query IDs are globally unique,
+  start with `CONSENSUS-` or `EXA-`, and every candidate `query_id` must resolve
+  to a query from each source named on that candidate.
 - Search Consensus as the active peer-reviewed index and Exa as an independent
   semantic coverage-gap channel. Fetch promising Consensus records before using
   them in an intake issue.
@@ -102,6 +108,36 @@ Allowed `work_type` values are `peer_reviewed`, `accepted_manuscript`,
 `plausible_contextual` or `uncertain`. `year`, `venue`, DOI, duplicate note and
 conflict note may be `null`; all other record fields are required.
 
+### Search manifest
+
+The `Search and provenance log` field is also machine-readable:
+
+```json
+{
+  "schema_version": 1,
+  "batch_id": "ACADEMIC-YYYY-MM-DD",
+  "repository_commit": "FULL_40_CHARACTER_MAIN_SHA",
+  "sources": [
+    {
+      "source": "Consensus",
+      "queries": [
+        {"query_id": "CONSENSUS-W1-Q1", "query_text": "Exact query text"}
+      ]
+    },
+    {
+      "source": "Exa",
+      "queries": [
+        {"query_id": "EXA-GAP-Q1", "query_text": "Exact semantic query"}
+      ]
+    }
+  ]
+}
+```
+
+The arrays contain every planned query, including a completed zero-result query.
+The aggregate returned counts remain in the ledger run object; candidate records
+refer back to this manifest through `query_ids`.
+
 ## Failure behaviour
 
 Stop without a candidate issue if a connector is unavailable or results remain
@@ -127,6 +163,8 @@ candidate count. Candidate assessments and per-source hits/exclusives must also
 reconcile with the aggregate ledger fields. Placeholder text or a copied total
 is not sufficient. All three issue-template safeguards must be present and
 checked exactly once; unchecked, partial or placeholder safeguards fail closed.
+The issue creation time must fall inside the declared run window, and the ledger
+comment must be created after the window closes on the same Rome calendar day.
 
 ## Human handoff
 

@@ -189,7 +189,7 @@ def validate_run(run: dict[str, Any]) -> dict[str, Any]:
     if not isinstance(run, dict):
         raise MetricsError("run: expected an object")
     require_exact_fields(run, RUN_FIELDS, "run")
-    if run["schema_version"] != SCHEMA_VERSION:
+    if type(run["schema_version"]) is not int or run["schema_version"] != SCHEMA_VERSION:
         raise MetricsError("run: unsupported schema_version")
 
     batch_id = run["batch_id"]
@@ -654,7 +654,10 @@ def validate_public_payload(payload: dict[str, Any]) -> dict[str, Any]:
     if not isinstance(payload, dict):
         raise MetricsError("public statistics: expected an object")
     require_exact_fields(payload, PUBLIC_FIELDS, "public statistics")
-    if payload["schemaVersion"] != SCHEMA_VERSION:
+    if (
+        type(payload["schemaVersion"]) is not int
+        or payload["schemaVersion"] != SCHEMA_VERSION
+    ):
         raise MetricsError("public statistics: unsupported schemaVersion")
 
     def reject_forbidden_keys(value: Any) -> None:

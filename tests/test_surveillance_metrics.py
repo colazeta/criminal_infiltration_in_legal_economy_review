@@ -15,6 +15,7 @@ from fetch_surveillance_ledger import (  # noqa: E402
     MARKER,
     extract_run,
     verify_intake_issue,
+    verify_ledger_comment_time,
     verify_repository_commit,
 )
 from surveillance import (  # noqa: E402
@@ -30,8 +31,30 @@ REPOSITORY = "colazeta/criminal_infiltration_in_legal_economy_review"
 
 def candidate_issue(run: dict, number: int = 31) -> dict:
     batch_id = run["batch_id"]
+    consensus_queries = [
+        {"query_id": f"CONSENSUS-W{ordinal}-Q1", "query_text": f"Consensus query {ordinal}"}
+        for ordinal in range(1, 8)
+    ]
+    exa_queries = [
+        {"query_id": f"EXA-GAP-Q{ordinal}", "query_text": f"Exa query {ordinal}"}
+        for ordinal in range(1, 5)
+    ]
+    search_manifest = {
+        "schema_version": 1,
+        "batch_id": batch_id,
+        "repository_commit": run["repository_commit"],
+        "sources": [
+            {"source": "Consensus", "queries": consensus_queries},
+            {"source": "Exa", "queries": exa_queries},
+        ],
+    }
     candidates = []
     candidate_sources = [["Consensus"], ["Exa"], ["Consensus", "Exa"]]
+    candidate_queries = [
+        ["CONSENSUS-W1-Q1"],
+        ["EXA-GAP-Q1"],
+        ["CONSENSUS-W2-Q1", "EXA-GAP-Q2"],
+    ]
     candidate_assessments = ["plausible_core", "plausible_core", "plausible_contextual"]
     for ordinal in range(1, run["totals"]["intake_candidates"] + 1):
         candidates.append(
@@ -45,7 +68,7 @@ def candidate_issue(run: dict, number: int = 31) -> dict:
                 "identifiers": {"doi": None, "other": [f"EX-{ordinal}"]},
                 "source_links": [f"https://example.org/paper-{ordinal}"],
                 "sources": candidate_sources[ordinal - 1],
-                "query_ids": ["CONSENSUS-W1-Q1"],
+                "query_ids": candidate_queries[ordinal - 1],
                 "verification_status": "metadata_partial",
                 "possible_duplicate": None,
                 "metadata_conflict": None,
@@ -63,9 +86,11 @@ def candidate_issue(run: dict, number: int = 31) -> dict:
         "number": number,
         "html_url": f"https://github.com/{REPOSITORY}/issues/{number}",
         "title": f"[INTAKE][ACADEMIC] {batch_id}",
+        "created_at": f"{run['run_date']}T05:00:00Z",
         "body": (
             f"### Batch ID\n\n{batch_id}\n\n"
-            "### Search and provenance log\n\nConsensus and Exa completed.\n\n"
+            "### Search and provenance log\n\n```json\n"
+            f"{json.dumps(search_manifest)}\n```\n\n"
             f"### Candidate records\n\n```json\n{json.dumps(manifest)}\n```\n\n"
             "### Safeguards\n\n"
             "- [x] No candidate was marked eligible or published.\n"
@@ -201,6 +226,12 @@ class SurveillanceRunTests(unittest.TestCase):
         with self.assertRaisesRegex(MetricsError, "batch_id date"):
             validate_run(run)
 
+    def test_boolean_schema_version_is_rejected(self) -> None:
+        run = completed_run()
+        run["schema_version"] = True
+        with self.assertRaisesRegex(MetricsError, "unsupported schema_version"):
+            validate_run(run)
+
     def test_window_offset_must_match_rome(self) -> None:
         run = completed_run()
         run["window_end"] = "2026-08-31T07:20:00+01:00"
@@ -294,10 +325,19 @@ class SurveillanceRunTests(unittest.TestCase):
         with self.assertRaisesRegex(MetricsError, "author is not authorised"):
             verify_intake_issue(run, issue, {"colazeta"}, 30)
 
+    def test_referenced_intake_issue_must_be_created_during_run(self) -> None:
+        run = validate_run(completed_run())
+        issue = candidate_issue(run)
+        issue["created_at"] = "2026-08-30T05:00:00Z"
+        with self.assertRaisesRegex(MetricsError, "during the run window"):
+            verify_intake_issue(run, issue, {"colazeta"}, 30)
+
     def test_persisted_candidate_count_must_match_ledger(self) -> None:
         run = validate_run(completed_run())
         issue = candidate_issue(run)
-        manifest_section = issue["body"].split("```json\n", 1)[1].split("\n```", 1)[0]
+        manifest_section = issue["body"].split(
+            "### Candidate records\n\n```json\n", 1
+        )[1].split("\n```", 1)[0]
         manifest = json.loads(manifest_section)
         manifest["candidates"].pop()
         issue["body"] = issue["body"].replace(
@@ -320,13 +360,37 @@ class SurveillanceRunTests(unittest.TestCase):
     def test_persisted_candidate_attribution_must_match_ledger(self) -> None:
         run = validate_run(completed_run())
         issue = candidate_issue(run)
-        manifest_section = issue["body"].split("```json\n", 1)[1].split("\n```", 1)[0]
+        manifest_section = issue["body"].split(
+            "### Candidate records\n\n```json\n", 1
+        )[1].split("\n```", 1)[0]
         manifest = json.loads(manifest_section)
         manifest["candidates"][0]["sources"] = ["Consensus", "Exa"]
         issue["body"] = issue["body"].replace(
             manifest_section, json.dumps(manifest), 1
         )
-        with self.assertRaisesRegex(MetricsError, "persisted source"):
+        with self.assertRaisesRegex(MetricsError, "query sources"):
+            verify_intake_issue(run, issue, {"colazeta"}, 30)
+
+    def test_candidate_query_must_exist_in_structured_search_log(self) -> None:
+        run = validate_run(completed_run())
+        issue = candidate_issue(run)
+        manifest_section = issue["body"].split("### Candidate records\n\n```json\n", 1)[1].split("\n```", 1)[0]
+        manifest = json.loads(manifest_section)
+        manifest["candidates"][0]["query_ids"] = ["CONSENSUS-MISSING-Q1"]
+        issue["body"] = issue["body"].replace(manifest_section, json.dumps(manifest), 1)
+        with self.assertRaisesRegex(MetricsError, "absent from Search log"):
+            verify_intake_issue(run, issue, {"colazeta"}, 30)
+
+    def test_search_log_query_count_must_match_plan(self) -> None:
+        run = validate_run(completed_run())
+        issue = candidate_issue(run)
+        manifest_section = issue["body"].split(
+            "### Search and provenance log\n\n```json\n", 1
+        )[1].split("\n```", 1)[0]
+        manifest = json.loads(manifest_section)
+        manifest["sources"][0]["queries"].pop()
+        issue["body"] = issue["body"].replace(manifest_section, json.dumps(manifest), 1)
+        with self.assertRaisesRegex(MetricsError, "planned queries"):
             verify_intake_issue(run, issue, {"colazeta"}, 30)
 
     def test_every_candidate_safeguard_must_be_checked(self) -> None:
@@ -363,6 +427,12 @@ class SurveillanceRunTests(unittest.TestCase):
         with self.assertRaisesRegex(MetricsError, "ancestor of governed main"):
             verify_repository_commit(run, unrelated)
 
+    def test_ledger_comment_must_be_created_after_same_day_run(self) -> None:
+        run = validate_run(completed_run())
+        verify_ledger_comment_time(run, {"created_at": "2026-08-31T05:21:00Z"})
+        with self.assertRaisesRegex(MetricsError, "daily run window"):
+            verify_ledger_comment_time(run, {"created_at": "2026-08-31T05:00:00Z"})
+
     def test_exclusive_candidate_attribution_must_be_exact(self) -> None:
         run = completed_run()
         run["sources"][0]["candidate_hits"] = 3
@@ -374,13 +444,19 @@ class SurveillanceRunTests(unittest.TestCase):
 
     def test_comment_parser_accepts_one_marked_json_block(self) -> None:
         run = completed_run()
-        body = f"Run summary\n\n{MARKER}\n```json\n{json.dumps(run)}\n```"
+        body = (
+            f"Daily surveillance batch {run['batch_id']}: {run['status']}.\n\n"
+            f"{MARKER}\n```json\n{json.dumps(run)}\n```"
+        )
         self.assertEqual(extract_run(body)["batch_id"], run["batch_id"])
 
     def test_comment_parser_rejects_ambiguous_marked_body(self) -> None:
         run = completed_run()
-        block = f"{MARKER}\n```json\n{json.dumps(run)}\n```"
-        with self.assertRaisesRegex(MetricsError, "exactly one"):
+        block = (
+            f"Daily surveillance batch {run['batch_id']}: {run['status']}.\n\n"
+            f"{MARKER}\n```json\n{json.dumps(run)}\n```"
+        )
+        with self.assertRaisesRegex(MetricsError, "canonical envelope"):
             extract_run(block + "\n" + block)
 
 

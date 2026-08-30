@@ -12,12 +12,22 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import urlsplit
 from urllib.request import Request, urlopen
 
-from surveillance import REPOSITORY_FULL_NAME, MetricsError, validate_run
+from surveillance import (
+    REPOSITORY_FULL_NAME,
+    ROME,
+    MetricsError,
+    parse_datetime,
+    validate_run,
+)
 
 
 MARKER = "<!-- surveillance-run:v1 -->"
-JSON_BLOCK = re.compile(
-    re.escape(MARKER) + r"\s*```json\s*(\{.*?\})\s*```",
+LEDGER_COMMENT = re.compile(
+    r"\ADaily surveillance batch "
+    r"(?P<batch>ACADEMIC-[0-9]{4}-[0-9]{2}-[0-9]{2}): "
+    r"(?P<status>completed|partial|failed)\.\n\n"
+    + re.escape(MARKER)
+    + r"\n```json\n(?P<payload>\{.*\})\n```\s*\Z",
     re.DOTALL,
 )
 INTAKE_TITLE_PREFIX = "[INTAKE][ACADEMIC]"
@@ -61,6 +71,10 @@ CANDIDATE_VERIFICATION_STATUSES = {
 }
 CANDIDATE_ASSESSMENTS = {"plausible_core", "plausible_contextual", "uncertain"}
 CANDIDATE_JSON_BLOCK = re.compile(r"\A```json\s*(\{.*\})\s*```\s*\Z", re.DOTALL)
+SEARCH_MANIFEST_FIELDS = {"schema_version", "batch_id", "repository_commit", "sources"}
+SEARCH_SOURCE_FIELDS = {"source", "queries"}
+SEARCH_QUERY_FIELDS = {"query_id", "query_text"}
+SEARCH_JSON_BLOCK = re.compile(r"\A```json\s*(\{.*\})\s*```\s*\Z", re.DOTALL)
 REQUIRED_SAFEGUARDS = (
     "No candidate was marked eligible or published.",
     "Canonical records and existing intake issues were checked for duplicates.",
@@ -96,14 +110,19 @@ def next_link(value: str | None) -> str | None:
 def extract_run(body: str) -> dict | None:
     if MARKER not in body:
         return None
-    matches = JSON_BLOCK.findall(body)
-    if len(matches) != 1:
-        raise MetricsError("Marked ledger comment must contain exactly one JSON block")
+    if body.count(MARKER) != 1:
+        raise MetricsError("Marked ledger comment must use the canonical envelope")
+    match = LEDGER_COMMENT.fullmatch(body.strip())
+    if not match:
+        raise MetricsError("Marked ledger comment must use the canonical envelope")
     try:
-        payload = json.loads(matches[0])
+        payload = json.loads(match.group("payload"))
     except json.JSONDecodeError as exc:
         raise MetricsError("Marked ledger comment contains invalid JSON") from exc
-    return validate_run(payload)
+    run = validate_run(payload)
+    if match.group("batch") != run["batch_id"] or match.group("status") != run["status"]:
+        raise MetricsError("Marked ledger comment summary disagrees with payload")
+    return run
 
 
 def issue_form_value(body: str, label: str) -> str | None:
@@ -147,7 +166,63 @@ def text_list(
     return result
 
 
-def verify_candidate_manifest(run: dict, section: str) -> None:
+def verify_search_manifest(run: dict, section: str) -> dict[str, str]:
+    """Validate the exact queries and bind their IDs to governed sources."""
+    match = SEARCH_JSON_BLOCK.fullmatch(section.strip())
+    if not match:
+        raise MetricsError("run.intake_issue: Search log must be one JSON object")
+    try:
+        manifest = json.loads(match.group(1))
+    except json.JSONDecodeError as exc:
+        raise MetricsError("run.intake_issue: Search log JSON is invalid") from exc
+    if not isinstance(manifest, dict) or set(manifest) != SEARCH_MANIFEST_FIELDS:
+        raise MetricsError("run.intake_issue: Search log manifest fields are invalid")
+    if (
+        type(manifest["schema_version"]) is not int
+        or manifest["schema_version"] != 1
+        or manifest["batch_id"] != run["batch_id"]
+        or manifest["repository_commit"] != run["repository_commit"]
+    ):
+        raise MetricsError("run.intake_issue: Search log provenance disagrees with run")
+
+    sources = manifest["sources"]
+    if not isinstance(sources, list) or len(sources) != len(run["sources"]):
+        raise MetricsError("run.intake_issue: Search log source set is incomplete")
+    run_sources = {row["source"]: row for row in run["sources"]}
+    seen_sources: set[str] = set()
+    query_sources: dict[str, str] = {}
+    for index, source in enumerate(sources):
+        label = f"run.intake_issue.search.sources[{index}]"
+        if not isinstance(source, dict) or set(source) != SEARCH_SOURCE_FIELDS:
+            raise MetricsError(f"{label}: invalid fields")
+        source_name = source["source"]
+        if source_name not in run_sources or source_name in seen_sources:
+            raise MetricsError(f"{label}.source: unexpected or duplicate source")
+        seen_sources.add(source_name)
+        queries = source["queries"]
+        planned = run_sources[source_name]["queries_planned"]
+        if not isinstance(queries, list) or len(queries) != planned:
+            raise MetricsError(f"{label}.queries: count disagrees with planned queries")
+        prefix = "CONSENSUS" if source_name == "Consensus" else "EXA"
+        for query_index, query in enumerate(queries):
+            query_label = f"{label}.queries[{query_index}]"
+            if not isinstance(query, dict) or set(query) != SEARCH_QUERY_FIELDS:
+                raise MetricsError(f"{query_label}: invalid fields")
+            query_id = required_text(query["query_id"], f"{query_label}.query_id", 80)
+            if not re.fullmatch(rf"{prefix}-[A-Z0-9][A-Z0-9._-]*", query_id):
+                raise MetricsError(f"{query_label}.query_id: invalid source-scoped ID")
+            if query_id in query_sources:
+                raise MetricsError("run.intake_issue: search query IDs must be unique")
+            required_text(query["query_text"], f"{query_label}.query_text", 2000)
+            query_sources[query_id] = source_name
+    if seen_sources != set(run_sources):
+        raise MetricsError("run.intake_issue: Search log source set is incomplete")
+    return query_sources
+
+
+def verify_candidate_manifest(
+    run: dict, section: str, query_sources: dict[str, str]
+) -> None:
     """Require one structured candidate object for every persisted intake count."""
     match = CANDIDATE_JSON_BLOCK.fullmatch(section.strip())
     if not match:
@@ -232,13 +307,17 @@ def verify_candidate_manifest(run: dict, section: str) -> None:
             source_hits[source] += 1
         if len(sources) == 1:
             source_exclusives[sources[0]] += 1
-        text_list(
+        query_ids = text_list(
             candidate["query_ids"],
             f"{label}.query_ids",
             minimum=1,
             maximum=20,
             item_length=80,
         )
+        if any(query_id not in query_sources for query_id in query_ids):
+            raise MetricsError(f"{label}.query_ids: query is absent from Search log")
+        if {query_sources[query_id] for query_id in query_ids} != set(sources):
+            raise MetricsError(f"{label}.query_ids: query sources disagree with candidate")
         if (
             not isinstance(candidate["verification_status"], str)
             or candidate["verification_status"]
@@ -307,6 +386,16 @@ def verify_repository_commit(run: dict, comparison: dict) -> None:
         )
 
 
+def verify_ledger_comment_time(run: dict, comment: dict) -> None:
+    """Bind the daily payload to a ledger comment created after that day's run."""
+    created = parse_datetime(comment.get("created_at"), "ledger comment.created_at")
+    ended = parse_datetime(run["window_end"], "run.window_end")
+    if created < ended or created.astimezone(ROME).date().isoformat() != run["run_date"]:
+        raise MetricsError(
+            "ledger comment: creation time is incompatible with the daily run window"
+        )
+
+
 def verify_intake_issue(
     run: dict,
     issue: dict,
@@ -335,6 +424,11 @@ def verify_intake_issue(
         raise MetricsError("run.intake_issue: issue author is not authorised")
     if issue.get("title") != f"{INTAKE_TITLE_PREFIX} {batch_id}":
         raise MetricsError("run.intake_issue: title does not identify this batch")
+    issue_created = parse_datetime(issue.get("created_at"), "intake issue.created_at")
+    started = parse_datetime(run["window_start"], "run.window_start")
+    ended = parse_datetime(run["window_end"], "run.window_end")
+    if not started <= issue_created <= ended:
+        raise MetricsError("run.intake_issue: issue was not created during the run window")
 
     body = issue.get("body")
     if not isinstance(body, str):
@@ -344,7 +438,8 @@ def verify_intake_issue(
         raise MetricsError("run.intake_issue: candidate-intake form is incomplete")
     if values["Batch ID"] != batch_id:
         raise MetricsError("run.intake_issue: issue batch ID disagrees with run")
-    verify_candidate_manifest(run, values["Candidate records"])
+    query_sources = verify_search_manifest(run, values["Search and provenance log"])
+    verify_candidate_manifest(run, values["Candidate records"], query_sources)
     verify_safeguards(values["Safeguards"])
 
 
@@ -388,6 +483,7 @@ def main() -> None:
         run = extract_run(body)
         if run is None:
             continue
+        verify_ledger_comment_time(run, comment)
         repository_commit = run["repository_commit"]
         if repository_commit not in commit_cache:
             compare_url = (
