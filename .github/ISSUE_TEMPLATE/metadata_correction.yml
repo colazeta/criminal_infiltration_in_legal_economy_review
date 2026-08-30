@@ -1,0 +1,29 @@
+name: Metadata correction
+description: Report a verified bibliographic or identifier correction
+title: "[METADATA] "
+body:
+  - type: input
+    id: record
+    attributes:
+      label: Record or candidate ID
+    validations:
+      required: true
+  - type: textarea
+    id: current
+    attributes:
+      label: Current value and problem
+    validations:
+      required: true
+  - type: textarea
+    id: correction
+    attributes:
+      label: Proposed correction
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Verification sources
+      description: DOI/provider/publisher sources and verification date; do not infer missing values.
+    validations:
+      required: true

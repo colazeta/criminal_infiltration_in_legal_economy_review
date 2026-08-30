@@ -56,7 +56,15 @@ function paperCard(record) {
   }
 
   const citation = makeElement("p", "citation");
-  const citationParts = [record.authors, record.year, record.venue].filter(Boolean);
+  const citationParts = [
+    record.authors,
+    record.year,
+    record.venue,
+    record.volume && record.issue
+      ? `${record.volume}(${record.issue})`
+      : record.volume,
+    record.pages,
+  ].filter(Boolean);
   citation.textContent = citationParts.join(" · ");
 
   const details = makeElement("details", "record-details");
@@ -72,8 +80,10 @@ function paperCard(record) {
   const metadata = makeElement("dl");
   const rows = [
     ["Decision", formatCode(record.screeningDecision)],
+    ["Screening stage", formatCode(record.screeningStage)],
     ["Scope fit", formatCode(record.scopeFit)],
     ["Document type", formatCode(record.documentType)],
+    ["Publisher", record.publisher],
     ["Metadata confidence", formatCode(record.metadataConfidence)],
     ["DOI", record.doi],
   ];
@@ -160,7 +170,8 @@ function populateMetrics(payload) {
   };
   set("#included-count", payload.counts.included);
   set("#editorial-count", payload.counts.editorialQueue);
-  set("#snapshot-date", payload.sourceSnapshot);
+  set("#archive-version", `v${payload.archiveVersion}`);
+  set("#coverage-date", payload.searchCoverageThrough);
   set("#metadata-fix-count", payload.counts.metadataFix);
   set("#manual-review-count", payload.counts.manualReview);
   set("#abstract-review-count", payload.counts.abstractReview);

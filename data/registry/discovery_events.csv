@@ -1,3 +1,3 @@
-event_id,paper_id,execution_id,feed_type,source_name,source_paper_id,query_string,retrieved_at,notes
-EV000001,P000001,E0,manual_seed,pre-E0 curated set,E0-D001,,2026-04-29,Canonical import from audited E0 seed staging.
-EV000002,P000002,E0R1,bibliographic_api,Crossref,E0R1-C002,Q01,2026-04-29,Canonical import from audited E0R1 identifier-first discovery.
+event_id,paper_id,execution_id,feed_type,source_name,source_platform,source_paper_id,parent_paper_id,query_id,query_string,rank,retrieved_at,retrieval_status,raw_snapshot,checksum,notes
+EV000001,P000001,E0,manual_seed,Curated seed review,manual,E0-D001,,,,,2026-04-29,success,,,Canonical import after bibliographic verification.
+EV000002,P000002,E0R1,bibliographic_api,Crossref,api.crossref.org,10.56687/9781529247145-010,,Q01,"(mafia OR ""organized crime"" OR ""criminal organization"") AND (""legal economy"" OR ""legitimate economy"" OR ""legal business"" OR firm OR company) AND (infiltration OR control OR ownership)",,2026-04-29,success,git:9d32106:data/raw/e0_identifier_first_raw/crossref_Q01.json,7b29fb4c83d0e71553d589830100a71aea014cbcd8f267519d4cdb9943219159,Legacy E0R1 result retained with its actual source/query; the run is not used to claim coverage.

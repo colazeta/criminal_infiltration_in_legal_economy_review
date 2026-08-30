@@ -1,0 +1,47 @@
+name: Screening review
+description: Record evidence needed for a governed eligibility decision
+title: "[SCREENING] "
+body:
+  - type: input
+    id: record
+    attributes:
+      label: Candidate or paper ID
+    validations:
+      required: true
+  - type: dropdown
+    id: stage
+    attributes:
+      label: Screening stage
+      options:
+        - title_abstract
+        - full_text
+        - seed_validation
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence basis and locator
+      description: Address the four-part eligibility test without reproducing long copyrighted text.
+    validations:
+      required: true
+  - type: dropdown
+    id: proposed_decision
+    attributes:
+      label: Proposed decision
+      options:
+        - eligible_core
+        - eligible_contextual
+        - maybe_full_text_needed
+        - not_eligible
+        - duplicate
+        - not_academic
+        - not_retrievable
+    validations:
+      required: true
+  - type: textarea
+    id: rationale
+    attributes:
+      label: Record-specific rationale and exclusion code if applicable
+    validations:
+      required: true

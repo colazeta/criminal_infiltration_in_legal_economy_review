@@ -1,0 +1,40 @@
+name: Candidate literature intake
+description: Stage scholarly candidates for human metadata and eligibility review
+title: "[INTAKE][ACADEMIC] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Intake is not an eligibility or publication decision. Do not assign canonical paper IDs or paste full text.
+  - type: input
+    id: batch_id
+    attributes:
+      label: Batch ID
+      placeholder: ACADEMIC-YYYY-MM-DD
+    validations:
+      required: true
+  - type: textarea
+    id: search_log
+    attributes:
+      label: Search and provenance log
+      description: Sources/connectors, exact queries, dates, counts, repository ref and failures.
+    validations:
+      required: true
+  - type: textarea
+    id: candidates
+    attributes:
+      label: Candidate records
+      description: Title, authors, year, venue, DOI/identifier, links, intake assessment, short relevance reason and possible duplicates.
+    validations:
+      required: true
+  - type: checkboxes
+    id: safeguards
+    attributes:
+      label: Safeguards
+      options:
+        - label: No candidate was marked eligible or published.
+          required: true
+        - label: Canonical records and existing intake issues were checked for duplicates.
+          required: true
+        - label: No copyrighted full text or long abstract is included.
+          required: true

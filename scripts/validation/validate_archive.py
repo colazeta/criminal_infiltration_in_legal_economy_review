@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate canonical registries and the generated public archive."""
+"""Validate registry integrity and the generated public archive."""
 
 from __future__ import annotations
 
@@ -8,18 +8,33 @@ import json
 import re
 import sys
 import unicodedata
-from collections import Counter
+from collections import Counter, defaultdict
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[2]
-DATA = ROOT / "data/registry"
-PUBLIC_ARCHIVE = ROOT / "site/data/archive.json"
+sys.path.insert(0, str(ROOT / "scripts"))
 
-ALLOWED_CANONICAL_STATUSES = {"seed_included", "review_included", "superseded"}
+from build_archive import (  # noqa: E402
+    ELIGIBLE_DECISIONS,
+    INCLUDED_STATUSES,
+    PUBLIC_RECORD_FIELDS,
+    ArchiveBuildError,
+    build_payload,
+    clean_doi,
+)
+
+
+REGISTRY = ROOT / "data/registry"
+PUBLIC_JSON = ROOT / "site/data/archive.json"
+PUBLIC_CSV = ROOT / "site/data/archive.csv"
+PUBLIC_SCHEMA = ROOT / "schema/public-archive.schema.json"
+DOI_PATTERN = re.compile(r"^10\.\d{4,9}/\S+$", re.I)
+DATE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+
+ALLOWED_CANONICAL_STATUSES = {*INCLUDED_STATUSES, "superseded", "withdrawn"}
 ALLOWED_DECISIONS = {
-    "eligible_core",
-    "eligible_contextual",
+    *ELIGIBLE_DECISIONS,
     "maybe_full_text_needed",
     "not_eligible",
     "duplicate",
@@ -27,7 +42,7 @@ ALLOWED_DECISIONS = {
     "not_retrievable",
 }
 ALLOWED_CONFIDENCE = {"low", "medium", "high"}
-DOI_PATTERN = re.compile(r"^10\.\d{4,9}/\S+$", re.I)
+ALLOWED_PUBLICATION_STATUS = {"published", "withheld"}
 
 
 def fail(message: str) -> None:
@@ -35,10 +50,17 @@ def fail(message: str) -> None:
     raise SystemExit(1)
 
 
-def read_csv(name: str) -> list[dict[str, str]]:
-    path = DATA / name
-    with path.open(newline="", encoding="utf-8-sig") as handle:
+def rows(name: str) -> list[dict[str, str]]:
+    with (REGISTRY / name).open(newline="", encoding="utf-8-sig") as handle:
         return [dict(row) for row in csv.DictReader(handle)]
+
+
+def require_unique(values: list[str], label: str) -> None:
+    if any(not value for value in values):
+        fail(f"{label}: blank identifier")
+    duplicates = sorted(value for value, count in Counter(values).items() if count > 1)
+    if duplicates:
+        fail(f"{label}: duplicate value(s): {', '.join(duplicates)}")
 
 
 def normalise_title(value: str) -> str:
@@ -47,162 +69,256 @@ def normalise_title(value: str) -> str:
     return re.sub(r"[^a-z0-9]+", " ", value.lower()).strip()
 
 
-def require_unique(rows: list[dict[str, str]], field: str, label: str) -> None:
-    values = [row.get(field, "").strip() for row in rows]
-    blank = sum(not value for value in values)
-    if blank:
-        fail(f"{label}: {blank} row(s) have an empty {field}")
-    duplicates = sorted(value for value, count in Counter(values).items() if count > 1)
-    if duplicates:
-        fail(f"{label}: duplicate {field}: {', '.join(duplicates)}")
-
-
-def validate_registries() -> tuple[list[dict[str, str]], list[dict[str, str]]]:
-    papers = read_csv("papers.csv")
-    events = read_csv("discovery_events.csv")
-    decisions = read_csv("screening_decisions.csv")
-    codes = read_csv("paper_codes.csv")
+def validate_registries() -> dict[str, list[dict[str, str]]]:
+    data = {
+        name: rows(name)
+        for name in (
+            "papers.csv",
+            "work_identifiers.csv",
+            "discovery_events.csv",
+            "screening_decisions.csv",
+            "publications.csv",
+            "paper_codes.csv",
+            "taxonomy.csv",
+            "editorial_summary.csv",
+            "archive_versions.csv",
+            "execution_metrics.csv",
+        )
+    }
+    papers = data["papers.csv"]
+    identifiers = data["work_identifiers.csv"]
+    events = data["discovery_events.csv"]
+    decisions = data["screening_decisions.csv"]
+    publications = data["publications.csv"]
+    taxonomy = data["taxonomy.csv"]
 
     if not papers:
-        fail("Canonical papers registry is empty")
-    require_unique(papers, "paper_id", "papers.csv")
-    require_unique(events, "event_id", "discovery_events.csv")
-    require_unique(decisions, "decision_id", "screening_decisions.csv")
+        fail("papers.csv is empty")
+    require_unique([row.get("paper_id", "").strip() for row in papers], "papers.csv")
+    require_unique(
+        [row.get("identifier_id", "").strip() for row in identifiers],
+        "work_identifiers.csv",
+    )
+    require_unique([row.get("event_id", "").strip() for row in events], "events")
+    require_unique(
+        [row.get("decision_id", "").strip() for row in decisions], "decisions"
+    )
+    require_unique(
+        [row.get("paper_id", "").strip() for row in publications], "publications"
+    )
 
     paper_ids = {row["paper_id"] for row in papers}
+    title_year: Counter[tuple[str, str]] = Counter()
     for row in papers:
-        missing = [
-            field
-            for field in ("title", "authors", "year", "venue", "canonical_status")
-            if not row.get(field, "").strip()
-        ]
-        if missing:
-            fail(f"{row['paper_id']}: missing required field(s): {', '.join(missing)}")
+        paper_id = row["paper_id"]
+        for field in ("title", "authors", "year", "venue", "document_type"):
+            if not row.get(field, "").strip():
+                fail(f"{paper_id}: missing {field}")
         if not re.fullmatch(r"\d{4}", row["year"].strip()):
-            fail(f"{row['paper_id']}: invalid year {row['year']!r}")
-        if row["canonical_status"] not in ALLOWED_CANONICAL_STATUSES:
-            fail(
-                f"{row['paper_id']}: invalid canonical_status "
-                f"{row['canonical_status']!r}"
-            )
-        doi = row.get("doi", "").strip()
+            fail(f"{paper_id}: invalid year")
+        if row.get("canonical_status") not in ALLOWED_CANONICAL_STATUSES:
+            fail(f"{paper_id}: invalid canonical status")
+        if row.get("updated_at") and not DATE_PATTERN.match(row["updated_at"]):
+            fail(f"{paper_id}: invalid updated_at")
+        doi = clean_doi(row.get("doi", ""))
         if doi and not DOI_PATTERN.match(doi):
-            fail(f"{row['paper_id']}: invalid DOI {doi!r}")
+            fail(f"{paper_id}: invalid DOI")
+        title_year[(normalise_title(row["title"]), row["year"])] += 1
+    duplicates = [key for key, count in title_year.items() if count > 1]
+    if duplicates:
+        fail(f"Probable duplicate work(s): {duplicates}")
 
-    dois = [row["doi"].strip().lower() for row in papers if row.get("doi", "").strip()]
-    duplicate_dois = sorted(doi for doi, count in Counter(dois).items() if count > 1)
-    if duplicate_dois:
-        fail(f"Duplicate canonical DOI(s): {', '.join(duplicate_dois)}")
-
-    title_year = [
-        (normalise_title(row["title"]), row["year"].strip()) for row in papers
-    ]
-    duplicate_works = sorted(
-        f"{title} ({year})"
-        for (title, year), count in Counter(title_year).items()
-        if count > 1
-    )
-    if duplicate_works:
-        fail(f"Probable duplicate canonical work(s): {', '.join(duplicate_works)}")
+    identifier_keys: list[str] = []
+    primary_doi_counts: Counter[str] = Counter()
+    primary_doi_by_paper: dict[str, str] = {}
+    for row in identifiers:
+        paper_id = row.get("paper_id", "")
+        if paper_id not in paper_ids:
+            fail(f"{row.get('identifier_id')}: orphan paper_id")
+        scheme = row.get("scheme", "").strip().lower()
+        value = (
+            clean_doi(row.get("value", ""))
+            if scheme == "doi"
+            else row.get("value", "").strip()
+        )
+        if not scheme or not value:
+            fail(f"{row.get('identifier_id')}: blank identifier value")
+        if scheme == "doi" and not DOI_PATTERN.match(value):
+            fail(f"{row.get('identifier_id')}: invalid DOI")
+        identifier_keys.append(f"{scheme}:{value.lower()}")
+        is_primary = row.get("is_primary", "").strip().lower()
+        if is_primary not in {"true", "false"}:
+            fail(f"{row.get('identifier_id')}: invalid is_primary")
+        if is_primary == "true" and scheme == "doi":
+            primary_doi_counts[paper_id] += 1
+            primary_doi_by_paper[paper_id] = value
+        if row.get("verification_status") != "verified":
+            fail(f"{row.get('identifier_id')}: identifier is not verified")
+    require_unique(identifier_keys, "work identifiers")
 
     event_counts: Counter[str] = Counter()
     for row in events:
-        if row.get("paper_id") not in paper_ids:
-            fail(f"{row['event_id']}: orphan paper_id {row.get('paper_id')!r}")
-        event_counts[row["paper_id"]] += 1
+        paper_id = row.get("paper_id", "")
+        if paper_id not in paper_ids:
+            fail(f"{row.get('event_id')}: orphan paper_id")
+        if row.get("retrieval_status") not in {"success", "partial", "failed"}:
+            fail(f"{row.get('event_id')}: invalid retrieval_status")
+        if not DATE_PATTERN.match(row.get("retrieved_at", "")):
+            fail(f"{row.get('event_id')}: invalid retrieved_at")
+        event_counts[paper_id] += 1
 
-    current_decisions: Counter[str] = Counter()
+    current: dict[str, list[dict[str, str]]] = defaultdict(list)
     for row in decisions:
         paper_id = row.get("paper_id", "")
         if paper_id not in paper_ids:
-            fail(f"{row['decision_id']}: orphan paper_id {paper_id!r}")
+            fail(f"{row.get('decision_id')}: orphan paper_id")
         if row.get("decision") not in ALLOWED_DECISIONS:
-            fail(f"{row['decision_id']}: invalid decision {row.get('decision')!r}")
+            fail(f"{row.get('decision_id')}: invalid decision")
         if row.get("confidence") not in ALLOWED_CONFIDENCE:
-            fail(f"{row['decision_id']}: invalid confidence {row.get('confidence')!r}")
+            fail(f"{row.get('decision_id')}: invalid confidence")
+        if not DATE_PATTERN.match(row.get("decision_date", "")):
+            fail(f"{row.get('decision_id')}: invalid decision_date")
         is_current = row.get("is_current", "").strip().lower()
         if is_current not in {"true", "false"}:
-            fail(f"{row['decision_id']}: is_current must be true or false")
+            fail(f"{row.get('decision_id')}: invalid is_current")
         if is_current == "true":
-            current_decisions[paper_id] += 1
-        if row.get("decision") in {"not_eligible", "duplicate", "not_academic", "not_retrievable"}:
-            if not row.get("exclusion_reason_code", "").strip():
-                fail(f"{row['decision_id']}: exclusion decision requires a reason code")
+            current[paper_id].append(row)
+        if row.get("decision") in {
+            "not_eligible",
+            "duplicate",
+            "not_academic",
+            "not_retrievable",
+        } and not row.get("exclusion_reason_code", "").strip():
+            fail(f"{row.get('decision_id')}: exclusion requires reason code")
 
-    for row in papers:
+    taxonomy_keys = {
+        (row.get("dimension", "").strip(), row.get("code", "").strip())
+        for row in taxonomy
+    }
+    if len(taxonomy_keys) != len(taxonomy) or any(
+        not all(key) for key in taxonomy_keys
+    ):
+        fail("taxonomy.csv has blank or duplicate keys")
+
+    publication_by_id = {row["paper_id"]: row for row in publications}
+    for row in publications:
         paper_id = row["paper_id"]
-        if row["canonical_status"] in {"seed_included", "review_included"}:
+        if paper_id not in paper_ids:
+            fail(f"publications.csv: orphan paper_id {paper_id}")
+        if row.get("publication_status") not in ALLOWED_PUBLICATION_STATUS:
+            fail(f"{paper_id}: invalid publication status")
+        if row.get("publication_status") == "published":
             if event_counts[paper_id] < 1:
-                fail(f"{paper_id}: included record has no discovery event")
-            if current_decisions[paper_id] != 1:
-                fail(
-                    f"{paper_id}: included record must have exactly one current "
-                    f"screening decision; found {current_decisions[paper_id]}"
-                )
+                fail(f"{paper_id}: published work has no discovery event")
+            if len(current[paper_id]) != 1:
+                fail(f"{paper_id}: published work must have one current decision")
+            if current[paper_id][0].get("decision") not in ELIGIBLE_DECISIONS:
+                fail(f"{paper_id}: published work is not currently eligible")
+            if ("topic", row.get("topic_code", "")) not in taxonomy_keys:
+                fail(f"{paper_id}: unknown public topic")
+            if not row.get("public_relevance_reason", "").strip():
+                fail(f"{paper_id}: blank public relevance reason")
+            if primary_doi_counts[paper_id] != 1:
+                fail(f"{paper_id}: expected one primary DOI")
+            paper = next(item for item in papers if item["paper_id"] == paper_id)
+            if clean_doi(paper.get("doi", "")) != primary_doi_by_paper[paper_id]:
+                fail(f"{paper_id}: primary DOI mismatch")
 
-    for row in codes:
+    for paper in papers:
+        paper_id = paper["paper_id"]
+        if paper.get("canonical_status") in INCLUDED_STATUSES:
+            if len(current[paper_id]) != 1:
+                fail(f"{paper_id}: included work must have one current decision")
+            if paper_id not in publication_by_id:
+                fail(f"{paper_id}: included work lacks a publication-manifest row")
+
+    for row in data["paper_codes.csv"]:
         if row.get("paper_id") not in paper_ids:
-            fail(f"paper_codes.csv: orphan paper_id {row.get('paper_id')!r}")
-        if not row.get("dimension", "").strip() or not row.get("code", "").strip():
-            fail("paper_codes.csv: every row requires dimension and code")
+            fail("paper_codes.csv contains an orphan paper_id")
+        if (row.get("dimension", ""), row.get("code", "")) not in taxonomy_keys:
+            fail("paper_codes.csv contains a code outside taxonomy.csv")
 
-    return papers, decisions
+    for name in ("editorial_summary.csv", "archive_versions.csv"):
+        current_rows = [
+            row
+            for row in data[name]
+            if row.get("is_current", "").strip().lower() == "true"
+        ]
+        if len(current_rows) != 1:
+            fail(f"{name}: expected exactly one current row")
+
+    try:
+        build_payload(ROOT)
+    except ArchiveBuildError as exc:
+        fail(f"Publication gate failed: {exc}")
+    return data
 
 
-def validate_public_archive(
-    papers: list[dict[str, str]], decisions: list[dict[str, str]]
-) -> None:
-    if not PUBLIC_ARCHIVE.exists():
-        fail("Generated archive is missing; run scripts/build_archive.py")
-    payload = json.loads(PUBLIC_ARCHIVE.read_text(encoding="utf-8"))
+def validate_public_archive(data: dict[str, list[dict[str, str]]]) -> None:
+    if not PUBLIC_JSON.exists() or not PUBLIC_CSV.exists():
+        fail("Generated archive files are missing")
+    payload = json.loads(PUBLIC_JSON.read_text(encoding="utf-8"))
+    schema = json.loads(PUBLIC_SCHEMA.read_text(encoding="utf-8"))
+    if set(payload) != set(schema.get("required", [])):
+        fail("archive.json top-level field allowlist differs from public schema")
+    schema_record_fields = tuple(
+        schema["properties"]["records"]["items"].get("required", [])
+    )
+    if schema_record_fields != PUBLIC_RECORD_FIELDS:
+        fail("Machine-readable record schema differs from builder allowlist")
     records = payload.get("records")
     if not isinstance(records, list):
         fail("archive.json records must be a list")
 
-    included_ids = {
+    expected_ids = {
         row["paper_id"]
-        for row in papers
-        if row.get("canonical_status") in {"seed_included", "review_included"}
+        for row in data["publications.csv"]
+        if row.get("publication_status") == "published"
     }
     public_ids = {record.get("id") for record in records}
-    if public_ids != included_ids:
-        fail(
-            "Public archive IDs do not match included canonical records: "
-            f"expected {sorted(included_ids)}, got {sorted(public_ids)}"
-        )
+    if public_ids != expected_ids:
+        fail(f"Public IDs differ from publication manifest: {public_ids} != {expected_ids}")
 
-    forbidden_fields = {
-        "reviewer",
-        "evidence_quote",
-        "exclusion_comment",
-        "auditNote",
-        "query_string",
+    decision_by_id = {
+        row["paper_id"]: row
+        for row in data["screening_decisions.csv"]
+        if row.get("is_current", "").lower() == "true"
     }
     for record in records:
+        if tuple(record) != PUBLIC_RECORD_FIELDS:
+            fail(f"{record.get('id')}: public field allowlist mismatch")
         if record.get("section") != "included" or record.get("status") != "included":
-            fail(f"{record.get('id')}: non-included record leaked into public archive")
-        leaked = sorted(forbidden_fields.intersection(record))
-        if leaked:
-            fail(f"{record.get('id')}: internal field(s) leaked: {', '.join(leaked)}")
-        if not record.get("reason"):
-            fail(f"{record.get('id')}: missing public relevance reason")
+            fail(f"{record.get('id')}: non-included record leaked")
+        if record.get("screeningDecision") != decision_by_id[record["id"]]["decision"]:
+            fail(f"{record.get('id')}: exported decision is stale")
+        doi = clean_doi(record.get("doi", ""))
+        if record.get("links") != {"doi": f"https://doi.org/{doi}"}:
+            fail(f"{record.get('id')}: unexpected public link")
 
     counts = payload.get("counts", {})
     if counts.get("records") != len(records) or counts.get("included") != len(records):
         fail("archive.json count metadata does not match records")
 
+    with PUBLIC_CSV.open(newline="", encoding="utf-8-sig") as handle:
+        csv_rows = list(csv.DictReader(handle))
+    if [row.get("id") for row in csv_rows] != [record.get("id") for record in records]:
+        fail("JSON/CSV record order differs")
+    expected_csv_fields = [field for field in PUBLIC_RECORD_FIELDS if field != "links"]
+    if csv_rows and list(csv_rows[0].keys()) != expected_csv_fields:
+        fail("CSV public field allowlist mismatch")
+
 
 def main() -> None:
-    papers, decisions = validate_registries()
-    validate_public_archive(papers, decisions)
+    data = validate_registries()
+    validate_public_archive(data)
     print(
-        f"[OK] Archive validation passed: {len(papers)} canonical record(s), "
-        f"{len(decisions)} screening decision(s)."
+        f"[OK] Archive gate passed: {len(data['papers.csv'])} canonical work(s), "
+        f"{len(data['publications.csv'])} publication-manifest row(s)."
     )
 
 
 if __name__ == "__main__":
     try:
         main()
-    except (csv.Error, json.JSONDecodeError, OSError) as exc:
+    except (csv.Error, json.JSONDecodeError, OSError, ValueError) as exc:
         fail(str(exc))

@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
-"""Build the public literature-archive dataset from governed repository data.
+"""Build the public archive from governed registries only.
 
-The public archive contains canonical records from ``data/registry/papers.csv``
-only. Editorial candidates and excluded records are counted for transparent
-pipeline reporting, but their bibliographic metadata are never published.
-
-No metadata is enriched or inferred by this script. It only transforms fields
-already stored in the repository and produces deterministic JSON/CSV exports.
+The builder is deliberately fail-closed. A row marked ``published`` in the
+publication manifest is emitted only when the canonical work, discovery event,
+current eligibility decision and approved public annotation all satisfy the
+publication gate. Editorial and legacy files are never read.
 """
 
 from __future__ import annotations
@@ -16,47 +14,63 @@ import csv
 import json
 import re
 import unicodedata
-from collections import Counter
+from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any, Iterable
 
 
 ROOT = Path(__file__).resolve().parents[1]
-REGISTRY = ROOT / "data/registry/papers.csv"
-DECISIONS = ROOT / "data/registry/screening_decisions.csv"
-AUDITED_STAGING = ROOT / "data/raw/e0_seed_promotion_staging_audited.csv"
-REVIEWED_CANDIDATES = ROOT / "data/raw/e0_verified_seed_candidates_reviewed.csv"
-VERIFICATION_MATRIX = ROOT / "data/raw/e0_seed_verification_matrix.csv"
 DEFAULT_OUTPUT_DIR = ROOT / "site/data"
 
+INCLUDED_STATUSES = {"seed_included", "review_included"}
+ELIGIBLE_DECISIONS = {"eligible_core", "eligible_contextual"}
+PUBLICATION_STATUSES = {"published", "withheld"}
+
 TOPIC_LABELS = {
-    "conceptual_theoretical": "Conceptual foundations",
-    "mafia_legal_business": "Mafia and legal business",
-    "criminal_firms": "Criminal firms",
-    "procurement_market_capture": "Public procurement and market capture",
-    "sectoral_infiltration": "Sectoral infiltration",
-    "ownership_corporate_control": "Ownership and corporate control",
-    "laundering_legal_business": "Laundering through legal business",
-    "money_laundering_legal_economy": "Laundering through legal business",
-    "methodological": "Methods and measurement",
-    "identifier_resolution_noise": "Identifier review",
+    "conceptual_foundations": "Conceptual foundations",
+    "criminal_transplantation": "Criminal transplantation",
 }
 
-STATUS_LABELS = {
-    "included": "Included seed",
-}
+PUBLIC_RECORD_FIELDS = (
+    "id",
+    "section",
+    "status",
+    "statusLabel",
+    "statusDescription",
+    "title",
+    "authors",
+    "year",
+    "venue",
+    "publisher",
+    "volume",
+    "issue",
+    "pages",
+    "documentType",
+    "language",
+    "doi",
+    "links",
+    "topicCode",
+    "topicLabel",
+    "scopeFit",
+    "metadataConfidence",
+    "reason",
+    "screeningDecision",
+    "screeningStage",
+    "sourceBasis",
+)
 
-STATUS_DESCRIPTIONS = {
-    "included": (
-        "Canonical E0 record imported after the pre-import audit. This is a "
-        "seed inclusion, not a completed full-review judgement."
-    ),
-}
+
+class ArchiveBuildError(ValueError):
+    """Raised when a requested public record does not pass the gate."""
 
 
 def read_csv(path: Path) -> list[dict[str, str]]:
     with path.open(newline="", encoding="utf-8-sig") as handle:
         return [dict(row) for row in csv.DictReader(handle)]
+
+
+def registry_rows(root: Path, name: str) -> list[dict[str, str]]:
+    return read_csv(root / "data/registry" / name)
 
 
 def normalise_title(value: str) -> str:
@@ -67,37 +81,9 @@ def normalise_title(value: str) -> str:
 
 def clean_doi(value: str) -> str:
     value = (value or "").strip()
-    value = re.sub(r"^https?://(?:dx\.)?doi\.org/", "", value, flags=re.I)
-    return value.lower()
-
-
-def record_key(row: dict[str, str]) -> str:
-    doi = clean_doi(row.get("doi", "") or row.get("verified_doi", ""))
-    if doi:
-        return f"doi:{doi}"
-    title = row.get("title", "") or row.get("verified_title", "")
-    year = row.get("year", "") or row.get("verified_year", "")
-    return f"title:{normalise_title(title)}|{year.strip()}"
-
-
-def nonempty(*values: str | None) -> str:
-    for value in values:
-        if value and value.strip():
-            return value.strip()
-    return ""
-
-
-def public_topic(code: str) -> str:
-    return TOPIC_LABELS.get(code, code.replace("_", " ").strip().title())
-
-
-def public_links(doi: str, openalex_id: str) -> dict[str, str]:
-    links: dict[str, str] = {}
-    if doi:
-        links["doi"] = f"https://doi.org/{doi}"
-    if openalex_id:
-        links["openalex"] = openalex_id
-    return links
+    value = re.sub(r"^(?:doi:)?\s*https?://(?:dx\.)?doi\.org/", "", value, flags=re.I)
+    value = re.sub(r"^doi:\s*", "", value, flags=re.I)
+    return value.rstrip(".,; ").lower()
 
 
 def year_value(value: str) -> int | None:
@@ -110,140 +96,265 @@ def year_value(value: str) -> int | None:
 def source_snapshot(rows: Iterable[dict[str, str]]) -> str:
     dates: list[str] = []
     for row in rows:
-        for key in ("updated_at", "created_at", "added_at", "decision_date"):
+        for key in (
+            "updated_at",
+            "metadata_verified_at",
+            "decision_date",
+            "snapshot_date",
+            "release_date",
+        ):
             value = (row.get(key) or "").strip()
             if re.fullmatch(r"\d{4}-\d{2}-\d{2}", value):
                 dates.append(value)
-    return max(dates, default="2026-04-29")
+    return max(dates, default="")
 
 
-def canonical_records(
+def one_current(rows: list[dict[str, str]], key: str) -> dict[str, dict[str, str]]:
+    grouped: dict[str, list[dict[str, str]]] = defaultdict(list)
+    for row in rows:
+        if (row.get("is_current") or "").strip().lower() == "true":
+            grouped[(row.get(key) or "").strip()].append(row)
+    result: dict[str, dict[str, str]] = {}
+    for item_id, current in grouped.items():
+        if len(current) == 1:
+            result[item_id] = current[0]
+    return result
+
+
+def identifier_maps(
+    identifiers: list[dict[str, str]],
+) -> tuple[dict[str, str], dict[str, list[dict[str, str]]]]:
+    primary_doi: dict[str, str] = {}
+    by_paper: dict[str, list[dict[str, str]]] = defaultdict(list)
+    for row in identifiers:
+        paper_id = (row.get("paper_id") or "").strip()
+        by_paper[paper_id].append(row)
+        if (
+            (row.get("scheme") or "").strip().lower() == "doi"
+            and (row.get("is_primary") or "").strip().lower() == "true"
+            and (row.get("verification_status") or "").strip() == "verified"
+        ):
+            primary_doi[paper_id] = clean_doi(row.get("value", ""))
+    return primary_doi, by_paper
+
+
+def status_copy(canonical_status: str, decision: str) -> tuple[str, str]:
+    tier = "Core" if decision == "eligible_core" else "Contextual"
+    if canonical_status == "seed_included":
+        return (
+            f"{tier} seed",
+            "Published seed record with a governed current eligibility decision. "
+            "It contributes to the initial nucleus and does not imply review saturation.",
+        )
+    return (
+        f"{tier} evidence",
+        "Published record with a governed current eligibility decision in the living corpus.",
+    )
+
+
+def build_records(
     papers: list[dict[str, str]],
+    events: list[dict[str, str]],
     decisions: list[dict[str, str]],
-    audited_by_key: dict[str, dict[str, str]],
-    candidates_by_key: dict[str, dict[str, str]],
-    verification_by_id: dict[str, dict[str, str]],
+    publications: list[dict[str, str]],
+    identifiers: list[dict[str, str]],
+    topic_labels: dict[str, str],
 ) -> list[dict[str, Any]]:
-    decision_by_paper: dict[str, dict[str, str]] = {}
-    for decision in decisions:
-        if decision.get("is_current", "").strip().lower() == "true":
-            decision_by_paper[decision.get("paper_id", "")] = decision
+    papers_by_id = {(row.get("paper_id") or "").strip(): row for row in papers}
+    if len(papers_by_id) != len(papers):
+        raise ArchiveBuildError("Duplicate canonical paper_id")
+    current_by_id = one_current(decisions, "paper_id")
+    current_counts = Counter(
+        (row.get("paper_id") or "").strip()
+        for row in decisions
+        if (row.get("is_current") or "").strip().lower() == "true"
+    )
+    event_counts = Counter((row.get("paper_id") or "").strip() for row in events)
+    primary_doi, identifiers_by_id = identifier_maps(identifiers)
 
     records: list[dict[str, Any]] = []
-    for paper in papers:
-        key = record_key(paper)
-        audit = audited_by_key.get(key, {})
-        candidate = candidates_by_key.get(key, {})
-        verification = verification_by_id.get(audit.get("seed_id", ""), {})
-        decision = decision_by_paper.get(paper.get("paper_id", ""), {})
-        doi = clean_doi(paper.get("doi", ""))
-        topic_code = nonempty(
-            audit.get("seed_category"), candidate.get("seed_stratum_review")
+    seen_publications: set[str] = set()
+    for publication in publications:
+        publication_status = (publication.get("publication_status") or "").strip()
+        if publication_status not in PUBLICATION_STATUSES:
+            raise ArchiveBuildError(
+                f"{publication.get('paper_id')}: unknown publication status "
+                f"{publication_status!r}"
+            )
+        if publication_status != "published":
+            continue
+
+        paper_id = (publication.get("paper_id") or "").strip()
+        if paper_id in seen_publications:
+            raise ArchiveBuildError(f"{paper_id}: duplicate publication-manifest row")
+        seen_publications.add(paper_id)
+        paper = papers_by_id.get(paper_id)
+        problems: list[str] = []
+        if not paper:
+            problems.append("missing canonical paper")
+        else:
+            if (paper.get("canonical_status") or "").strip() not in INCLUDED_STATUSES:
+                problems.append("canonical status is not included")
+            for field in ("title", "authors", "year", "venue", "document_type"):
+                if not (paper.get(field) or "").strip():
+                    problems.append(f"missing bibliographic field {field}")
+
+        if event_counts[paper_id] < 1:
+            problems.append("no discovery event")
+        if current_counts[paper_id] != 1:
+            problems.append(
+                f"expected one current decision, found {current_counts[paper_id]}"
+            )
+        decision = current_by_id.get(paper_id, {})
+        decision_value = (decision.get("decision") or "").strip()
+        if decision_value not in ELIGIBLE_DECISIONS:
+            problems.append("current decision is not eligible")
+        for field in (
+            "public_relevance_reason",
+            "scope_fit",
+            "metadata_confidence",
+            "source_basis",
+            "metadata_verified_at",
+        ):
+            if not (publication.get(field) or "").strip():
+                problems.append(f"missing approved public field {field}")
+        topic_code = (publication.get("topic_code") or "").strip()
+        if topic_code not in topic_labels:
+            problems.append("public topic is not in the controlled taxonomy")
+        doi = primary_doi.get(paper_id, "")
+        if not doi:
+            problems.append("no verified primary DOI")
+        if paper and clean_doi(paper.get("doi", "")) != doi:
+            problems.append("papers.csv DOI and primary identifier disagree")
+        if not identifiers_by_id.get(paper_id):
+            problems.append("no identifier record")
+        if problems:
+            raise ArchiveBuildError(f"{paper_id}: " + "; ".join(problems))
+
+        assert paper is not None
+        status_label, status_description = status_copy(
+            (paper.get("canonical_status") or "").strip(), decision_value
         )
-        records.append(
-            {
-                "id": paper.get("paper_id", ""),
-                "sourceId": audit.get("seed_id", ""),
-                "section": "included",
-                "status": "included",
-                "statusLabel": STATUS_LABELS["included"],
-                "statusDescription": STATUS_DESCRIPTIONS["included"],
-                "title": paper.get("title", "").strip(),
-                "authors": paper.get("authors", "").strip(),
-                "year": year_value(paper.get("year", "")),
-                "venue": paper.get("venue", "").strip(),
-                "documentType": paper.get("document_type", "").strip(),
-                "language": paper.get("language", "").strip(),
-                "abstractAvailable": bool(paper.get("abstract", "").strip()),
-                "doi": doi,
-                "openalexId": candidate.get("openalex_id", "").strip(),
-                "links": public_links(doi, candidate.get("openalex_id", "").strip()),
-                "topicCode": topic_code,
-                "topicLabel": public_topic(topic_code),
-                "scopeFit": nonempty(
-                    candidate.get("scope_fit"),
-                    verification.get("scope_fit_after_verification"),
-                    "direct",
-                ),
-                "metadataConfidence": nonempty(
-                    candidate.get("metadata_confidence"),
-                    verification.get("metadata_confidence"),
-                ),
-                "reason": nonempty(
-                    audit.get("reason_for_seed_inclusion"),
-                    candidate.get("review_reason"),
-                ),
-                "screeningDecision": decision.get("decision", "").strip(),
-                "sourceBasis": nonempty(
-                    audit.get("source_basis"), candidate.get("source")
-                ),
-            }
-        )
+        record = {
+            "id": paper_id,
+            "section": "included",
+            "status": "included",
+            "statusLabel": status_label,
+            "statusDescription": status_description,
+            "title": (paper.get("title") or "").strip(),
+            "authors": (paper.get("authors") or "").strip(),
+            "year": year_value(paper.get("year", "")),
+            "venue": (paper.get("venue") or "").strip(),
+            "publisher": (paper.get("publisher") or "").strip(),
+            "volume": (paper.get("volume") or "").strip(),
+            "issue": (paper.get("issue") or "").strip(),
+            "pages": (paper.get("pages") or "").strip(),
+            "documentType": (paper.get("document_type") or "").strip(),
+            "language": (paper.get("language") or "").strip(),
+            "doi": doi,
+            "links": {"doi": f"https://doi.org/{doi}"},
+            "topicCode": topic_code,
+            "topicLabel": topic_labels[topic_code],
+            "scopeFit": (publication.get("scope_fit") or "").strip(),
+            "metadataConfidence": (
+                publication.get("metadata_confidence") or ""
+            ).strip(),
+            "reason": (publication.get("public_relevance_reason") or "").strip(),
+            "screeningDecision": decision_value,
+            "screeningStage": (decision.get("screening_stage") or "").strip(),
+            "sourceBasis": (publication.get("source_basis") or "").strip(),
+        }
+        if tuple(record) != PUBLIC_RECORD_FIELDS:
+            raise ArchiveBuildError("Internal public record schema drift")
+        records.append(record)
+
+    records.sort(
+        key=lambda row: (-(row["year"] or 0), normalise_title(row["title"]), row["id"])
+    )
     return records
 
 
-def build_payload() -> dict[str, Any]:
-    papers = read_csv(REGISTRY)
-    decisions = read_csv(DECISIONS)
-    audited = read_csv(AUDITED_STAGING)
-    reviewed = read_csv(REVIEWED_CANDIDATES)
-    verification = read_csv(VERIFICATION_MATRIX)
+def current_singleton(rows: list[dict[str, str]], label: str) -> dict[str, str]:
+    current = [
+        row
+        for row in rows
+        if (row.get("is_current") or "").strip().lower() == "true"
+    ]
+    if len(current) != 1:
+        raise ArchiveBuildError(f"{label}: expected one current row, found {len(current)}")
+    return current[0]
 
-    audited_by_key = {record_key(row): row for row in audited}
-    candidates_by_key = {record_key(row): row for row in reviewed}
-    verification_by_id = {row.get("seed_id", ""): row for row in verification}
 
-    records = canonical_records(
-        papers,
-        decisions,
-        audited_by_key,
-        candidates_by_key,
-        verification_by_id,
-    )
-    records.sort(
-        key=lambda row: (
-            -(row["year"] or 0),
-            normalise_title(row["title"]),
-        )
-    )
+def as_nonnegative_int(row: dict[str, str], field: str) -> int:
+    try:
+        value = int((row.get(field) or "").strip())
+    except ValueError as exc:
+        raise ArchiveBuildError(f"editorial_summary.csv: invalid {field}") from exc
+    if value < 0:
+        raise ArchiveBuildError(f"editorial_summary.csv: {field} cannot be negative")
+    return value
 
-    status_counts = Counter(record["status"] for record in records)
-    metadata_fix_count = sum(
-        1 for row in audited if row.get("pre_import_decision") == "import_after_metadata_fix"
+
+def build_payload(root: Path = ROOT) -> dict[str, Any]:
+    papers = registry_rows(root, "papers.csv")
+    events = registry_rows(root, "discovery_events.csv")
+    decisions = registry_rows(root, "screening_decisions.csv")
+    publications = registry_rows(root, "publications.csv")
+    identifiers = registry_rows(root, "work_identifiers.csv")
+    taxonomy = registry_rows(root, "taxonomy.csv")
+    summaries = registry_rows(root, "editorial_summary.csv")
+    versions = registry_rows(root, "archive_versions.csv")
+
+    topic_labels = {
+        (row.get("code") or "").strip(): (row.get("label") or "").strip()
+        for row in taxonomy
+        if (row.get("dimension") or "").strip() == "topic"
+    }
+    records = build_records(
+        papers, events, decisions, publications, identifiers, topic_labels
     )
-    manual_review_count = sum(
-        1 for row in audited if row.get("pre_import_decision") == "hold_for_manual_review"
+    summary = current_singleton(summaries, "editorial_summary.csv")
+    version = current_singleton(versions, "archive_versions.csv")
+
+    metadata_fix = as_nonnegative_int(summary, "metadata_fix")
+    manual_review = as_nonnegative_int(summary, "manual_review")
+    abstract_review = as_nonnegative_int(summary, "abstract_review")
+    rejected = as_nonnegative_int(summary, "rejected_omitted")
+    core = sum(
+        record["screeningDecision"] == "eligible_core" for record in records
     )
-    abstract_review_count = sum(
-        1
-        for row in reviewed
-        if row.get("final_recommendation") == "keep_candidate_pending_abstract_review"
-    )
-    rejected_count = sum(
-        1 for row in reviewed if row.get("final_recommendation") == "reject"
-    )
-    snapshot = source_snapshot([*papers, *decisions, *audited, *reviewed])
+    contextual = len(records) - core
+
     return {
-        "schemaVersion": 1,
-        "sourceSnapshot": snapshot,
+        "schemaVersion": int(version["schema_version"]),
+        "archiveVersion": version["version"],
+        "protocolVersion": version["protocol_version"],
+        "releaseDate": version["release_date"],
+        "searchCoverageThrough": version["search_coverage_through"],
+        "sourceSnapshot": source_snapshot(
+            [*papers, *decisions, *publications, summary, version]
+        ),
         "methodology": {
-            "includedDefinition": STATUS_DESCRIPTIONS["included"],
-            "editorialDefinition": (
-                "Candidate and excluded records remain in non-public editorial "
-                "files until a governed inclusion decision is recorded."
+            "includedDefinition": (
+                "Records pass the canonical, discovery, current eligibility and "
+                "explicit publication-manifest gates."
             ),
-            "rejectedRecordsOmitted": rejected_count,
+            "editorialDefinition": (
+                "Aggregate editorial counts are published separately; candidate "
+                "metadata and reviewer notes are not included in the archive export."
+            ),
+            "rejectedRecordsOmitted": rejected,
         },
         "counts": {
             "records": len(records),
-            "included": status_counts["included"],
-            "editorialQueue": metadata_fix_count
-            + manual_review_count
-            + abstract_review_count,
-            "metadataFix": metadata_fix_count,
-            "manualReview": manual_review_count,
-            "abstractReview": abstract_review_count,
-            "rejectedOmitted": rejected_count,
+            "included": len(records),
+            "core": core,
+            "contextual": contextual,
+            "editorialQueue": metadata_fix + manual_review + abstract_review,
+            "metadataFix": metadata_fix,
+            "manualReview": manual_review,
+            "abstractReview": abstract_review,
+            "rejectedOmitted": rejected,
         },
         "records": records,
     }
@@ -251,33 +362,28 @@ def build_payload() -> dict[str, Any]:
 
 def write_outputs(payload: dict[str, Any], output_dir: Path) -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
-    json_path = output_dir / "archive.json"
-    json_path.write_text(
+    (output_dir / "archive.json").write_text(
         json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
 
-    csv_fields = [
-        "id",
-        "section",
-        "status",
-        "title",
-        "authors",
-        "year",
-        "venue",
-        "doi",
-        "topicCode",
-        "topicLabel",
-        "scopeFit",
-        "metadataConfidence",
-        "reason",
-        "sourceBasis",
-    ]
+    csv_fields = [field for field in PUBLIC_RECORD_FIELDS if field != "links"]
     with (output_dir / "archive.csv").open(
         "w", newline="", encoding="utf-8"
     ) as handle:
-        writer = csv.DictWriter(handle, fieldnames=csv_fields, extrasaction="ignore")
+        writer = csv.DictWriter(
+            handle,
+            fieldnames=csv_fields,
+            extrasaction="ignore",
+            lineterminator="\n",
+        )
         writer.writeheader()
-        writer.writerows(payload["records"])
+        for record in payload["records"]:
+            safe = dict(record)
+            for field in csv_fields:
+                value = safe.get(field)
+                if isinstance(value, str) and value.startswith(("=", "+", "-", "@")):
+                    safe[field] = "'" + value
+            writer.writerow(safe)
 
 
 def main() -> None:
@@ -293,11 +399,15 @@ def main() -> None:
     write_outputs(payload, args.output_dir)
     counts = payload["counts"]
     print(
-        "Built public archive: "
-        f"{counts['included']} included; {counts['editorialQueue']} editorial "
-        f"records and {counts['rejectedOmitted']} rejected records omitted."
+        "Built public archive "
+        f"v{payload['archiveVersion']}: {counts['included']} published; "
+        f"{counts['editorialQueue']} editorial and "
+        f"{counts['rejectedOmitted']} rejected records omitted."
     )
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except (ArchiveBuildError, csv.Error, json.JSONDecodeError, OSError) as exc:
+        raise SystemExit(f"[FAIL] {exc}") from exc

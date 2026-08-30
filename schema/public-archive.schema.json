@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/schema/public-archive.schema.json",
+  "title": "Criminal Infiltration Public Archive",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "archiveVersion",
+    "protocolVersion",
+    "releaseDate",
+    "searchCoverageThrough",
+    "sourceSnapshot",
+    "methodology",
+    "counts",
+    "records"
+  ],
+  "properties": {
+    "schemaVersion": { "type": "integer", "minimum": 1 },
+    "archiveVersion": { "type": "string" },
+    "protocolVersion": { "type": "string" },
+    "releaseDate": { "type": "string", "format": "date" },
+    "searchCoverageThrough": { "type": "string", "format": "date" },
+    "sourceSnapshot": { "type": "string", "format": "date" },
+    "methodology": { "type": "object" },
+    "counts": { "type": "object" },
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "section",
+          "status",
+          "statusLabel",
+          "statusDescription",
+          "title",
+          "authors",
+          "year",
+          "venue",
+          "publisher",
+          "volume",
+          "issue",
+          "pages",
+          "documentType",
+          "language",
+          "doi",
+          "links",
+          "topicCode",
+          "topicLabel",
+          "scopeFit",
+          "metadataConfidence",
+          "reason",
+          "screeningDecision",
+          "screeningStage",
+          "sourceBasis"
+        ],
+        "properties": {
+          "id": { "type": "string" },
+          "section": { "const": "included" },
+          "status": { "const": "included" },
+          "statusLabel": { "type": "string" },
+          "statusDescription": { "type": "string" },
+          "title": { "type": "string" },
+          "authors": { "type": "string" },
+          "year": { "type": ["integer", "null"] },
+          "venue": { "type": "string" },
+          "publisher": { "type": "string" },
+          "volume": { "type": "string" },
+          "issue": { "type": "string" },
+          "pages": { "type": "string" },
+          "documentType": { "type": "string" },
+          "language": { "type": "string" },
+          "doi": { "type": "string" },
+          "links": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["doi"],
+            "properties": { "doi": { "type": "string", "format": "uri" } }
+          },
+          "topicCode": { "type": "string" },
+          "topicLabel": { "type": "string" },
+          "scopeFit": { "type": "string" },
+          "metadataConfidence": { "type": "string" },
+          "reason": { "type": "string" },
+          "screeningDecision": {
+            "enum": ["eligible_core", "eligible_contextual"]
+          },
+          "screeningStage": { "type": "string" },
+          "sourceBasis": { "type": "string" }
+        }
+      }
+    }
+  }
+}

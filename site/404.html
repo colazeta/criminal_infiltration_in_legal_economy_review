@@ -4,15 +4,29 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Page not found · Criminal Infiltration Literature Archive</title>
-    <link rel="stylesheet" href="./styles.css" />
+    <style>
+      body { margin: 0; background: #f4f1e9; color: #17211f; font: 1rem/1.55 system-ui, sans-serif; }
+      main { width: min(720px, calc(100% - 40px)); margin: 12vh auto; }
+      section { padding: 3rem; border: 1px solid #d8d1c3; border-radius: 18px; background: #fffdf7; }
+      h1 { margin: 0 0 1rem; font: 3rem/1 Georgia, serif; }
+      p { color: #4f5c58; }
+      a { color: #183f38; font-weight: 700; }
+      a:focus-visible { outline: 3px solid #fff; outline-offset: 3px; box-shadow: 0 0 0 6px #17211f; }
+    </style>
   </head>
   <body>
     <main>
-      <section class="empty-state">
-        <p class="eyebrow">404</p>
+      <section>
+        <p>404</p>
         <h1>Page not found</h1>
-        <p><a href="./">Return to the publication archive</a>.</p>
+        <p><a id="home-link" href="/">Return to the publication archive</a>.</p>
       </section>
     </main>
+    <script>
+      const root = location.hostname.endsWith("github.io")
+        ? "/criminal_infiltration_in_legal_economy_review/"
+        : "/";
+      document.querySelector("#home-link").href = root;
+    </script>
   </body>
 </html>
