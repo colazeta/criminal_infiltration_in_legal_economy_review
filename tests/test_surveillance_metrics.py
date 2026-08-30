@@ -333,6 +333,15 @@ class SurveillanceRunTests(unittest.TestCase):
         with self.assertRaisesRegex(MetricsError, "every required safeguard"):
             verify_intake_issue(run, issue, {"colazeta"}, 30)
 
+    def test_duplicate_unchecked_safeguard_is_rejected(self) -> None:
+        run = validate_run(completed_run())
+        issue = candidate_issue(run)
+        issue["body"] += (
+            "\n- [ ] Canonical records and existing intake issues were checked for duplicates."
+        )
+        with self.assertRaisesRegex(MetricsError, "exactly three confirmations"):
+            verify_intake_issue(run, issue, {"colazeta"}, 30)
+
     def test_repository_commit_must_be_on_main_history(self) -> None:
         run = validate_run(completed_run())
         valid_comparison = {

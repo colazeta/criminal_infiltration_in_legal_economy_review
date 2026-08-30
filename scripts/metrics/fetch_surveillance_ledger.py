@@ -277,9 +277,14 @@ def verify_candidate_manifest(run: dict, section: str) -> None:
 
 def verify_safeguards(section: str) -> None:
     """Require every governed issue-form safeguard to be explicitly checked."""
+    lines = [line.strip() for line in section.splitlines() if line.strip()]
+    if len(lines) != len(REQUIRED_SAFEGUARDS):
+        raise MetricsError(
+            "run.intake_issue: safeguards must contain exactly three confirmations"
+        )
     for safeguard in REQUIRED_SAFEGUARDS:
-        pattern = re.compile(rf"(?m)^- \[[xX]\] {re.escape(safeguard)}\s*$")
-        if len(pattern.findall(section)) != 1:
+        pattern = re.compile(rf"- \[[xX]\] {re.escape(safeguard)}")
+        if sum(pattern.fullmatch(line) is not None for line in lines) != 1:
             raise MetricsError(
                 "run.intake_issue: every required safeguard must be checked exactly once"
             )
