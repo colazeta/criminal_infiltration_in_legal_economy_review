@@ -312,15 +312,26 @@ class SurveillanceRunTests(unittest.TestCase):
         run = validate_run(completed_run())
         item = candidate_issue(run)
         item["repository_url"] = f"https://api.github.com/repos/{REPOSITORY}"
-        search_result = {"incomplete_results": False, "items": [item]}
-        verify_intake_issue_uniqueness(run, search_result)
+        repository_issues = [item]
+        verify_intake_issue_uniqueness(run, repository_issues)
 
         duplicate = copy.deepcopy(item)
         duplicate["number"] = 32
         duplicate["html_url"] = f"https://github.com/{REPOSITORY}/issues/32"
-        search_result["items"].append(duplicate)
+        repository_issues.append(duplicate)
         with self.assertRaisesRegex(MetricsError, "exactly the referenced"):
-            verify_intake_issue_uniqueness(run, search_result)
+            verify_intake_issue_uniqueness(run, repository_issues)
+
+    def test_zero_candidate_batch_must_have_no_intake_issue(self) -> None:
+        run = validate_run(zero_run())
+        verify_intake_issue_uniqueness(run, [])
+        stray = {
+            "number": 44,
+            "title": f"[INTAKE][ACADEMIC] {run['batch_id']}",
+            "repository_url": f"https://api.github.com/repos/{REPOSITORY}",
+        }
+        with self.assertRaisesRegex(MetricsError, "zero-intake batch"):
+            verify_intake_issue_uniqueness(run, [stray])
 
     def test_metrics_ledger_cannot_pose_as_intake_issue(self) -> None:
         run = validate_run(completed_run())
@@ -496,6 +507,15 @@ class SurveillanceRunTests(unittest.TestCase):
         )
         with self.assertRaisesRegex(MetricsError, "canonical envelope"):
             extract_run(block + "\n" + block)
+
+    def test_recognisable_comment_with_missing_marker_is_rejected(self) -> None:
+        run = completed_run()
+        body = (
+            f"Daily surveillance batch {run['batch_id']}: {run['status']}.\n\n"
+            f"<!-- surveillance-run:typo -->\n```json\n{json.dumps(run)}\n```"
+        )
+        with self.assertRaisesRegex(MetricsError, "canonical envelope"):
+            extract_run(body)
 
 
 class PublicStatisticsTests(unittest.TestCase):

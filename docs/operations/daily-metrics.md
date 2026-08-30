@@ -158,9 +158,11 @@ coincidere con quelle pianificate e ogni `query_id` citato da un candidato deve
 esistere e appartenere alla fonte dichiarata. L'issue deve essere stata creata
 durante la finestra e il commento nel ledger dopo la sua chiusura, sempre nello
 stesso giorno di Roma. Un commento modificato non viene più considerato
-append-only ed è rifiutato. Una ricerca live delle issue deve inoltre trovare
-esattamente una sola issue con il titolo del batch, coincidente con il numero
-registrato nel ledger. Il JSON pubblico
+append-only ed è rifiutato. L'inventario live e paginato di tutte le issue deve
+inoltre trovare esattamente una sola issue con il titolo del batch, coincidente
+con il numero registrato nel ledger, oppure zero issue quando il run dichiara
+zero candidati. Un commento che inizia come un run giornaliero ma ha marker o
+involucro malformati blocca il deploy anziché sparire dalla serie. Il JSON pubblico
 espone soltanto conteggi, stato tecnico, data e
 l'informazione che una issue è stata creata; non ne pubblica il collegamento.
 Né il ledger né il JSON pubblico contengono:

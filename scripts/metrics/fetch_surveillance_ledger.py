@@ -9,7 +9,7 @@ import os
 import re
 from pathlib import Path
 from urllib.error import HTTPError, URLError
-from urllib.parse import urlencode, urlsplit
+from urllib.parse import urlsplit
 from urllib.request import Request, urlopen
 
 from surveillance import (
@@ -29,6 +29,9 @@ LEDGER_COMMENT = re.compile(
     + re.escape(MARKER)
     + r"\n```json\n(?P<payload>\{.*\})\n```\s*\Z",
     re.DOTALL,
+)
+LEDGER_SUMMARY_PREFIX = re.compile(
+    r"\ADaily surveillance batch ACADEMIC-[0-9]{4}-[0-9]{2}-[0-9]{2}:"
 )
 INTAKE_TITLE_PREFIX = "[INTAKE][ACADEMIC]"
 INTAKE_BODY_FIELDS = (
@@ -109,6 +112,8 @@ def next_link(value: str | None) -> str | None:
 
 def extract_run(body: str) -> dict | None:
     if MARKER not in body:
+        if LEDGER_SUMMARY_PREFIX.match(body.strip()):
+            raise MetricsError("Marked ledger comment must use the canonical envelope")
         return None
     if body.count(MARKER) != 1:
         raise MetricsError("Marked ledger comment must use the canonical envelope")
@@ -401,28 +406,27 @@ def verify_ledger_comment_time(run: dict, comment: dict) -> None:
         )
 
 
-def verify_intake_issue_uniqueness(run: dict, search_result: dict) -> None:
-    """Require one and only one batch-titled intake issue in the repository."""
+def verify_intake_issue_uniqueness(run: dict, repository_issues: list[dict]) -> None:
+    """Reconcile each batch against the complete paginated issue inventory."""
     intake = run["intake_issue"]
-    if not intake["created"]:
-        return
-    items = search_result.get("items")
-    if search_result.get("incomplete_results") is not False or not isinstance(items, list):
-        raise MetricsError("run.intake_issue: GitHub uniqueness search is incomplete")
     title = f"{INTAKE_TITLE_PREFIX} {run['batch_id']}"
     expected_repository_url = f"https://api.github.com/repos/{REPOSITORY_FULL_NAME}"
     matches = [
         item
-        for item in items
+        for item in repository_issues
         if isinstance(item, dict)
         and item.get("title") == title
         and item.get("repository_url") == expected_repository_url
         and item.get("pull_request") is None
     ]
-    if len(matches) != 1 or matches[0].get("number") != intake["number"]:
+    if intake["created"] and (
+        len(matches) != 1 or matches[0].get("number") != intake["number"]
+    ):
         raise MetricsError(
             "run.intake_issue: batch must have exactly the referenced intake issue"
         )
+    if not intake["created"] and matches:
+        raise MetricsError("run.intake_issue: zero-intake batch has a persisted issue")
 
 
 def verify_intake_issue(
@@ -498,15 +502,14 @@ def main() -> None:
         comments.extend(page)
         url = next_link(links)
 
+    repository_issues: list[dict] | None = None
+
     runs = []
     intake_cache: dict[int, dict] = {}
-    intake_search_cache: dict[str, dict] = {}
     commit_cache: dict[str, dict] = {}
     allowed_authors = set(args.allowed_author)
     for comment in comments:
         body = comment.get("body") or ""
-        if MARKER not in body:
-            continue
         author = ((comment.get("user") or {}).get("login") or "").strip()
         if author not in allowed_authors:
             continue
@@ -514,6 +517,19 @@ def main() -> None:
         if run is None:
             continue
         verify_ledger_comment_time(run, comment)
+        if repository_issues is None:
+            repository_issues = []
+            issues_url = (
+                f"https://api.github.com/repos/{args.repository}/issues"
+                "?state=all&per_page=100"
+            )
+            while issues_url:
+                issue_page, issue_links = api_get(issues_url, token)
+                if not isinstance(issue_page, list):
+                    raise MetricsError("GitHub issues response is not a list")
+                repository_issues.extend(issue_page)
+                issues_url = next_link(issue_links)
+        verify_intake_issue_uniqueness(run, repository_issues)
         repository_commit = run["repository_commit"]
         if repository_commit not in commit_cache:
             compare_url = (
@@ -527,22 +543,6 @@ def main() -> None:
         verify_repository_commit(run, commit_cache[repository_commit])
         intake = run["intake_issue"]
         if intake["created"]:
-            batch_id = run["batch_id"]
-            if batch_id not in intake_search_cache:
-                title = f"{INTAKE_TITLE_PREFIX} {batch_id}"
-                search_query = urlencode(
-                    {
-                        "q": f'repo:{args.repository} is:issue in:title "{title}"',
-                        "per_page": 100,
-                    }
-                )
-                search_result, _ = api_get(
-                    f"https://api.github.com/search/issues?{search_query}", token
-                )
-                if not isinstance(search_result, dict):
-                    raise MetricsError("GitHub intake search response is not an object")
-                intake_search_cache[batch_id] = search_result
-            verify_intake_issue_uniqueness(run, intake_search_cache[batch_id])
             number = intake["number"]
             if number not in intake_cache:
                 issue_url = (
