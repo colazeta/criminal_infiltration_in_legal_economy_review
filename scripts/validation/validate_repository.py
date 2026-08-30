@@ -100,7 +100,16 @@ REQUIRED_HEADERS = {
         "supersedes_publication_id",
     },
     "taxonomy.csv": {"dimension", "code", "label", "taxonomy_version"},
-    "paper_codes.csv": {"paper_id", "dimension", "code"},
+    "paper_codes.csv": {
+        "coding_id",
+        "paper_id",
+        "dimension",
+        "code",
+        "coding_version",
+        "is_current",
+        "supersedes_coding_id",
+    },
+    "exclusion_reasons.csv": {"code", "label", "definition"},
     "work_relations.csv": {
         "relation_id",
         "source_paper_id",
@@ -236,6 +245,11 @@ def check_actions_pinned() -> None:
         "CURATOR: ${{ github.actor }}",
         "scripts/curation/apply_action.py",
         "pull-requests: write",
+        "## Changed files",
+        "## Validation commands and results",
+        "## Record counts after the change",
+        "External retrieval performed",
+        "Unresolved human decisions",
     ):
         if phrase not in curation:
             fail(f"Curation workflow missing safeguard: {phrase}")
@@ -304,6 +318,21 @@ def check_governance_copy() -> None:
     for phrase in ("GitHub Actions", ".github/workflows/archive.yml", "site/"):
         if phrase not in pages:
             fail(f"GitHub Pages guide missing deployment element: {phrase}")
+
+    with (ROOT / "data/registry/exclusion_reasons.csv").open(
+        newline="", encoding="utf-8-sig"
+    ) as handle:
+        machine_codes = {
+            row.get("code", "").strip() for row in csv.DictReader(handle)
+        }
+    codebook = (ROOT / "docs/methodology/eligibility.md").read_text(
+        encoding="utf-8"
+    )
+    documented_codes = set(
+        re.findall(r"^- `([A-Z][A-Z0-9_]+)`$", codebook, re.M)
+    )
+    if machine_codes != documented_codes:
+        fail("Machine-readable exclusion reasons differ from the eligibility codebook")
 
 
 def main() -> None:

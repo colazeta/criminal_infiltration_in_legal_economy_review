@@ -176,6 +176,12 @@ def validate_assets() -> None:
     curator = (SITE / "curate.html").read_text(encoding="utf-8")
     if re.search(r"<(?:form|input|textarea)\b", curator, re.I):
         fail("curate.html must not collect credentials or submit unauthenticated data")
+    for private_registry_reference in ("data/registry", "papers.csv"):
+        if private_registry_reference in curator:
+            fail(
+                "curate.html must not link directly to governed registry data: "
+                f"{private_registry_reference}"
+            )
     for phrase in (
         "GitHub Actions",
         "personal access token",

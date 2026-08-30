@@ -37,13 +37,15 @@ Registra che un paper non appartiene alla review.
 Compilare:
 
 - `paper_id`;
-- `reason_code`: una ragione breve e stabile, per esempio `outside_scope`;
+- `reason_code`: un codice controllato presente in
+  `data/registry/exclusion_reasons.csv`, per esempio `TOPIC_OFF_SCOPE`;
 - `reason`: la motivazione specifica per quel paper;
 - `evidence`: la base esaminata, con un riferimento breve al punto rilevante;
 - `confidence`: quanto è solida la decisione.
 
-Il workflow aggiunge una nuova decisione `not_eligible`, porta il record nello
-stato `review_excluded` e assicura che resti fuori dalla biblioteca pubblica.
+Il workflow aggiunge la decisione di esclusione coerente con il codice, porta il
+record nello stato `review_excluded` e assicura che resti fuori dalla biblioteca
+pubblica. Per un vero duplicato bisogna usare `merge_duplicate`.
 
 ### `merge_duplicate`
 
@@ -66,7 +68,9 @@ cancellate.
 1. Aprire la [Curator console in GitHub Actions](https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/actions/workflows/curation.yml).
 2. Selezionare **Run workflow**.
 3. Scegliere l'operazione.
-4. Compilare soltanto i campi pertinenti.
+4. Recuperare il `paper_id` dallo spazio di revisione autorizzato e compilare
+   soltanto i campi pertinenti. Il portale pubblico non collega il registro
+   editoriale grezzo.
 5. Scrivere `APPLY` nel campo di conferma.
 6. Avviare il workflow.
 
@@ -78,6 +82,10 @@ Il workflow:
 4. prova ad aprire una pull request;
 5. se GitHub impedisce al token automatico di aprire PR, mostra nella pagina
    della run il collegamento **Create pull request** già pronto.
+
+La pull request elenca file modificati, comandi e risultati dei controlli,
+conteggi dell'archivio, recuperi esterni e decisioni ancora aperte. Questo rende
+la modifica controllabile senza ricostruire manualmente la run.
 
 Il sistema non applica un'operazione se `APPLY` manca, se un ID non esiste, se
 il tema non appartiene alla tassonomia o se la modifica produrrebbe uno stato

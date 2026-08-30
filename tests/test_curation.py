@@ -36,11 +36,14 @@ HEADERS = {
         "supersedes_publication_id", "version_note", "updated_at",
     ],
     "paper_codes.csv": [
-        "paper_id", "dimension", "code", "evidence_quote", "coder", "coded_at", "notes",
+        "coding_id", "paper_id", "dimension", "code", "coding_version",
+        "evidence_quote", "coder", "coded_at", "is_current",
+        "supersedes_coding_id", "notes",
     ],
     "taxonomy.csv": [
         "dimension", "code", "label", "definition", "parent_code", "taxonomy_version",
     ],
+    "exclusion_reasons.csv": ["code", "label", "definition"],
     "work_relations.csv": [
         "relation_id", "source_paper_id", "target_paper_id", "relation", "reason",
         "evidence", "curator", "decided_at",
@@ -103,12 +106,16 @@ class CuratorActionTests(unittest.TestCase):
             ],
             "paper_codes.csv": [
                 row(
-                    paper_id="P000001", dimension="topic", code="alpha",
-                    evidence_quote="Fixture A", coder="fixture", coded_at="2026-01-01", notes="",
+                    coding_id="PC000001", paper_id="P000001", dimension="topic",
+                    code="alpha", coding_version="1", evidence_quote="Fixture A",
+                    coder="fixture", coded_at="2026-01-01", is_current="true",
+                    supersedes_coding_id="", notes="",
                 ),
                 row(
-                    paper_id="P000002", dimension="topic", code="beta",
-                    evidence_quote="Fixture B", coder="fixture", coded_at="2026-01-01", notes="",
+                    coding_id="PC000002", paper_id="P000002", dimension="topic",
+                    code="beta", coding_version="1", evidence_quote="Fixture B",
+                    coder="fixture", coded_at="2026-01-01", is_current="true",
+                    supersedes_coding_id="", notes="",
                 ),
             ],
             "taxonomy.csv": [
@@ -119,6 +126,24 @@ class CuratorActionTests(unittest.TestCase):
                 row(
                     dimension="topic", code="beta", label="Beta", definition="Second topic",
                     parent_code="", taxonomy_version="1.0",
+                ),
+            ],
+            "exclusion_reasons.csv": [
+                row(
+                    code="TOPIC_OFF_SCOPE", label="Outside scope",
+                    definition="The work is outside the review topic.",
+                ),
+                row(
+                    code="DUPLICATE_RECORD", label="Duplicate",
+                    definition="Another record represents the work.",
+                ),
+                row(
+                    code="NOT_ACADEMIC_SOURCE", label="Not academic",
+                    definition="The item is not an academic source.",
+                ),
+                row(
+                    code="FULL_TEXT_UNAVAILABLE", label="Unavailable",
+                    definition="The necessary full text is unavailable.",
                 ),
             ],
             "work_relations.csv": [],
@@ -211,26 +236,50 @@ class CuratorActionTests(unittest.TestCase):
         self.assertEqual("beta", current[0]["topic_code"])
         self.assertEqual("PUB000001V001", current[0]["supersedes_publication_id"])
         codes = [
-            (row["dimension"], row["code"])
+            row
             for row in editor.tables["paper_codes.csv"]
             if row["paper_id"] == "P000001"
         ]
-        self.assertEqual([("topic", "beta")], codes)
+        self.assertEqual(2, len(codes))
+        self.assertEqual("Fixture A", codes[0]["evidence_quote"])
+        self.assertEqual("false", codes[0]["is_current"])
+        self.assertEqual("beta", codes[1]["code"])
+        self.assertEqual("2", codes[1]["coding_version"])
+        self.assertEqual("true", codes[1]["is_current"])
+        self.assertEqual("PC000001", codes[1]["supersedes_coding_id"])
 
     def test_exclude_work_preserves_history_and_withholds_current_version(self) -> None:
         editor = RegistryEditor(self.root)
-        editor.apply(self.instruction("exclude_work", reason_code="outside_scope"))
+        editor.apply(self.instruction("exclude_work", reason_code="TOPIC_OFF_SCOPE"))
         paper = next(row for row in editor.tables["papers.csv"] if row["paper_id"] == "P000001")
         self.assertEqual("review_excluded", paper["canonical_status"])
         decisions = [row for row in editor.tables["screening_decisions.csv"] if row["paper_id"] == "P000001"]
         self.assertEqual(2, len(decisions))
         current_decision = next(row for row in decisions if row["is_current"] == "true")
         self.assertEqual("not_eligible", current_decision["decision"])
-        self.assertEqual("outside_scope", current_decision["exclusion_reason_code"])
+        self.assertEqual("TOPIC_OFF_SCOPE", current_decision["exclusion_reason_code"])
         publications = [row for row in editor.tables["publications.csv"] if row["paper_id"] == "P000001"]
         self.assertEqual(2, len(publications))
         current_publication = next(row for row in publications if row["is_current"] == "true")
         self.assertEqual("withheld", current_publication["publication_status"])
+
+    def test_exclude_work_rejects_an_invented_reason_code(self) -> None:
+        editor = RegistryEditor(self.root)
+        with self.assertRaisesRegex(CurationError, "Unknown exclusion reason code"):
+            editor.apply(
+                self.instruction("exclude_work", reason_code="outside_scope")
+            )
+
+    def test_source_reason_uses_the_matching_decision(self) -> None:
+        editor = RegistryEditor(self.root)
+        editor.apply(
+            self.instruction("exclude_work", reason_code="NOT_ACADEMIC_SOURCE")
+        )
+        current = next(
+            row for row in editor.tables["screening_decisions.csv"]
+            if row["paper_id"] == "P000001" and row["is_current"] == "true"
+        )
+        self.assertEqual("not_academic", current["decision"])
 
     def test_merge_duplicate_moves_identity_and_keeps_retired_history(self) -> None:
         editor = RegistryEditor(self.root)
@@ -266,6 +315,12 @@ class CuratorActionTests(unittest.TestCase):
             "duplicate",
             next(row for row in source_decisions if row["is_current"] == "true")["decision"],
         )
+        source_codes = [
+            row for row in editor.tables["paper_codes.csv"]
+            if row["paper_id"] == "P000002"
+        ]
+        self.assertEqual(1, len(source_codes))
+        self.assertEqual("Fixture B", source_codes[0]["evidence_quote"])
 
 
 if __name__ == "__main__":

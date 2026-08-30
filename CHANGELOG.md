@@ -15,6 +15,7 @@ follow semantic versioning while the project is in prerelease.
 - guarded GitHub intake lane added to the existing Daily AML & CI Research Work
   automation without consuming another scheduled-task slot;
 - append-only work-relation registry and curator-operation tests;
+- controlled exclusion-reason registry and versioned topic-coding history;
 - separate plain-language and technical literature-expansion guides.
 
 ### Changed
@@ -24,6 +25,8 @@ follow semantic versioning while the project is in prerelease.
 - extended validation to curator actions, work relations and every workflow.
 - repaired malformed historical screening and execution-metric rows; row-width
   and header defects are now validation failures.
+- removed direct raw-registry access from the public curator page and expanded
+  every generated curator PR with the complete audit record.
 
 ## [0.2.0] - 2026-08-30
 

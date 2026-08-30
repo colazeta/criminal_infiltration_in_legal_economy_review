@@ -35,6 +35,10 @@ documented contribution.
 
 ## Exclusion reason codes
 
+The machine-readable controlled list is
+[`data/registry/exclusion_reasons.csv`](../../data/registry/exclusion_reasons.csv).
+The codes below must match it exactly:
+
 - `TOPIC_OFF_SCOPE`
 - `NO_CRIMINAL_ACTOR_OR_INTEREST`
 - `NO_LEGAL_ECONOMY_LINK`

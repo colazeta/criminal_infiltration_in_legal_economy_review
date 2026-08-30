@@ -26,6 +26,7 @@ REGISTRY_FILES = (
     "publications.csv",
     "paper_codes.csv",
     "taxonomy.csv",
+    "exclusion_reasons.csv",
     "work_relations.csv",
 )
 
@@ -253,41 +254,72 @@ class RegistryEditor:
             )
 
         codes = self.tables["paper_codes.csv"]
-        codes[:] = [
+        history = [
             row
             for row in codes
-            if not (
-                row.get("paper_id") == instruction.paper_id
-                and row.get("dimension") == "topic"
-            )
+            if row.get("paper_id") == instruction.paper_id
+            and row.get("dimension") == "topic"
         ]
-        codes.append(
-            {
-                "paper_id": instruction.paper_id,
-                "dimension": "topic",
-                "code": topic,
-                "evidence_quote": evidence,
-                "coder": instruction.actor,
-                "coded_at": instruction.action_date,
-                "notes": reason,
-            }
-        )
+        current = [
+            row
+            for row in history
+            if (row.get("is_current") or "").strip().lower() == "true"
+        ]
+        if len(current) > 1 or (history and len(current) != 1):
+            raise CurationError(
+                f"{instruction.paper_id} has an invalid current topic-code history"
+            )
+        previous = current[0] if current else None
+        if previous:
+            previous["is_current"] = "false"
+        version = max(
+            (int(row["coding_version"]) for row in history),
+            default=0,
+        ) + 1
+        new_code = {
+            "coding_id": next_identifier(codes, "coding_id", "PC"),
+            "paper_id": instruction.paper_id,
+            "dimension": "topic",
+            "code": topic,
+            "coding_version": str(version),
+            "evidence_quote": evidence,
+            "coder": instruction.actor,
+            "coded_at": instruction.action_date,
+            "is_current": "true",
+            "supersedes_coding_id": previous["coding_id"] if previous else "",
+            "notes": reason,
+        }
+        if previous:
+            codes.insert(codes.index(previous) + 1, new_code)
+        else:
+            codes.append(new_code)
 
     def exclude_work(self, instruction: Instruction) -> None:
         paper = self.require_active_paper(instruction.paper_id)
         reason_code = require_text(instruction.reason_code, "exclusion reason code", 100)
-        if not re.fullmatch(r"[a-z0-9][a-z0-9_-]*", reason_code):
+        valid_reason_codes = {
+            row["code"] for row in self.tables["exclusion_reasons.csv"]
+        }
+        if reason_code not in valid_reason_codes:
             raise CurationError(
-                "exclusion reason code must use lowercase letters, numbers, _ or -"
+                f"Unknown exclusion reason code: {reason_code}"
+            )
+        if reason_code == "DUPLICATE_RECORD":
+            raise CurationError(
+                "Use merge_duplicate when another canonical record represents the work"
             )
         reason = require_text(instruction.reason, "reason")
         evidence = require_text(instruction.evidence, "evidence basis")
+        decision = {
+            "NOT_ACADEMIC_SOURCE": "not_academic",
+            "FULL_TEXT_UNAVAILABLE": "not_retrievable",
+        }.get(reason_code, "not_eligible")
         paper["canonical_status"] = "review_excluded"
         paper["updated_at"] = instruction.action_date
         self.append_decision(
             instruction.paper_id,
             instruction,
-            "not_eligible",
+            decision,
             reason_code,
             reason,
             f"Owner-curator action {instruction.run_id}. Evidence basis: {evidence}",
@@ -356,29 +388,11 @@ class RegistryEditor:
             if row.get("paper_id") == instruction.paper_id:
                 row["paper_id"] = target_id
 
-        codes = self.tables["paper_codes.csv"]
-        target_keys = {
-            (row.get("dimension"), row.get("code"))
-            for row in codes
-            if row.get("paper_id") == target_id
-        }
-        reconciled_codes: list[dict[str, str]] = []
-        for row in codes:
-            if row.get("paper_id") != instruction.paper_id:
-                reconciled_codes.append(row)
-                continue
-            key = (row.get("dimension"), row.get("code"))
-            if key not in target_keys:
-                row["paper_id"] = target_id
-                reconciled_codes.append(row)
-                target_keys.add(key)
-        self.tables["paper_codes.csv"] = reconciled_codes
-
         self.append_decision(
             instruction.paper_id,
             instruction,
             "duplicate",
-            "duplicate_record",
+            "DUPLICATE_RECORD",
             f"Duplicate of {target_id}: {reason}",
             f"Owner-curator action {instruction.run_id}. Identity evidence: {evidence}",
         )

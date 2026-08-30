@@ -11,7 +11,8 @@ validated; no search automation writes here directly.
 | `screening_decisions.csv` | One historical or current screening decision |
 | `publications.csv` | One versioned public-release state and annotation |
 | `taxonomy.csv` | One controlled code definition |
-| `paper_codes.csv` | One evidence-backed code applied to a work |
+| `paper_codes.csv` | One versioned evidence-backed code applied to a work |
+| `exclusion_reasons.csv` | One controlled screening-exclusion reason |
 | `work_relations.csv` | One curator-confirmed link between related work records |
 | `editorial_summary.csv` | One aggregate public-safe queue snapshot |
 | `execution_metrics.csv` | One E0 or E1/E2/E3 execution metric row |

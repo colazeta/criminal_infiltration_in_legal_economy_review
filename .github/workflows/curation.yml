@@ -26,7 +26,7 @@ on:
         required: false
         type: string
       reason_code:
-        description: Codice breve di esclusione; serve solo per exclude_work
+        description: Codice controllato come TOPIC_OFF_SCOPE; serve solo per exclude_work
         required: false
         type: string
       reason:
@@ -139,12 +139,52 @@ jobs:
         run: |
           compare_url="https://github.com/${GITHUB_REPOSITORY}/compare/main...${BRANCH}?expand=1"
           run_url="https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          body_file="$RUNNER_TEMP/curation-pr.md"
+          canonical_count=$(python3 -c 'import csv; print(sum(1 for _ in csv.DictReader(open("data/registry/papers.csv", encoding="utf-8-sig"))))')
+          publication_count=$(python3 -c 'import csv; print(sum(1 for _ in csv.DictReader(open("data/registry/publications.csv", encoding="utf-8-sig"))))')
+          public_count=$(python3 -c 'import json; print(len(json.load(open("site/data/archive.json", encoding="utf-8"))["records"]))')
+          {
+            echo "## Explicit curator instruction"
+            echo
+            echo "- Operation: `${OPERATION}`"
+            echo "- Paper: `${PAPER_ID}`"
+            echo "- GitHub actor: `${GITHUB_ACTOR}`"
+            echo "- Validated workflow run: ${run_url}"
+            echo
+            echo "## Changed files"
+            echo
+            git diff --name-only main...HEAD | sed 's/^/- `/' | sed 's/$/`/'
+            echo
+            echo "## Validation commands and results"
+            echo
+            echo '```text'
+            echo "PASS python scripts/validation/validate_repository.py"
+            echo "PASS python -m unittest discover -s tests -p 'test_*.py'"
+            echo "PASS python scripts/build_archive.py"
+            echo "PASS python scripts/validation/validate_archive.py"
+            echo "PASS python scripts/validation/validate_site.py"
+            echo "PASS node --check site/app.js"
+            echo "PASS python scripts/report_saturation.py"
+            echo '```'
+            echo
+            echo "## Record counts after the change"
+            echo
+            echo "- Canonical work rows: ${canonical_count}"
+            echo "- Versioned publication rows: ${publication_count}"
+            echo "- Current public records: ${public_count}"
+            echo
+            echo "## Retrieval and human decisions"
+            echo
+            echo "- External retrieval performed: none; this workflow only applies the explicit form instruction."
+            echo "- Unresolved human decisions: an authorised person must inspect and merge this PR."
+            echo "- Automatic eligibility inference or merge: none."
+          } > "$body_file"
           set +e
           pr_url=$(gh pr create \
             --base main \
             --head "$BRANCH" \
             --title "Curate ${PAPER_ID}: ${OPERATION}" \
-            --body "Prepared from an explicit owner-curator instruction. Full validation passed in ${run_url}. Registry and publication changes are not auto-merged." 2>pr-error.log)
+            --body-file "$body_file" 2>pr-error.log)
           pr_status=$?
           set -e
           {
@@ -165,4 +205,8 @@ jobs:
               sed -n '1,20p' pr-error.log
               echo '```'
             fi
+            echo
+            echo "### Audit record to retain in the pull request"
+            echo
+            cat "$body_file"
           } >> "$GITHUB_STEP_SUMMARY"
