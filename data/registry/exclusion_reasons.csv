@@ -1,0 +1,13 @@
+code,label,definition
+TOPIC_OFF_SCOPE,Topic outside scope,The work does not address the review topic.
+NO_CRIMINAL_ACTOR_OR_INTEREST,No criminal actor or interest,The evidence does not identify a criminal actor or interest.
+NO_LEGAL_ECONOMY_LINK,No legal-economy link,The evidence does not identify a target or relationship in the legal economy.
+NO_INFILTRATION_RELATION,No infiltration relation,The evidence does not support sustained access participation influence control or embeddedness.
+MENTION_ONLY_NOT_ANALYTICAL,Mention only,The relationship is mentioned but is not substantively analysed.
+ADJACENT_PHENOMENON_ONLY,Adjacent phenomenon only,The work addresses a neighbouring phenomenon without the infiltration relation.
+CRIME_DOMAIN_MISMATCH,Crime-domain mismatch,The criminal phenomenon is outside the review boundary.
+DOCUMENT_TYPE_EXCLUDED,Document type excluded,The item does not meet the included scholarly document-type rule.
+LANGUAGE_EXCLUDED,Language excluded,The item falls outside the documented language rule.
+DUPLICATE_RECORD,Duplicate record,Another canonical record represents the same scholarly work.
+NOT_ACADEMIC_SOURCE,Not an academic source,The item is outside the scholarly-source scope.
+FULL_TEXT_UNAVAILABLE,Full text unavailable,The evidence required for a defensible decision could not be obtained.

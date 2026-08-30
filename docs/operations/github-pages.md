@@ -6,6 +6,7 @@ The repository uses a custom GitHub Actions workflow rather than Jekyll.
 
 - Public URL: <https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/>
 - Site source: `site/`
+- Curator help page: `site/curate.html`
 - Workflow: `.github/workflows/archive.yml`
 - Publishing branch: `main`
 - GitHub Pages source: **GitHub Actions**
@@ -17,10 +18,13 @@ has its own governed build and deploy workflow.
 
 ## How the first public deployment happens
 
-1. Review the release pull request and all unresolved human decisions.
+1. Confirm that every scientific decision in the release was explicitly made by
+   an authorised curator. A maintenance-only release may proceed under continuing
+   owner authority.
 2. Confirm the PR's **Validate and publish archive** workflow is green.
-3. Merge the reviewed PR into `main` manually. Registry/publication changes are
-   never auto-merged.
+3. Merge the validated PR into `main`. Registry/publication changes are never
+   auto-merged; documentation, code and site maintenance may be merged by an
+   authorised agent when the owner has already granted continuing authority.
 4. The push to `main` starts `.github/workflows/archive.yml`.
 5. The `quality` job validates the repository, tests, deterministic export,
    archive, site and JavaScript.
@@ -30,7 +34,9 @@ has its own governed build and deploy workflow.
 8. Open **Settings → Pages** and use **Visit site**, or open the public URL above.
 
 GitHub states that a first publication or update can take several minutes. The
-site is static: it needs no server, database, token or secret at runtime.
+site is static: it needs no server, database, token or secret at runtime. The
+public curator page therefore contains instructions and links only; the
+write-capable form remains inside authenticated GitHub Actions.
 
 ## What happens on later updates
 

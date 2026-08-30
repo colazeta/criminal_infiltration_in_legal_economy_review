@@ -1,0 +1,214 @@
+name: Curator console
+
+run-name: "Curator: ${{ inputs.operation }} ${{ inputs.paper_id }}"
+
+on:
+  workflow_dispatch:
+    inputs:
+      operation:
+        description: Operazione da applicare
+        required: true
+        type: choice
+        options:
+          - change_topic
+          - exclude_work
+          - merge_duplicate
+      paper_id:
+        description: Paper ID da modificare o record duplicato da ritirare
+        required: true
+        type: string
+      target_paper_id:
+        description: Record che sopravvive; serve solo per merge_duplicate
+        required: false
+        type: string
+      topic_code:
+        description: Nuovo codice tematico; serve solo per change_topic
+        required: false
+        type: string
+      reason_code:
+        description: Codice controllato come TOPIC_OFF_SCOPE; serve solo per exclude_work
+        required: false
+        type: string
+      reason:
+        description: Motivazione specifica della decisione
+        required: true
+        type: string
+      evidence:
+        description: Fonte o punto esaminato che sostiene la decisione; non incollare lunghi testi
+        required: true
+        type: string
+      confidence:
+        description: Solidità della decisione
+        required: true
+        default: high
+        type: choice
+        options:
+          - high
+          - medium
+          - low
+      confirmation:
+        description: Scrivere esattamente APPLY per preparare la modifica
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: curation-${{ github.actor }}
+  cancel-in-progress: false
+
+jobs:
+  prepare-change:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: main
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.11"
+
+      - name: Apply explicit curator instruction
+        env:
+          OPERATION: ${{ inputs.operation }}
+          PAPER_ID: ${{ inputs.paper_id }}
+          TARGET_PAPER_ID: ${{ inputs.target_paper_id }}
+          TOPIC_CODE: ${{ inputs.topic_code }}
+          REASON_CODE: ${{ inputs.reason_code }}
+          REASON: ${{ inputs.reason }}
+          EVIDENCE: ${{ inputs.evidence }}
+          CONFIDENCE: ${{ inputs.confidence }}
+          CONFIRMATION: ${{ inputs.confirmation }}
+          CURATOR: ${{ github.actor }}
+          CURATION_RUN_ID: ${{ github.run_id }}-${{ github.run_attempt }}
+        run: |
+          action_date="$(date -u +%F)"
+          python scripts/curation/apply_action.py \
+            --operation "$OPERATION" \
+            --paper-id "$PAPER_ID" \
+            --target-paper-id "$TARGET_PAPER_ID" \
+            --topic-code "$TOPIC_CODE" \
+            --reason-code "$REASON_CODE" \
+            --reason "$REASON" \
+            --evidence "$EVIDENCE" \
+            --confidence "$CONFIDENCE" \
+            --actor "$CURATOR" \
+            --date "$action_date" \
+            --run-id "$CURATION_RUN_ID" \
+            --confirm "$CONFIRMATION"
+
+      - name: Validate the complete archive
+        run: |
+          python scripts/validation/validate_repository.py
+          python -m unittest discover -s tests -p 'test_*.py'
+          python scripts/build_archive.py
+          python scripts/validation/validate_archive.py
+          python scripts/validation/validate_site.py
+          node --check site/app.js
+          python scripts/report_saturation.py
+
+      - name: Create a review branch
+        id: branch
+        env:
+          OPERATION: ${{ inputs.operation }}
+          PAPER_ID: ${{ inputs.paper_id }}
+        run: |
+          branch="curation/run-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$branch"
+          git add data/registry site/data
+          git commit -m "Curate ${PAPER_ID}: ${OPERATION}"
+          git push origin "$branch"
+          echo "branch=$branch" >> "$GITHUB_OUTPUT"
+
+      - name: Open a visible pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH: ${{ steps.branch.outputs.branch }}
+          OPERATION: ${{ inputs.operation }}
+          PAPER_ID: ${{ inputs.paper_id }}
+        run: |
+          run_url="https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          body_file="$RUNNER_TEMP/curation-pr.md"
+          canonical_count=$(python3 -c 'import csv; print(sum(1 for _ in csv.DictReader(open("data/registry/papers.csv", encoding="utf-8-sig"))))')
+          publication_count=$(python3 -c 'import csv; print(sum(1 for _ in csv.DictReader(open("data/registry/publications.csv", encoding="utf-8-sig"))))')
+          public_count=$(python3 -c 'import json; print(len(json.load(open("site/data/archive.json", encoding="utf-8"))["records"]))')
+          {
+            echo "## Explicit curator instruction"
+            echo
+            echo "- Operation: `${OPERATION}`"
+            echo "- Paper: `${PAPER_ID}`"
+            echo "- GitHub actor: `${GITHUB_ACTOR}`"
+            echo "- Validated workflow run: ${run_url}"
+            echo
+            echo "## Changed files"
+            echo
+            git diff --name-only main...HEAD | sed 's/^/- `/' | sed 's/$/`/'
+            echo
+            echo "## Validation commands and results"
+            echo
+            echo '```text'
+            echo "PASS python scripts/validation/validate_repository.py"
+            echo "PASS python -m unittest discover -s tests -p 'test_*.py'"
+            echo "PASS python scripts/build_archive.py"
+            echo "PASS python scripts/validation/validate_archive.py"
+            echo "PASS python scripts/validation/validate_site.py"
+            echo "PASS node --check site/app.js"
+            echo "PASS python scripts/report_saturation.py"
+            echo '```'
+            echo
+            echo "## Record counts after the change"
+            echo
+            echo "- Canonical work rows: ${canonical_count}"
+            echo "- Versioned publication rows: ${publication_count}"
+            echo "- Current public records: ${public_count}"
+            echo
+            echo "## Retrieval and human decisions"
+            echo
+            echo "- External retrieval performed: none; this workflow only applies the explicit form instruction."
+            echo "- Unresolved human decisions: an authorised person must inspect and merge this PR."
+            echo "- Automatic eligibility inference or merge: none."
+          } > "$body_file"
+          encoded_title=$(python3 -c 'import sys; from urllib.parse import quote; print(quote(sys.argv[1], safe=""))' "Curate ${PAPER_ID}: ${OPERATION}")
+          encoded_body=$(python3 -c 'import sys; from urllib.parse import quote; print(quote(sys.stdin.read(), safe=""))' < "$body_file")
+          compare_url="https://github.com/${GITHUB_REPOSITORY}/compare/main...${BRANCH}?expand=1&title=${encoded_title}&body=${encoded_body}"
+          set +e
+          pr_url=$(gh pr create \
+            --base main \
+            --head "$BRANCH" \
+            --title "Curate ${PAPER_ID}: ${OPERATION}" \
+            --body-file "$body_file" 2>pr-error.log)
+          pr_status=$?
+          set -e
+          {
+            echo "## Curation change prepared"
+            echo
+            echo "Operation: \`${OPERATION}\`"
+            echo
+            echo "Paper: \`${PAPER_ID}\`"
+            echo
+            if [ "$pr_status" -eq 0 ]; then
+              echo "Pull request: ${pr_url}"
+            else
+              echo "GitHub did not allow this workflow token to open a pull request."
+              echo
+              echo "[Create the prefilled pull request](${compare_url})"
+              echo
+              echo '```text'
+              sed -n '1,20p' pr-error.log
+              echo '```'
+            fi
+            echo
+            echo "### Audit record to retain in the pull request"
+            echo
+            cat "$body_file"
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -1,241 +1,223 @@
-# Literature expansion strategy
+# Come cresce l'archivio della letteratura
 
-## Purpose
+Questa è la versione operativa e leggibile della strategia di ricerca. Spiega
+che cosa viene fatto, in quale ordine e quali decisioni restano umane. La
+[reference tecnica](expansion-reference.md) conserva i dettagli necessari per
+audit, metriche e riproducibilità.
 
-The aim is not to collect the largest possible pile of records. It is to expand
-the corpus across terminology, disciplines, sectors, countries and citation
-networks while retaining a reproducible account of what was searched, what was
-found and why a work did or did not progress.
+## La versione breve
 
-The strategy combines:
+L'archivio cresce attraverso sei passaggi:
 
-1. **known-item calibration**, so searches can retrieve benchmark works;
-2. **concept-family searching**, so the review is not tied to the exact phrase
-   “criminal infiltration”;
-3. **semantic gap searching**, to find differently worded research;
-4. **backward and forward citation searching**, to traverse the scholarly graph;
-5. **coverage-gap analysis**, to target under-represented sectors, mechanisms,
-   methods and geographies;
-6. **living surveillance**, to identify new work after each formal cycle.
+1. **Verificare la ricerca.** Controlliamo che ritrovi paper già noti e che non
+   confonda l'infiltrazione con temi soltanto vicini.
+2. **Cercare in più fonti.** Usiamo parole e strumenti diversi perché nessun
+   database e nessuna espressione coprono da soli l'intero campo.
+3. **Unire i risultati ripetuti.** Conserviamo ogni luogo in cui un paper è stato
+   trovato, ma mostriamo al revisore un solo lavoro invece di molte copie.
+4. **Seguire bibliografie e citazioni.** Guardiamo i lavori citati dai paper
+   rilevanti e quelli più recenti che li citano.
+5. **Leggere e classificare.** Una persona decide se il lavoro è rilevante e
+   quali etichette sono davvero sostenute dal materiale esaminato.
+6. **Misurare ciò che può mancare.** I risultati indicano dove deve concentrarsi
+   il ciclo successivo.
 
-PRISMA 2020, PRISMA-S and PRISMA-LSR guide reporting and update transparency.
-They do not by themselves prove that a search is complete.
+Trovare un paper non significa includerlo. Includere un paper non significa
+renderlo automaticamente pubblico.
 
-## The coverage model
+## Le tre fasi di ogni ciclo
 
-Every search family draws from several concept blocks. Blocks are adapted to
-each source; one generic Boolean string must never be copied across providers.
+Nel repository compaiono le sigle E1, E2 ed E3:
 
-| Block | Question | Illustrative language, not a fixed query |
+| Fase | Significato semplice | Attività |
 |---|---|---|
-| Criminal interest | Who benefits or exercises influence? | organised crime, mafia, criminal group/network, illicit actor, mafia-type association |
-| Relational mechanism | What connects the actor to the legal economy? | infiltration, control, capture, ownership, participation, influence, embeddedness, collusion, front company |
-| Legal-economy target | Where does the relationship operate? | company, firm, business, market, sector, procurement, supply chain, professional service, public contract |
-| Organisational position | Through which role or asset? | shareholder, beneficial owner, director, manager, employee, intermediary, subcontractor, concession holder |
-| Consequence or indicator | What is observed? | market distortion, procurement allocation, governance change, network position, firm performance, violence or corruption as an enabling mechanism |
-| Geography and terminology | Which local vocabulary may hide the construct? | mafia penetration, criminal entrepreneurship, economic conditioning, territorial transplantation and equivalent non-English terms |
+| **E1** | Cercare nelle fonti scientifiche | Eseguire ricerche documentate in database e strumenti accademici |
+| **E2** | Guardare indietro | Esaminare le bibliografie dei paper rilevanti |
+| **E3** | Guardare avanti | Cercare i lavori successivi che citano i paper rilevanti |
 
-Money laundering, corruption, facilitation, passive investment and ordinary
-corporate offending are near neighbours. They are searched when useful for
-recall, but remain ineligible unless the relational infiltration test is met.
+Un ciclo formale è completo soltanto quando tutte e tre le fasi sono state
+eseguite e gli eventuali errori sono stati registrati. Un avviso rapido di un
+motore di ricerca è utile, ma non equivale a un ciclo completo.
 
-## Search workstreams
+## Che cosa cerchiamo
 
-Each E1 execution covers the workstreams below or records why one is not
-applicable. A workstream is a coverage objective, not a single query.
+La sola espressione “criminal infiltration” è troppo stretta. Un paper rilevante
+può parlare invece di controllo di imprese, partecipazione nell'economia legale,
+proprietà criminale, espansione territoriale, società di facciata o influenza
+stabile su un mercato.
 
-| ID | Workstream | Main blind spot addressed |
-|---|---|---|
-| W1 | Direct infiltration construct | Papers using the review's central vocabulary |
-| W2 | Ownership, control and governance | Research describing the relationship without using “infiltration” |
-| W3 | Markets, procurement and sectors | Sector-specific studies hidden in specialist literatures |
-| W4 | Territorial expansion and embeddedness | Mafia transplantation, migration and durable local presence |
-| W5 | Methods, data and indicators | Network, judicial, company, interview and mixed-method evidence |
-| W6 | Geography and language | Local concepts and non-English titles/abstracts |
-| W7 | Recent research and changed terminology | New publications and emerging labels since the previous coverage date |
+Ogni ricerca combina alcune di queste domande:
 
-## What each source is for
-
-Sources overlap intentionally. Agreement is useful; unique retrievals expose
-coverage gaps. Only providers authorised in
-[`docs/governance/sources.md`](../governance/sources.md) may be used.
-
-| Source | Primary role | It must not be used to do |
-|---|---|---|
-| Scite | Primary scholarly discovery, citation context and access/retraction signals | Decide eligibility from a result or citation label |
-| OpenAlex | Reproducible structured/full-text search, author/topic expansion and citation metadata | Supply final metadata without verification |
-| Exa Search | Natural-language semantic search for terminology and disciplinary blind spots | Replace a logged database search or silently fetch returned domains |
-| Crossref | DOI resolution and bibliographic verification | Establish relevance from metadata alone |
-| Semantic Scholar | Independent paper search and citation/reference graph | Override identity conflicts automatically |
-| OpenCitations | Open DOI-based backward/forward citation links | Be treated as a complete citation graph |
-| Unpaywall | Locate lawful open-access versions | Treat access status as screening evidence |
-
-Scopus, Web of Science, ProQuest, Google Scholar or institutional catalogues may
-be added only through the reviewed source-authorisation procedure. A manual
-portal search is logged just as carefully as an API execution.
-
-## Phase A: calibrate before expanding
-
-1. Create a **positive benchmark set** of independently verified relevant works.
-2. Create a **near-neighbour set** covering laundering, corruption, passive
-   investment and corporate crime that should not pass without relational
-   evidence.
-3. Test each main query family against the positive benchmarks available in that
-   source.
-4. Revise a query that misses a benchmark for an explainable terminology reason;
-   do not add every benchmark title as a hidden shortcut.
-5. Record benchmark hits/misses and any source-indexing limitation in the cycle
-   issue.
-
-Calibration checks sensitivity and conceptual drift. It is not a statistical
-estimate of total recall.
-
-## Phase B: run E1 database and scholarly searches
-
-For every source/query combination, record:
-
-- cycle and execution ID;
-- source, platform and access mode;
-- exact source-specific query or natural-language prompt;
-- filters, coverage dates, sort order, pagination and result cap;
-- request date and repository commit used for deduplication;
-- returned occurrences, unique candidates and errors;
-- raw snapshot or verification artifact and checksum when retained.
-
-Retrieve all results within the declared query/filter when the interface permits
-it. If a provider imposes a cap, record it and examine overlap and the tail of the
-ranking before claiming that the query was exhausted. Never describe “top 20” as
-complete retrieval.
-
-### Recommended first-pass division
-
-- **Scite:** run all seven workstreams as scholarly searches.
-- **OpenAlex:** run reproducible concept-family searches and structured filters;
-  keep the OpenAlex work ID alongside any DOI.
-- **Exa:** run distinct natural-language descriptions for W2, W4, W5 and W6,
-  using the research-paper/publication category. Its purpose is semantic
-  difference, not synonym repetition.
-- **Crossref:** verify identifiers and manifestations after candidate discovery.
-
-## Phase C: reconcile identity without losing provenance
-
-Preserve every discovery occurrence before deduplication. Resolve candidates in
-this order:
-
-1. exact normalised DOI;
-2. exact OpenAlex, Semantic Scholar or other stable scholarly identifier;
-3. exact normalised title plus year;
-4. approximate title similarity as a **possible duplicate flag only**.
-
-Different DOI manifestations may belong to one canonical work. A DOI/title
-collision is a metadata conflict and stops automatic reconciliation. Every
-source/query that found the work remains a separate discovery event.
-
-## Phase D: traverse the citation graph
-
-After E1 candidate screening, define the citation frontier explicitly.
-
-- **E2 backward search:** inspect references of eligible frontier works.
-- **E3 forward search:** inspect works that cite eligible frontier works.
-- Use at least two available citation providers when practical; record provider
-  disagreement rather than silently taking the union as complete.
-- Newly eligible works join the next frontier. A work already traversed at the
-  same version does not need to be traversed again unless its citation graph or
-  publication state changed.
-- Targeted author, project, journal-special-issue and institutional searches may
-  supplement E1 when the graph exposes a clear gap; they are separately logged.
-
-The frontier, retrieval dates and failed identifiers belong in the review-cycle
-issue. Unresolved citation failures make the cycle incomplete.
-
-## Phase E: screen and code
-
-1. Apply mechanical checks: scholarly type, stable identity and minimally usable
-   bibliographic metadata.
-2. Screen title/abstract against the four-part eligibility test.
-3. Retrieve and examine full text when the abstract cannot support the decision.
-4. Record an evidence locator and versioned decision; title words alone never
-   establish eligibility.
-5. Apply controlled codes only for information supported by examined evidence.
-6. Keep ambiguous records pending. Do not force them into an included/excluded
-   binary merely to close the cycle.
-
-Where two people screen, retain individual assessments and adjudication. In all
-cases, publication requires an independent curator decision after screening.
-
-## Phase F: measure coverage and choose the next search
-
-After each complete cycle, report:
-
-| Measure | What it answers |
+| Domanda | Esempi di parole utili |
 |---|---|
-| Benchmark retrieval | Did the query families find known relevant works indexed by the source? |
-| Source/query marginal yield | Which source or query added candidates and eligible works not found elsewhere? |
-| Source overlap | Are sources repeating the same records or covering distinct literatures? |
-| Candidate novelty rate | How quickly is the unique candidate pool still growing? |
-| Screening yield | How often do newly screened unique works become eligible? |
-| Eligible increment | How much did the eligible corpus grow? |
-| New controlled codes | Did a new theme, sector, mechanism, method, geography or outcome appear? |
-| Failure inventory | Could unavailable sources or unresolved identities conceal material work? |
+| Chi porta l'interesse criminale? | organised crime, mafia, criminal network, illicit actor |
+| Qual è la relazione? | control, ownership, participation, influence, embeddedness, capture |
+| Dove avviene? | company, business, market, procurement, supply chain, professional service |
+| Attraverso quale posizione? | owner, shareholder, director, manager, employee, intermediary, subcontractor |
+| Che cosa si può osservare? | cambiamenti nella governance, concorrenza distorta, assegnazione di contratti, risultati d'impresa |
+| Quali termini locali vengono usati? | mafia transplantation, condizionamento economico e termini equivalenti in altre lingue |
 
-Use the controlled-code coverage table to select the next workstream. A cell with
-little evidence is a reason to investigate, not proof that no literature exists.
+Riciclaggio, corruzione, investimento passivo e criminalità d'impresa vengono
+cercati quando aiutano a riconoscere i confini del tema. Non vengono inclusi se
+il paper non studia una relazione continuativa tra un interesse criminale e
+l'economia legale.
 
-## Formal cycle and surveillance cadence
+## Le sette aree da coprire
 
-### Formal expansion cycle
+Ogni ciclo formale controlla queste aree. Se una non è pertinente al ciclo, il
+registro di ricerca ne spiega la ragione.
 
-A complete assessable cycle contains:
+1. Paper che usano esplicitamente il linguaggio dell'infiltrazione.
+2. Proprietà, controllo e governo delle imprese.
+3. Mercati, appalti pubblici e singoli settori economici.
+4. Espansione territoriale e presenza locale stabile.
+5. Metodi, dati e indicatori usati per osservare il fenomeno.
+6. Paesi, lingue e termini locali trascurati dalle ricerche precedenti.
+7. Nuove pubblicazioni e nuovo vocabolario emersi dall'ultimo ciclo.
 
-1. one reconciled E1 update covering the declared workstreams;
-2. one backward search over the declared frontier;
-3. one forward search over the declared frontier;
-4. screening of all new unique candidates;
-5. no unresolved retrieval failure that could materially affect the result.
+## Perché servono più fonti
 
-Run a formal cycle for each planned corpus update and after a material change to
-scope, sources or query design.
+Ogni strumento ha un compito diverso. Ripetere la stessa query ovunque non basta.
 
-### Living surveillance
+| Fonte | Compito principale nel progetto |
+|---|---|
+| Consensus | Cercare paper peer-reviewed e controllare i dettagli dei candidati |
+| OpenAlex | Eseguire ricerche strutturate e ripetibili; mappare autori, temi e citazioni |
+| Exa | Trovare lavori che descrivono lo stesso fenomeno con un linguaggio molto diverso |
+| Scite | Aggiungere ricerca scientifica e contesto delle citazioni quando l'accesso dell'account è disponibile |
+| Crossref | Verificare DOI e dati bibliografici |
+| Semantic Scholar | Controllare un secondo grafo di paper e citazioni |
+| OpenCitations | Aggiungere collegamenti di citazione aperti basati sui DOI |
+| Unpaywall | Trovare, quando esiste, una versione ad accesso aperto lecita |
 
-When scheduled capacity is available, the Work automation runs every two weeks:
+Nessuna fonte decide l'inclusione. Un ordine dei risultati, un'etichetta di
+citazione o un punteggio di somiglianza sono soltanto indizi da esaminare.
 
-- Scite is the primary scholarly channel;
-- Exa is an independent semantic gap channel;
-- GitHub receives at most one idempotent, deduplicated intake issue;
-- no file, registry, branch, PR, eligibility or publication state is changed.
+## Passaggio 1: verificare la ricerca prima di fidarsi
 
-Surveillance leads enter the next formal cycle. A surveillance run is not an E1–E3
-cycle and cannot support saturation.
+Si parte con due piccoli insiemi di riferimento:
 
-## Stop rule
+- paper già confermati come rilevanti;
+- paper su argomenti vicini che non devono essere inclusi senza prove ulteriori.
 
-The exact rule remains in [`saturation.md`](saturation.md). Reviewer consideration
-is possible only after three consecutive complete cycles with eligible increment
-below 2%, screening yield below 2%, no new controlled code and no unresolved
-retrieval failure. The automated output is only `REVIEW REQUIRED`; a person makes
-and documents any stop decision. Living surveillance continues afterward.
+Il primo gruppo mostra se una query perde lavori importanti già noti. Il secondo
+mostra se la ricerca sta scivolando verso riciclaggio, corruzione o criminalità
+d'impresa in generale. Il registro indica quali paper di riferimento ciascuna
+fonte riesce o non riesce a trovare.
 
-## Definition of done for the first expansion
+È un controllo pratico di qualità, non la prova che la ricerca abbia trovato
+tutto ciò che esiste.
 
-- [ ] Positive and near-neighbour benchmark sets are frozen and documented.
-- [ ] W1–W7 have an explicit source/query plan or a stated non-applicability.
-- [ ] Scite, OpenAlex and Exa E1 searches are completed and reconciled.
-- [ ] DOI/identifier metadata are verified through approved sources.
-- [ ] Backward and forward citation searches cover the declared frontier.
-- [ ] All new unique candidates have a current screening state.
-- [ ] Provider failures, caps and inaccessible records are visible.
-- [ ] Cycle metrics and source/query marginal yield are computed.
-- [ ] Any publication proposal is a separate human-reviewed curator change.
+## Passaggio 2: registrare bene ogni ricerca
 
-## Reporting references
+Per ogni fonte e query si conservano:
 
-- [PRISMA 2020 checklist](https://www.prisma-statement.org/prisma-2020-checklist)
-- [PRISMA 2020 flow diagram](https://www.prisma-statement.org/prisma-2020-flow-diagram)
-- [PRISMA-S search-reporting extension](https://www.prisma-statement.org/prisma-search)
-- [PRISMA-LSR living-review extension](https://www.prisma-statement.org/lsr)
-- [OpenAlex API reference](https://help.openalex.org/api/)
-- [Crossref REST API documentation](https://www.crossref.org/documentation/retrieve-metadata/rest-api/)
-- [Semantic Scholar Academic Graph API](https://www.semanticscholar.org/product/api)
-- [OpenCitations Index API](https://api.opencitations.net/index)
-- [Exa research-publication search](https://exa.ai/blog/publications-search)
+- data;
+- query o prompt esatto;
+- filtri, limiti temporali e tetti ai risultati;
+- numero di risultati restituiti;
+- errori o pagine non accessibili;
+- identificatore della fonte e DOI, quando disponibili;
+- fotografia o checksum, quando le regole della fonte lo permettono.
+
+Se un servizio restituisce soltanto i primi risultati, la ricerca viene marcata
+come limitata. Non può essere descritta come completa.
+
+## Passaggio 3: gestire i risultati ripetuti
+
+Lo stesso lavoro può comparire in molte ricerche e attraverso diversi DOI o
+record editoriali. Ogni occorrenza viene conservata; poi si decide se i record
+rappresentano la stessa opera.
+
+L'identità viene controllata in questo ordine:
+
+1. DOI identico;
+2. altro identificatore scientifico stabile;
+3. titolo normalizzato e anno;
+4. somiglianza approssimativa del titolo, usata soltanto per segnalare un dubbio.
+
+Quando due record sono davvero lo stesso lavoro, il curatore sceglie quello che
+resta principale. Gli altri identificatori e le occorrenze di ricerca vengono
+collegati a esso, non cancellati in silenzio.
+
+## Passaggio 4: seguire bibliografie e citazioni
+
+Dopo il primo screening:
+
+- E2 controlla le bibliografie dei paper rilevanti;
+- E3 cerca i lavori successivi che li citano;
+- ogni nuovo paper rilevante entra nel ciclo di citazioni successivo;
+- eventuali differenze tra fornitori di citazioni restano registrate.
+
+Una ricerca di citazioni fallita resta un errore aperto. Non viene contata come
+una ricerca con zero risultati.
+
+## Passaggio 5: valutare ogni lavoro
+
+Il revisore controlla:
+
+1. che sia un lavoro scientifico;
+2. che identità e metadati di base siano affidabili;
+3. che sia riconoscibile un interesse criminale;
+4. che esista un obiettivo nell'economia legale;
+5. che il paper analizzi accesso, partecipazione, influenza, controllo o presenza
+   stabile;
+6. che questa relazione sia una parte sostanziale dell'analisi.
+
+Se titolo e abstract non bastano, il lavoro resta in attesa finché non può essere
+esaminato il testo completo. Etichette e ragioni di esclusione devono essere
+sostenute dal materiale realmente letto.
+
+## Passaggio 6: scegliere la ricerca successiva
+
+Alla fine di un ciclo completo si chiede:
+
+- Quale fonte ha trovato paper davvero nuovi?
+- Quali query hanno restituito quasi soltanto lavori già noti?
+- Quanti paper esaminati erano effettivamente rilevanti?
+- È apparso un nuovo settore, meccanismo, metodo, paese o risultato?
+- Esistono ancora errori tecnici che nascondono una parte della letteratura?
+- Quale area resta coperta debolmente?
+
+Le risposte determinano il ciclo successivo. Una copertura debole è una ragione
+per cercare meglio, non una prova che la letteratura non esista.
+
+## Quando può rallentare la ricerca?
+
+Il sistema non dichiara mai che la letteratura sia completa. Può soltanto
+richiedere una decisione umana di arresto dopo **tre cicli completi consecutivi**
+nei quali:
+
+- i paper eleggibili aumentano di meno del 2%;
+- meno del 2% dei nuovi paper esaminati risulta eleggibile;
+- non compare nessuna nuova etichetta controllata;
+- non rimane aperto nessun errore importante di recupero.
+
+Anche dopo questa decisione, gli avvisi periodici continuano a cercare nuovi
+lavori.
+
+## Che cosa può fare l'automazione
+
+L'automazione può interrogare fonti approvate, togliere le ripetizioni esatte da
+un gruppo di candidati e preparare una issue. Non può decidere l'eleggibilità,
+inventare metadati mancanti, unire identità dubbie o pubblicare un paper.
+
+Il [pannello di curatela](../operations/curation.md) offre al proprietario un
+percorso autenticato in GitHub per cambiare un tema, escludere un lavoro o unire
+un duplicato confermato senza modificare manualmente i CSV.
+
+## Checklist del primo ciclo completo
+
+- [ ] I paper rilevanti e quelli di confine usati per il controllo sono documentati.
+- [ ] Tutte le sette aree hanno un piano di ricerca o una ragione di esclusione.
+- [ ] Le ricerche E1 sono complete e i loro limiti sono visibili.
+- [ ] DOI e dati bibliografici sono stati verificati.
+- [ ] E2 copre le bibliografie dei paper rilevanti scelti.
+- [ ] E3 copre le citazioni successive dello stesso insieme.
+- [ ] Ogni nuovo lavoro unico ha uno stato di screening corrente.
+- [ ] Errori e record non accessibili restano visibili.
+- [ ] Il ciclo riporta paper nuovi, paper eleggibili, sovrapposizioni e nuove etichette.
+- [ ] L'eventuale pubblicazione è una decisione separata del curatore.
+
+Per campi specifici dei fornitori, identificatori, metriche e standard di
+rendicontazione, consulta la [reference tecnica](expansion-reference.md).

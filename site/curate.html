@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Pannello del curatore per correggere temi, escludere paper e unire duplicati nell'archivio Criminal Infiltration."
+    />
+    <title>Pannello di curatela · Criminal Infiltration Archive</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>◫</text></svg>" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body class="curator-page">
+    <a class="skip-link" href="#main-content">Vai al contenuto</a>
+
+    <header class="site-header">
+      <div class="header-inner">
+        <a class="brand" href="./" aria-label="Torna alla biblioteca">
+          <span class="brand-mark" aria-hidden="true">CI</span>
+          <span>
+            <strong>Criminal Infiltration</strong>
+            <small>Pannello di curatela</small>
+          </span>
+        </a>
+        <nav aria-label="Navigazione principale">
+          <a href="./">Biblioteca</a>
+          <a href="#curator-actions">Operazioni</a>
+          <a href="https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/blob/main/docs/GUIDA_RAPIDA_IT.md">Guida</a>
+          <a href="https://github.com/colazeta/criminal_infiltration_in_legal_economy_review">Repository</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main-content">
+      <section class="curator-hero" aria-labelledby="page-title">
+        <div>
+          <p class="eyebrow">Area del proprietario</p>
+          <h1 id="page-title">Correggi l'archivio senza modificare i CSV</h1>
+          <p class="intro-copy">
+            Da qui puoi cambiare il tema di un paper, escluderlo oppure unire due
+            record che descrivono lo stesso lavoro. GitHub registra chi ha dato il
+            comando, conserva la storia precedente e controlla il risultato.
+          </p>
+        </div>
+        <aside class="curator-summary" aria-label="Regola di sicurezza">
+          <strong>Nessuna password nel sito</strong>
+          <p>
+            Questo portale è pubblico e statico. L'operazione effettiva si svolge
+            nel modulo autenticato di GitHub Actions, accessibile soltanto a chi ha
+            i permessi sul repository.
+          </p>
+        </aside>
+      </section>
+
+      <section class="workflow-launch" id="curator-workflow" aria-labelledby="workflow-title">
+        <div>
+          <p class="eyebrow">Inizia qui</p>
+          <h2 id="workflow-title">Apri il modulo sicuro su GitHub</h2>
+          <ol>
+            <li>Accedi a GitHub con l'account autorizzato.</li>
+            <li>Premi <strong>Run workflow</strong>.</li>
+            <li>Scegli un'operazione e compila soltanto i campi indicati qui sotto.</li>
+            <li>Scrivi <strong>APPLY</strong> per confermare e avvia il controllo.</li>
+          </ol>
+        </div>
+        <div class="launch-actions">
+          <a
+            class="button-link"
+            href="https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/actions/workflows/curation.yml"
+            rel="noreferrer"
+          >Apri la console del curatore</a>
+          <a
+            class="secondary-link"
+            href="./#archive"
+          >Consulta i paper pubblici</a>
+        </div>
+      </section>
+
+      <section class="curator-actions" id="curator-actions" aria-labelledby="actions-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Le tre operazioni</p>
+            <h2 id="actions-title">Che cosa vuoi correggere?</h2>
+          </div>
+          <p>I nomi in verde sono quelli che troverai nel menu di GitHub.</p>
+        </div>
+
+        <div class="curator-grid">
+          <article class="curator-card">
+            <span class="operation-key">change_topic</span>
+            <h3>Cambia il tema</h3>
+            <p>Usalo quando il paper è corretto ma l'etichetta principale non lo è.</p>
+            <h4>Campi necessari</h4>
+            <ul class="field-list">
+              <li><strong>paper_id</strong>: il paper da correggere</li>
+              <li><strong>topic_code</strong>: il nuovo tema già presente nella tassonomia</li>
+              <li><strong>reason</strong>: perché il nuovo tema è più adatto</li>
+              <li><strong>evidence</strong>: il punto esaminato che sostiene la scelta</li>
+            </ul>
+          </article>
+
+          <article class="curator-card">
+            <span class="operation-key">exclude_work</span>
+            <h3>Escludi un paper</h3>
+            <p>Usalo dopo aver verificato che il lavoro non appartiene alla review.</p>
+            <h4>Campi necessari</h4>
+            <ul class="field-list">
+              <li><strong>paper_id</strong>: il paper da escludere</li>
+              <li><strong>reason_code</strong>: un codice controllato, per esempio TOPIC_OFF_SCOPE</li>
+              <li><strong>reason</strong>: la motivazione specifica</li>
+              <li><strong>evidence</strong>: abstract, testo o scheda effettivamente esaminati</li>
+            </ul>
+          </article>
+
+          <article class="curator-card">
+            <span class="operation-key">merge_duplicate</span>
+            <h3>Unisci un duplicato</h3>
+            <p>Usalo soltanto quando due record rappresentano davvero lo stesso lavoro.</p>
+            <h4>Campi necessari</h4>
+            <ul class="field-list">
+              <li><strong>paper_id</strong>: il record duplicato da ritirare</li>
+              <li><strong>target_paper_id</strong>: il record corretto che sopravvive</li>
+              <li><strong>reason</strong>: perché i record sono la stessa opera</li>
+              <li><strong>evidence</strong>: DOI, titolo, edizione o altra prova verificata</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section class="workflow-result" aria-labelledby="result-title">
+        <div>
+          <p class="eyebrow">Dopo il comando</p>
+          <h2 id="result-title">Che cosa fa il sistema</h2>
+        </div>
+        <ol>
+          <li>Controlla gli ID, i campi obbligatori e la coerenza della richiesta.</li>
+          <li>Aggiunge una nuova decisione o versione senza cancellare quella precedente.</li>
+          <li>Ricostruisce l'archivio ed esegue tutti i test.</li>
+          <li>Prepara una modifica GitHub visibile e reversibile.</li>
+        </ol>
+        <p class="safety-note">
+          Non inserire mai un personal access token, una password o testi integrali dei
+          paper. Se un controllo fallisce, nessuna modifica viene proposta.
+        </p>
+      </section>
+    </main>
+
+    <footer>
+      <p>Le operazioni del curatore sono attribuite, versionate e validate.</p>
+      <p>
+        <a href="./">Biblioteca</a> ·
+        <a href="https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/blob/main/docs/operations/curation.md">Istruzioni complete</a>
+      </p>
+    </footer>
+  </body>
+</html>

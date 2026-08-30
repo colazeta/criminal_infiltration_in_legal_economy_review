@@ -17,7 +17,12 @@
 - `screening_decisions.csv`: versioned decisions; one current row per included work.
 - `publications.csv`: version-preserving publication history, explicit current
   release status and approved annotations.
-- `taxonomy.csv` / `paper_codes.csv`: controlled labels and evidence-backed codes.
+- `taxonomy.csv` / `paper_codes.csv`: controlled labels and append-only,
+  versioned evidence-backed coding decisions.
+- `exclusion_reasons.csv`: controlled reason codes used by non-eligible,
+  duplicate, non-academic and non-retrievable decisions.
+- `work_relations.csv`: explicit curator-confirmed identity relations, including
+  the surviving record when a duplicate is merged.
 - `editorial_summary.csv`: public-safe aggregate queue counts only.
 - `execution_metrics.csv`: E1–E3 component metrics grouped by cycle.
 - `archive_versions.csv`: corpus/protocol/schema version and coverage dates.
@@ -41,6 +46,11 @@ non-public work is never promoted by inference.
 
 `review_pending` is a canonical, non-publishable state for a bibliographically
 resolved work that still lacks sufficient screening evidence.
+
+`review_excluded` is a retained, non-publishable work with a current
+evidence-backed exclusion decision. `superseded` retains a former record after
+its identifiers and discovery occurrences have been reconciled with the
+surviving canonical work. Neither state is deleted from the audit history.
 
 ## Publication history
 
@@ -77,6 +87,26 @@ The machine-readable contract is `schema/public-archive.schema.json`.
 `papers.doi` is the denormalised primary DOI for simple export. Its value must
 equal the one verified primary DOI in `work_identifiers.csv`. Alternative DOI
 manifestations remain separate rows linked to the same work.
+
+When the curator confirms that two canonical records represent the same work,
+the duplicate record becomes `superseded`, a `duplicate_of` relation identifies
+the survivor, and identifiers plus discovery occurrences move to the surviving
+record. Earlier screening and publication rows remain attached to the retired
+record so that its previous state can still be reconstructed. Evidence-backed
+coding rows also remain attached to the retired record; they are not rewritten
+as if they had originally been assigned to the survivor.
+
+## Curator actions
+
+The [curator desk](../operations/curation.md) supports three initial operations:
+changing the primary topic, excluding a work and merging a confirmed duplicate.
+Each instruction is explicit, attributed to the GitHub actor and validated in a
+temporary branch. It never deletes decision or publication history.
+
+A topic change appends a new `paper_codes.csv` version, retires the prior current
+row and links the two through `supersedes_coding_id`. Earlier evidence, coder,
+date and notes remain unchanged. Exclusion operations accept only codes from
+`exclusion_reasons.csv`.
 
 ## Determinism
 

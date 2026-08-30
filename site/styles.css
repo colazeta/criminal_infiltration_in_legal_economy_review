@@ -578,6 +578,180 @@ summary:focus-visible {
   font-size: 0.72rem;
 }
 
+.curator-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(280px, 0.65fr);
+  gap: 56px;
+  align-items: end;
+}
+
+.curator-summary {
+  padding: 24px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.curator-summary strong {
+  color: var(--green);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.2rem;
+  font-weight: 500;
+}
+
+.curator-summary p {
+  margin: 0.7rem 0 0;
+  color: var(--ink-soft);
+  font-size: 0.86rem;
+}
+
+.workflow-launch {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(260px, 0.75fr);
+  gap: 48px;
+  margin: 62px 0 96px;
+  padding: 34px;
+  border-radius: var(--radius);
+  background: var(--green);
+  color: #f7f4ea;
+}
+
+.workflow-launch .eyebrow {
+  color: #e9b7a8;
+}
+
+.workflow-launch h2,
+.workflow-result h2 {
+  margin-bottom: 1rem;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(1.8rem, 3.5vw, 3rem);
+  font-weight: 500;
+  line-height: 1.05;
+}
+
+.workflow-launch ol,
+.workflow-result ol {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+
+.workflow-launch li + li,
+.workflow-result li + li {
+  margin-top: 0.5rem;
+}
+
+.launch-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: center;
+  gap: 12px;
+}
+
+.button-link,
+.secondary-link {
+  display: block;
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  text-align: center;
+  text-decoration: none;
+}
+
+.button-link {
+  background: #fffdf7;
+  color: var(--green);
+  font-weight: 750;
+}
+
+.secondary-link {
+  border: 1px solid rgb(255 255 255 / 35%);
+  color: #f7f4ea;
+  font-size: 0.82rem;
+}
+
+.button-link:hover,
+.secondary-link:hover {
+  color: #f2c6b9;
+}
+
+.curator-actions {
+  scroll-margin-top: 24px;
+}
+
+.curator-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+.curator-card {
+  padding: 24px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.operation-key {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 0.28rem 0.58rem;
+  background: var(--green-soft);
+  color: var(--green);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.curator-card h3 {
+  margin: 1.2rem 0 0.4rem;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.45rem;
+  font-weight: 500;
+}
+
+.curator-card > p,
+.field-list {
+  color: var(--ink-soft);
+  font-size: 0.84rem;
+}
+
+.curator-card h4 {
+  margin: 1.4rem 0 0.55rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.field-list {
+  margin: 0;
+  padding-left: 1.1rem;
+}
+
+.field-list li + li {
+  margin-top: 0.42rem;
+}
+
+.workflow-result {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.8fr) minmax(300px, 1.2fr);
+  gap: 36px 64px;
+  margin-top: 90px;
+  padding-top: 66px;
+  border-top: 1px solid var(--line);
+}
+
+.workflow-result .safety-note {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 18px 20px;
+  border-left: 4px solid var(--rust);
+  background: var(--paper-deep);
+  color: var(--ink-soft);
+  font-size: 0.85rem;
+}
+
 footer {
   display: flex;
   justify-content: space-between;
@@ -598,7 +772,10 @@ footer p {
   }
 
   .intro,
-  .pipeline-panel {
+  .pipeline-panel,
+  .curator-hero,
+  .workflow-launch,
+  .workflow-result {
     grid-template-columns: 1fr;
   }
 
@@ -612,6 +789,10 @@ footer p {
 
   .method-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .curator-grid {
+    grid-template-columns: 1fr;
   }
 
   .metrics {
@@ -673,8 +854,19 @@ footer p {
   .controls,
   .method-grid,
   .pipeline-panel dl,
-  .details-grid {
+  .details-grid,
+  .curator-grid {
     grid-template-columns: 1fr;
+  }
+
+  .workflow-launch {
+    margin-block: 46px 70px;
+    padding: 24px 20px;
+  }
+
+  .workflow-result {
+    margin-top: 70px;
+    padding-top: 52px;
   }
 
   .controls {

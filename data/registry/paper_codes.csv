@@ -1,1 +1,1 @@
-paper_id,dimension,code,evidence_quote,coder,coded_at,notes
+coding_id,paper_id,dimension,code,coding_version,evidence_quote,coder,coded_at,is_current,supersedes_coding_id,notes

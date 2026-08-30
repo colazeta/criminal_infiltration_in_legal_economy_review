@@ -1,5 +1,8 @@
 blank_issues_enabled: false
 contact_links:
+  - name: Curator desk
+    url: https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/curate.html
+    about: Change a topic, exclude a reviewed work or join a confirmed duplicate.
   - name: Public literature archive
     url: https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/
     about: Browse the current governed corpus before proposing a candidate.
