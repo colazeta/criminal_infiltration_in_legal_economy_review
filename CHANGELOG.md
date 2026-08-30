@@ -16,11 +16,11 @@ follow semantic versioning while the project is in prerelease.
 
 ### Changed
 
-- corrected P000001 venue/issue/pages and structured both seed citations;
-- withheld P000002 pending evidence-backed human screening after its historical
-  title-only decision failed the eligibility evidence rule;
-- withheld P000001 pending an independent human publication decision on its
-  evidence-backed contextual reclassification;
+- reconciled seed bibliographic metadata and identifier manifestations;
+- migrated unresolved seed screening and publication states into append-only,
+  governed histories;
+- set the current public archive to empty until independent human publication
+  approval is recorded;
 - public cards now read only governed registries;
 - build/deploy checks are pinned and fail closed.
 
