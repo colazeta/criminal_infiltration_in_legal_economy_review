@@ -44,10 +44,11 @@ Title keywords can prioritise; they cannot establish eligibility. Abstract or
 full text is examined whenever the four-part construct test cannot be answered
 with confidence. Codes require an evidence locator and controlled taxonomy.
 
-The present published record is explicitly identified as the initial seed
-nucleus. A second canonical seed candidate is withheld pending substantive
-evidence screening. Public presence is not a claim of complete searching, final
-saturation or quantitative synthesis.
+No record is currently published. P000001 has an evidence-backed contextual
+screening decision but awaits an independent human publication decision;
+P000002 remains pending substantive evidence screening. This empty public state
+is not a claim that no relevant literature exists, and the project makes no
+claim of complete searching, final saturation or quantitative synthesis.
 
 ## Public archive
 

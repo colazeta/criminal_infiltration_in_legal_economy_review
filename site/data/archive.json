@@ -11,45 +11,15 @@
     "rejectedRecordsOmitted": 19
   },
   "counts": {
-    "records": 1,
-    "included": 1,
+    "records": 0,
+    "included": 0,
     "core": 0,
-    "contextual": 1,
+    "contextual": 0,
     "editorialQueue": 36,
     "metadataFix": 2,
     "manualReview": 9,
     "abstractReview": 25,
     "rejectedOmitted": 19
   },
-  "records": [
-    {
-      "id": "P000001",
-      "section": "included",
-      "status": "included",
-      "statusLabel": "Contextual seed",
-      "statusDescription": "Published seed record with a governed current eligibility decision. It contributes to the initial nucleus and does not imply review saturation.",
-      "title": "How Mafias Migrate: The Case of the `Ndrangheta in Northern Italy",
-      "authors": "Varese, Federico",
-      "year": 2006,
-      "venue": "Law & Society Review",
-      "publisher": "Cambridge University Press",
-      "volume": "40",
-      "issue": "2",
-      "pages": "411-444",
-      "documentType": "journal_article",
-      "language": "",
-      "doi": "10.1111/j.1540-5893.2006.00260.x",
-      "links": {
-        "doi": "https://doi.org/10.1111/j.1540-5893.2006.00260.x"
-      },
-      "topicCode": "criminal_transplantation",
-      "topicLabel": "Criminal transplantation",
-      "scopeFit": "contextual",
-      "metadataConfidence": "high",
-      "reason": "Systematically examines conditions for long-term mafia transplantation to new territories and provides a necessary conceptual account of durable criminal embeddedness; retained as contextual rather than direct legal-economy evidence.",
-      "screeningDecision": "eligible_contextual",
-      "screeningStage": "title_abstract",
-      "sourceBasis": "Scite DOI-indexed abstract reviewed 2026-08-30; bibliographic metadata verified with Scite"
-    }
-  ]
+  "records": []
 }

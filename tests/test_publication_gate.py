@@ -291,10 +291,7 @@ class PublicationGateTests(unittest.TestCase):
 
     def test_repository_release_withholds_unsupported_seed(self) -> None:
         payload = build_payload(ROOT)
-        self.assertEqual(["P000001"], [record["id"] for record in payload["records"]])
-        self.assertEqual(
-            "eligible_contextual", payload["records"][0]["screeningDecision"]
-        )
+        self.assertEqual([], payload["records"])
 
 
 if __name__ == "__main__":
