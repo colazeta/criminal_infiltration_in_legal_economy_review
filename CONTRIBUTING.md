@@ -9,6 +9,11 @@ Open a **Candidate literature intake** issue. Supply stable metadata and source
 links; do not paste copyrighted full text. A candidate issue is not an inclusion
 decision and must not assign a canonical `paper_id`.
 
+For a full corpus-expansion round, open an **E1–E3 review cycle** issue and
+follow the [expansion strategy](docs/methodology/expansion.md). Do not present a
+single search, a fixed top-N result list or a surveillance batch as a completed
+review cycle.
+
 ## Metadata or screening changes
 
 Use the corresponding issue form. Registry changes should be one auditable unit:

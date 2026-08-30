@@ -27,6 +27,10 @@
         <nav aria-label="Primary navigation">
           <a href="#archive">Archive</a>
           <a href="#methodology">Methodology</a>
+          <a
+            href="https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/blob/main/INDEX.md"
+            rel="noreferrer"
+          >Project guide</a>
           <a href="./data/archive.csv" download>Download CSV</a>
           <a
             href="https://github.com/colazeta/criminal_infiltration_in_legal_economy_review"
@@ -62,7 +66,7 @@
       <section class="metrics" aria-label="Archive status">
         <article>
           <span id="included-count">—</span>
-          <p>included publications</p>
+          <p>current public records</p>
         </article>
         <article>
           <span id="editorial-count">—</span>
@@ -81,7 +85,7 @@
       <section class="archive" id="archive" aria-labelledby="archive-title">
         <div class="section-heading">
           <div>
-            <p class="eyebrow">Included evidence</p>
+            <p class="eyebrow">Publication gate</p>
             <h2 id="archive-title">Publication archive</h2>
           </div>
           <p>
@@ -125,13 +129,13 @@
 
         <div class="results-meta">
           <p id="result-count" aria-live="polite">Loading publications…</p>
-          <p class="legend"><span aria-hidden="true"></span> Governed published record</p>
+          <p class="legend"><span aria-hidden="true"></span> Human-approved published record</p>
         </div>
 
         <div id="paper-list" class="paper-list" aria-busy="true"></div>
         <div id="empty-state" class="empty-state" hidden>
-          <h3>No publications match these filters</h3>
-          <p>Clear one or more filters to return to the full included corpus.</p>
+          <h3 id="empty-state-title">No publications match these filters</h3>
+          <p id="empty-state-copy">Clear one or more filters to return to the full included corpus.</p>
         </div>
         <div id="load-error" class="empty-state error-state" hidden>
           <h3>The archive data could not be loaded</h3>
@@ -214,7 +218,11 @@
         Versioned metadata and inclusion provenance are generated from governed
         registries only. No full texts are redistributed.
       </p>
-      <p><a href="./data/archive.json">JSON</a> · <a href="./data/archive.csv">CSV</a></p>
+      <p>
+        <a href="./data/archive.json">JSON</a> ·
+        <a href="./data/archive.csv">CSV</a> ·
+        <a href="https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/blob/main/INDEX.md">Project guide</a>
+      </p>
     </footer>
   </body>
 </html>

@@ -12,6 +12,9 @@ follow semantic versioning while the project is in prerelease.
 - work-to-identifier mapping, controlled taxonomy and archive version registry;
 - cycle-grouped saturation reporting and negative gate tests;
 - Scite + Exa academic intake policy with GitHub issue-only writes;
+- plain-language repository index and GitHub Pages publication guide;
+- calibrated, multi-source literature expansion strategy with explicit
+  workstreams, citation chasing and coverage-gap metrics;
 - citation, contribution, release and PRISMA-oriented reporting metadata.
 
 ### Changed
@@ -22,7 +25,8 @@ follow semantic versioning while the project is in prerelease.
 - set the current public archive to empty until independent human publication
   approval is recorded;
 - public cards now read only governed registries;
-- build/deploy checks are pinned and fail closed.
+- public empty-state copy now distinguishes active screening from filter results;
+- build/deploy checks are pinned, concurrency-safe and fail closed.
 
 ### Removed
 

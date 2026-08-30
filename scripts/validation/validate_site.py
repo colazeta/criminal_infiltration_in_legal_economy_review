@@ -138,6 +138,13 @@ def validate_assets() -> None:
         fail("Site does not load the generated archive dataset")
     if "replaceChildren" not in javascript or "textContent" not in javascript:
         fail("Site must render untrusted metadata through DOM text nodes")
+    for required in (
+        "Screening is still in progress",
+        "independent publication approval",
+        "No publications match these filters",
+    ):
+        if required not in javascript:
+            fail(f"app.js missing governed empty-state copy: {required}")
 
     css = (SITE / "styles.css").read_text(encoding="utf-8")
     for required in (

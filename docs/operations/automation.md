@@ -6,6 +6,9 @@ ChatGPT Work runs a conservative surveillance intake using Scite and Exa, then
 uses GitHub only to create a structured issue for new candidates. It does not
 edit repository content.
 
+This surveillance feed supports, but never replaces, the formal E1–E3 process
+in the [literature expansion strategy](../methodology/expansion.md).
+
 ## Write boundary
 
 The only permitted external write is one new GitHub issue per batch. The run

@@ -2,6 +2,8 @@
 
 Authorisation is purpose-specific. A connector result may provide metadata for
 candidate intake; it does not authorise fetching every linked publisher domain.
+The sequencing and distinct role of each source are defined in the
+[literature expansion strategy](../methodology/expansion.md).
 
 ## Work connectors
 

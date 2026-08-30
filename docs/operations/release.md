@@ -19,7 +19,8 @@ release.
 6. Confirm generated JSON/CSV match a fresh deterministic build and contain only
    current `published` publication rows.
 7. Review the public archive, methodology limitations and download files.
-8. Merge through review; GitHub Pages deploys only from `main`.
+8. Follow the [GitHub Pages guide](github-pages.md), merge through review and
+   verify the `main` deployment.
 9. When configured, archive the release in Zenodo and record the DOI in the
    version registry/CFF.
 
