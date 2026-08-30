@@ -11,6 +11,10 @@ A review cycle consists of one completed E1, E2 and E3 execution over the
 eligible frontier. The Work automation is a surveillance intake channel, not a
 replacement for this auditable cycle.
 
+The complete coverage design, workstreams, benchmark calibration, provider
+roles and first-expansion checklist are in the
+[literature expansion strategy](expansion.md).
+
 ## Required execution record
 
 Record the execution/cycle ID, date, component, operator or automation, source

@@ -9,6 +9,8 @@ const state = {
 const elements = {
   list: document.querySelector("#paper-list"),
   empty: document.querySelector("#empty-state"),
+  emptyTitle: document.querySelector("#empty-state-title"),
+  emptyCopy: document.querySelector("#empty-state-copy"),
   error: document.querySelector("#load-error"),
   count: document.querySelector("#result-count"),
   search: document.querySelector("#search-input"),
@@ -138,10 +140,20 @@ function filteredRecords() {
 
 function render() {
   const records = filteredRecords();
+  const corpusIsEmpty = state.payload && state.payload.records.length === 0;
   elements.list.replaceChildren(...records.map(paperCard));
   elements.list.setAttribute("aria-busy", "false");
   elements.count.textContent = `${records.length} publication${records.length === 1 ? "" : "s"} shown`;
   elements.empty.hidden = records.length !== 0;
+  if (records.length === 0 && corpusIsEmpty) {
+    elements.emptyTitle.textContent = "No publications are currently public";
+    elements.emptyCopy.textContent =
+      "The governed public export currently contains no records. This may reflect pending publication review, withholding, or withdrawal.";
+  } else if (records.length === 0) {
+    elements.emptyTitle.textContent = "No publications match these filters";
+    elements.emptyCopy.textContent =
+      "Clear one or more filters to return to the full included corpus.";
+  }
 }
 
 function populateFilters(records) {

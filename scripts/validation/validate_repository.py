@@ -14,6 +14,7 @@ ROOT = Path(__file__).resolve().parents[2]
 REQUIRED_FILES = (
     "AGENTS.md",
     "README.md",
+    "INDEX.md",
     "CONTRIBUTING.md",
     "CHANGELOG.md",
     "CITATION.cff",
@@ -23,12 +24,14 @@ REQUIRED_FILES = (
     "docs/methodology/protocol.md",
     "docs/methodology/eligibility.md",
     "docs/methodology/discovery.md",
+    "docs/methodology/expansion.md",
     "docs/methodology/saturation.md",
     "docs/methodology/reporting.md",
     "docs/governance/data-model.md",
     "docs/governance/sources.md",
     "docs/operations/automation.md",
     "docs/operations/release.md",
+    "docs/operations/github-pages.md",
     "docs/history/e0-pilot.md",
     "data/registry/README.md",
     "schema/public-archive.schema.json",
@@ -196,6 +199,13 @@ def check_actions_pinned() -> None:
     for action in uses:
         if not re.fullmatch(r"[^@]+@[0-9a-f]{40}", action):
             fail(f"GitHub Action is not pinned to a commit: {action}")
+    safe_concurrency = (
+        "concurrency:\n"
+        "  group: archive-${{ github.workflow }}-${{ github.ref }}\n"
+        "  cancel-in-progress: true"
+    )
+    if safe_concurrency not in workflow:
+        fail("Archive workflow must cancel superseded runs for the same ref")
 
 
 def check_release_metadata() -> None:
@@ -232,6 +242,23 @@ def check_governance_copy() -> None:
     readme = (ROOT / "README.md").read_text(encoding="utf-8").lower()
     if "living curated evidence map" not in readme:
         fail("README must preserve the living-archive limitation")
+    expansion = (ROOT / "docs/methodology/expansion.md").read_text(
+        encoding="utf-8"
+    ).lower()
+    for phrase in (
+        "known-item calibration",
+        "source/query marginal yield",
+        "backward and forward citation",
+        "independent curator decision",
+    ):
+        if phrase not in expansion:
+            fail(f"Expansion strategy missing safeguard: {phrase}")
+    pages = (ROOT / "docs/operations/github-pages.md").read_text(
+        encoding="utf-8"
+    )
+    for phrase in ("GitHub Actions", ".github/workflows/archive.yml", "site/"):
+        if phrase not in pages:
+            fail(f"GitHub Pages guide missing deployment element: {phrase}")
 
 
 def main() -> None:

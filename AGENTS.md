@@ -53,9 +53,11 @@ Only governed screening decisions may use `eligible_core` or
 - Any registry/publication change: `docs/governance/data-model.md` and
   `docs/methodology/eligibility.md`.
 - Retrieval or intake: `docs/methodology/discovery.md`,
-  `docs/governance/sources.md` and `docs/operations/automation.md`.
+  `docs/methodology/expansion.md`, `docs/governance/sources.md` and
+  `docs/operations/automation.md`.
 - Saturation work: `docs/methodology/saturation.md`.
-- Release/deployment: `docs/operations/release.md`.
+- Release/deployment: `docs/operations/release.md` and
+  `docs/operations/github-pages.md`.
 
 Do not require unrelated documents merely to make a small maintenance change.
 

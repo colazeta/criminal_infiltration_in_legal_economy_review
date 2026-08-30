@@ -10,9 +10,17 @@ body:
     validations:
       required: true
   - type: textarea
+    id: benchmark
+    attributes:
+      label: Benchmark calibration
+      description: Positive and near-neighbour benchmark sets, source-indexing limits, and query-family hits/misses.
+    validations:
+      required: true
+  - type: textarea
     id: strategies
     attributes:
-      label: E1 sources and exact strategies
+      label: E1 source/query matrix
+      description: Workstreams, provider-specific strategies, filters, dates, pagination/caps and planned verification artifacts.
     validations:
       required: true
   - type: textarea
@@ -36,5 +44,6 @@ body:
     id: metrics
     attributes:
       label: Reconciled counts and cycle metrics
+      description: Include benchmark retrieval, source/query marginal yield, overlap, novelty, screening yield, eligible increment, new codes and failures.
     validations:
       required: true

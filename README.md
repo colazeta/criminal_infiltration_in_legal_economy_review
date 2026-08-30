@@ -4,8 +4,8 @@ A searchable, governed archive of scholarly work on **criminal infiltration in
 the legal economy**.
 
 - [Public archive](https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/)
-- [Live preview](https://criminal-infiltration-archive.colazeta.chatgpt.site)
-- [Methodology index](docs/README.md)
+- [Start here: repository index](INDEX.md)
+- [Documentation index](docs/README.md)
 - [How to contribute](CONTRIBUTING.md)
 
 The repository's primary product is the public publication index. The review
@@ -33,6 +33,7 @@ cannot publish a work.
 
 | Path | Purpose |
 |---|---|
+| `INDEX.md` | Plain-language routes for readers, reviewers and maintainers |
 | `data/registry/` | Canonical works, identifiers, decisions and publication state |
 | `data/legacy/` | Retired pilot evidence retained only for audit |
 | `docs/methodology/` | Protocol, eligibility, discovery, saturation and reporting |
@@ -41,6 +42,26 @@ cannot publish a work.
 | `scripts/` | Deterministic build, saturation report and validators |
 | `tests/` | Negative publication-gate and cycle-grouping tests |
 | `site/` | Static public interface and deterministic data exports |
+
+## Expanding the literature
+
+The [literature expansion strategy](docs/methodology/expansion.md) combines
+known-item calibration, source-specific concept families, semantic gap search,
+backward/forward citation searching and coverage-gap analysis. Scite, OpenAlex
+and Exa have different discovery roles; Crossref and citation APIs verify or
+extend the graph. Every occurrence is preserved before deduplication, and every
+formal literature update is a complete E1–E3 cycle.
+
+Automation may create one deduplicated intake issue. It cannot assign canonical
+IDs, decide eligibility, edit registries, declare saturation or publish papers.
+
+## Publishing the website
+
+GitHub Pages is already configured to use the pinned workflow in
+`.github/workflows/archive.yml`. A reviewed merge to `main` runs quality checks,
+builds `site/` and deploys the public archive. See the
+[GitHub Pages guide](docs/operations/github-pages.md) for the exact first-release
+steps and troubleshooting.
 
 ## Build locally
 
