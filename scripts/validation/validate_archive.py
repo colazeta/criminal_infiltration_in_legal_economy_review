@@ -36,9 +36,11 @@ DATE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 ALLOWED_CANONICAL_STATUSES = {
     *INCLUDED_STATUSES,
     "review_pending",
+    "review_excluded",
     "superseded",
     "withdrawn",
 }
+ACTIVE_CANONICAL_STATUSES = {*INCLUDED_STATUSES, "review_pending"}
 ALLOWED_DECISIONS = {
     *ELIGIBLE_DECISIONS,
     "maybe_full_text_needed",
@@ -58,7 +60,21 @@ def fail(message: str) -> None:
 
 def rows(name: str) -> list[dict[str, str]]:
     with (REGISTRY / name).open(newline="", encoding="utf-8-sig") as handle:
-        return [dict(row) for row in csv.DictReader(handle)]
+        reader = csv.DictReader(handle)
+        if not reader.fieldnames:
+            fail(f"{name}: missing header")
+        if any(not (field or "").strip() for field in reader.fieldnames):
+            fail(f"{name}: blank header column")
+        if len(reader.fieldnames) != len(set(reader.fieldnames)):
+            fail(f"{name}: duplicate header columns")
+        parsed: list[dict[str, str]] = []
+        for line_number, row in enumerate(reader, start=2):
+            if None in row:
+                fail(f"{name}:{line_number} has more values than header columns")
+            if any(value is None for value in row.values()):
+                fail(f"{name}:{line_number} has fewer values than header columns")
+            parsed.append(dict(row))
+        return parsed
 
 
 def require_unique(values: list[str], label: str) -> None:
@@ -86,6 +102,7 @@ def validate_registries() -> dict[str, list[dict[str, str]]]:
             "publications.csv",
             "paper_codes.csv",
             "taxonomy.csv",
+            "work_relations.csv",
             "editorial_summary.csv",
             "archive_versions.csv",
             "execution_metrics.csv",
@@ -97,6 +114,7 @@ def validate_registries() -> dict[str, list[dict[str, str]]]:
     decisions = data["screening_decisions.csv"]
     publications = data["publications.csv"]
     taxonomy = data["taxonomy.csv"]
+    relations = data["work_relations.csv"]
 
     if not papers:
         fail("papers.csv is empty")
@@ -113,6 +131,10 @@ def validate_registries() -> dict[str, list[dict[str, str]]]:
         [row.get("publication_id", "").strip() for row in publications],
         "publications",
     )
+    require_unique(
+        [row.get("relation_id", "").strip() for row in relations],
+        "work relations",
+    )
 
     try:
         current_publications = current_publication_rows(publications)
@@ -123,6 +145,7 @@ def validate_registries() -> dict[str, list[dict[str, str]]]:
     }
 
     paper_ids = {row["paper_id"] for row in papers}
+    papers_by_id = {row["paper_id"]: row for row in papers}
     title_year: Counter[tuple[str, str]] = Counter()
     for row in papers:
         paper_id = row["paper_id"]
@@ -138,7 +161,8 @@ def validate_registries() -> dict[str, list[dict[str, str]]]:
         doi = clean_doi(row.get("doi", ""))
         if doi and not DOI_PATTERN.match(doi):
             fail(f"{paper_id}: invalid DOI")
-        title_year[(normalise_title(row["title"]), row["year"])] += 1
+        if row.get("canonical_status") != "superseded":
+            title_year[(normalise_title(row["title"]), row["year"])] += 1
     duplicates = [key for key, count in title_year.items() if count > 1]
     if duplicates:
         fail(f"Probable duplicate work(s): {duplicates}")
@@ -205,6 +229,39 @@ def validate_registries() -> dict[str, list[dict[str, str]]]:
             "not_retrievable",
         } and not row.get("exclusion_reason_code", "").strip():
             fail(f"{row.get('decision_id')}: exclusion requires reason code")
+
+    relation_by_source: dict[str, dict[str, str]] = {}
+    for row in relations:
+        relation_id = row.get("relation_id", "")
+        source_id = row.get("source_paper_id", "")
+        target_id = row.get("target_paper_id", "")
+        if source_id not in paper_ids or target_id not in paper_ids:
+            fail(f"{relation_id}: orphan work relation")
+        if source_id == target_id:
+            fail(f"{relation_id}: source and target must differ")
+        if row.get("relation") != "duplicate_of":
+            fail(f"{relation_id}: unsupported work relation")
+        if source_id in relation_by_source:
+            fail(f"{source_id}: several current work relations")
+        if papers_by_id[source_id].get("canonical_status") != "superseded":
+            fail(f"{relation_id}: duplicate source is not superseded")
+        for field in ("reason", "evidence", "curator"):
+            if not row.get(field, "").strip():
+                fail(f"{relation_id}: blank {field}")
+        if not DATE_PATTERN.match(row.get("decided_at", "")):
+            fail(f"{relation_id}: invalid decided_at")
+        relation_by_source[source_id] = row
+
+    for source_id, relation in relation_by_source.items():
+        seen = {source_id}
+        target_id = relation["target_paper_id"]
+        while target_id in relation_by_source:
+            if target_id in seen:
+                fail(f"{source_id}: duplicate relation cycle")
+            seen.add(target_id)
+            target_id = relation_by_source[target_id]["target_paper_id"]
+        if papers_by_id[target_id].get("canonical_status") not in ACTIVE_CANONICAL_STATUSES:
+            fail(f"{source_id}: duplicate chain does not end at an active record")
 
     taxonomy_keys = {
         (row.get("dimension", "").strip(), row.get("code", "").strip())
@@ -298,6 +355,21 @@ def validate_registries() -> dict[str, list[dict[str, str]]]:
                 fail(f"{paper_id}: included work must have one current decision")
             if paper_id not in current_publication_by_paper:
                 fail(f"{paper_id}: included work lacks a publication-manifest row")
+        status = paper.get("canonical_status")
+        current_decisions = current[paper_id]
+        current_publication = current_publication_by_paper.get(paper_id)
+        if status == "review_excluded":
+            if len(current_decisions) != 1 or current_decisions[0].get("decision") != "not_eligible":
+                fail(f"{paper_id}: excluded work needs one current not_eligible decision")
+            if not current_publication or current_publication.get("publication_status") != "withheld":
+                fail(f"{paper_id}: excluded work must be withheld")
+        if status == "superseded":
+            if paper_id not in relation_by_source:
+                fail(f"{paper_id}: superseded work lacks a duplicate relation")
+            if len(current_decisions) != 1 or current_decisions[0].get("decision") != "duplicate":
+                fail(f"{paper_id}: superseded work needs one current duplicate decision")
+            if not current_publication or current_publication.get("publication_status") != "withheld":
+                fail(f"{paper_id}: superseded work must be withheld")
 
     for row in data["paper_codes.csv"]:
         if row.get("paper_id") not in paper_ids:

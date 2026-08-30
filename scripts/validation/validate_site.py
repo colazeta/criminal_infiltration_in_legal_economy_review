@@ -49,14 +49,14 @@ def fail(message: str) -> None:
     raise SystemExit(1)
 
 
-def parse_page(path: Path) -> PageParser:
+def parse_page(path: Path, expected_lang: str) -> PageParser:
     parser = PageParser()
     parser.feed(path.read_text(encoding="utf-8"))
     duplicates = sorted(value for value, count in Counter(parser.ids).items() if count > 1)
     if duplicates:
         fail(f"{path.name}: duplicate id(s): {', '.join(duplicates)}")
-    if parser.lang != "en":
-        fail(f"{path.name}: expected html lang=en")
+    if parser.lang != expected_lang:
+        fail(f"{path.name}: expected html lang={expected_lang}")
     if parser.main_count != 1 or parser.h1_count != 1:
         fail(f"{path.name}: expected exactly one main and one h1")
     return parser
@@ -90,9 +90,16 @@ def check_reference(path: Path, reference: str, ids: set[str]) -> None:
 
 def validate_pages() -> None:
     pages = sorted(SITE.glob("*.html"))
-    if {path.name for path in pages} != {"index.html", "404.html"}:
-        fail("Expected index.html and 404.html only")
-    parsed: dict[Path, PageParser] = {path: parse_page(path) for path in pages}
+    expected_languages = {
+        "index.html": "en",
+        "404.html": "en",
+        "curate.html": "it",
+    }
+    if {path.name for path in pages} != set(expected_languages):
+        fail("Expected index.html, curate.html and 404.html only")
+    parsed: dict[Path, PageParser] = {
+        path: parse_page(path, expected_languages[path.name]) for path in pages
+    }
     required_ids = {
         "archive",
         "archive-controls",
@@ -107,6 +114,10 @@ def validate_pages() -> None:
     missing = sorted(required_ids - index_ids)
     if missing:
         fail(f"index.html missing interface ID(s): {', '.join(missing)}")
+    curator_ids = set(parsed[SITE / "curate.html"].ids)
+    missing = sorted({"curator-workflow", "curator-actions"} - curator_ids)
+    if missing:
+        fail(f"curate.html missing interface ID(s): {', '.join(missing)}")
     for path, parser in parsed.items():
         for reference in parser.references:
             check_reference(path, reference, set(parser.ids))
@@ -161,6 +172,18 @@ def validate_assets() -> None:
     ):
         if required not in css:
             fail(f"styles.css missing accessibility safeguard: {required}")
+
+    curator = (SITE / "curate.html").read_text(encoding="utf-8")
+    if re.search(r"<(?:form|input|textarea)\b", curator, re.I):
+        fail("curate.html must not collect credentials or submit unauthenticated data")
+    for phrase in (
+        "GitHub Actions",
+        "personal access token",
+        "curation.yml",
+        "APPLY",
+    ):
+        if phrase not in curator:
+            fail(f"curate.html missing curator guidance: {phrase}")
 
 
 def main() -> None:

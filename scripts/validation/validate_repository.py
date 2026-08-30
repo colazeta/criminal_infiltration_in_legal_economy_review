@@ -21,15 +21,18 @@ REQUIRED_FILES = (
     ".zenodo.json",
     "LICENSE",
     "docs/README.md",
+    "docs/GUIDA_RAPIDA_IT.md",
     "docs/methodology/protocol.md",
     "docs/methodology/eligibility.md",
     "docs/methodology/discovery.md",
     "docs/methodology/expansion.md",
+    "docs/methodology/expansion-reference.md",
     "docs/methodology/saturation.md",
     "docs/methodology/reporting.md",
     "docs/governance/data-model.md",
     "docs/governance/sources.md",
     "docs/operations/automation.md",
+    "docs/operations/curation.md",
     "docs/operations/release.md",
     "docs/operations/github-pages.md",
     "docs/history/e0-pilot.md",
@@ -37,12 +40,15 @@ REQUIRED_FILES = (
     "schema/public-archive.schema.json",
     "scripts/build_archive.py",
     "scripts/report_saturation.py",
+    "scripts/curation/apply_action.py",
     "scripts/validation/validate_archive.py",
     "scripts/validation/validate_site.py",
     "site/index.html",
+    "site/curate.html",
     "site/app.js",
     "site/styles.css",
     ".github/workflows/archive.yml",
+    ".github/workflows/curation.yml",
 )
 
 REQUIRED_HEADERS = {
@@ -95,6 +101,16 @@ REQUIRED_HEADERS = {
     },
     "taxonomy.csv": {"dimension", "code", "label", "taxonomy_version"},
     "paper_codes.csv": {"paper_id", "dimension", "code"},
+    "work_relations.csv": {
+        "relation_id",
+        "source_paper_id",
+        "target_paper_id",
+        "relation",
+        "reason",
+        "evidence",
+        "curator",
+        "decided_at",
+    },
     "editorial_summary.csv": {"snapshot_date", "is_current"},
     "archive_versions.csv": {
         "version",
@@ -192,13 +208,18 @@ def check_issue_forms() -> None:
 
 
 def check_actions_pinned() -> None:
+    workflow_paths = sorted((ROOT / ".github/workflows").glob("*.yml"))
+    if not workflow_paths:
+        fail("No GitHub Actions workflows found")
+    for path in workflow_paths:
+        workflow = path.read_text(encoding="utf-8")
+        uses = re.findall(r"^\s*uses:\s*([^\s#]+)", workflow, re.M)
+        if not uses:
+            fail(f"{path.name}: workflow contains no actions")
+        for action in uses:
+            if not re.fullmatch(r"[^@]+@[0-9a-f]{40}", action):
+                fail(f"{path.name}: action is not pinned to a commit: {action}")
     workflow = (ROOT / ".github/workflows/archive.yml").read_text(encoding="utf-8")
-    uses = re.findall(r"^\s*uses:\s*([^\s#]+)", workflow, re.M)
-    if not uses:
-        fail("Archive workflow contains no actions")
-    for action in uses:
-        if not re.fullmatch(r"[^@]+@[0-9a-f]{40}", action):
-            fail(f"GitHub Action is not pinned to a commit: {action}")
     safe_concurrency = (
         "concurrency:\n"
         "  group: archive-${{ github.workflow }}-${{ github.ref }}\n"
@@ -206,6 +227,18 @@ def check_actions_pinned() -> None:
     )
     if safe_concurrency not in workflow:
         fail("Archive workflow must cancel superseded runs for the same ref")
+
+    curation = (ROOT / ".github/workflows/curation.yml").read_text(encoding="utf-8")
+    for phrase in (
+        "workflow_dispatch:",
+        "confirmation:",
+        "--confirm \"$CONFIRMATION\"",
+        "CURATOR: ${{ github.actor }}",
+        "scripts/curation/apply_action.py",
+        "pull-requests: write",
+    ):
+        if phrase not in curation:
+            fail(f"Curation workflow missing safeguard: {phrase}")
 
 
 def check_release_metadata() -> None:
@@ -236,7 +269,7 @@ def check_governance_copy() -> None:
         if phrase not in agents:
             fail(f"AGENTS.md missing governance phrase: {phrase}")
     sources = (ROOT / "docs/governance/sources.md").read_text(encoding="utf-8")
-    for source in ("Scite", "Exa Search", "GitHub"):
+    for source in ("Consensus", "Scite", "Exa Search", "GitHub"):
         if source not in sources:
             fail(f"Source governance missing {source}")
     readme = (ROOT / "README.md").read_text(encoding="utf-8").lower()
@@ -246,13 +279,25 @@ def check_governance_copy() -> None:
         encoding="utf-8"
     ).lower()
     for phrase in (
+        "verificare la ricerca prima di fidarsi",
+        "guardare indietro",
+        "guardare avanti",
+        "tre cicli completi consecutivi",
+        "pannello di curatela",
+    ):
+        if phrase not in expansion:
+            fail(f"Plain-language expansion guide missing safeguard: {phrase}")
+    technical_expansion = (
+        ROOT / "docs/methodology/expansion-reference.md"
+    ).read_text(encoding="utf-8").lower()
+    for phrase in (
         "known-item calibration",
         "source/query marginal yield",
         "backward and forward citation",
         "independent curator decision",
     ):
-        if phrase not in expansion:
-            fail(f"Expansion strategy missing safeguard: {phrase}")
+        if phrase not in technical_expansion:
+            fail(f"Technical expansion reference missing safeguard: {phrase}")
     pages = (ROOT / "docs/operations/github-pages.md").read_text(
         encoding="utf-8"
     )

@@ -21,6 +21,11 @@ canonical work, identifiers, discovery event, current decision and publication
 annotation are updated together where applicable. Preserve earlier decisions by
 marking them non-current rather than deleting them.
 
+Repository owners may use the [curator desk](docs/operations/curation.md) for
+three routine, explicit actions: changing a primary topic, excluding a reviewed
+work and joining a confirmed duplicate. The workflow prepares the coordinated
+registry changes and runs the complete validation set.
+
 ## Code and documentation
 
 Create a focused branch/PR, follow `AGENTS.md`, and report the validation commands

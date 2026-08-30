@@ -3,6 +3,28 @@
 All notable archive, protocol and schema changes are recorded here. Versions
 follow semantic versioning while the project is in prerelease.
 
+## Unreleased
+
+### Added
+
+- Italian quick guide and a plain-language curator portal;
+- authenticated curator workflow for topic changes, exclusions and confirmed
+  duplicate merges;
+- Work surveillance contract using the active Consensus + Exa connector pair,
+  with Scite's current account limitation recorded explicitly;
+- guarded GitHub intake lane added to the existing Daily AML & CI Research Work
+  automation without consuming another scheduled-task slot;
+- append-only work-relation registry and curator-operation tests;
+- separate plain-language and technical literature-expansion guides.
+
+### Changed
+
+- simplified the repository index, public-site methodology and search-strategy
+  wording;
+- extended validation to curator actions, work relations and every workflow.
+- repaired malformed historical screening and execution-metric rows; row-width
+  and header defects are now validation failures.
+
 ## [0.2.0] - 2026-08-30
 
 ### Added

@@ -19,6 +19,10 @@ boundary between discovery, editorial judgement and publication.
 5. Never overwrite decision history. Add a new decision and retire the former
    current row in the same reviewed change.
 6. Never auto-merge a registry or publication change.
+7. When the owner has granted continuing maintenance authority, complete
+   documentation, software, test, CI and site work through validation and merge
+   without waiting for an extra ad-hoc approval. This authority never supplies a
+   missing scientific judgement or curator instruction.
 
 ## Task routing and write boundaries
 
@@ -31,8 +35,9 @@ boundary between discovery, editorial judgement and publication.
 | Release maintainer | Site, release metadata, changelog and deployment | Scientific decisions not already recorded |
 | Maintenance agent | Docs, tests and CI within assigned scope | Bibliographic retrieval unless explicitly assigned |
 
-If a task spans roles, keep the stages in separate commits or PRs and preserve a
-human review boundary before publication.
+If a task spans roles, keep the stages distinguishable and preserve the explicit
+curator decision before publication. Routine maintenance may proceed
+autonomously when the owner has already granted that authority.
 
 ## Candidate-to-public flow
 
@@ -42,7 +47,9 @@ human review boundary before publication.
 4. A curator adds or updates the canonical work, identifiers, discovery event and
    approved public annotation together.
 5. CI rebuilds the site and applies the full publication gate.
-6. A person reviews and merges; deployment follows `main`.
+6. CI validates the visible change. Registry/publication changes remain
+   unmerged until an authorised curator or reviewer accepts them; validated
+   maintenance changes may be merged under continuing owner authority.
 
 Intake assessments use `plausible_core`, `plausible_contextual` or `uncertain`.
 Only governed screening decisions may use `eligible_core` or
@@ -53,8 +60,11 @@ Only governed screening decisions may use `eligible_core` or
 - Any registry/publication change: `docs/governance/data-model.md` and
   `docs/methodology/eligibility.md`.
 - Retrieval or intake: `docs/methodology/discovery.md`,
-  `docs/methodology/expansion.md`, `docs/governance/sources.md` and
+  `docs/methodology/expansion.md`, the relevant sections of
+  `docs/methodology/expansion-reference.md`, `docs/governance/sources.md` and
   `docs/operations/automation.md`.
+- Curator-console action: `docs/operations/curation.md`,
+  `docs/governance/data-model.md` and `docs/methodology/eligibility.md`.
 - Saturation work: `docs/methodology/saturation.md`.
 - Release/deployment: `docs/operations/release.md` and
   `docs/operations/github-pages.md`.

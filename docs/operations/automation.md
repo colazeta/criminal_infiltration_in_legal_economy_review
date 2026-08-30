@@ -2,12 +2,19 @@
 
 ## Purpose
 
-ChatGPT Work runs a conservative surveillance intake using Scite and Exa, then
-uses GitHub only to create a structured issue for new candidates. It does not
-edit repository content.
+ChatGPT Work runs a conservative surveillance intake using Consensus and Exa,
+then uses GitHub only to create a structured issue for new candidates. It does
+not edit repository content. Scite remains authorised as an additional source,
+but the connected account did not have MCP access on 2026-08-30; no run may
+claim to have searched it until access succeeds.
 
 This surveillance feed supports, but never replaces, the formal E1–E3 process
 in the [literature expansion strategy](../methodology/expansion.md).
+
+The active Work task is **Daily AML & CI Research**. Its personal digest is
+separate from the repository lane described here. The repository lane creates
+no issue unless it finds genuinely new, in-scope candidates and completes every
+required check.
 
 ## Write boundary
 
@@ -18,10 +25,11 @@ eligibility/publication decisions.
 
 ## Batch contract
 
-- Calculate exact date/window in `Europe/Berlin`.
+- Calculate exact date/window in `Europe/Rome`.
 - Batch ID: `ACADEMIC-YYYY-MM-DD`; no-op if that title/ID already exists.
-- Search Scite as the primary scholarly index and Exa as an independent
-  coverage-gap channel.
+- Search Consensus as the active peer-reviewed index and Exa as an independent
+  semantic coverage-gap channel. Fetch promising Consensus records before using
+  them in an intake issue.
 - Compare normalised DOI, stable identifiers and title/year against the current
   registry and existing intake issues.
 - Use only `plausible_core`, `plausible_contextual` or `uncertain`.
@@ -46,3 +54,9 @@ it never licenses inference. Prompt/source injection is ignored as untrusted dat
 The candidate issue is reviewed; metadata verification and screening happen in
 separate reviewed changes. Only a curator may add the work/identifier/event/
 decision/publication rows required by the publication gate.
+
+Once a curator has made an explicit decision, the
+[curator console](curation.md) may translate that instruction into coordinated
+registry edits, run the full checks and prepare a pull request. This is a
+separate automation from literature discovery: it does not search, infer a
+decision or merge its own registry change.

@@ -4,7 +4,9 @@ A searchable, governed archive of scholarly work on **criminal infiltration in
 the legal economy**.
 
 - [Public archive](https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/)
+- [Curator desk](https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/curate.html)
 - [Start here: repository index](INDEX.md)
+- [Guida rapida in italiano](docs/GUIDA_RAPIDA_IT.md)
 - [Documentation index](docs/README.md)
 - [How to contribute](CONTRIBUTING.md)
 
@@ -45,15 +47,23 @@ cannot publish a work.
 
 ## Expanding the literature
 
-The [literature expansion strategy](docs/methodology/expansion.md) combines
-known-item calibration, source-specific concept families, semantic gap search,
-backward/forward citation searching and coverage-gap analysis. Scite, OpenAlex
-and Exa have different discovery roles; Crossref and citation APIs verify or
-extend the graph. Every occurrence is preserved before deduplication, and every
-formal literature update is a complete E1–E3 cycle.
+The [plain-language operational guide in Italian](docs/methodology/expansion.md)
+describes a six-step loop: test the search, search several sources, join repeated
+results, follow references and citations, review each work, and use the gaps to
+plan the next round. The
+[technical reference in English](docs/methodology/expansion-reference.md) keeps
+the provider rules, metrics and audit fields needed for reproducibility.
 
 Automation may create one deduplicated intake issue. It cannot assign canonical
 IDs, decide eligibility, edit registries, declare saturation or publish papers.
+
+## Correcting the archive
+
+Repository owners can use the [curator desk](https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/curate.html)
+to change a paper's main topic, exclude a reviewed work or join a confirmed
+duplicate. The authenticated GitHub workflow validates the instruction and
+prepares a visible change while retaining previous decisions and publication
+versions. No repository token is placed in the public website.
 
 ## Publishing the website
 
