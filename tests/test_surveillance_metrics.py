@@ -15,6 +15,7 @@ from fetch_surveillance_ledger import (  # noqa: E402
     MARKER,
     extract_run,
     verify_intake_issue,
+    verify_intake_issue_uniqueness,
     verify_ledger_comment_time,
     verify_repository_commit,
 )
@@ -307,6 +308,20 @@ class SurveillanceRunTests(unittest.TestCase):
         with self.assertRaisesRegex(MetricsError, "batch ID"):
             verify_intake_issue(run, wrong_batch, {"colazeta"}, 30)
 
+    def test_batch_requires_exactly_one_referenced_intake_issue(self) -> None:
+        run = validate_run(completed_run())
+        item = candidate_issue(run)
+        item["repository_url"] = f"https://api.github.com/repos/{REPOSITORY}"
+        search_result = {"incomplete_results": False, "items": [item]}
+        verify_intake_issue_uniqueness(run, search_result)
+
+        duplicate = copy.deepcopy(item)
+        duplicate["number"] = 32
+        duplicate["html_url"] = f"https://github.com/{REPOSITORY}/issues/32"
+        search_result["items"].append(duplicate)
+        with self.assertRaisesRegex(MetricsError, "exactly the referenced"):
+            verify_intake_issue_uniqueness(run, search_result)
+
     def test_metrics_ledger_cannot_pose_as_intake_issue(self) -> None:
         run = validate_run(completed_run())
         run["intake_issue"] = {
@@ -429,9 +444,32 @@ class SurveillanceRunTests(unittest.TestCase):
 
     def test_ledger_comment_must_be_created_after_same_day_run(self) -> None:
         run = validate_run(completed_run())
-        verify_ledger_comment_time(run, {"created_at": "2026-08-31T05:21:00Z"})
-        with self.assertRaisesRegex(MetricsError, "daily run window"):
-            verify_ledger_comment_time(run, {"created_at": "2026-08-31T05:00:00Z"})
+        verify_ledger_comment_time(
+            run,
+            {
+                "created_at": "2026-08-31T05:21:00Z",
+                "updated_at": "2026-08-31T05:21:00Z",
+            },
+        )
+        with self.assertRaisesRegex(MetricsError, "unedited daily run"):
+            verify_ledger_comment_time(
+                run,
+                {
+                    "created_at": "2026-08-31T05:00:00Z",
+                    "updated_at": "2026-08-31T05:00:00Z",
+                },
+            )
+
+    def test_edited_ledger_comment_is_rejected(self) -> None:
+        run = validate_run(completed_run())
+        with self.assertRaisesRegex(MetricsError, "unedited daily run"):
+            verify_ledger_comment_time(
+                run,
+                {
+                    "created_at": "2026-08-31T05:21:00Z",
+                    "updated_at": "2026-09-01T05:21:00Z",
+                },
+            )
 
     def test_exclusive_candidate_attribution_must_be_exact(self) -> None:
         run = completed_run()

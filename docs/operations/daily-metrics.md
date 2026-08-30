@@ -157,7 +157,10 @@ issue di intake è un secondo manifest JSON: il numero di query per fonte deve
 coincidere con quelle pianificate e ogni `query_id` citato da un candidato deve
 esistere e appartenere alla fonte dichiarata. L'issue deve essere stata creata
 durante la finestra e il commento nel ledger dopo la sua chiusura, sempre nello
-stesso giorno di Roma. Il JSON pubblico
+stesso giorno di Roma. Un commento modificato non viene più considerato
+append-only ed è rifiutato. Una ricerca live delle issue deve inoltre trovare
+esattamente una sola issue con il titolo del batch, coincidente con il numero
+registrato nel ledger. Il JSON pubblico
 espone soltanto conteggi, stato tecnico, data e
 l'informazione che una issue è stata creata; non ne pubblica il collegamento.
 Né il ledger né il JSON pubblico contengono:

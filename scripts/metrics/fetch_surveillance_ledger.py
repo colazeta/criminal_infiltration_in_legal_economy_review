@@ -9,7 +9,7 @@ import os
 import re
 from pathlib import Path
 from urllib.error import HTTPError, URLError
-from urllib.parse import urlsplit
+from urllib.parse import urlencode, urlsplit
 from urllib.request import Request, urlopen
 
 from surveillance import (
@@ -389,10 +389,39 @@ def verify_repository_commit(run: dict, comparison: dict) -> None:
 def verify_ledger_comment_time(run: dict, comment: dict) -> None:
     """Bind the daily payload to a ledger comment created after that day's run."""
     created = parse_datetime(comment.get("created_at"), "ledger comment.created_at")
+    updated = parse_datetime(comment.get("updated_at"), "ledger comment.updated_at")
     ended = parse_datetime(run["window_end"], "run.window_end")
-    if created < ended or created.astimezone(ROME).date().isoformat() != run["run_date"]:
+    if (
+        created != updated
+        or created < ended
+        or created.astimezone(ROME).date().isoformat() != run["run_date"]
+    ):
         raise MetricsError(
-            "ledger comment: creation time is incompatible with the daily run window"
+            "ledger comment: timestamps are incompatible with an unedited daily run"
+        )
+
+
+def verify_intake_issue_uniqueness(run: dict, search_result: dict) -> None:
+    """Require one and only one batch-titled intake issue in the repository."""
+    intake = run["intake_issue"]
+    if not intake["created"]:
+        return
+    items = search_result.get("items")
+    if search_result.get("incomplete_results") is not False or not isinstance(items, list):
+        raise MetricsError("run.intake_issue: GitHub uniqueness search is incomplete")
+    title = f"{INTAKE_TITLE_PREFIX} {run['batch_id']}"
+    expected_repository_url = f"https://api.github.com/repos/{REPOSITORY_FULL_NAME}"
+    matches = [
+        item
+        for item in items
+        if isinstance(item, dict)
+        and item.get("title") == title
+        and item.get("repository_url") == expected_repository_url
+        and item.get("pull_request") is None
+    ]
+    if len(matches) != 1 or matches[0].get("number") != intake["number"]:
+        raise MetricsError(
+            "run.intake_issue: batch must have exactly the referenced intake issue"
         )
 
 
@@ -471,6 +500,7 @@ def main() -> None:
 
     runs = []
     intake_cache: dict[int, dict] = {}
+    intake_search_cache: dict[str, dict] = {}
     commit_cache: dict[str, dict] = {}
     allowed_authors = set(args.allowed_author)
     for comment in comments:
@@ -497,6 +527,22 @@ def main() -> None:
         verify_repository_commit(run, commit_cache[repository_commit])
         intake = run["intake_issue"]
         if intake["created"]:
+            batch_id = run["batch_id"]
+            if batch_id not in intake_search_cache:
+                title = f"{INTAKE_TITLE_PREFIX} {batch_id}"
+                search_query = urlencode(
+                    {
+                        "q": f'repo:{args.repository} is:issue in:title "{title}"',
+                        "per_page": 100,
+                    }
+                )
+                search_result, _ = api_get(
+                    f"https://api.github.com/search/issues?{search_query}", token
+                )
+                if not isinstance(search_result, dict):
+                    raise MetricsError("GitHub intake search response is not an object")
+                intake_search_cache[batch_id] = search_result
+            verify_intake_issue_uniqueness(run, intake_search_cache[batch_id])
             number = intake["number"]
             if number not in intake_cache:
                 issue_url = (

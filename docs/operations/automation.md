@@ -165,6 +165,9 @@ is not sufficient. All three issue-template safeguards must be present and
 checked exactly once; unchecked, partial or placeholder safeguards fail closed.
 The issue creation time must fall inside the declared run window, and the ledger
 comment must be created after the window closes on the same Rome calendar day.
+Ledger comments are append-only: an edited comment is rejected. Before
+publishing a positive run, GitHub search must also return exactly one issue with
+the batch's exact intake title, and it must be the issue referenced by the run.
 
 ## Human handoff
 
