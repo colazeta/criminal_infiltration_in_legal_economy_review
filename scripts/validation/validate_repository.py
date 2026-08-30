@@ -199,6 +199,13 @@ def check_actions_pinned() -> None:
     for action in uses:
         if not re.fullmatch(r"[^@]+@[0-9a-f]{40}", action):
             fail(f"GitHub Action is not pinned to a commit: {action}")
+    safe_concurrency = (
+        "concurrency:\n"
+        "  group: archive-${{ github.workflow }}-${{ github.ref }}\n"
+        "  cancel-in-progress: true"
+    )
+    if safe_concurrency not in workflow:
+        fail("Archive workflow must cancel superseded runs for the same ref")
 
 
 def check_release_metadata() -> None:

@@ -39,8 +39,9 @@ Every reviewed merge to `main` repeats the same sequence. The workflow rebuilds
 it does not publish candidate intake or reviewer notes.
 
 A public archive with zero records is a valid release when no work currently
-passes the independent publication gate. The interface, aggregate editorial
-counts and methodology remain available.
+passes the independent publication gate, including while review is pending or
+records are withheld or withdrawn. The interface, aggregate editorial counts
+and methodology remain available.
 
 ## Local preview before merge
 

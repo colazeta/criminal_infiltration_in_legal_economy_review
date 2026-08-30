@@ -14,9 +14,9 @@ separate steps.
 - **Understand the data:** [registry index](data/registry/README.md)
 - **Publish or troubleshoot the website:** [GitHub Pages guide](docs/operations/github-pages.md)
 
-The public archive can legitimately contain zero records while screening or
-independent publication review is incomplete. That is a safety state, not a
-technical failure and not a claim that no relevant literature exists.
+The public archive can legitimately contain zero records when publication review
+is pending or records are withheld or withdrawn. That is a governed state, not
+a technical failure and not a claim that no relevant literature exists.
 
 ## What do you want to do?
 

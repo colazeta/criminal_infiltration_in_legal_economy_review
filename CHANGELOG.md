@@ -25,8 +25,8 @@ follow semantic versioning while the project is in prerelease.
 - set the current public archive to empty until independent human publication
   approval is recorded;
 - public cards now read only governed registries;
-- public empty-state copy now distinguishes active screening from filter results;
-- build/deploy checks are pinned, concurrency-safe and fail closed.
+- public empty-state copy now distinguishes a governed empty corpus from filter results;
+- build/deploy checks are pinned, cancel superseded runs and fail closed.
 
 ### Removed
 

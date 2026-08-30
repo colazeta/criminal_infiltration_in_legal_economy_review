@@ -139,12 +139,18 @@ def validate_assets() -> None:
     if "replaceChildren" not in javascript or "textContent" not in javascript:
         fail("Site must render untrusted metadata through DOM text nodes")
     for required in (
-        "Screening is still in progress",
-        "independent publication approval",
+        "No publications are currently public",
+        "pending publication review, withholding, or withdrawal",
         "No publications match these filters",
     ):
         if required not in javascript:
             fail(f"app.js missing governed empty-state copy: {required}")
+    for unsupported_inference in (
+        "Screening is still in progress",
+        "No work currently has independent publication approval",
+    ):
+        if unsupported_inference in javascript:
+            fail(f"app.js infers an ungoverned empty-state reason: {unsupported_inference}")
 
     css = (SITE / "styles.css").read_text(encoding="utf-8")
     for required in (

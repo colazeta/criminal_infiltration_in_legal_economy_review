@@ -146,9 +146,9 @@ function render() {
   elements.count.textContent = `${records.length} publication${records.length === 1 ? "" : "s"} shown`;
   elements.empty.hidden = records.length !== 0;
   if (records.length === 0 && corpusIsEmpty) {
-    elements.emptyTitle.textContent = "Screening is still in progress";
+    elements.emptyTitle.textContent = "No publications are currently public";
     elements.emptyCopy.textContent =
-      "No work currently has independent publication approval. Candidate records remain in the governed editorial layer.";
+      "The governed public export currently contains no records. This may reflect pending publication review, withholding, or withdrawal.";
   } else if (records.length === 0) {
     elements.emptyTitle.textContent = "No publications match these filters";
     elements.emptyCopy.textContent =
