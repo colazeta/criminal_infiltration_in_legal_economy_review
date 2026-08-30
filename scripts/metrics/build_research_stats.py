@@ -7,12 +7,17 @@ import argparse
 import json
 from pathlib import Path
 
-from surveillance import MetricsError, build_public_payload, validate_public_payload
+from surveillance import (
+    REPOSITORY_FULL_NAME,
+    MetricsError,
+    build_public_payload,
+    validate_public_payload,
+)
 
 
 ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_OUTPUT = ROOT / "site/data/research-stats.json"
-DEFAULT_REPOSITORY = "colazeta/criminal_infiltration_in_legal_economy_review"
+DEFAULT_REPOSITORY = REPOSITORY_FULL_NAME
 DEFAULT_LEDGER_ISSUE = 30
 
 

@@ -11,7 +11,7 @@ from pathlib import Path
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
-from surveillance import MetricsError, validate_run
+from surveillance import REPOSITORY_FULL_NAME, MetricsError, validate_run
 
 
 MARKER = "<!-- surveillance-run:v1 -->"
@@ -69,8 +69,8 @@ def main() -> None:
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--token-env", default="GITHUB_TOKEN")
     args = parser.parse_args()
-    if not re.fullmatch(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+", args.repository):
-        raise MetricsError("repository must use owner/name form")
+    if args.repository != REPOSITORY_FULL_NAME:
+        raise MetricsError("repository must match the governed repository")
     token = os.environ.get(args.token_env)
     if not token:
         raise MetricsError(f"Missing token environment variable {args.token_env}")

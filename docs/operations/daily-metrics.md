@@ -111,6 +111,9 @@ unici. I candidati esclusivi misurano invece il contributo marginale della
 singola fonte. Nella tabella pubblica, esecuzioni e query descrivono la salute
 tecnica della fonte anche nelle giornate parziali; occorrenze, risultati e
 candidati vengono invece sommati soltanto per giornate interamente complete.
+Poiché le fonti attive sono esattamente due, il numero esclusivo di una fonte è
+anche verificato come: candidati totali meno candidati intercettati dall'altra
+fonte.
 
 ## Finestre temporali
 
@@ -131,8 +134,9 @@ recupero irrisolto.
 
 ## Protezione dei dati e verificabilità
 
-Il ledger contiene anche il riferimento all'eventuale issue di intake per
-l'audit. Il JSON pubblico espone soltanto conteggi, stato tecnico, data e
+Il ledger contiene anche il riferimento canonico all'eventuale issue di intake
+nello stesso repository; URL e numero devono coincidere. Il JSON pubblico
+espone soltanto conteggi, stato tecnico, data e
 l'informazione che una issue è stata creata; non ne pubblica il collegamento.
 Nessuno dei due contiene:
 

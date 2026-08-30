@@ -14,6 +14,7 @@ from zoneinfo import ZoneInfo
 SCHEMA_VERSION = 1
 ROME = ZoneInfo("Europe/Rome")
 ACTIVE_SOURCES = frozenset({"Consensus", "Exa"})
+REPOSITORY_FULL_NAME = "colazeta/criminal_infiltration_in_legal_economy_review"
 STATUS_VALUES = {"completed", "partial", "failed"}
 SOURCE_STATUS_VALUES = {"completed", "failed", "not_run"}
 TOTAL_FIELDS = (
@@ -357,6 +358,10 @@ def validate_run(run: dict[str, Any]) -> dict[str, Any]:
             raise MetricsError("run.intake_issue.url: only GitHub HTTPS URLs are allowed")
     if created != (number is not None and url is not None):
         raise MetricsError("run.intake_issue: created, number and URL disagree")
+    if created and url != f"https://github.com/{REPOSITORY_FULL_NAME}/issues/{number}":
+        raise MetricsError(
+            "run.intake_issue: URL must match the canonical repository and issue number"
+        )
 
     if status == "completed":
         if any(value is None for value in normalised_totals.values()):
@@ -398,6 +403,18 @@ def validate_run(run: dict[str, Any]) -> dict[str, Any]:
             raise MetricsError("run.sources: candidate hits exceed total intake candidates")
         if source_candidate_hits < intake_candidates or source_exclusive > intake_candidates:
             raise MetricsError("run.sources: candidate attribution does not reconcile")
+        for row in normalised_sources:
+            other = next(
+                candidate
+                for candidate in normalised_sources
+                if candidate["source"] != row["source"]
+            )
+            if row["exclusive_candidates"] != (
+                intake_candidates - other["candidate_hits"]
+            ):
+                raise MetricsError(
+                    "run.sources: exclusive candidate attribution does not reconcile"
+                )
         if created != (intake_candidates > 0):
             raise MetricsError("run.intake_issue: issue creation disagrees with intake count")
     else:
@@ -489,8 +506,8 @@ def build_public_payload(
 
     if not isinstance(ledger_issue, int) or ledger_issue < 1:
         raise MetricsError("ledger_issue must be a positive integer")
-    if not re.fullmatch(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+", repository):
-        raise MetricsError("repository must use owner/name form")
+    if repository != REPOSITORY_FULL_NAME:
+        raise MetricsError("repository must match the governed repository")
     validated = [validate_run(run) for run in runs]
     validated.sort(key=lambda row: row["run_date"])
     batch_ids = [row["batch_id"] for row in validated]
@@ -663,7 +680,15 @@ def validate_public_payload(payload: dict[str, Any]) -> dict[str, Any]:
         raise MetricsError("public statistics: ledger issue must be positive")
     issue_url = ledger["url"]
     parsed = urlsplit(issue_url) if isinstance(issue_url, str) else None
-    if not parsed or parsed.scheme != "https" or parsed.netloc != "github.com":
+    expected_ledger_url = (
+        f"https://github.com/{REPOSITORY_FULL_NAME}/issues/{issue_number}"
+    )
+    if (
+        not parsed
+        or parsed.scheme != "https"
+        or parsed.netloc != "github.com"
+        or issue_url != expected_ledger_url
+    ):
         raise MetricsError("public statistics: invalid ledger URL")
 
     daily = payload["daily"]
@@ -880,6 +905,15 @@ def validate_public_payload(payload: dict[str, Any]) -> dict[str, Any]:
             raise MetricsError(
                 "public statistics: source candidate totals disagree with daily rows"
             )
+        source_by_name = dict(zip(source_names, source_volume_rows))
+        for name, row in source_by_name.items():
+            other_name = next(source for source in ACTIVE_SOURCES if source != name)
+            if row["exclusiveCandidates"] != (
+                global_candidates - source_by_name[other_name]["candidateHits"]
+            ):
+                raise MetricsError(
+                    "public statistics: exclusive candidate totals disagree with daily rows"
+                )
 
     summary = payload["summary"]
     if not isinstance(summary, dict):

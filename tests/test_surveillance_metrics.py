@@ -199,6 +199,21 @@ class SurveillanceRunTests(unittest.TestCase):
         with self.assertRaisesRegex(MetricsError, "issue creation"):
             validate_run(run)
 
+    def test_intake_issue_url_must_match_number_and_repository(self) -> None:
+        run = completed_run()
+        run["intake_issue"]["url"] = "https://github.com/other/repo/issues/999"
+        with self.assertRaisesRegex(MetricsError, "canonical repository"):
+            validate_run(run)
+
+    def test_exclusive_candidate_attribution_must_be_exact(self) -> None:
+        run = completed_run()
+        run["sources"][0]["candidate_hits"] = 3
+        run["sources"][0]["exclusive_candidates"] = 3
+        run["sources"][1]["candidate_hits"] = 3
+        run["sources"][1]["exclusive_candidates"] = 0
+        with self.assertRaisesRegex(MetricsError, "exclusive candidate attribution"):
+            validate_run(run)
+
     def test_comment_parser_accepts_one_marked_json_block(self) -> None:
         run = completed_run()
         body = f"Run summary\n\n{MARKER}\n```json\n{json.dumps(run)}\n```"
@@ -294,6 +309,13 @@ class PublicStatisticsTests(unittest.TestCase):
         payload = build_public_payload([completed_run()], 30, REPOSITORY)
         payload["sources"][0]["source"] = "Mafia Firms"
         with self.assertRaisesRegex(MetricsError, "governed active set"):
+            validate_public_payload(payload)
+
+    def test_public_exclusive_candidate_totals_are_exact(self) -> None:
+        payload = build_public_payload([completed_run()], 30, REPOSITORY)
+        payload["sources"][0]["exclusiveCandidates"] = 2
+        payload["sources"][1]["exclusiveCandidates"] = 0
+        with self.assertRaisesRegex(MetricsError, "exclusive candidate totals"):
             validate_public_payload(payload)
 
 
