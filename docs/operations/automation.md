@@ -34,6 +34,10 @@ technical provenance only, never candidate metadata.
 
 - Calculate exact date/window in `Europe/Rome`.
 - Batch ID: `ACADEMIC-YYYY-MM-DD`; no-op if that title/ID already exists.
+- Give a created intake issue the exact title
+  `[INTAKE][ACADEMIC] ACADEMIC-YYYY-MM-DD` and preserve the candidate form's
+  `Batch ID`, `Search and provenance log`, `Candidate records` and `Safeguards`
+  sections. The batch ID in the title and form must equal the ledger batch.
 - Search Consensus as the active peer-reviewed index and Exa as an independent
   semantic coverage-gap channel. Fetch promising Consensus records before using
   them in an intake issue.
@@ -65,6 +69,12 @@ The exact fields and reconciliations are documented in
 [daily research statistics](daily-metrics.md). A batch already present in the
 ledger is a complete no-op: neither a second comment nor a second intake issue is
 created.
+
+During deployment, a positive candidate count is accepted only after GitHub
+returns the referenced issue and confirms that it is not the metrics ledger or a
+pull request, was created by the authorised account, uses the candidate-intake
+title/form and carries the same batch ID. A missing, renamed or mismatched issue
+stops publication instead of turning unpersisted candidates into public counts.
 
 ## Human handoff
 

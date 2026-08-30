@@ -135,7 +135,10 @@ recupero irrisolto.
 ## Protezione dei dati e verificabilità
 
 Il ledger contiene anche il riferimento canonico all'eventuale issue di intake
-nello stesso repository; URL e numero devono coincidere. Il JSON pubblico
+per lo stesso batch nello stesso repository. URL e numero devono coincidere. Il
+workflow recupera anche quella issue e verifica autore, tipo, titolo e campo
+`Batch ID`; il ledger #30, una pull request o un'issue di un altro batch non
+possono convalidare il conteggio dei candidati. Il JSON pubblico
 espone soltanto conteggi, stato tecnico, data e
 l'informazione che una issue è stata creata; non ne pubblica il collegamento.
 Nessuno dei due contiene:

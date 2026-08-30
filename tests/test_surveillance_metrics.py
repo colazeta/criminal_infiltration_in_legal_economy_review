@@ -10,7 +10,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts/metrics"))
 
-from fetch_surveillance_ledger import MARKER, extract_run  # noqa: E402
+from fetch_surveillance_ledger import (  # noqa: E402
+    MARKER,
+    extract_run,
+    verify_intake_issue,
+)
 from surveillance import (  # noqa: E402
     MetricsError,
     build_public_payload,
@@ -20,6 +24,22 @@ from surveillance import (  # noqa: E402
 
 
 REPOSITORY = "colazeta/criminal_infiltration_in_legal_economy_review"
+
+
+def candidate_issue(run: dict, number: int = 31) -> dict:
+    batch_id = run["batch_id"]
+    return {
+        "number": number,
+        "html_url": f"https://github.com/{REPOSITORY}/issues/{number}",
+        "title": f"[INTAKE][ACADEMIC] {batch_id}",
+        "body": (
+            f"### Batch ID\n\n{batch_id}\n\n"
+            "### Search and provenance log\n\nConsensus and Exa completed.\n\n"
+            "### Candidate records\n\nThree structured candidate records.\n\n"
+            "### Safeguards\n\n- [x] No candidate was marked eligible or published."
+        ),
+        "user": {"login": "colazeta"},
+    }
 
 
 def completed_run(day: str = "2026-08-31") -> dict:
@@ -204,6 +224,35 @@ class SurveillanceRunTests(unittest.TestCase):
         run["intake_issue"]["url"] = "https://github.com/other/repo/issues/999"
         with self.assertRaisesRegex(MetricsError, "canonical repository"):
             validate_run(run)
+
+    def test_referenced_intake_issue_must_match_batch_and_template(self) -> None:
+        run = validate_run(completed_run())
+        verify_intake_issue(run, candidate_issue(run), {"colazeta"}, 30)
+
+        wrong_batch = candidate_issue(run)
+        wrong_batch["body"] = wrong_batch["body"].replace(
+            run["batch_id"], "ACADEMIC-2026-08-30", 1
+        )
+        with self.assertRaisesRegex(MetricsError, "batch ID"):
+            verify_intake_issue(run, wrong_batch, {"colazeta"}, 30)
+
+    def test_metrics_ledger_cannot_pose_as_intake_issue(self) -> None:
+        run = validate_run(completed_run())
+        run["intake_issue"] = {
+            "created": True,
+            "number": 30,
+            "url": f"https://github.com/{REPOSITORY}/issues/30",
+        }
+        issue = candidate_issue(run, number=30)
+        with self.assertRaisesRegex(MetricsError, "metrics ledger"):
+            verify_intake_issue(run, issue, {"colazeta"}, 30)
+
+    def test_referenced_intake_issue_requires_authorised_issue_author(self) -> None:
+        run = validate_run(completed_run())
+        issue = candidate_issue(run)
+        issue["user"]["login"] = "someone-else"
+        with self.assertRaisesRegex(MetricsError, "author is not authorised"):
+            verify_intake_issue(run, issue, {"colazeta"}, 30)
 
     def test_exclusive_candidate_attribution_must_be_exact(self) -> None:
         run = completed_run()
