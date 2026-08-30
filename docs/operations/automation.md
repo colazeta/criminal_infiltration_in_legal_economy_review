@@ -38,6 +38,10 @@ technical provenance only, never candidate metadata.
   `[INTAKE][ACADEMIC] ACADEMIC-YYYY-MM-DD` and preserve the candidate form's
   `Batch ID`, `Search and provenance log`, `Candidate records` and `Safeguards`
   sections. The batch ID in the title and form must equal the ledger batch.
+- Write `Candidate records` as one fenced JSON object with `schema_version: 1`,
+  the exact `batch_id` and a `candidates` array. Use a unique ID of the form
+  `CAND-ACADEMIC-YYYY-MM-DD-NNN` for every record and the governed fields shown
+  in the issue template. The array length must equal `intake_candidates`.
 - Search Consensus as the active peer-reviewed index and Exa as an independent
   semantic coverage-gap channel. Fetch promising Consensus records before using
   them in an intake issue.
@@ -55,6 +59,45 @@ technical provenance only, never candidate metadata.
 Each candidate records stated title/authors/year/venue/type, DOI and other stable
 IDs, source links, query IDs, verification status, possible duplicate/conflict,
 intake assessment and required human action. Similarity alone never merges.
+
+### Candidate manifest
+
+The `Candidate records` form field contains exactly one JSON object. This is the
+minimal shape for one record (repeat the object in `candidates` as needed):
+
+```json
+{
+  "schema_version": 1,
+  "batch_id": "ACADEMIC-YYYY-MM-DD",
+  "candidates": [
+    {
+      "candidate_id": "CAND-ACADEMIC-YYYY-MM-DD-001",
+      "title": "Stated title",
+      "authors": ["Stated author"],
+      "year": 2026,
+      "venue": null,
+      "work_type": "working_paper",
+      "identifiers": {"doi": null, "other": []},
+      "source_links": ["https://example.org/record"],
+      "sources": ["Consensus", "Exa"],
+      "query_ids": ["CONSENSUS-W1-Q1", "EXA-GAP-Q1"],
+      "verification_status": "metadata_partial",
+      "possible_duplicate": null,
+      "metadata_conflict": null,
+      "intake_assessment": "uncertain",
+      "relevance_reason": "Short paraphrased reason.",
+      "required_human_action": "Verify metadata and screen eligibility."
+    }
+  ]
+}
+```
+
+Allowed `work_type` values are `peer_reviewed`, `accepted_manuscript`,
+`working_paper`, `preprint`, `other` and `unknown`. Allowed
+`verification_status` values are `metadata_verified`, `metadata_partial` and
+`identifier_unresolved`. Intake assessments remain `plausible_core`,
+`plausible_contextual` or `uncertain`. `year`, `venue`, DOI, duplicate note and
+conflict note may be `null`; all other record fields are required.
 
 ## Failure behaviour
 
@@ -75,6 +118,11 @@ returns the referenced issue and confirms that it is not the metrics ledger or a
 pull request, was created by the authorised account, uses the candidate-intake
 title/form and carries the same batch ID. A missing, renamed or mismatched issue
 stops publication instead of turning unpersisted candidates into public counts.
+The deployment also parses the candidate manifest, checks its governed fields
+and unique batch-scoped IDs, and requires its array length to equal the ledger's
+candidate count. Candidate assessments and per-source hits/exclusives must also
+reconcile with the aggregate ledger fields. Placeholder text or a copied total
+is not sufficient.
 
 ## Human handoff
 

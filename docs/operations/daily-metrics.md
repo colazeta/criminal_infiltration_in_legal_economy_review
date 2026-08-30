@@ -138,7 +138,12 @@ Il ledger contiene anche il riferimento canonico all'eventuale issue di intake
 per lo stesso batch nello stesso repository. URL e numero devono coincidere. Il
 workflow recupera anche quella issue e verifica autore, tipo, titolo e campo
 `Batch ID`; il ledger #30, una pull request o un'issue di un altro batch non
-possono convalidare il conteggio dei candidati. Il JSON pubblico
+possono convalidare il conteggio dei candidati. La sezione `Candidate records`
+è un manifest JSON: ogni elemento ha un ID univoco legato al batch e campi
+controllati, e la lunghezza dell'array deve coincidere con
+`intake_candidates`. Testo segnaposto o un totale dichiarato senza record non
+sono accettati. Anche valutazioni intake e attribuzione alle fonti vengono
+riconciliate con i conteggi aggregati. Il JSON pubblico
 espone soltanto conteggi, stato tecnico, data e
 l'informazione che una issue è stata creata; non ne pubblica il collegamento.
 Nessuno dei due contiene:

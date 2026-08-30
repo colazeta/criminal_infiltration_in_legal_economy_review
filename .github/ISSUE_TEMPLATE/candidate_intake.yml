@@ -24,7 +24,9 @@ body:
     id: candidates
     attributes:
       label: Candidate records
-      description: Title, authors, year, venue, DOI/identifier, links, intake assessment, short relevance reason and possible duplicates.
+      description: One JSON manifest with schema_version 1, the exact batch_id and a candidates array. Each candidate needs a batch-scoped candidate_id, title, authors, year, venue, work_type, identifiers (doi and other), source_links, sources, query_ids, verification_status, possible_duplicate, metadata_conflict, intake_assessment, relevance_reason and required_human_action.
+      placeholder: '{"schema_version":1,"batch_id":"ACADEMIC-YYYY-MM-DD","candidates":[]}'
+      render: json
     validations:
       required: true
   - type: checkboxes

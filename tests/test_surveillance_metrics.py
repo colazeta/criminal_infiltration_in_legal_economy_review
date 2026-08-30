@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import copy
 import json
+import re
 import sys
 import unittest
 from pathlib import Path
@@ -28,6 +29,35 @@ REPOSITORY = "colazeta/criminal_infiltration_in_legal_economy_review"
 
 def candidate_issue(run: dict, number: int = 31) -> dict:
     batch_id = run["batch_id"]
+    candidates = []
+    candidate_sources = [["Consensus"], ["Exa"], ["Consensus", "Exa"]]
+    candidate_assessments = ["plausible_core", "plausible_core", "plausible_contextual"]
+    for ordinal in range(1, run["totals"]["intake_candidates"] + 1):
+        candidates.append(
+            {
+                "candidate_id": f"CAND-{batch_id}-{ordinal:03d}",
+                "title": f"Candidate {ordinal}",
+                "authors": ["Example Author"],
+                "year": 2026,
+                "venue": "Example Journal",
+                "work_type": "peer_reviewed",
+                "identifiers": {"doi": None, "other": [f"EX-{ordinal}"]},
+                "source_links": [f"https://example.org/paper-{ordinal}"],
+                "sources": candidate_sources[ordinal - 1],
+                "query_ids": ["CONSENSUS-W1-Q1"],
+                "verification_status": "metadata_partial",
+                "possible_duplicate": None,
+                "metadata_conflict": None,
+                "intake_assessment": candidate_assessments[ordinal - 1],
+                "relevance_reason": "Potentially concerns criminal infiltration.",
+                "required_human_action": "Verify metadata and screen eligibility.",
+            }
+        )
+    manifest = {
+        "schema_version": 1,
+        "batch_id": batch_id,
+        "candidates": candidates,
+    }
     return {
         "number": number,
         "html_url": f"https://github.com/{REPOSITORY}/issues/{number}",
@@ -35,7 +65,7 @@ def candidate_issue(run: dict, number: int = 31) -> dict:
         "body": (
             f"### Batch ID\n\n{batch_id}\n\n"
             "### Search and provenance log\n\nConsensus and Exa completed.\n\n"
-            "### Candidate records\n\nThree structured candidate records.\n\n"
+            f"### Candidate records\n\n```json\n{json.dumps(manifest)}\n```\n\n"
             "### Safeguards\n\n- [x] No candidate was marked eligible or published."
         ),
         "user": {"login": "colazeta"},
@@ -252,6 +282,41 @@ class SurveillanceRunTests(unittest.TestCase):
         issue = candidate_issue(run)
         issue["user"]["login"] = "someone-else"
         with self.assertRaisesRegex(MetricsError, "author is not authorised"):
+            verify_intake_issue(run, issue, {"colazeta"}, 30)
+
+    def test_persisted_candidate_count_must_match_ledger(self) -> None:
+        run = validate_run(completed_run())
+        issue = candidate_issue(run)
+        manifest_section = issue["body"].split("```json\n", 1)[1].split("\n```", 1)[0]
+        manifest = json.loads(manifest_section)
+        manifest["candidates"].pop()
+        issue["body"] = issue["body"].replace(
+            manifest_section, json.dumps(manifest), 1
+        )
+        with self.assertRaisesRegex(MetricsError, "persisted candidate count"):
+            verify_intake_issue(run, issue, {"colazeta"}, 30)
+
+    def test_unstructured_candidate_placeholder_is_rejected(self) -> None:
+        run = validate_run(completed_run())
+        issue = candidate_issue(run)
+        issue["body"] = re.sub(
+            r"(?s)(### Candidate records\n\n).*?(\n\n### Safeguards)",
+            r"\1N/A\2",
+            issue["body"],
+        )
+        with self.assertRaisesRegex(MetricsError, "must be one JSON object"):
+            verify_intake_issue(run, issue, {"colazeta"}, 30)
+
+    def test_persisted_candidate_attribution_must_match_ledger(self) -> None:
+        run = validate_run(completed_run())
+        issue = candidate_issue(run)
+        manifest_section = issue["body"].split("```json\n", 1)[1].split("\n```", 1)[0]
+        manifest = json.loads(manifest_section)
+        manifest["candidates"][0]["sources"] = ["Consensus", "Exa"]
+        issue["body"] = issue["body"].replace(
+            manifest_section, json.dumps(manifest), 1
+        )
+        with self.assertRaisesRegex(MetricsError, "persisted source"):
             verify_intake_issue(run, issue, {"colazeta"}, 30)
 
     def test_exclusive_candidate_attribution_must_be_exact(self) -> None:

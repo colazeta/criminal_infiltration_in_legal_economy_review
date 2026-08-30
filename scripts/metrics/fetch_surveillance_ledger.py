@@ -9,6 +9,7 @@ import os
 import re
 from pathlib import Path
 from urllib.error import HTTPError, URLError
+from urllib.parse import urlsplit
 from urllib.request import Request, urlopen
 
 from surveillance import REPOSITORY_FULL_NAME, MetricsError, validate_run
@@ -26,6 +27,40 @@ INTAKE_BODY_FIELDS = (
     "Candidate records",
     "Safeguards",
 )
+CANDIDATE_MANIFEST_FIELDS = {"schema_version", "batch_id", "candidates"}
+CANDIDATE_RECORD_FIELDS = {
+    "candidate_id",
+    "title",
+    "authors",
+    "year",
+    "venue",
+    "work_type",
+    "identifiers",
+    "source_links",
+    "sources",
+    "query_ids",
+    "verification_status",
+    "possible_duplicate",
+    "metadata_conflict",
+    "intake_assessment",
+    "relevance_reason",
+    "required_human_action",
+}
+CANDIDATE_WORK_TYPES = {
+    "peer_reviewed",
+    "accepted_manuscript",
+    "working_paper",
+    "preprint",
+    "other",
+    "unknown",
+}
+CANDIDATE_VERIFICATION_STATUSES = {
+    "metadata_verified",
+    "metadata_partial",
+    "identifier_unresolved",
+}
+CANDIDATE_ASSESSMENTS = {"plausible_core", "plausible_contextual", "uncertain"}
+CANDIDATE_JSON_BLOCK = re.compile(r"\A```json\s*(\{.*\})\s*```\s*\Z", re.DOTALL)
 
 
 def api_get(url: str, token: str) -> tuple[object, str | None]:
@@ -72,11 +107,167 @@ def issue_form_value(body: str, label: str) -> str | None:
         rf"(?m)^###\s+{re.escape(label)}\s*$\n+(?P<value>.*?)(?=^###\s+|\Z)",
         re.DOTALL,
     )
-    match = pattern.search(body.replace("\r\n", "\n"))
-    if not match:
+    matches = list(pattern.finditer(body.replace("\r\n", "\n")))
+    if len(matches) != 1:
         return None
-    value = match.group("value").strip()
+    value = matches[0].group("value").strip()
     return value or None
+
+
+def required_text(value: object, label: str, max_length: int = 500) -> str:
+    if not isinstance(value, str) or not value.strip() or len(value.strip()) > max_length:
+        raise MetricsError(f"{label}: expected non-empty text up to {max_length} characters")
+    return value.strip()
+
+
+def optional_text(value: object, label: str, max_length: int = 500) -> str | None:
+    if value is None:
+        return None
+    return required_text(value, label, max_length)
+
+
+def text_list(
+    value: object,
+    label: str,
+    *,
+    minimum: int,
+    maximum: int,
+    item_length: int = 500,
+) -> list[str]:
+    if not isinstance(value, list) or not minimum <= len(value) <= maximum:
+        raise MetricsError(f"{label}: expected {minimum} to {maximum} text values")
+    result = [required_text(item, f"{label}[]", item_length) for item in value]
+    if len(result) != len(set(result)):
+        raise MetricsError(f"{label}: duplicate values are not allowed")
+    return result
+
+
+def verify_candidate_manifest(run: dict, section: str) -> None:
+    """Require one structured candidate object for every persisted intake count."""
+    match = CANDIDATE_JSON_BLOCK.fullmatch(section.strip())
+    if not match:
+        raise MetricsError("run.intake_issue: Candidate records must be one JSON object")
+    try:
+        manifest = json.loads(match.group(1))
+    except json.JSONDecodeError as exc:
+        raise MetricsError("run.intake_issue: Candidate records JSON is invalid") from exc
+    if not isinstance(manifest, dict) or set(manifest) != CANDIDATE_MANIFEST_FIELDS:
+        raise MetricsError("run.intake_issue: Candidate records manifest fields are invalid")
+    if (
+        type(manifest["schema_version"]) is not int
+        or manifest["schema_version"] != 1
+        or manifest["batch_id"] != run["batch_id"]
+    ):
+        raise MetricsError("run.intake_issue: Candidate records manifest batch is invalid")
+    candidates = manifest["candidates"]
+    expected_count = run["totals"]["intake_candidates"]
+    if not isinstance(candidates, list) or len(candidates) != expected_count:
+        raise MetricsError("run.intake_issue: persisted candidate count disagrees with run")
+
+    candidate_ids: list[str] = []
+    assessment_counts = {value: 0 for value in CANDIDATE_ASSESSMENTS}
+    source_hits = {value: 0 for value in ("Consensus", "Exa")}
+    source_exclusives = {value: 0 for value in ("Consensus", "Exa")}
+    duplicate_notes = 0
+    conflict_notes = 0
+    expected_id = re.compile(rf"CAND-{re.escape(run['batch_id'])}-[0-9]{{3}}")
+    for index, candidate in enumerate(candidates):
+        label = f"run.intake_issue.candidates[{index}]"
+        if not isinstance(candidate, dict) or set(candidate) != CANDIDATE_RECORD_FIELDS:
+            raise MetricsError(f"{label}: candidate record fields are invalid")
+        candidate_id = required_text(candidate["candidate_id"], f"{label}.candidate_id", 80)
+        if not expected_id.fullmatch(candidate_id):
+            raise MetricsError(f"{label}.candidate_id: invalid batch-scoped ID")
+        candidate_ids.append(candidate_id)
+        required_text(candidate["title"], f"{label}.title", 500)
+        text_list(candidate["authors"], f"{label}.authors", minimum=1, maximum=50)
+        year = candidate["year"]
+        if year is not None and (
+            isinstance(year, bool)
+            or not isinstance(year, int)
+            or not 1800 <= year <= int(run["run_date"][:4]) + 1
+        ):
+            raise MetricsError(f"{label}.year: invalid publication year")
+        optional_text(candidate["venue"], f"{label}.venue", 300)
+        if (
+            not isinstance(candidate["work_type"], str)
+            or candidate["work_type"] not in CANDIDATE_WORK_TYPES
+        ):
+            raise MetricsError(f"{label}.work_type: invalid value")
+        identifiers = candidate["identifiers"]
+        if not isinstance(identifiers, dict) or set(identifiers) != {"doi", "other"}:
+            raise MetricsError(f"{label}.identifiers: invalid fields")
+        optional_text(identifiers["doi"], f"{label}.identifiers.doi", 200)
+        text_list(
+            identifiers["other"],
+            f"{label}.identifiers.other",
+            minimum=0,
+            maximum=20,
+            item_length=200,
+        )
+        links = text_list(
+            candidate["source_links"],
+            f"{label}.source_links",
+            minimum=1,
+            maximum=20,
+            item_length=1000,
+        )
+        if any(
+            urlsplit(link).scheme not in {"http", "https"}
+            or not urlsplit(link).netloc
+            for link in links
+        ):
+            raise MetricsError(f"{label}.source_links: invalid URL")
+        sources = text_list(
+            candidate["sources"], f"{label}.sources", minimum=1, maximum=2, item_length=40
+        )
+        if not set(sources).issubset({"Consensus", "Exa"}):
+            raise MetricsError(f"{label}.sources: source is not governed")
+        for source in sources:
+            source_hits[source] += 1
+        if len(sources) == 1:
+            source_exclusives[sources[0]] += 1
+        text_list(
+            candidate["query_ids"],
+            f"{label}.query_ids",
+            minimum=1,
+            maximum=20,
+            item_length=80,
+        )
+        if (
+            not isinstance(candidate["verification_status"], str)
+            or candidate["verification_status"]
+            not in CANDIDATE_VERIFICATION_STATUSES
+        ):
+            raise MetricsError(f"{label}.verification_status: invalid value")
+        optional_text(candidate["possible_duplicate"], f"{label}.possible_duplicate", 500)
+        optional_text(candidate["metadata_conflict"], f"{label}.metadata_conflict", 500)
+        duplicate_notes += candidate["possible_duplicate"] is not None
+        conflict_notes += candidate["metadata_conflict"] is not None
+        if (
+            not isinstance(candidate["intake_assessment"], str)
+            or candidate["intake_assessment"] not in CANDIDATE_ASSESSMENTS
+        ):
+            raise MetricsError(f"{label}.intake_assessment: invalid value")
+        assessment_counts[candidate["intake_assessment"]] += 1
+        required_text(candidate["relevance_reason"], f"{label}.relevance_reason", 1000)
+        required_text(
+            candidate["required_human_action"], f"{label}.required_human_action", 500
+        )
+    if len(candidate_ids) != len(set(candidate_ids)):
+        raise MetricsError("run.intake_issue: candidate IDs must be unique")
+    if assessment_counts != run["assessments"]:
+        raise MetricsError("run.intake_issue: persisted assessments disagree with run")
+    for source in run["sources"]:
+        source_name = source["source"]
+        if source_hits[source_name] != source["candidate_hits"]:
+            raise MetricsError("run.intake_issue: persisted source hits disagree with run")
+        if source_exclusives[source_name] != source["exclusive_candidates"]:
+            raise MetricsError("run.intake_issue: persisted source exclusives disagree with run")
+    if duplicate_notes > run["totals"]["possible_duplicate_flags"]:
+        raise MetricsError("run.intake_issue: persisted duplicate notes exceed run flags")
+    if conflict_notes > run["totals"]["metadata_conflicts"]:
+        raise MetricsError("run.intake_issue: persisted conflict notes exceed run flags")
 
 
 def verify_intake_issue(
@@ -99,7 +290,10 @@ def verify_intake_issue(
         raise MetricsError("run.intake_issue: referenced object is a pull request")
     if issue.get("number") != number or issue.get("html_url") != canonical_url:
         raise MetricsError("run.intake_issue: fetched issue identity disagrees with run")
-    author = ((issue.get("user") or {}).get("login") or "").strip()
+    user = issue.get("user")
+    if not isinstance(user, dict):
+        raise MetricsError("run.intake_issue: issue author is missing")
+    author = (user.get("login") or "").strip()
     if author not in allowed_authors:
         raise MetricsError("run.intake_issue: issue author is not authorised")
     if issue.get("title") != f"{INTAKE_TITLE_PREFIX} {batch_id}":
@@ -113,6 +307,7 @@ def verify_intake_issue(
         raise MetricsError("run.intake_issue: candidate-intake form is incomplete")
     if values["Batch ID"] != batch_id:
         raise MetricsError("run.intake_issue: issue batch ID disagrees with run")
+    verify_candidate_manifest(run, values["Candidate records"])
 
 
 def main() -> None:
