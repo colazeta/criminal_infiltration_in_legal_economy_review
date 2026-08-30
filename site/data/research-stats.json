@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "ledgerIssue": {
+    "number": 30,
+    "url": "https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/issues/30"
+  },
+  "dataThrough": null,
+  "dateRange": {
+    "first": null,
+    "last": null
+  },
+  "summary": {
+    "runDays": 0,
+    "completedRuns": 0,
+    "partialRuns": 0,
+    "failedRuns": 0,
+    "lastRunStatus": null,
+    "last7Days": {
+      "completedRuns": 0,
+      "uniqueResults": null,
+      "knownMatches": null,
+      "newCandidates": null
+    },
+    "last30Days": {
+      "loggedRuns": 0,
+      "completedRuns": 0,
+      "partialRuns": 0,
+      "failedRuns": 0,
+      "sourceCompletionRate": null,
+      "uniqueResults": null,
+      "knownMatches": null,
+      "newCandidates": null,
+      "metadataConflicts": null
+    },
+    "allTime": {
+      "newCandidates": null
+    }
+  },
+  "definitions": {
+    "occurrencesReturned": "All result occurrences returned across source queries; repeats are included.",
+    "uniqueResults": "Results remaining after within-run identifier and title/year reconciliation.",
+    "knownMatches": "Unique results already represented in the registry or an earlier intake issue.",
+    "newCandidates": "Records not already known that were forwarded to the human intake queue with a plausible or uncertain assessment.",
+    "candidateRate": "New intake candidates divided by unique results in a completed run; this is not screening yield.",
+    "sourceCompletionRate": "Completed expected source runs divided by all expected source runs; failures are not treated as zero-result searches."
+  },
+  "daily": [],
+  "sources": []
+}

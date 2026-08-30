@@ -18,6 +18,12 @@ validated; no search automation writes here directly.
 | `execution_metrics.csv` | One E0 or E1/E2/E3 execution metric row |
 | `archive_versions.csv` | One versioned corpus release state |
 
+Daily Work surveillance is not written here and is not an E1–E3 execution. Its
+aggregate run telemetry is stored in
+[GitHub issue #30](https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/issues/30)
+and documented in
+[`docs/operations/daily-metrics.md`](../../docs/operations/daily-metrics.md).
+
 Primary/foreign keys and enumerations are enforced by
 `scripts/validation/validate_archive.py`. See
 `docs/governance/data-model.md` for the publication gate.

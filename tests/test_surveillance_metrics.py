@@ -1,0 +1,615 @@
+from __future__ import annotations
+
+import copy
+import json
+import re
+import sys
+import unittest
+from pathlib import Path
+
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "scripts/metrics"))
+
+from fetch_surveillance_ledger import (  # noqa: E402
+    MARKER,
+    extract_run,
+    verify_intake_issue,
+    verify_intake_issue_uniqueness,
+    verify_ledger_comment_time,
+    verify_repository_commit,
+)
+from surveillance import (  # noqa: E402
+    MetricsError,
+    build_public_payload,
+    validate_public_payload,
+    validate_run,
+)
+
+
+REPOSITORY = "colazeta/criminal_infiltration_in_legal_economy_review"
+
+
+def candidate_issue(run: dict, number: int = 31) -> dict:
+    batch_id = run["batch_id"]
+    consensus_queries = [
+        {"query_id": f"CONSENSUS-W{ordinal}-Q1", "query_text": f"Consensus query {ordinal}"}
+        for ordinal in range(1, 8)
+    ]
+    exa_queries = [
+        {"query_id": f"EXA-GAP-Q{ordinal}", "query_text": f"Exa query {ordinal}"}
+        for ordinal in range(1, 5)
+    ]
+    search_manifest = {
+        "schema_version": 1,
+        "batch_id": batch_id,
+        "repository_commit": run["repository_commit"],
+        "sources": [
+            {"source": "Consensus", "queries": consensus_queries},
+            {"source": "Exa", "queries": exa_queries},
+        ],
+    }
+    candidates = []
+    candidate_sources = [["Consensus"], ["Exa"], ["Consensus", "Exa"]]
+    candidate_queries = [
+        ["CONSENSUS-W1-Q1"],
+        ["EXA-GAP-Q1"],
+        ["CONSENSUS-W2-Q1", "EXA-GAP-Q2"],
+    ]
+    candidate_assessments = ["plausible_core", "plausible_core", "plausible_contextual"]
+    for ordinal in range(1, run["totals"]["intake_candidates"] + 1):
+        candidates.append(
+            {
+                "candidate_id": f"CAND-{batch_id}-{ordinal:03d}",
+                "title": f"Candidate {ordinal}",
+                "authors": ["Example Author"],
+                "year": 2026,
+                "venue": "Example Journal",
+                "work_type": "peer_reviewed",
+                "identifiers": {"doi": None, "other": [f"EX-{ordinal}"]},
+                "source_links": [f"https://example.org/paper-{ordinal}"],
+                "sources": candidate_sources[ordinal - 1],
+                "query_ids": candidate_queries[ordinal - 1],
+                "verification_status": "metadata_partial",
+                "possible_duplicate": None,
+                "metadata_conflict": None,
+                "intake_assessment": candidate_assessments[ordinal - 1],
+                "relevance_reason": "Potentially concerns criminal infiltration.",
+                "required_human_action": "Verify metadata and screen eligibility.",
+            }
+        )
+    manifest = {
+        "schema_version": 1,
+        "batch_id": batch_id,
+        "candidates": candidates,
+    }
+    return {
+        "number": number,
+        "html_url": f"https://github.com/{REPOSITORY}/issues/{number}",
+        "title": f"[INTAKE][ACADEMIC] {batch_id}",
+        "created_at": f"{run['run_date']}T05:00:00Z",
+        "body": (
+            f"### Batch ID\n\n{batch_id}\n\n"
+            "### Search and provenance log\n\n```json\n"
+            f"{json.dumps(search_manifest)}\n```\n\n"
+            f"### Candidate records\n\n```json\n{json.dumps(manifest)}\n```\n\n"
+            "### Safeguards\n\n"
+            "- [x] No candidate was marked eligible or published.\n"
+            "- [x] Canonical records and existing intake issues were checked for duplicates.\n"
+            "- [x] No copyrighted full text or long abstract is included."
+        ),
+        "user": {"login": "colazeta"},
+    }
+
+
+def completed_run(day: str = "2026-08-31") -> dict:
+    return {
+        "schema_version": 1,
+        "batch_id": f"ACADEMIC-{day}",
+        "run_date": day,
+        "window_start": f"{day}T00:00:00+02:00",
+        "window_end": f"{day}T07:20:00+02:00",
+        "timezone": "Europe/Rome",
+        "status": "completed",
+        "repository_commit": "a" * 40,
+        "expected_sources": ["Consensus", "Exa"],
+        "sources": [
+            {
+                "source": "Consensus",
+                "status": "completed",
+                "queries_planned": 7,
+                "queries_completed": 7,
+                "occurrences_returned": 12,
+                "unique_results": 8,
+                "candidate_hits": 2,
+                "exclusive_candidates": 1,
+                "failure_code": None,
+                "limitations": [],
+            },
+            {
+                "source": "Exa",
+                "status": "completed",
+                "queries_planned": 4,
+                "queries_completed": 4,
+                "occurrences_returned": 10,
+                "unique_results": 7,
+                "candidate_hits": 2,
+                "exclusive_candidates": 1,
+                "failure_code": None,
+                "limitations": ["Provider ranking capped the inspected tail."],
+            },
+        ],
+        "totals": {
+            "occurrences_returned": 22,
+            "unique_results": 12,
+            "known_matches": 5,
+            "intake_candidates": 3,
+            "not_forwarded": 3,
+            "unresolved_identity": 1,
+            "possible_duplicate_flags": 1,
+            "metadata_conflicts": 1,
+        },
+        "assessments": {
+            "plausible_core": 2,
+            "plausible_contextual": 1,
+            "uncertain": 0,
+        },
+        "intake_issue": {
+            "created": True,
+            "number": 31,
+            "url": f"https://github.com/{REPOSITORY}/issues/31",
+        },
+        "notes": ["Counts describe intake triage, not eligibility."],
+    }
+
+
+def zero_run(day: str = "2026-09-01") -> dict:
+    run = completed_run(day)
+    for source in run["sources"]:
+        for field in (
+            "occurrences_returned",
+            "unique_results",
+            "candidate_hits",
+            "exclusive_candidates",
+        ):
+            source[field] = 0
+        source["limitations"] = []
+    for field in run["totals"]:
+        run["totals"][field] = 0
+    for field in run["assessments"]:
+        run["assessments"][field] = 0
+    run["intake_issue"] = {"created": False, "number": None, "url": None}
+    run["notes"] = ["Successful zero-candidate run."]
+    return run
+
+
+def partial_run(day: str = "2026-09-02") -> dict:
+    run = completed_run(day)
+    run["status"] = "partial"
+    failed = run["sources"][1]
+    failed["status"] = "failed"
+    failed["queries_completed"] = 1
+    for field in (
+        "occurrences_returned",
+        "unique_results",
+        "candidate_hits",
+        "exclusive_candidates",
+    ):
+        failed[field] = None
+    failed["failure_code"] = "connector_unavailable"
+    failed["limitations"] = ["Exa did not complete the required search."]
+    for field in run["totals"]:
+        run["totals"][field] = None
+    for field in run["assessments"]:
+        run["assessments"][field] = 0
+    run["intake_issue"] = {"created": False, "number": None, "url": None}
+    return run
+
+
+class SurveillanceRunTests(unittest.TestCase):
+    def test_completed_run_is_valid(self) -> None:
+        result = validate_run(completed_run())
+        self.assertEqual(result["totals"]["intake_candidates"], 3)
+
+    def test_successful_zero_is_distinct_from_missing(self) -> None:
+        result = validate_run(zero_run())
+        self.assertEqual(result["totals"]["unique_results"], 0)
+        self.assertFalse(result["intake_issue"]["created"])
+
+    def test_partial_run_requires_null_aggregate_totals(self) -> None:
+        result = validate_run(partial_run())
+        self.assertEqual(result["status"], "partial")
+        self.assertIsNone(result["totals"]["unique_results"])
+
+    def test_batch_date_must_match(self) -> None:
+        run = completed_run()
+        run["batch_id"] = "ACADEMIC-2026-09-01"
+        with self.assertRaisesRegex(MetricsError, "batch_id date"):
+            validate_run(run)
+
+    def test_boolean_schema_version_is_rejected(self) -> None:
+        run = completed_run()
+        run["schema_version"] = True
+        with self.assertRaisesRegex(MetricsError, "unsupported schema_version"):
+            validate_run(run)
+
+    def test_window_offset_must_match_rome(self) -> None:
+        run = completed_run()
+        run["window_end"] = "2026-08-31T07:20:00+01:00"
+        with self.assertRaisesRegex(MetricsError, "offset incompatible"):
+            validate_run(run)
+
+    def test_daily_window_must_start_on_run_date(self) -> None:
+        run = completed_run()
+        run["window_start"] = "2026-01-01T00:00:00+01:00"
+        with self.assertRaisesRegex(MetricsError, "window_start date"):
+            validate_run(run)
+
+    def test_expected_source_requires_a_query(self) -> None:
+        run = zero_run()
+        run["sources"][0]["queries_planned"] = 0
+        run["sources"][0]["queries_completed"] = 0
+        with self.assertRaisesRegex(MetricsError, "requires a planned query"):
+            validate_run(run)
+
+    def test_source_set_must_match_governance(self) -> None:
+        run = completed_run()
+        run["expected_sources"][1] = "Google Scholar"
+        run["sources"][1]["source"] = "Google Scholar"
+        with self.assertRaisesRegex(MetricsError, "governed active source set"):
+            validate_run(run)
+
+    def test_unique_result_disposition_must_reconcile(self) -> None:
+        run = completed_run()
+        run["totals"]["known_matches"] += 1
+        with self.assertRaisesRegex(MetricsError, "disposition"):
+            validate_run(run)
+
+    def test_cross_source_union_cannot_be_smaller_than_a_source(self) -> None:
+        run = completed_run()
+        run["totals"].update(
+            {
+                "unique_results": 7,
+                "known_matches": 3,
+                "intake_candidates": 3,
+                "not_forwarded": 1,
+                "unresolved_identity": 0,
+            }
+        )
+        with self.assertRaisesRegex(MetricsError, "fall below a source total"):
+            validate_run(run)
+
+    def test_incomplete_run_cannot_report_aggregate_zeroes(self) -> None:
+        run = partial_run()
+        run["totals"]["unique_results"] = 0
+        with self.assertRaisesRegex(MetricsError, "must be null"):
+            validate_run(run)
+
+    def test_issue_creation_must_match_candidate_count(self) -> None:
+        run = completed_run()
+        run["intake_issue"] = {"created": False, "number": None, "url": None}
+        with self.assertRaisesRegex(MetricsError, "issue creation"):
+            validate_run(run)
+
+    def test_intake_issue_url_must_match_number_and_repository(self) -> None:
+        run = completed_run()
+        run["intake_issue"]["url"] = "https://github.com/other/repo/issues/999"
+        with self.assertRaisesRegex(MetricsError, "canonical repository"):
+            validate_run(run)
+
+    def test_referenced_intake_issue_must_match_batch_and_template(self) -> None:
+        run = validate_run(completed_run())
+        verify_intake_issue(run, candidate_issue(run), {"colazeta"}, 30)
+
+        wrong_batch = candidate_issue(run)
+        wrong_batch["body"] = wrong_batch["body"].replace(
+            run["batch_id"], "ACADEMIC-2026-08-30", 1
+        )
+        with self.assertRaisesRegex(MetricsError, "batch ID"):
+            verify_intake_issue(run, wrong_batch, {"colazeta"}, 30)
+
+    def test_batch_requires_exactly_one_referenced_intake_issue(self) -> None:
+        run = validate_run(completed_run())
+        item = candidate_issue(run)
+        item["repository_url"] = f"https://api.github.com/repos/{REPOSITORY}"
+        repository_issues = [item]
+        verify_intake_issue_uniqueness(run, repository_issues)
+
+        duplicate = copy.deepcopy(item)
+        duplicate["number"] = 32
+        duplicate["html_url"] = f"https://github.com/{REPOSITORY}/issues/32"
+        repository_issues.append(duplicate)
+        with self.assertRaisesRegex(MetricsError, "exactly the referenced"):
+            verify_intake_issue_uniqueness(run, repository_issues)
+
+    def test_zero_candidate_batch_must_have_no_intake_issue(self) -> None:
+        run = validate_run(zero_run())
+        verify_intake_issue_uniqueness(run, [])
+        stray = {
+            "number": 44,
+            "title": f"[INTAKE][ACADEMIC] {run['batch_id']}",
+            "repository_url": f"https://api.github.com/repos/{REPOSITORY}",
+        }
+        with self.assertRaisesRegex(MetricsError, "zero-intake batch"):
+            verify_intake_issue_uniqueness(run, [stray])
+
+    def test_metrics_ledger_cannot_pose_as_intake_issue(self) -> None:
+        run = validate_run(completed_run())
+        run["intake_issue"] = {
+            "created": True,
+            "number": 30,
+            "url": f"https://github.com/{REPOSITORY}/issues/30",
+        }
+        issue = candidate_issue(run, number=30)
+        with self.assertRaisesRegex(MetricsError, "metrics ledger"):
+            verify_intake_issue(run, issue, {"colazeta"}, 30)
+
+    def test_referenced_intake_issue_requires_authorised_issue_author(self) -> None:
+        run = validate_run(completed_run())
+        issue = candidate_issue(run)
+        issue["user"]["login"] = "someone-else"
+        with self.assertRaisesRegex(MetricsError, "author is not authorised"):
+            verify_intake_issue(run, issue, {"colazeta"}, 30)
+
+    def test_referenced_intake_issue_must_be_created_during_run(self) -> None:
+        run = validate_run(completed_run())
+        issue = candidate_issue(run)
+        issue["created_at"] = "2026-08-30T05:00:00Z"
+        with self.assertRaisesRegex(MetricsError, "during the run window"):
+            verify_intake_issue(run, issue, {"colazeta"}, 30)
+
+    def test_persisted_candidate_count_must_match_ledger(self) -> None:
+        run = validate_run(completed_run())
+        issue = candidate_issue(run)
+        manifest_section = issue["body"].split(
+            "### Candidate records\n\n```json\n", 1
+        )[1].split("\n```", 1)[0]
+        manifest = json.loads(manifest_section)
+        manifest["candidates"].pop()
+        issue["body"] = issue["body"].replace(
+            manifest_section, json.dumps(manifest), 1
+        )
+        with self.assertRaisesRegex(MetricsError, "persisted candidate count"):
+            verify_intake_issue(run, issue, {"colazeta"}, 30)
+
+    def test_unstructured_candidate_placeholder_is_rejected(self) -> None:
+        run = validate_run(completed_run())
+        issue = candidate_issue(run)
+        issue["body"] = re.sub(
+            r"(?s)(### Candidate records\n\n).*?(\n\n### Safeguards)",
+            r"\1N/A\2",
+            issue["body"],
+        )
+        with self.assertRaisesRegex(MetricsError, "must be one JSON object"):
+            verify_intake_issue(run, issue, {"colazeta"}, 30)
+
+    def test_persisted_candidate_attribution_must_match_ledger(self) -> None:
+        run = validate_run(completed_run())
+        issue = candidate_issue(run)
+        manifest_section = issue["body"].split(
+            "### Candidate records\n\n```json\n", 1
+        )[1].split("\n```", 1)[0]
+        manifest = json.loads(manifest_section)
+        manifest["candidates"][0]["sources"] = ["Consensus", "Exa"]
+        issue["body"] = issue["body"].replace(
+            manifest_section, json.dumps(manifest), 1
+        )
+        with self.assertRaisesRegex(MetricsError, "query sources"):
+            verify_intake_issue(run, issue, {"colazeta"}, 30)
+
+    def test_candidate_query_must_exist_in_structured_search_log(self) -> None:
+        run = validate_run(completed_run())
+        issue = candidate_issue(run)
+        manifest_section = issue["body"].split("### Candidate records\n\n```json\n", 1)[1].split("\n```", 1)[0]
+        manifest = json.loads(manifest_section)
+        manifest["candidates"][0]["query_ids"] = ["CONSENSUS-MISSING-Q1"]
+        issue["body"] = issue["body"].replace(manifest_section, json.dumps(manifest), 1)
+        with self.assertRaisesRegex(MetricsError, "absent from Search log"):
+            verify_intake_issue(run, issue, {"colazeta"}, 30)
+
+    def test_search_log_query_count_must_match_plan(self) -> None:
+        run = validate_run(completed_run())
+        issue = candidate_issue(run)
+        manifest_section = issue["body"].split(
+            "### Search and provenance log\n\n```json\n", 1
+        )[1].split("\n```", 1)[0]
+        manifest = json.loads(manifest_section)
+        manifest["sources"][0]["queries"].pop()
+        issue["body"] = issue["body"].replace(manifest_section, json.dumps(manifest), 1)
+        with self.assertRaisesRegex(MetricsError, "planned queries"):
+            verify_intake_issue(run, issue, {"colazeta"}, 30)
+
+    def test_every_candidate_safeguard_must_be_checked(self) -> None:
+        run = validate_run(completed_run())
+        issue = candidate_issue(run)
+        issue["body"] = issue["body"].replace(
+            "- [x] Canonical records and existing intake issues were checked for duplicates.",
+            "- [ ] Canonical records and existing intake issues were checked for duplicates.",
+        )
+        with self.assertRaisesRegex(MetricsError, "every required safeguard"):
+            verify_intake_issue(run, issue, {"colazeta"}, 30)
+
+    def test_duplicate_unchecked_safeguard_is_rejected(self) -> None:
+        run = validate_run(completed_run())
+        issue = candidate_issue(run)
+        issue["body"] += (
+            "\n- [ ] Canonical records and existing intake issues were checked for duplicates."
+        )
+        with self.assertRaisesRegex(MetricsError, "exactly three confirmations"):
+            verify_intake_issue(run, issue, {"colazeta"}, 30)
+
+    def test_repository_commit_must_be_on_main_history(self) -> None:
+        run = validate_run(completed_run())
+        valid_comparison = {
+            "status": "ahead",
+            "base_commit": {"sha": run["repository_commit"]},
+            "merge_base_commit": {"sha": run["repository_commit"]},
+        }
+        verify_repository_commit(run, valid_comparison)
+
+        unrelated = copy.deepcopy(valid_comparison)
+        unrelated["status"] = "diverged"
+        unrelated["merge_base_commit"]["sha"] = "b" * 40
+        with self.assertRaisesRegex(MetricsError, "ancestor of governed main"):
+            verify_repository_commit(run, unrelated)
+
+    def test_ledger_comment_must_be_created_after_same_day_run(self) -> None:
+        run = validate_run(completed_run())
+        verify_ledger_comment_time(
+            run,
+            {
+                "created_at": "2026-08-31T05:21:00Z",
+                "updated_at": "2026-08-31T05:21:00Z",
+            },
+        )
+        with self.assertRaisesRegex(MetricsError, "unedited daily run"):
+            verify_ledger_comment_time(
+                run,
+                {
+                    "created_at": "2026-08-31T05:00:00Z",
+                    "updated_at": "2026-08-31T05:00:00Z",
+                },
+            )
+
+    def test_edited_ledger_comment_is_rejected(self) -> None:
+        run = validate_run(completed_run())
+        with self.assertRaisesRegex(MetricsError, "unedited daily run"):
+            verify_ledger_comment_time(
+                run,
+                {
+                    "created_at": "2026-08-31T05:21:00Z",
+                    "updated_at": "2026-09-01T05:21:00Z",
+                },
+            )
+
+    def test_exclusive_candidate_attribution_must_be_exact(self) -> None:
+        run = completed_run()
+        run["sources"][0]["candidate_hits"] = 3
+        run["sources"][0]["exclusive_candidates"] = 3
+        run["sources"][1]["candidate_hits"] = 3
+        run["sources"][1]["exclusive_candidates"] = 0
+        with self.assertRaisesRegex(MetricsError, "exclusive candidate attribution"):
+            validate_run(run)
+
+    def test_comment_parser_accepts_one_marked_json_block(self) -> None:
+        run = completed_run()
+        body = (
+            f"Daily surveillance batch {run['batch_id']}: {run['status']}.\n\n"
+            f"{MARKER}\n```json\n{json.dumps(run)}\n```"
+        )
+        self.assertEqual(extract_run(body)["batch_id"], run["batch_id"])
+
+    def test_comment_parser_rejects_ambiguous_marked_body(self) -> None:
+        run = completed_run()
+        block = (
+            f"Daily surveillance batch {run['batch_id']}: {run['status']}.\n\n"
+            f"{MARKER}\n```json\n{json.dumps(run)}\n```"
+        )
+        with self.assertRaisesRegex(MetricsError, "canonical envelope"):
+            extract_run(block + "\n" + block)
+
+    def test_recognisable_comment_with_missing_marker_is_rejected(self) -> None:
+        run = completed_run()
+        body = (
+            f"Daily surveillance batch {run['batch_id']}: {run['status']}.\n\n"
+            f"<!-- surveillance-run:typo -->\n```json\n{json.dumps(run)}\n```"
+        )
+        with self.assertRaisesRegex(MetricsError, "canonical envelope"):
+            extract_run(body)
+
+
+class PublicStatisticsTests(unittest.TestCase):
+    def test_payload_separates_run_health_and_candidate_yield(self) -> None:
+        payload = build_public_payload(
+            [completed_run(), zero_run(), partial_run()], 30, REPOSITORY
+        )
+        self.assertEqual(payload["summary"]["runDays"], 3)
+        self.assertEqual(payload["summary"]["completedRuns"], 2)
+        self.assertEqual(payload["summary"]["partialRuns"], 1)
+        self.assertEqual(payload["summary"]["last7Days"]["newCandidates"], 3)
+        self.assertEqual(payload["summary"]["last30Days"]["uniqueResults"], 12)
+        self.assertEqual(payload["daily"][0]["candidateRate"], 0.25)
+        self.assertEqual(payload["daily"][0]["knownOverlapRate"], 0.416667)
+        self.assertIsNone(payload["daily"][1]["candidateRate"])
+        self.assertIsNone(payload["daily"][2]["uniqueResults"])
+
+    def test_zero_denominator_rates_are_null_not_zero(self) -> None:
+        payload = build_public_payload([zero_run()], 30, REPOSITORY)
+        row = payload["daily"][0]
+        self.assertIsNone(row["candidateRate"])
+        self.assertIsNone(row["knownOverlapRate"])
+        self.assertIsNone(row["deduplicationShare"])
+        self.assertEqual(payload["summary"]["last7Days"]["newCandidates"], 0)
+        self.assertEqual(payload["summary"]["allTime"]["newCandidates"], 0)
+
+    def test_windows_without_completed_runs_remain_null(self) -> None:
+        payload = build_public_payload([partial_run()], 30, REPOSITORY)
+        self.assertIsNone(payload["summary"]["last7Days"]["uniqueResults"])
+        self.assertIsNone(payload["summary"]["last30Days"]["newCandidates"])
+        self.assertIsNone(payload["summary"]["allTime"]["newCandidates"])
+        consensus = next(
+            row for row in payload["sources"] if row["source"] == "Consensus"
+        )
+        exa = next(row for row in payload["sources"] if row["source"] == "Exa")
+        self.assertEqual(consensus["completedRuns"], 1)
+        self.assertEqual(consensus["queriesCompleted"], 7)
+        self.assertEqual(exa["queriesCompleted"], 1)
+        self.assertIsNone(consensus["occurrencesReturned"])
+        self.assertIsNone(exa["occurrencesReturned"])
+
+    def test_old_completed_run_does_not_fill_current_window(self) -> None:
+        payload = build_public_payload(
+            [completed_run("2026-07-01"), partial_run("2026-08-31")],
+            30,
+            REPOSITORY,
+        )
+        self.assertIsNone(payload["summary"]["last30Days"]["uniqueResults"])
+        self.assertEqual(payload["summary"]["allTime"]["newCandidates"], 3)
+        self.assertTrue(
+            all(row["occurrencesReturned"] is None for row in payload["sources"])
+        )
+
+    def test_empty_series_has_no_measured_volume(self) -> None:
+        payload = build_public_payload([], 30, REPOSITORY)
+        self.assertIsNone(payload["summary"]["last7Days"]["uniqueResults"])
+        self.assertIsNone(payload["summary"]["last30Days"]["newCandidates"])
+        self.assertIsNone(payload["summary"]["allTime"]["newCandidates"])
+
+    def test_duplicate_day_fails_closed(self) -> None:
+        first = completed_run()
+        second = copy.deepcopy(first)
+        second["repository_commit"] = "b" * 40
+        with self.assertRaisesRegex(MetricsError, "duplicate"):
+            build_public_payload([first, second], 30, REPOSITORY)
+
+    def test_public_rows_contain_no_candidate_metadata(self) -> None:
+        payload = build_public_payload([completed_run()], 30, REPOSITORY)
+        validate_public_payload(payload)
+        serialized = json.dumps(payload).lower()
+        for forbidden in ("title", "authors", "abstract", "doi", "evidence_quote"):
+            self.assertNotIn(f'"{forbidden}"', serialized)
+        self.assertNotIn("intakeIssueUrl", payload["daily"][0])
+        self.assertTrue(payload["daily"][0]["intakeIssueCreated"])
+
+    def test_public_summary_tampering_is_rejected(self) -> None:
+        payload = build_public_payload([completed_run()], 30, REPOSITORY)
+        payload["summary"]["last7Days"]["newCandidates"] = 99
+        with self.assertRaisesRegex(MetricsError, "summary disagrees"):
+            validate_public_payload(payload)
+
+    def test_public_source_label_is_governed(self) -> None:
+        payload = build_public_payload([completed_run()], 30, REPOSITORY)
+        payload["sources"][0]["source"] = "Mafia Firms"
+        with self.assertRaisesRegex(MetricsError, "governed active set"):
+            validate_public_payload(payload)
+
+    def test_public_exclusive_candidate_totals_are_exact(self) -> None:
+        payload = build_public_payload([completed_run()], 30, REPOSITORY)
+        payload["sources"][0]["exclusiveCandidates"] = 2
+        payload["sources"][1]["exclusiveCandidates"] = 0
+        with self.assertRaisesRegex(MetricsError, "exclusive candidate totals"):
+            validate_public_payload(payload)
+
+
+if __name__ == "__main__":
+    unittest.main()

@@ -4,6 +4,8 @@ on:
   pull_request:
   push:
     branches: [main]
+  schedule:
+    - cron: "30 6 * * *"
   workflow_dispatch:
 
 permissions:
@@ -34,10 +36,12 @@ jobs:
       - name: Verify deterministic committed export
         run: |
           python scripts/build_archive.py --output-dir "$RUNNER_TEMP/archive"
+          python scripts/metrics/build_research_stats.py --output "$RUNNER_TEMP/archive/research-stats.json"
           diff -ru "$RUNNER_TEMP/archive" site/data
           python scripts/validation/validate_archive.py
           python scripts/validation/validate_site.py
           node --check site/app.js
+          node --check site/stats.js
 
   deploy:
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
@@ -45,6 +49,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      issues: read
       pages: write
       id-token: write
     environment:
@@ -59,11 +64,26 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Fetch validated daily research metrics
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          LEDGER_AUTHOR: ${{ github.repository_owner }}
+        run: |
+          python scripts/metrics/fetch_surveillance_ledger.py \
+            --repository "$GITHUB_REPOSITORY" \
+            --issue 30 \
+            --allowed-author "$LEDGER_AUTHOR" \
+            --output "$RUNNER_TEMP/surveillance-ledger.json"
+
       - name: Build release artifact
         run: |
           python scripts/build_archive.py
+          python scripts/metrics/build_research_stats.py \
+            --input "$RUNNER_TEMP/surveillance-ledger.json"
           python scripts/validation/validate_archive.py
           python scripts/validation/validate_site.py
+          node --check site/app.js
+          node --check site/stats.js
 
       - name: Configure Pages
         uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5

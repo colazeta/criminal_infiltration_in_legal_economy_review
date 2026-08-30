@@ -7,6 +7,7 @@
 | `data/registry/` | Governed source of truth | Yes, fixed allowlist only |
 | `data/legacy/` | Retired pilot evidence | Never |
 | GitHub intake issues | Candidate staging and search logs | Never |
+| GitHub metrics ledger | Aggregate daily surveillance telemetry | Safe aggregates only, after validation |
 | `site/data/` | Deterministic derived export | Output only |
 
 ## Registries
@@ -26,6 +27,12 @@
 - `editorial_summary.csv`: public-safe aggregate queue counts only.
 - `execution_metrics.csv`: E1–E3 component metrics grouped by cycle.
 - `archive_versions.csv`: corpus/protocol/schema version and coverage dates.
+
+Daily surveillance does not add a registry row. One aggregate comment per batch
+is stored in [GitHub issue #30](https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/issues/30).
+The deployment validates those comments and derives
+`site/data/research-stats.json`. This keeps operational telemetry separate from
+the E1–E3 saturation registry and from scientific decisions.
 
 ## Full publication gate
 
@@ -82,6 +89,13 @@ The builder uses a closed field allowlist. Reviewer identity, internal notes,
 queries, evidence quotes, candidate records and full text are forbidden.
 The machine-readable contract is `schema/public-archive.schema.json`.
 
+The statistics export has a separate closed allowlist containing dates, counts,
+technical run status, source-level aggregates and whether an intake issue was
+created. Candidate
+titles, identifiers, queries and reviewer material are forbidden. Its contracts
+are `schema/surveillance-run.schema.json` and
+`schema/research-stats.schema.json`.
+
 ## Identity
 
 `papers.doi` is the denormalised primary DOI for simple export. Its value must
@@ -110,5 +124,9 @@ date and notes remain unchanged. Exclusion operations accept only codes from
 
 ## Determinism
 
-The build uses no network, timestamp or raw/editorial input. Unknown fields stay
-blank/null. Records sort by year descending, normalised title and stable ID.
+The archive build uses no network, timestamp or raw/editorial input. Unknown
+fields stay blank/null. Records sort by year descending, normalised title and
+stable ID. Daily statistics are a separate deployment input: GitHub Actions
+fetches the public ledger, accepts only authorised and schema-valid aggregate
+comments, and fails without replacing the last valid deployment when the ledger
+cannot be verified.

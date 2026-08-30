@@ -17,14 +17,18 @@ body:
     id: search_log
     attributes:
       label: Search and provenance log
-      description: Sources/connectors, exact queries, dates, counts, repository ref and failures.
+      description: One JSON manifest with schema_version 1, the exact batch_id and repository_commit, and one source object for Consensus and Exa. Each source has a queries array containing unique source-scoped query_id and exact query_text values; its length equals queries_planned in the ledger.
+      placeholder: '{"schema_version":1,"batch_id":"ACADEMIC-YYYY-MM-DD","repository_commit":"FULL_MAIN_SHA","sources":[]}'
+      render: json
     validations:
       required: true
   - type: textarea
     id: candidates
     attributes:
       label: Candidate records
-      description: Title, authors, year, venue, DOI/identifier, links, intake assessment, short relevance reason and possible duplicates.
+      description: One JSON manifest with schema_version 1, the exact batch_id and a candidates array. Each candidate needs a batch-scoped candidate_id, title, authors, year, venue, work_type, identifiers (doi and other), source_links, sources, query_ids, verification_status, possible_duplicate, metadata_conflict, intake_assessment, relevance_reason and required_human_action.
+      placeholder: '{"schema_version":1,"batch_id":"ACADEMIC-YYYY-MM-DD","candidates":[]}'
+      render: json
     validations:
       required: true
   - type: checkboxes

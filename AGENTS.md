@@ -28,7 +28,7 @@ boundary between discovery, editorial judgement and publication.
 
 | Role | May write | Must not write |
 |---|---|---|
-| Discovery/intake | One structured GitHub intake issue | Repository files, branches, PRs, registries, publication state |
+| Discovery/intake | One structured intake issue when needed and one aggregate metrics-ledger comment per batch | Repository files, branches, PRs, registries, publication state |
 | Metadata verifier | Candidate issue or reviewed metadata PR | Eligibility decisions, public relevance claims |
 | Screener | Reviewed decision/evidence PR | Publication manifest unless the task explicitly includes curation |
 | Curator | Registry and publication-manifest PR | Unverified metadata, automatic merge |
@@ -62,7 +62,8 @@ Only governed screening decisions may use `eligible_core` or
 - Retrieval or intake: `docs/methodology/discovery.md`,
   `docs/methodology/expansion.md`, the relevant sections of
   `docs/methodology/expansion-reference.md`, `docs/governance/sources.md` and
-  `docs/operations/automation.md`.
+  `docs/operations/automation.md`. Daily surveillance also requires
+  `docs/operations/daily-metrics.md`.
 - Curator-console action: `docs/operations/curation.md`,
   `docs/governance/data-model.md` and `docs/methodology/eligibility.md`.
 - Saturation work: `docs/methodology/saturation.md`.
@@ -83,6 +84,7 @@ python3 scripts/build_archive.py
 python3 scripts/validation/validate_archive.py
 python3 scripts/validation/validate_site.py
 node --check site/app.js
+node --check site/stats.js
 python3 scripts/report_saturation.py
 ```
 

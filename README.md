@@ -4,6 +4,7 @@ A searchable, governed archive of scholarly work on **criminal infiltration in
 the legal economy**.
 
 - [Public archive](https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/)
+- [Daily research statistics](https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/stats.html)
 - [Curator desk](https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/curate.html)
 - [Start here: repository index](INDEX.md)
 - [Guida rapida in italiano](docs/GUIDA_RAPIDA_IT.md)
@@ -54,8 +55,11 @@ plan the next round. The
 [technical reference in English](docs/methodology/expansion-reference.md) keeps
 the provider rules, metrics and audit fields needed for reproducibility.
 
-Automation may create one deduplicated intake issue. It cannot assign canonical
-IDs, decide eligibility, edit registries, declare saturation or publish papers.
+Automation may create one deduplicated intake issue and one aggregate metrics
+comment per daily batch. It cannot assign canonical IDs, decide eligibility,
+edit registries, declare saturation or publish papers. The
+[daily-metrics guide](docs/operations/daily-metrics.md) explains how successful
+zero-result days, partial runs and failures are kept distinct.
 
 ## Correcting the archive
 
@@ -84,6 +88,7 @@ python3 scripts/build_archive.py
 python3 scripts/validation/validate_archive.py
 python3 scripts/validation/validate_site.py
 node --check site/app.js
+node --check site/stats.js
 python3 -m http.server 8000 --directory site
 ```
 

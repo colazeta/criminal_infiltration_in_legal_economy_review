@@ -1,0 +1,167 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/schema/research-stats.schema.json",
+  "title": "Public daily research statistics",
+  "description": "Public-safe aggregate statistics derived from validated surveillance-run comments.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "ledgerIssue",
+    "dataThrough",
+    "dateRange",
+    "summary",
+    "definitions",
+    "daily",
+    "sources"
+  ],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "ledgerIssue": {"$ref": "#/$defs/ledgerIssue"},
+    "dataThrough": {"$ref": "#/$defs/nullableDate"},
+    "dateRange": {"$ref": "#/$defs/dateRange"},
+    "summary": {"$ref": "#/$defs/summary"},
+    "definitions": {"$ref": "#/$defs/definitions"},
+    "daily": {"type": "array", "items": {"$ref": "#/$defs/dailyRow"}},
+    "sources": {"type": "array", "items": {"$ref": "#/$defs/sourceSummary"}}
+  },
+  "$defs": {
+    "count": {"type": "integer", "minimum": 0},
+    "nullableCount": {
+      "oneOf": [{"$ref": "#/$defs/count"}, {"type": "null"}]
+    },
+    "rate": {"type": "number", "minimum": 0, "maximum": 1},
+    "nullableRate": {
+      "oneOf": [{"$ref": "#/$defs/rate"}, {"type": "null"}]
+    },
+    "nullableDate": {
+      "oneOf": [{"type": "string", "format": "date"}, {"type": "null"}]
+    },
+    "ledgerIssue": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["number", "url"],
+      "properties": {
+        "number": {"type": "integer", "minimum": 1},
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https://github\\.com/colazeta/criminal_infiltration_in_legal_economy_review/issues/[1-9][0-9]*$"
+        }
+      }
+    },
+    "dateRange": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["first", "last"],
+      "properties": {
+        "first": {"$ref": "#/$defs/nullableDate"},
+        "last": {"$ref": "#/$defs/nullableDate"}
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["runDays", "completedRuns", "partialRuns", "failedRuns", "lastRunStatus", "last7Days", "last30Days", "allTime"],
+      "properties": {
+        "runDays": {"$ref": "#/$defs/count"},
+        "completedRuns": {"$ref": "#/$defs/count"},
+        "partialRuns": {"$ref": "#/$defs/count"},
+        "failedRuns": {"$ref": "#/$defs/count"},
+        "lastRunStatus": {
+          "oneOf": [{"enum": ["completed", "partial", "failed"]}, {"type": "null"}]
+        },
+        "last7Days": {"$ref": "#/$defs/sevenDaySummary"},
+        "last30Days": {"$ref": "#/$defs/thirtyDaySummary"},
+        "allTime": {"$ref": "#/$defs/allTimeSummary"}
+      }
+    },
+    "sevenDaySummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["completedRuns", "uniqueResults", "knownMatches", "newCandidates"],
+      "properties": {
+        "completedRuns": {"$ref": "#/$defs/count"},
+        "uniqueResults": {"$ref": "#/$defs/nullableCount"},
+        "knownMatches": {"$ref": "#/$defs/nullableCount"},
+        "newCandidates": {"$ref": "#/$defs/nullableCount"}
+      }
+    },
+    "thirtyDaySummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["loggedRuns", "completedRuns", "partialRuns", "failedRuns", "sourceCompletionRate", "uniqueResults", "knownMatches", "newCandidates", "metadataConflicts"],
+      "properties": {
+        "loggedRuns": {"$ref": "#/$defs/count"},
+        "completedRuns": {"$ref": "#/$defs/count"},
+        "partialRuns": {"$ref": "#/$defs/count"},
+        "failedRuns": {"$ref": "#/$defs/count"},
+        "sourceCompletionRate": {"$ref": "#/$defs/nullableRate"},
+        "uniqueResults": {"$ref": "#/$defs/nullableCount"},
+        "knownMatches": {"$ref": "#/$defs/nullableCount"},
+        "newCandidates": {"$ref": "#/$defs/nullableCount"},
+        "metadataConflicts": {"$ref": "#/$defs/nullableCount"}
+      }
+    },
+    "allTimeSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["newCandidates"],
+      "properties": {"newCandidates": {"$ref": "#/$defs/nullableCount"}}
+    },
+    "definitions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["occurrencesReturned", "uniqueResults", "knownMatches", "newCandidates", "candidateRate", "sourceCompletionRate"],
+      "properties": {
+        "occurrencesReturned": {"type": "string", "minLength": 1},
+        "uniqueResults": {"type": "string", "minLength": 1},
+        "knownMatches": {"type": "string", "minLength": 1},
+        "newCandidates": {"type": "string", "minLength": 1},
+        "candidateRate": {"type": "string", "minLength": 1},
+        "sourceCompletionRate": {"type": "string", "minLength": 1}
+      }
+    },
+    "dailyRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["date", "batchId", "status", "expectedSourceCount", "completedSourceCount", "sourceCompleteness", "occurrencesReturned", "uniqueResults", "knownMatches", "intakeCandidates", "notForwarded", "unresolvedIdentity", "possibleDuplicateFlags", "metadataConflicts", "candidateRate", "knownOverlapRate", "deduplicationShare", "intakeIssueCreated"],
+      "properties": {
+        "date": {"type": "string", "format": "date"},
+        "batchId": {"type": "string", "pattern": "^ACADEMIC-[0-9]{4}-[0-9]{2}-[0-9]{2}$"},
+        "status": {"enum": ["completed", "partial", "failed"]},
+        "expectedSourceCount": {"type": "integer", "minimum": 1},
+        "completedSourceCount": {"$ref": "#/$defs/count"},
+        "sourceCompleteness": {"$ref": "#/$defs/rate"},
+        "occurrencesReturned": {"$ref": "#/$defs/nullableCount"},
+        "uniqueResults": {"$ref": "#/$defs/nullableCount"},
+        "knownMatches": {"$ref": "#/$defs/nullableCount"},
+        "intakeCandidates": {"$ref": "#/$defs/nullableCount"},
+        "notForwarded": {"$ref": "#/$defs/nullableCount"},
+        "unresolvedIdentity": {"$ref": "#/$defs/nullableCount"},
+        "possibleDuplicateFlags": {"$ref": "#/$defs/nullableCount"},
+        "metadataConflicts": {"$ref": "#/$defs/nullableCount"},
+        "candidateRate": {"$ref": "#/$defs/nullableRate"},
+        "knownOverlapRate": {"$ref": "#/$defs/nullableRate"},
+        "deduplicationShare": {"$ref": "#/$defs/nullableRate"},
+        "intakeIssueCreated": {"type": "boolean"}
+      }
+    },
+    "sourceSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "expectedRuns", "completedRuns", "completionRate", "queriesCompleted", "occurrencesReturned", "uniqueResults", "candidateHits", "exclusiveCandidates"],
+      "properties": {
+        "source": {"enum": ["Consensus", "Exa"]},
+        "expectedRuns": {"$ref": "#/$defs/count"},
+        "completedRuns": {"$ref": "#/$defs/count"},
+        "completionRate": {"$ref": "#/$defs/nullableRate"},
+        "queriesCompleted": {"$ref": "#/$defs/count"},
+        "occurrencesReturned": {"$ref": "#/$defs/nullableCount"},
+        "uniqueResults": {"$ref": "#/$defs/nullableCount"},
+        "candidateHits": {"$ref": "#/$defs/nullableCount"},
+        "exclusiveCandidates": {"$ref": "#/$defs/nullableCount"}
+      }
+    }
+  }
+}

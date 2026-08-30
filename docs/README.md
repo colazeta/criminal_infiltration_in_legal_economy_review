@@ -9,6 +9,7 @@
 | understand what counts as criminal infiltration | [Protocol](methodology/protocol.md) → [eligibility codebook](methodology/eligibility.md) |
 | expand the corpus systematically | [Operational guide in Italian](methodology/expansion.md) → [technical reference in English](methodology/expansion-reference.md) → [discovery protocol](methodology/discovery.md) |
 | understand when searching can stop | [Saturation metrics](methodology/saturation.md) |
+| understand daily search statistics | [Daily research statistics](operations/daily-metrics.md) |
 | understand what is public and why | [Data model and publication gate](governance/data-model.md) |
 | suggest or review a paper | [Contribution guide](../CONTRIBUTING.md) |
 | change a topic, exclude or merge a duplicate | [Curator desk instructions](operations/curation.md) |
@@ -33,6 +34,7 @@
 ## Operations
 
 - [Academic intake automation](operations/automation.md)
+- [Daily research statistics](operations/daily-metrics.md)
 - [Curator desk](operations/curation.md)
 - [Release and preservation](operations/release.md)
 - [GitHub Pages publication](operations/github-pages.md)

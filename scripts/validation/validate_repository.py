@@ -32,21 +32,30 @@ REQUIRED_FILES = (
     "docs/governance/data-model.md",
     "docs/governance/sources.md",
     "docs/operations/automation.md",
+    "docs/operations/daily-metrics.md",
     "docs/operations/curation.md",
     "docs/operations/release.md",
     "docs/operations/github-pages.md",
     "docs/history/e0-pilot.md",
     "data/registry/README.md",
     "schema/public-archive.schema.json",
+    "schema/surveillance-run.schema.json",
+    "schema/research-stats.schema.json",
     "scripts/build_archive.py",
+    "scripts/metrics/build_research_stats.py",
+    "scripts/metrics/fetch_surveillance_ledger.py",
+    "scripts/metrics/surveillance.py",
     "scripts/report_saturation.py",
     "scripts/curation/apply_action.py",
     "scripts/validation/validate_archive.py",
     "scripts/validation/validate_site.py",
     "site/index.html",
     "site/curate.html",
+    "site/stats.html",
     "site/app.js",
+    "site/stats.js",
     "site/styles.css",
+    "site/data/research-stats.json",
     ".github/workflows/archive.yml",
     ".github/workflows/curation.yml",
 )
@@ -197,6 +206,17 @@ def check_public_boundary() -> None:
     ):
         if name not in builder:
             fail(f"Public builder does not declare required registry {name}")
+    metrics_builder = (ROOT / "scripts/metrics/surveillance.py").read_text(
+        encoding="utf-8"
+    )
+    for forbidden in (
+        "data/registry",
+        "data/legacy",
+        "candidate_outcomes",
+        "screening_decisions.csv",
+    ):
+        if forbidden in metrics_builder:
+            fail(f"Daily metrics builder crosses its aggregate boundary: {forbidden}")
 
 
 def check_issue_forms() -> None:
@@ -236,6 +256,17 @@ def check_actions_pinned() -> None:
     )
     if safe_concurrency not in workflow:
         fail("Archive workflow must cancel superseded runs for the same ref")
+    for phrase in (
+        'cron: "30 6 * * *"',
+        "issues: read",
+        "fetch_surveillance_ledger.py",
+        "build_research_stats.py",
+        "--issue 30",
+        '--allowed-author "$LEDGER_AUTHOR"',
+        "node --check site/stats.js",
+    ):
+        if phrase not in workflow:
+            fail(f"Archive workflow missing daily-metrics safeguard: {phrase}")
 
     curation = (ROOT / ".github/workflows/curation.yml").read_text(encoding="utf-8")
     for phrase in (
@@ -321,6 +352,56 @@ def check_governance_copy() -> None:
     for phrase in ("GitHub Actions", ".github/workflows/archive.yml", "site/"):
         if phrase not in pages:
             fail(f"GitHub Pages guide missing deployment element: {phrase}")
+
+    metrics = (ROOT / "docs/operations/daily-metrics.md").read_text(
+        encoding="utf-8"
+    )
+    metrics_flat = " ".join(metrics.split())
+    for phrase in (
+        "Nuovi candidati",
+        "Tasso di nuovi candidati",
+        "Completezza delle fonti",
+        "non vengono trasformati in zero",
+        "Consensus ed Exa",
+        "relativi totali sono `null`",
+        "non entra nella regola di arresto",
+        "ledger GitHub #30",
+    ):
+        if phrase not in metrics_flat:
+            fail(f"Daily metrics guide missing interpretation safeguard: {phrase}")
+
+    automation = (ROOT / "docs/operations/automation.md").read_text(
+        encoding="utf-8"
+    )
+    for phrase in (
+        "aggregate comment per batch",
+        "successful zero-candidate run",
+        "partial",
+        "failed",
+        "daily-metrics.md",
+    ):
+        if phrase not in automation:
+            fail(f"Automation runbook missing daily-metrics contract: {phrase}")
+
+    for schema_name in ("surveillance-run.schema.json", "research-stats.schema.json"):
+        schema = json.loads((ROOT / "schema" / schema_name).read_text(encoding="utf-8"))
+        if schema.get("additionalProperties") is not False:
+            fail(f"{schema_name} must use a closed top-level schema")
+    run_schema = json.loads(
+        (ROOT / "schema/surveillance-run.schema.json").read_text(encoding="utf-8")
+    )
+    source_enum = run_schema["properties"]["expected_sources"]["items"].get("enum")
+    if set(source_enum or []) != {"Consensus", "Exa"}:
+        fail("Daily telemetry schema must enforce the governed active source set")
+    metrics_builder = (ROOT / "scripts/metrics/surveillance.py").read_text(
+        encoding="utf-8"
+    )
+    for phrase in (
+        'ACTIVE_SOURCES = frozenset({"Consensus", "Exa"})',
+        "summed(runs_subset",
+    ):
+        if phrase not in metrics_builder:
+            fail(f"Daily metrics builder missing safeguard: {phrase}")
 
     with (ROOT / "data/registry/exclusion_reasons.csv").open(
         newline="", encoding="utf-8-sig"
