@@ -209,6 +209,8 @@ def validate_run(run: dict[str, Any]) -> dict[str, Any]:
         for moment in (started, ended)
     ):
         raise MetricsError("run: window timestamps use an offset incompatible with Europe/Rome")
+    if started.astimezone(ROME).date() != run_date:
+        raise MetricsError("run: window_start date differs from run_date")
     if ended.astimezone(ROME).date() != run_date:
         raise MetricsError("run: window_end date differs from run_date")
     if run["timezone"] != "Europe/Rome":

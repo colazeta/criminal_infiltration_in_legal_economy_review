@@ -207,6 +207,12 @@ class SurveillanceRunTests(unittest.TestCase):
         with self.assertRaisesRegex(MetricsError, "offset incompatible"):
             validate_run(run)
 
+    def test_daily_window_must_start_on_run_date(self) -> None:
+        run = completed_run()
+        run["window_start"] = "2026-01-01T00:00:00+01:00"
+        with self.assertRaisesRegex(MetricsError, "window_start date"):
+            validate_run(run)
+
     def test_expected_source_requires_a_query(self) -> None:
         run = zero_run()
         run["sources"][0]["queries_planned"] = 0

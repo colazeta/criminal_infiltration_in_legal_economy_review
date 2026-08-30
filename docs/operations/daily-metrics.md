@@ -39,7 +39,10 @@ conformi a [`schema/surveillance-run.schema.json`](../../schema/surveillance-run
 ## L'unità di osservazione
 
 Una riga equivale a **una giornata di sorveglianza**, calcolata in
-`Europe/Rome`. Ogni fonte attesa compare una volta con uno stato esplicito:
+`Europe/Rome`. Sia l'inizio sia la fine della finestra devono ricadere nella
+data dichiarata: non è possibile comprimere una ricerca di più giorni in una
+sola riga quotidiana. Ogni fonte attesa compare una volta con uno stato
+esplicito:
 
 - `completed`: tutte le query pianificate della fonte sono terminate;
 - `failed`: la fonte non ha prodotto un risultato utilizzabile;
