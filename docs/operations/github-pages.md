@@ -7,6 +7,8 @@ The repository uses a custom GitHub Actions workflow rather than Jekyll.
 - Public URL: <https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/>
 - Site source: `site/`
 - Curator help page: `site/curate.html`
+- Daily statistics page: `site/stats.html`
+- Aggregate metrics ledger: [GitHub issue #30](https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/issues/30)
 - Workflow: `.github/workflows/archive.yml`
 - Publishing branch: `main`
 - GitHub Pages source: **GitHub Actions**
@@ -38,11 +40,22 @@ site is static: it needs no server, database, token or secret at runtime. The
 public curator page therefore contains instructions and links only; the
 write-capable form remains inside authenticated GitHub Actions.
 
+During deployment only, the workflow uses its short-lived GitHub token to read
+aggregate comments from metrics ledger #30. No token is included in the site
+artifact.
+
 ## What happens on later updates
 
 Every reviewed merge to `main` repeats the same sequence. The workflow rebuilds
 `site/data/archive.json` and `site/data/archive.csv` from the governed registry;
 it does not publish candidate intake or reviewer notes.
+
+The workflow also runs once per day after the surveillance automation. It reads
+ledger #30, accepts only comments by the configured repository owner, validates
+their schema and creates `site/data/research-stats.json`. A read, author or
+validation failure stops deployment, leaving the previous valid site online.
+The committed statistics file is an empty deterministic baseline used by pull
+request checks; the deployed artifact is enriched from the ledger.
 
 A public archive with zero records is a valid release when no work currently
 passes the independent publication gate, including while review is pending or
@@ -55,9 +68,11 @@ and methodology remain available.
 python3 scripts/validation/validate_repository.py
 python3 -m unittest discover -s tests -p 'test_*.py'
 python3 scripts/build_archive.py
+python3 scripts/metrics/build_research_stats.py
 python3 scripts/validation/validate_archive.py
 python3 scripts/validation/validate_site.py
 node --check site/app.js
+node --check site/stats.js
 python3 -m http.server 8000 --directory site
 ```
 
@@ -73,6 +88,8 @@ Open <http://localhost:8000>. The build itself performs no network request.
 | Artifact upload fails | `site/index.html` and generated data must exist | Rebuild and validate the `site/` directory |
 | Deployment permission fails | Deploy job needs `pages: write` and `id-token: write` | Repair the pinned workflow permissions in a reviewed PR |
 | Site is stale | Compare deployed workflow SHA with current `main` | Wait for the current run or re-run the failed job |
+| Statistics are stale | Inspect ledger #30 and the last scheduled workflow | Repair an invalid or missing authorised ledger comment; never invent a zero |
+| Statistics deployment fails | Check comment author, schema and reconciled totals | Correct the ledger explicitly; do not weaken validation |
 | Site is empty | Check governed publication rows and archive counts | Treat zero as valid unless an approved published row is missing |
 | A link breaks under the project URL | Avoid root-relative `/...` links | Use paths relative to the `site/` directory |
 

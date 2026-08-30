@@ -21,6 +21,7 @@ paper rilevante; un paper rilevante non è automaticamente pubblico.
 ## Collegamenti principali
 
 - [Consulta la biblioteca pubblica](https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/)
+- [Consulta le statistiche giornaliere](https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/stats.html)
 - [Apri il pannello di curatela](https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/curate.html)
 - [Leggi come viene ampliata la letteratura](docs/methodology/expansion.md)
 - [Leggi che cosa conta come infiltrazione criminale](docs/methodology/eligibility.md)
@@ -33,6 +34,7 @@ paper rilevante; un paper rilevante non è automaticamente pubblico.
 |---|---|---|
 | Cercare un paper già approvato | [Biblioteca pubblica](https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/) | Puoi cercare e filtrare i record pubblicati |
 | Capire come viene cercata la letteratura | [Strategia di espansione](docs/methodology/expansion.md) | Trovi i sei passaggi usati per cercare, unire e valutare i paper |
+| Capire i numeri di ogni giornata | [Statistiche giornaliere](docs/operations/daily-metrics.md) | Distingue risultati, ripetizioni, lavori già noti, nuovi candidati e fallimenti |
 | Cambiare il tema di un paper | [Pannello di curatela](https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/curate.html) | GitHub prepara una modifica controllata senza richiedere l'editing manuale dei CSV |
 | Escludere un paper | [Pannello di curatela](https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/curate.html) | La decisione e la motivazione vengono aggiunte alla storia; il paper resta fuori dal sito |
 | Unire due record duplicati | [Pannello di curatela](https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/curate.html) | Un record rimane quello principale; identificatori e provenienze vengono conservati |
@@ -88,6 +90,7 @@ Può:
 
 - interrogare le fonti accademiche autorizzate;
 - preparare i record candidati;
+- registrare conteggi giornalieri aggregati senza pubblicare i candidati;
 - riconoscere identificatori identici e segnalare possibili duplicati;
 - applicare un'istruzione esplicita inviata dal pannello del curatore;
 - controllare il risultato e preparare una modifica GitHub visibile;

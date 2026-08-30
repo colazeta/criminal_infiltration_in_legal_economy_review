@@ -212,10 +212,16 @@ the personal research digest:
 - Exa is an independent semantic gap channel;
 - Scite is added only after its account access succeeds;
 - GitHub receives at most one idempotent, deduplicated intake issue;
+- GitHub issue #30 receives one aggregate, schema-valid telemetry comment per
+  batch, including successful zero-candidate runs and technical failures;
 - no file, registry, branch, PR, eligibility or publication state is changed.
 
 Surveillance leads enter the next formal cycle. A surveillance run is not an E1–E3
 cycle and cannot support saturation.
+
+The surveillance telemetry contract and the distinction between occurrences,
+unique results, known matches and intake candidates are defined in
+[`docs/operations/daily-metrics.md`](../operations/daily-metrics.md).
 
 ## Stop rule
 

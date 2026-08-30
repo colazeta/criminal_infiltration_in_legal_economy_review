@@ -18,10 +18,11 @@ non è automaticamente pubblicato sul sito.
 ## I collegamenti principali
 
 - [Biblioteca pubblica](https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/)
+- [Statistiche giornaliere](https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/stats.html)
 - [Pannello di curatela](https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/curate.html)
 - [Strategia di espansione spiegata semplicemente](methodology/expansion.md)
 - [Regola di inclusione](methodology/eligibility.md)
-- [Indice completo in inglese](../INDEX.md)
+- [Indice completo del progetto](../INDEX.md)
 
 ## Che cosa puoi fare dal pannello
 
@@ -52,6 +53,16 @@ La guida completa, ma leggibile, è in
 [`docs/methodology/expansion.md`](methodology/expansion.md). I dettagli tecnici
 necessari alla riproducibilità sono conservati separatamente nella
 [reference metodologica](methodology/expansion-reference.md).
+
+## Come leggere le statistiche quotidiane
+
+La pagina delle statistiche distingue quattro livelli: risultati restituiti,
+risultati unici, lavori già conosciuti e nuovi candidati inviati alla revisione.
+Segnala separatamente una giornata completa, parziale o fallita. Perciò un errore
+di una fonte non viene contato come una giornata con zero paper.
+
+Questi numeri descrivono la scoperta, non l'eleggibilità. Le formule e gli esempi
+sono nella [guida alle statistiche](operations/daily-metrics.md).
 
 ## Il punto essenziale
 

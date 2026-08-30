@@ -17,6 +17,7 @@ SITE = ROOT / "site"
 sys.path.insert(0, str(ROOT / "scripts"))
 
 from build_archive import build_payload  # noqa: E402
+from metrics.surveillance import MetricsError, validate_public_payload  # noqa: E402
 
 
 class PageParser(HTMLParser):
@@ -94,9 +95,10 @@ def validate_pages() -> None:
         "index.html": "en",
         "404.html": "en",
         "curate.html": "it",
+        "stats.html": "it",
     }
     if {path.name for path in pages} != set(expected_languages):
-        fail("Expected index.html, curate.html and 404.html only")
+        fail("Expected index.html, stats.html, curate.html and 404.html only")
     parsed: dict[Path, PageParser] = {
         path: parse_page(path, expected_languages[path.name]) for path in pages
     }
@@ -118,6 +120,23 @@ def validate_pages() -> None:
     missing = sorted({"curator-workflow", "curator-actions"} - curator_ids)
     if missing:
         fail(f"curate.html missing interface ID(s): {', '.join(missing)}")
+    stats_ids = set(parsed[SITE / "stats.html"].ids)
+    missing = sorted(
+        {
+            "research-statistics",
+            "new-candidates-7",
+            "all-time-candidates",
+            "unique-results-7",
+            "source-completion-30",
+            "data-through",
+            "daily-chart",
+            "source-table-body",
+            "daily-table-body",
+        }
+        - stats_ids
+    )
+    if missing:
+        fail(f"stats.html missing interface ID(s): {', '.join(missing)}")
     for path, parser in parsed.items():
         for reference in parser.references:
             check_reference(path, reference, set(parser.ids))
@@ -139,6 +158,12 @@ def validate_payload() -> int:
             if name != "doi" or parsed.scheme != "https" or parsed.netloc != "doi.org":
                 fail(f"{record.get('id')}: unexpected external public link")
     return len(records)
+
+
+def validate_statistics() -> int:
+    payload = json.loads((SITE / "data/research-stats.json").read_text(encoding="utf-8"))
+    validate_public_payload(payload)
+    return len(payload["daily"])
 
 
 def validate_assets() -> None:
@@ -191,16 +216,44 @@ def validate_assets() -> None:
         if phrase not in curator:
             fail(f"curate.html missing curator guidance: {phrase}")
 
+    statistics = (SITE / "stats.html").read_text(encoding="utf-8")
+    statistics_flat = " ".join(statistics.split()).lower()
+    for phrase in (
+        "Nuovo non significa eleggibile",
+        "Una ricerca non riuscita non vale zero",
+        "La sorveglianza non misura la saturazione",
+        "issues/30",
+    ):
+        if phrase.lower() not in statistics_flat:
+            fail(f"stats.html missing interpretation safeguard: {phrase}")
+
+    stats_javascript = (SITE / "stats.js").read_text(encoding="utf-8")
+    if re.search(r"\.innerHTML\s*=|insertAdjacentHTML", stats_javascript):
+        fail("stats.js must not inject ledger data as HTML")
+    for required in (
+        'fetch("./data/research-stats.json")',
+        "replaceChildren",
+        "textContent",
+        "completed.length < 8",
+        "sourceCompletionRate",
+    ):
+        if required not in stats_javascript:
+            fail(f"stats.js missing rendering safeguard: {required}")
+
 
 def main() -> None:
     validate_pages()
     count = validate_payload()
+    metric_days = validate_statistics()
     validate_assets()
-    print(f"[OK] Static site validation passed: {count} public record(s).")
+    print(
+        "[OK] Static site validation passed: "
+        f"{count} public record(s), {metric_days} daily metric row(s)."
+    )
 
 
 if __name__ == "__main__":
     try:
         main()
-    except (OSError, json.JSONDecodeError, ValueError) as exc:
+    except (MetricsError, OSError, json.JSONDecodeError, ValueError) as exc:
         fail(str(exc))

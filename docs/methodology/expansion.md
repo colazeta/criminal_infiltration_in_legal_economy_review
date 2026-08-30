@@ -202,6 +202,10 @@ L'automazione può interrogare fonti approvate, togliere le ripetizioni esatte d
 un gruppo di candidati e preparare una issue. Non può decidere l'eleggibilità,
 inventare metadati mancanti, unire identità dubbie o pubblicare un paper.
 
+Ogni giornata registra anche conteggi aggregati, compresi gli zero reali, i run
+parziali e i fallimenti. La [guida alle statistiche giornaliere](../operations/daily-metrics.md)
+spiega formule e limiti senza esporre i metadati dei candidati.
+
 Il [pannello di curatela](../operations/curation.md) offre al proprietario un
 percorso autenticato in GitHub per cambiare un tema, escludere un lavoro o unire
 un duplicato confermato senza modificare manualmente i CSV.

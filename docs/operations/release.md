@@ -4,7 +4,9 @@
 
 Create a release when the public corpus, a public annotation, protocol, schema or
 controlled taxonomy changes. A no-change surveillance run does not require a
-release.
+release. Refreshing aggregate daily statistics also does not change the archive
+version: the deployed statistics retain their own data-through date and ledger
+provenance.
 
 ## Checklist
 

@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Statistiche giornaliere, aggregate e verificabili della ricerca sulla criminal infiltration nell'economia legale."
+    />
+    <title>Statistiche della ricerca · Criminal Infiltration Archive</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>◫</text></svg>" />
+    <link rel="stylesheet" href="./styles.css" />
+    <script src="./stats.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#research-statistics">Vai alle statistiche</a>
+
+    <header class="site-header">
+      <div class="header-inner">
+        <a class="brand" href="./" aria-label="Pagina iniziale dell'archivio">
+          <span class="brand-mark" aria-hidden="true">CI</span>
+          <span>
+            <strong>Criminal Infiltration</strong>
+            <small>Statistiche della ricerca</small>
+          </span>
+        </a>
+        <nav aria-label="Navigazione principale">
+          <a href="./#archive">Archivio</a>
+          <a href="#research-statistics" aria-current="page">Statistiche</a>
+          <a href="./#methodology">Metodo</a>
+          <a href="./curate.html">Pannello del curatore</a>
+          <a
+            href="https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/blob/main/INDEX.md"
+            rel="noreferrer"
+          >Guida</a>
+          <a
+            href="https://github.com/colazeta/criminal_infiltration_in_legal_economy_review"
+            rel="noreferrer"
+          >Repository</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="intro" aria-labelledby="stats-page-title">
+        <div>
+          <p class="eyebrow">Sorveglianza quotidiana</p>
+          <h1 id="stats-page-title">Che cosa trova ogni giorno la ricerca</h1>
+          <p class="intro-copy">
+            Questa pagina misura i risultati restituiti, le ripetizioni, i lavori
+            già conosciuti e i nuovi candidati inviati alla revisione umana. Conserva
+            anche i fallimenti: una ricerca non riuscita non vale zero.
+          </p>
+        </div>
+        <aside class="scope-note" aria-label="Avviso interpretativo">
+          <span class="scope-dot" aria-hidden="true"></span>
+          <div>
+            <strong>Nuovo non significa eleggibile</strong>
+            <p>
+              Un candidato entra soltanto nella coda editoriale. Inclusione,
+              etichette e pubblicazione richiedono decisioni umane separate.
+            </p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="metrics stats-metrics" aria-label="Indicatori recenti">
+        <article>
+          <span id="new-candidates-7">—</span>
+          <p>nuovi candidati negli ultimi 7 giorni osservati</p>
+        </article>
+        <article>
+          <span id="all-time-candidates">—</span>
+          <p>candidati complessivi dalla prima giornata registrata</p>
+        </article>
+        <article>
+          <span id="unique-results-7">—</span>
+          <p>risultati unici negli ultimi 7 giorni osservati</p>
+        </article>
+        <article>
+          <span id="source-completion-30">—</span>
+          <p>completezza delle fonti negli ultimi 30 giorni osservati</p>
+        </article>
+        <article>
+          <span id="data-through">—</span>
+          <p>dati aggiornati fino al</p>
+        </article>
+      </section>
+
+      <section
+        class="statistics-section"
+        id="research-statistics"
+        aria-labelledby="research-statistics-title"
+      >
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Risultati e novità</p>
+            <h2 id="research-statistics-title">Andamento giornaliero</h2>
+          </div>
+          <p>
+            I conteggi principali usano soltanto giornate completate. Le giornate
+            parziali o fallite restano nella tabella e riducono la misura di
+            completezza.
+          </p>
+        </div>
+
+        <div id="metrics-empty" class="empty-state" hidden>
+          <h3>La serie giornaliera non è ancora iniziata</h3>
+          <p>
+            Il registro è pronto. La prima esecuzione valida aggiungerà qui i suoi
+            conteggi senza pubblicare titoli o metadati dei candidati.
+          </p>
+        </div>
+
+        <div id="metrics-content" hidden>
+          <p id="run-status" class="status-banner" aria-live="polite"></p>
+
+          <article class="chart-card" aria-labelledby="daily-chart-title">
+            <div class="chart-heading">
+              <div>
+                <h3 id="daily-chart-title">Risultati unici e nuovi candidati</h3>
+                <p>Conteggi per giornata completata, fino agli ultimi 30 giorni osservati.</p>
+              </div>
+              <div class="chart-legend" aria-label="Legenda del grafico">
+                <span><i class="legend-swatch legend-unique" aria-hidden="true"></i>Risultati unici</span>
+                <span><i class="legend-swatch legend-candidate" aria-hidden="true"></i>Nuovi candidati</span>
+                <span><i class="legend-incomplete" aria-hidden="true">×</i>Esecuzione incompleta</span>
+              </div>
+            </div>
+            <div id="daily-chart" class="chart-host"></div>
+            <p id="chart-note" class="chart-note"></p>
+          </article>
+
+          <section class="source-section" aria-labelledby="source-title">
+            <div class="compact-heading">
+              <div>
+                <p class="eyebrow">Controllo delle fonti</p>
+                <h3 id="source-title">Contributo negli ultimi 30 giorni osservati</h3>
+              </div>
+              <p>
+                I candidati condivisi possono comparire in più fonti; quelli
+                esclusivi mostrano il contributo marginale della singola fonte.
+              </p>
+            </div>
+            <div class="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col">Fonte</th>
+                    <th scope="col">Esecuzioni complete</th>
+                    <th scope="col">Query complete</th>
+                    <th scope="col">Occorrenze</th>
+                    <th scope="col">Risultati unici nella fonte</th>
+                    <th scope="col">Candidati intercettati</th>
+                    <th scope="col">Candidati esclusivi</th>
+                  </tr>
+                </thead>
+                <tbody id="source-table-body"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="daily-table-section" aria-labelledby="daily-table-title">
+            <div class="compact-heading">
+              <div>
+                <p class="eyebrow">Dati esatti</p>
+                <h3 id="daily-table-title">Registro degli ultimi 30 giorni osservati</h3>
+              </div>
+              <p>
+                Il trattino indica un dato non misurabile. Non viene mai sostituito
+                con zero.
+              </p>
+            </div>
+            <div class="table-scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col">Data</th>
+                    <th scope="col">Stato</th>
+                    <th scope="col">Occorrenze</th>
+                    <th scope="col">Unici</th>
+                    <th scope="col">Già noti</th>
+                    <th scope="col">Candidati</th>
+                    <th scope="col">Tasso di nuovi candidati</th>
+                    <th scope="col">Issue di intake</th>
+                  </tr>
+                </thead>
+                <tbody id="daily-table-body"></tbody>
+              </table>
+            </div>
+          </section>
+        </div>
+
+        <div id="metrics-error" class="empty-state error-state" hidden>
+          <h3>Le statistiche non possono essere caricate</h3>
+          <p>Il sito conserva il precedente rilascio valido; controlla il workflow GitHub.</p>
+        </div>
+      </section>
+
+      <section class="definitions-section" aria-labelledby="definitions-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Come leggere i numeri</p>
+            <h2 id="definitions-title">Quattro passaggi diversi</h2>
+          </div>
+        </div>
+        <div class="method-grid definitions-grid">
+          <article>
+            <span class="step">01</span>
+            <h3>Occorrenze</h3>
+            <p>Ogni risultato restituito da ogni query, comprese le ripetizioni.</p>
+          </article>
+          <article>
+            <span class="step">02</span>
+            <h3>Risultati unici</h3>
+            <p>Record rimasti dopo il confronto di DOI, identificatori e titolo/anno.</p>
+          </article>
+          <article>
+            <span class="step">03</span>
+            <h3>Già noti</h3>
+            <p>Risultati unici già presenti nel registro o in una precedente issue di intake.</p>
+          </article>
+          <article>
+            <span class="step">04</span>
+            <h3>Nuovi candidati</h3>
+            <p>Lavori non già noti, plausibili o incerti, inviati alla valutazione umana.</p>
+          </article>
+        </div>
+        <div class="pipeline-panel metrics-boundary">
+          <div>
+            <p class="eyebrow">Confine metodologico</p>
+            <h3>La sorveglianza non misura la saturazione</h3>
+          </div>
+          <p>
+            Le statistiche quotidiane misurano la scoperta. La resa della valutazione
+            umana, l'aumento dei paper eleggibili e l'eventuale regola di arresto si calcolano
+            soltanto sui cicli formali E1–E3 completi.
+          </p>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <p>
+        Il sito pubblica soltanto aggregati verificati. Titoli dei candidati, note
+        editoriali, prove e decisioni restano fuori da questo dataset.
+      </p>
+      <p>
+        <a href="./">Archivio</a> ·
+        <a href="./data/research-stats.json">JSON statistiche</a> ·
+        <a href="https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/issues/30">Registro GitHub</a> ·
+        <a href="./curate.html">Pannello del curatore</a>
+      </p>
+    </footer>
+  </body>
+</html>

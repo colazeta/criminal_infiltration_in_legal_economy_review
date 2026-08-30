@@ -35,3 +35,7 @@ automatic declaration of saturation.
 
 Living surveillance continues after any stop decision because new research can
 appear later.
+
+Daily surveillance counts are reported separately in
+[`docs/operations/daily-metrics.md`](../operations/daily-metrics.md). They cannot
+be substituted for E1–E3 execution rows or used to satisfy the stop rule.
