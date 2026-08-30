@@ -250,6 +250,9 @@ def check_actions_pinned() -> None:
         "## Record counts after the change",
         "External retrieval performed",
         "Unresolved human decisions",
+        "encoded_body",
+        "&body=${encoded_body}",
+        "Create the prefilled pull request",
     ):
         if phrase not in curation:
             fail(f"Curation workflow missing safeguard: {phrase}")

@@ -137,7 +137,6 @@ jobs:
           OPERATION: ${{ inputs.operation }}
           PAPER_ID: ${{ inputs.paper_id }}
         run: |
-          compare_url="https://github.com/${GITHUB_REPOSITORY}/compare/main...${BRANCH}?expand=1"
           run_url="https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
           body_file="$RUNNER_TEMP/curation-pr.md"
           canonical_count=$(python3 -c 'import csv; print(sum(1 for _ in csv.DictReader(open("data/registry/papers.csv", encoding="utf-8-sig"))))')
@@ -179,6 +178,9 @@ jobs:
             echo "- Unresolved human decisions: an authorised person must inspect and merge this PR."
             echo "- Automatic eligibility inference or merge: none."
           } > "$body_file"
+          encoded_title=$(python3 -c 'import sys; from urllib.parse import quote; print(quote(sys.argv[1], safe=""))' "Curate ${PAPER_ID}: ${OPERATION}")
+          encoded_body=$(python3 -c 'import sys; from urllib.parse import quote; print(quote(sys.stdin.read(), safe=""))' < "$body_file")
+          compare_url="https://github.com/${GITHUB_REPOSITORY}/compare/main...${BRANCH}?expand=1&title=${encoded_title}&body=${encoded_body}"
           set +e
           pr_url=$(gh pr create \
             --base main \
@@ -199,7 +201,7 @@ jobs:
             else
               echo "GitHub did not allow this workflow token to open a pull request."
               echo
-              echo "[Create the pull request](${compare_url})"
+              echo "[Create the prefilled pull request](${compare_url})"
               echo
               echo '```text'
               sed -n '1,20p' pr-error.log

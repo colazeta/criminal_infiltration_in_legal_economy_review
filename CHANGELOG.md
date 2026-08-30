@@ -26,7 +26,7 @@ follow semantic versioning while the project is in prerelease.
 - repaired malformed historical screening and execution-metric rows; row-width
   and header defects are now validation failures.
 - removed direct raw-registry access from the public curator page and expanded
-  every generated curator PR with the complete audit record.
+  every generated or manually opened curator PR with the complete audit record.
 
 ## [0.2.0] - 2026-08-30
 

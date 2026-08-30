@@ -81,7 +81,8 @@ Il workflow:
 3. crea un branch dedicato;
 4. prova ad aprire una pull request;
 5. se GitHub impedisce al token automatico di aprire PR, mostra nella pagina
-   della run il collegamento **Create pull request** già pronto.
+   della run il collegamento **Create the prefilled pull request** già pronto,
+   con titolo e registro di audit precompilati.
 
 La pull request elenca file modificati, comandi e risultati dei controlli,
 conteggi dell'archivio, recuperi esterni e decisioni ancora aperte. Questo rende
