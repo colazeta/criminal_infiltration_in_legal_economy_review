@@ -34,6 +34,9 @@ technical provenance only, never candidate metadata.
 
 - Calculate exact date/window in `Europe/Rome`.
 - Batch ID: `ACADEMIC-YYYY-MM-DD`; no-op if that title/ID already exists.
+- Record the exact 40-character commit read from `main`. Deployment verifies
+  that this commit exists in the governed repository and remains on `main`'s
+  history.
 - Give a created intake issue the exact title
   `[INTAKE][ACADEMIC] ACADEMIC-YYYY-MM-DD` and preserve the candidate form's
   `Batch ID`, `Search and provenance log`, `Candidate records` and `Safeguards`
@@ -122,7 +125,8 @@ The deployment also parses the candidate manifest, checks its governed fields
 and unique batch-scoped IDs, and requires its array length to equal the ledger's
 candidate count. Candidate assessments and per-source hits/exclusives must also
 reconcile with the aggregate ledger fields. Placeholder text or a copied total
-is not sufficient.
+is not sufficient. All three issue-template safeguards must be present and
+checked exactly once; unchecked, partial or placeholder safeguards fail closed.
 
 ## Human handoff
 

@@ -61,6 +61,11 @@ CANDIDATE_VERIFICATION_STATUSES = {
 }
 CANDIDATE_ASSESSMENTS = {"plausible_core", "plausible_contextual", "uncertain"}
 CANDIDATE_JSON_BLOCK = re.compile(r"\A```json\s*(\{.*\})\s*```\s*\Z", re.DOTALL)
+REQUIRED_SAFEGUARDS = (
+    "No candidate was marked eligible or published.",
+    "Canonical records and existing intake issues were checked for duplicates.",
+    "No copyrighted full text or long abstract is included.",
+)
 
 
 def api_get(url: str, token: str) -> tuple[object, str | None]:
@@ -270,6 +275,33 @@ def verify_candidate_manifest(run: dict, section: str) -> None:
         raise MetricsError("run.intake_issue: persisted conflict notes exceed run flags")
 
 
+def verify_safeguards(section: str) -> None:
+    """Require every governed issue-form safeguard to be explicitly checked."""
+    for safeguard in REQUIRED_SAFEGUARDS:
+        pattern = re.compile(rf"(?m)^- \[[xX]\] {re.escape(safeguard)}\s*$")
+        if len(pattern.findall(section)) != 1:
+            raise MetricsError(
+                "run.intake_issue: every required safeguard must be checked exactly once"
+            )
+
+
+def verify_repository_commit(run: dict, comparison: dict) -> None:
+    """Require the recorded registry revision to remain on main's history."""
+    repository_commit = run["repository_commit"]
+    base_commit = comparison.get("base_commit")
+    merge_base_commit = comparison.get("merge_base_commit")
+    if (
+        comparison.get("status") not in {"ahead", "identical"}
+        or not isinstance(base_commit, dict)
+        or base_commit.get("sha") != repository_commit
+        or not isinstance(merge_base_commit, dict)
+        or merge_base_commit.get("sha") != repository_commit
+    ):
+        raise MetricsError(
+            "run.repository_commit: commit is not an ancestor of governed main"
+        )
+
+
 def verify_intake_issue(
     run: dict,
     issue: dict,
@@ -308,6 +340,7 @@ def verify_intake_issue(
     if values["Batch ID"] != batch_id:
         raise MetricsError("run.intake_issue: issue batch ID disagrees with run")
     verify_candidate_manifest(run, values["Candidate records"])
+    verify_safeguards(values["Safeguards"])
 
 
 def main() -> None:
@@ -338,6 +371,7 @@ def main() -> None:
 
     runs = []
     intake_cache: dict[int, dict] = {}
+    commit_cache: dict[str, dict] = {}
     allowed_authors = set(args.allowed_author)
     for comment in comments:
         body = comment.get("body") or ""
@@ -349,6 +383,17 @@ def main() -> None:
         run = extract_run(body)
         if run is None:
             continue
+        repository_commit = run["repository_commit"]
+        if repository_commit not in commit_cache:
+            compare_url = (
+                f"https://api.github.com/repos/{args.repository}/compare/"
+                f"{repository_commit}...main"
+            )
+            comparison, _ = api_get(compare_url, token)
+            if not isinstance(comparison, dict):
+                raise MetricsError("GitHub commit comparison response is not an object")
+            commit_cache[repository_commit] = comparison
+        verify_repository_commit(run, commit_cache[repository_commit])
         intake = run["intake_issue"]
         if intake["created"]:
             number = intake["number"]

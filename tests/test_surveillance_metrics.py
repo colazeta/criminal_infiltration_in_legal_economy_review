@@ -15,6 +15,7 @@ from fetch_surveillance_ledger import (  # noqa: E402
     MARKER,
     extract_run,
     verify_intake_issue,
+    verify_repository_commit,
 )
 from surveillance import (  # noqa: E402
     MetricsError,
@@ -66,7 +67,10 @@ def candidate_issue(run: dict, number: int = 31) -> dict:
             f"### Batch ID\n\n{batch_id}\n\n"
             "### Search and provenance log\n\nConsensus and Exa completed.\n\n"
             f"### Candidate records\n\n```json\n{json.dumps(manifest)}\n```\n\n"
-            "### Safeguards\n\n- [x] No candidate was marked eligible or published."
+            "### Safeguards\n\n"
+            "- [x] No candidate was marked eligible or published.\n"
+            "- [x] Canonical records and existing intake issues were checked for duplicates.\n"
+            "- [x] No copyrighted full text or long abstract is included."
         ),
         "user": {"login": "colazeta"},
     }
@@ -318,6 +322,31 @@ class SurveillanceRunTests(unittest.TestCase):
         )
         with self.assertRaisesRegex(MetricsError, "persisted source"):
             verify_intake_issue(run, issue, {"colazeta"}, 30)
+
+    def test_every_candidate_safeguard_must_be_checked(self) -> None:
+        run = validate_run(completed_run())
+        issue = candidate_issue(run)
+        issue["body"] = issue["body"].replace(
+            "- [x] Canonical records and existing intake issues were checked for duplicates.",
+            "- [ ] Canonical records and existing intake issues were checked for duplicates.",
+        )
+        with self.assertRaisesRegex(MetricsError, "every required safeguard"):
+            verify_intake_issue(run, issue, {"colazeta"}, 30)
+
+    def test_repository_commit_must_be_on_main_history(self) -> None:
+        run = validate_run(completed_run())
+        valid_comparison = {
+            "status": "ahead",
+            "base_commit": {"sha": run["repository_commit"]},
+            "merge_base_commit": {"sha": run["repository_commit"]},
+        }
+        verify_repository_commit(run, valid_comparison)
+
+        unrelated = copy.deepcopy(valid_comparison)
+        unrelated["status"] = "diverged"
+        unrelated["merge_base_commit"]["sha"] = "b" * 40
+        with self.assertRaisesRegex(MetricsError, "ancestor of governed main"):
+            verify_repository_commit(run, unrelated)
 
     def test_exclusive_candidate_attribution_must_be_exact(self) -> None:
         run = completed_run()

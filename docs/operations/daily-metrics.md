@@ -143,7 +143,10 @@ possono convalidare il conteggio dei candidati. La sezione `Candidate records`
 controllati, e la lunghezza dell'array deve coincidere con
 `intake_candidates`. Testo segnaposto o un totale dichiarato senza record non
 sono accettati. Anche valutazioni intake e attribuzione alle fonti vengono
-riconciliate con i conteggi aggregati. Il JSON pubblico
+riconciliate con i conteggi aggregati. Le tre salvaguardie dell'issue devono
+essere tutte spuntate. Il workflow verifica inoltre che il commit dichiarato
+esista nel repository e appartenga alla storia di `main`, così la versione del
+registro usata per la deduplicazione resta auditabile. Il JSON pubblico
 espone soltanto conteggi, stato tecnico, data e
 l'informazione che una issue è stata creata; non ne pubblica il collegamento.
 Nessuno dei due contiene:
