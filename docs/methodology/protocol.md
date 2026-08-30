@@ -44,9 +44,10 @@ Title keywords can prioritise; they cannot establish eligibility. Abstract or
 full text is examined whenever the four-part construct test cannot be answered
 with confidence. Codes require an evidence locator and controlled taxonomy.
 
-The present two records are explicitly identified as the initial seed nucleus.
-Their public presence is not a claim of complete searching, final saturation or
-quantitative synthesis.
+The present published record is explicitly identified as the initial seed
+nucleus. A second canonical seed candidate is withheld pending substantive
+evidence screening. Public presence is not a claim of complete searching, final
+saturation or quantitative synthesis.
 
 ## Public archive
 

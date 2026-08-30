@@ -1,2 +1,3 @@
 snapshot_date,metadata_fix,manual_review,abstract_review,rejected_omitted,is_current,notes
-2026-04-29,2,9,25,19,true,Aggregate legacy E0 editorial counts; candidate metadata is not part of the public archive.
+2026-04-29,2,9,25,19,false,Historical aggregate legacy E0 editorial counts.
+2026-08-30,2,9,25,19,true,P000002 is already represented by the legacy abstract-review aggregate through its alternate manifestation; candidate metadata is not public.

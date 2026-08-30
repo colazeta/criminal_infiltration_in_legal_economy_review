@@ -50,7 +50,9 @@ class PublicationGateTests(unittest.TestCase):
         ]
         self.publications = [
             {
+                "publication_id": "PUB1V1",
                 "paper_id": "P1",
+                "publication_version": "1",
                 "publication_status": "published",
                 "public_relevance_reason": "Directly analyses the review construct.",
                 "topic_code": "topic",
@@ -58,6 +60,11 @@ class PublicationGateTests(unittest.TestCase):
                 "metadata_confidence": "high",
                 "source_basis": "Verified source",
                 "metadata_verified_at": "2026-01-01",
+                "first_published_version": "1.0.0",
+                "is_current": "true",
+                "supersedes_publication_id": "",
+                "version_note": "Initial publication.",
+                "updated_at": "2026-01-01",
             }
         ]
         self.identifiers = [
@@ -90,6 +97,138 @@ class PublicationGateTests(unittest.TestCase):
     def test_withheld_record_is_not_published(self) -> None:
         self.publications[0]["publication_status"] = "withheld"
         self.assertEqual([], self.records())
+
+    def test_historical_published_current_withheld_is_not_published(self) -> None:
+        self.publications[0]["is_current"] = "false"
+        current = copy.deepcopy(self.publications[0])
+        current.update(
+            {
+                "publication_id": "PUB1V2",
+                "publication_version": "2",
+                "publication_status": "withheld",
+                "public_relevance_reason": "",
+                "topic_code": "",
+                "scope_fit": "",
+                "is_current": "true",
+                "supersedes_publication_id": "PUB1V1",
+                "version_note": "Withheld pending review.",
+                "updated_at": "2026-01-02",
+            }
+        )
+        self.publications.append(current)
+        self.assertEqual([], self.records())
+
+    def test_builder_uses_only_current_publication_annotation(self) -> None:
+        self.publications[0]["is_current"] = "false"
+        current = copy.deepcopy(self.publications[0])
+        current.update(
+            {
+                "publication_id": "PUB1V2",
+                "publication_version": "2",
+                "public_relevance_reason": "Corrected current annotation.",
+                "scope_fit": "contextual",
+                "is_current": "true",
+                "supersedes_publication_id": "PUB1V1",
+                "version_note": "Corrected annotation.",
+                "updated_at": "2026-01-02",
+            }
+        )
+        self.publications.append(current)
+        records = self.records()
+        self.assertEqual("Corrected current annotation.", records[0]["reason"])
+        self.assertEqual("contextual", records[0]["scopeFit"])
+
+    def test_publication_history_requires_exactly_one_current_row(self) -> None:
+        self.publications[0]["is_current"] = "false"
+        with self.assertRaisesRegex(ArchiveBuildError, "found 0"):
+            self.records()
+
+        self.publications[0]["is_current"] = "true"
+        second = copy.deepcopy(self.publications[0])
+        second.update(
+            {
+                "publication_id": "PUB1V2",
+                "publication_version": "2",
+                "supersedes_publication_id": "PUB1V1",
+                "updated_at": "2026-01-02",
+            }
+        )
+        self.publications.append(second)
+        with self.assertRaisesRegex(ArchiveBuildError, "found 2"):
+            self.records()
+
+    def test_publication_history_requires_latest_row_to_be_current(self) -> None:
+        second = copy.deepcopy(self.publications[0])
+        second.update(
+            {
+                "publication_id": "PUB1V2",
+                "publication_version": "2",
+                "is_current": "false",
+                "supersedes_publication_id": "PUB1V1",
+                "updated_at": "2026-01-02",
+            }
+        )
+        self.publications.append(second)
+        with self.assertRaisesRegex(ArchiveBuildError, "must be the latest version"):
+            self.records()
+
+    def test_publication_history_rejects_broken_supersession(self) -> None:
+        self.publications[0]["is_current"] = "false"
+        second = copy.deepcopy(self.publications[0])
+        second.update(
+            {
+                "publication_id": "PUB1V2",
+                "publication_version": "2",
+                "is_current": "true",
+                "supersedes_publication_id": "PUB-OTHER",
+                "updated_at": "2026-01-02",
+            }
+        )
+        self.publications.append(second)
+        with self.assertRaisesRegex(ArchiveBuildError, "preceding version PUB1V1"):
+            self.records()
+
+    def test_publication_history_rejects_version_gaps_and_duplicate_identity(self) -> None:
+        self.publications[0]["is_current"] = "false"
+        third = copy.deepcopy(self.publications[0])
+        third.update(
+            {
+                "publication_id": "PUB1V3",
+                "publication_version": "3",
+                "is_current": "true",
+                "supersedes_publication_id": "PUB1V1",
+                "updated_at": "2026-01-03",
+            }
+        )
+        self.publications.append(third)
+        with self.assertRaisesRegex(ArchiveBuildError, "contiguous from 1"):
+            self.records()
+
+        self.publications = [self.publications[0], copy.deepcopy(self.publications[0])]
+        with self.assertRaisesRegex(ArchiveBuildError, "duplicate publication_id"):
+            self.records()
+
+    def test_publication_history_rejects_duplicate_version_and_invalid_marker(self) -> None:
+        duplicate_version = copy.deepcopy(self.publications[0])
+        duplicate_version.update(
+            {
+                "publication_id": "PUB-ALTERNATE",
+                "is_current": "false",
+            }
+        )
+        self.publications.append(duplicate_version)
+        with self.assertRaisesRegex(ArchiveBuildError, "duplicate publication_version"):
+            self.records()
+
+        self.publications = [self.publications[0]]
+        self.publications[0]["is_current"] = "yes"
+        with self.assertRaisesRegex(ArchiveBuildError, "must be true or false"):
+            self.records()
+
+    def test_publication_version_one_cannot_supersede_another_row(self) -> None:
+        self.publications[0]["supersedes_publication_id"] = "PUB-OLDER"
+        with self.assertRaisesRegex(ArchiveBuildError, "version 1 cannot supersede"):
+            self.records()
 
     def test_current_pending_decision_fails_closed(self) -> None:
         self.decisions[0]["decision"] = "maybe_full_text_needed"
@@ -149,6 +288,13 @@ class PublicationGateTests(unittest.TestCase):
                 "rejected_omitted\n999999\n", encoding="utf-8"
             )
             self.assertEqual(expected, build_payload(temp_root))
+
+    def test_repository_release_withholds_unsupported_seed(self) -> None:
+        payload = build_payload(ROOT)
+        self.assertEqual(["P000001"], [record["id"] for record in payload["records"]])
+        self.assertEqual(
+            "eligible_contextual", payload["records"][0]["screeningDecision"]
+        )
 
 
 if __name__ == "__main__":

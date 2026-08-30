@@ -11,10 +11,10 @@
     "rejectedRecordsOmitted": 19
   },
   "counts": {
-    "records": 2,
-    "included": 2,
-    "core": 2,
-    "contextual": 0,
+    "records": 1,
+    "included": 1,
+    "core": 0,
+    "contextual": 1,
     "editorialQueue": 36,
     "metadataFix": 2,
     "manualReview": 9,
@@ -23,39 +23,10 @@
   },
   "records": [
     {
-      "id": "P000002",
-      "section": "included",
-      "status": "included",
-      "statusLabel": "Core seed",
-      "statusDescription": "Published seed record with a governed current eligibility decision. It contributes to the initial nucleus and does not imply review saturation.",
-      "title": "7 Beyond Mafia: Considerations on Criminal Infiltration in the Legal Economy",
-      "authors": "Nicolazzo, Giovanni",
-      "year": 2025,
-      "venue": "White-Collar and Organizational Crime",
-      "publisher": "Bristol University Press",
-      "volume": "",
-      "issue": "",
-      "pages": "111-124",
-      "documentType": "book_chapter",
-      "language": "",
-      "doi": "10.56687/9781529247145-010",
-      "links": {
-        "doi": "https://doi.org/10.56687/9781529247145-010"
-      },
-      "topicCode": "conceptual_foundations",
-      "topicLabel": "Conceptual foundations",
-      "scopeFit": "direct",
-      "metadataConfidence": "high",
-      "reason": "Develops the conceptual boundary of criminal infiltration in the legal economy beyond a mafia-only frame and anchors the review's construct definition.",
-      "screeningDecision": "eligible_core",
-      "screeningStage": "seed_validation",
-      "sourceBasis": "Crossref discovery; DOI family and bibliographic metadata verified with Scite"
-    },
-    {
       "id": "P000001",
       "section": "included",
       "status": "included",
-      "statusLabel": "Core seed",
+      "statusLabel": "Contextual seed",
       "statusDescription": "Published seed record with a governed current eligibility decision. It contributes to the initial nucleus and does not imply review saturation.",
       "title": "How Mafias Migrate: The Case of the `Ndrangheta in Northern Italy",
       "authors": "Varese, Federico",
@@ -73,12 +44,12 @@
       },
       "topicCode": "criminal_transplantation",
       "topicLabel": "Criminal transplantation",
-      "scopeFit": "direct",
+      "scopeFit": "contextual",
       "metadataConfidence": "high",
-      "reason": "Examines the conditions under which a mafia group establishes a durable organisational presence in a new territory and therefore informs the review's core concepts of criminal transplantation and embeddedness.",
-      "screeningDecision": "eligible_core",
-      "screeningStage": "seed_validation",
-      "sourceBasis": "Manual seed review; DOI and bibliographic metadata verified with Scite"
+      "reason": "Systematically examines conditions for long-term mafia transplantation to new territories and provides a necessary conceptual account of durable criminal embeddedness; retained as contextual rather than direct legal-economy evidence.",
+      "screeningDecision": "eligible_contextual",
+      "screeningStage": "title_abstract",
+      "sourceBasis": "Scite DOI-indexed abstract reviewed 2026-08-30; bibliographic metadata verified with Scite"
     }
   ]
 }

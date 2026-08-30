@@ -44,7 +44,10 @@ def execution(
 
 
 def cycle(cycle_id: str, date: str = "2026-01-01") -> list[dict[str, str]]:
-    return [execution(cycle_id, component, date=date) for component in ("database", "backward", "forward")]
+    return [
+        execution(cycle_id, component, date=date)
+        for component in ("database", "backward", "forward")
+    ]
 
 
 class SaturationCycleTests(unittest.TestCase):
@@ -54,7 +57,11 @@ class SaturationCycleTests(unittest.TestCase):
         self.assertEqual(1, trailing_qualifying(assessments))
 
     def test_three_complete_low_yield_cycles_require_review(self) -> None:
-        rows = cycle("R1", "2026-01-01") + cycle("R2", "2026-02-01") + cycle("R3", "2026-03-01")
+        rows = (
+            cycle("R1", "2026-01-01")
+            + cycle("R2", "2026-02-01")
+            + cycle("R3", "2026-03-01")
+        )
         self.assertEqual(3, trailing_qualifying(assess_cycles(rows)))
 
     def test_missing_forward_or_failed_component_breaks_sequence(self) -> None:
@@ -85,9 +92,46 @@ class SaturationCycleTests(unittest.TestCase):
         self.assertFalse(assess_cycles(rows)[0].qualifying)
 
     def test_latest_incomplete_cycle_breaks_trailing_streak(self) -> None:
-        rows = cycle("R1", "2026-01-01") + cycle("R2", "2026-02-01") + cycle("R3", "2026-03-01")
+        rows = (
+            cycle("R1", "2026-01-01")
+            + cycle("R2", "2026-02-01")
+            + cycle("R3", "2026-03-01")
+        )
         rows += cycle("R4", "2026-04-01")[:2]
         self.assertEqual(0, trailing_qualifying(assess_cycles(rows)))
+
+    def test_ungrouped_review_execution_fails_after_qualifying_streak(self) -> None:
+        rows = (
+            cycle("R1", "2026-01-01")
+            + cycle("R2", "2026-02-01")
+            + cycle("R3", "2026-03-01")
+        )
+        ungrouped = execution("R4", "database", date="2026-04-01")
+        ungrouped["execution_id"] = "E1R4"
+        ungrouped["cycle_id"] = ""
+        rows.append(ungrouped)
+        with self.assertRaisesRegex(ValueError, r"E1R4.*missing cycle_id"):
+            assess_cycles(rows)
+
+    def test_only_e0_may_omit_cycle_id(self) -> None:
+        rows = cycle("R1")
+        rows.append(
+            {"execution_id": "E0", "cycle_id": "", "execution_type": "seed"}
+        )
+        self.assertEqual(1, trailing_qualifying(assess_cycles(rows)))
+
+        rows[-1]["execution_id"] = "E2R1"
+        with self.assertRaisesRegex(ValueError, r"E2R1.*missing cycle_id"):
+            assess_cycles(rows)
+
+    def test_e0_must_be_the_explicit_ungrouped_seed(self) -> None:
+        rows = [{"execution_id": "E0", "cycle_id": "", "execution_type": "database"}]
+        with self.assertRaisesRegex(ValueError, "ungrouped seed execution"):
+            assess_cycles(rows)
+
+        rows[0].update(execution_type="seed", cycle_id="R1")
+        with self.assertRaisesRegex(ValueError, "ungrouped seed execution"):
+            assess_cycles(rows)
 
     def test_malformed_metric_fails_loudly(self) -> None:
         rows = cycle("R1")

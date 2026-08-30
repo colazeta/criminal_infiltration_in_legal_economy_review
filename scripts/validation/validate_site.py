@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import json
 import re
+import sys
 from collections import Counter
 from html.parser import HTMLParser
 from pathlib import Path
@@ -13,6 +14,9 @@ from urllib.parse import urlsplit
 
 ROOT = Path(__file__).resolve().parents[2]
 SITE = ROOT / "site"
+sys.path.insert(0, str(ROOT / "scripts"))
+
+from build_archive import build_payload  # noqa: E402
 
 
 class PageParser(HTMLParser):
@@ -110,6 +114,8 @@ def validate_pages() -> None:
 
 def validate_payload() -> int:
     payload = json.loads((SITE / "data/archive.json").read_text(encoding="utf-8"))
+    if payload != build_payload(ROOT):
+        fail("archive.json is stale relative to the governed registries")
     records = payload.get("records")
     if not isinstance(records, list):
         fail("archive.json records must be a list")
@@ -154,5 +160,5 @@ def main() -> None:
 if __name__ == "__main__":
     try:
         main()
-    except (OSError, json.JSONDecodeError) as exc:
+    except (OSError, json.JSONDecodeError, ValueError) as exc:
         fail(str(exc))

@@ -1,3 +1,5 @@
 decision_id,paper_id,execution_id,screening_stage,decision,exclusion_reason_code,exclusion_comment,confidence,reviewer,decision_date,is_current,notes
-SD000001,P000001,E0,seed_validation,eligible_core,,,high,pre_import_audit,2026-04-29,true,Initial governed seed decision; publication is controlled separately by publications.csv.
-SD000002,P000002,E0R1,seed_validation,eligible_core,,,high,pre_import_audit,2026-04-29,true,Initial governed seed decision; publication is controlled separately by publications.csv.
+SD000001,P000001,E0,seed_validation,eligible_core,,,high,pre_import_audit,2026-04-29,false,Historical seed decision superseded after substantive evidence review narrowed the work to contextual eligibility.
+SD000004,P000001,E0,title_abstract,eligible_contextual,,,medium,repository_quality_audit,2026-08-30,true,Scite DOI-indexed abstract reviewed at 10.1111/j.1540-5893.2006.00260.x; supports a conceptual account of durable mafia transplantation but not direct legal-economy evidence.
+SD000002,P000002,E0R1,seed_validation,eligible_core,,,high,pre_import_audit,2026-04-29,false,Historical pilot decision superseded because the retained evidence basis was title-level only.
+SD000003,P000002,E0R1,seed_validation,maybe_full_text_needed,,,high,repository_quality_audit,2026-08-30,true,Legacy Crossref snapshot git:9d32106:data/raw/e0_identifier_first_raw/crossref_Q01.json (SHA-256 7b29fb4c83d0e71553d589830100a71aea014cbcd8f267519d4cdb9943219159) contains bibliography but no abstract; the prior rationale was title-only, so human substantive screening is required.

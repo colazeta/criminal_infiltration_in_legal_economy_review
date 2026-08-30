@@ -14,6 +14,13 @@ Two compact audit tables remain under `data/legacy/e0/`:
 They are non-authoritative and are never read by the public build. The original
 raw snapshots and execution notes remain recoverable in Git at commit `9d32106`.
 
+Candidate rows C001, C002 and C003 were later resolved as three DOI
+manifestations of canonical work P000002. The pilot promoted C002 using
+title-level evidence while C001 remained pending abstract review. Because the
+preserved Crossref snapshot contains no abstract, release 0.2.0 retains the
+bibliographic work and its identifiers but withholds it from the public archive
+pending substantive human screening.
+
 Key preserved checksums:
 
 | Artifact at `9d32106` | SHA-256 |

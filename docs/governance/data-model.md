@@ -15,7 +15,8 @@
 - `work_identifiers.csv`: verified primary and alternate identifiers or manifestations.
 - `discovery_events.csv`: every occurrence and its retrieval provenance.
 - `screening_decisions.csv`: versioned decisions; one current row per included work.
-- `publications.csv`: explicit public-release status and approved annotations.
+- `publications.csv`: version-preserving publication history, explicit current
+  release status and approved annotations.
 - `taxonomy.csv` / `paper_codes.csv`: controlled labels and evidence-backed codes.
 - `editorial_summary.csv`: public-safe aggregate queue counts only.
 - `execution_metrics.csv`: E1–E3 component metrics grouped by cycle.
@@ -23,7 +24,7 @@
 
 ## Full publication gate
 
-For a `published` manifest row, the builder requires:
+For a current `published` manifest row, the builder requires:
 
 1. canonical status `seed_included` or `review_included`;
 2. complete minimum bibliography;
@@ -34,8 +35,34 @@ For a `published` manifest row, the builder requires:
 7. approved, nonblank public relevance annotation;
 8. a topic in the controlled taxonomy.
 
-Any inconsistent `published` row fails the build. `withheld` rows remain absent.
-A non-public work is never promoted by inference.
+Any inconsistent current `published` row fails the build. A current `withheld`
+row remains absent even when an earlier historical version was published. A
+non-public work is never promoted by inference.
+
+`review_pending` is a canonical, non-publishable state for a bibliographically
+resolved work that still lacks sufficient screening evidence.
+
+## Publication history
+
+One `publications.csv` row represents one preserved version of the publication
+state and its approved annotation. Once a row is superseded, its annotation and
+status fields are immutable. The version key is `publication_id`; within a work,
+`publication_version` starts at 1 and increases contiguously.
+
+- Every work represented in the manifest has exactly one `is_current=true` row.
+- The current row is always the highest version.
+- Version 1 leaves `supersedes_publication_id` blank.
+- Every later version points to the immediately preceding `publication_id`.
+- `version_note` records why the version was created.
+- A correction, reclassification or withdrawal appends a row and changes only
+  the former row's current marker from `true` to `false`; it never replaces or
+  deletes the former annotation.
+- `first_published_version` records the archive release in which the work first
+  appeared and remains unchanged in all later versions after first publication.
+
+The builder validates the complete chain but derives the current site solely
+from the one current row. Historical `published` rows therefore preserve what
+was previously released without keeping a superseded work or annotation online.
 
 ## Public allowlist
 

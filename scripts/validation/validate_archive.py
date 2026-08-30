@@ -22,6 +22,7 @@ from build_archive import (  # noqa: E402
     ArchiveBuildError,
     build_payload,
     clean_doi,
+    current_publication_rows,
 )
 
 
@@ -32,7 +33,12 @@ PUBLIC_SCHEMA = ROOT / "schema/public-archive.schema.json"
 DOI_PATTERN = re.compile(r"^10\.\d{4,9}/\S+$", re.I)
 DATE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
-ALLOWED_CANONICAL_STATUSES = {*INCLUDED_STATUSES, "superseded", "withdrawn"}
+ALLOWED_CANONICAL_STATUSES = {
+    *INCLUDED_STATUSES,
+    "review_pending",
+    "superseded",
+    "withdrawn",
+}
 ALLOWED_DECISIONS = {
     *ELIGIBLE_DECISIONS,
     "maybe_full_text_needed",
@@ -104,8 +110,17 @@ def validate_registries() -> dict[str, list[dict[str, str]]]:
         [row.get("decision_id", "").strip() for row in decisions], "decisions"
     )
     require_unique(
-        [row.get("paper_id", "").strip() for row in publications], "publications"
+        [row.get("publication_id", "").strip() for row in publications],
+        "publications",
     )
+
+    try:
+        current_publications = current_publication_rows(publications)
+    except ArchiveBuildError as exc:
+        fail(f"Invalid publication history: {exc}")
+    current_publication_by_paper = {
+        row["paper_id"]: row for row in current_publications
+    }
 
     paper_ids = {row["paper_id"] for row in papers}
     title_year: Counter[tuple[str, str]] = Counter()
@@ -200,36 +215,88 @@ def validate_registries() -> dict[str, list[dict[str, str]]]:
     ):
         fail("taxonomy.csv has blank or duplicate keys")
 
-    publication_by_id = {row["paper_id"]: row for row in publications}
+    publications_by_paper: dict[str, list[dict[str, str]]] = defaultdict(list)
     for row in publications:
+        publication_id = row["publication_id"]
         paper_id = row["paper_id"]
         if paper_id not in paper_ids:
-            fail(f"publications.csv: orphan paper_id {paper_id}")
+            fail(f"{publication_id}: orphan paper_id {paper_id}")
+        publications_by_paper[paper_id].append(row)
         if row.get("publication_status") not in ALLOWED_PUBLICATION_STATUS:
-            fail(f"{paper_id}: invalid publication status")
+            fail(f"{publication_id}: invalid publication status")
+        if not row.get("version_note", "").strip():
+            fail(f"{publication_id}: blank version_note")
+        if not DATE_PATTERN.match(row.get("updated_at", "")):
+            fail(f"{publication_id}: invalid updated_at")
+        metadata_verified_at = row.get("metadata_verified_at", "").strip()
+        if metadata_verified_at and not DATE_PATTERN.match(metadata_verified_at):
+            fail(f"{publication_id}: invalid metadata_verified_at")
+        first_published_version = row.get("first_published_version", "").strip()
+        if first_published_version and not re.fullmatch(
+            r"\d+\.\d+\.\d+", first_published_version
+        ):
+            fail(f"{publication_id}: invalid first_published_version")
         if row.get("publication_status") == "published":
-            if event_counts[paper_id] < 1:
-                fail(f"{paper_id}: published work has no discovery event")
-            if len(current[paper_id]) != 1:
-                fail(f"{paper_id}: published work must have one current decision")
-            if current[paper_id][0].get("decision") not in ELIGIBLE_DECISIONS:
-                fail(f"{paper_id}: published work is not currently eligible")
             if ("topic", row.get("topic_code", "")) not in taxonomy_keys:
-                fail(f"{paper_id}: unknown public topic")
-            if not row.get("public_relevance_reason", "").strip():
-                fail(f"{paper_id}: blank public relevance reason")
-            if primary_doi_counts[paper_id] != 1:
-                fail(f"{paper_id}: expected one primary DOI")
-            paper = next(item for item in papers if item["paper_id"] == paper_id)
-            if clean_doi(paper.get("doi", "")) != primary_doi_by_paper[paper_id]:
-                fail(f"{paper_id}: primary DOI mismatch")
+                fail(f"{publication_id}: unknown public topic")
+            for field in (
+                "public_relevance_reason",
+                "scope_fit",
+                "metadata_confidence",
+                "source_basis",
+                "metadata_verified_at",
+                "first_published_version",
+            ):
+                if not row.get(field, "").strip():
+                    fail(f"{publication_id}: blank {field}")
+            if row.get("metadata_confidence") not in ALLOWED_CONFIDENCE:
+                fail(f"{publication_id}: invalid metadata_confidence")
+
+    for paper_id, history in publications_by_paper.items():
+        ordered = sorted(history, key=lambda row: int(row["publication_version"]))
+        previous_date = ""
+        first_published_revision: int | None = None
+        first_published_release = ""
+        for row in ordered:
+            updated_at = row["updated_at"]
+            if previous_date and updated_at < previous_date:
+                fail(f"{paper_id}: publication updated_at precedes its predecessor")
+            previous_date = updated_at
+            if (
+                first_published_revision is None
+                and row.get("publication_status") == "published"
+            ):
+                first_published_revision = int(row["publication_version"])
+                first_published_release = row.get("first_published_version", "").strip()
+            if (
+                first_published_revision is not None
+                and int(row["publication_version"]) >= first_published_revision
+                and row.get("first_published_version", "").strip()
+                != first_published_release
+            ):
+                fail(f"{paper_id}: first_published_version changed across history")
+
+    for paper_id, publication in current_publication_by_paper.items():
+        if len(current[paper_id]) != 1:
+            fail(f"{paper_id}: current publication requires one current decision")
+        if publication.get("publication_status") != "published":
+            continue
+        if event_counts[paper_id] < 1:
+            fail(f"{paper_id}: published work has no discovery event")
+        if current[paper_id][0].get("decision") not in ELIGIBLE_DECISIONS:
+            fail(f"{paper_id}: published work is not currently eligible")
+        if primary_doi_counts[paper_id] != 1:
+            fail(f"{paper_id}: expected one primary DOI")
+        paper = next(item for item in papers if item["paper_id"] == paper_id)
+        if clean_doi(paper.get("doi", "")) != primary_doi_by_paper[paper_id]:
+            fail(f"{paper_id}: primary DOI mismatch")
 
     for paper in papers:
         paper_id = paper["paper_id"]
         if paper.get("canonical_status") in INCLUDED_STATUSES:
             if len(current[paper_id]) != 1:
                 fail(f"{paper_id}: included work must have one current decision")
-            if paper_id not in publication_by_id:
+            if paper_id not in current_publication_by_paper:
                 fail(f"{paper_id}: included work lacks a publication-manifest row")
 
     for row in data["paper_codes.csv"]:
@@ -270,9 +337,10 @@ def validate_public_archive(data: dict[str, list[dict[str, str]]]) -> None:
     if not isinstance(records, list):
         fail("archive.json records must be a list")
 
+    current_publications = current_publication_rows(data["publications.csv"])
     expected_ids = {
         row["paper_id"]
-        for row in data["publications.csv"]
+        for row in current_publications
         if row.get("publication_status") == "published"
     }
     public_ids = {record.get("id") for record in records}
@@ -313,7 +381,7 @@ def main() -> None:
     validate_public_archive(data)
     print(
         f"[OK] Archive gate passed: {len(data['papers.csv'])} canonical work(s), "
-        f"{len(data['publications.csv'])} publication-manifest row(s)."
+        f"{len(data['publications.csv'])} versioned publication row(s)."
     )
 
 

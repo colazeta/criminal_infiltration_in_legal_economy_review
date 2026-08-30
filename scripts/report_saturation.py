@@ -121,9 +121,23 @@ def assess_cycle(cycle_id: str, rows: list[dict[str, str]]) -> CycleAssessment:
 def assess_cycles(rows: list[dict[str, str]]) -> list[CycleAssessment]:
     grouped: dict[str, list[dict[str, str]]] = defaultdict(list)
     for row in rows:
+        execution_id = (row.get("execution_id") or "").strip()
         cycle_id = (row.get("cycle_id") or "").strip()
-        if cycle_id:
-            grouped[cycle_id].append(row)
+        if execution_id.upper() == "E0":
+            execution_type = (row.get("execution_type") or "").strip().lower()
+            if execution_type != "seed" or cycle_id:
+                raise ValueError(
+                    "E0 must be the ungrouped seed execution; "
+                    "it cannot represent a review-cycle component"
+                )
+            continue
+        if not cycle_id:
+            label = execution_id or "<missing execution_id>"
+            raise ValueError(
+                f"review execution {label!r} is missing cycle_id; "
+                "only E0 may omit cycle_id"
+            )
+        grouped[cycle_id].append(row)
     assessments = [assess_cycle(cycle_id, grouped[cycle_id]) for cycle_id in grouped]
     return sorted(assessments, key=lambda item: (item.completed_at, item.cycle_id))
 

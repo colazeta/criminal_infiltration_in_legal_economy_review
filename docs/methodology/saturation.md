@@ -27,8 +27,11 @@ cycles where:
 - no unresolved retrieval failure could conceal material records.
 
 `scripts/report_saturation.py` groups execution rows by `cycle_id`; incomplete,
-failed or invalid cycles break the trailing sequence. Its strongest output is
-`REVIEW REQUIRED`, never an automatic declaration of saturation.
+failed or invalid cycles break the trailing sequence. E0 is the only execution
+that may omit `cycle_id` and be excluded. Any E1, E2, E3 or other review
+execution without `cycle_id` makes the report fail closed instead of being
+silently discarded. Its strongest output is `REVIEW REQUIRED`, never an
+automatic declaration of saturation.
 
 Living surveillance continues after any stop decision because new research can
 appear later.

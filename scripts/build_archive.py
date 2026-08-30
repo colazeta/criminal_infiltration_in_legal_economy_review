@@ -121,6 +121,101 @@ def one_current(rows: list[dict[str, str]], key: str) -> dict[str, dict[str, str
     return result
 
 
+def current_publication_rows(
+    publications: list[dict[str, str]],
+) -> list[dict[str, str]]:
+    """Validate publication-version chains and return one current row per work."""
+
+    by_id: dict[str, dict[str, str]] = {}
+    by_paper: dict[str, dict[int, dict[str, str]]] = defaultdict(dict)
+    for row in publications:
+        publication_id = (row.get("publication_id") or "").strip()
+        paper_id = (row.get("paper_id") or "").strip()
+        if not publication_id:
+            raise ArchiveBuildError("publications.csv: blank publication_id")
+        if publication_id in by_id:
+            raise ArchiveBuildError(
+                f"publications.csv: duplicate publication_id {publication_id}"
+            )
+        if not paper_id:
+            raise ArchiveBuildError(f"{publication_id}: blank paper_id")
+        try:
+            version = int((row.get("publication_version") or "").strip())
+        except ValueError as exc:
+            raise ArchiveBuildError(
+                f"{publication_id}: publication_version must be a positive integer"
+            ) from exc
+        if version < 1:
+            raise ArchiveBuildError(
+                f"{publication_id}: publication_version must be a positive integer"
+            )
+        if version in by_paper[paper_id]:
+            raise ArchiveBuildError(
+                f"{paper_id}: duplicate publication_version {version}"
+            )
+        status = (row.get("publication_status") or "").strip()
+        if status not in PUBLICATION_STATUSES:
+            raise ArchiveBuildError(
+                f"{publication_id}: unknown publication status {status!r}"
+            )
+        is_current = (row.get("is_current") or "").strip().lower()
+        if is_current not in {"true", "false"}:
+            raise ArchiveBuildError(
+                f"{publication_id}: is_current must be true or false"
+            )
+        by_id[publication_id] = row
+        by_paper[paper_id][version] = row
+
+    current: list[dict[str, str]] = []
+    for paper_id, version_rows in by_paper.items():
+        versions = sorted(version_rows)
+        expected = list(range(1, len(versions) + 1))
+        if versions != expected:
+            raise ArchiveBuildError(
+                f"{paper_id}: publication versions must be contiguous from 1; "
+                f"found {versions}"
+            )
+        current_rows = [
+            row
+            for row in version_rows.values()
+            if (row.get("is_current") or "").strip().lower() == "true"
+        ]
+        if len(current_rows) != 1:
+            raise ArchiveBuildError(
+                f"{paper_id}: expected one current publication row, "
+                f"found {len(current_rows)}"
+            )
+        current_row = current_rows[0]
+        current_version = int(current_row["publication_version"])
+        if current_version != versions[-1]:
+            raise ArchiveBuildError(
+                f"{paper_id}: current publication row must be the latest version"
+            )
+
+        for version in versions:
+            row = version_rows[version]
+            publication_id = (row.get("publication_id") or "").strip()
+            supersedes = (row.get("supersedes_publication_id") or "").strip()
+            if version == 1:
+                if supersedes:
+                    raise ArchiveBuildError(
+                        f"{publication_id}: version 1 cannot supersede another row"
+                    )
+                continue
+            predecessor = version_rows[version - 1]
+            predecessor_id = (
+                predecessor.get("publication_id") or ""
+            ).strip()
+            if supersedes != predecessor_id:
+                raise ArchiveBuildError(
+                    f"{publication_id}: supersedes_publication_id must reference "
+                    f"the preceding version {predecessor_id}"
+                )
+        current.append(current_row)
+
+    return current
+
+
 def identifier_maps(
     identifiers: list[dict[str, str]],
 ) -> tuple[dict[str, str], dict[str, list[dict[str, str]]]]:
@@ -173,21 +268,12 @@ def build_records(
     primary_doi, identifiers_by_id = identifier_maps(identifiers)
 
     records: list[dict[str, Any]] = []
-    seen_publications: set[str] = set()
-    for publication in publications:
+    for publication in current_publication_rows(publications):
         publication_status = (publication.get("publication_status") or "").strip()
-        if publication_status not in PUBLICATION_STATUSES:
-            raise ArchiveBuildError(
-                f"{publication.get('paper_id')}: unknown publication status "
-                f"{publication_status!r}"
-            )
         if publication_status != "published":
             continue
 
         paper_id = (publication.get("paper_id") or "").strip()
-        if paper_id in seen_publications:
-            raise ArchiveBuildError(f"{paper_id}: duplicate publication-manifest row")
-        seen_publications.add(paper_id)
         paper = papers_by_id.get(paper_id)
         problems: list[str] = []
         if not paper:
@@ -313,6 +399,7 @@ def build_payload(root: Path = ROOT) -> dict[str, Any]:
     records = build_records(
         papers, events, decisions, publications, identifiers, topic_labels
     )
+    current_publications = current_publication_rows(publications)
     summary = current_singleton(summaries, "editorial_summary.csv")
     version = current_singleton(versions, "archive_versions.csv")
 
@@ -332,7 +419,7 @@ def build_payload(root: Path = ROOT) -> dict[str, Any]:
         "releaseDate": version["release_date"],
         "searchCoverageThrough": version["search_coverage_through"],
         "sourceSnapshot": source_snapshot(
-            [*papers, *decisions, *publications, summary, version]
+            [*papers, *decisions, *current_publications, summary, version]
         ),
         "methodology": {
             "includedDefinition": (
