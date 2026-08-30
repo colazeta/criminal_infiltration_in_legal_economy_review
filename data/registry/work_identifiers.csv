@@ -1,0 +1,5 @@
+identifier_id,paper_id,scheme,value,relation,is_primary,source,verification_status,verified_at
+ID000001,P000001,doi,10.1111/j.1540-5893.2006.00260.x,canonical,true,Scite,verified,2026-08-29
+ID000002,P000002,doi,10.56687/9781529247145-010,canonical,true,Scite,verified,2026-08-29
+ID000003,P000002,doi,10.51952/9781529247145.ch007,manifestation,false,Scite,verified,2026-08-29
+ID000004,P000002,doi,10.2307/jj.26193012.12,manifestation,false,Scite,verified,2026-08-30

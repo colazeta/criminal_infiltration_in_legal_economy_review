@@ -1,0 +1,30 @@
+name: Archive release
+description: Prepare a versioned corpus and site release
+title: "[RELEASE] v"
+body:
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      placeholder: 0.3.0
+    validations:
+      required: true
+  - type: textarea
+    id: changes
+    attributes:
+      label: Works and methodology changed
+    validations:
+      required: true
+  - type: checkboxes
+    id: release_gate
+    attributes:
+      label: Release gate
+      options:
+        - label: Archive version, CFF, Zenodo metadata and changelog agree.
+          required: true
+        - label: Full validation and deterministic build pass.
+          required: true
+        - label: Public download counts and links were reviewed.
+          required: true
+        - label: Human review is complete; no auto-merge is requested.
+          required: true

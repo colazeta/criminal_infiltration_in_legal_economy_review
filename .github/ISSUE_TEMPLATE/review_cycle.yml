@@ -1,0 +1,40 @@
+name: E1-E3 review cycle
+description: Plan and reconcile one complete database and citation-searching cycle
+title: "[CYCLE] "
+body:
+  - type: input
+    id: cycle_id
+    attributes:
+      label: Cycle ID
+      placeholder: R1
+    validations:
+      required: true
+  - type: textarea
+    id: strategies
+    attributes:
+      label: E1 sources and exact strategies
+    validations:
+      required: true
+  - type: textarea
+    id: frontier
+    attributes:
+      label: E2/E3 eligible frontier
+      description: List source paper IDs and planned backward/forward feeds.
+    validations:
+      required: true
+  - type: checkboxes
+    id: completion
+    attributes:
+      label: Completion gate
+      options:
+        - label: Database update completed and logged.
+        - label: Backward search completed over the frontier.
+        - label: Forward search completed over the frontier.
+        - label: New unique candidates were screened.
+        - label: Retrieval failures are recorded and resolved or explicitly open.
+  - type: textarea
+    id: metrics
+    attributes:
+      label: Reconciled counts and cycle metrics
+    validations:
+      required: true

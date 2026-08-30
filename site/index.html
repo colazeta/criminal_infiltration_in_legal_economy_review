@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="A governed, searchable archive of research on criminal infiltration in the legal economy."
+    />
+    <title>Criminal Infiltration Literature Archive</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>◫</text></svg>" />
+    <link rel="stylesheet" href="./styles.css" />
+    <script src="./app.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#archive">Skip to the archive</a>
+
+    <header class="site-header">
+      <div class="header-inner">
+        <a class="brand" href="./" aria-label="Archive home">
+          <span class="brand-mark" aria-hidden="true">CI</span>
+          <span>
+            <strong>Criminal Infiltration</strong>
+            <small>Literature Archive</small>
+          </span>
+        </a>
+        <nav aria-label="Primary navigation">
+          <a href="#archive">Archive</a>
+          <a href="#methodology">Methodology</a>
+          <a href="./data/archive.csv" download>Download CSV</a>
+          <a
+            href="https://github.com/colazeta/criminal_infiltration_in_legal_economy_review"
+            rel="noreferrer"
+          >Repository</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="intro" aria-labelledby="page-title">
+        <div>
+          <p class="eyebrow">Living curated evidence map</p>
+          <h1 id="page-title">Research on criminal infiltration in the legal economy</h1>
+          <p class="intro-copy">
+            Search the publication-ready layer of a reproducible literature review.
+            A work appears only after canonical, identifier, discovery, eligibility,
+            taxonomy, publication-manifest and human review checks all pass.
+          </p>
+        </div>
+        <aside class="scope-note" aria-label="Coverage notice">
+          <span class="scope-dot" aria-hidden="true"></span>
+          <div>
+            <strong>Screening in progress</strong>
+            <p>
+              No work is currently public. Candidate metadata and screening outcomes
+              stay outside this export until independent publication approval is complete.
+            </p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="metrics" aria-label="Archive status">
+        <article>
+          <span id="included-count">—</span>
+          <p>included publications</p>
+        </article>
+        <article>
+          <span id="editorial-count">—</span>
+          <p>records in editorial review</p>
+        </article>
+        <article>
+          <span id="archive-version">—</span>
+          <p>archive version</p>
+        </article>
+        <article>
+          <span id="coverage-date">—</span>
+          <p>search coverage through</p>
+        </article>
+      </section>
+
+      <section class="archive" id="archive" aria-labelledby="archive-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Included evidence</p>
+            <h2 id="archive-title">Publication archive</h2>
+          </div>
+          <p>
+            Pending, duplicate, excluded, and unresolved records are never mixed into
+            these results.
+          </p>
+        </div>
+
+        <form class="controls" id="archive-controls" role="search">
+          <label class="search-field">
+            <span>Search title, author, venue or DOI</span>
+            <input
+              id="search-input"
+              type="search"
+              autocomplete="off"
+              placeholder="e.g. procurement, Varese, 10.1111…"
+            />
+          </label>
+          <label>
+            <span>Topic</span>
+            <select id="topic-filter">
+              <option value="all">All topics</option>
+            </select>
+          </label>
+          <label>
+            <span>Year</span>
+            <select id="year-filter">
+              <option value="all">All years</option>
+            </select>
+          </label>
+          <label>
+            <span>Sort</span>
+            <select id="sort-order">
+              <option value="newest">Newest first</option>
+              <option value="oldest">Oldest first</option>
+              <option value="title">Title A–Z</option>
+            </select>
+          </label>
+          <button type="reset" id="clear-filters">Clear filters</button>
+        </form>
+
+        <div class="results-meta">
+          <p id="result-count" aria-live="polite">Loading publications…</p>
+          <p class="legend"><span aria-hidden="true"></span> Governed published record</p>
+        </div>
+
+        <div id="paper-list" class="paper-list" aria-busy="true"></div>
+        <div id="empty-state" class="empty-state" hidden>
+          <h3>No publications match these filters</h3>
+          <p>Clear one or more filters to return to the full included corpus.</p>
+        </div>
+        <div id="load-error" class="empty-state error-state" hidden>
+          <h3>The archive data could not be loaded</h3>
+          <p>Please try again or inspect the source registry in the repository.</p>
+        </div>
+      </section>
+
+      <section class="methodology" id="methodology" aria-labelledby="methodology-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Traceable by design</p>
+            <h2 id="methodology-title">What the archive does — and does not — claim</h2>
+          </div>
+        </div>
+
+        <div class="method-grid">
+          <article>
+            <span class="step">01</span>
+            <h3>One canonical work</h3>
+            <p>
+              Each visible item is deduplicated into the canonical work registry.
+              Primary and alternate DOI manifestations are resolved before publication.
+            </p>
+          </article>
+          <article>
+            <span class="step">02</span>
+            <h3>Complete publication gate</h3>
+            <p>
+              One current eligible decision, a discovery event, verified identifier,
+              controlled topic and approved public annotation are all required.
+            </p>
+          </article>
+          <article>
+            <span class="step">03</span>
+            <h3>No hidden promotion</h3>
+            <p>
+              Automated retrieval may create leads, but it cannot turn them into
+              included evidence. Ambiguity remains in the editorial layer.
+            </p>
+          </article>
+          <article>
+            <span class="step">04</span>
+            <h3>No completeness claim</h3>
+            <p>
+              E0 establishes the seed corpus. Saturation can only be assessed after
+              repeated database and citation-chain executions.
+            </p>
+          </article>
+        </div>
+
+        <div class="pipeline-panel">
+          <div>
+            <p class="eyebrow">Editorial pipeline</p>
+            <h3>Records held outside the public corpus</h3>
+          </div>
+          <dl>
+            <div>
+              <dt id="metadata-fix-count">—</dt>
+              <dd>metadata corrections</dd>
+            </div>
+            <div>
+              <dt id="manual-review-count">—</dt>
+              <dd>manual scope decisions</dd>
+            </div>
+            <div>
+              <dt id="abstract-review-count">—</dt>
+              <dd>abstract/full-text reviews</dd>
+            </div>
+            <div>
+              <dt id="rejected-count">—</dt>
+              <dd>rejected records omitted</dd>
+            </div>
+          </dl>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <p>
+        Versioned metadata and inclusion provenance are generated from governed
+        registries only. No full texts are redistributed.
+      </p>
+      <p><a href="./data/archive.json">JSON</a> · <a href="./data/archive.csv">CSV</a></p>
+    </footer>
+  </body>
+</html>

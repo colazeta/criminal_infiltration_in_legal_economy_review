@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 2,
+  "archiveVersion": "0.2.0",
+  "protocolVersion": "1.1",
+  "releaseDate": "2026-08-30",
+  "searchCoverageThrough": "2026-04-29",
+  "sourceSnapshot": "2026-08-30",
+  "methodology": {
+    "includedDefinition": "Records pass the canonical, discovery, current eligibility and explicit publication-manifest gates.",
+    "editorialDefinition": "Aggregate editorial counts are published separately; candidate metadata and reviewer notes are not included in the archive export.",
+    "rejectedRecordsOmitted": 19
+  },
+  "counts": {
+    "records": 0,
+    "included": 0,
+    "core": 0,
+    "contextual": 0,
+    "editorialQueue": 36,
+    "metadataFix": 2,
+    "manualReview": 9,
+    "abstractReview": 25,
+    "rejectedOmitted": 19
+  },
+  "records": []
+}

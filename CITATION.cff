@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+message: "If you use this archive, cite the version you consulted."
+title: "Criminal Infiltration Literature Archive"
+type: dataset
+authors:
+  - family-names: Nicolazzo
+    given-names: Giovanni
+repository-code: "https://github.com/colazeta/criminal_infiltration_in_legal_economy_review"
+url: "https://criminal-infiltration-archive.colazeta.chatgpt.site"
+version: 0.2.0
+date-released: 2026-08-30
+keywords:
+  - criminal infiltration
+  - legal economy
+  - organised crime
+  - evidence map
+  - systematic review
+abstract: >-
+  A living, governed and searchable archive of scholarly work on criminal
+  infiltration in the legal economy.

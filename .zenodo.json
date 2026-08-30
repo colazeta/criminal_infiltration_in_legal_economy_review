@@ -1,0 +1,26 @@
+{
+  "title": "Criminal Infiltration Literature Archive",
+  "description": "A living, governed and searchable archive of scholarly work on criminal infiltration in the legal economy.",
+  "upload_type": "dataset",
+  "version": "0.2.0",
+  "publication_date": "2026-08-30",
+  "creators": [
+    {
+      "name": "Nicolazzo, Giovanni"
+    }
+  ],
+  "keywords": [
+    "criminal infiltration",
+    "legal economy",
+    "organised crime",
+    "evidence map",
+    "systematic review"
+  ],
+  "related_identifiers": [
+    {
+      "identifier": "https://github.com/colazeta/criminal_infiltration_in_legal_economy_review",
+      "relation": "isSupplementTo",
+      "scheme": "url"
+    }
+  ]
+}
