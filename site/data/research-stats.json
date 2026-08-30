@@ -17,9 +17,9 @@
     "lastRunStatus": null,
     "last7Days": {
       "completedRuns": 0,
-      "uniqueResults": 0,
-      "knownMatches": 0,
-      "newCandidates": 0
+      "uniqueResults": null,
+      "knownMatches": null,
+      "newCandidates": null
     },
     "last30Days": {
       "loggedRuns": 0,
@@ -27,20 +27,20 @@
       "partialRuns": 0,
       "failedRuns": 0,
       "sourceCompletionRate": null,
-      "uniqueResults": 0,
-      "knownMatches": 0,
-      "newCandidates": 0,
-      "metadataConflicts": 0
+      "uniqueResults": null,
+      "knownMatches": null,
+      "newCandidates": null,
+      "metadataConflicts": null
     },
     "allTime": {
-      "newCandidates": 0
+      "newCandidates": null
     }
   },
   "definitions": {
     "occurrencesReturned": "All result occurrences returned across source queries; repeats are included.",
     "uniqueResults": "Results remaining after within-run identifier and title/year reconciliation.",
     "knownMatches": "Unique results already represented in the registry or an earlier intake issue.",
-    "newCandidates": "Novel records forwarded to the human intake queue with a plausible or uncertain assessment.",
+    "newCandidates": "Records not already known that were forwarded to the human intake queue with a plausible or uncertain assessment.",
     "candidateRate": "New intake candidates divided by unique results in a completed run; this is not screening yield.",
     "sourceCompletionRate": "Completed expected source runs divided by all expected source runs; failures are not treated as zero-result searches."
   },

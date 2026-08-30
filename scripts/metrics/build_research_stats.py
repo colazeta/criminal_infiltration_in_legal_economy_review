@@ -42,10 +42,15 @@ def main() -> None:
     args.output.write_text(
         json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
+    measured_candidates = payload["summary"]["allTime"]["newCandidates"]
+    candidate_message = (
+        f"{measured_candidates} intake candidate(s)."
+        if measured_candidates is not None
+        else "intake candidates not yet measured."
+    )
     print(
         "Built daily research statistics: "
-        f"{payload['summary']['runDays']} logged day(s), "
-        f"{payload['summary']['allTime']['newCandidates']} intake candidate(s)."
+        f"{payload['summary']['runDays']} logged day(s), {candidate_message}"
     )
 
 

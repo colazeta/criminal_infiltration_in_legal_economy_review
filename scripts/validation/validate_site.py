@@ -235,6 +235,7 @@ def validate_assets() -> None:
         "replaceChildren",
         "textContent",
         "completed.length < 8",
+        "calendarWindow(rows, 30)",
         "sourceCompletionRate",
     ):
         if required not in stats_javascript:

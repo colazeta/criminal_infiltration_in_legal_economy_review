@@ -13,6 +13,7 @@ from zoneinfo import ZoneInfo
 
 SCHEMA_VERSION = 1
 ROME = ZoneInfo("Europe/Rome")
+ACTIVE_SOURCES = frozenset({"Consensus", "Exa"})
 STATUS_VALUES = {"completed", "partial", "failed"}
 SOURCE_STATUS_VALUES = {"completed", "failed", "not_run"}
 TOTAL_FIELDS = (
@@ -232,6 +233,10 @@ def validate_run(run: dict[str, Any]) -> dict[str, Any]:
             r"[A-Za-z][A-Za-z0-9 ._-]{1,39}", source_name
         ):
             raise MetricsError("run: invalid expected source name")
+    if set(expected_sources) != ACTIVE_SOURCES:
+        raise MetricsError(
+            "run: expected_sources must match the governed active source set"
+        )
 
     sources = run["sources"]
     if not isinstance(sources, list) or len(sources) != len(expected_sources):
@@ -383,6 +388,12 @@ def validate_run(run: dict[str, Any]) -> dict[str, Any]:
             raise MetricsError("run.totals: occurrences do not equal source occurrences")
         if unique_results > source_unique:
             raise MetricsError("run.totals: cross-source unique results exceed source totals")
+        if unique_results < max(
+            row["unique_results"] for row in normalised_sources
+        ):
+            raise MetricsError(
+                "run.totals: cross-source unique results fall below a source total"
+            )
         if any(row["candidate_hits"] > intake_candidates for row in normalised_sources):
             raise MetricsError("run.sources: candidate hits exceed total intake candidates")
         if source_candidate_hits < intake_candidates or source_exclusive > intake_candidates:
@@ -425,6 +436,7 @@ def safe_rate(numerator: int, denominator: int) -> float | None:
 def source_summary(runs: list[dict[str, Any]], start: date) -> list[dict[str, Any]]:
     expected: dict[str, int] = defaultdict(int)
     completed: dict[str, int] = defaultdict(int)
+    contribution_runs: dict[str, int] = defaultdict(int)
     totals: dict[str, dict[str, int]] = defaultdict(lambda: defaultdict(int))
     for run in runs:
         if parse_date(run["run_date"], "run.run_date") < start:
@@ -433,17 +445,19 @@ def source_summary(runs: list[dict[str, Any]], start: date) -> list[dict[str, An
         for name in run["expected_sources"]:
             expected[name] += 1
             row = by_name[name]
+            totals[name]["queries_completed"] += row["queries_completed"]
             if row["status"] != "completed":
                 continue
             completed[name] += 1
-            for field in (
-                "queries_completed",
-                "occurrences_returned",
-                "unique_results",
-                "candidate_hits",
-                "exclusive_candidates",
-            ):
-                totals[name][field] += row[field]
+            if run["status"] == "completed":
+                contribution_runs[name] += 1
+                for field in (
+                    "occurrences_returned",
+                    "unique_results",
+                    "candidate_hits",
+                    "exclusive_candidates",
+                ):
+                    totals[name][field] += row[field]
     return [
         {
             "source": name,
@@ -451,10 +465,18 @@ def source_summary(runs: list[dict[str, Any]], start: date) -> list[dict[str, An
             "completedRuns": completed[name],
             "completionRate": safe_rate(completed[name], expected[name]),
             "queriesCompleted": totals[name]["queries_completed"],
-            "occurrencesReturned": totals[name]["occurrences_returned"],
-            "uniqueResults": totals[name]["unique_results"],
-            "candidateHits": totals[name]["candidate_hits"],
-            "exclusiveCandidates": totals[name]["exclusive_candidates"],
+            "occurrencesReturned": (
+                totals[name]["occurrences_returned"] if contribution_runs[name] else None
+            ),
+            "uniqueResults": (
+                totals[name]["unique_results"] if contribution_runs[name] else None
+            ),
+            "candidateHits": (
+                totals[name]["candidate_hits"] if contribution_runs[name] else None
+            ),
+            "exclusiveCandidates": (
+                totals[name]["exclusive_candidates"] if contribution_runs[name] else None
+            ),
         }
         for name in sorted(expected)
     ]
@@ -549,7 +571,9 @@ def build_public_payload(
         for row in run["sources"]
     )
 
-    def summed(runs_subset: list[dict[str, Any]], field: str) -> int:
+    def summed(runs_subset: list[dict[str, Any]], field: str) -> int | None:
+        if not runs_subset:
+            return None
         return sum(run["totals"][field] for run in runs_subset)
 
     summary = {
@@ -596,7 +620,7 @@ def build_public_payload(
             "occurrencesReturned": "All result occurrences returned across source queries; repeats are included.",
             "uniqueResults": "Results remaining after within-run identifier and title/year reconciliation.",
             "knownMatches": "Unique results already represented in the registry or an earlier intake issue.",
-            "newCandidates": "Novel records forwarded to the human intake queue with a plausible or uncertain assessment.",
+            "newCandidates": "Records not already known that were forwarded to the human intake queue with a plausible or uncertain assessment.",
             "candidateRate": "New intake candidates divided by unique results in a completed run; this is not screening yield.",
             "sourceCompletionRate": "Completed expected source runs divided by all expected source runs; failures are not treated as zero-result searches.",
         },
@@ -750,7 +774,25 @@ def validate_public_payload(payload: dict[str, Any]) -> dict[str, Any]:
     sources = payload["sources"]
     if not isinstance(sources, list):
         raise MetricsError("public statistics: sources must be a list")
+    if normalised_daily:
+        source_window_start = (
+            parse_date(normalised_daily[-1]["date"], "daily date")
+            - timedelta(days=29)
+        )
+        source_window_rows = [
+            row
+            for row in normalised_daily
+            if parse_date(row["date"], "daily date") >= source_window_start
+        ]
+        has_completed_day = any(
+            daily_row["status"] == "completed" for daily_row in source_window_rows
+        )
+    else:
+        source_window_rows = []
+        has_completed_day = False
     source_names = []
+    source_volume_rows = []
+    source_completed_runs = 0
     for index, row in enumerate(sources):
         label = f"public statistics.sources[{index}]"
         if not isinstance(row, dict):
@@ -758,23 +800,86 @@ def validate_public_payload(payload: dict[str, Any]) -> dict[str, Any]:
         require_exact_fields(row, PUBLIC_SOURCE_FIELDS, label)
         if not isinstance(row["source"], str) or not row["source"].strip():
             raise MetricsError(f"{label}: invalid source")
+        if row["source"] not in ACTIVE_SOURCES:
+            raise MetricsError(f"{label}: source is not in the governed active set")
         source_names.append(row["source"])
         expected_runs = count(row["expectedRuns"], f"{label}.expectedRuns")
         completed_runs = count(row["completedRuns"], f"{label}.completedRuns")
+        if expected_runs != len(source_window_rows):
+            raise MetricsError(f"{label}: expected runs disagree with daily rows")
         if completed_runs > expected_runs:
             raise MetricsError(f"{label}: completed runs exceed expected runs")
+        source_completed_runs += completed_runs
         if row["completionRate"] != safe_rate(completed_runs, expected_runs):
             raise MetricsError(f"{label}: completion rate does not reconcile")
-        for field in (
-            "queriesCompleted",
-            "occurrencesReturned",
-            "uniqueResults",
-            "candidateHits",
-            "exclusiveCandidates",
+        count(row["queriesCompleted"], f"{label}.queriesCompleted")
+        volume_values = {
+            field: count_or_none(row[field], f"{label}.{field}")
+            for field in (
+                "occurrencesReturned",
+                "uniqueResults",
+                "candidateHits",
+                "exclusiveCandidates",
+            )
+        }
+        if has_completed_day and any(
+            value is None for value in volume_values.values()
         ):
-            count(row[field], f"{label}.{field}")
+            raise MetricsError(f"{label}: completed-window source volumes cannot be null")
+        if not has_completed_day and any(
+            value is not None for value in volume_values.values()
+        ):
+            raise MetricsError(f"{label}: source volumes require a completed day")
+        if has_completed_day:
+            source_volume_rows.append(volume_values)
+            if volume_values["uniqueResults"] > volume_values["occurrencesReturned"]:
+                raise MetricsError(f"{label}: unique results exceed occurrences")
+            if volume_values["exclusiveCandidates"] > volume_values["candidateHits"]:
+                raise MetricsError(f"{label}: exclusive candidates exceed candidate hits")
     if source_names != sorted(set(source_names)):
         raise MetricsError("public statistics: sources must be unique and sorted")
+    if normalised_daily and set(source_names) != ACTIVE_SOURCES:
+        raise MetricsError("public statistics: source summary must contain the active set")
+    if not normalised_daily and source_names:
+        raise MetricsError("public statistics: an empty series cannot contain source summaries")
+    expected_completed_sources = sum(
+        row["completedSourceCount"] for row in source_window_rows
+    )
+    if source_completed_runs != expected_completed_sources:
+        raise MetricsError(
+            "public statistics: source completion totals disagree with daily rows"
+        )
+    if has_completed_day:
+        completed_days = [
+            row for row in source_window_rows if row["status"] == "completed"
+        ]
+        global_occurrences = sum(row["occurrencesReturned"] for row in completed_days)
+        global_unique = sum(row["uniqueResults"] for row in completed_days)
+        global_candidates = sum(row["intakeCandidates"] for row in completed_days)
+        if (
+            sum(row["occurrencesReturned"] for row in source_volume_rows)
+            != global_occurrences
+        ):
+            raise MetricsError(
+                "public statistics: source occurrences disagree with daily rows"
+            )
+        source_unique = [row["uniqueResults"] for row in source_volume_rows]
+        if global_unique < max(source_unique) or global_unique > sum(source_unique):
+            raise MetricsError("public statistics: source unique totals disagree with daily rows")
+        source_candidate_hits = [
+            row["candidateHits"] for row in source_volume_rows
+        ]
+        source_exclusive = sum(
+            row["exclusiveCandidates"] for row in source_volume_rows
+        )
+        if (
+            any(value > global_candidates for value in source_candidate_hits)
+            or sum(source_candidate_hits) < global_candidates
+            or source_exclusive > global_candidates
+        ):
+            raise MetricsError(
+                "public statistics: source candidate totals disagree with daily rows"
+            )
 
     summary = payload["summary"]
     if not isinstance(summary, dict):
@@ -808,7 +913,9 @@ def build_public_payload_from_daily(daily: list[dict[str, Any]]) -> dict[str, An
     ]
     thirty_complete = [row for row in thirty_rows if row["status"] == "completed"]
 
-    def total(rows: list[dict[str, Any]], field: str) -> int:
+    def total(rows: list[dict[str, Any]], field: str) -> int | None:
+        if not rows:
+            return None
         return sum(row[field] for row in rows)
 
     expected_source_runs = sum(row["expectedSourceCount"] for row in thirty_rows)

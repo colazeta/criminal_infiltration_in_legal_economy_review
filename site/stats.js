@@ -58,6 +58,14 @@ function setText(selector, value) {
   document.querySelector(selector).textContent = String(value);
 }
 
+function calendarWindow(rows, days) {
+  if (!rows.length) return [];
+  const millisecondsPerDay = 24 * 60 * 60 * 1000;
+  const anchor = Date.parse(`${rows[rows.length - 1].date}T00:00:00Z`);
+  const threshold = anchor - (days - 1) * millisecondsPerDay;
+  return rows.filter((row) => Date.parse(`${row.date}T00:00:00Z`) >= threshold);
+}
+
 function populateKpis(payload) {
   setText("#new-candidates-7", displayNumber(payload.summary.last7Days.newCandidates));
   setText("#all-time-candidates", displayNumber(payload.summary.allTime.newCandidates));
@@ -97,8 +105,7 @@ function intakeCell(row) {
 }
 
 function renderDailyTable(rows) {
-  const rendered = [...rows]
-    .slice(-30)
+  const rendered = [...calendarWindow(rows, 30)]
     .reverse()
     .map((row) => {
       const tr = makeStatsElement("tr");
@@ -123,7 +130,7 @@ function renderDailyTable(rows) {
 }
 
 function renderChart(rows) {
-  const windowRows = rows.slice(-30);
+  const windowRows = calendarWindow(rows, 30);
   const completed = windowRows.filter((row) => row.status === "completed");
   statsElements.chart.replaceChildren();
   if (completed.length < 8) {

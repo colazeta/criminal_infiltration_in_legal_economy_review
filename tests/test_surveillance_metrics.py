@@ -160,10 +160,31 @@ class SurveillanceRunTests(unittest.TestCase):
         with self.assertRaisesRegex(MetricsError, "requires a planned query"):
             validate_run(run)
 
+    def test_source_set_must_match_governance(self) -> None:
+        run = completed_run()
+        run["expected_sources"][1] = "Google Scholar"
+        run["sources"][1]["source"] = "Google Scholar"
+        with self.assertRaisesRegex(MetricsError, "governed active source set"):
+            validate_run(run)
+
     def test_unique_result_disposition_must_reconcile(self) -> None:
         run = completed_run()
         run["totals"]["known_matches"] += 1
         with self.assertRaisesRegex(MetricsError, "disposition"):
+            validate_run(run)
+
+    def test_cross_source_union_cannot_be_smaller_than_a_source(self) -> None:
+        run = completed_run()
+        run["totals"].update(
+            {
+                "unique_results": 7,
+                "known_matches": 3,
+                "intake_candidates": 3,
+                "not_forwarded": 1,
+                "unresolved_identity": 0,
+            }
+        )
+        with self.assertRaisesRegex(MetricsError, "fall below a source total"):
             validate_run(run)
 
     def test_incomplete_run_cannot_report_aggregate_zeroes(self) -> None:
@@ -211,6 +232,41 @@ class PublicStatisticsTests(unittest.TestCase):
         self.assertIsNone(row["candidateRate"])
         self.assertIsNone(row["knownOverlapRate"])
         self.assertIsNone(row["deduplicationShare"])
+        self.assertEqual(payload["summary"]["last7Days"]["newCandidates"], 0)
+        self.assertEqual(payload["summary"]["allTime"]["newCandidates"], 0)
+
+    def test_windows_without_completed_runs_remain_null(self) -> None:
+        payload = build_public_payload([partial_run()], 30, REPOSITORY)
+        self.assertIsNone(payload["summary"]["last7Days"]["uniqueResults"])
+        self.assertIsNone(payload["summary"]["last30Days"]["newCandidates"])
+        self.assertIsNone(payload["summary"]["allTime"]["newCandidates"])
+        consensus = next(
+            row for row in payload["sources"] if row["source"] == "Consensus"
+        )
+        exa = next(row for row in payload["sources"] if row["source"] == "Exa")
+        self.assertEqual(consensus["completedRuns"], 1)
+        self.assertEqual(consensus["queriesCompleted"], 7)
+        self.assertEqual(exa["queriesCompleted"], 1)
+        self.assertIsNone(consensus["occurrencesReturned"])
+        self.assertIsNone(exa["occurrencesReturned"])
+
+    def test_old_completed_run_does_not_fill_current_window(self) -> None:
+        payload = build_public_payload(
+            [completed_run("2026-07-01"), partial_run("2026-08-31")],
+            30,
+            REPOSITORY,
+        )
+        self.assertIsNone(payload["summary"]["last30Days"]["uniqueResults"])
+        self.assertEqual(payload["summary"]["allTime"]["newCandidates"], 3)
+        self.assertTrue(
+            all(row["occurrencesReturned"] is None for row in payload["sources"])
+        )
+
+    def test_empty_series_has_no_measured_volume(self) -> None:
+        payload = build_public_payload([], 30, REPOSITORY)
+        self.assertIsNone(payload["summary"]["last7Days"]["uniqueResults"])
+        self.assertIsNone(payload["summary"]["last30Days"]["newCandidates"])
+        self.assertIsNone(payload["summary"]["allTime"]["newCandidates"])
 
     def test_duplicate_day_fails_closed(self) -> None:
         first = completed_run()
@@ -232,6 +288,12 @@ class PublicStatisticsTests(unittest.TestCase):
         payload = build_public_payload([completed_run()], 30, REPOSITORY)
         payload["summary"]["last7Days"]["newCandidates"] = 99
         with self.assertRaisesRegex(MetricsError, "summary disagrees"):
+            validate_public_payload(payload)
+
+    def test_public_source_label_is_governed(self) -> None:
+        payload = build_public_payload([completed_run()], 30, REPOSITORY)
+        payload["sources"][0]["source"] = "Mafia Firms"
+        with self.assertRaisesRegex(MetricsError, "governed active set"):
             validate_public_payload(payload)
 
 

@@ -53,7 +53,9 @@ Lo stato complessivo è:
 
 Solo una giornata `completed` alimenta i conteggi di volume e novità. In una
 giornata parziale o fallita, i totali sono `null`: non vengono trasformati in
-zero.
+zero. Se una finestra di 7 o 30 giorni non contiene neppure una giornata
+completa, anche i relativi totali sono `null`; diventano zero soltanto quando
+almeno una ricerca completa ha misurato davvero zero.
 
 ## Le tre metriche principali
 
@@ -80,7 +82,7 @@ stessa cosa.
 | **Non inoltrati** | Risultati non già noti che non hanno superato il triage di intake; non sono esclusioni scientifiche e non alimentano il tasso di nuovi candidati |
 | **Identità irrisolta** | Record che non possono essere confrontati con sufficiente affidabilità |
 
-Per una giornata completa devono valere due riconciliazioni:
+Per una giornata completa deve valere questa riconciliazione:
 
 ```text
 risultati unici = già noti + nuovi candidati + non inoltrati + identità irrisolta
@@ -91,7 +93,10 @@ metadati. Sono indicatori di cautela, non paper aggiuntivi.
 
 ## Confronto tra le fonti
 
-Per Consensus, Exa e ogni futura fonte autorizzata vengono registrati:
+Il contratto corrente accetta esattamente le due fonti attive dichiarate nella
+governance: Consensus ed Exa. Un nome diverso rende invalido il run; una futura
+fonte richiede prima una modifica revisionata di governance, schema e
+validazione. Per ciascuna fonte vengono registrati:
 
 - query pianificate e completate;
 - occorrenze restituite;
@@ -103,7 +108,9 @@ Per Consensus, Exa e ogni futura fonte autorizzata vengono registrati:
 I candidati intercettati da più fonti possono comparire in più righe. Per questo
 la somma per fonte non coincide necessariamente con il totale dei candidati
 unici. I candidati esclusivi misurano invece il contributo marginale della
-singola fonte.
+singola fonte. Nella tabella pubblica, esecuzioni e query descrivono la salute
+tecnica della fonte anche nelle giornate parziali; occorrenze, risultati e
+candidati vengono invece sommati soltanto per giornate interamente complete.
 
 ## Finestre temporali
 

@@ -78,9 +78,9 @@
       "required": ["completedRuns", "uniqueResults", "knownMatches", "newCandidates"],
       "properties": {
         "completedRuns": {"$ref": "#/$defs/count"},
-        "uniqueResults": {"$ref": "#/$defs/count"},
-        "knownMatches": {"$ref": "#/$defs/count"},
-        "newCandidates": {"$ref": "#/$defs/count"}
+        "uniqueResults": {"$ref": "#/$defs/nullableCount"},
+        "knownMatches": {"$ref": "#/$defs/nullableCount"},
+        "newCandidates": {"$ref": "#/$defs/nullableCount"}
       }
     },
     "thirtyDaySummary": {
@@ -93,17 +93,17 @@
         "partialRuns": {"$ref": "#/$defs/count"},
         "failedRuns": {"$ref": "#/$defs/count"},
         "sourceCompletionRate": {"$ref": "#/$defs/nullableRate"},
-        "uniqueResults": {"$ref": "#/$defs/count"},
-        "knownMatches": {"$ref": "#/$defs/count"},
-        "newCandidates": {"$ref": "#/$defs/count"},
-        "metadataConflicts": {"$ref": "#/$defs/count"}
+        "uniqueResults": {"$ref": "#/$defs/nullableCount"},
+        "knownMatches": {"$ref": "#/$defs/nullableCount"},
+        "newCandidates": {"$ref": "#/$defs/nullableCount"},
+        "metadataConflicts": {"$ref": "#/$defs/nullableCount"}
       }
     },
     "allTimeSummary": {
       "type": "object",
       "additionalProperties": false,
       "required": ["newCandidates"],
-      "properties": {"newCandidates": {"$ref": "#/$defs/count"}}
+      "properties": {"newCandidates": {"$ref": "#/$defs/nullableCount"}}
     },
     "definitions": {
       "type": "object",
@@ -148,15 +148,15 @@
       "additionalProperties": false,
       "required": ["source", "expectedRuns", "completedRuns", "completionRate", "queriesCompleted", "occurrencesReturned", "uniqueResults", "candidateHits", "exclusiveCandidates"],
       "properties": {
-        "source": {"type": "string", "minLength": 1, "maxLength": 40},
+        "source": {"enum": ["Consensus", "Exa"]},
         "expectedRuns": {"$ref": "#/$defs/count"},
         "completedRuns": {"$ref": "#/$defs/count"},
         "completionRate": {"$ref": "#/$defs/nullableRate"},
         "queriesCompleted": {"$ref": "#/$defs/count"},
-        "occurrencesReturned": {"$ref": "#/$defs/count"},
-        "uniqueResults": {"$ref": "#/$defs/count"},
-        "candidateHits": {"$ref": "#/$defs/count"},
-        "exclusiveCandidates": {"$ref": "#/$defs/count"}
+        "occurrencesReturned": {"$ref": "#/$defs/nullableCount"},
+        "uniqueResults": {"$ref": "#/$defs/nullableCount"},
+        "candidateHits": {"$ref": "#/$defs/nullableCount"},
+        "exclusiveCandidates": {"$ref": "#/$defs/nullableCount"}
       }
     }
   }
