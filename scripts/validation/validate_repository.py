@@ -330,9 +330,13 @@ def check_public_boundary() -> None:
     bindings = wrangler.get("durable_objects", {}).get("bindings", [])
     if not any(row.get("name") == "SUBMISSIONS" for row in bindings):
         fail("Wrangler lacks atomic submission coordination")
-    exported = wrangler.get("exports", {}).get("SubmissionCoordinator", {})
-    if exported.get("storage") != "sqlite":
-        fail("SubmissionCoordinator must use durable SQLite storage")
+    migrations = wrangler.get("migrations", [])
+    if not any(
+        row.get("tag") == "v1"
+        and "SubmissionCoordinator" in row.get("new_sqlite_classes", [])
+        for row in migrations
+    ):
+        fail("SubmissionCoordinator lacks its initial SQLite migration")
     gitignore = (ROOT / ".gitignore").read_text(encoding="utf-8")
     for ignored in ("curator-app/wrangler.jsonc", "curator-app/.dev.vars"):
         if ignored not in gitignore:

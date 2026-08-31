@@ -410,6 +410,20 @@ class QueueIssueReconciliationTests(unittest.TestCase):
         self, api_mock
     ) -> None:
         row = materialise(ROOT)[0]
+        current_body = """<!-- curator-candidate:E0-D002 -->
+
+## Candidate record
+
+Verifier-corrected metadata that is not yet in the queue table.
+
+## Curator action
+
+Old action link.
+
+## Verifier notes
+
+Preserve this manually authored note.
+"""
         writes = reconcile_issue(
             "colazeta/criminal_infiltration_in_legal_economy_review",
             "token",
@@ -421,7 +435,7 @@ class QueueIssueReconciliationTests(unittest.TestCase):
                     {"name": "curation:queue"},
                     {"name": "stage:manual-review"},
                 ],
-                "body": "<!-- curator-candidate:E0-D002 -->\n\nOld action link.",
+                "body": current_body,
             },
             {},
         )
@@ -430,6 +444,9 @@ class QueueIssueReconciliationTests(unittest.TestCase):
         self.assertEqual("PATCH", call.args[2])
         self.assertIn("curate.html?candidate=", call.args[4]["body"])
         self.assertIn("temporary fallback", " ".join(call.args[4]["body"].split()))
+        self.assertIn("Verifier-corrected metadata", call.args[4]["body"])
+        self.assertIn("Preserve this manually authored note", call.args[4]["body"])
+        self.assertNotIn("Old action link", call.args[4]["body"])
 
     @patch("scripts.curation.materialize_queue_issues.api_request")
     @patch("scripts.curation.materialize_queue_issues.paginated", return_value=[])

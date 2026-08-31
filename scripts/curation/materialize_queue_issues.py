@@ -12,6 +12,7 @@ import argparse
 import csv
 import json
 import os
+import re
 import time
 from pathlib import Path
 from urllib.error import HTTPError
@@ -175,6 +176,33 @@ def source_links(value: str) -> str:
     return "\n".join(rendered)
 
 
+def curator_action_section(repository: str, row: dict[str, str]) -> str:
+    return f"""## Curator action
+
+[Open this candidate in the curator workspace]({curator_site_url(repository, row['candidate_id'])})
+
+The workspace authenticates the curator through the repository GitHub App and
+submits an attributed instruction. [Use the GitHub issue form as a temporary
+fallback]({decision_form_url(repository, row['candidate_id'])}). Either route
+prepares a reviewable pull request; neither can publish the work or merge its
+own change."""
+
+
+def replace_curator_action(
+    body: str, repository: str, row: dict[str, str]
+) -> str:
+    existing = str(body or "").rstrip()
+    replacement = curator_action_section(repository, row)
+    match = re.search(
+        r"(?ms)^## Curator action\s*$.*?(?=^##\s|\Z)", existing
+    )
+    if match:
+        before = existing[: match.start()].rstrip()
+        after = existing[match.end() :].lstrip()
+        return "\n\n".join(part for part in (before, replacement, after) if part) + "\n"
+    return f"{existing}\n\n{replacement}\n" if existing else f"{replacement}\n"
+
+
 def issue_body(repository: str, row: dict[str, str]) -> str:
     doi = row["doi"] or "Not recorded"
     if row["doi"]:
@@ -231,15 +259,7 @@ approval. Review the available evidence under the current four-part test."""
 
 {provenance}
 
-## Curator action
-
-[Open this candidate in the curator workspace]({curator_site_url(repository, row['candidate_id'])})
-
-The workspace authenticates the curator through the repository GitHub App and
-submits an attributed instruction. [Use the GitHub issue form as a temporary
-fallback]({decision_form_url(repository, row['candidate_id'])}). Either route
-prepares a reviewable pull request; neither can publish the work or merge its
-own change.
+{curator_action_section(repository, row)}
 """
 
 
@@ -339,8 +359,9 @@ def reconcile_issue(
     if not isinstance(number, int):
         raise GitHubError(f"GitHub issue number is missing for {row['candidate_id']}")
     writes = 0
-    desired_body = issue_body(repository, row)
-    if str(issue.get("body") or "") != desired_body:
+    current_body = str(issue.get("body") or "")
+    desired_body = replace_curator_action(current_body, repository, row)
+    if current_body != desired_body:
         api_request(
             repository,
             token,

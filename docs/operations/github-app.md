@@ -48,6 +48,8 @@ l'issue attribuita a `colazeta`, requisito controllato anche da
 ## Configurazione del Worker
 
 Il backend è scritto per Cloudflare Workers e non usa dipendenze runtime.
+Il file Wrangler include la migrazione SQLite iniziale `v1` del coordinatore;
+non rimuoverla o rinominarla dopo il primo deploy.
 
 1. Copiare `curator-app/wrangler.example.jsonc` in
    `curator-app/wrangler.jsonc`.

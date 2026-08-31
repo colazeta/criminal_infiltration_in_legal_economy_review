@@ -18,12 +18,14 @@
       }
     ]
   },
-  "exports": {
-    "SubmissionCoordinator": {
-      "type": "durable-object",
-      "storage": "sqlite"
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": [
+        "SubmissionCoordinator"
+      ]
     }
-  },
+  ],
   "vars": {
     "GITHUB_REPOSITORY": "colazeta/criminal_infiltration_in_legal_economy_review",
     "GITHUB_REPOSITORY_ID": "1224850188",
