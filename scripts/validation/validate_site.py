@@ -17,6 +17,7 @@ SITE = ROOT / "site"
 sys.path.insert(0, str(ROOT / "scripts"))
 
 from build_archive import build_payload  # noqa: E402
+from curation.build_curator_stats import build_payload as build_curator_payload  # noqa: E402
 from metrics.surveillance import MetricsError, validate_public_payload  # noqa: E402
 
 
@@ -117,7 +118,20 @@ def validate_pages() -> None:
     if missing:
         fail(f"index.html missing interface ID(s): {', '.join(missing)}")
     curator_ids = set(parsed[SITE / "curate.html"].ids)
-    missing = sorted({"curator-workflow", "curator-actions"} - curator_ids)
+    missing = sorted(
+        {
+            "curator-workflow",
+            "curator-actions",
+            "queue-total",
+            "queue-metadata",
+            "queue-manual",
+            "queue-abstract",
+            "queue-legacy-rejected",
+            "queue-origin-summary",
+            "last-run-status",
+        }
+        - curator_ids
+    )
     if missing:
         fail(f"curate.html missing interface ID(s): {', '.join(missing)}")
     stats_ids = set(parsed[SITE / "stats.html"].ids)
@@ -166,6 +180,56 @@ def validate_statistics() -> int:
     return len(payload["daily"])
 
 
+def validate_curator_statistics() -> dict[str, object]:
+    payload = json.loads(
+        (SITE / "data/curator-stats.json").read_text(encoding="utf-8")
+    )
+    if payload != build_curator_payload(ROOT):
+        fail("curator-stats.json is stale relative to the governed queue")
+    expected = {
+        "schemaVersion",
+        "totalMaterialised",
+        "open",
+        "completed",
+        "actionCount",
+        "byStage",
+        "openByOrigin",
+    }
+    if not isinstance(payload, dict) or set(payload) != expected:
+        fail("curator-stats.json must use the closed aggregate field set")
+    integer_fields = (
+        payload["totalMaterialised"],
+        payload["open"],
+        payload["completed"],
+        payload["actionCount"],
+    )
+    if any(type(value) is not int or value < 0 for value in integer_fields):
+        fail("curator-stats.json top-level counts must be non-negative integers")
+    by_stage = payload["byStage"]
+    by_origin = payload["openByOrigin"]
+    if not isinstance(by_stage, dict) or set(by_stage) != {
+        "metadataFix",
+        "manualReview",
+        "abstractReview",
+        "legacyRejectionReview",
+    }:
+        fail("curator-stats.json has an invalid stage aggregate")
+    if not isinstance(by_origin, dict) or set(by_origin) != {"legacy", "daily"}:
+        fail("curator-stats.json has an invalid origin aggregate")
+    if any(
+        type(value) is not int or value < 0
+        for value in (*by_stage.values(), *by_origin.values())
+    ):
+        fail("curator-stats.json nested counts must be non-negative integers")
+    if sum(by_stage.values()) != payload["open"]:
+        fail("curator-stats.json stage counts do not sum to open")
+    if sum(by_origin.values()) != payload["open"]:
+        fail("curator-stats.json origin counts do not sum to open")
+    if payload["open"] + payload["completed"] != payload["totalMaterialised"]:
+        fail("curator-stats.json open/completed counts do not reconcile")
+    return payload
+
+
 def validate_assets() -> None:
     javascript = (SITE / "app.js").read_text(encoding="utf-8")
     if re.search(r"\.innerHTML\s*=|insertAdjacentHTML", javascript):
@@ -212,9 +276,38 @@ def validate_assets() -> None:
         "personal access token",
         "curation.yml",
         "APPLY",
+        "candidate_decision.yml",
+        "curation%3Aqueue",
+        "Una decisione modifica la coda, non pubblica il paper",
     ):
         if phrase not in curator:
             fail(f"curate.html missing curator guidance: {phrase}")
+    if re.search(r"E0(?:R1)?-[A-Z]\d{3}", curator):
+        fail("curate.html must not expose a candidate record")
+
+    curator_javascript = (SITE / "curator.js").read_text(encoding="utf-8")
+    if re.search(r"\.innerHTML\s*=|insertAdjacentHTML", curator_javascript):
+        fail("curator.js must not inject data as HTML")
+    for required in (
+        'fetch("./data/curator-stats.json")',
+        'fetch("./data/research-stats.json")',
+        "textContent",
+        "legacyRejectionReview",
+        "openByOrigin",
+        "lastRunStatus",
+    ):
+        if required not in curator_javascript:
+            fail(f"curator.js missing safe aggregate rendering: {required}")
+    for forbidden in (
+        "data/curation",
+        "review_queue",
+        "candidate_id",
+        "title",
+        "doi",
+        "authors",
+    ):
+        if forbidden in curator_javascript:
+            fail(f"curator.js crosses the public candidate boundary: {forbidden}")
 
     statistics = (SITE / "stats.html").read_text(encoding="utf-8")
     statistics_flat = " ".join(statistics.split()).lower()
@@ -246,10 +339,12 @@ def main() -> None:
     validate_pages()
     count = validate_payload()
     metric_days = validate_statistics()
+    curator_stats = validate_curator_statistics()
     validate_assets()
     print(
         "[OK] Static site validation passed: "
-        f"{count} public record(s), {metric_days} daily metric row(s)."
+        f"{count} public record(s), {metric_days} daily metric row(s), "
+        f"{curator_stats['open']} open curator item(s)."
     )
 
 

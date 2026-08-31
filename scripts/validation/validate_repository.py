@@ -6,6 +6,7 @@ from __future__ import annotations
 import csv
 import json
 import re
+from collections import Counter
 from pathlib import Path
 
 
@@ -38,7 +39,11 @@ REQUIRED_FILES = (
     "docs/operations/github-pages.md",
     "docs/history/e0-pilot.md",
     "data/registry/README.md",
+    "data/curation/README.md",
+    "data/curation/review_queue.csv",
+    "data/curation/actions.csv",
     "schema/public-archive.schema.json",
+    "schema/curator-stats.schema.json",
     "schema/surveillance-run.schema.json",
     "schema/research-stats.schema.json",
     "scripts/build_archive.py",
@@ -47,6 +52,11 @@ REQUIRED_FILES = (
     "scripts/metrics/surveillance.py",
     "scripts/report_saturation.py",
     "scripts/curation/apply_action.py",
+    "scripts/curation/build_curator_stats.py",
+    "scripts/curation/build_legacy_queue.py",
+    "scripts/curation/import_intake_issue.py",
+    "scripts/curation/apply_candidate_decision.py",
+    "scripts/curation/materialize_queue_issues.py",
     "scripts/validation/validate_archive.py",
     "scripts/validation/validate_site.py",
     "site/index.html",
@@ -54,10 +64,16 @@ REQUIRED_FILES = (
     "site/stats.html",
     "site/app.js",
     "site/stats.js",
+    "site/curator.js",
     "site/styles.css",
     "site/data/research-stats.json",
+    "site/data/curator-stats.json",
     ".github/workflows/archive.yml",
     ".github/workflows/curation.yml",
+    ".github/workflows/candidate-curation.yml",
+    ".github/workflows/intake-to-curation.yml",
+    ".github/workflows/materialize-curation.yml",
+    ".github/ISSUE_TEMPLATE/candidate_decision.yml",
 )
 
 REQUIRED_HEADERS = {
@@ -191,7 +207,14 @@ def check_registry_headers() -> None:
 
 def check_public_boundary() -> None:
     builder = (ROOT / "scripts/build_archive.py").read_text(encoding="utf-8")
-    for forbidden in ("data/raw", "data/legacy", "candidate_outcomes", "promotion_audit"):
+    for forbidden in (
+        "data/raw",
+        "data/legacy",
+        "data/curation",
+        "candidate_outcomes",
+        "promotion_audit",
+        "review_queue",
+    ):
         if forbidden in builder:
             fail(f"Public builder refers to non-registry source: {forbidden}")
     for name in (
@@ -212,11 +235,179 @@ def check_public_boundary() -> None:
     for forbidden in (
         "data/registry",
         "data/legacy",
+        "data/curation",
         "candidate_outcomes",
         "screening_decisions.csv",
     ):
         if forbidden in metrics_builder:
             fail(f"Daily metrics builder crosses its aggregate boundary: {forbidden}")
+
+    public_curator = (ROOT / "site/curator.js").read_text(encoding="utf-8")
+    public_page = (ROOT / "site/curate.html").read_text(encoding="utf-8")
+    for forbidden in (
+        "data/curation",
+        "review_queue.csv",
+        "actions.csv",
+        "raw.githubusercontent.com",
+    ):
+        if forbidden in public_curator or forbidden in public_page:
+            fail(f"Public curator surface crosses the candidate boundary: {forbidden}")
+    if re.search(r"E0(?:R1)?-[A-Z]\d{3}", public_page + public_curator):
+        fail("Public curator surface embeds a candidate identifier")
+
+
+def check_curator_queue() -> None:
+    with (ROOT / "data/curation/review_queue.csv").open(
+        newline="", encoding="utf-8-sig"
+    ) as handle:
+        queue = list(csv.DictReader(handle))
+    required = {
+        "candidate_id",
+        "title",
+        "doi",
+        "authors",
+        "year",
+        "venue",
+        "work_type",
+        "source",
+        "source_links",
+        "other_identifiers",
+        "source_query_id",
+        "verification_status",
+        "intake_assessment",
+        "intake_reason",
+        "possible_duplicate",
+        "metadata_conflict",
+        "required_human_action",
+        "origin",
+        "review_stage",
+        "current_status",
+        "current_decision",
+        "exclusion_reason_code",
+        "topic_code",
+        "duplicate_target_id",
+        "last_action_id",
+        "provenance",
+    }
+    headers = set(queue[0]) if queue else set()
+    if required - headers:
+        fail(
+            "review_queue.csv missing column(s): "
+            + ", ".join(sorted(required - headers))
+        )
+    candidate_ids = {row["candidate_id"] for row in queue}
+    if len(queue) < 55 or "" in candidate_ids or len(candidate_ids) != len(queue):
+        fail("Curator queue must contain at least 55 unique materialised candidates")
+    legacy = [row for row in queue if row["origin"].startswith("legacy_")]
+    daily = [row for row in queue if row["origin"] == "daily_surveillance"]
+    if len(legacy) + len(daily) != len(queue):
+        fail("Curator queue contains an unknown candidate origin")
+    if len(legacy) != 55:
+        fail("Curator queue must preserve exactly 55 audited legacy candidates")
+    expected = Counter(
+        {
+            "metadata_fix": 2,
+            "manual_review": 9,
+            "abstract_full_text_review": 25,
+            "legacy_rejection_review": 19,
+        }
+    )
+    if Counter(row["review_stage"] for row in legacy) != expected:
+        fail("Legacy curator stage counts differ from the audited materialisation")
+    if {"E0-D001", "E0R1-C002"} & candidate_ids:
+        fail("Already imported works returned to the candidate queue")
+    for row in daily:
+        if not re.fullmatch(
+            r"CAND-ACADEMIC-\d{4}-\d{2}-\d{2}-\d{3}", row["candidate_id"]
+        ):
+            fail(f"Daily curator candidate has invalid ID: {row['candidate_id']}")
+        if row["review_stage"] not in {"metadata_fix", "abstract_full_text_review"}:
+            fail(f"Daily candidate has invalid review stage: {row['candidate_id']}")
+        if row["verification_status"] not in {
+            "metadata_verified",
+            "metadata_partial",
+            "identifier_unresolved",
+        }:
+            fail(f"Daily candidate has invalid verification status: {row['candidate_id']}")
+        if row["intake_assessment"] not in {
+            "plausible_core",
+            "plausible_contextual",
+            "uncertain",
+        }:
+            fail(f"Daily candidate has invalid intake assessment: {row['candidate_id']}")
+        for field in ("intake_reason", "required_human_action", "source_links"):
+            if not row[field].strip():
+                fail(f"Daily candidate lacks {field}: {row['candidate_id']}")
+        if not re.fullmatch(
+            r"github-issue:#\d+;batch:ACADEMIC-\d{4}-\d{2}-\d{2}",
+            row["provenance"],
+        ):
+            fail(f"Daily candidate has invalid provenance: {row['candidate_id']}")
+
+    allowed_statuses = {
+        "pending",
+        "screened_eligible_core",
+        "screened_eligible_contextual",
+        "needs_full_text",
+        "screened_not_eligible",
+        "duplicate_confirmed",
+        "screened_not_academic",
+        "screened_not_retrievable",
+    }
+    if any(row["current_status"] not in allowed_statuses for row in queue):
+        fail("Curator queue contains an invalid current status")
+
+    with (ROOT / "data/curation/actions.csv").open(
+        newline="", encoding="utf-8-sig"
+    ) as handle:
+        reader = csv.DictReader(handle)
+        action_headers = set(reader.fieldnames or [])
+        actions = list(reader)
+    required_actions = {
+        "action_id",
+        "candidate_id",
+        "github_issue_number",
+        "decision",
+        "exclusion_reason_code",
+        "topic_code",
+        "duplicate_target_id",
+        "actor",
+        "previous_status",
+        "new_status",
+    }
+    if required_actions - action_headers:
+        fail(
+            "actions.csv missing column(s): "
+            + ", ".join(sorted(required_actions - action_headers))
+        )
+    if len({row["action_id"] for row in actions}) != len(actions):
+        fail("Curator action IDs must be unique")
+    if len({row["github_issue_number"] for row in actions}) != len(actions):
+        fail("One GitHub decision issue may create only one curator action")
+    if any(row["candidate_id"] not in candidate_ids for row in actions):
+        fail("Curator action refers to an unknown candidate")
+    action_index = {row["action_id"]: row for row in actions}
+    action_ids = set(action_index)
+    for row in queue:
+        if row["current_status"] == "pending":
+            if row["current_decision"] or row["last_action_id"]:
+                fail(f"Pending candidate carries a decision: {row['candidate_id']}")
+        elif not row["current_decision"] or row["last_action_id"] not in action_ids:
+            fail(f"Decided candidate lacks its append-only action: {row['candidate_id']}")
+        else:
+            action = action_index[row["last_action_id"]]
+            if (
+                action["candidate_id"] != row["candidate_id"]
+                or action["new_status"] != row["current_status"]
+                or action["decision"] != row["current_decision"]
+                or action["exclusion_reason_code"] != row["exclusion_reason_code"]
+                or action["topic_code"] != row["topic_code"]
+                or action["duplicate_target_id"] != row["duplicate_target_id"]
+            ):
+                fail(
+                    "Curator queue projection disagrees with its last action: "
+                    f"{row['candidate_id']}"
+                )
 
 
 def check_issue_forms() -> None:
@@ -264,6 +455,7 @@ def check_actions_pinned() -> None:
         "--issue 30",
         '--allowed-author "$LEDGER_AUTHOR"',
         "node --check site/stats.js",
+        'build_curator_stats.py --output "$RUNNER_TEMP/archive/curator-stats.json"',
     ):
         if phrase not in workflow:
             fail(f"Archive workflow missing daily-metrics safeguard: {phrase}")
@@ -287,6 +479,55 @@ def check_actions_pinned() -> None:
     ):
         if phrase not in curation:
             fail(f"Curation workflow missing safeguard: {phrase}")
+
+    candidate_curation = (
+        ROOT / ".github/workflows/candidate-curation.yml"
+    ).read_text(encoding="utf-8")
+    for phrase in (
+        "github.actor == github.repository_owner",
+        "curation:decision",
+        "apply_candidate_decision.py",
+        "build_curator_stats.py",
+        "site/data/curator-stats.json",
+        "data/curation",
+        "pull-requests: write",
+        "Automatic eligibility or publication inference: none",
+        "Unresolved human decisions",
+        "Closes #${ISSUE_NUMBER}",
+    ):
+        if phrase not in candidate_curation:
+            fail(f"Candidate-curation workflow missing safeguard: {phrase}")
+
+    materialize = (
+        ROOT / ".github/workflows/materialize-curation.yml"
+    ).read_text(encoding="utf-8")
+    for phrase in (
+        "issues: write",
+        "build_legacy_queue.py --check",
+        "materialize_queue_issues.py",
+        "cancel-in-progress: false",
+    ):
+        if phrase not in materialize:
+            fail(f"Queue materialisation workflow missing safeguard: {phrase}")
+
+    intake = (
+        ROOT / ".github/workflows/intake-to-curation.yml"
+    ).read_text(encoding="utf-8")
+    for phrase in (
+        "github.actor == github.repository_owner",
+        "[INTAKE][ACADEMIC] ",
+        "import_intake_issue.py",
+        "build_curator_stats.py",
+        "site/data/curator-stats.json",
+        "--issue-title-file",
+        "data/curation",
+        "pull-requests: write",
+        "Automatic screening or publication inference: none",
+        "Unresolved human decisions",
+        "Canonical or publication rows changed: 0",
+    ):
+        if phrase not in intake:
+            fail(f"Intake-to-curation workflow missing safeguard: {phrase}")
 
 
 def check_release_metadata() -> None:
@@ -383,7 +624,11 @@ def check_governance_copy() -> None:
         if phrase not in automation:
             fail(f"Automation runbook missing daily-metrics contract: {phrase}")
 
-    for schema_name in ("surveillance-run.schema.json", "research-stats.schema.json"):
+    for schema_name in (
+        "surveillance-run.schema.json",
+        "research-stats.schema.json",
+        "curator-stats.schema.json",
+    ):
         schema = json.loads((ROOT / "schema" / schema_name).read_text(encoding="utf-8"))
         if schema.get("additionalProperties") is not False:
             fail(f"{schema_name} must use a closed top-level schema")
@@ -423,6 +668,7 @@ def main() -> None:
     check_files()
     check_registry_headers()
     check_public_boundary()
+    check_curator_queue()
     check_issue_forms()
     check_actions_pinned()
     check_release_metadata()

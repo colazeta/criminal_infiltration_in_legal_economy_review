@@ -81,10 +81,12 @@ workflow changes:
 python3 scripts/validation/validate_repository.py
 python3 -m unittest discover -s tests -p 'test_*.py'
 python3 scripts/build_archive.py
+python3 scripts/curation/build_curator_stats.py
 python3 scripts/validation/validate_archive.py
 python3 scripts/validation/validate_site.py
 node --check site/app.js
 node --check site/stats.js
+node --check site/curator.js
 python3 scripts/report_saturation.py
 ```
 

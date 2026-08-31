@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/schema/curator-stats.schema.json",
+  "title": "Aggregate curator queue statistics",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "totalMaterialised",
+    "open",
+    "completed",
+    "actionCount",
+    "byStage",
+    "openByOrigin"
+  ],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "totalMaterialised": {"type": "integer", "minimum": 0},
+    "open": {"type": "integer", "minimum": 0},
+    "completed": {"type": "integer", "minimum": 0},
+    "actionCount": {"type": "integer", "minimum": 0},
+    "byStage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "metadataFix",
+        "manualReview",
+        "abstractReview",
+        "legacyRejectionReview"
+      ],
+      "properties": {
+        "metadataFix": {"type": "integer", "minimum": 0},
+        "manualReview": {"type": "integer", "minimum": 0},
+        "abstractReview": {"type": "integer", "minimum": 0},
+        "legacyRejectionReview": {"type": "integer", "minimum": 0}
+      }
+    },
+    "openByOrigin": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["legacy", "daily"],
+      "properties": {
+        "legacy": {"type": "integer", "minimum": 0},
+        "daily": {"type": "integer", "minimum": 0}
+      }
+    }
+  }
+}

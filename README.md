@@ -38,6 +38,7 @@ cannot publish a work.
 |---|---|
 | `INDEX.md` | Plain-language routes for readers, reviewers and maintainers |
 | `data/registry/` | Canonical works, identifiers, decisions and publication state |
+| `data/curation/` | Materialised review queue and append-only candidate decisions |
 | `data/legacy/` | Retired pilot evidence retained only for audit |
 | `docs/methodology/` | Protocol, eligibility, discovery, saturation and reporting |
 | `docs/governance/` | Data contract and authorised sources/connectors |
@@ -61,13 +62,20 @@ edit registries, declare saturation or publish papers. The
 [daily-metrics guide](docs/operations/daily-metrics.md) explains how successful
 zero-result days, partial runs and failures are kept distinct.
 
+A validated positive intake batch now prepares a separate pull request that
+adds its candidates to `data/curation/review_queue.csv`. After human merge, each
+new row receives an individual GitHub review issue. Intake assessment,
+screening, canonical promotion and publication remain four distinct gates.
+
 ## Correcting the archive
 
-Repository owners can use the [curator desk](https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/curate.html)
-to change a paper's main topic, exclude a reviewed work or join a confirmed
-duplicate. The authenticated GitHub workflow validates the instruction and
-prepares a visible change while retaining previous decisions and publication
-versions. No repository token is placed in the public website.
+Repository owners can use the [curator workspace](https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/curate.html)
+to open the individually materialised legacy and daily candidates, filter them
+by review stage and record an evidence-backed decision. Candidate actions update only the
+editorial queue; canonical promotion and publication remain separate reviewed
+changes. A second authenticated workflow handles topic changes, exclusions and
+confirmed duplicate merges for existing canonical records. No repository token
+or candidate metadata is placed in the public website.
 
 ## Publishing the website
 
@@ -85,10 +93,12 @@ Requires Python 3.11+ and Node only for the JavaScript syntax check.
 python3 scripts/validation/validate_repository.py
 python3 -m unittest discover -s tests -p 'test_*.py'
 python3 scripts/build_archive.py
+python3 scripts/curation/build_curator_stats.py
 python3 scripts/validation/validate_archive.py
 python3 scripts/validation/validate_site.py
 node --check site/app.js
 node --check site/stats.js
+node --check site/curator.js
 python3 -m http.server 8000 --directory site
 ```
 

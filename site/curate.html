@@ -5,11 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="Pannello del curatore per correggere temi, escludere paper e unire duplicati nell'archivio Criminal Infiltration."
+      content="Workspace del curatore per esaminare la coda, registrare decisioni e governare l'archivio Criminal Infiltration."
     />
-    <title>Pannello di curatela · Criminal Infiltration Archive</title>
+    <title>Workspace del curatore · Criminal Infiltration Archive</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>◫</text></svg>" />
     <link rel="stylesheet" href="./styles.css" />
+    <script src="./curator.js" defer></script>
   </head>
   <body class="curator-page">
     <a class="skip-link" href="#main-content">Vai al contenuto</a>
@@ -20,135 +21,249 @@
           <span class="brand-mark" aria-hidden="true">CI</span>
           <span>
             <strong>Criminal Infiltration</strong>
-            <small>Pannello di curatela</small>
+            <small>Workspace del curatore</small>
           </span>
         </a>
         <nav aria-label="Navigazione principale">
-          <a href="./">Biblioteca</a>
+          <a href="#curator-workflow">Coda</a>
+          <a href="#curator-actions">Decisioni</a>
           <a href="./stats.html">Statistiche</a>
-          <a href="#curator-actions">Operazioni</a>
-          <a href="https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/blob/main/docs/GUIDA_RAPIDA_IT.md">Guida</a>
+          <a href="./">Biblioteca</a>
           <a href="https://github.com/colazeta/criminal_infiltration_in_legal_economy_review">Repository</a>
         </nav>
       </div>
     </header>
 
     <main id="main-content">
-      <section class="curator-hero" aria-labelledby="page-title">
-        <div>
-          <p class="eyebrow">Area del proprietario</p>
-          <h1 id="page-title">Correggi l'archivio senza modificare i CSV</h1>
-          <p class="intro-copy">
-            Da qui puoi cambiare il tema di un paper, escluderlo oppure unire due
-            record che descrivono lo stesso lavoro. GitHub registra chi ha dato il
-            comando, conserva la storia precedente e controlla il risultato.
-          </p>
+      <section class="curator-workspace" id="curator-workflow" aria-labelledby="page-title">
+        <div class="workspace-heading">
+          <div>
+            <p class="eyebrow">Superficie di lavoro</p>
+            <h1 id="page-title">Coda editoriale e decisioni</h1>
+            <p class="intro-copy">
+              Qui controlli che cosa richiede attenzione, apri le singole schede e
+              registri una decisione sostenuta da evidenza. Intake, screening,
+              archivio canonico e pubblicazione restano passaggi distinti.
+            </p>
+          </div>
+          <aside class="run-health" aria-labelledby="run-health-title">
+            <span class="health-dot" id="run-health-dot" aria-hidden="true"></span>
+            <div>
+              <p class="workspace-label" id="run-health-title">Ultima sorveglianza</p>
+              <strong id="last-run-status">Caricamento…</strong>
+              <p id="last-run-date">—</p>
+            </div>
+          </aside>
         </div>
-        <aside class="curator-summary" aria-label="Regola di sicurezza">
-          <strong>Nessuna password nel sito</strong>
-          <p>
-            Questo portale è pubblico e statico. L'operazione effettiva si svolge
-            nel modulo autenticato di GitHub Actions, accessibile soltanto a chi ha
-            i permessi sul repository.
-          </p>
-        </aside>
-      </section>
 
-      <section class="workflow-launch" id="curator-workflow" aria-labelledby="workflow-title">
-        <div>
-          <p class="eyebrow">Inizia qui</p>
-          <h2 id="workflow-title">Apri il modulo sicuro su GitHub</h2>
-          <ol>
-            <li>Accedi a GitHub con l'account autorizzato.</li>
-            <li>Premi <strong>Run workflow</strong>.</li>
-            <li>Scegli un'operazione e compila soltanto i campi indicati qui sotto.</li>
-            <li>Scrivi <strong>APPLY</strong> per confermare e avvia il controllo.</li>
-          </ol>
-        </div>
-        <div class="launch-actions">
+        <div class="curator-toolbar" aria-label="Azioni principali">
           <a
-            class="button-link"
+            class="primary-action"
+            href="https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/issues?q=is%3Aissue+is%3Aopen+label%3A%22curation%3Aqueue%22"
+          >Apri la coda completa</a>
+          <a
+            class="toolbar-action"
+            href="https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/issues/new?template=candidate_decision.yml"
+          >Registra una decisione</a>
+          <a
+            class="toolbar-action"
+            href="https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/issues?q=is%3Aissue+%22%5BINTAKE%5D%5BACADEMIC%5D%22+sort%3Acreated-desc"
+          >Controlla i batch di intake</a>
+          <a
+            class="toolbar-action"
             href="https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/actions/workflows/curation.yml"
-            rel="noreferrer"
-          >Apri la console del curatore</a>
-          <a
-            class="secondary-link"
-            href="./#archive"
-          >Consulta i paper pubblici</a>
+          >Gestisci record canonici</a>
         </div>
+
+        <section class="queue-overview" aria-labelledby="queue-overview-title">
+          <div class="compact-heading">
+            <div>
+              <p class="eyebrow">Backlog materializzato</p>
+              <h2 id="queue-overview-title">Ogni conteggio corrisponde a schede identificabili</h2>
+            </div>
+            <p>
+              I segnali del pilot sono conservati per audit, ma non diventano
+              automaticamente decisioni attuali. I nuovi batch validati
+              confluiscono nella coda tramite una pull request separata.
+            </p>
+          </div>
+
+          <div class="queue-metrics" aria-label="Composizione della coda">
+            <article class="queue-total-card">
+              <span id="queue-total">—</span>
+              <strong>schede aperte da lavorare</strong>
+              <p id="queue-origin-summary">Backlog legacy e intake giornalieri validati.</p>
+            </article>
+            <article>
+              <span id="queue-metadata">—</span>
+              <strong>metadati da correggere</strong>
+              <p>Autori o altri campi bibliografici non ancora sufficienti.</p>
+            </article>
+            <article>
+              <span id="queue-manual">—</span>
+              <strong>revisioni manuali</strong>
+              <p>Scope e valore contestuale richiedono una valutazione umana.</p>
+            </article>
+            <article>
+              <span id="queue-abstract">—</span>
+              <strong>abstract o full text</strong>
+              <p>Il solo titolo non consente una decisione difendibile.</p>
+            </article>
+            <article>
+              <span id="queue-legacy-rejected">—</span>
+              <strong>rigetti legacy da verificare</strong>
+              <p>Segnali storici non ancora equivalenti a esclusioni governate.</p>
+            </article>
+          </div>
+        </section>
+
+        <section class="queue-lanes" aria-labelledby="queue-lanes-title">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Viste operative</p>
+              <h2 id="queue-lanes-title">Entra direttamente nel lavoro da fare</h2>
+            </div>
+            <p>Le schede si aprono nell’area autenticata di GitHub; nessun token è conservato in questa pagina.</p>
+          </div>
+          <div class="lane-grid">
+            <a
+              class="lane-card lane-metadata"
+              href="https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/issues?q=is%3Aissue+is%3Aopen+label%3A%22stage%3Ametadata-fix%22"
+            >
+              <span>01</span>
+              <strong>Ripara i metadati</strong>
+              <p>Verifica identità, autori, DOI e manifestazioni prima dello screening.</p>
+              <small>Apri questa vista →</small>
+            </a>
+            <a
+              class="lane-card lane-manual"
+              href="https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/issues?q=is%3Aissue+is%3Aopen+label%3A%22stage%3Amanual-review%22"
+            >
+              <span>02</span>
+              <strong>Decidi lo scope</strong>
+              <p>Valuta il contributo diretto o contestuale con la regola corrente.</p>
+              <small>Apri questa vista →</small>
+            </a>
+            <a
+              class="lane-card lane-reading"
+              href="https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/issues?q=is%3Aissue+is%3Aopen+label%3A%22stage%3Aabstract-review%22"
+            >
+              <span>03</span>
+              <strong>Leggi l’evidenza</strong>
+              <p>Passa da titolo a abstract o full text e indica il punto esaminato.</p>
+              <small>Apri questa vista →</small>
+            </a>
+            <a
+              class="lane-card lane-recheck"
+              href="https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/issues?q=is%3Aissue+is%3Aopen+label%3A%22stage%3Alegacy-rejection-review%22"
+            >
+              <span>04</span>
+              <strong>Ricontrolla i rigetti</strong>
+              <p>Conferma o correggi il vecchio triage usando codici ed evidenza attuali.</p>
+              <small>Apri questa vista →</small>
+            </a>
+          </div>
+        </section>
       </section>
 
-      <section class="curator-actions" id="curator-actions" aria-labelledby="actions-title">
+      <section class="decision-workspace" id="curator-actions" aria-labelledby="actions-title">
         <div class="section-heading">
           <div>
-            <p class="eyebrow">Le tre operazioni</p>
-            <h2 id="actions-title">Che cosa vuoi correggere?</h2>
+            <p class="eyebrow">Decisioni governate</p>
+            <h2 id="actions-title">Una decisione modifica la coda, non pubblica il paper</h2>
           </div>
-          <p>I nomi in verde sono quelli che troverai nel menu di GitHub.</p>
+          <p>
+            Ogni istruzione produce una modifica separata, attribuita e da
+            revisionare prima del merge.
+          </p>
         </div>
 
-        <div class="curator-grid">
-          <article class="curator-card">
-            <span class="operation-key">change_topic</span>
-            <h3>Cambia il tema</h3>
-            <p>Usalo quando il paper è corretto ma l'etichetta principale non lo è.</p>
-            <h4>Campi necessari</h4>
-            <ul class="field-list">
-              <li><strong>paper_id</strong>: il paper da correggere</li>
-              <li><strong>topic_code</strong>: il nuovo tema già presente nella tassonomia</li>
-              <li><strong>reason</strong>: perché il nuovo tema è più adatto</li>
-              <li><strong>evidence</strong>: il punto esaminato che sostiene la scelta</li>
-            </ul>
+        <div class="decision-grid">
+          <article>
+            <span class="decision-index">A</span>
+            <h3>Includi o rinvia</h3>
+            <p>
+              Registra <code>eligible_core</code>, <code>eligible_contextual</code>
+              oppure <code>maybe_full_text_needed</code>, con stage, evidenza,
+              motivazione e livello di confidenza.
+            </p>
           </article>
-
-          <article class="curator-card">
-            <span class="operation-key">exclude_work</span>
-            <h3>Escludi un paper</h3>
-            <p>Usalo dopo aver verificato che il lavoro non appartiene alla review.</p>
-            <h4>Campi necessari</h4>
-            <ul class="field-list">
-              <li><strong>paper_id</strong>: il paper da escludere</li>
-              <li><strong>reason_code</strong>: un codice controllato, per esempio TOPIC_OFF_SCOPE</li>
-              <li><strong>reason</strong>: la motivazione specifica</li>
-              <li><strong>evidence</strong>: abstract, testo o scheda effettivamente esaminati</li>
-            </ul>
+          <article>
+            <span class="decision-index">B</span>
+            <h3>Escludi con un codice</h3>
+            <p>
+              Se il lavoro è fuori perimetro, scegli uno dei motivi governati e
+              spiega perché si applica proprio a quella scheda.
+            </p>
           </article>
-
-          <article class="curator-card">
-            <span class="operation-key">merge_duplicate</span>
-            <h3>Unisci un duplicato</h3>
-            <p>Usalo soltanto quando due record rappresentano davvero lo stesso lavoro.</p>
-            <h4>Campi necessari</h4>
-            <ul class="field-list">
-              <li><strong>paper_id</strong>: il record duplicato da ritirare</li>
-              <li><strong>target_paper_id</strong>: il record corretto che sopravvive</li>
-              <li><strong>reason</strong>: perché i record sono la stessa opera</li>
-              <li><strong>evidence</strong>: DOI, titolo, edizione o altra prova verificata</li>
-            </ul>
+          <article>
+            <span class="decision-index">C</span>
+            <h3>Conferma un duplicato</h3>
+            <p>
+              Indica il candidato o paper che sopravvive e la prova d’identità.
+              Una somiglianza di titolo non è sufficiente.
+            </p>
+          </article>
+          <article>
+            <span class="decision-index">D</span>
+            <h3>Assegna il tema</h3>
+            <p>
+              I temi sono codici controllati e richiedono evidenza. Possono essere
+              assegnati soltanto insieme a una decisione eleggibile.
+            </p>
           </article>
         </div>
+
+        <div class="decision-callout">
+          <div>
+            <p class="eyebrow">Percorso autenticato</p>
+            <h3>Come registrare una decisione</h3>
+          </div>
+          <ol>
+            <li>Apri una scheda dalla coda e copia il suo candidate ID.</li>
+            <li>Apri il modulo di decisione e compila solo i campi pertinenti.</li>
+            <li>Scrivi <strong>APPLY</strong>: GitHub Actions convalida l’istruzione.</li>
+            <li>Controlla la pull request prodotta e decidi se integrarla.</li>
+          </ol>
+          <a
+            class="primary-action"
+            href="https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/issues/new?template=candidate_decision.yml"
+          >Apri il modulo di decisione</a>
+        </div>
+
+        <details class="canonical-tools">
+          <summary>Operazioni sui record già canonici</summary>
+          <div>
+            <p>
+              Per cambiare il tema di un paper già registrato, escluderlo o unire
+              due record canonici continua a usare il workflow
+              <code>curation.yml</code>. Anche questo flusso prepara una pull
+              request e non effettua auto-merge.
+            </p>
+            <a
+              class="text-action"
+              href="https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/actions/workflows/curation.yml"
+            >Apri la console dei record canonici →</a>
+          </div>
+        </details>
       </section>
 
-      <section class="workflow-result" aria-labelledby="result-title">
+      <section class="curator-boundary" aria-labelledby="boundary-title">
         <div>
-          <p class="eyebrow">Dopo il comando</p>
-          <h2 id="result-title">Che cosa fa il sistema</h2>
+          <p class="eyebrow">Confine di sicurezza</p>
+          <h2 id="boundary-title">Questa pagina non è il database editoriale</h2>
         </div>
-        <ol>
-          <li>Controlla gli ID, i campi obbligatori e la coerenza della richiesta.</li>
-          <li>Aggiunge una nuova decisione o versione senza cancellare quella precedente.</li>
-          <li>Ricostruisce l'archivio ed esegue tutti i test.</li>
-          <li>Prepara una modifica GitHub visibile e reversibile.</li>
-        </ol>
-        <p class="safety-note">
-          Non inserire mai un personal access token, una password o testi integrali dei
-          paper. Se un controllo fallisce, nessuna modifica viene proposta.
+        <p>
+          Mostra soltanto conteggi aggregati e collegamenti alle aree autenticate.
+          Non raccoglie password, personal access token, evidenza o dati dei
+          candidati. Le decisioni restano fuori dall’export pubblico; promozione
+          canonica e pubblicazione richiedono passaggi successivi e indipendenti.
         </p>
       </section>
     </main>
 
     <footer>
-      <p>Le operazioni del curatore sono attribuite, versionate e validate.</p>
+      <p>Decisioni attribuite, versionate e mai fuse automaticamente.</p>
       <p>
         <a href="./">Biblioteca</a> ·
         <a href="./stats.html">Statistiche</a> ·

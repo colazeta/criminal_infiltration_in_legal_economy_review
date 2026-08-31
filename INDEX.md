@@ -35,9 +35,11 @@ paper rilevante; un paper rilevante non è automaticamente pubblico.
 | Cercare un paper già approvato | [Biblioteca pubblica](https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/) | Puoi cercare e filtrare i record pubblicati |
 | Capire come viene cercata la letteratura | [Strategia di espansione](docs/methodology/expansion.md) | Trovi i sei passaggi usati per cercare, unire e valutare i paper |
 | Capire i numeri di ogni giornata | [Statistiche giornaliere](docs/operations/daily-metrics.md) | Distingue risultati, ripetizioni, lavori già noti, nuovi candidati e fallimenti |
-| Cambiare il tema di un paper | [Pannello di curatela](https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/curate.html) | GitHub prepara una modifica controllata senza richiedere l'editing manuale dei CSV |
-| Escludere un paper | [Pannello di curatela](https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/curate.html) | La decisione e la motivazione vengono aggiunte alla storia; il paper resta fuori dal sito |
-| Unire due record duplicati | [Pannello di curatela](https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/curate.html) | Un record rimane quello principale; identificatori e provenienze vengono conservati |
+| Vedere i candidati da esaminare | [Workspace di curatela](https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/curate.html) | I 55 record legacy e i nuovi intake validati sono separati per metadati, scope, lettura e vecchi rigetti da ricontrollare |
+| Registrare una decisione su un candidato | [Modulo autenticato](https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/issues/new?template=candidate_decision.yml) | Una pull request aggiorna la coda e conserva l'azione; non pubblica il paper |
+| Cambiare il tema di un paper canonico | [Workspace di curatela](https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/curate.html) | GitHub prepara una modifica controllata senza richiedere l'editing manuale dei CSV |
+| Escludere un paper canonico | [Workspace di curatela](https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/curate.html) | La decisione e la motivazione vengono aggiunte alla storia; il paper resta fuori dal sito |
+| Unire due record canonici duplicati | [Workspace di curatela](https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/curate.html) | Un record rimane quello principale; identificatori e provenienze vengono conservati |
 | Correggere titolo, DOI o autore | [Modulo per i metadati](https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/issues/new?template=metadata_correction.yml) | Viene preparata una correzione sostenuta da una fonte |
 | Aggiungere un possibile paper | [Modulo candidato](https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/issues/new?template=candidate_intake.yml) | Il paper entra nella coda di revisione; non viene incluso automaticamente |
 | Eseguire un ciclo completo di ricerca | [Modulo ciclo E1–E3](https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/issues/new?template=review_cycle.yml) | Le ricerche nelle fonti e nelle citazioni vengono documentate insieme |
@@ -60,8 +62,8 @@ paper rilevante; un paper rilevante non è automaticamente pubblico.
 
 ## Il percorso di un paper
 
-1. Una ricerca o una persona trova un possibile paper.
-2. Titolo, autori, anno e identificatori vengono controllati.
+1. Una ricerca o una persona trova un possibile paper e lo registra nell'intake.
+2. Un passaggio revisionabile lo materializza nella coda; titolo, autori, anno e identificatori vengono controllati.
 3. I record ripetuti vengono ricondotti allo stesso lavoro.
 4. Una persona valuta il paper usando la regola di inclusione.
 5. La persona registra una decisione e soltanto le etichette sostenute dalle
@@ -77,6 +79,7 @@ nascondere la decisione scientifica.
 | Area | Significato pratico |
 |---|---|
 | [`data/registry/`](data/registry/README.md) | Fonte ufficiale dei record correnti e della loro storia |
+| [`data/curation/`](data/curation/README.md) | Coda individuale dei candidati e storia append-only delle decisioni |
 | [`docs/methodology/`](docs/README.md#methodology) | Regole di ricerca, inclusione e misurazione |
 | [`docs/operations/`](docs/README.md#operations) | Funzionamento del pannello, delle automazioni, delle release e del sito |
 | [`scripts/`](scripts/) | Programmi che preparano le modifiche, costruiscono la biblioteca e cercano errori |
