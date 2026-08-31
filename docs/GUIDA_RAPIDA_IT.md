@@ -24,19 +24,29 @@ non è automaticamente pubblicato sul sito.
 - [Regola di inclusione](methodology/eligibility.md)
 - [Indice completo del progetto](../INDEX.md)
 
-## Che cosa puoi fare dal pannello
+## Che cosa puoi fare dal workspace
 
-Il pannello ti porta a un modulo GitHub riservato a chi ha permessi di scrittura
-sul repository. Non devi modificare a mano i file CSV.
+Il workspace mostra i conteggi della coda e apre le singole schede nell'area
+GitHub autenticata. Non devi modificare a mano i file CSV.
 
-Puoi chiedere di:
+La coda iniziale contiene 55 candidati materializzati: 2 con metadati da
+correggere, 9 da valutare manualmente, 25 da leggere almeno a livello di
+abstract/full text e 19 vecchi rigetti da ricontrollare. Questi ultimi non sono
+considerati esclusioni finché una persona non registra una nuova decisione.
 
-- cambiare il tema principale assegnato a un paper;
-- escludere un paper indicando la ragione;
-- unire un record duplicato al record corretto.
+Per un candidato puoi registrare inclusione core o contestuale, necessità di
+full text, esclusione con codice governato, fonte non accademica, irreperibilità
+o duplicato confermato. Il sistema aggiorna soltanto la coda e prepara una pull
+request: non assegna automaticamente un paper ID e non pubblica il lavoro.
 
-GitHub prepara la modifica, esegue tutti i controlli e apre una modifica
-tracciabile. Le decisioni precedenti non vengono cancellate.
+Quando un batch giornaliero contiene candidati, GitHub prepara una pull request
+che li trasferisce nella coda editoriale conservando fonti, query, conflitti e
+azione umana richiesta. Dopo il merge compaiono come schede individuali. Questo
+passaggio non decide se il paper è eleggibile.
+
+Per i paper già canonici puoi inoltre cambiare il tema principale, escludere un
+record o unirlo a un duplicato confermato. GitHub conserva sempre la storia
+precedente e non effettua auto-merge.
 
 ## Come cresce la letteratura
 

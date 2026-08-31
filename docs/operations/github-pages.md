@@ -48,7 +48,10 @@ artifact.
 
 Every reviewed merge to `main` repeats the same sequence. The workflow rebuilds
 `site/data/archive.json` and `site/data/archive.csv` from the governed registry;
-it does not publish candidate intake or reviewer notes.
+it does not publish candidate intake or reviewer notes. A separate deterministic
+step derives `site/data/curator-stats.json` from the curation layer using a
+closed allowlist of aggregate counts only: open/completed totals, work lanes and
+legacy/daily origin totals.
 
 The workflow also runs once per day after the surveillance automation. It reads
 ledger #30, accepts only comments by the configured repository owner, validates
@@ -69,10 +72,12 @@ python3 scripts/validation/validate_repository.py
 python3 -m unittest discover -s tests -p 'test_*.py'
 python3 scripts/build_archive.py
 python3 scripts/metrics/build_research_stats.py
+python3 scripts/curation/build_curator_stats.py
 python3 scripts/validation/validate_archive.py
 python3 scripts/validation/validate_site.py
 node --check site/app.js
 node --check site/stats.js
+node --check site/curator.js
 python3 -m http.server 8000 --directory site
 ```
 

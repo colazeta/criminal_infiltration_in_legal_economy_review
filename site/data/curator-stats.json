@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "totalMaterialised": 55,
+  "open": 55,
+  "completed": 0,
+  "actionCount": 0,
+  "byStage": {
+    "metadataFix": 2,
+    "manualReview": 9,
+    "abstractReview": 25,
+    "legacyRejectionReview": 19
+  },
+  "openByOrigin": {
+    "legacy": 55,
+    "daily": 0
+  }
+}

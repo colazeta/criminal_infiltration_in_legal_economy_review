@@ -5,6 +5,7 @@
 | Layer | Purpose | Read by public builder |
 |---|---|---|
 | `data/registry/` | Governed source of truth | Yes, fixed allowlist only |
+| `data/curation/` | Materialised candidate queue and append-only curator actions | Never |
 | `data/legacy/` | Retired pilot evidence | Never |
 | GitHub intake issues | Candidate staging and search logs | Never |
 | GitHub metrics ledger | Aggregate daily surveillance telemetry | Safe aggregates only, after validation |
@@ -33,6 +34,29 @@ is stored in [GitHub issue #30](https://github.com/colazeta/criminal_infiltratio
 The deployment validates those comments and derives
 `site/data/research-stats.json`. This keeps operational telemetry separate from
 the E1–E3 saturation registry and from scientific decisions.
+
+## Candidate curation layer
+
+`data/curation/review_queue.csv` materialises candidates as individually
+addressable records without promoting them into the canonical archive. Its
+legacy fields preserve what the pilot stated. Daily rows preserve the validated
+intake assessment, metadata status, source/query references, duplicate or
+conflict notes and required human action. `current_status`,
+`current_decision`, controlled reason/topic fields and `last_action_id` describe
+the current human-reviewed projection.
+
+`data/curation/actions.csv` is append-only. Each row records the authenticated
+GitHub issue, actor, screening stage, decision, reason/topic/duplicate target,
+confidence, rationale, evidence locator, date and transition in queue status.
+An action may supersede the queue's current projection, but earlier action rows
+are never rewritten.
+
+The curation layer is never read by `scripts/build_archive.py` or copied to
+`site/data/`. Its candidate metadata and review evidence therefore cannot enter
+the public archive export. GitHub candidate issues are the authenticated working
+surface; the public curator page contains only aggregate counts and links.
+An authorised intake issue reaches this layer only through a validated,
+reviewable pull request; it is never converted directly into a canonical work.
 
 ## Full publication gate
 
@@ -96,6 +120,11 @@ titles, identifiers, queries and reviewer material are forbidden. Its contracts
 are `schema/surveillance-run.schema.json` and
 `schema/research-stats.schema.json`.
 
+The curator workspace uses another closed aggregate projection containing only
+queue totals, open work by lane and legacy/daily origin counts. Its contract is
+`schema/curator-stats.schema.json`; bibliographic fields, decisions, evidence,
+issue numbers and curator identities are absent.
+
 ## Identity
 
 `papers.doi` is the denormalised primary DOI for simple export. Its value must
@@ -112,10 +141,13 @@ as if they had originally been assigned to the survivor.
 
 ## Curator actions
 
-The [curator desk](../operations/curation.md) supports three initial operations:
-changing the primary topic, excluding a work and merging a confirmed duplicate.
-Each instruction is explicit, attributed to the GitHub actor and validated in a
-temporary branch. It never deletes decision or publication history.
+The [curator workspace](../operations/curation.md) has a candidate lane and a
+canonical lane. Candidate decisions update only `data/curation/` and prepare a
+pull request; they cannot assign a canonical ID or publish a work. The canonical
+lane supports changing the primary topic, excluding a work and merging a
+confirmed duplicate. Every instruction is explicit, attributed to the GitHub
+actor and validated in a temporary branch. It never deletes decision or
+publication history.
 
 A topic change appends a new `paper_codes.csv` version, retires the prior current
 row and links the two through `supersedes_coding_id`. Earlier evidence, coder,

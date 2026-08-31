@@ -165,6 +165,12 @@ zero candidati. Un commento che inizia come un run giornaliero ma ha marker o
 involucro malformati blocca il deploy anziché sparire dalla serie. Il JSON pubblico
 espone soltanto conteggi, stato tecnico, data e
 l'informazione che una issue è stata creata; non ne pubblica il collegamento.
+
+Una issue di intake valida attiva inoltre un flusso repository separato che
+prepara, senza auto-merge, il suo ingresso nella coda editoriale. Questo secondo
+passaggio conserva la provenienza ma non modifica i conteggi del ledger, non
+assegna eleggibilità e non pubblica metadati dei candidati.
+
 Né il ledger né il JSON pubblico contengono:
 
 - titoli, autori, DOI o abstract dei candidati;

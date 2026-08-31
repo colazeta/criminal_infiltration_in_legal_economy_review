@@ -30,6 +30,13 @@ releases, deployments or issue state; it must not assign canonical IDs or use
 eligibility/publication decisions. The ledger comment contains counts and
 technical provenance only, never candidate metadata.
 
+This boundary applies to the external surveillance task. After that task has
+persisted a valid intake issue, the repository-owned
+`intake-to-curation.yml` workflow may mechanically prepare a branch and pull
+request containing the same candidates in the non-public curation layer. That
+downstream workflow performs no retrieval or screening, never edits the
+canonical registry and cannot merge its own pull request.
+
 ## Batch contract
 
 - Calculate exact date/window in `Europe/Rome`.

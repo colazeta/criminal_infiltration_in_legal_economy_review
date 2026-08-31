@@ -1,0 +1,106 @@
+name: Curator candidate decision
+description: Record one evidence-backed decision for a materialised candidate
+title: "[CURATOR] "
+labels:
+  - "curation:decision"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This form records a human screening instruction. It does not publish the work or merge a repository change. Copy the candidate ID from its queue issue and use only evidence you actually examined.
+  - type: input
+    id: candidate_id
+    attributes:
+      label: Candidate ID
+      placeholder: E0R1-C001 or CAND-ACADEMIC-YYYY-MM-DD-001
+    validations:
+      required: true
+  - type: dropdown
+    id: screening_stage
+    attributes:
+      label: Screening stage
+      options:
+        - title_abstract
+        - full_text
+        - seed_validation
+    validations:
+      required: true
+  - type: dropdown
+    id: decision
+    attributes:
+      label: Decision
+      options:
+        - eligible_core
+        - eligible_contextual
+        - maybe_full_text_needed
+        - not_eligible
+        - duplicate
+        - not_academic
+        - not_retrievable
+    validations:
+      required: true
+  - type: dropdown
+    id: exclusion_reason_code
+    attributes:
+      label: Exclusion reason
+      description: Select NOT_APPLICABLE for eligible or full-text-needed decisions.
+      options:
+        - NOT_APPLICABLE
+        - TOPIC_OFF_SCOPE
+        - NO_CRIMINAL_ACTOR_OR_INTEREST
+        - NO_LEGAL_ECONOMY_LINK
+        - NO_INFILTRATION_RELATION
+        - MENTION_ONLY_NOT_ANALYTICAL
+        - ADJACENT_PHENOMENON_ONLY
+        - CRIME_DOMAIN_MISMATCH
+        - DOCUMENT_TYPE_EXCLUDED
+        - LANGUAGE_EXCLUDED
+        - DUPLICATE_RECORD
+        - NOT_ACADEMIC_SOURCE
+        - FULL_TEXT_UNAVAILABLE
+    validations:
+      required: true
+  - type: input
+    id: topic_code
+    attributes:
+      label: Topic code
+      description: Required only for eligible decisions; use a governed topic code.
+      placeholder: conceptual_foundations
+  - type: input
+    id: duplicate_target
+    attributes:
+      label: Duplicate target
+      description: Required only for duplicate; enter the surviving candidate or paper ID.
+      placeholder: E0R1-C010 or P000001
+  - type: dropdown
+    id: confidence
+    attributes:
+      label: Confidence
+      options:
+        - high
+        - medium
+        - low
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence basis and locator
+      description: Identify the abstract, section or metadata source examined. Do not paste long copyrighted text.
+    validations:
+      required: true
+  - type: textarea
+    id: rationale
+    attributes:
+      label: Record-specific rationale
+      description: Explain how the evidence supports the selected decision under the current eligibility rule.
+    validations:
+      required: true
+  - type: input
+    id: confirmation
+    attributes:
+      label: Confirmation
+      description: Write exactly APPLY. The resulting pull request still requires review and merge.
+      placeholder: APPLY
+    validations:
+      required: true

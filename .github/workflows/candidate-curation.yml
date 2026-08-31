@@ -1,0 +1,166 @@
+name: Candidate curator decision
+
+run-name: "Candidate decision from issue #${{ github.event.issue.number }}"
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: candidate-curation-${{ github.event.issue.number }}
+  cancel-in-progress: false
+
+jobs:
+  prepare-change:
+    if: >-
+      github.actor == github.repository_owner &&
+      contains(github.event.issue.labels.*.name, 'curation:decision')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: main
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.11"
+
+      - name: Read authenticated issue form
+        run: |
+          python3 -c 'import json, os, pathlib; event=json.load(open(os.environ["GITHUB_EVENT_PATH"], encoding="utf-8")); pathlib.Path(os.environ["RUNNER_TEMP"], "candidate-decision.md").write_text(event["issue"].get("body") or "", encoding="utf-8")'
+
+      - name: Apply explicit candidate decision
+        env:
+          CURATOR: ${{ github.actor }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          action_date="$(date -u +%F)"
+          python scripts/curation/apply_candidate_decision.py \
+            --issue-body-file "$RUNNER_TEMP/candidate-decision.md" \
+            --actor "$CURATOR" \
+            --issue-number "$ISSUE_NUMBER" \
+            --date "$action_date" \
+            --output "$RUNNER_TEMP/candidate-action.json"
+
+      - name: Validate the complete archive
+        run: |
+          python scripts/validation/validate_repository.py
+          python -m unittest discover -s tests -p 'test_*.py'
+          python scripts/build_archive.py
+          python scripts/curation/build_curator_stats.py
+          python scripts/validation/validate_archive.py
+          python scripts/validation/validate_site.py
+          node --check site/app.js
+          node --check site/stats.js
+          node --check site/curator.js
+          python scripts/report_saturation.py
+
+      - name: Create a review branch
+        id: branch
+        run: |
+          candidate_id="$(python3 -c 'import json, os; print(json.load(open(os.path.join(os.environ["RUNNER_TEMP"], "candidate-action.json"), encoding="utf-8"))["candidate_id"])')"
+          decision="$(python3 -c 'import json, os; print(json.load(open(os.path.join(os.environ["RUNNER_TEMP"], "candidate-action.json"), encoding="utf-8"))["decision"])')"
+          branch="curation/candidate-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$branch"
+          git add data/curation site/data/curator-stats.json
+          git commit -m "Screen ${candidate_id}: ${decision}"
+          git push origin "$branch"
+          echo "branch=$branch" >> "$GITHUB_OUTPUT"
+          echo "candidate_id=$candidate_id" >> "$GITHUB_OUTPUT"
+          echo "decision=$decision" >> "$GITHUB_OUTPUT"
+
+      - name: Open a visible pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH: ${{ steps.branch.outputs.branch }}
+          CANDIDATE_ID: ${{ steps.branch.outputs.candidate_id }}
+          DECISION: ${{ steps.branch.outputs.decision }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          run_url="https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          issue_url="https://github.com/${GITHUB_REPOSITORY}/issues/${ISSUE_NUMBER}"
+          body_file="$RUNNER_TEMP/candidate-curation-pr.md"
+          pending_count="$(python3 -c 'import csv; print(sum(r["current_status"] == "pending" for r in csv.DictReader(open("data/curation/review_queue.csv", encoding="utf-8-sig"))))')"
+          queue_count="$(python3 -c 'import csv; print(sum(1 for _ in csv.DictReader(open("data/curation/review_queue.csv", encoding="utf-8-sig"))))')"
+          action_count="$(python3 -c 'import csv; print(sum(1 for _ in csv.DictReader(open("data/curation/actions.csv", encoding="utf-8-sig"))))')"
+          {
+            echo "## Explicit curator instruction"
+            echo
+            echo "- Candidate: \`${CANDIDATE_ID}\`"
+            echo "- Decision: \`${DECISION}\`"
+            echo "- GitHub actor: \`${GITHUB_ACTOR}\`"
+            echo "- Decision issue: ${issue_url}"
+            echo "- Validated workflow run: ${run_url}"
+            echo
+            echo "## Changed files"
+            echo
+            git diff --name-only main...HEAD | sed 's/^/- `/' | sed 's/$/`/'
+            echo
+            echo "## Validation commands and results"
+            echo
+            echo '```text'
+            echo "PASS python scripts/validation/validate_repository.py"
+            echo "PASS python -m unittest discover -s tests -p 'test_*.py'"
+            echo "PASS python scripts/build_archive.py"
+            echo "PASS python scripts/curation/build_curator_stats.py"
+            echo "PASS python scripts/validation/validate_archive.py"
+            echo "PASS python scripts/validation/validate_site.py"
+            echo "PASS node --check site/app.js"
+            echo "PASS node --check site/stats.js"
+            echo "PASS node --check site/curator.js"
+            echo "PASS python scripts/report_saturation.py"
+            echo '```'
+            echo
+            echo "## Record counts after the change"
+            echo
+            echo "- Materialised candidates: ${queue_count}"
+            echo "- Candidates still in initial pending state: ${pending_count}"
+            echo "- Append-only curator actions: ${action_count}"
+            echo "- Canonical or publication rows changed: 0"
+            echo
+            echo "## Retrieval and human decisions"
+            echo
+            echo "- External retrieval performed: none."
+            echo "- Automatic eligibility or publication inference: none."
+            echo "- Unresolved human decisions: an authorised person must inspect and merge this PR; metadata verification, canonical promotion and publication remain separate."
+            echo
+            echo "Closes #${ISSUE_NUMBER}"
+          } > "$body_file"
+          encoded_title="$(python3 -c 'import sys; from urllib.parse import quote; print(quote(sys.argv[1], safe=""))' "Screen ${CANDIDATE_ID}: ${DECISION}")"
+          encoded_body="$(python3 -c 'import sys; from urllib.parse import quote; print(quote(sys.stdin.read(), safe=""))' < "$body_file")"
+          compare_url="https://github.com/${GITHUB_REPOSITORY}/compare/main...${BRANCH}?expand=1&title=${encoded_title}&body=${encoded_body}"
+          set +e
+          pr_url="$(gh pr create --base main --head "$BRANCH" --title "Screen ${CANDIDATE_ID}: ${DECISION}" --body-file "$body_file" 2>pr-error.log)"
+          pr_status=$?
+          set -e
+          if [ "$pr_status" -eq 0 ]; then
+            gh issue comment "$ISSUE_NUMBER" --body "Decision validated and prepared for review: ${pr_url}"
+          else
+            gh issue comment "$ISSUE_NUMBER" --body "The decision passed validation, but GitHub did not allow the workflow token to open the pull request. [Create the prefilled pull request](${compare_url})."
+          fi
+          {
+            echo "## Candidate change prepared"
+            echo
+            if [ "$pr_status" -eq 0 ]; then
+              echo "Pull request: ${pr_url}"
+            else
+              echo "[Create the prefilled pull request](${compare_url})"
+              echo
+              echo '```text'
+              sed -n '1,20p' pr-error.log
+              echo '```'
+            fi
+            echo
+            cat "$body_file"
+          } >> "$GITHUB_STEP_SUMMARY"
