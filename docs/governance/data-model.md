@@ -54,10 +54,11 @@ are never rewritten.
 The curation layer is never read by `scripts/build_archive.py` or copied to
 `site/data/`. Its candidate metadata and review evidence therefore cannot enter
 the public archive export. GitHub candidate issues remain the authenticated
-source for the working surface. After GitHub App authentication, `curate.html`
-loads their bounded fields at runtime through the curator backend; it does not
-write them into the static artifact or browser-persistent storage. The public
-page source contains only aggregate counts, controlled form options and links.
+source for the working surface. After GitHub App authentication, the isolated
+Worker copy of `curate.html` loads their bounded fields at runtime; it does not
+write them into the static artifact or persistent browser storage. The
+`colazeta.github.io` source contains only aggregate counts, controlled form
+options and a link to the dedicated console, and never receives the session.
 An authorised intake issue reaches this layer only through a validated,
 reviewable pull request; it is never converted directly into a canonical work.
 

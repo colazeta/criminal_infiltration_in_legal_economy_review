@@ -91,6 +91,7 @@ node --check site/stats.js
 node --check site/curator.js
 node --check site/curator-config.js
 node --check curator-app/src/index.js
+node --check curator-app/src/worker.js
 node --test curator-app/test/*.test.js
 python3 scripts/report_saturation.py
 ```

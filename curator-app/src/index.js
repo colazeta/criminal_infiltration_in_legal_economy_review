@@ -6,6 +6,14 @@ const API_VERSION = "2026-03-10";
 const MAX_TEXT_LENGTH = 2000;
 const SESSION_SECONDS = 8 * 60 * 60;
 const STATE_SECONDS = 10 * 60;
+const CURATOR_ASSETS = new Set([
+  "/curate.html",
+  "/curator.js",
+  "/styles.css",
+  "/data/curator-options.json",
+  "/data/curator-stats.json",
+  "/data/research-stats.json",
+]);
 
 const DECISIONS = new Set([
   "eligible_core",
@@ -75,6 +83,13 @@ function configuration(env) {
   const callbackUrl = new URL(requiredEnv(env, "GITHUB_CALLBACK_URL"));
   if (siteUrl.protocol !== "https:" || callbackUrl.protocol !== "https:") {
     throw new CuratorAppError(503, "invalid_configuration", "Gli URL della GitHub App devono usare HTTPS.");
+  }
+  if (siteUrl.origin !== callbackUrl.origin || siteUrl.pathname !== "/curate.html") {
+    throw new CuratorAppError(
+      503,
+      "invalid_configuration",
+      "Console e callback devono usare la stessa origine isolata del Worker.",
+    );
   }
   const repositoryId = requiredEnv(env, "GITHUB_REPOSITORY_ID");
   if (!/^\d+$/.test(repositoryId)) {
@@ -177,6 +192,63 @@ function commonHeaders() {
   };
 }
 
+function curatorAssetHeaders(headers, path) {
+  const result = new Headers(headers);
+  result.set("Cross-Origin-Opener-Policy", "same-origin");
+  result.set("Cross-Origin-Resource-Policy", "same-origin");
+  result.set("Permissions-Policy", "camera=(), geolocation=(), microphone=()");
+  result.set("Referrer-Policy", "no-referrer");
+  result.set("X-Content-Type-Options", "nosniff");
+  if (path === "/curate.html") {
+    result.set("Cache-Control", "no-store");
+    result.set(
+      "Content-Security-Policy",
+      "default-src 'self'; base-uri 'none'; connect-src 'self'; form-action 'none'; frame-ancestors 'none'; img-src 'self' data:; script-src 'self'; style-src 'self'",
+    );
+  }
+  return result;
+}
+
+function curatorConfigResponse(request) {
+  const origin = new URL(request.url).origin;
+  const source = `"use strict";\nwindow.CURATOR_APP_CONFIG = Object.freeze({\n  apiBaseUrl: ${JSON.stringify(origin)},\n  secureAppUrl: ${JSON.stringify(`${origin}/curate.html`)}\n});\n`;
+  return new Response(source, {
+    status: 200,
+    headers: curatorAssetHeaders(
+      {
+        "Cache-Control": "no-store",
+        "Content-Type": "text/javascript; charset=utf-8",
+      },
+      "/curator-config.js",
+    ),
+  });
+}
+
+async function serveCuratorAsset(request, env) {
+  const url = new URL(request.url);
+  if (url.pathname === "/") {
+    const target = new URL("/curate.html", url);
+    target.search = url.search;
+    return new Response(null, {
+      status: 302,
+      headers: { ...commonHeaders(), Location: target.toString() },
+    });
+  }
+  if (url.pathname === "/curator-config.js") return curatorConfigResponse(request);
+  if (!CURATOR_ASSETS.has(url.pathname)) {
+    throw new CuratorAppError(404, "route_not_found", "Risorsa non disponibile sull'origine curatoriale.");
+  }
+  if (!env.ASSETS || typeof env.ASSETS.fetch !== "function") {
+    throw new CuratorAppError(503, "assets_not_configured", "Gli asset della console non sono configurati.");
+  }
+  const response = await env.ASSETS.fetch(request);
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers: curatorAssetHeaders(response.headers, url.pathname),
+  });
+}
+
 function corsHeaders(request, config) {
   if (request.headers.get("Origin") !== config.siteOrigin) return {};
   return {
@@ -200,7 +272,14 @@ function jsonResponse(payload, status = 200, extraHeaders = {}) {
 }
 
 function requireSiteOrigin(request, config) {
-  if (request.headers.get("Origin") !== config.siteOrigin) {
+  const targetOrigin = new URL(request.url).origin;
+  const requestOrigin = request.headers.get("Origin");
+  const unsafeMethod = !["GET", "HEAD", "OPTIONS"].includes(request.method);
+  if (
+    targetOrigin !== config.siteOrigin ||
+    (requestOrigin && requestOrigin !== config.siteOrigin) ||
+    (unsafeMethod && !requestOrigin)
+  ) {
     throw new CuratorAppError(403, "origin_not_allowed", "Origine della richiesta non autorizzata.");
   }
 }
@@ -646,8 +725,7 @@ async function findSubmission(config, token, login, submissionId) {
     : null;
 }
 
-async function createDecision(config, session, input) {
-  const values = validateDecision(input);
+async function createDecisionValues(config, session, values) {
   const existing = await findSubmission(config, session.token, session.login, values.submissionId);
   if (existing) {
     return { issueNumber: Number(existing.number), issueUrl: String(existing.html_url), replayed: true };
@@ -663,6 +741,125 @@ async function createDecision(config, session, input) {
     }),
   });
   return { issueNumber: Number(issue.number), issueUrl: String(issue.html_url), replayed: false };
+}
+
+async function decisionFingerprint(values) {
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(JSON.stringify(values)));
+  return base64Url(new Uint8Array(digest));
+}
+
+function durableStub(namespace, name) {
+  if (!namespace) {
+    throw new CuratorAppError(503, "coordination_not_configured", "Il coordinatore degli invii non è configurato.");
+  }
+  if (typeof namespace.getByName === "function") return namespace.getByName(name);
+  if (typeof namespace.idFromName === "function" && typeof namespace.get === "function") {
+    return namespace.get(namespace.idFromName(name));
+  }
+  throw new CuratorAppError(503, "coordination_not_configured", "Il coordinatore degli invii non è disponibile.");
+}
+
+async function createDecision(env, session, input) {
+  const values = validateDecision(input);
+  const stub = durableStub(env.SUBMISSIONS, values.submissionId);
+  const response = await stub.fetch("https://submission.internal/create", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ input, login: session.login, token: session.token }),
+  });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new CuratorAppError(
+      response.status,
+      payload.error?.code || "submission_coordination_failed",
+      payload.error?.message || "Il coordinatore non ha completato l'invio.",
+    );
+  }
+  return payload;
+}
+
+export class SubmissionCoordinatorCore {
+  constructor(ctx, env) {
+    this.ctx = ctx;
+    this.env = env;
+    this.result = null;
+    this.reservation = null;
+    this.inFlight = null;
+    this.ready = ctx.blockConcurrencyWhile(async () => {
+      [this.result, this.reservation] = await Promise.all([
+        ctx.storage.get("result"),
+        ctx.storage.get("reservation"),
+      ]);
+    });
+  }
+
+  async perform(payload, values, fingerprint) {
+    const config = configuration(this.env);
+    if (
+      String(payload.login || "").toLowerCase() !== config.curatorLogin.toLowerCase() ||
+      !String(payload.token || "").startsWith("ghu_")
+    ) {
+      throw new CuratorAppError(403, "curator_not_authorized", "L'invio non è attribuito al curatore previsto.");
+    }
+    if (this.reservation && this.reservation.fingerprint !== fingerprint) {
+      throw new CuratorAppError(409, "idempotency_conflict", "Il submission ID è già associato a un'altra decisione.");
+    }
+    if (!this.reservation) {
+      this.reservation = { fingerprint, reservedAt: new Date().toISOString() };
+      await this.ctx.storage.put("reservation", this.reservation);
+    }
+    const result = await createDecisionValues(
+      config,
+      { login: payload.login, token: payload.token },
+      values,
+    );
+    this.result = { fingerprint, value: result };
+    await this.ctx.storage.put("result", this.result);
+    return result;
+  }
+
+  async fetch(request) {
+    try {
+      const url = new URL(request.url);
+      if (request.method !== "POST" || url.origin !== "https://submission.internal" || url.pathname !== "/create") {
+        throw new CuratorAppError(404, "route_not_found", "Endpoint interno non disponibile.");
+      }
+      await this.ready;
+      const payload = await request.json();
+      const values = validateDecision(payload.input);
+      const fingerprint = await decisionFingerprint(values);
+      if (this.result) {
+        if (this.result.fingerprint !== fingerprint) {
+          throw new CuratorAppError(409, "idempotency_conflict", "Il submission ID è già associato a un'altra decisione.");
+        }
+        return jsonResponse({ ...this.result.value, replayed: true });
+      }
+      if (this.inFlight) {
+        if (this.inFlight.fingerprint !== fingerprint) {
+          throw new CuratorAppError(409, "idempotency_conflict", "Il submission ID è già associato a un'altra decisione.");
+        }
+        return jsonResponse({ ...(await this.inFlight.promise), replayed: true });
+      }
+      const promise = this.perform(payload, values, fingerprint);
+      this.inFlight = { fingerprint, promise };
+      try {
+        return jsonResponse(await promise, 201);
+      } finally {
+        this.inFlight = null;
+      }
+    } catch (error) {
+      const known = error instanceof CuratorAppError;
+      return jsonResponse(
+        {
+          error: {
+            code: known ? error.code : "submission_coordination_failed",
+            message: known ? error.message : "Il coordinatore ha interrotto l'invio in sicurezza.",
+          },
+        },
+        known ? error.status : 500,
+      );
+    }
+  }
 }
 
 async function readJson(request) {
@@ -681,7 +878,7 @@ async function readJson(request) {
   }
 }
 
-async function handleApi(request, config, path) {
+async function handleApi(request, env, config, path) {
   requireSiteOrigin(request, config);
   const cors = corsHeaders(request, config);
   if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: { ...commonHeaders(), ...cors } });
@@ -708,7 +905,7 @@ async function handleApi(request, config, path) {
     if (headerKey !== values.submissionId) {
       throw new CuratorAppError(400, "idempotency_mismatch", "La chiave di invio non corrisponde alla decisione.");
     }
-    const result = await createDecision(config, session, values);
+    const result = await createDecision(env, session, values);
     return jsonResponse(result, result.replayed ? 200 : 201, cors);
   }
   if (path === "/auth/logout" && request.method === "POST") {
@@ -730,11 +927,14 @@ async function route(request, env) {
     }
     return jsonResponse({ status: configured ? "ok" : "configuration_required" }, configured ? 200 : 503);
   }
+  if (request.method === "GET" && (url.pathname === "/" || url.pathname === "/curator-config.js" || CURATOR_ASSETS.has(url.pathname))) {
+    return serveCuratorAsset(request, env);
+  }
   const config = configuration(env);
   if (url.pathname === "/auth/login" && request.method === "GET") return startLogin(request, config);
   if (url.pathname === "/auth/callback" && request.method === "GET") return finishLogin(request, config);
   if (url.pathname.startsWith("/api/") || url.pathname === "/auth/logout") {
-    return handleApi(request, config, url.pathname);
+    return handleApi(request, env, config, url.pathname);
   }
   throw new CuratorAppError(404, "route_not_found", "Endpoint non disponibile.");
 }

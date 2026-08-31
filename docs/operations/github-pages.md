@@ -6,8 +6,8 @@ The repository uses a custom GitHub Actions workflow rather than Jekyll.
 
 - Public URL: <https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/>
 - Site source: `site/`
-- Curator workspace: `site/curate.html`
-- Authenticated curator backend: `curator-app/` (deployed separately)
+- Public curator entrypoint: `site/curate.html`
+- Isolated authenticated console and backend: `curator-app/` (deployed separately)
 - Daily statistics page: `site/stats.html`
 - Aggregate metrics ledger: [GitHub issue #30](https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/issues/30)
 - Workflow: `.github/workflows/archive.yml`
@@ -37,11 +37,13 @@ has its own governed build and deploy workflow.
 8. Open **Settings → Pages** and use **Visit site**, or open the public URL above.
 
 GitHub states that a first publication or update can take several minutes. The
-Pages artifact remains static and contains no server-side secret. Its curator
-form becomes write-capable only when `site/curator-config.js` points to the
-separately deployed GitHub App backend described in
-[`github-app.md`](github-app.md). If that endpoint is absent or unhealthy, the
-page fails closed and exposes the authenticated GitHub issue form as a fallback.
+The Pages artifact remains static and contains no server-side secret or curator
+session. Once `site/curator-config.js` contains the reviewed `secureAppUrl`, the
+public page links to the separately deployed console described in
+[`github-app.md`](github-app.md). The console and API share a dedicated Worker
+origin; reusable authorization values never enter `colazeta.github.io`. If the
+console is absent, the page fails closed and exposes the authenticated GitHub
+issue form as a fallback.
 
 During deployment only, the workflow uses its short-lived GitHub token to read
 aggregate comments from metrics ledger #30. No token is included in the site
@@ -84,6 +86,7 @@ node --check site/stats.js
 node --check site/curator.js
 node --check site/curator-config.js
 node --check curator-app/src/index.js
+node --check curator-app/src/worker.js
 node --test curator-app/test/*.test.js
 python3 -m http.server 8000 --directory site
 ```

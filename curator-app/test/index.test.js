@@ -3,6 +3,7 @@ import test from "node:test";
 
 import worker, {
   CuratorAppError,
+  SubmissionCoordinatorCore,
   decisionIssueBody,
   parseCandidateIssue,
   seal,
@@ -17,11 +18,44 @@ const ENV = {
   GITHUB_CLIENT_ID: "Iv1.test",
   GITHUB_CLIENT_SECRET: "secret",
   GITHUB_CALLBACK_URL: "https://curator.example.workers.dev/auth/callback",
-  SITE_URL: "https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/curate.html",
+  SITE_URL: "https://curator.example.workers.dev/curate.html",
   CURATOR_LOGIN: "colazeta",
   SESSION_SECRET,
 };
-const ORIGIN = "https://colazeta.github.io";
+const ORIGIN = "https://curator.example.workers.dev";
+
+function coordinatorEnvironment(overrides = {}) {
+  const env = { ...ENV, ...overrides };
+  const objects = new Map();
+  env.SUBMISSIONS = {
+    getByName(name) {
+      if (!objects.has(name)) {
+        const values = new Map();
+        const state = {
+          blockConcurrencyWhile(callback) {
+            return callback();
+          },
+          storage: {
+            async get(key) {
+              return values.get(key);
+            },
+            async put(key, value) {
+              values.set(key, structuredClone(value));
+            },
+          },
+        };
+        objects.set(name, new SubmissionCoordinatorCore(state, env));
+      }
+      const instance = objects.get(name);
+      return {
+        fetch(input, init) {
+          return instance.fetch(input instanceof Request ? input : new Request(input, init));
+        },
+      };
+    },
+  };
+  return env;
+}
 
 function validDecision(overrides = {}) {
   return {
@@ -235,6 +269,38 @@ test("OAuth callback attributes the user and returns only a sealed browser sessi
   assert.equal(fragment.get("curator_csrf"), session.csrf);
 });
 
+test("the Worker serves only the isolated curator asset surface", async () => {
+  const env = {
+    ...ENV,
+    ASSETS: {
+      async fetch(request) {
+        return new Response(`asset:${new URL(request.url).pathname}`, {
+          headers: { "Content-Type": "text/html; charset=utf-8" },
+        });
+      },
+    },
+  };
+  const configResponse = await worker.fetch(
+    new Request("https://curator.example.workers.dev/curator-config.js"),
+    env,
+  );
+  assert.equal(configResponse.status, 200);
+  assert.match(await configResponse.text(), /apiBaseUrl: "https:\/\/curator\.example\.workers\.dev"/);
+
+  const consoleResponse = await worker.fetch(
+    new Request("https://curator.example.workers.dev/curate.html"),
+    env,
+  );
+  assert.equal(consoleResponse.status, 200);
+  assert.match(consoleResponse.headers.get("Content-Security-Policy"), /connect-src 'self'/);
+
+  const unrelated = await worker.fetch(
+    new Request("https://curator.example.workers.dev/index.html"),
+    env,
+  );
+  assert.equal(unrelated.status, 404);
+});
+
 test("authenticated candidate list is returned only to the configured site", async (context) => {
   const originalFetch = globalThis.fetch;
   context.after(() => {
@@ -303,7 +369,7 @@ test("decision submission verifies the queue issue and creates an attributed ins
       },
       body: JSON.stringify(decision),
     }),
-    ENV,
+    coordinatorEnvironment(),
   );
   assert.equal(response.status, 201);
   assert.deepEqual(await response.json(), {
@@ -312,4 +378,54 @@ test("decision submission verifies the queue issue and creates an attributed ins
     replayed: false,
   });
   assert.equal(calls.length, 3);
+});
+
+test("concurrent retries reserve one submission atomically", async (context) => {
+  const originalFetch = globalThis.fetch;
+  context.after(() => {
+    globalThis.fetch = originalFetch;
+  });
+  let creations = 0;
+  globalThis.fetch = async (url, init = {}) => {
+    if (String(url).includes("state=all")) return Response.json([]);
+    if (String(url).endsWith("/issues/33")) return Response.json(queueIssue());
+    if (String(url).endsWith("/issues") && init.method === "POST") {
+      creations += 1;
+      await new Promise((resolve) => setTimeout(resolve, 15));
+      return Response.json(
+        { number: 92, html_url: "https://github.com/colazeta/example/issues/92" },
+        { status: 201 },
+      );
+    }
+    throw new Error(`Unexpected fetch: ${url}`);
+  };
+  const env = coordinatorEnvironment();
+  const token = await sessionToken();
+  const decision = validDecision();
+  const request = () =>
+    worker.fetch(
+      new Request("https://curator.example.workers.dev/api/decisions", {
+        method: "POST",
+        headers: {
+          Origin: ORIGIN,
+          Authorization: `Bearer ${token}`,
+          "X-CSRF-Token": "csrf-test",
+          "Idempotency-Key": decision.submissionId,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(decision),
+      }),
+      env,
+    );
+  const responses = await Promise.all([request(), request()]);
+  assert.deepEqual(
+    responses.map((response) => response.status).sort(),
+    [200, 201],
+  );
+  assert.equal(creations, 1);
+  const payloads = await Promise.all(responses.map((response) => response.json()));
+  assert.deepEqual(
+    payloads.map((payload) => payload.replayed).sort(),
+    [false, true],
+  );
 });

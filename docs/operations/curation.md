@@ -13,12 +13,13 @@ equivale a promozione canonica e non approva la pubblicazione.
 GitHub Pages resta un sito statico e pubblico: non può custodire credenziali o
 scrivere nel repository. La pagina
 [`curate.html`](https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/curate.html)
-contiene però il pannello editoriale e si collega a un backend separato tramite
-una GitHub App. Dopo l'accesso, il backend legge le schede direttamente dalle
-issue e invia la decisione per conto dell'utente autenticato. Il sito non chiede
+rimanda al pannello editoriale servito, insieme al backend, da un'origine Worker
+dedicata. Dopo l'accesso, la GitHub App legge le schede direttamente dalle issue
+e invia la decisione per conto dell'utente autenticato. GitHub Pages non riceve
+la sessione; la console non chiede
 password o personal access token e non incorpora il token GitHub.
 
-Il documento statico e `site/data/` continuano a mostrare soltanto conteggi
+Il documento statico su GitHub Pages e `site/data/` continuano a mostrare soltanto conteggi
 aggregati e codici controllati. Titoli, identificatori, provenienza ed evidenza
 sono caricati a runtime soltanto per il curatore autenticato e non diventano un
 export pubblico. La configurazione e il modello di sicurezza sono descritti in

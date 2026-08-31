@@ -132,6 +132,7 @@ def validate_pages() -> None:
             "last-run-status",
             "editorial-app",
             "curator-login-panel",
+            "curator-secure-app",
             "editorial-console",
             "candidate-list",
             "candidate-detail",
@@ -369,8 +370,14 @@ def validate_assets() -> None:
             fail(f"curator.js crosses the public candidate boundary: {forbidden}")
 
     curator_config = (SITE / "curator-config.js").read_text(encoding="utf-8")
-    if "CURATOR_APP_CONFIG" not in curator_config or "apiBaseUrl" not in curator_config:
+    if (
+        "CURATOR_APP_CONFIG" not in curator_config
+        or "apiBaseUrl" not in curator_config
+        or "secureAppUrl" not in curator_config
+    ):
         fail("curator-config.js lacks the reviewed API endpoint contract")
+    if not re.search(r'apiBaseUrl:\s*""', curator_config):
+        fail("GitHub Pages curator config must leave the API origin empty")
     for forbidden in ("clientSecret", "GITHUB_CLIENT_SECRET", "SESSION_SECRET", "ghu_"):
         if forbidden in curator_config:
             fail(f"curator-config.js contains forbidden secret material: {forbidden}")

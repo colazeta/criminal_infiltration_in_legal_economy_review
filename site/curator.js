@@ -7,6 +7,7 @@ const config = window.CURATOR_APP_CONFIG || {};
 
 const state = {
   apiBaseUrl: normaliseApiBase(config.apiBaseUrl),
+  secureAppUrl: normaliseAppUrl(config.secureAppUrl),
   token: "",
   csrf: "",
   user: null,
@@ -33,6 +34,20 @@ function normaliseApiBase(value) {
     const local = parsed.protocol === "http:" && ["127.0.0.1", "localhost"].includes(parsed.hostname);
     if (parsed.protocol !== "https:" && !local) return "";
     return parsed.origin;
+  } catch {
+    return "";
+  }
+}
+
+function normaliseAppUrl(value) {
+  const raw = String(value || "").trim();
+  if (!raw) return "";
+  try {
+    const parsed = new URL(raw);
+    const local = parsed.protocol === "http:" && ["127.0.0.1", "localhost"].includes(parsed.hostname);
+    if (parsed.protocol !== "https:" && !local) return "";
+    parsed.hash = "";
+    return parsed.toString();
   } catch {
     return "";
   }
@@ -164,6 +179,31 @@ function loginUrl() {
   const requestedCandidate = new URL(window.location.href).searchParams.get("candidate");
   if (requestedCandidate) target.searchParams.set("candidate", requestedCandidate);
   return target.toString();
+}
+
+function secureWorkspaceUrl() {
+  if (!state.secureAppUrl) return "";
+  const target = new URL(state.secureAppUrl);
+  const requestedCandidate = new URL(window.location.href).searchParams.get("candidate");
+  if (requestedCandidate) target.searchParams.set("candidate", requestedCandidate);
+  return target.toString();
+}
+
+function configureSecureWorkspaceLink() {
+  const target = secureWorkspaceUrl();
+  const link = byId("curator-secure-app");
+  if (link) {
+    link.hidden = !target;
+    if (target) link.href = target;
+    else link.removeAttribute("href");
+  }
+  if (target) {
+    setText("curator-unavailable-title", "Apri la console curatoriale isolata");
+    setText(
+      "curator-unavailable-copy",
+      "La sessione autenticata vive su un’origine dedicata. La pagina pubblica non riceve bearer, token anti-CSRF o metadati dei candidati.",
+    );
+  }
 }
 
 function showAppMessage(message, kind = "info", link = null) {
@@ -604,6 +644,7 @@ async function loadPublicData() {
 async function initialise() {
   consumeAuthenticationFragment();
   consumeAuthenticationError();
+  configureSecureWorkspaceLink();
   wireInterface();
   await loadPublicData();
   if (!state.options) return;

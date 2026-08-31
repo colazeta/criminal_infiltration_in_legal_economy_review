@@ -70,15 +70,17 @@ screening, canonical promotion and publication remain four distinct gates.
 ## Correcting the archive
 
 Repository owners can use the [curator workspace](https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/curate.html)
-to authenticate with the repository GitHub App once its backend is configured, open the individually
-materialised legacy and daily candidates, filter them by review stage and
-submit an evidence-backed decision without leaving the site. Candidate actions
+to open an isolated console and authenticate with the repository GitHub App
+once its backend is configured. There they can open the individually materialised
+legacy and daily candidates, filter them by review stage and submit an
+evidence-backed decision without leaving the site. Candidate actions
 update only the editorial queue; canonical promotion and publication remain
 separate reviewed changes. A second authenticated workflow handles topic
 changes, exclusions and confirmed duplicate merges for existing canonical
 records. No repository token or candidate metadata is placed in the static
-website artifact; authenticated candidate fields are loaded at runtime from
-GitHub issues. Until activation, the workspace fails closed and links to the
+website artifact or the shared `colazeta.github.io` origin; authenticated
+candidate fields are loaded at runtime from GitHub issues on the dedicated
+Worker origin. Until activation, the workspace fails closed and links to the
 existing authenticated GitHub issue form.
 
 ## Publishing the website
@@ -106,6 +108,7 @@ node --check site/stats.js
 node --check site/curator.js
 node --check site/curator-config.js
 node --check curator-app/src/index.js
+node --check curator-app/src/worker.js
 node --test curator-app/test/*.test.js
 python3 -m http.server 8000 --directory site
 ```

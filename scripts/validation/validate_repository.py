@@ -75,6 +75,7 @@ REQUIRED_FILES = (
     "site/data/curator-options.json",
     "curator-app/package.json",
     "curator-app/src/index.js",
+    "curator-app/src/worker.js",
     "curator-app/test/index.test.js",
     "curator-app/wrangler.example.jsonc",
     ".github/workflows/archive.yml",
@@ -295,12 +296,43 @@ def check_public_boundary() -> None:
         "AES-GCM",
         "expires_in",
         "revokeToken",
+        "CURATOR_ASSETS",
+        "env.ASSETS.fetch",
+        "SUBMISSIONS",
+        "SubmissionCoordinatorCore",
+        "idempotency_conflict",
+        "siteUrl.origin !== callbackUrl.origin",
     ):
         if required not in backend:
             fail(f"Curator backend lacks security control: {required}")
     for forbidden in ("GITHUB_PRIVATE_KEY", "installation access token"):
         if forbidden in backend:
             fail(f"Curator backend unexpectedly uses server-to-server authority: {forbidden}")
+    public_config = (ROOT / "site/curator-config.js").read_text(encoding="utf-8")
+    if not re.search(r'apiBaseUrl:\s*""', public_config):
+        fail("GitHub Pages must not receive the curator API bearer")
+    if "secureAppUrl" not in public_config:
+        fail("GitHub Pages lacks the isolated curator-console link contract")
+    worker_entry = (ROOT / "curator-app/src/worker.js").read_text(encoding="utf-8")
+    for required in ('from "cloudflare:workers"', "extends DurableObject", "SubmissionCoordinatorCore"):
+        if required not in worker_entry:
+            fail(f"Curator Worker entrypoint lacks Durable Object control: {required}")
+    wrangler = json.loads(
+        (ROOT / "curator-app/wrangler.example.jsonc").read_text(encoding="utf-8")
+    )
+    if wrangler.get("main") != "src/worker.js":
+        fail("Wrangler must use the Durable Object Worker entrypoint")
+    if wrangler.get("vars", {}).get("SITE_URL", "").startswith("https://colazeta.github.io"):
+        fail("Authenticated curator console must not use the shared GitHub Pages origin")
+    assets = wrangler.get("assets", {})
+    if assets.get("binding") != "ASSETS" or assets.get("run_worker_first") is not True:
+        fail("Curator assets must run through the Worker allowlist")
+    bindings = wrangler.get("durable_objects", {}).get("bindings", [])
+    if not any(row.get("name") == "SUBMISSIONS" for row in bindings):
+        fail("Wrangler lacks atomic submission coordination")
+    exported = wrangler.get("exports", {}).get("SubmissionCoordinator", {})
+    if exported.get("storage") != "sqlite":
+        fail("SubmissionCoordinator must use durable SQLite storage")
     gitignore = (ROOT / ".gitignore").read_text(encoding="utf-8")
     for ignored in ("curator-app/wrangler.jsonc", "curator-app/.dev.vars"):
         if ignored not in gitignore:
@@ -510,6 +542,7 @@ def check_actions_pinned() -> None:
         'build_curator_options.py --output "$RUNNER_TEMP/archive/curator-options.json"',
         "node --check site/curator-config.js",
         "node --check curator-app/src/index.js",
+        "node --check curator-app/src/worker.js",
         "node --test curator-app/test/*.test.js",
     ):
         if phrase not in workflow:

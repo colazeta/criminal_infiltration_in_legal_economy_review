@@ -1210,6 +1210,19 @@ tbody tr:last-child td {
   font-size: 0.8rem;
 }
 
+.curator-app-unavailable-actions {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.curator-app-unavailable-actions a {
+  justify-content: center;
+  text-align: center;
+}
+
 .curator-login-panel .workspace-label {
   margin-bottom: 0.35rem;
 }
@@ -2087,6 +2100,10 @@ footer p {
   .decision-form-heading {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .curator-app-unavailable-actions {
+    width: 100%;
   }
 
   .curator-app-message,

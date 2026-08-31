@@ -65,6 +65,7 @@ jobs:
           node --check site/curator.js
           node --check site/curator-config.js
           node --check curator-app/src/index.js
+          node --check curator-app/src/worker.js
           node --test curator-app/test/*.test.js
           python scripts/report_saturation.py
 
@@ -126,6 +127,7 @@ jobs:
             echo "PASS node --check site/curator.js"
             echo "PASS node --check site/curator-config.js"
             echo "PASS node --check curator-app/src/index.js"
+            echo "PASS node --check curator-app/src/worker.js"
             echo "PASS node --test curator-app/test/*.test.js"
             echo "PASS python scripts/report_saturation.py"
             echo '```'

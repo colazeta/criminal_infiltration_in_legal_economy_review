@@ -19,8 +19,9 @@ follow semantic versioning while the project is in prerelease.
 - separate plain-language and technical literature-expansion guides;
 - aggregate daily-surveillance ledger, closed telemetry schemas and a public
   statistics page with source-completeness guardrails;
-- on-site candidate browser and decision form backed by a least-privilege
-  GitHub App, OAuth PKCE and an attributed issue-to-PR workflow.
+- isolated on-site candidate browser and decision form backed by a
+  least-privilege GitHub App, OAuth PKCE, atomic submission coordination and an
+  attributed issue-to-PR workflow.
 
 ### Changed
 
