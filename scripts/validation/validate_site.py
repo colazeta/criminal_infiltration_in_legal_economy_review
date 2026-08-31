@@ -17,6 +17,7 @@ SITE = ROOT / "site"
 sys.path.insert(0, str(ROOT / "scripts"))
 
 from build_archive import build_payload  # noqa: E402
+from curation.build_curator_options import build_payload as build_curator_options  # noqa: E402
 from curation.build_curator_stats import build_payload as build_curator_payload  # noqa: E402
 from metrics.surveillance import MetricsError, validate_public_payload  # noqa: E402
 
@@ -129,6 +130,19 @@ def validate_pages() -> None:
             "queue-legacy-rejected",
             "queue-origin-summary",
             "last-run-status",
+            "editorial-app",
+            "curator-login-panel",
+            "curator-secure-app",
+            "editorial-console",
+            "candidate-list",
+            "candidate-detail",
+            "decision-form",
+            "screening-stage",
+            "decision",
+            "evidence-basis",
+            "decision-rationale",
+            "explicit-confirmation",
+            "submit-decision",
         }
         - curator_ids
     )
@@ -230,6 +244,36 @@ def validate_curator_statistics() -> dict[str, object]:
     return payload
 
 
+def validate_curator_options() -> dict[str, object]:
+    payload = json.loads(
+        (SITE / "data/curator-options.json").read_text(encoding="utf-8")
+    )
+    if payload != build_curator_options(ROOT):
+        fail("curator-options.json is stale relative to the controlled registries")
+    expected = {
+        "schemaVersion",
+        "screeningStages",
+        "decisions",
+        "confidenceLevels",
+        "exclusionReasons",
+        "topics",
+    }
+    if not isinstance(payload, dict) or set(payload) != expected:
+        fail("curator-options.json must use the closed controlled field set")
+    for key in expected - {"schemaVersion"}:
+        rows = payload[key]
+        if not isinstance(rows, list) or not rows:
+            fail(f"curator-options.json {key} must be a non-empty list")
+        codes = [row.get("code") for row in rows if isinstance(row, dict)]
+        if len(codes) != len(rows) or "" in codes or len(codes) != len(set(codes)):
+            fail(f"curator-options.json {key} contains an invalid or duplicate code")
+    rendered = json.dumps(payload).lower()
+    for value in ("candidate_id", "github_issue", "actor", "rationale", "evidence_basis"):
+        if re.search(rf'"{re.escape(value)}"\s*:', rendered):
+            fail(f"curator-options.json contains candidate or reviewer field: {value}")
+    return payload
+
+
 def validate_assets() -> None:
     javascript = (SITE / "app.js").read_text(encoding="utf-8")
     if re.search(r"\.innerHTML\s*=|insertAdjacentHTML", javascript):
@@ -263,8 +307,12 @@ def validate_assets() -> None:
             fail(f"styles.css missing accessibility safeguard: {required}")
 
     curator = (SITE / "curate.html").read_text(encoding="utf-8")
-    if re.search(r"<(?:form|input|textarea)\b", curator, re.I):
-        fail("curate.html must not collect credentials or submit unauthenticated data")
+    if re.search(r"<input\b[^>]*type=[\"']password[\"']", curator, re.I):
+        fail("curate.html must never collect a password")
+    if re.search(r"<(?:input|textarea)\b[^>]*(?:name|id)=[\"'][^\"']*(?:token|secret|password)", curator, re.I):
+        fail("curate.html contains a credential-shaped input")
+    if re.search(r"<form\b[^>]*\baction=", curator, re.I):
+        fail("curate.html form must submit only through the authenticated JavaScript client")
     for private_registry_reference in ("data/registry", "papers.csv"):
         if private_registry_reference in curator:
             fail(
@@ -279,6 +327,9 @@ def validate_assets() -> None:
         "candidate_decision.yml",
         "curation%3Aqueue",
         "Una decisione modifica la coda, non pubblica il paper",
+        "Accedi con GitHub",
+        "Invia la decisione",
+        "GitHub App curatoriale",
     ):
         if phrase not in curator:
             fail(f"curate.html missing curator guidance: {phrase}")
@@ -291,6 +342,15 @@ def validate_assets() -> None:
     for required in (
         'fetch("./data/curator-stats.json")',
         'fetch("./data/research-stats.json")',
+        'fetch("./data/curator-options.json")',
+        'apiFetch("/api/session")',
+        'apiFetch("/api/candidates")',
+        'apiFetch("/api/decisions"',
+        "sessionStorage",
+        "history.replaceState",
+        "crypto.randomUUID",
+        "reportValidity",
+        "replaceChildren",
         "textContent",
         "legacyRejectionReview",
         "openByOrigin",
@@ -301,13 +361,26 @@ def validate_assets() -> None:
     for forbidden in (
         "data/curation",
         "review_queue",
-        "candidate_id",
-        "title",
-        "doi",
-        "authors",
+        "api.github.com",
+        "GITHUB_CLIENT_SECRET",
+        "GITHUB_PRIVATE_KEY",
+        "localStorage",
     ):
         if forbidden in curator_javascript:
             fail(f"curator.js crosses the public candidate boundary: {forbidden}")
+
+    curator_config = (SITE / "curator-config.js").read_text(encoding="utf-8")
+    if (
+        "CURATOR_APP_CONFIG" not in curator_config
+        or "apiBaseUrl" not in curator_config
+        or "secureAppUrl" not in curator_config
+    ):
+        fail("curator-config.js lacks the reviewed API endpoint contract")
+    if not re.search(r'apiBaseUrl:\s*""', curator_config):
+        fail("GitHub Pages curator config must leave the API origin empty")
+    for forbidden in ("clientSecret", "GITHUB_CLIENT_SECRET", "SESSION_SECRET", "ghu_"):
+        if forbidden in curator_config:
+            fail(f"curator-config.js contains forbidden secret material: {forbidden}")
 
     statistics = (SITE / "stats.html").read_text(encoding="utf-8")
     statistics_flat = " ".join(statistics.split()).lower()
@@ -340,11 +413,13 @@ def main() -> None:
     count = validate_payload()
     metric_days = validate_statistics()
     curator_stats = validate_curator_statistics()
+    curator_options = validate_curator_options()
     validate_assets()
     print(
         "[OK] Static site validation passed: "
         f"{count} public record(s), {metric_days} daily metric row(s), "
-        f"{curator_stats['open']} open curator item(s)."
+        f"{curator_stats['open']} open curator item(s), "
+        f"{len(curator_options['decisions'])} curator decision option(s)."
     )
 
 

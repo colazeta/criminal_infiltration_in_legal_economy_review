@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/schema/curator-options.schema.json",
+  "title": "Public-safe curator form options",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "screeningStages",
+    "decisions",
+    "confidenceLevels",
+    "exclusionReasons",
+    "topics"
+  ],
+  "properties": {
+    "schemaVersion": {"const": 1},
+    "screeningStages": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/describedOption"}
+    },
+    "decisions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/describedOption"}
+    },
+    "confidenceLevels": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/labelledOption"}
+    },
+    "exclusionReasons": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/governedOption"}
+    },
+    "topics": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/governedOption"}
+    }
+  },
+  "$defs": {
+    "labelledOption": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "label"],
+      "properties": {
+        "code": {"type": "string", "minLength": 1},
+        "label": {"type": "string", "minLength": 1}
+      }
+    },
+    "describedOption": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "label", "description"],
+      "properties": {
+        "code": {"type": "string", "minLength": 1},
+        "label": {"type": "string", "minLength": 1},
+        "description": {"type": "string", "minLength": 1}
+      }
+    },
+    "governedOption": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["code", "label", "definition"],
+      "properties": {
+        "code": {"type": "string", "minLength": 1},
+        "label": {"type": "string", "minLength": 1},
+        "definition": {"type": "string", "minLength": 1}
+      }
+    }
+  }
+}

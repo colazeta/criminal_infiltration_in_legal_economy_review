@@ -8,15 +8,22 @@ Il workspace separa due attività diverse:
 Nessuna delle due attività effettua auto-merge. Una decisione di screening non
 equivale a promozione canonica e non approva la pubblicazione.
 
-## Perché le decisioni avvengono dentro GitHub
+## Perché il sito usa una GitHub App
 
-GitHub Pages è un sito statico e pubblico. Non può custodire una password o un
-personal access token capace di modificare il repository. La pagina
+GitHub Pages resta un sito statico e pubblico: non può custodire credenziali o
+scrivere nel repository. La pagina
 [`curate.html`](https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/curate.html)
-mostra quindi soltanto conteggi aggregati e collegamenti. Le schede e i moduli
-che possono preparare una modifica si aprono nell'area GitHub autenticata.
-I conteggi vengono ricostruiti da una proiezione pubblica chiusa che non contiene
-titoli, identificatori, note, decisioni o identità del curatore.
+rimanda al pannello editoriale servito, insieme al backend, da un'origine Worker
+dedicata. Dopo l'accesso, la GitHub App legge le schede direttamente dalle issue
+e invia la decisione per conto dell'utente autenticato. GitHub Pages non riceve
+la sessione; la console non chiede
+password o personal access token e non incorpora il token GitHub.
+
+Il documento statico su GitHub Pages e `site/data/` continuano a mostrare soltanto conteggi
+aggregati e codici controllati. Titoli, identificatori, provenienza ed evidenza
+sono caricati a runtime soltanto per il curatore autenticato e non diventano un
+export pubblico. La configurazione e il modello di sicurezza sono descritti in
+[`github-app.md`](github-app.md).
 
 ## Coda dei candidati
 
@@ -63,20 +70,25 @@ triage, non una decisione di eleggibilità.
 
 ## Registrare una decisione su un candidato
 
-1. Aprire la [coda delle schede](https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/issues?q=is%3Aissue+is%3Aopen+label%3A%22curation%3Aqueue%22).
-2. Scegliere un candidato e leggere la sua provenienza.
-3. Aprire il [modulo di decisione](https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/issues/new?template=candidate_decision.yml).
-4. Copiare il `candidate_id` e compilare stage, decisione, evidenza, motivazione
-   e confidenza.
-5. Per un'esclusione usare un codice esatto da
+1. Aprire il [pannello di curatela](https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/curate.html)
+   e accedere con l'account GitHub autorizzato.
+2. Cercare una scheda o filtrare la coda per corsia, quindi esaminare metadati,
+   provenienza e collegamenti disponibili.
+3. Compilare stage, decisione, evidenza, motivazione e confidenza. Il pannello
+   mostra soltanto i campi compatibili con la decisione scelta.
+4. Per un'esclusione usare un codice esatto da
    `data/registry/exclusion_reasons.csv`.
-6. Per `eligible_core` o `eligible_contextual` usare un tema già presente nella
+5. Per `eligible_core` o `eligible_contextual` usare un tema già presente nella
    tassonomia.
-7. Per `duplicate` indicare il candidato o paper che sopravvive e la prova di
+6. Per `duplicate` indicare il candidato o paper che sopravvive e la prova di
    identità.
-8. Scrivere `APPLY` nel campo di conferma e inviare la issue.
+7. Confermare esplicitamente e inviare. La App scrive `APPLY` nella issue
+   strutturata e ne mostra il collegamento.
 
-Soltanto una issue creata dal proprietario del repository e dotata
+Il [modulo GitHub](https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/issues/new?template=candidate_decision.yml)
+resta disponibile come percorso di riserva se il backend non è attivo.
+
+Soltanto una issue attribuita al proprietario del repository e dotata
 dell'etichetta `curation:decision` viene elaborata. Il workflow
 `.github/workflows/candidate-curation.yml`:
 

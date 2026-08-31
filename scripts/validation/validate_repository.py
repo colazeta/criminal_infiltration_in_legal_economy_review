@@ -35,6 +35,7 @@ REQUIRED_FILES = (
     "docs/operations/automation.md",
     "docs/operations/daily-metrics.md",
     "docs/operations/curation.md",
+    "docs/operations/github-app.md",
     "docs/operations/release.md",
     "docs/operations/github-pages.md",
     "docs/history/e0-pilot.md",
@@ -44,6 +45,7 @@ REQUIRED_FILES = (
     "data/curation/actions.csv",
     "schema/public-archive.schema.json",
     "schema/curator-stats.schema.json",
+    "schema/curator-options.schema.json",
     "schema/surveillance-run.schema.json",
     "schema/research-stats.schema.json",
     "scripts/build_archive.py",
@@ -53,6 +55,7 @@ REQUIRED_FILES = (
     "scripts/report_saturation.py",
     "scripts/curation/apply_action.py",
     "scripts/curation/build_curator_stats.py",
+    "scripts/curation/build_curator_options.py",
     "scripts/curation/build_legacy_queue.py",
     "scripts/curation/import_intake_issue.py",
     "scripts/curation/apply_candidate_decision.py",
@@ -65,9 +68,16 @@ REQUIRED_FILES = (
     "site/app.js",
     "site/stats.js",
     "site/curator.js",
+    "site/curator-config.js",
     "site/styles.css",
     "site/data/research-stats.json",
     "site/data/curator-stats.json",
+    "site/data/curator-options.json",
+    "curator-app/package.json",
+    "curator-app/src/index.js",
+    "curator-app/src/worker.js",
+    "curator-app/test/index.test.js",
+    "curator-app/wrangler.example.jsonc",
     ".github/workflows/archive.yml",
     ".github/workflows/curation.yml",
     ".github/workflows/candidate-curation.yml",
@@ -254,6 +264,83 @@ def check_public_boundary() -> None:
             fail(f"Public curator surface crosses the candidate boundary: {forbidden}")
     if re.search(r"E0(?:R1)?-[A-Z]\d{3}", public_page + public_curator):
         fail("Public curator surface embeds a candidate identifier")
+    for forbidden in (
+        "api.github.com",
+        "GITHUB_CLIENT_SECRET",
+        "GITHUB_PRIVATE_KEY",
+        "ghu_",
+        "localStorage",
+    ):
+        if forbidden in public_curator or forbidden in public_page:
+            fail(f"Public curator surface contains a forbidden credential path: {forbidden}")
+    for required in (
+        "sessionStorage",
+        "history.replaceState",
+        'fetch("./data/curator-options.json")',
+        'apiFetch("/api/candidates")',
+        'apiFetch("/api/decisions"',
+    ):
+        if required not in public_curator:
+            fail(f"Public curator surface lacks an authenticated boundary: {required}")
+
+    backend = (ROOT / "curator-app/src/index.js").read_text(encoding="utf-8")
+    for required in (
+        "code_challenge_method",
+        "repository_id",
+        "CURATOR_LOGIN",
+        "GITHUB_REPOSITORY_ID",
+        "X-CSRF-Token",
+        "Idempotency-Key",
+        "curation:queue",
+        "curation:decision",
+        "AES-GCM",
+        "expires_in",
+        "revokeToken",
+        "CURATOR_ASSETS",
+        "env.ASSETS.fetch",
+        "SUBMISSIONS",
+        "SubmissionCoordinatorCore",
+        "idempotency_conflict",
+        "siteUrl.origin !== callbackUrl.origin",
+    ):
+        if required not in backend:
+            fail(f"Curator backend lacks security control: {required}")
+    for forbidden in ("GITHUB_PRIVATE_KEY", "installation access token"):
+        if forbidden in backend:
+            fail(f"Curator backend unexpectedly uses server-to-server authority: {forbidden}")
+    public_config = (ROOT / "site/curator-config.js").read_text(encoding="utf-8")
+    if not re.search(r'apiBaseUrl:\s*""', public_config):
+        fail("GitHub Pages must not receive the curator API bearer")
+    if "secureAppUrl" not in public_config:
+        fail("GitHub Pages lacks the isolated curator-console link contract")
+    worker_entry = (ROOT / "curator-app/src/worker.js").read_text(encoding="utf-8")
+    for required in ('from "cloudflare:workers"', "extends DurableObject", "SubmissionCoordinatorCore"):
+        if required not in worker_entry:
+            fail(f"Curator Worker entrypoint lacks Durable Object control: {required}")
+    wrangler = json.loads(
+        (ROOT / "curator-app/wrangler.example.jsonc").read_text(encoding="utf-8")
+    )
+    if wrangler.get("main") != "src/worker.js":
+        fail("Wrangler must use the Durable Object Worker entrypoint")
+    if wrangler.get("vars", {}).get("SITE_URL", "").startswith("https://colazeta.github.io"):
+        fail("Authenticated curator console must not use the shared GitHub Pages origin")
+    assets = wrangler.get("assets", {})
+    if assets.get("binding") != "ASSETS" or assets.get("run_worker_first") is not True:
+        fail("Curator assets must run through the Worker allowlist")
+    bindings = wrangler.get("durable_objects", {}).get("bindings", [])
+    if not any(row.get("name") == "SUBMISSIONS" for row in bindings):
+        fail("Wrangler lacks atomic submission coordination")
+    migrations = wrangler.get("migrations", [])
+    if not any(
+        row.get("tag") == "v1"
+        and "SubmissionCoordinator" in row.get("new_sqlite_classes", [])
+        for row in migrations
+    ):
+        fail("SubmissionCoordinator lacks its initial SQLite migration")
+    gitignore = (ROOT / ".gitignore").read_text(encoding="utf-8")
+    for ignored in ("curator-app/wrangler.jsonc", "curator-app/.dev.vars"):
+        if ignored not in gitignore:
+            fail(f".gitignore does not protect local curator credentials: {ignored}")
 
 
 def check_curator_queue() -> None:
@@ -456,6 +543,11 @@ def check_actions_pinned() -> None:
         '--allowed-author "$LEDGER_AUTHOR"',
         "node --check site/stats.js",
         'build_curator_stats.py --output "$RUNNER_TEMP/archive/curator-stats.json"',
+        'build_curator_options.py --output "$RUNNER_TEMP/archive/curator-options.json"',
+        "node --check site/curator-config.js",
+        "node --check curator-app/src/index.js",
+        "node --check curator-app/src/worker.js",
+        "node --test curator-app/test/*.test.js",
     ):
         if phrase not in workflow:
             fail(f"Archive workflow missing daily-metrics safeguard: {phrase}")
@@ -628,6 +720,7 @@ def check_governance_copy() -> None:
         "surveillance-run.schema.json",
         "research-stats.schema.json",
         "curator-stats.schema.json",
+        "curator-options.schema.json",
     ):
         schema = json.loads((ROOT / "schema" / schema_name).read_text(encoding="utf-8"))
         if schema.get("additionalProperties") is not False:

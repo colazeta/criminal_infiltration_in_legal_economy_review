@@ -12,6 +12,7 @@ import argparse
 import csv
 import json
 import os
+import re
 import time
 from pathlib import Path
 from urllib.error import HTTPError
@@ -148,6 +149,12 @@ def decision_form_url(repository: str, candidate_id: str) -> str:
     return f"https://github.com/{repository}/issues/new?{query}"
 
 
+def curator_site_url(repository: str, candidate_id: str) -> str:
+    owner, name = repository.split("/", 1)
+    query = urlencode({"candidate": candidate_id})
+    return f"https://{owner.lower()}.github.io/{name}/curate.html?{query}"
+
+
 def markdown_text(value: str, fallback: str = "Not recorded") -> str:
     value = " ".join((value or "").split())
     return value.replace("|", "\\|") if value else fallback
@@ -167,6 +174,33 @@ def source_links(value: str) -> str:
         safe_link = link.replace("<", "%3C").replace(">", "%3E").replace(" ", "%20")
         rendered.append(f"- Source link {index}: <{safe_link}>")
     return "\n".join(rendered)
+
+
+def curator_action_section(repository: str, row: dict[str, str]) -> str:
+    return f"""## Curator action
+
+[Open this candidate in the curator workspace]({curator_site_url(repository, row['candidate_id'])})
+
+The workspace authenticates the curator through the repository GitHub App and
+submits an attributed instruction. [Use the GitHub issue form as a temporary
+fallback]({decision_form_url(repository, row['candidate_id'])}). Either route
+prepares a reviewable pull request; neither can publish the work or merge its
+own change."""
+
+
+def replace_curator_action(
+    body: str, repository: str, row: dict[str, str]
+) -> str:
+    existing = str(body or "").rstrip()
+    replacement = curator_action_section(repository, row)
+    match = re.search(
+        r"(?ms)^## Curator action\s*$.*?(?=^##\s|\Z)", existing
+    )
+    if match:
+        before = existing[: match.start()].rstrip()
+        after = existing[match.end() :].lstrip()
+        return "\n\n".join(part for part in (before, replacement, after) if part) + "\n"
+    return f"{existing}\n\n{replacement}\n" if existing else f"{replacement}\n"
 
 
 def issue_body(repository: str, row: dict[str, str]) -> str:
@@ -225,13 +259,7 @@ approval. Review the available evidence under the current four-part test."""
 
 {provenance}
 
-## Curator action
-
-[Record an evidence-backed decision]({decision_form_url(repository, row['candidate_id'])})
-
-Copy the candidate ID exactly into the authenticated decision form. The form
-prepares a reviewable pull request; it cannot publish the work or merge its own
-change.
+{curator_action_section(repository, row)}
 """
 
 
@@ -331,6 +359,17 @@ def reconcile_issue(
     if not isinstance(number, int):
         raise GitHubError(f"GitHub issue number is missing for {row['candidate_id']}")
     writes = 0
+    current_body = str(issue.get("body") or "")
+    desired_body = replace_curator_action(current_body, repository, row)
+    if current_body != desired_body:
+        api_request(
+            repository,
+            token,
+            "PATCH",
+            f"/issues/{number}",
+            {"body": desired_body},
+        )
+        writes += 1
     action_id = row.get("last_action_id", "")
     if action_id:
         marker = f"<!-- curator-action:{action_id} -->"
