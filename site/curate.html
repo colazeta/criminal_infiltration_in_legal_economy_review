@@ -10,6 +10,7 @@
     <title>Workspace del curatore · Criminal Infiltration Archive</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>◫</text></svg>" />
     <link rel="stylesheet" href="./styles.css" />
+    <script src="./curator-config.js" defer></script>
     <script src="./curator.js" defer></script>
   </head>
   <body class="curator-page">
@@ -26,7 +27,7 @@
         </a>
         <nav aria-label="Navigazione principale">
           <a href="#curator-workflow">Coda</a>
-          <a href="#curator-actions">Decisioni</a>
+          <a href="#editorial-app">Decisioni</a>
           <a href="./stats.html">Statistiche</a>
           <a href="./">Biblioteca</a>
           <a href="https://github.com/colazeta/criminal_infiltration_in_legal_economy_review">Repository</a>
@@ -59,12 +60,12 @@
         <div class="curator-toolbar" aria-label="Azioni principali">
           <a
             class="primary-action"
-            href="https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/issues?q=is%3Aissue+is%3Aopen+label%3A%22curation%3Aqueue%22"
-          >Apri la coda completa</a>
+            href="#editorial-app"
+          >Lavora sulla coda</a>
           <a
             class="toolbar-action"
-            href="https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/issues/new?template=candidate_decision.yml"
-          >Registra una decisione</a>
+            href="https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/issues?q=is%3Aissue+is%3Aopen+label%3A%22curation%3Aqueue%22"
+          >Controlla la coda su GitHub</a>
           <a
             class="toolbar-action"
             href="https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/issues?q=is%3Aissue+%22%5BINTAKE%5D%5BACADEMIC%5D%22+sort%3Acreated-desc"
@@ -74,6 +75,198 @@
             href="https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/actions/workflows/curation.yml"
           >Gestisci record canonici</a>
         </div>
+
+        <section class="editorial-app" id="editorial-app" aria-labelledby="editorial-app-title">
+          <div class="section-heading editorial-app-heading">
+            <div>
+              <p class="eyebrow">GitHub App curatoriale</p>
+              <h2 id="editorial-app-title">Scegli, valuta e invia senza lasciare il sito</h2>
+            </div>
+            <p>
+              L’accesso GitHub identifica il curatore. La decisione crea
+              un’istruzione attribuita; GitHub Actions la convalida e prepara
+              una pull request, senza pubblicare né effettuare merge.
+            </p>
+          </div>
+
+          <div class="curator-app-message" id="curator-app-message" role="status" aria-live="polite" hidden></div>
+
+          <div class="curator-app-unavailable" id="curator-app-unavailable" hidden>
+            <div>
+              <strong>Backend della GitHub App non ancora attivato</strong>
+              <p>
+                L’interfaccia è pronta, ma l’invio diretto rimane bloccato finché
+                la App non viene registrata e il suo endpoint HTTPS non viene configurato.
+              </p>
+            </div>
+            <a
+              class="toolbar-action"
+              href="https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/issues/new?template=candidate_decision.yml"
+            >Usa temporaneamente il modulo GitHub</a>
+          </div>
+
+          <div class="curator-login-panel" id="curator-login-panel" hidden>
+            <div>
+              <p class="workspace-label">Accesso richiesto</p>
+              <h3>Autenticati come curatore</h3>
+              <p>
+                La App richiede soltanto accesso in lettura e scrittura alle issue
+                del repository selezionato. Non inserire password o personal access token.
+              </p>
+            </div>
+            <a class="primary-action" id="curator-login" href="#editorial-app">Accedi con GitHub</a>
+          </div>
+
+          <div class="curator-session-panel" id="curator-session-panel" hidden>
+            <p>
+              Sessione attribuita a <strong id="curator-login-name">—</strong>
+            </p>
+            <button class="text-button" id="curator-logout" type="button">Termina sessione</button>
+          </div>
+
+          <div class="editorial-console" id="editorial-console" hidden>
+            <aside class="candidate-browser" aria-labelledby="candidate-browser-title">
+              <div class="candidate-browser-heading">
+                <div>
+                  <p class="workspace-label">Coda autenticata</p>
+                  <h3 id="candidate-browser-title">Schede aperte</h3>
+                </div>
+                <span id="candidate-result-count">—</span>
+              </div>
+              <div class="candidate-controls">
+                <label>
+                  <span>Cerca</span>
+                  <input
+                    id="candidate-search"
+                    type="search"
+                    placeholder="Titolo, autore, DOI o ID"
+                    autocomplete="off"
+                  />
+                </label>
+                <label>
+                  <span>Corsia</span>
+                  <select id="candidate-lane-filter">
+                    <option value="">Tutte le corsie</option>
+                    <option value="metadata_fix">Metadati</option>
+                    <option value="manual_review">Revisione manuale</option>
+                    <option value="abstract_full_text_review">Abstract / full text</option>
+                    <option value="legacy_rejection_review">Rigetti legacy</option>
+                  </select>
+                </label>
+              </div>
+              <div class="candidate-list" id="candidate-list" aria-live="polite"></div>
+              <p class="candidate-list-empty" id="candidate-list-empty" hidden>Nessuna scheda corrisponde ai filtri.</p>
+            </aside>
+
+            <section class="candidate-decision-panel" aria-labelledby="candidate-decision-title">
+              <div class="candidate-empty-state" id="candidate-empty-state">
+                <span aria-hidden="true">01</span>
+                <h3 id="candidate-decision-title">Seleziona una scheda</h3>
+                <p>
+                  I metadati e la provenienza vengono caricati soltanto dopo
+                  l’autenticazione. Nessun candidato entra nell’export pubblico.
+                </p>
+              </div>
+
+              <article class="candidate-detail" id="candidate-detail" hidden>
+                <div class="candidate-detail-heading">
+                  <div>
+                    <p class="workspace-label" id="selected-provenance-kind">—</p>
+                    <code id="selected-candidate-id">—</code>
+                    <h3 id="selected-candidate-title">—</h3>
+                  </div>
+                  <a id="selected-candidate-issue" href="https://github.com" hidden>Apri la scheda GitHub ↗</a>
+                </div>
+                <dl class="candidate-metadata">
+                  <div><dt>Autori</dt><dd id="selected-candidate-authors">—</dd></div>
+                  <div><dt>Anno</dt><dd id="selected-candidate-year">—</dd></div>
+                  <div><dt>Sede editoriale</dt><dd id="selected-candidate-venue">—</dd></div>
+                  <div>
+                    <dt>DOI</dt>
+                    <dd>
+                      <span id="selected-candidate-doi">—</span>
+                      <a id="selected-candidate-doi-link" href="https://doi.org" hidden>verifica ↗</a>
+                    </dd>
+                  </div>
+                  <div><dt>Fonte</dt><dd id="selected-candidate-source">—</dd></div>
+                  <div><dt>Stage corrente</dt><dd id="selected-candidate-stage">—</dd></div>
+                </dl>
+                <details class="candidate-provenance-details">
+                  <summary>Mostra la provenienza registrata</summary>
+                  <dl id="candidate-provenance"></dl>
+                </details>
+              </article>
+
+              <form class="decision-form" id="decision-form" autocomplete="off" hidden>
+                <div class="decision-form-heading">
+                  <div>
+                    <p class="workspace-label">Decisione per <span id="form-candidate-id">—</span></p>
+                    <h3>Registra l’istruzione editoriale</h3>
+                  </div>
+                  <p>I campi incompatibili vengono esclusi prima dell’invio.</p>
+                </div>
+
+                <div class="decision-fields">
+                  <label>
+                    <span>Stage esaminato</span>
+                    <select id="screening-stage" required></select>
+                  </label>
+                  <label>
+                    <span>Decisione</span>
+                    <select id="decision" required></select>
+                  </label>
+                  <label id="exclusion-field" hidden>
+                    <span>Motivo di esclusione</span>
+                    <select id="exclusion-reason"></select>
+                  </label>
+                  <label id="topic-field" hidden>
+                    <span>Tema governato</span>
+                    <select id="topic-code"></select>
+                  </label>
+                  <label id="duplicate-field" hidden>
+                    <span>Candidato o paper prevalente</span>
+                    <input id="duplicate-target" type="text" maxlength="60" placeholder="Candidate ID o paper ID" />
+                  </label>
+                  <label>
+                    <span>Confidenza</span>
+                    <select id="confidence" required></select>
+                  </label>
+                  <label class="wide-field">
+                    <span>Base di evidenza e punto esaminato</span>
+                    <textarea
+                      id="evidence-basis"
+                      rows="4"
+                      maxlength="2000"
+                      required
+                      placeholder="Indica abstract, sezione, pagina o fonte di metadati effettivamente esaminata."
+                    ></textarea>
+                    <small>Non incollare passaggi estesi o full text protetto.</small>
+                  </label>
+                  <label class="wide-field">
+                    <span>Motivazione riferita alla scheda</span>
+                    <textarea
+                      id="decision-rationale"
+                      rows="5"
+                      maxlength="2000"
+                      required
+                      placeholder="Spiega come l’evidenza sostiene la decisione secondo la regola corrente."
+                    ></textarea>
+                  </label>
+                </div>
+
+                <label class="explicit-confirmation">
+                  <input id="explicit-confirmation" type="checkbox" required />
+                  <span>
+                    Confermo che questa è una mia decisione editoriale. La App
+                    registrerà <strong>APPLY</strong>; la pull request resterà da revisionare.
+                  </span>
+                </label>
+                <button class="primary-action" id="submit-decision" type="submit">Invia la decisione</button>
+                <div class="decision-result" id="decision-result" role="status" aria-live="polite" hidden></div>
+              </form>
+            </section>
+          </div>
+        </section>
 
         <section class="queue-overview" aria-labelledby="queue-overview-title">
           <div class="compact-heading">
@@ -123,7 +316,7 @@
               <p class="eyebrow">Viste operative</p>
               <h2 id="queue-lanes-title">Entra direttamente nel lavoro da fare</h2>
             </div>
-            <p>Le schede si aprono nell’area autenticata di GitHub; nessun token è conservato in questa pagina.</p>
+            <p>Le stesse corsie sono disponibili nel pannello autenticato; GitHub resta consultabile per audit.</p>
           </div>
           <div class="lane-grid">
             <a
@@ -220,15 +413,15 @@
             <h3>Come registrare una decisione</h3>
           </div>
           <ol>
-            <li>Apri una scheda dalla coda e copia il suo candidate ID.</li>
-            <li>Apri il modulo di decisione e compila solo i campi pertinenti.</li>
-            <li>Scrivi <strong>APPLY</strong>: GitHub Actions convalida l’istruzione.</li>
+            <li>Accedi con GitHub e scegli una scheda direttamente nel pannello.</li>
+            <li>Compila soltanto i campi resi pertinenti dalla decisione.</li>
+            <li>Conferma: la App registra <strong>APPLY</strong> nell’istruzione attribuita.</li>
             <li>Controlla la pull request prodotta e decidi se integrarla.</li>
           </ol>
           <a
             class="primary-action"
             href="https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/issues/new?template=candidate_decision.yml"
-          >Apri il modulo di decisione</a>
+          >Modulo GitHub di riserva</a>
         </div>
 
         <details class="canonical-tools">
@@ -254,10 +447,12 @@
           <h2 id="boundary-title">Questa pagina non è il database editoriale</h2>
         </div>
         <p>
-          Mostra soltanto conteggi aggregati e collegamenti alle aree autenticate.
-          Non raccoglie password, personal access token, evidenza o dati dei
-          candidati. Le decisioni restano fuori dall’export pubblico; promozione
-          canonica e pubblicazione richiedono passaggi successivi e indipendenti.
+          Il documento pubblico contiene soltanto conteggi e codici controllati.
+          Dopo l’accesso, la GitHub App recupera le schede attraverso una sessione
+          temporanea e attribuita; la pagina non raccoglie password o personal
+          access token. Candidati, evidenza e identità restano fuori dall’export
+          pubblico. Promozione canonica e pubblicazione richiedono passaggi
+          successivi e indipendenti.
         </p>
       </section>
     </main>

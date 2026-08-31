@@ -1,0 +1,16 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "criminal-infiltration-curator",
+  "main": "src/index.js",
+  "compatibility_date": "2026-08-31",
+  "workers_dev": true,
+  "preview_urls": false,
+  "vars": {
+    "GITHUB_REPOSITORY": "colazeta/criminal_infiltration_in_legal_economy_review",
+    "GITHUB_REPOSITORY_ID": "1224850188",
+    "CURATOR_LOGIN": "colazeta",
+    "SITE_URL": "https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/curate.html",
+    "GITHUB_CALLBACK_URL": "https://REPLACE_WITH_WORKER_HOST/auth/callback",
+    "GITHUB_CLIENT_ID": "REPLACE_AFTER_GITHUB_APP_REGISTRATION"
+  }
+}

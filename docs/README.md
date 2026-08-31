@@ -12,7 +12,8 @@
 | understand daily search statistics | [Daily research statistics](operations/daily-metrics.md) |
 | understand what is public and why | [Data model and publication gate](governance/data-model.md) |
 | suggest or review a paper | [Contribution guide](../CONTRIBUTING.md) |
-| change a topic, exclude or merge a duplicate | [Curator desk instructions](operations/curation.md) |
+| review candidates or change a governed record | [Curator desk instructions](operations/curation.md) |
+| configure authenticated on-site decisions | [GitHub App guide](operations/github-app.md) |
 | publish the site | [GitHub Pages guide](operations/github-pages.md) → [release runbook](operations/release.md) |
 | inspect the canonical tables | [Registry index](../data/registry/README.md) |
 
@@ -36,6 +37,7 @@
 - [Academic intake automation](operations/automation.md)
 - [Daily research statistics](operations/daily-metrics.md)
 - [Curator desk](operations/curation.md)
+- [Curator GitHub App](operations/github-app.md)
 - [Release and preservation](operations/release.md)
 - [GitHub Pages publication](operations/github-pages.md)
 

@@ -154,6 +154,11 @@ class LegacyQueueTests(unittest.TestCase):
         self.assertIn(f"curator-candidate:{row['candidate_id']}", body)
         self.assertIn("Pilot provenance — not a decision", body)
         self.assertIn("It is not a governed eligibility decision", body_flat)
+        self.assertIn(
+            f"curate.html?candidate={row['candidate_id']}",
+            body,
+        )
+        self.assertIn("temporary fallback", body_flat)
         self.assertNotIn("abstract", body.lower())
 
     def test_public_curator_projection_contains_aggregates_only(self) -> None:
@@ -401,15 +406,47 @@ class DailyIntakeQueueTests(unittest.TestCase):
 
 class QueueIssueReconciliationTests(unittest.TestCase):
     @patch("scripts.curation.materialize_queue_issues.api_request")
+    def test_existing_queue_issue_receives_curator_workspace_link(
+        self, api_mock
+    ) -> None:
+        row = materialise(ROOT)[0]
+        writes = reconcile_issue(
+            "colazeta/criminal_infiltration_in_legal_economy_review",
+            "token",
+            row,
+            {
+                "number": 299,
+                "state": "open",
+                "labels": [
+                    {"name": "curation:queue"},
+                    {"name": "stage:manual-review"},
+                ],
+                "body": "<!-- curator-candidate:E0-D002 -->\n\nOld action link.",
+            },
+            {},
+        )
+        self.assertEqual(1, writes)
+        call = api_mock.call_args
+        self.assertEqual("PATCH", call.args[2])
+        self.assertIn("curate.html?candidate=", call.args[4]["body"])
+        self.assertIn("temporary fallback", " ".join(call.args[4]["body"].split()))
+
+    @patch("scripts.curation.materialize_queue_issues.api_request")
     @patch("scripts.curation.materialize_queue_issues.paginated", return_value=[])
     def test_completed_candidate_issue_is_linked_and_closed(
         self, paginated_mock, api_mock
     ) -> None:
-        row = {
-            "candidate_id": "E0-D002",
-            "current_status": "screened_not_eligible",
-            "last_action_id": "CA000001",
-        }
+        row = next(
+            dict(candidate)
+            for candidate in materialise(ROOT)
+            if candidate["candidate_id"] == "E0-D002"
+        )
+        row.update(
+            {
+                "current_status": "screened_not_eligible",
+                "last_action_id": "CA000001",
+            }
+        )
         actions = {
             "CA000001": {
                 "action_id": "CA000001",
@@ -421,7 +458,15 @@ class QueueIssueReconciliationTests(unittest.TestCase):
             "colazeta/criminal_infiltration_in_legal_economy_review",
             "token",
             row,
-            {"number": 300, "state": "open", "labels": []},
+            {
+                "number": 300,
+                "state": "open",
+                "labels": [],
+                "body": issue_body(
+                    "colazeta/criminal_infiltration_in_legal_economy_review",
+                    row,
+                ),
+            },
             actions,
         )
         self.assertEqual(2, writes)

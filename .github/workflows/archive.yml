@@ -38,12 +38,16 @@ jobs:
           python scripts/build_archive.py --output-dir "$RUNNER_TEMP/archive"
           python scripts/metrics/build_research_stats.py --output "$RUNNER_TEMP/archive/research-stats.json"
           python scripts/curation/build_curator_stats.py --output "$RUNNER_TEMP/archive/curator-stats.json"
+          python scripts/curation/build_curator_options.py --output "$RUNNER_TEMP/archive/curator-options.json"
           diff -ru "$RUNNER_TEMP/archive" site/data
           python scripts/validation/validate_archive.py
           python scripts/validation/validate_site.py
           node --check site/app.js
           node --check site/stats.js
           node --check site/curator.js
+          node --check site/curator-config.js
+          node --check curator-app/src/index.js
+          node --test curator-app/test/*.test.js
 
   deploy:
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
@@ -83,11 +87,15 @@ jobs:
           python scripts/metrics/build_research_stats.py \
             --input "$RUNNER_TEMP/surveillance-ledger.json"
           python scripts/curation/build_curator_stats.py
+          python scripts/curation/build_curator_options.py
           python scripts/validation/validate_archive.py
           python scripts/validation/validate_site.py
           node --check site/app.js
           node --check site/stats.js
           node --check site/curator.js
+          node --check site/curator-config.js
+          node --check curator-app/src/index.js
+          node --test curator-app/test/*.test.js
 
       - name: Configure Pages
         uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5

@@ -65,6 +65,7 @@ Only governed screening decisions may use `eligible_core` or
   `docs/operations/automation.md`. Daily surveillance also requires
   `docs/operations/daily-metrics.md`.
 - Curator-console action: `docs/operations/curation.md`,
+  `docs/operations/github-app.md`,
   `docs/governance/data-model.md` and `docs/methodology/eligibility.md`.
 - Saturation work: `docs/methodology/saturation.md`.
 - Release/deployment: `docs/operations/release.md` and
@@ -82,11 +83,15 @@ python3 scripts/validation/validate_repository.py
 python3 -m unittest discover -s tests -p 'test_*.py'
 python3 scripts/build_archive.py
 python3 scripts/curation/build_curator_stats.py
+python3 scripts/curation/build_curator_options.py
 python3 scripts/validation/validate_archive.py
 python3 scripts/validation/validate_site.py
 node --check site/app.js
 node --check site/stats.js
 node --check site/curator.js
+node --check site/curator-config.js
+node --check curator-app/src/index.js
+node --test curator-app/test/*.test.js
 python3 scripts/report_saturation.py
 ```
 

@@ -6,7 +6,8 @@ The repository uses a custom GitHub Actions workflow rather than Jekyll.
 
 - Public URL: <https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/>
 - Site source: `site/`
-- Curator help page: `site/curate.html`
+- Curator workspace: `site/curate.html`
+- Authenticated curator backend: `curator-app/` (deployed separately)
 - Daily statistics page: `site/stats.html`
 - Aggregate metrics ledger: [GitHub issue #30](https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/issues/30)
 - Workflow: `.github/workflows/archive.yml`
@@ -36,9 +37,11 @@ has its own governed build and deploy workflow.
 8. Open **Settings → Pages** and use **Visit site**, or open the public URL above.
 
 GitHub states that a first publication or update can take several minutes. The
-site is static: it needs no server, database, token or secret at runtime. The
-public curator page therefore contains instructions and links only; the
-write-capable form remains inside authenticated GitHub Actions.
+Pages artifact remains static and contains no server-side secret. Its curator
+form becomes write-capable only when `site/curator-config.js` points to the
+separately deployed GitHub App backend described in
+[`github-app.md`](github-app.md). If that endpoint is absent or unhealthy, the
+page fails closed and exposes the authenticated GitHub issue form as a fallback.
 
 During deployment only, the workflow uses its short-lived GitHub token to read
 aggregate comments from metrics ledger #30. No token is included in the site
@@ -73,11 +76,15 @@ python3 -m unittest discover -s tests -p 'test_*.py'
 python3 scripts/build_archive.py
 python3 scripts/metrics/build_research_stats.py
 python3 scripts/curation/build_curator_stats.py
+python3 scripts/curation/build_curator_options.py
 python3 scripts/validation/validate_archive.py
 python3 scripts/validation/validate_site.py
 node --check site/app.js
 node --check site/stats.js
 node --check site/curator.js
+node --check site/curator-config.js
+node --check curator-app/src/index.js
+node --test curator-app/test/*.test.js
 python3 -m http.server 8000 --directory site
 ```
 

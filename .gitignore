@@ -8,3 +8,6 @@ dist/
 .pytest_cache/
 .mypy_cache/
 .DS_Store
+curator-app/wrangler.jsonc
+curator-app/.dev.vars
+curator-app/.dev.vars.*

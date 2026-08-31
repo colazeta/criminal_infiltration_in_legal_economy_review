@@ -1,0 +1,145 @@
+{
+  "schemaVersion": 1,
+  "screeningStages": [
+    {
+      "code": "title_abstract",
+      "label": "Titolo e abstract",
+      "description": "Decisione basata su titolo e abstract esaminati."
+    },
+    {
+      "code": "full_text",
+      "label": "Testo completo",
+      "description": "Decisione basata sul testo completo o su sezioni identificate."
+    },
+    {
+      "code": "seed_validation",
+      "label": "Validazione seed",
+      "description": "Riesame governato di un lavoro proveniente dal seed."
+    }
+  ],
+  "decisions": [
+    {
+      "code": "eligible_core",
+      "label": "Includi nel nucleo",
+      "description": "La relazione di infiltrazione è centrale e sostenuta dall'evidenza."
+    },
+    {
+      "code": "eligible_contextual",
+      "label": "Includi come contestuale",
+      "description": "Contributo concettuale, comparativo o metodologico necessario."
+    },
+    {
+      "code": "maybe_full_text_needed",
+      "label": "Serve altro testo",
+      "description": "L'evidenza disponibile non consente ancora una decisione."
+    },
+    {
+      "code": "not_eligible",
+      "label": "Escludi dal perimetro",
+      "description": "Il lavoro non soddisfa il confine concettuale della review."
+    },
+    {
+      "code": "duplicate",
+      "label": "Segna come duplicato",
+      "description": "Un altro candidato o paper rappresenta lo stesso lavoro."
+    },
+    {
+      "code": "not_academic",
+      "label": "Fonte non accademica",
+      "description": "Il record non rientra nelle fonti scientifiche ammesse."
+    },
+    {
+      "code": "not_retrievable",
+      "label": "Non reperibile",
+      "description": "Non è stato possibile ottenere l'evidenza necessaria."
+    }
+  ],
+  "confidenceLevels": [
+    {
+      "code": "high",
+      "label": "Alta"
+    },
+    {
+      "code": "medium",
+      "label": "Media"
+    },
+    {
+      "code": "low",
+      "label": "Bassa"
+    }
+  ],
+  "exclusionReasons": [
+    {
+      "code": "TOPIC_OFF_SCOPE",
+      "label": "Topic outside scope",
+      "definition": "The work does not address the review topic."
+    },
+    {
+      "code": "NO_CRIMINAL_ACTOR_OR_INTEREST",
+      "label": "No criminal actor or interest",
+      "definition": "The evidence does not identify a criminal actor or interest."
+    },
+    {
+      "code": "NO_LEGAL_ECONOMY_LINK",
+      "label": "No legal-economy link",
+      "definition": "The evidence does not identify a target or relationship in the legal economy."
+    },
+    {
+      "code": "NO_INFILTRATION_RELATION",
+      "label": "No infiltration relation",
+      "definition": "The evidence does not support sustained access participation influence control or embeddedness."
+    },
+    {
+      "code": "MENTION_ONLY_NOT_ANALYTICAL",
+      "label": "Mention only",
+      "definition": "The relationship is mentioned but is not substantively analysed."
+    },
+    {
+      "code": "ADJACENT_PHENOMENON_ONLY",
+      "label": "Adjacent phenomenon only",
+      "definition": "The work addresses a neighbouring phenomenon without the infiltration relation."
+    },
+    {
+      "code": "CRIME_DOMAIN_MISMATCH",
+      "label": "Crime-domain mismatch",
+      "definition": "The criminal phenomenon is outside the review boundary."
+    },
+    {
+      "code": "DOCUMENT_TYPE_EXCLUDED",
+      "label": "Document type excluded",
+      "definition": "The item does not meet the included scholarly document-type rule."
+    },
+    {
+      "code": "LANGUAGE_EXCLUDED",
+      "label": "Language excluded",
+      "definition": "The item falls outside the documented language rule."
+    },
+    {
+      "code": "DUPLICATE_RECORD",
+      "label": "Duplicate record",
+      "definition": "Another canonical record represents the same scholarly work."
+    },
+    {
+      "code": "NOT_ACADEMIC_SOURCE",
+      "label": "Not an academic source",
+      "definition": "The item is outside the scholarly-source scope."
+    },
+    {
+      "code": "FULL_TEXT_UNAVAILABLE",
+      "label": "Full text unavailable",
+      "definition": "The evidence required for a defensible decision could not be obtained."
+    }
+  ],
+  "topics": [
+    {
+      "code": "conceptual_foundations",
+      "label": "Conceptual foundations",
+      "definition": "Work that defines or clarifies the criminal-infiltration construct"
+    },
+    {
+      "code": "criminal_transplantation",
+      "label": "Criminal transplantation",
+      "definition": "Work on the durable relocation or establishment of criminal organisations in new territories or legal-economy settings"
+    }
+  ]
+}

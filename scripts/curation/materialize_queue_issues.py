@@ -148,6 +148,12 @@ def decision_form_url(repository: str, candidate_id: str) -> str:
     return f"https://github.com/{repository}/issues/new?{query}"
 
 
+def curator_site_url(repository: str, candidate_id: str) -> str:
+    owner, name = repository.split("/", 1)
+    query = urlencode({"candidate": candidate_id})
+    return f"https://{owner.lower()}.github.io/{name}/curate.html?{query}"
+
+
 def markdown_text(value: str, fallback: str = "Not recorded") -> str:
     value = " ".join((value or "").split())
     return value.replace("|", "\\|") if value else fallback
@@ -227,11 +233,13 @@ approval. Review the available evidence under the current four-part test."""
 
 ## Curator action
 
-[Record an evidence-backed decision]({decision_form_url(repository, row['candidate_id'])})
+[Open this candidate in the curator workspace]({curator_site_url(repository, row['candidate_id'])})
 
-Copy the candidate ID exactly into the authenticated decision form. The form
-prepares a reviewable pull request; it cannot publish the work or merge its own
-change.
+The workspace authenticates the curator through the repository GitHub App and
+submits an attributed instruction. [Use the GitHub issue form as a temporary
+fallback]({decision_form_url(repository, row['candidate_id'])}). Either route
+prepares a reviewable pull request; neither can publish the work or merge its
+own change.
 """
 
 
@@ -331,6 +339,16 @@ def reconcile_issue(
     if not isinstance(number, int):
         raise GitHubError(f"GitHub issue number is missing for {row['candidate_id']}")
     writes = 0
+    desired_body = issue_body(repository, row)
+    if str(issue.get("body") or "") != desired_body:
+        api_request(
+            repository,
+            token,
+            "PATCH",
+            f"/issues/{number}",
+            {"body": desired_body},
+        )
+        writes += 1
     action_id = row.get("last_action_id", "")
     if action_id:
         marker = f"<!-- curator-action:{action_id} -->"

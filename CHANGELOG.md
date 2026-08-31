@@ -18,7 +18,9 @@ follow semantic versioning while the project is in prerelease.
 - controlled exclusion-reason registry and versioned topic-coding history;
 - separate plain-language and technical literature-expansion guides;
 - aggregate daily-surveillance ledger, closed telemetry schemas and a public
-  statistics page with source-completeness guardrails.
+  statistics page with source-completeness guardrails;
+- on-site candidate browser and decision form backed by a least-privilege
+  GitHub App, OAuth PKCE and an attributed issue-to-PR workflow.
 
 ### Changed
 
@@ -30,7 +32,9 @@ follow semantic versioning while the project is in prerelease.
 - removed direct raw-registry access from the public curator page and expanded
   every generated or manually opened curator PR with the complete audit record;
 - separated daily discovery statistics from formal E1–E3 saturation metrics and
-  scheduled a fail-closed Pages refresh from ledger issue #30.
+  scheduled a fail-closed Pages refresh from ledger issue #30;
+- changed materialised queue issues to open their candidate directly in the
+  curator workspace while retaining the GitHub issue form as a fallback.
 
 ## [0.2.0] - 2026-08-30
 
