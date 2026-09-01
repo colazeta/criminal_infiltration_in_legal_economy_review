@@ -8,6 +8,7 @@ const SESSION_SECONDS = 8 * 60 * 60;
 const STATE_SECONDS = 10 * 60;
 const CURATOR_ASSETS = new Set([
   "/curate.html",
+  "/curate",
   "/curator.js",
   "/styles.css",
   "/data/curator-options.json",
