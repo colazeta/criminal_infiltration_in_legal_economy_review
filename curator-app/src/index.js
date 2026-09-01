@@ -245,10 +245,7 @@ async function serveCuratorAsset(request, env) {
   if (!env.ASSETS || typeof env.ASSETS.fetch !== "function") {
     throw new CuratorAppError(503, "assets_not_configured", "Gli asset della console non sono configurati.");
   }
-  const assetRequest = url.pathname === "/curate"
-    ? new Request(new URL("/curate.html", url), request)
-    : request;
-  const response = await env.ASSETS.fetch(assetRequest);
+  const response = await env.ASSETS.fetch(request);
   return new Response(response.body, {
     status: response.status,
     statusText: response.statusText,
