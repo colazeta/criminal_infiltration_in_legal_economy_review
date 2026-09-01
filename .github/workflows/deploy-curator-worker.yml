@@ -29,9 +29,13 @@ jobs:
 
       - name: Prepare production configuration
         env:
-          CURATOR_CLIENT_ID: ${{ vars.CURATOR_CLIENT_ID }}
+          CURATOR_CLIENT_ID: ${{ secrets.CURATOR_CLIENT_ID }}
           CURATOR_WORKER_HOST: criminal-infiltration-curator.colazeta-research.workers.dev
         run: |
+          if [ -z "$CURATOR_CLIENT_ID" ]; then
+            echo "::error::Missing environment secret CURATOR_CLIENT_ID"
+            exit 1
+          fi
           python - <<'PY'
           import os
           from pathlib import Path
@@ -55,6 +59,14 @@ jobs:
           CURATOR_CLIENT_SECRET: ${{ secrets.CURATOR_CLIENT_SECRET }}
           CURATOR_SESSION_SECRET: ${{ secrets.CURATOR_SESSION_SECRET }}
         run: |
+          if [ -z "$CURATOR_CLIENT_SECRET" ]; then
+            echo "::error::Missing environment secret CURATOR_CLIENT_SECRET"
+            exit 1
+          fi
+          if [ -z "$CURATOR_SESSION_SECRET" ]; then
+            echo "::error::Missing environment secret CURATOR_SESSION_SECRET"
+            exit 1
+          fi
           printf '%s' "$CURATOR_CLIENT_SECRET" | npx --yes wrangler@4.128.0 secret put GITHUB_CLIENT_SECRET --config wrangler.generated.jsonc
           printf '%s' "$CURATOR_SESSION_SECRET" | npx --yes wrangler@4.128.0 secret put SESSION_SECRET --config wrangler.generated.jsonc
           rm -f wrangler.generated.jsonc
