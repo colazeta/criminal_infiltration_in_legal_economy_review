@@ -42,6 +42,7 @@ const NON_ELIGIBLE_REASONS = new Set([
   "DOCUMENT_TYPE_EXCLUDED",
   "LANGUAGE_EXCLUDED",
 ]);
+const SECONDARY_COLLECTIONS = new Set(["broader_aml"]);
 const INPUT_FIELDS = new Set([
   "candidateId",
   "candidateIssueNumber",
@@ -50,6 +51,8 @@ const INPUT_FIELDS = new Set([
   "exclusionReasonCode",
   "topicCode",
   "duplicateTarget",
+  "secondaryCollectionCode",
+  "secondaryCollectionRationale",
   "confidence",
   "evidence",
   "rationale",
@@ -617,6 +620,12 @@ function validateDecision(input) {
   let exclusionReasonCode = optionalField(input.exclusionReasonCode, "Motivo di esclusione", 80);
   const topicCode = optionalField(input.topicCode, "Tema", 80);
   const duplicateTarget = optionalField(input.duplicateTarget, "Duplicato prevalente", 60);
+  const secondaryCollectionCode = optionalField(
+    input.secondaryCollectionCode,
+    "Raccolta collegata",
+    80,
+  );
+  const secondaryRationaleInput = String(input.secondaryCollectionRationale || "").trim();
   if (input.confirmed !== true) {
     throw new CuratorAppError(422, "confirmation_required", "La conferma esplicita è obbligatoria.");
   }
@@ -655,6 +664,26 @@ function validateDecision(input) {
       throw new CuratorAppError(422, "invalid_decision", "Una decisione di esclusione non può assegnare tema o duplicato.");
     }
   }
+  let secondaryCollectionRationale = "";
+  if (secondaryCollectionCode) {
+    if (decision !== "not_eligible" || !SECONDARY_COLLECTIONS.has(secondaryCollectionCode)) {
+      throw new CuratorAppError(
+        422,
+        "invalid_decision",
+        "La raccolta collegata è ammessa soltanto con not_eligible e con un codice governato.",
+      );
+    }
+    secondaryCollectionRationale = textField(
+      secondaryRationaleInput,
+      "La rilevanza per la raccolta collegata",
+    );
+  } else if (secondaryRationaleInput) {
+    throw new CuratorAppError(
+      422,
+      "invalid_decision",
+      "La rilevanza secondaria richiede una raccolta collegata.",
+    );
+  }
   return {
     candidateId,
     candidateIssueNumber: issueNumber,
@@ -663,6 +692,8 @@ function validateDecision(input) {
     exclusionReasonCode,
     topicCode,
     duplicateTarget,
+    secondaryCollectionCode,
+    secondaryCollectionRationale,
     confidence,
     evidence: textField(input.evidence, "La base di evidenza"),
     rationale: textField(input.rationale, "La motivazione"),
@@ -678,6 +709,8 @@ function decisionIssueBody(values) {
     ["Exclusion reason", values.exclusionReasonCode || "NOT_APPLICABLE"],
     ["Topic code", values.topicCode || "_No response_"],
     ["Duplicate target", values.duplicateTarget || "_No response_"],
+    ["Secondary collection", values.secondaryCollectionCode || "NOT_APPLICABLE"],
+    ["Secondary collection relevance", values.secondaryCollectionRationale || "_No response_"],
     ["Confidence", values.confidence],
     ["Evidence basis and locator", values.evidence],
     ["Record-specific rationale", values.rationale],

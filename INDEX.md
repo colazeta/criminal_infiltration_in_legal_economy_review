@@ -3,8 +3,9 @@
 Questo è l'indice pratico del progetto. Per una versione ancora più breve puoi
 leggere la [guida rapida](docs/GUIDA_RAPIDA_IT.md).
 
-Lo scopo è uno solo: mantenere una raccolta affidabile e consultabile dei paper
-sull'infiltrazione criminale nell'economia legale.
+Lo scopo principale è mantenere una raccolta affidabile e consultabile dei paper
+sull'infiltrazione criminale nell'economia legale, senza perdere la letteratura
+adiacente utile per antiriciclaggio e criminalità economico-finanziaria.
 
 ## Le tre parti del progetto
 
@@ -21,6 +22,7 @@ paper rilevante; un paper rilevante non è automaticamente pubblico.
 ## Collegamenti principali
 
 - [Consulta la biblioteca pubblica](https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/)
+- [Consulta la raccolta AML più ampia](https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/aml.html)
 - [Consulta le statistiche giornaliere](https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/stats.html)
 - [Apri il pannello di curatela](https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/curate.html)
 - [Leggi come viene ampliata la letteratura](docs/methodology/expansion.md)
@@ -33,6 +35,7 @@ paper rilevante; un paper rilevante non è automaticamente pubblico.
 | Obiettivo | Dove andare | Che cosa succede |
 |---|---|---|
 | Cercare un paper già approvato | [Biblioteca pubblica](https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/) | Puoi cercare e filtrare i record pubblicati |
+| Cercare letteratura AML fuori dalla review | [Raccolta AML più ampia](https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/aml.html) | Mostra soltanto lavori `not_eligible` per l'infiltrazione ma approvati separatamente come rilevanti per AML o criminalità economico-finanziaria |
 | Capire come viene cercata la letteratura | [Strategia di espansione](docs/methodology/expansion.md) | Trovi i sei passaggi usati per cercare, unire e valutare i paper |
 | Capire i numeri di ogni giornata | [Statistiche giornaliere](docs/operations/daily-metrics.md) | Distingue risultati, ripetizioni, lavori già noti, nuovi candidati e fallimenti |
 | Vedere i candidati da esaminare | [Workspace di curatela](https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/curate.html) | I 55 record legacy e i nuovi intake validati sono separati per metadati, scope, lettura e vecchi rigetti da ricontrollare |
@@ -57,6 +60,7 @@ paper rilevante; un paper rilevante non è automaticamente pubblico.
 | Tema | Etichetta principale mostrata per un paper pubblicato |
 | Trattenuto | Record conservato ma non mostrato nella biblioteca corrente |
 | Escluso | Lavoro valutato fuori ambito, con una ragione registrata |
+| Raccolta collegata | Biblioteca separata che conserva un escluso rilevante per un tema più ampio senza cambiarne l'esito nella review |
 | Duplicato | Record che descrive un lavoro già rappresentato da un altro record |
 | Record pubblico | Paper che ha superato i controlli di identità, screening, classificazione e pubblicazione |
 
@@ -68,10 +72,13 @@ paper rilevante; un paper rilevante non è automaticamente pubblico.
 4. Una persona valuta il paper usando la regola di inclusione.
 5. La persona registra una decisione e soltanto le etichette sostenute dalle
    prove esaminate.
-6. Un'azione esplicita del curatore stabilisce se il record può essere pubblico.
-7. I test automatici ricostruiscono e pubblicano il sito.
+6. Se il lavoro è `not_eligible` ma utile per AML, la persona può indirizzarlo
+   alla raccolta collegata con una seconda motivazione.
+7. Un'azione esplicita del curatore stabilisce se il record può essere pubblico
+   nel corpus core oppure, separatamente, nella raccolta AML.
+8. I test automatici ricostruiscono e pubblicano il sito.
 
-Nei passaggi 4–6 il sistema può preparare il lavoro, ma non può inventare o
+Nei passaggi 4–7 il sistema può preparare il lavoro, ma non può inventare o
 nascondere la decisione scientifica.
 
 ## Dove sono conservate le informazioni

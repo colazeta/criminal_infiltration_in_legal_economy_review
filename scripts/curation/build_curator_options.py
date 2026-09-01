@@ -68,15 +68,25 @@ def build_payload(root: Path = ROOT) -> dict[str, object]:
         for row in read_csv(root / "data" / "registry" / "taxonomy.csv")
         if row.get("dimension") == "topic"
     ]
+    secondary_collections = read_csv(
+        root / "data" / "registry" / "secondary_collections.csv"
+    )
     reason_codes = [row.get("code", "").strip() for row in reasons]
     topic_codes = [row.get("code", "").strip() for row in topics]
+    secondary_codes = [
+        row.get("collection_code", "").strip() for row in secondary_collections
+    ]
     if "" in reason_codes or len(reason_codes) != len(set(reason_codes)):
         raise CuratorOptionsError("Exclusion reasons contain an empty or duplicate code")
     if "" in topic_codes or len(topic_codes) != len(set(topic_codes)):
         raise CuratorOptionsError("Topic taxonomy contains an empty or duplicate code")
+    if "" in secondary_codes or len(secondary_codes) != len(set(secondary_codes)):
+        raise CuratorOptionsError(
+            "Secondary collections contain an empty or duplicate code"
+        )
 
     return {
-        "schemaVersion": 1,
+        "schemaVersion": 2,
         "screeningStages": [
             {"code": code, "label": label, "description": description}
             for code, label, description in STAGE_OPTIONS
@@ -104,6 +114,15 @@ def build_payload(root: Path = ROOT) -> dict[str, object]:
             }
             for row in topics
         ],
+        "secondaryCollections": [
+            {
+                "code": row["collection_code"].strip(),
+                "label": row["label"].strip(),
+                "description": row["description"].strip(),
+                "eligibilityRelation": row["eligibility_relation"].strip(),
+            }
+            for row in secondary_collections
+        ],
     }
 
 
@@ -130,7 +149,8 @@ def main() -> None:
         "[OK] Built curator options: "
         f"{len(payload['decisions'])} decisions, "
         f"{len(payload['exclusionReasons'])} exclusion reasons, "
-        f"{len(payload['topics'])} topics."
+        f"{len(payload['topics'])} topics and "
+        f"{len(payload['secondaryCollections'])} secondary collection(s)."
     )
 
 

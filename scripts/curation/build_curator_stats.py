@@ -17,6 +17,9 @@ STAGE_KEYS = {
     "abstract_full_text_review": "abstractReview",
     "legacy_rejection_review": "legacyRejectionReview",
 }
+SECONDARY_COLLECTION_KEYS = {
+    "broader_aml": "broaderAml",
+}
 
 
 class CuratorStatsError(ValueError):
@@ -40,9 +43,27 @@ def build_payload(root: Path = ROOT) -> dict[str, object]:
 
     by_stage = {value: 0 for value in STAGE_KEYS.values()}
     open_by_origin = {"legacy": 0, "daily": 0}
+    by_secondary_collection = {
+        value: 0 for value in SECONDARY_COLLECTION_KEYS.values()
+    }
     open_count = 0
     for row in queue:
         status = row.get("current_status", "")
+        secondary_collection = row.get("secondary_collection_code", "")
+        if secondary_collection:
+            if secondary_collection not in SECONDARY_COLLECTION_KEYS:
+                raise CuratorStatsError(
+                    "Unknown secondary collection for "
+                    f"{row.get('candidate_id', 'candidate')}"
+                )
+            if status in ACTIVE_STATUSES:
+                raise CuratorStatsError(
+                    "An open candidate cannot already be routed to a secondary "
+                    f"collection: {row.get('candidate_id', 'candidate')}"
+                )
+            by_secondary_collection[
+                SECONDARY_COLLECTION_KEYS[secondary_collection]
+            ] += 1
         if status not in ACTIVE_STATUSES:
             continue
         open_count += 1
@@ -67,13 +88,14 @@ def build_payload(root: Path = ROOT) -> dict[str, object]:
             )
 
     return {
-        "schemaVersion": 1,
+        "schemaVersion": 2,
         "totalMaterialised": len(queue),
         "open": open_count,
         "completed": len(queue) - open_count,
         "actionCount": len(actions),
         "byStage": by_stage,
         "openByOrigin": open_by_origin,
+        "bySecondaryCollection": by_secondary_collection,
     }
 
 

@@ -36,6 +36,7 @@ jobs:
       - name: Verify deterministic committed export
         run: |
           python scripts/build_archive.py --output-dir "$RUNNER_TEMP/archive"
+          python scripts/build_secondary_collections.py --output-dir "$RUNNER_TEMP/archive"
           python scripts/metrics/build_research_stats.py --output "$RUNNER_TEMP/archive/research-stats.json"
           python scripts/curation/build_curator_stats.py --output "$RUNNER_TEMP/archive/curator-stats.json"
           python scripts/curation/build_curator_options.py --output "$RUNNER_TEMP/archive/curator-options.json"
@@ -43,6 +44,7 @@ jobs:
           python scripts/validation/validate_archive.py
           python scripts/validation/validate_site.py
           node --check site/app.js
+          node --check site/aml.js
           node --check site/stats.js
           node --check site/curator.js
           node --check site/curator-config.js
@@ -85,6 +87,7 @@ jobs:
       - name: Build release artifact
         run: |
           python scripts/build_archive.py
+          python scripts/build_secondary_collections.py
           python scripts/metrics/build_research_stats.py \
             --input "$RUNNER_TEMP/surveillance-ledger.json"
           python scripts/curation/build_curator_stats.py
@@ -92,6 +95,7 @@ jobs:
           python scripts/validation/validate_archive.py
           python scripts/validation/validate_site.py
           node --check site/app.js
+          node --check site/aml.js
           node --check site/stats.js
           node --check site/curator.js
           node --check site/curator-config.js

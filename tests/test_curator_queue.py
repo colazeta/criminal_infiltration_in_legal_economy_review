@@ -31,6 +31,8 @@ def decision_body(
     exclusion_reason: str = "NOT_APPLICABLE",
     topic_code: str = "conceptual_foundations",
     duplicate_target: str = "_No response_",
+    secondary_collection: str = "NOT_APPLICABLE",
+    secondary_collection_rationale: str = "_No response_",
     confirmation: str = "APPLY",
 ) -> str:
     sections = {
@@ -40,6 +42,8 @@ def decision_body(
         "Exclusion reason": exclusion_reason,
         "Topic code": topic_code,
         "Duplicate target": duplicate_target,
+        "Secondary collection": secondary_collection,
+        "Secondary collection relevance": secondary_collection_rationale,
         "Confidence": "high",
         "Evidence basis and locator": "Full text, section 2, examined by the curator.",
         "Record-specific rationale": "The work provides a necessary conceptual contribution.",
@@ -140,10 +144,15 @@ class LegacyQueueTests(unittest.TestCase):
         )
         self.assertNotIn("E0-D001", {row["candidate_id"] for row in rows})
         self.assertNotIn("E0R1-C002", {row["candidate_id"] for row in rows})
-        committed = (ROOT / "data/curation/review_queue.csv").read_text(
-            encoding="utf-8"
-        )
-        self.assertEqual(committed, render(rows))
+        with (ROOT / "data/curation/review_queue.csv").open(
+            newline="", encoding="utf-8-sig"
+        ) as handle:
+            committed = [
+                row
+                for row in csv.DictReader(handle)
+                if row["origin"].startswith("legacy_")
+            ]
+        self.assertEqual(render(committed), render(rows))
 
     def test_issue_payload_marks_legacy_signal_as_non_decision(self) -> None:
         row = materialise(ROOT)[0]
@@ -163,9 +172,21 @@ class LegacyQueueTests(unittest.TestCase):
 
     def test_public_curator_projection_contains_aggregates_only(self) -> None:
         payload = build_curator_stats(ROOT)
-        self.assertEqual(55, payload["open"])
-        self.assertEqual(0, payload["completed"])
-        self.assertEqual({"legacy": 55, "daily": 0}, payload["openByOrigin"])
+        with (ROOT / "data/curation/review_queue.csv").open(
+            newline="", encoding="utf-8-sig"
+        ) as handle:
+            queue = list(csv.DictReader(handle))
+        open_rows = [row for row in queue if row["current_status"] in {"pending", "needs_full_text"}]
+        self.assertEqual(len(open_rows), payload["open"])
+        self.assertEqual(len(queue) - len(open_rows), payload["completed"])
+        self.assertEqual(
+            Counter(
+                "daily" if row["origin"] == "daily_surveillance" else "legacy"
+                for row in open_rows
+            ),
+            Counter(payload["openByOrigin"]),
+        )
+        self.assertEqual({"broaderAml": 0}, payload["bySecondaryCollection"])
         rendered = json.dumps(payload).lower()
         for forbidden in ("candidate_id", "title", "doi", "actor", "rationale"):
             self.assertNotIn(forbidden, rendered)
@@ -183,6 +204,7 @@ class CandidateDecisionTests(unittest.TestCase):
             "data/registry/papers.csv",
             "data/registry/taxonomy.csv",
             "data/registry/exclusion_reasons.csv",
+            "data/registry/secondary_collections.csv",
         ):
             source = ROOT / relative
             target = self.root / relative
@@ -191,6 +213,7 @@ class CandidateDecisionTests(unittest.TestCase):
             path.name: path.read_text(encoding="utf-8")
             for path in (self.root / "data/registry").glob("*.csv")
         }
+        self.open_before = build_curator_stats(self.root)["open"]
 
     def tearDown(self) -> None:
         self.temporary.cleanup()
@@ -217,7 +240,7 @@ class CandidateDecisionTests(unittest.TestCase):
         self.assertEqual("conceptual_foundations", candidate["topic_code"])
         self.assertEqual(1, len(self.rows("data/curation/actions.csv")))
         public_stats = build_curator_stats(self.root)
-        self.assertEqual(54, public_stats["open"])
+        self.assertEqual(self.open_before - 1, public_stats["open"])
         self.assertEqual(1, public_stats["completed"])
         self.assertEqual(1, public_stats["actionCount"])
         registry_after = {
@@ -240,6 +263,62 @@ class CandidateDecisionTests(unittest.TestCase):
                 "colazeta",
                 "102",
                 "2026-08-31",
+            )
+
+    def test_non_eligible_candidate_can_be_routed_to_broader_aml(self) -> None:
+        action = apply_decision(
+            self.root,
+            decision_body(
+                decision="not_eligible",
+                exclusion_reason="ADJACENT_PHENOMENON_ONLY",
+                topic_code="_No response_",
+                secondary_collection="broader_aml",
+                secondary_collection_rationale=(
+                    "The work substantively analyses a laundering mechanism."
+                ),
+            ),
+            "colazeta",
+            "106",
+            "2026-09-01",
+        )
+        self.assertEqual("not_eligible", action["decision"])
+        self.assertEqual("broader_aml", action["secondary_collection_code"])
+        candidate = next(
+            row
+            for row in self.rows("data/curation/review_queue.csv")
+            if row["candidate_id"] == "E0-D002"
+        )
+        self.assertEqual("screened_not_eligible", candidate["current_status"])
+        self.assertEqual("broader_aml", candidate["secondary_collection_code"])
+        public_stats = build_curator_stats(self.root)
+        self.assertEqual(1, public_stats["bySecondaryCollection"]["broaderAml"])
+
+    def test_secondary_collection_requires_not_eligible_and_rationale(self) -> None:
+        with self.assertRaisesRegex(CandidateDecisionError, "only with not_eligible"):
+            apply_decision(
+                self.root,
+                decision_body(
+                    secondary_collection="broader_aml",
+                    secondary_collection_rationale="Adjacent AML contribution.",
+                ),
+                "colazeta",
+                "107",
+                "2026-09-01",
+            )
+        with self.assertRaisesRegex(
+            CandidateDecisionError, "secondary collection relevance"
+        ):
+            apply_decision(
+                self.root,
+                decision_body(
+                    decision="not_eligible",
+                    exclusion_reason="ADJACENT_PHENOMENON_ONLY",
+                    topic_code="_No response_",
+                    secondary_collection="broader_aml",
+                ),
+                "colazeta",
+                "108",
+                "2026-09-01",
             )
 
     def test_duplicate_requires_known_distinct_target(self) -> None:
@@ -284,6 +363,7 @@ class DailyIntakeQueueTests(unittest.TestCase):
             ROOT / "data/curation/review_queue.csv",
             self.root / "data/curation/review_queue.csv",
         )
+        self.queue_before = len(self.rows())
 
     def tearDown(self) -> None:
         self.temporary.cleanup()
@@ -303,7 +383,7 @@ class DailyIntakeQueueTests(unittest.TestCase):
             "2026-08-31",
         )
         self.assertEqual(1, len(result["added"]))
-        self.assertEqual(56, result["queue_total"])
+        self.assertEqual(self.queue_before + 1, result["queue_total"])
         row = next(
             row
             for row in self.rows()
@@ -495,6 +575,55 @@ Preserve this manually authored note.
         self.assertEqual(
             {"state": "closed", "state_reason": "completed"},
             calls[1].args[4],
+        )
+
+    @patch("scripts.curation.materialize_queue_issues.paginated", return_value=[])
+    @patch("scripts.curation.materialize_queue_issues.api_request")
+    def test_routed_candidate_issue_receives_secondary_collection_label(
+        self, api_mock, paginated_mock
+    ) -> None:
+        row = next(
+            dict(candidate)
+            for candidate in materialise(ROOT)
+            if candidate["candidate_id"] == "E0-D002"
+        )
+        row.update(
+            {
+                "current_status": "screened_not_eligible",
+                "secondary_collection_code": "broader_aml",
+                "last_action_id": "CA000002",
+            }
+        )
+        actions = {
+            "CA000002": {
+                "action_id": "CA000002",
+                "candidate_id": "E0-D002",
+                "github_issue_number": "302",
+                "decision": "not_eligible",
+                "secondary_collection_code": "broader_aml",
+            }
+        }
+        writes = reconcile_issue(
+            "colazeta/criminal_infiltration_in_legal_economy_review",
+            "token",
+            row,
+            {
+                "number": 300,
+                "state": "closed",
+                "labels": [{"name": "curation:queue"}],
+                "body": issue_body(
+                    "colazeta/criminal_infiltration_in_legal_economy_review",
+                    row,
+                ),
+            },
+            actions,
+        )
+        self.assertEqual(2, writes)
+        self.assertEqual("POST", api_mock.call_args_list[0].args[2])
+        self.assertIn("broader_aml", api_mock.call_args_list[0].args[4]["body"])
+        self.assertEqual(
+            {"labels": ["collection:broader-aml"]},
+            api_mock.call_args_list[1].args[4],
         )
 
 

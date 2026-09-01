@@ -48,6 +48,11 @@ and appends a row to `actions.csv`. It does not create a canonical paper, alter
 `data/registry/`, or publish anything. Metadata verification and canonical
 promotion remain separate reviewed changes.
 
+A `not_eligible` action may also record `broader_aml` plus a distinct relevance
+rationale. This preserves the candidate for a later AML publication review
+without changing the negative core decision. The routing field is never read by
+either public builder.
+
 The GitHub issue materialiser keeps open work visible, links merged actions to
 the originating queue issue and closes only those issues whose current queue
 status represents a completed screening outcome.

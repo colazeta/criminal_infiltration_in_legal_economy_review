@@ -382,6 +382,25 @@ summary:focus-visible {
   font-weight: 700;
 }
 
+.badge-secondary {
+  background: #f4e8d2;
+  border-color: #d8b879;
+  color: #674515;
+}
+
+.secondary-scope-note .scope-dot,
+.secondary-legend span {
+  background: #b77a28;
+}
+
+.secondary-paper-card {
+  border-left: 3px solid #d8b879;
+}
+
+.aml-controls {
+  grid-template-columns: minmax(18rem, 2fr) minmax(9rem, 0.7fr) minmax(9rem, 0.7fr) auto;
+}
+
 .record-id {
   color: #7b8581;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
@@ -1647,7 +1666,7 @@ tbody tr:last-child td {
 
 .queue-metrics {
   display: grid;
-  grid-template-columns: 1.25fr repeat(4, 1fr);
+  grid-template-columns: 1.25fr repeat(5, 1fr);
   margin-top: 22px;
   overflow: hidden;
   border: 1px solid var(--line);
@@ -1684,6 +1703,11 @@ tbody tr:last-child td {
   margin: 0.55rem 0 0;
   color: var(--ink-soft);
   font-size: 0.74rem;
+}
+
+.queue-metrics p a {
+  color: inherit;
+  font-weight: 750;
 }
 
 .queue-total-card {

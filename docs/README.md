@@ -11,6 +11,7 @@
 | understand when searching can stop | [Saturation metrics](methodology/saturation.md) |
 | understand daily search statistics | [Daily research statistics](operations/daily-metrics.md) |
 | understand what is public and why | [Data model and publication gate](governance/data-model.md) |
+| understand how excluded AML literature is retained | [Eligibility codebook](methodology/eligibility.md#broader-aml-collection) → [Curator desk](operations/curation.md#conservare-un-escluso-nella-raccolta-aml) |
 | suggest or review a paper | [Contribution guide](../CONTRIBUTING.md) |
 | review candidates or change a governed record | [Curator desk instructions](operations/curation.md) |
 | configure authenticated on-site decisions | [GitHub App guide](operations/github-app.md) |

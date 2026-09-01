@@ -5,6 +5,7 @@
 The repository uses a custom GitHub Actions workflow rather than Jekyll.
 
 - Public URL: <https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/>
+- Broader AML collection: <https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/aml.html>
 - Site source: `site/`
 - Public curator entrypoint: `site/curate.html`
 - Isolated authenticated console and backend: `curator-app/` (deployed separately)
@@ -37,7 +38,7 @@ has its own governed build and deploy workflow.
 8. Open **Settings → Pages** and use **Visit site**, or open the public URL above.
 
 GitHub states that a first publication or update can take several minutes. The
-The Pages artifact remains static and contains no server-side secret or curator
+Pages artifact remains static and contains no server-side secret or curator
 session. Once `site/curator-config.js` contains the reviewed `secureAppUrl`, the
 public page links to the separately deployed console described in
 [`github-app.md`](github-app.md). The console and API share a dedicated Worker
@@ -54,9 +55,13 @@ artifact.
 Every reviewed merge to `main` repeats the same sequence. The workflow rebuilds
 `site/data/archive.json` and `site/data/archive.csv` from the governed registry;
 it does not publish candidate intake or reviewer notes. A separate deterministic
-step derives `site/data/curator-stats.json` from the curation layer using a
-closed allowlist of aggregate counts only: open/completed totals, work lanes and
-legacy/daily origin totals.
+builder creates `site/data/secondary-collections.json` and CSV only from
+canonical `review_excluded` works with a current `not_eligible` decision and an
+independent secondary-publication approval. Those records appear on `aml.html`
+and never enter the core archive counts or saturation measures. Another
+deterministic step derives `site/data/curator-stats.json` from the curation layer
+using a closed allowlist of aggregate counts only: open/completed totals, work
+lanes, legacy/daily origin totals and routed secondary-collection totals.
 
 The workflow also runs once per day after the surveillance automation. It reads
 ledger #30, accepts only comments by the configured repository owner, validates
@@ -76,12 +81,14 @@ and methodology remain available.
 python3 scripts/validation/validate_repository.py
 python3 -m unittest discover -s tests -p 'test_*.py'
 python3 scripts/build_archive.py
+python3 scripts/build_secondary_collections.py
 python3 scripts/metrics/build_research_stats.py
 python3 scripts/curation/build_curator_stats.py
 python3 scripts/curation/build_curator_options.py
 python3 scripts/validation/validate_archive.py
 python3 scripts/validation/validate_site.py
 node --check site/app.js
+node --check site/aml.js
 node --check site/stats.js
 node --check site/curator.js
 node --check site/curator-config.js

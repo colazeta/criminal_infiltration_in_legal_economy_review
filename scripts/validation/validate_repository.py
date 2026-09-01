@@ -44,11 +44,13 @@ REQUIRED_FILES = (
     "data/curation/review_queue.csv",
     "data/curation/actions.csv",
     "schema/public-archive.schema.json",
+    "schema/public-secondary-collections.schema.json",
     "schema/curator-stats.schema.json",
     "schema/curator-options.schema.json",
     "schema/surveillance-run.schema.json",
     "schema/research-stats.schema.json",
     "scripts/build_archive.py",
+    "scripts/build_secondary_collections.py",
     "scripts/metrics/build_research_stats.py",
     "scripts/metrics/fetch_surveillance_ledger.py",
     "scripts/metrics/surveillance.py",
@@ -63,14 +65,18 @@ REQUIRED_FILES = (
     "scripts/validation/validate_archive.py",
     "scripts/validation/validate_site.py",
     "site/index.html",
+    "site/aml.html",
     "site/curate.html",
     "site/stats.html",
     "site/app.js",
+    "site/aml.js",
     "site/stats.js",
     "site/curator.js",
     "site/curator-config.js",
     "site/styles.css",
     "site/data/research-stats.json",
+    "site/data/secondary-collections.json",
+    "site/data/secondary-collections.csv",
     "site/data/curator-stats.json",
     "site/data/curator-options.json",
     "curator-app/package.json",
@@ -133,6 +139,24 @@ REQUIRED_HEADERS = {
         "source_basis",
         "is_current",
         "supersedes_publication_id",
+    },
+    "secondary_collections.csv": {
+        "collection_code",
+        "label",
+        "description",
+        "eligibility_relation",
+        "collection_version",
+    },
+    "secondary_publications.csv": {
+        "secondary_publication_id",
+        "paper_id",
+        "collection_code",
+        "publication_version",
+        "publication_status",
+        "public_relevance_reason",
+        "source_basis",
+        "is_current",
+        "supersedes_secondary_publication_id",
     },
     "taxonomy.csv": {"dimension", "code", "label", "taxonomy_version"},
     "paper_codes.csv": {
@@ -217,6 +241,9 @@ def check_registry_headers() -> None:
 
 def check_public_boundary() -> None:
     builder = (ROOT / "scripts/build_archive.py").read_text(encoding="utf-8")
+    secondary_builder = (ROOT / "scripts/build_secondary_collections.py").read_text(
+        encoding="utf-8"
+    )
     for forbidden in (
         "data/raw",
         "data/legacy",
@@ -225,7 +252,7 @@ def check_public_boundary() -> None:
         "promotion_audit",
         "review_queue",
     ):
-        if forbidden in builder:
+        if forbidden in builder or forbidden in secondary_builder:
             fail(f"Public builder refers to non-registry source: {forbidden}")
     for name in (
         "papers.csv",
@@ -239,6 +266,19 @@ def check_public_boundary() -> None:
     ):
         if name not in builder:
             fail(f"Public builder does not declare required registry {name}")
+    for name in (
+        "papers.csv",
+        "work_identifiers.csv",
+        "discovery_events.csv",
+        "screening_decisions.csv",
+        "publications.csv",
+        "secondary_collections.csv",
+        "secondary_publications.csv",
+        "exclusion_reasons.csv",
+        "archive_versions.csv",
+    ):
+        if name not in secondary_builder:
+            fail(f"Secondary builder does not declare required registry {name}")
     metrics_builder = (ROOT / "scripts/metrics/surveillance.py").read_text(
         encoding="utf-8"
     )
@@ -279,6 +319,8 @@ def check_public_boundary() -> None:
         'fetch("./data/curator-options.json")',
         'apiFetch("/api/candidates")',
         'apiFetch("/api/decisions"',
+        "secondaryCollectionCode",
+        "secondaryCollectionRationale",
     ):
         if required not in public_curator:
             fail(f"Public curator surface lacks an authenticated boundary: {required}")
@@ -300,6 +342,7 @@ def check_public_boundary() -> None:
         "env.ASSETS.fetch",
         "SUBMISSIONS",
         "SubmissionCoordinatorCore",
+        "SECONDARY_COLLECTIONS",
         "idempotency_conflict",
         "siteUrl.origin !== callbackUrl.origin",
     ):
@@ -373,6 +416,8 @@ def check_curator_queue() -> None:
         "exclusion_reason_code",
         "topic_code",
         "duplicate_target_id",
+        "secondary_collection_code",
+        "secondary_collection_rationale",
         "last_action_id",
         "provenance",
     }
@@ -458,6 +503,8 @@ def check_curator_queue() -> None:
         "exclusion_reason_code",
         "topic_code",
         "duplicate_target_id",
+        "secondary_collection_code",
+        "secondary_collection_rationale",
         "actor",
         "previous_status",
         "new_status",
@@ -473,11 +520,38 @@ def check_curator_queue() -> None:
         fail("One GitHub decision issue may create only one curator action")
     if any(row["candidate_id"] not in candidate_ids for row in actions):
         fail("Curator action refers to an unknown candidate")
+    with (ROOT / "data/registry/secondary_collections.csv").open(
+        newline="", encoding="utf-8-sig"
+    ) as handle:
+        secondary_codes = {
+            row.get("collection_code", "").strip() for row in csv.DictReader(handle)
+        }
+    for action in actions:
+        collection_code = action["secondary_collection_code"].strip()
+        collection_rationale = action["secondary_collection_rationale"].strip()
+        if collection_code:
+            if (
+                action["decision"] != "not_eligible"
+                or collection_code not in secondary_codes
+                or not collection_rationale
+            ):
+                fail(
+                    f"{action['action_id']}: invalid secondary-collection routing"
+                )
+        elif collection_rationale:
+            fail(
+                f"{action['action_id']}: secondary rationale lacks a collection"
+            )
     action_index = {row["action_id"]: row for row in actions}
     action_ids = set(action_index)
     for row in queue:
         if row["current_status"] == "pending":
-            if row["current_decision"] or row["last_action_id"]:
+            if (
+                row["current_decision"]
+                or row["last_action_id"]
+                or row["secondary_collection_code"]
+                or row["secondary_collection_rationale"]
+            ):
                 fail(f"Pending candidate carries a decision: {row['candidate_id']}")
         elif not row["current_decision"] or row["last_action_id"] not in action_ids:
             fail(f"Decided candidate lacks its append-only action: {row['candidate_id']}")
@@ -490,6 +564,10 @@ def check_curator_queue() -> None:
                 or action["exclusion_reason_code"] != row["exclusion_reason_code"]
                 or action["topic_code"] != row["topic_code"]
                 or action["duplicate_target_id"] != row["duplicate_target_id"]
+                or action["secondary_collection_code"]
+                != row["secondary_collection_code"]
+                or action["secondary_collection_rationale"]
+                != row["secondary_collection_rationale"]
             ):
                 fail(
                     "Curator queue projection disagrees with its last action: "
@@ -512,6 +590,17 @@ def check_issue_forms() -> None:
         ids = re.findall(r"^\s+id:\s*([a-z0-9_-]+)\s*$", text, re.M)
         if len(ids) != len(set(ids)):
             fail(f"{path.name}: duplicate body id")
+    candidate_form = (
+        ROOT / ".github/ISSUE_TEMPLATE/candidate_decision.yml"
+    ).read_text(encoding="utf-8")
+    for required in (
+        "id: secondary_collection_code",
+        "id: secondary_collection_rationale",
+        "broader_aml",
+        "valid only with not_eligible",
+    ):
+        if required not in candidate_form:
+            fail(f"Candidate decision form lacks secondary routing: {required}")
 
 
 def check_actions_pinned() -> None:
@@ -542,6 +631,8 @@ def check_actions_pinned() -> None:
         "--issue 30",
         '--allowed-author "$LEDGER_AUTHOR"',
         "node --check site/stats.js",
+        "build_secondary_collections.py",
+        "node --check site/aml.js",
         'build_curator_stats.py --output "$RUNNER_TEMP/archive/curator-stats.json"',
         'build_curator_options.py --output "$RUNNER_TEMP/archive/curator-options.json"',
         "node --check site/curator-config.js",
@@ -568,6 +659,8 @@ def check_actions_pinned() -> None:
         "encoded_body",
         "&body=${encoded_body}",
         "Create the prefilled pull request",
+        "build_secondary_collections.py",
+        "node --check site/aml.js",
     ):
         if phrase not in curation:
             fail(f"Curation workflow missing safeguard: {phrase}")
@@ -586,6 +679,8 @@ def check_actions_pinned() -> None:
         "Automatic eligibility or publication inference: none",
         "Unresolved human decisions",
         "Closes #${ISSUE_NUMBER}",
+        "build_secondary_collections.py",
+        "node --check site/aml.js",
     ):
         if phrase not in candidate_curation:
             fail(f"Candidate-curation workflow missing safeguard: {phrase}")
@@ -617,6 +712,8 @@ def check_actions_pinned() -> None:
         "Automatic screening or publication inference: none",
         "Unresolved human decisions",
         "Canonical or publication rows changed: 0",
+        "build_secondary_collections.py",
+        "node --check site/aml.js",
     ):
         if phrase not in intake:
             fail(f"Intake-to-curation workflow missing safeguard: {phrase}")
@@ -717,6 +814,7 @@ def check_governance_copy() -> None:
             fail(f"Automation runbook missing daily-metrics contract: {phrase}")
 
     for schema_name in (
+        "public-secondary-collections.schema.json",
         "surveillance-run.schema.json",
         "research-stats.schema.json",
         "curator-stats.schema.json",
@@ -755,6 +853,15 @@ def check_governance_copy() -> None:
     )
     if machine_codes != documented_codes:
         fail("Machine-readable exclusion reasons differ from the eligibility codebook")
+    eligibility_flat = " ".join(codebook.split())
+    for phrase in (
+        "broader_aml",
+        "does not change the `not_eligible` decision",
+        "does not count toward the core or contextual corpus",
+        "versioned secondary-publication approval",
+    ):
+        if phrase not in eligibility_flat:
+            fail(f"Eligibility codebook lacks secondary-boundary rule: {phrase}")
 
 
 def main() -> None:

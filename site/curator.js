@@ -76,11 +76,13 @@ function formatDate(value) {
 function renderQueue(stats) {
   const counts = stats.byStage || {};
   const origins = stats.openByOrigin || {};
+  const secondary = stats.bySecondaryCollection || {};
   setText("queue-total", Number(stats.open || 0));
   setText("queue-metadata", Number(counts.metadataFix || 0));
   setText("queue-manual", Number(counts.manualReview || 0));
   setText("queue-abstract", Number(counts.abstractReview || 0));
   setText("queue-legacy-rejected", Number(counts.legacyRejectionReview || 0));
+  setText("queue-secondary-aml", Number(secondary.broaderAml || 0));
   setText(
     "queue-origin-summary",
     `${Number(origins.legacy || 0)} legacy · ${Number(origins.daily || 0)} da intake · ${Number(stats.completed || 0)} completate`,
@@ -103,6 +105,7 @@ function renderAggregateUnavailable() {
     "queue-manual",
     "queue-abstract",
     "queue-legacy-rejected",
+    "queue-secondary-aml",
     "queue-origin-summary",
   ]) {
     setText(id, "n.d.");
@@ -279,6 +282,11 @@ function initialiseFormOptions(options) {
   appendOptions(byId("decision"), options.decisions, "Seleziona la decisione");
   appendOptions(byId("exclusion-reason"), options.exclusionReasons, "Seleziona il motivo");
   appendOptions(byId("topic-code"), options.topics, "Seleziona il tema");
+  appendOptions(
+    byId("secondary-collection"),
+    options.secondaryCollections,
+    "Non conservare in una raccolta collegata",
+  );
   appendOptions(byId("confidence"), options.confidenceLevels, "Seleziona la confidenza");
 }
 
@@ -441,6 +449,8 @@ function updateConditionalFields() {
   const reason = byId("exclusion-reason");
   const topic = byId("topic-code");
   const duplicate = byId("duplicate-target");
+  const secondaryCollection = byId("secondary-collection");
+  const secondaryRationale = byId("secondary-rationale");
   const eligible = decision === "eligible_core" || decision === "eligible_contextual";
   const specialReasons = {
     duplicate: "DUPLICATE_RECORD",
@@ -454,10 +464,24 @@ function updateConditionalFields() {
   );
   setGroup("topic-field", eligible, eligible);
   setGroup("duplicate-field", decision === "duplicate", decision === "duplicate");
+  setGroup("secondary-collection-field", decision === "not_eligible");
+  const usesSecondaryCollection =
+    decision === "not_eligible" && Boolean(secondaryCollection?.value);
+  setGroup(
+    "secondary-rationale-field",
+    usesSecondaryCollection,
+    usesSecondaryCollection,
+  );
   const usesReason = decision === "not_eligible" || Object.hasOwn(specialReasons, decision);
   setGroup("exclusion-field", usesReason, usesReason);
   if (!eligible && topic) topic.value = "";
   if (decision !== "duplicate" && duplicate) duplicate.value = "";
+  if (decision !== "not_eligible" && secondaryCollection) {
+    secondaryCollection.value = "";
+  }
+  if (!usesSecondaryCollection && secondaryRationale) {
+    secondaryRationale.value = "";
+  }
   if (reason) {
     if (decision === "not_eligible") {
       setReasonAvailability(nonEligibleCodes);
@@ -487,6 +511,8 @@ function decisionPayload(form) {
     exclusionReasonCode: byId("exclusion-reason").value,
     topicCode: byId("topic-code").value,
     duplicateTarget: byId("duplicate-target").value.trim(),
+    secondaryCollectionCode: byId("secondary-collection").value,
+    secondaryCollectionRationale: byId("secondary-rationale").value.trim(),
     confidence: byId("confidence").value,
     evidence: byId("evidence-basis").value.trim(),
     rationale: byId("decision-rationale").value.trim(),
@@ -603,6 +629,7 @@ function wireInterface() {
   byId("candidate-search")?.addEventListener("input", renderCandidateList);
   byId("candidate-lane-filter")?.addEventListener("change", renderCandidateList);
   byId("decision")?.addEventListener("change", updateConditionalFields);
+  byId("secondary-collection")?.addEventListener("change", updateConditionalFields);
   byId("decision-form")?.addEventListener("submit", submitDecision);
   byId("decision-form")?.addEventListener("input", (event) => {
     if (event.target.id !== "explicit-confirmation") delete event.currentTarget.dataset.submissionId;

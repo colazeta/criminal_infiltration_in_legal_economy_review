@@ -73,6 +73,19 @@ body:
       description: Required only for duplicate; enter the surviving candidate or paper ID.
       placeholder: E0R1-C010 or P000001
   - type: dropdown
+    id: secondary_collection_code
+    attributes:
+      label: Secondary collection
+      description: Optional and valid only with not_eligible. This records a destination request; it does not publish the work.
+      options:
+        - NOT_APPLICABLE
+        - broader_aml
+  - type: textarea
+    id: secondary_collection_rationale
+    attributes:
+      label: Secondary collection relevance
+      description: Required when a secondary collection is selected. Explain the broader AML or economic/financial-crime relevance.
+  - type: dropdown
     id: confidence
     attributes:
       label: Confidence

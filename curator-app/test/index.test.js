@@ -66,6 +66,8 @@ function validDecision(overrides = {}) {
     exclusionReasonCode: "",
     topicCode: "conceptual_foundations",
     duplicateTarget: "",
+    secondaryCollectionCode: "",
+    secondaryCollectionRationale: "",
     confidence: "high",
     evidence: "Full text, section 2.",
     rationale: "The work supplies a necessary conceptual contribution.",
@@ -178,6 +180,38 @@ test("decision validation enforces governed field combinations", () => {
     }),
   );
   assert.equal(duplicate.exclusionReasonCode, "DUPLICATE_RECORD");
+  const retained = validateDecision(
+    validDecision({
+      decision: "not_eligible",
+      topicCode: "",
+      exclusionReasonCode: "ADJACENT_PHENOMENON_ONLY",
+      secondaryCollectionCode: "broader_aml",
+      secondaryCollectionRationale: "Substantive analysis of a laundering mechanism.",
+    }),
+  );
+  assert.equal(retained.secondaryCollectionCode, "broader_aml");
+  assert.throws(
+    () =>
+      validateDecision(
+        validDecision({
+          secondaryCollectionCode: "broader_aml",
+          secondaryCollectionRationale: "Not compatible with an eligible decision.",
+        }),
+      ),
+    /soltanto con not_eligible/i,
+  );
+  assert.throws(
+    () =>
+      validateDecision(
+        validDecision({
+          decision: "not_eligible",
+          topicCode: "",
+          exclusionReasonCode: "ADJACENT_PHENOMENON_ONLY",
+          secondaryCollectionCode: "broader_aml",
+        }),
+      ),
+    /rilevanza per la raccolta collegata/i,
+  );
 });
 
 test("generated issue body preserves the existing parser contract", () => {
@@ -190,6 +224,8 @@ test("generated issue body preserves the existing parser contract", () => {
     "Exclusion reason",
     "Topic code",
     "Duplicate target",
+    "Secondary collection",
+    "Secondary collection relevance",
     "Confidence",
     "Evidence basis and locator",
     "Record-specific rationale",

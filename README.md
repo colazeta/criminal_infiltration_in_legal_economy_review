@@ -4,6 +4,7 @@ A searchable, governed archive of scholarly work on **criminal infiltration in
 the legal economy**.
 
 - [Public archive](https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/)
+- [Broader AML collection](https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/aml.html)
 - [Daily research statistics](https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/stats.html)
 - [Curator desk](https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/curate.html)
 - [Start here: repository index](INDEX.md)
@@ -31,6 +32,12 @@ A work appears on the site only when all publication gates pass:
 Candidate intake, reviewer notes, rejected works and legacy retrieval files are
 not read by the site builder. Automated discovery can create an intake issue; it
 cannot publish a work.
+
+A work that is `not_eligible` for the infiltration review may still be retained
+in the separately governed broader AML and economic/financial-crime collection.
+It appears there only after canonical verification and an independent,
+versioned secondary-publication approval. It never changes core inclusion or
+saturation counts.
 
 ## Repository map
 
@@ -99,11 +106,13 @@ Requires Python 3.11+ and Node only for the JavaScript syntax check.
 python3 scripts/validation/validate_repository.py
 python3 -m unittest discover -s tests -p 'test_*.py'
 python3 scripts/build_archive.py
+python3 scripts/build_secondary_collections.py
 python3 scripts/curation/build_curator_stats.py
 python3 scripts/curation/build_curator_options.py
 python3 scripts/validation/validate_archive.py
 python3 scripts/validation/validate_site.py
 node --check site/app.js
+node --check site/aml.js
 node --check site/stats.js
 node --check site/curator.js
 node --check site/curator-config.js
@@ -124,6 +133,10 @@ a legal-economy target, sustained access/participation/influence/control or
 embeddedness, and substantive analysis of that relationship. Money laundering,
 corruption, facilitation, passive investment and corporate offending are not
 treated as infiltration without that relational evidence.
+
+Relevant scholarly work on those adjacent phenomena can be preserved in the
+separate broader AML collection while remaining explicitly outside the review
+corpus.
 
 The complete rule is in [the eligibility codebook](docs/methodology/eligibility.md).
 The repository does not redistribute full text; it publishes curated metadata,

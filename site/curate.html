@@ -30,6 +30,7 @@
           <a href="#editorial-app">Decisioni</a>
           <a href="https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/stats.html">Statistiche</a>
           <a href="https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/">Biblioteca</a>
+          <a href="https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/aml.html">Raccolta AML</a>
           <a href="https://github.com/colazeta/criminal_infiltration_in_legal_economy_review">Repository</a>
         </nav>
       </div>
@@ -230,9 +231,24 @@
                     <span>Candidato o paper prevalente</span>
                     <input id="duplicate-target" type="text" maxlength="60" placeholder="Candidate ID o paper ID" />
                   </label>
+                  <label id="secondary-collection-field" hidden>
+                    <span>Conserva anche nella raccolta collegata</span>
+                    <select id="secondary-collection"></select>
+                    <small>Disponibile solo per un lavoro non eleggibile nel corpus principale.</small>
+                  </label>
                   <label>
                     <span>Confidenza</span>
                     <select id="confidence" required></select>
+                  </label>
+                  <label class="wide-field" id="secondary-rationale-field" hidden>
+                    <span>Rilevanza per la raccolta collegata</span>
+                    <textarea
+                      id="secondary-rationale"
+                      rows="4"
+                      maxlength="2000"
+                      placeholder="Spiega perché il lavoro è utile per l’antiriciclaggio o la criminalità economico-finanziaria, pur restando fuori dalla review sull’infiltrazione."
+                    ></textarea>
+                    <small>Questa nota indirizza il successivo controllo editoriale; non è un’approvazione alla pubblicazione.</small>
                   </label>
                   <label class="wide-field">
                     <span>Base di evidenza e punto esaminato</span>
@@ -310,6 +326,19 @@
               <strong>rigetti legacy da verificare</strong>
               <p>Segnali storici non ancora equivalenti a esclusioni governate.</p>
             </article>
+            <article>
+              <span id="queue-secondary-aml">—</span>
+              <strong>esclusi instradati ad AML</strong>
+              <p>
+                Restano fuori dal corpus principale; la
+                <a href="./aml.html">pubblicazione secondaria</a> richiede un’approvazione distinta.
+              </p>
+              <p>
+                <a href="https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/issues?q=is%3Aissue+label%3A%22collection%3Abroader-aml%22">
+                  Apri le schede instradate →
+                </a>
+              </p>
+            </article>
           </div>
         </section>
 
@@ -386,10 +415,12 @@
           </article>
           <article>
             <span class="decision-index">B</span>
-            <h3>Escludi con un codice</h3>
+            <h3>Escludi senza perdere il lavoro</h3>
             <p>
               Se il lavoro è fuori perimetro, scegli uno dei motivi governati e
-              spiega perché si applica proprio a quella scheda.
+              spiega perché si applica proprio a quella scheda. Se è pertinente
+              all’antiriciclaggio o alla criminalità economico-finanziaria, puoi
+              indirizzarlo alla raccolta più ampia.
             </p>
           </article>
           <article>
@@ -464,6 +495,7 @@
       <p>Decisioni attribuite, versionate e mai fuse automaticamente.</p>
       <p>
         <a href="https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/">Biblioteca</a> ·
+        <a href="https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/aml.html">Raccolta AML</a> ·
         <a href="https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/stats.html">Statistiche</a> ·
         <a href="https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/blob/main/docs/operations/curation.md">Istruzioni complete</a>
       </p>

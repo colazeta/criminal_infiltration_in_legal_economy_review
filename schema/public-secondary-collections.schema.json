@@ -1,0 +1,131 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/schema/public-secondary-collections.schema.json",
+  "title": "Criminal Infiltration Archive Secondary Collections",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "archiveVersion",
+    "releaseDate",
+    "searchCoverageThrough",
+    "sourceSnapshot",
+    "methodology",
+    "counts",
+    "collections",
+    "records"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "archiveVersion": { "type": "string" },
+    "releaseDate": { "type": "string", "format": "date" },
+    "searchCoverageThrough": { "type": "string", "format": "date" },
+    "sourceSnapshot": { "type": "string", "format": "date" },
+    "methodology": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["collectionDefinition", "coreBoundary", "publicationDefinition"],
+      "properties": {
+        "collectionDefinition": { "type": "string", "minLength": 1 },
+        "coreBoundary": { "type": "string", "minLength": 1 },
+        "publicationDefinition": { "type": "string", "minLength": 1 }
+      }
+    },
+    "counts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["records", "byCollection"],
+      "properties": {
+        "records": { "type": "integer", "minimum": 0 },
+        "byCollection": {
+          "type": "object",
+          "additionalProperties": { "type": "integer", "minimum": 0 }
+        }
+      }
+    },
+    "collections": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["code", "label", "description", "eligibilityRelation", "records"],
+        "properties": {
+          "code": { "type": "string", "pattern": "^[a-z][a-z0-9_]+$" },
+          "label": { "type": "string", "minLength": 1 },
+          "description": { "type": "string", "minLength": 1 },
+          "eligibilityRelation": { "const": "outside_core_review" },
+          "records": { "type": "integer", "minimum": 0 }
+        }
+      }
+    },
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "collectionCode",
+          "collectionLabel",
+          "section",
+          "status",
+          "statusLabel",
+          "statusDescription",
+          "title",
+          "authors",
+          "year",
+          "venue",
+          "publisher",
+          "volume",
+          "issue",
+          "pages",
+          "documentType",
+          "language",
+          "doi",
+          "links",
+          "exclusionReasonCode",
+          "exclusionReasonLabel",
+          "reason",
+          "screeningDecision",
+          "screeningStage",
+          "metadataConfidence",
+          "sourceBasis"
+        ],
+        "properties": {
+          "id": { "type": "string", "pattern": "^P[0-9]{6}$" },
+          "collectionCode": { "type": "string", "pattern": "^[a-z][a-z0-9_]+$" },
+          "collectionLabel": { "type": "string", "minLength": 1 },
+          "section": { "const": "broader_aml" },
+          "status": { "const": "outside_core_review" },
+          "statusLabel": { "type": "string", "minLength": 1 },
+          "statusDescription": { "type": "string", "minLength": 1 },
+          "title": { "type": "string", "minLength": 1 },
+          "authors": { "type": "string", "minLength": 1 },
+          "year": { "type": ["integer", "null"], "minimum": 1000, "maximum": 2100 },
+          "venue": { "type": "string", "minLength": 1 },
+          "publisher": { "type": "string" },
+          "volume": { "type": "string" },
+          "issue": { "type": "string" },
+          "pages": { "type": "string" },
+          "documentType": { "type": "string", "minLength": 1 },
+          "language": { "type": "string" },
+          "doi": { "type": "string" },
+          "links": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "doi": { "type": "string", "format": "uri", "pattern": "^https://doi\\.org/" }
+            }
+          },
+          "exclusionReasonCode": { "type": "string", "minLength": 1 },
+          "exclusionReasonLabel": { "type": "string", "minLength": 1 },
+          "reason": { "type": "string", "minLength": 1 },
+          "screeningDecision": { "const": "not_eligible" },
+          "screeningStage": { "enum": ["title_abstract", "full_text", "seed_validation"] },
+          "metadataConfidence": { "enum": ["low", "medium", "high"] },
+          "sourceBasis": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  }
+}

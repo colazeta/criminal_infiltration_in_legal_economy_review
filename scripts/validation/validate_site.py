@@ -17,6 +17,9 @@ SITE = ROOT / "site"
 sys.path.insert(0, str(ROOT / "scripts"))
 
 from build_archive import build_payload  # noqa: E402
+from build_secondary_collections import (  # noqa: E402
+    build_payload as build_secondary_payload,
+)
 from curation.build_curator_options import build_payload as build_curator_options  # noqa: E402
 from curation.build_curator_stats import build_payload as build_curator_payload  # noqa: E402
 from metrics.surveillance import MetricsError, validate_public_payload  # noqa: E402
@@ -95,12 +98,13 @@ def validate_pages() -> None:
     pages = sorted(SITE.glob("*.html"))
     expected_languages = {
         "index.html": "en",
+        "aml.html": "en",
         "404.html": "en",
         "curate.html": "it",
         "stats.html": "it",
     }
     if {path.name for path in pages} != set(expected_languages):
-        fail("Expected index.html, stats.html, curate.html and 404.html only")
+        fail("Expected index.html, aml.html, stats.html, curate.html and 404.html only")
     parsed: dict[Path, PageParser] = {
         path: parse_page(path, expected_languages[path.name]) for path in pages
     }
@@ -128,6 +132,7 @@ def validate_pages() -> None:
             "queue-manual",
             "queue-abstract",
             "queue-legacy-rejected",
+            "queue-secondary-aml",
             "queue-origin-summary",
             "last-run-status",
             "editorial-app",
@@ -143,6 +148,8 @@ def validate_pages() -> None:
             "decision-rationale",
             "explicit-confirmation",
             "submit-decision",
+            "secondary-collection",
+            "secondary-rationale",
         }
         - curator_ids
     )
@@ -165,6 +172,23 @@ def validate_pages() -> None:
     )
     if missing:
         fail(f"stats.html missing interface ID(s): {', '.join(missing)}")
+    aml_ids = set(parsed[SITE / "aml.html"].ids)
+    missing = sorted(
+        {
+            "aml-collection",
+            "aml-controls",
+            "aml-search-input",
+            "aml-paper-list",
+            "aml-result-count",
+            "aml-record-count",
+            "aml-archive-version",
+            "aml-coverage-date",
+            "aml-methodology",
+        }
+        - aml_ids
+    )
+    if missing:
+        fail(f"aml.html missing interface ID(s): {', '.join(missing)}")
     for path, parser in parsed.items():
         for reference in parser.references:
             check_reference(path, reference, set(parser.ids))
@@ -194,6 +218,32 @@ def validate_statistics() -> int:
     return len(payload["daily"])
 
 
+def validate_secondary_payload() -> int:
+    payload = json.loads(
+        (SITE / "data/secondary-collections.json").read_text(encoding="utf-8")
+    )
+    if payload != build_secondary_payload(ROOT):
+        fail(
+            "secondary-collections.json is stale relative to the governed registries"
+        )
+    records = payload.get("records")
+    if not isinstance(records, list):
+        fail("secondary-collections.json records must be a list")
+    if payload.get("counts", {}).get("records") != len(records):
+        fail("Secondary rendered-data count mismatch")
+    for record in records:
+        if (
+            record.get("status") != "outside_core_review"
+            or record.get("screeningDecision") != "not_eligible"
+        ):
+            fail(f"{record.get('id')}: secondary record crosses core eligibility")
+        for name, value in (record.get("links") or {}).items():
+            parsed = urlsplit(value)
+            if name != "doi" or parsed.scheme != "https" or parsed.netloc != "doi.org":
+                fail(f"{record.get('id')}: unexpected secondary external link")
+    return len(records)
+
+
 def validate_curator_statistics() -> dict[str, object]:
     payload = json.loads(
         (SITE / "data/curator-stats.json").read_text(encoding="utf-8")
@@ -208,6 +258,7 @@ def validate_curator_statistics() -> dict[str, object]:
         "actionCount",
         "byStage",
         "openByOrigin",
+        "bySecondaryCollection",
     }
     if not isinstance(payload, dict) or set(payload) != expected:
         fail("curator-stats.json must use the closed aggregate field set")
@@ -221,6 +272,7 @@ def validate_curator_statistics() -> dict[str, object]:
         fail("curator-stats.json top-level counts must be non-negative integers")
     by_stage = payload["byStage"]
     by_origin = payload["openByOrigin"]
+    by_secondary_collection = payload["bySecondaryCollection"]
     if not isinstance(by_stage, dict) or set(by_stage) != {
         "metadataFix",
         "manualReview",
@@ -230,9 +282,18 @@ def validate_curator_statistics() -> dict[str, object]:
         fail("curator-stats.json has an invalid stage aggregate")
     if not isinstance(by_origin, dict) or set(by_origin) != {"legacy", "daily"}:
         fail("curator-stats.json has an invalid origin aggregate")
+    if (
+        not isinstance(by_secondary_collection, dict)
+        or set(by_secondary_collection) != {"broaderAml"}
+    ):
+        fail("curator-stats.json has an invalid secondary-collection aggregate")
     if any(
         type(value) is not int or value < 0
-        for value in (*by_stage.values(), *by_origin.values())
+        for value in (
+            *by_stage.values(),
+            *by_origin.values(),
+            *by_secondary_collection.values(),
+        )
     ):
         fail("curator-stats.json nested counts must be non-negative integers")
     if sum(by_stage.values()) != payload["open"]:
@@ -241,6 +302,8 @@ def validate_curator_statistics() -> dict[str, object]:
         fail("curator-stats.json origin counts do not sum to open")
     if payload["open"] + payload["completed"] != payload["totalMaterialised"]:
         fail("curator-stats.json open/completed counts do not reconcile")
+    if sum(by_secondary_collection.values()) > payload["completed"]:
+        fail("curator secondary routes cannot exceed completed candidates")
     return payload
 
 
@@ -257,6 +320,7 @@ def validate_curator_options() -> dict[str, object]:
         "confidenceLevels",
         "exclusionReasons",
         "topics",
+        "secondaryCollections",
     }
     if not isinstance(payload, dict) or set(payload) != expected:
         fail("curator-options.json must use the closed controlled field set")
@@ -295,6 +359,19 @@ def validate_assets() -> None:
     ):
         if unsupported_inference in javascript:
             fail(f"app.js infers an ungoverned empty-state reason: {unsupported_inference}")
+
+    aml_javascript = (SITE / "aml.js").read_text(encoding="utf-8")
+    if re.search(r"\.innerHTML\s*=|insertAdjacentHTML", aml_javascript):
+        fail("aml.js must not inject bibliographic metadata as HTML")
+    for required in (
+        'fetch("./data/secondary-collections.json")',
+        "replaceChildren",
+        "textContent",
+        "No related records are currently public",
+        "canonical verification and secondary publication approval",
+    ):
+        if required not in aml_javascript:
+            fail(f"aml.js missing secondary-collection safeguard: {required}")
 
     css = (SITE / "styles.css").read_text(encoding="utf-8")
     for required in (
@@ -355,6 +432,8 @@ def validate_assets() -> None:
         "legacyRejectionReview",
         "openByOrigin",
         "lastRunStatus",
+        "secondaryCollectionCode",
+        "secondaryCollectionRationale",
     ):
         if required not in curator_javascript:
             fail(f"curator.js missing safe aggregate rendering: {required}")
@@ -411,13 +490,15 @@ def validate_assets() -> None:
 def main() -> None:
     validate_pages()
     count = validate_payload()
+    secondary_count = validate_secondary_payload()
     metric_days = validate_statistics()
     curator_stats = validate_curator_statistics()
     curator_options = validate_curator_options()
     validate_assets()
     print(
         "[OK] Static site validation passed: "
-        f"{count} public record(s), {metric_days} daily metric row(s), "
+        f"{count} core public record(s), {secondary_count} secondary record(s), "
+        f"{metric_days} daily metric row(s), "
         f"{curator_stats['open']} open curator item(s), "
         f"{len(curator_options['decisions'])} curator decision option(s)."
     )

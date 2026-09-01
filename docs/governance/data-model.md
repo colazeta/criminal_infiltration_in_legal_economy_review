@@ -19,6 +19,10 @@
 - `screening_decisions.csv`: versioned decisions; one current row per included work.
 - `publications.csv`: version-preserving publication history, explicit current
   release status and approved annotations.
+- `secondary_collections.csv`: controlled definitions for public collections
+  that remain outside the systematic-review corpus.
+- `secondary_publications.csv`: versioned, separately approved public state and
+  annotation for one canonical work in one secondary collection.
 - `taxonomy.csv` / `paper_codes.csv`: controlled labels and append-only,
   versioned evidence-backed coding decisions.
 - `exclusion_reasons.csv`: controlled reason codes used by non-eligible,
@@ -45,9 +49,14 @@ conflict notes and required human action. `current_status`,
 `current_decision`, controlled reason/topic fields and `last_action_id` describe
 the current human-reviewed projection.
 
+`secondary_collection_code` and `secondary_collection_rationale` form a
+separate optional destination instruction. They may be recorded only with
+`not_eligible`; they never alter that screening outcome.
+
 `data/curation/actions.csv` is append-only. Each row records the authenticated
 GitHub issue, actor, screening stage, decision, reason/topic/duplicate target,
-confidence, rationale, evidence locator, date and transition in queue status.
+optional secondary destination and rationale, confidence, rationale, evidence
+locator, date and transition in queue status.
 An action may supersede the queue's current projection, but earlier action rows
 are never rewritten.
 
@@ -64,6 +73,8 @@ reviewable pull request; it is never converted directly into a canonical work.
 
 ## Full publication gate
 
+This gate applies to the criminal-infiltration review archive.
+
 For a current `published` manifest row, the builder requires:
 
 1. canonical status `seed_included` or `review_included`;
@@ -78,6 +89,25 @@ For a current `published` manifest row, the builder requires:
 Any inconsistent current `published` row fails the build. A current `withheld`
 row remains absent even when an earlier historical version was published. A
 non-public work is never promoted by inference.
+
+## Secondary publication gate
+
+The broader AML page is built independently from
+`secondary_publications.csv`. A current `published` secondary row requires:
+
+1. a canonical scholarly work with status `review_excluded`;
+2. complete minimum bibliography and at least one verified primary identifier;
+3. at least one discovery event;
+4. exactly one current `not_eligible` screening decision with a governed
+   exclusion reason;
+5. a current `withheld` row in the core `publications.csv` manifest;
+6. a governed secondary collection whose relation is `outside_core_review`;
+7. an approved, nonblank public relevance annotation and verified source basis.
+
+The candidate routing field is not read by this builder and cannot itself make
+a record public. The secondary export is written to
+`site/data/secondary-collections.json` and CSV, while core archive counts,
+records and saturation inputs remain unchanged.
 
 `review_pending` is a canonical, non-publishable state for a bibliographically
 resolved work that still lacks sufficient screening evidence.
@@ -116,6 +146,11 @@ topic, relevance note, sanitised source basis and release metadata may appear.
 The builder uses a closed field allowlist. Reviewer identity, internal notes,
 queries, evidence quotes, candidate records and full text are forbidden.
 The machine-readable contract is `schema/public-archive.schema.json`.
+
+Secondary records use their own closed allowlist in
+`schema/public-secondary-collections.schema.json`; it includes the controlled
+core exclusion reason and broader public relevance note, but no reviewer,
+candidate or evidence fields.
 
 The statistics export has a separate closed allowlist containing dates, counts,
 technical run status, source-level aggregates and whether an intake issue was

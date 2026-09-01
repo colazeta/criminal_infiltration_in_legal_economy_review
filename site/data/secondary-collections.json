@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "archiveVersion": "0.2.0",
+  "releaseDate": "2026-08-30",
+  "searchCoverageThrough": "2026-04-29",
+  "sourceSnapshot": "2026-08-30",
+  "methodology": {
+    "collectionDefinition": "Secondary collections retain reviewed scholarly work that is useful outside the systematic review's narrower eligibility boundary.",
+    "coreBoundary": "Every record here has a current not_eligible decision and remains withheld from the criminal-infiltration review corpus.",
+    "publicationDefinition": "Visibility requires verified canonical metadata and a separate, versioned secondary-publication approval."
+  },
+  "counts": {
+    "records": 0,
+    "byCollection": {
+      "broader_aml": 0
+    }
+  },
+  "collections": [
+    {
+      "code": "broader_aml",
+      "label": "Anti-money laundering and economic/financial crime",
+      "description": "Scholarly work on money laundering and economic or financial crime that is relevant to the broader evidence library but does not meet the criminal-infiltration review eligibility rule",
+      "eligibilityRelation": "outside_core_review",
+      "records": 0
+    }
+  ],
+  "records": []
+}

@@ -103,6 +103,13 @@ riusi con contenuto diverso e conserva soltanto fingerprint e risultato. Il
 Worker verifica che la scheda sia ancora aperta, abbia la label di coda e
 contenga il candidate ID selezionato.
 
+Per `not_eligible` il payload può inoltre contenere il solo codice governato
+`broader_aml` e una motivazione non vuota della rilevanza secondaria. Il backend
+rifiuta la destinazione con qualsiasi altra decisione e la issue strutturata
+mantiene separati motivo di esclusione e rilevanza AML. Anche in questo caso la
+App crea soltanto l'istruzione per la coda: non scrive il manifesto pubblico
+secondario.
+
 ## Validazione locale
 
 ```bash
