@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "screeningStages": [
     {
       "code": "title_abstract",
@@ -140,6 +140,14 @@
       "code": "criminal_transplantation",
       "label": "Criminal transplantation",
       "definition": "Work on the durable relocation or establishment of criminal organisations in new territories or legal-economy settings"
+    }
+  ],
+  "secondaryCollections": [
+    {
+      "code": "broader_aml",
+      "label": "Anti-money laundering and economic/financial crime",
+      "description": "Scholarly work on money laundering and economic or financial crime that is relevant to the broader evidence library but does not meet the criminal-infiltration review eligibility rule",
+      "eligibilityRelation": "outside_core_review"
     }
   ]
 }

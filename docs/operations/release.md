@@ -12,14 +12,16 @@ provenance.
 
 1. For every publication-state or public-annotation change, append a versioned
    `publications.csv` row, retire the former current marker and verify the
-   supersession chain. Never edit the former annotation in place.
+   supersession chain. Apply the same rule to a secondary collection through
+   `secondary_publications.csv`. Never edit a former annotation in place.
 2. Update `archive_versions.csv`; retain exactly one current row.
 3. Update `CHANGELOG.md`, `CITATION.cff` and `.zenodo.json` consistently.
 4. Record corpus/protocol/schema version, release date, search coverage through,
    records added/changed/removed and previous version.
 5. Run the complete commands in `AGENTS.md` from a clean checkout.
 6. Confirm generated JSON/CSV match a fresh deterministic build and contain only
-   current `published` publication rows.
+   current `published` publication rows. Confirm the secondary export contains
+   only current `not_eligible` works that remain withheld from the core.
 7. Review the public archive, methodology limitations and download files.
 8. Follow the [GitHub Pages guide](github-pages.md), merge through review and
    verify the `main` deployment.

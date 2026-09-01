@@ -432,6 +432,8 @@ def import_candidates(
                 "exclusion_reason_code": "",
                 "topic_code": "",
                 "duplicate_target_id": "",
+                "secondary_collection_code": "",
+                "secondary_collection_rationale": "",
                 "last_action_id": "",
                 "materialised_at": imported_at,
                 "updated_at": imported_at,

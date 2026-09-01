@@ -10,6 +10,8 @@ validated; no search automation writes here directly.
 | `discovery_events.csv` | One occurrence in a search/seed/citation execution |
 | `screening_decisions.csv` | One historical or current screening decision |
 | `publications.csv` | One versioned public-release state and annotation |
+| `secondary_collections.csv` | One governed collection outside the core review |
+| `secondary_publications.csv` | One versioned public state for a work in a secondary collection |
 | `taxonomy.csv` | One controlled code definition |
 | `paper_codes.csv` | One versioned evidence-backed code applied to a work |
 | `exclusion_reasons.csv` | One controlled screening-exclusion reason |
@@ -33,6 +35,11 @@ row has a unique `publication_id` and a per-work `publication_version`; later
 rows point to their immediate predecessor through
 `supersedes_publication_id`. Exactly one row per represented work is current,
 and only that row controls the current public export.
+
+`secondary_publications.csv` uses the same linear-history rule for each
+`paper_id` + `collection_code` pair. A published row can expose only a canonical
+`review_excluded` work with a current `not_eligible` decision while the core
+manifest remains `withheld`.
 
 Routine curator changes should be prepared through the
 [curator desk](../../docs/operations/curation.md), rather than by editing several

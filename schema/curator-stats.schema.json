@@ -11,10 +11,11 @@
     "completed",
     "actionCount",
     "byStage",
-    "openByOrigin"
+    "openByOrigin",
+    "bySecondaryCollection"
   ],
   "properties": {
-    "schemaVersion": {"const": 1},
+    "schemaVersion": {"const": 2},
     "totalMaterialised": {"type": "integer", "minimum": 0},
     "open": {"type": "integer", "minimum": 0},
     "completed": {"type": "integer", "minimum": 0},
@@ -42,6 +43,14 @@
       "properties": {
         "legacy": {"type": "integer", "minimum": 0},
         "daily": {"type": "integer", "minimum": 0}
+      }
+    },
+    "bySecondaryCollection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["broaderAml"],
+      "properties": {
+        "broaderAml": {"type": "integer", "minimum": 0}
       }
     }
   }

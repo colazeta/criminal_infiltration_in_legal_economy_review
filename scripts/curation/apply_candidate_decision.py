@@ -44,6 +44,8 @@ ISSUE_LABELS = {
     "Exclusion reason": "exclusion_reason_code",
     "Topic code": "topic_code",
     "Duplicate target": "duplicate_target_id",
+    "Secondary collection": "secondary_collection_code",
+    "Secondary collection relevance": "secondary_collection_rationale",
     "Confidence": "confidence",
     "Evidence basis and locator": "evidence_basis",
     "Record-specific rationale": "rationale",
@@ -126,6 +128,7 @@ def validate_instruction(
     papers: list[dict[str, str]],
     taxonomy: list[dict[str, str]],
     reasons: list[dict[str, str]],
+    secondary_collections: list[dict[str, str]],
 ) -> dict[str, str]:
     values = {key: clean(value) for key, value in values.items()}
     if values.get("confirmation") != "APPLY":
@@ -149,10 +152,32 @@ def validate_instruction(
     reason_code = values.get("exclusion_reason_code", "")
     topic_code = values.get("topic_code", "")
     duplicate_target = values.get("duplicate_target_id", "")
+    secondary_collection = values.get("secondary_collection_code", "")
+    secondary_rationale = values.get("secondary_collection_rationale", "")
     valid_reasons = {row["code"] for row in reasons}
     valid_topics = {
         row["code"] for row in taxonomy if row.get("dimension") == "topic"
     }
+    valid_secondary_collections = {
+        row["collection_code"] for row in secondary_collections
+    }
+
+    if secondary_collection:
+        if decision != "not_eligible":
+            raise CandidateDecisionError(
+                "A secondary collection can be assigned only with not_eligible"
+            )
+        if secondary_collection not in valid_secondary_collections:
+            raise CandidateDecisionError(
+                "Secondary collection must use a governed collection code"
+            )
+        values["secondary_collection_rationale"] = require_text(
+            secondary_rationale, "secondary collection relevance"
+        )
+    elif secondary_rationale:
+        raise CandidateDecisionError(
+            "Secondary collection relevance requires a secondary collection"
+        )
 
     if decision in {"eligible_core", "eligible_contextual"}:
         if topic_code not in valid_topics:
@@ -229,12 +254,20 @@ def apply_decision(
     _, papers = read_table(root / "data" / "registry" / "papers.csv")
     _, taxonomy = read_table(root / "data" / "registry" / "taxonomy.csv")
     _, reasons = read_table(root / "data" / "registry" / "exclusion_reasons.csv")
+    _, secondary_collections = read_table(
+        root / "data" / "registry" / "secondary_collections.csv"
+    )
     if any(row.get("github_issue_number") == issue_number for row in actions):
         raise CandidateDecisionError(
             f"GitHub issue #{issue_number} has already produced a curator action"
         )
     values = validate_instruction(
-        parse_issue_form(issue_body), queue, papers, taxonomy, reasons
+        parse_issue_form(issue_body),
+        queue,
+        papers,
+        taxonomy,
+        reasons,
+        secondary_collections,
     )
     candidate = next(
         row for row in queue if row["candidate_id"] == values["candidate_id"]
@@ -252,6 +285,10 @@ def apply_decision(
         "exclusion_reason_code": values["exclusion_reason_code"],
         "topic_code": values["topic_code"],
         "duplicate_target_id": values["duplicate_target_id"],
+        "secondary_collection_code": values["secondary_collection_code"],
+        "secondary_collection_rationale": values[
+            "secondary_collection_rationale"
+        ],
         "confidence": values["confidence"],
         "rationale": values["rationale"],
         "evidence_basis": values["evidence_basis"],
@@ -268,6 +305,10 @@ def apply_decision(
             "exclusion_reason_code": values["exclusion_reason_code"],
             "topic_code": values["topic_code"],
             "duplicate_target_id": values["duplicate_target_id"],
+            "secondary_collection_code": values["secondary_collection_code"],
+            "secondary_collection_rationale": values[
+                "secondary_collection_rationale"
+            ],
             "last_action_id": action_id,
             "updated_at": decided_at,
         }

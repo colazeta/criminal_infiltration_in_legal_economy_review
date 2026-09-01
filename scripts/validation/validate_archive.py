@@ -24,12 +24,21 @@ from build_archive import (  # noqa: E402
     clean_doi,
     current_publication_rows,
 )
+from build_secondary_collections import (  # noqa: E402
+    SECONDARY_RECORD_FIELDS,
+    SecondaryCollectionBuildError,
+    build_payload as build_secondary_payload,
+    current_secondary_publication_rows,
+)
 
 
 REGISTRY = ROOT / "data/registry"
 PUBLIC_JSON = ROOT / "site/data/archive.json"
 PUBLIC_CSV = ROOT / "site/data/archive.csv"
 PUBLIC_SCHEMA = ROOT / "schema/public-archive.schema.json"
+SECONDARY_JSON = ROOT / "site/data/secondary-collections.json"
+SECONDARY_CSV = ROOT / "site/data/secondary-collections.csv"
+SECONDARY_SCHEMA = ROOT / "schema/public-secondary-collections.schema.json"
 DOI_PATTERN = re.compile(r"^10\.\d{4,9}/\S+$", re.I)
 DATE_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
@@ -100,6 +109,8 @@ def validate_registries() -> dict[str, list[dict[str, str]]]:
             "discovery_events.csv",
             "screening_decisions.csv",
             "publications.csv",
+            "secondary_collections.csv",
+            "secondary_publications.csv",
             "paper_codes.csv",
             "taxonomy.csv",
             "exclusion_reasons.csv",
@@ -114,6 +125,8 @@ def validate_registries() -> dict[str, list[dict[str, str]]]:
     events = data["discovery_events.csv"]
     decisions = data["screening_decisions.csv"]
     publications = data["publications.csv"]
+    secondary_collections = data["secondary_collections.csv"]
+    secondary_publications = data["secondary_publications.csv"]
     taxonomy = data["taxonomy.csv"]
     exclusion_reasons = data["exclusion_reasons.csv"]
     relations = data["work_relations.csv"]
@@ -132,6 +145,17 @@ def validate_registries() -> dict[str, list[dict[str, str]]]:
     require_unique(
         [row.get("publication_id", "").strip() for row in publications],
         "publications",
+    )
+    require_unique(
+        [row.get("collection_code", "").strip() for row in secondary_collections],
+        "secondary collections",
+    )
+    require_unique(
+        [
+            row.get("secondary_publication_id", "").strip()
+            for row in secondary_publications
+        ],
+        "secondary publications",
     )
     require_unique(
         [row.get("relation_id", "").strip() for row in relations],
@@ -153,6 +177,12 @@ def validate_registries() -> dict[str, list[dict[str, str]]]:
     current_publication_by_paper = {
         row["paper_id"]: row for row in current_publications
     }
+    try:
+        current_secondary_publications = current_secondary_publication_rows(
+            secondary_publications
+        )
+    except SecondaryCollectionBuildError as exc:
+        fail(f"Invalid secondary publication history: {exc}")
 
     paper_ids = {row["paper_id"] for row in papers}
     papers_by_id = {row["paper_id"]: row for row in papers}
@@ -178,6 +208,7 @@ def validate_registries() -> dict[str, list[dict[str, str]]]:
         fail(f"Probable duplicate work(s): {duplicates}")
 
     identifier_keys: list[str] = []
+    primary_identifier_counts: Counter[str] = Counter()
     primary_doi_counts: Counter[str] = Counter()
     primary_doi_by_paper: dict[str, str] = {}
     for row in identifiers:
@@ -201,6 +232,8 @@ def validate_registries() -> dict[str, list[dict[str, str]]]:
         if is_primary == "true" and scheme == "doi":
             primary_doi_counts[paper_id] += 1
             primary_doi_by_paper[paper_id] = value
+        if is_primary == "true":
+            primary_identifier_counts[paper_id] += 1
         if row.get("verification_status") != "verified":
             fail(f"{row.get('identifier_id')}: identifier is not verified")
     require_unique(identifier_keys, "work identifiers")
@@ -306,6 +339,19 @@ def validate_registries() -> dict[str, list[dict[str, str]]]:
     ):
         fail("taxonomy.csv has blank or duplicate keys")
 
+    collection_codes = {
+        row.get("collection_code", "").strip() for row in secondary_collections
+    }
+    for row in secondary_collections:
+        code = row.get("collection_code", "").strip()
+        for field in ("label", "description", "collection_version"):
+            if not row.get(field, "").strip():
+                fail(f"{code}: blank secondary-collection {field}")
+        if row.get("eligibility_relation", "").strip() != "outside_core_review":
+            fail(f"{code}: secondary collection crosses the core eligibility boundary")
+        if not re.fullmatch(r"\d+\.\d+", row.get("collection_version", "")):
+            fail(f"{code}: invalid collection_version")
+
     publications_by_paper: dict[str, list[dict[str, str]]] = defaultdict(list)
     for row in publications:
         publication_id = row["publication_id"]
@@ -366,6 +412,73 @@ def validate_registries() -> dict[str, list[dict[str, str]]]:
                 != first_published_release
             ):
                 fail(f"{paper_id}: first_published_version changed across history")
+
+    secondary_by_membership: dict[
+        tuple[str, str], list[dict[str, str]]
+    ] = defaultdict(list)
+    for row in secondary_publications:
+        publication_id = row["secondary_publication_id"]
+        paper_id = row["paper_id"]
+        collection_code = row["collection_code"]
+        if paper_id not in paper_ids:
+            fail(f"{publication_id}: orphan paper_id {paper_id}")
+        if collection_code not in collection_codes:
+            fail(f"{publication_id}: unknown secondary collection")
+        secondary_by_membership[(paper_id, collection_code)].append(row)
+        if row.get("publication_status") not in ALLOWED_PUBLICATION_STATUS:
+            fail(f"{publication_id}: invalid secondary publication status")
+        if not row.get("version_note", "").strip():
+            fail(f"{publication_id}: blank version_note")
+        if not DATE_PATTERN.match(row.get("updated_at", "")):
+            fail(f"{publication_id}: invalid updated_at")
+        verified_at = row.get("metadata_verified_at", "").strip()
+        if verified_at and not DATE_PATTERN.match(verified_at):
+            fail(f"{publication_id}: invalid metadata_verified_at")
+        first_published = row.get("first_published_version", "").strip()
+        if first_published and not re.fullmatch(r"\d+\.\d+\.\d+", first_published):
+            fail(f"{publication_id}: invalid first_published_version")
+        if row.get("publication_status") == "published":
+            for field in (
+                "public_relevance_reason",
+                "metadata_confidence",
+                "source_basis",
+                "metadata_verified_at",
+                "first_published_version",
+            ):
+                if not row.get(field, "").strip():
+                    fail(f"{publication_id}: blank {field}")
+            if row.get("metadata_confidence") not in ALLOWED_CONFIDENCE:
+                fail(f"{publication_id}: invalid metadata_confidence")
+
+    for key, history in secondary_by_membership.items():
+        ordered = sorted(history, key=lambda row: int(row["publication_version"]))
+        previous_date = ""
+        first_published_release = ""
+        for row in ordered:
+            updated_at = row["updated_at"]
+            if previous_date and updated_at < previous_date:
+                fail(f"{key}: secondary updated_at precedes its predecessor")
+            previous_date = updated_at
+            if row["publication_status"] == "published" and not first_published_release:
+                first_published_release = row["first_published_version"]
+            if first_published_release and row["first_published_version"] != first_published_release:
+                fail(f"{key}: first_published_version changed across secondary history")
+
+    for publication in current_secondary_publications:
+        if publication.get("publication_status") != "published":
+            continue
+        paper_id = publication["paper_id"]
+        if papers_by_id[paper_id].get("canonical_status") != "review_excluded":
+            fail(f"{paper_id}: public secondary work is not review_excluded")
+        if len(current[paper_id]) != 1 or current[paper_id][0].get("decision") != "not_eligible":
+            fail(f"{paper_id}: public secondary work lacks current not_eligible decision")
+        if event_counts[paper_id] < 1:
+            fail(f"{paper_id}: public secondary work has no discovery event")
+        if primary_identifier_counts[paper_id] < 1:
+            fail(f"{paper_id}: public secondary work lacks a primary identifier")
+        core_publication = current_publication_by_paper.get(paper_id)
+        if not core_publication or core_publication.get("publication_status") != "withheld":
+            fail(f"{paper_id}: public secondary work is not withheld from the core")
 
     for paper_id, publication in current_publication_by_paper.items():
         if len(current[paper_id]) != 1:
@@ -457,6 +570,10 @@ def validate_registries() -> dict[str, list[dict[str, str]]]:
         build_payload(ROOT)
     except ArchiveBuildError as exc:
         fail(f"Publication gate failed: {exc}")
+    try:
+        build_secondary_payload(ROOT)
+    except SecondaryCollectionBuildError as exc:
+        fail(f"Secondary publication gate failed: {exc}")
     return data
 
 
@@ -515,12 +632,95 @@ def validate_public_archive(data: dict[str, list[dict[str, str]]]) -> None:
         fail("CSV public field allowlist mismatch")
 
 
+def validate_secondary_archive(data: dict[str, list[dict[str, str]]]) -> None:
+    if not SECONDARY_JSON.exists() or not SECONDARY_CSV.exists():
+        fail("Generated secondary-collection files are missing")
+    payload = json.loads(SECONDARY_JSON.read_text(encoding="utf-8"))
+    schema = json.loads(SECONDARY_SCHEMA.read_text(encoding="utf-8"))
+    if set(payload) != set(schema.get("required", [])):
+        fail(
+            "secondary-collections.json top-level allowlist differs from public schema"
+        )
+    schema_record_fields = tuple(
+        schema["properties"]["records"]["items"].get("required", [])
+    )
+    if schema_record_fields != SECONDARY_RECORD_FIELDS:
+        fail("Secondary machine-readable schema differs from builder allowlist")
+    records = payload.get("records")
+    if not isinstance(records, list):
+        fail("secondary-collections.json records must be a list")
+    current_rows = current_secondary_publication_rows(
+        data["secondary_publications.csv"]
+    )
+    expected = {
+        (row["paper_id"], row["collection_code"])
+        for row in current_rows
+        if row.get("publication_status") == "published"
+    }
+    exported = {
+        (record.get("id"), record.get("collectionCode")) for record in records
+    }
+    if exported != expected:
+        fail(f"Secondary public IDs differ from manifest: {exported} != {expected}")
+    decision_by_id = {
+        row["paper_id"]: row
+        for row in data["screening_decisions.csv"]
+        if row.get("is_current", "").lower() == "true"
+    }
+    for record in records:
+        if tuple(record) != SECONDARY_RECORD_FIELDS:
+            fail(f"{record.get('id')}: secondary public field allowlist mismatch")
+        if (
+            record.get("section") != "broader_aml"
+            or record.get("status") != "outside_core_review"
+            or record.get("screeningDecision") != "not_eligible"
+        ):
+            fail(f"{record.get('id')}: core-eligibility boundary is not explicit")
+        decision = decision_by_id[record["id"]]
+        if record.get("exclusionReasonCode") != decision["exclusion_reason_code"]:
+            fail(f"{record.get('id')}: exported exclusion reason is stale")
+        doi = clean_doi(record.get("doi", ""))
+        expected_links = {"doi": f"https://doi.org/{doi}"} if doi else {}
+        if record.get("links") != expected_links:
+            fail(f"{record.get('id')}: unexpected secondary public link")
+    collection_codes = [
+        row["collection_code"] for row in data["secondary_collections.csv"]
+    ]
+    exported_collections = [row.get("code") for row in payload["collections"]]
+    if exported_collections != sorted(collection_codes):
+        fail("Secondary collection definitions differ from the governed registry")
+    counts = Counter(record["collectionCode"] for record in records)
+    expected_counts = {code: counts[code] for code in sorted(collection_codes)}
+    if (
+        payload.get("counts", {}).get("records") != len(records)
+        or payload.get("counts", {}).get("byCollection") != expected_counts
+    ):
+        fail("secondary-collections.json count metadata does not match records")
+    with SECONDARY_CSV.open(newline="", encoding="utf-8-sig") as handle:
+        reader = csv.DictReader(handle)
+        csv_fields = list(reader.fieldnames or [])
+        csv_rows = list(reader)
+    expected_csv_fields = [
+        field for field in SECONDARY_RECORD_FIELDS if field != "links"
+    ]
+    if csv_fields != expected_csv_fields:
+        fail("Secondary CSV public field allowlist mismatch")
+    if [
+        (row.get("id"), row.get("collectionCode")) for row in csv_rows
+    ] != [
+        (record.get("id"), record.get("collectionCode")) for record in records
+    ]:
+        fail("Secondary JSON/CSV record order differs")
+
+
 def main() -> None:
     data = validate_registries()
     validate_public_archive(data)
+    validate_secondary_archive(data)
     print(
         f"[OK] Archive gate passed: {len(data['papers.csv'])} canonical work(s), "
-        f"{len(data['publications.csv'])} versioned publication row(s)."
+        f"{len(data['publications.csv'])} core publication row(s), "
+        f"{len(data['secondary_publications.csv'])} secondary publication row(s)."
     )
 
 

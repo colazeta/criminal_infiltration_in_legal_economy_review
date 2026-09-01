@@ -110,11 +110,13 @@ jobs:
           python scripts/validation/validate_repository.py
           python -m unittest discover -s tests -p 'test_*.py'
           python scripts/build_archive.py
+          python scripts/build_secondary_collections.py
           python scripts/curation/build_curator_stats.py
           python scripts/curation/build_curator_options.py
           python scripts/validation/validate_archive.py
           python scripts/validation/validate_site.py
           node --check site/app.js
+          node --check site/aml.js
           node --check site/stats.js
           node --check site/curator.js
           node --check site/curator-config.js
@@ -168,11 +170,13 @@ jobs:
             echo "PASS python scripts/validation/validate_repository.py"
             echo "PASS python -m unittest discover -s tests -p 'test_*.py'"
             echo "PASS python scripts/build_archive.py"
+            echo "PASS python scripts/build_secondary_collections.py"
             echo "PASS python scripts/curation/build_curator_stats.py"
             echo "PASS python scripts/curation/build_curator_options.py"
             echo "PASS python scripts/validation/validate_archive.py"
             echo "PASS python scripts/validation/validate_site.py"
             echo "PASS node --check site/app.js"
+            echo "PASS node --check site/aml.js"
             echo "PASS node --check site/stats.js"
             echo "PASS node --check site/curator.js"
             echo "PASS node --check site/curator-config.js"

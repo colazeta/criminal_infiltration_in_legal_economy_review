@@ -33,6 +33,22 @@ organised-crime violence do not constitute infiltration without the sustained
 legal-economy relationship. They may be contextual only with a specific,
 documented contribution.
 
+## Broader AML collection
+
+Core eligibility and broader subject relevance are separate judgements. A
+scholarly work may receive `not_eligible` under the four-part infiltration test
+and still be explicitly routed to the governed `broader_aml` collection when it
+substantively concerns money laundering or economic/financial crime.
+
+That routing:
+
+- does not change the `not_eligible` decision or its controlled exclusion code;
+- requires a separate, record-specific explanation of the broader relevance;
+- does not count toward the core or contextual corpus, review yields or
+  saturation;
+- does not make the candidate public. Canonical metadata verification and a
+  versioned secondary-publication approval remain necessary.
+
 ## Exclusion reason codes
 
 The machine-readable controlled list is

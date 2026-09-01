@@ -82,11 +82,13 @@ workflow changes:
 python3 scripts/validation/validate_repository.py
 python3 -m unittest discover -s tests -p 'test_*.py'
 python3 scripts/build_archive.py
+python3 scripts/build_secondary_collections.py
 python3 scripts/curation/build_curator_stats.py
 python3 scripts/curation/build_curator_options.py
 python3 scripts/validation/validate_archive.py
 python3 scripts/validation/validate_site.py
 node --check site/app.js
+node --check site/aml.js
 node --check site/stats.js
 node --check site/curator.js
 node --check site/curator-config.js

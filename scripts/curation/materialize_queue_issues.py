@@ -32,6 +32,10 @@ LABELS = {
         "8b8b83",
         "Pilot rejection signal retained for human re-checking",
     ),
+    "collection:broader-aml": (
+        "1f6f78",
+        "Excluded from the core review and routed to the broader AML collection",
+    ),
 }
 STAGE_LABEL = {
     "metadata_fix": "stage:metadata-fix",
@@ -44,6 +48,9 @@ STAGE_NAME = {
     "manual_review": "Manual scope review",
     "abstract_full_text_review": "Abstract / full-text review",
     "legacy_rejection_review": "Legacy rejection re-check",
+}
+SECONDARY_LABEL = {
+    "broader_aml": "collection:broader-aml",
 }
 ACTIVE_STATUSES = {"pending", "needs_full_text"}
 QUEUE_STATUSES = ACTIVE_STATUSES | {
@@ -335,6 +342,12 @@ def validate_action_links(
 def action_comment(row: dict[str, str], action: dict[str, str]) -> str:
     action_id = action["action_id"]
     issue_number = action["github_issue_number"]
+    secondary = ""
+    if action.get("secondary_collection_code"):
+        secondary = (
+            "- Secondary destination: "
+            f"{inline_code(action['secondary_collection_code'])}\n"
+        )
     return f"""<!-- curator-action:{action_id} -->
 ## Queue state updated
 
@@ -342,9 +355,10 @@ def action_comment(row: dict[str, str], action: dict[str, str]) -> str:
 - Recorded decision: {inline_code(action['decision'])}
 - Append-only action: {inline_code(action_id)}
 - Decision instruction: #{issue_number}
+{secondary}
 
 This updates the curator queue only. It does not assign a canonical paper ID or
-approve publication.
+approve publication in either the core archive or a secondary collection.
 """
 
 
@@ -407,6 +421,22 @@ def reconcile_issue(
             {"labels": ["stage:abstract-review"]},
         )
         writes += 1
+    secondary_code = row.get("secondary_collection_code", "")
+    if secondary_code:
+        secondary_label = SECONDARY_LABEL.get(secondary_code)
+        if not secondary_label:
+            raise GitHubError(
+                f"Unknown secondary collection for {row['candidate_id']}"
+            )
+        if secondary_label not in labels:
+            api_request(
+                repository,
+                token,
+                "POST",
+                f"/issues/{number}/labels",
+                {"labels": [secondary_label]},
+            )
+            writes += 1
     return writes
 
 

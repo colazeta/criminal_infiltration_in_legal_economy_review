@@ -18,6 +18,7 @@ non è automaticamente pubblicato sul sito.
 ## I collegamenti principali
 
 - [Biblioteca pubblica](https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/)
+- [Raccolta AML più ampia](https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/aml.html)
 - [Statistiche giornaliere](https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/stats.html)
 - [Pannello di curatela](https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/curate.html)
 - [Strategia di espansione spiegata semplicemente](methodology/expansion.md)
@@ -38,6 +39,12 @@ Per un candidato puoi registrare inclusione core o contestuale, necessità di
 full text, esclusione con codice governato, fonte non accademica, irreperibilità
 o duplicato confermato. Il sistema aggiorna soltanto la coda e prepara una pull
 request: non assegna automaticamente un paper ID e non pubblica il lavoro.
+
+Se un articolo è `not_eligible` per la review sull'infiltrazione ma resta
+importante per antiriciclaggio o criminalità economico-finanziaria, puoi anche
+selezionare `broader_aml` e spiegare separatamente questa rilevanza. L'articolo
+resta escluso dal corpus principale; diventa visibile nella pagina AML solo dopo
+verifica canonica e una seconda approvazione editoriale.
 
 Quando un batch giornaliero contiene candidati, GitHub prepara una pull request
 che li trasferisce nella coda editoriale conservando fonti, query, conflitti e

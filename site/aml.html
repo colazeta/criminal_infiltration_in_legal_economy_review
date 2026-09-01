@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="A governed collection of anti-money-laundering and economic or financial-crime literature outside the criminal-infiltration review corpus."
+    />
+    <title>Broader AML Literature Collection</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>◫</text></svg>" />
+    <link rel="stylesheet" href="./styles.css" />
+    <script src="./aml.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#aml-collection">Skip to the collection</a>
+
+    <header class="site-header">
+      <div class="header-inner">
+        <a class="brand" href="./" aria-label="Archive home">
+          <span class="brand-mark" aria-hidden="true">CI</span>
+          <span>
+            <strong>Criminal Infiltration</strong>
+            <small>Literature Archive</small>
+          </span>
+        </a>
+        <nav aria-label="Primary navigation">
+          <a href="./">Core review</a>
+          <a href="#aml-collection" aria-current="page">Broader AML</a>
+          <a href="./stats.html">Daily statistics</a>
+          <a href="./curate.html">Curator desk</a>
+          <a href="./data/secondary-collections.csv" download>Download CSV</a>
+          <a
+            href="https://github.com/colazeta/criminal_infiltration_in_legal_economy_review"
+            rel="noreferrer"
+          >Repository</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="intro" aria-labelledby="page-title">
+        <div>
+          <p class="eyebrow">Related evidence · separate corpus</p>
+          <h1 id="page-title">Anti-money laundering and economic/financial crime</h1>
+          <p class="intro-copy">
+            This collection retains scholarly work that is useful for the wider
+            AML and economic-crime field but does not meet the narrower eligibility
+            rule for criminal infiltration in the legal economy.
+          </p>
+        </div>
+        <aside class="scope-note secondary-scope-note" aria-label="Eligibility boundary">
+          <span class="scope-dot" aria-hidden="true"></span>
+          <div>
+            <strong>Outside the systematic-review corpus</strong>
+            <p>
+              Every record remains <code>not_eligible</code> for the core review.
+              Its presence here never changes inclusion counts or saturation.
+            </p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="metrics" aria-label="Collection status">
+        <article>
+          <span id="aml-record-count">—</span>
+          <p>approved related records</p>
+        </article>
+        <article>
+          <span id="aml-collection-count">—</span>
+          <p>governed related collections</p>
+        </article>
+        <article>
+          <span id="aml-archive-version">—</span>
+          <p>archive version</p>
+        </article>
+        <article>
+          <span id="aml-coverage-date">—</span>
+          <p>search coverage through</p>
+        </article>
+      </section>
+
+      <section class="archive" id="aml-collection" aria-labelledby="aml-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Broader evidence library</p>
+            <h2 id="aml-title">Reviewed related literature</h2>
+          </div>
+          <p>
+            Screening exclusion and secondary publication are recorded separately.
+            Only records that pass both controls appear here.
+          </p>
+        </div>
+
+        <form class="controls aml-controls" id="aml-controls" role="search">
+          <label class="search-field">
+            <span>Search title, author, venue or DOI</span>
+            <input
+              id="aml-search-input"
+              type="search"
+              autocomplete="off"
+              placeholder="e.g. laundering, beneficial ownership…"
+            />
+          </label>
+          <label>
+            <span>Year</span>
+            <select id="aml-year-filter">
+              <option value="all">All years</option>
+            </select>
+          </label>
+          <label>
+            <span>Sort</span>
+            <select id="aml-sort-order">
+              <option value="newest">Newest first</option>
+              <option value="oldest">Oldest first</option>
+              <option value="title">Title A–Z</option>
+            </select>
+          </label>
+          <button type="reset" id="aml-clear-filters">Clear filters</button>
+        </form>
+
+        <div class="results-meta">
+          <p id="aml-result-count" aria-live="polite">Loading related publications…</p>
+          <p class="legend secondary-legend"><span aria-hidden="true"></span> Approved outside-core record</p>
+        </div>
+
+        <div id="aml-paper-list" class="paper-list" aria-busy="true"></div>
+        <div id="aml-empty-state" class="empty-state" hidden>
+          <h3 id="aml-empty-title">No related records are currently public</h3>
+          <p id="aml-empty-copy">
+            The collection structure is active, but no individual work has yet
+            completed canonical verification and secondary publication approval.
+          </p>
+        </div>
+        <div id="aml-load-error" class="empty-state error-state" hidden>
+          <h3>The related-literature data could not be loaded</h3>
+          <p>Please try again or inspect the governed registries in the repository.</p>
+        </div>
+      </section>
+
+      <section class="methodology" id="aml-methodology" aria-labelledby="aml-methodology-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Two independent judgements</p>
+            <h2 id="aml-methodology-title">Why separation matters</h2>
+          </div>
+        </div>
+        <div class="method-grid">
+          <article>
+            <span class="step">01</span>
+            <h3>Core eligibility stays negative</h3>
+            <p>The work is explicitly excluded under the infiltration codebook.</p>
+          </article>
+          <article>
+            <span class="step">02</span>
+            <h3>Broader relevance is recorded</h3>
+            <p>A curator explains its distinct AML or economic-crime contribution.</p>
+          </article>
+          <article>
+            <span class="step">03</span>
+            <h3>Metadata are verified</h3>
+            <p>A canonical scholarly identity and discovery provenance are required.</p>
+          </article>
+          <article>
+            <span class="step">04</span>
+            <h3>Publication is approved separately</h3>
+            <p>No candidate becomes visible merely because it was routed here.</p>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <p>
+        Related records are governed and versioned, but they are not evidence of
+        eligibility for the criminal-infiltration systematic review.
+      </p>
+      <p>
+        <a href="./">Core review</a> ·
+        <a href="./data/secondary-collections.json">JSON</a> ·
+        <a href="./data/secondary-collections.csv">CSV</a> ·
+        <a href="./curate.html">Curator desk</a>
+      </p>
+    </footer>
+  </body>
+</html>

@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "totalMaterialised": 55,
   "open": 55,
   "completed": 0,
@@ -13,5 +13,8 @@
   "openByOrigin": {
     "legacy": 55,
     "daily": 0
+  },
+  "bySecondaryCollection": {
+    "broaderAml": 0
   }
 }

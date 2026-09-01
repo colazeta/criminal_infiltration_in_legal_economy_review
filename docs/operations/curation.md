@@ -78,11 +78,14 @@ triage, non una decisione di eleggibilità.
    mostra soltanto i campi compatibili con la decisione scelta.
 4. Per un'esclusione usare un codice esatto da
    `data/registry/exclusion_reasons.csv`.
-5. Per `eligible_core` o `eligible_contextual` usare un tema già presente nella
+5. Se la decisione è `not_eligible` ma il lavoro è utile per antiriciclaggio o
+   criminalità economico-finanziaria, selezionare `broader_aml` e scrivere una
+   motivazione distinta della rilevanza più ampia.
+6. Per `eligible_core` o `eligible_contextual` usare un tema già presente nella
    tassonomia.
-6. Per `duplicate` indicare il candidato o paper che sopravvive e la prova di
+7. Per `duplicate` indicare il candidato o paper che sopravvive e la prova di
    identità.
-7. Confermare esplicitamente e inviare. La App scrive `APPLY` nella issue
+8. Confermare esplicitamente e inviare. La App scrive `APPLY` nella issue
    strutturata e ne mostra il collegamento.
 
 Il [modulo GitHub](https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/issues/new?template=candidate_decision.yml)
@@ -118,6 +121,26 @@ codice di esclusione coerente. `not_academic`, `not_retrievable` e `duplicate`
 usano rispettivamente `NOT_ACADEMIC_SOURCE`, `FULL_TEXT_UNAVAILABLE` e
 `DUPLICATE_RECORD`.
 
+### Conservare un escluso nella raccolta AML
+
+La destinazione `broader_aml` è disponibile soltanto con `not_eligible`. Il
+codice di esclusione continua a spiegare perché il lavoro non entra nella review
+sull'infiltrazione; la seconda motivazione spiega invece perché vale la pena
+conservarlo nella biblioteca più ampia. Le due affermazioni non si sostituiscono.
+
+Il merge della decisione aggiorna soltanto la coda. Per mostrare il lavoro nella
+pagina pubblica AML servono poi, in una modifica scientifica separata:
+
+1. verifica e promozione dei metadati nel record canonico;
+2. decisione corrente `not_eligible` e stato canonico `review_excluded`;
+3. manifesto core corrente `withheld`;
+4. approvazione versionata in `secondary_publications.csv` con una nota pubblica.
+
+La pagina AML resta quindi separata dal corpus core e può essere vuota anche
+quando la coda contiene lavori già indirizzati a quella raccolta. Le relative
+schede GitHub chiuse ricevono l'etichetta `collection:broader-aml`, così il
+curatore può ritrovarle dalla propria area.
+
 ## Che cosa non fa una decisione sul candidato
 
 Il workflow dei candidati non:
@@ -127,6 +150,7 @@ Il workflow dei candidati non:
 - modifica screening o pubblicazioni già registrati;
 - dichiara verificato un DOI;
 - pubblica il candidato nel sito;
+- pubblica il candidato nella raccolta AML;
 - unisce la propria pull request.
 
 Verifica dei metadati, promozione canonica e approvazione della nota pubblica

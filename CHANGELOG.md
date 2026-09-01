@@ -22,6 +22,9 @@ follow semantic versioning while the project is in prerelease.
 - isolated on-site candidate browser and decision form backed by a
   least-privilege GitHub App, OAuth PKCE, atomic submission coordination and an
   attributed issue-to-PR workflow.
+- separate broader AML and economic/financial-crime collection with an
+  independent publication gate for scholarly works that remain `not_eligible`
+  for the criminal-infiltration review.
 
 ### Changed
 
@@ -36,6 +39,9 @@ follow semantic versioning while the project is in prerelease.
   scheduled a fail-closed Pages refresh from ledger issue #30;
 - changed materialised queue issues to open their candidate directly in the
   curator workspace while retaining the GitHub issue form as a fallback.
+- made candidate screening record an optional governed `broader_aml`
+  destination and distinct relevance rationale without changing core decisions,
+  review counts or saturation.
 
 ## [0.2.0] - 2026-08-30
 
