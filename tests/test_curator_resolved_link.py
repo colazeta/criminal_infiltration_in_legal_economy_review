@@ -44,6 +44,8 @@ class CuratorResolvedLinkTests(unittest.TestCase):
         self.assertIn('site/curator-resolved-link.js', deploy)
         self.assertIn('curator-resolved-link.js', deploy)
         self.assertIn('/api/retrieval', deploy)
+        self.assertIn('retry_unauthenticated_401', deploy)
+        self.assertIn('attempts=6', deploy)
         self.assertIn('node --check site/curator-resolved-link.js', resolver)
 
     def test_retrieval_writeback_prefers_pr_but_does_not_force_main(self) -> None:
