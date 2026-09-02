@@ -1,0 +1,210 @@
+.curator-page .editorial-console {
+  grid-template-columns: minmax(360px, 0.95fr) minmax(0, 1.45fr);
+}
+
+.curator-page .candidate-browser {
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
+}
+
+.curator-page .candidate-list {
+  max-height: 720px;
+  padding: 0 14px 12px;
+}
+
+.queue-review-card {
+  gap: 7px;
+  padding: 15px 15px 14px;
+  border-left-width: 3px;
+  background: #fff;
+  transition: border-color 140ms ease, background 140ms ease, box-shadow 140ms ease, transform 140ms ease;
+}
+
+.queue-review-card:hover {
+  transform: translateY(-1px);
+}
+
+.queue-review-card .candidate-card-top {
+  align-items: center;
+}
+
+.queue-review-card .candidate-card-top code {
+  max-width: 62%;
+  overflow: hidden;
+  color: var(--ink-soft);
+  font-size: 0.58rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.queue-stage-badge {
+  display: inline-flex;
+  max-width: 48%;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 4px 7px;
+  background: var(--paper-deep);
+  color: var(--ink-soft) !important;
+  font-size: 0.56rem !important;
+  font-weight: 760;
+  line-height: 1.15;
+  text-align: right;
+}
+
+.queue-card-title {
+  display: -webkit-box;
+  margin-top: 3px;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  font-size: 1rem !important;
+  line-height: 1.24 !important;
+}
+
+.queue-card-authors {
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--ink);
+  font-size: 0.68rem;
+  font-weight: 650;
+  line-height: 1.42;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.queue-card-citation {
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--ink-soft);
+  font-size: 0.66rem;
+  line-height: 1.4;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.queue-card-doi {
+  display: block;
+  overflow: hidden;
+  color: var(--ink-soft);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.58rem;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.queue-card-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 2px;
+}
+
+.queue-card-chip {
+  display: inline-flex;
+  min-height: 22px;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 3px 7px;
+  background: var(--paper-deep);
+  color: var(--ink-soft);
+  font-size: 0.55rem;
+  font-weight: 760;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.queue-card-chip[data-state="positive"] {
+  border-color: rgb(24 63 56 / 24%);
+  background: var(--green-soft);
+  color: var(--green);
+}
+
+.queue-card-chip[data-state="loading"] {
+  border-style: dashed;
+}
+
+.queue-card-chip[data-state="warning"] {
+  border-color: rgb(212 167 44 / 45%);
+  background: #fff9e7;
+  color: #70580f;
+}
+
+.queue-card-chip[data-state="source"] {
+  background: #fff;
+}
+
+.candidate-queue-pager {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 8px;
+  align-items: center;
+  padding: 11px 14px 14px;
+  border-top: 1px solid var(--line);
+  background: var(--paper-deep);
+}
+
+.candidate-page-button {
+  min-height: 34px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 6px 9px;
+  background: #fff;
+  color: var(--green);
+  font: inherit;
+  font-size: 0.62rem;
+  font-weight: 760;
+  cursor: pointer;
+}
+
+.candidate-page-button:last-child {
+  justify-self: end;
+}
+
+.candidate-page-button:disabled {
+  opacity: 0.38;
+  cursor: default;
+}
+
+.candidate-page-info {
+  color: var(--ink-soft);
+  font-size: 0.6rem;
+  font-weight: 720;
+  white-space: nowrap;
+}
+
+@media (max-width: 1050px) {
+  .curator-page .editorial-console {
+    grid-template-columns: minmax(330px, 0.9fr) minmax(0, 1.35fr);
+  }
+}
+
+@media (max-width: 820px) {
+  .curator-page .editorial-console {
+    grid-template-columns: 1fr;
+  }
+
+  .curator-page .candidate-browser {
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .curator-page .candidate-list {
+    max-height: 540px;
+  }
+}
+
+@media (max-width: 520px) {
+  .candidate-queue-pager {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .candidate-page-info {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    text-align: center;
+  }
+}
