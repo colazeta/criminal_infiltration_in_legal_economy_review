@@ -340,18 +340,28 @@ def check_candidate_coverage(data: dict[str, list[dict[str, str]]]) -> None:
     ):
         if [row["candidate_id"] for row in data[path_name]] != queue_ids:
             fail(f"coverage_not_one_to_one_with_candidate_queue:{path_name}")
-    evidence_ids = {row["candidate_id"] for row in data["data/curation/access_evidence.csv"]}
+    evidence_rows = data["data/curation/access_evidence.csv"]
+    evidence_ids = {row["candidate_id"] for row in evidence_rows}
     if not evidence_ids <= set(queue_ids):
         fail(f"access_evidence_unknown_candidates:{sorted(evidence_ids - set(queue_ids))}")
     retrieval = {row["candidate_id"]: row for row in data["data/curation/retrieval_coverage.csv"]}
+    abstracts = {row["candidate_id"]: row for row in data["data/curation/abstract_coverage.csv"]}
     for row in data["data/curation/access_coverage.csv"]:
         candidate_id = row["candidate_id"]
         status = row.get("access_status", "")
         if status == "open" and (not row.get("access_url", "").strip() or not row.get("evidence_source", "").strip()):
             fail(f"open_access_without_positive_evidence:{candidate_id}")
         if status == "restricted":
-            if retrieval.get(candidate_id, {}).get("full_text_url", "").strip():
-                fail(f"restricted_conflicts_with_governed_full_text:{candidate_id}")
+            # A full-text locator can legitimately point to a paywalled publisher
+            # manifestation. Restriction conflicts only with *positive open-access
+            # evidence*, not with the existence of a full-text URL itself.
+            if retrieval.get(candidate_id, {}).get("open_access_url", "").strip():
+                fail(f"restricted_conflicts_with_open_access_location:{candidate_id}")
+            abstract = abstracts.get(candidate_id, {})
+            if abstract.get("coverage_status") == "available" and abstract.get("match_type") == "resolved_pdf":
+                fail(f"restricted_conflicts_with_verified_public_pdf:{candidate_id}")
+            if candidate_id in evidence_ids:
+                fail(f"restricted_conflicts_with_assisted_open_evidence:{candidate_id}")
             if not row.get("evidence_source", "").strip() or not row.get("evidence_detail", "").strip():
                 fail(f"restricted_without_closed_evidence:{candidate_id}")
     for path_name in ("data/curation/abstract_coverage.csv", "data/curation/retrieval_coverage.csv"):
