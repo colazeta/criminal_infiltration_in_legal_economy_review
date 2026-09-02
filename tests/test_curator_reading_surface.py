@@ -56,6 +56,16 @@ class CuratorReadingSurfaceTests(unittest.TestCase):
         self.assertIn('candidate-reading-byline', javascript)
         self.assertIn('Apri articolo', javascript)
 
+    def test_abstract_never_enters_static_public_payloads(self) -> None:
+        for relative in (
+            "site/data/archive.json",
+            "site/data/secondary-collections.json",
+            "site/data/curator-stats.json",
+            "site/data/curator-options.json",
+        ):
+            content = (ROOT / relative).read_text(encoding="utf-8").lower()
+            self.assertNotIn('"abstract"', content, relative)
+
 
 if __name__ == "__main__":
     unittest.main()
