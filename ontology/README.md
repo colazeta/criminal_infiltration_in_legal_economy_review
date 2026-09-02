@@ -50,10 +50,10 @@ The abstract/access coverage ledgers are metadata-only assessments. They must no
 Access is assessed at manifestation level whenever possible.
 
 - `open`: a public full-text/OA manifestation is positively verified;
-- `restricted`: positive closed-access evidence exists and there is no conflicting public-full-text manifestation;
+- `restricted`: positive closed-access evidence exists and there is no conflicting **positively verified open** manifestation;
 - `unknown`: evidence is insufficient or conflicting.
 
-A work can therefore have a restricted publisher manifestation and an open repository manifestation at the same time. Work-level UI labels are projections of the best verified manifestation, not intrinsic properties of the intellectual work.
+A full-text locator is **not itself evidence of open access**: it may point to a paywalled publisher PDF/XML manifestation. Conversely, a work can have a restricted publisher manifestation and an open repository manifestation at the same time. Work-level UI labels are projections of the best verified manifestation, not intrinsic properties of the intellectual work.
 
 ## Controlled concepts
 
@@ -79,7 +79,7 @@ The validator fails when:
 - canonical DOI identity is inconsistent with `work_identifiers.csv`;
 - a manifestation identifier is treated as a primary canonical identifier;
 - coverage ledgers drift from the candidate queue;
-- `restricted` conflicts with a governed full-text locator without being reconciled;
+- `restricted` conflicts with a verified OA location, an anonymously retrieved PDF, or assisted positive open-access evidence;
 - a decided candidate lacks attributable append-only provenance;
 - abstract/full-text bodies enter metadata-only coverage ledgers.
 
