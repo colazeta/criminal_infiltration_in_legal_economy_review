@@ -77,6 +77,7 @@ test("DOI enrichment prefers a verified OpenAlex abstract", async (context) => {
   assert.equal(result.abstractSource, "OpenAlex");
   assert.equal(result.matchType, "doi");
   assert.equal(result.articleUrl, "https://publisher.example/article");
+  assert.deepEqual(result.providersTried, ["OpenAlex", "Crossref"]);
 });
 
 test("Crossref abstract is used when the DOI match in OpenAlex has no abstract", async (context) => {
@@ -115,7 +116,7 @@ test("Crossref abstract is used when the DOI match in OpenAlex has no abstract",
   assert.equal(result.abstract, "This study examines criminal infiltration in companies.");
 });
 
-test("title-year fallback refuses an unrelated bibliographic match", async (context) => {
+test("unresolved structured search becomes needs_web_search instead of abstract absent", async (context) => {
   withFetchMock(context, async (url) => {
     const value = String(url);
     if (value.startsWith("https://api.openalex.org/works?")) {
@@ -150,5 +151,9 @@ test("title-year fallback refuses an unrelated bibliographic match", async (cont
     year: "2025",
   });
   assert.equal(result.abstract, "");
-  assert.equal(result.matchType, "none");
+  assert.equal(result.matchType, "needs_web_search");
+  assert.equal(result.searchStatus, "needs_web_search");
+  assert.ok(result.providersTried.includes("Semantic Scholar"));
+  assert.ok(result.providersTried.includes("DataCite"));
+  assert.ok(result.providersTried.includes("Europe PMC"));
 });
