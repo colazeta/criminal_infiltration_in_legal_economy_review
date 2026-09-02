@@ -4,6 +4,12 @@ const byId = (id) => document.getElementById(id);
 const SESSION_KEY = "criminal-infiltration-curator-session";
 const CSRF_KEY = "criminal-infiltration-curator-csrf";
 const config = window.CURATOR_APP_CONFIG || {};
+const VALID_LANES = new Set([
+  "metadata_fix",
+  "manual_review",
+  "abstract_full_text_review",
+  "legacy_rejection_review",
+]);
 
 const state = {
   apiBaseUrl: normaliseApiBase(config.apiBaseUrl),
@@ -14,6 +20,7 @@ const state = {
   options: null,
   candidates: [],
   selected: null,
+  submitted: new Set(),
 };
 
 function setText(id, value) {
@@ -176,20 +183,119 @@ function consumeAuthenticationError() {
   history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
 }
 
+function copyWorkspaceContext(target) {
+  const source = new URL(window.location.href);
+  for (const key of ["candidate", "lane"]) {
+    const value = source.searchParams.get(key);
+    if (value) target.searchParams.set(key, value);
+  }
+  return target;
+}
+
 function loginUrl() {
   if (!state.apiBaseUrl) return "";
-  const target = new URL(`${state.apiBaseUrl}/auth/login`);
-  const requestedCandidate = new URL(window.location.href).searchParams.get("candidate");
-  if (requestedCandidate) target.searchParams.set("candidate", requestedCandidate);
-  return target.toString();
+  return copyWorkspaceContext(new URL(`${state.apiBaseUrl}/auth/login`)).toString();
 }
 
 function secureWorkspaceUrl() {
   if (!state.secureAppUrl) return "";
-  const target = new URL(state.secureAppUrl);
-  const requestedCandidate = new URL(window.location.href).searchParams.get("candidate");
-  if (requestedCandidate) target.searchParams.set("candidate", requestedCandidate);
-  return target.toString();
+  return copyWorkspaceContext(new URL(state.secureAppUrl)).toString();
+}
+
+function laneCodeForCard(card) {
+  if (card.classList.contains("lane-metadata")) return "metadata_fix";
+  if (card.classList.contains("lane-manual")) return "manual_review";
+  if (card.classList.contains("lane-reading")) return "abstract_full_text_review";
+  if (card.classList.contains("lane-recheck")) return "legacy_rejection_review";
+  return "";
+}
+
+function requestedLane() {
+  const lane = new URL(window.location.href).searchParams.get("lane") || "";
+  return VALID_LANES.has(lane) ? lane : "";
+}
+
+function setRequestedLane(lane) {
+  if (!VALID_LANES.has(lane)) return;
+  const url = new URL(window.location.href);
+  url.searchParams.set("lane", lane);
+  url.searchParams.delete("candidate");
+  history.replaceState(null, "", `${url.pathname}${url.search}`);
+}
+
+function applyRequestedLane() {
+  const lane = requestedLane();
+  const filter = byId("candidate-lane-filter");
+  if (lane && filter) filter.value = lane;
+}
+
+function activateLane(lane) {
+  if (!VALID_LANES.has(lane)) return;
+  if (!state.apiBaseUrl) {
+    const target = new URL(state.secureAppUrl || "", window.location.href);
+    target.searchParams.set("lane", lane);
+    target.searchParams.delete("candidate");
+    window.location.assign(target.toString());
+    return;
+  }
+  setRequestedLane(lane);
+  const filter = byId("candidate-lane-filter");
+  if (filter) filter.value = lane;
+  renderCandidateList();
+  byId("editorial-app")?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function configureDirectCuratorNavigation() {
+  const operationalToolbarLinks = document.querySelectorAll(".curator-toolbar .toolbar-action");
+  for (const link of operationalToolbarLinks) link.hidden = true;
+
+  for (const card of document.querySelectorAll(".lane-card")) {
+    const lane = laneCodeForCard(card);
+    if (!lane) continue;
+    if (state.apiBaseUrl) {
+      card.href = "#editorial-app";
+    } else if (state.secureAppUrl) {
+      const target = new URL(state.secureAppUrl);
+      target.searchParams.set("lane", lane);
+      card.href = target.toString();
+    }
+    const label = card.querySelector("small");
+    if (label) label.textContent = "Apri nel curatore →";
+    card.addEventListener("click", (event) => {
+      event.preventDefault();
+      activateLane(lane);
+    });
+  }
+
+  const routedAml = document.querySelector('a[href*="collection%3Abroader-aml"]');
+  if (routedAml) {
+    routedAml.href = "./aml.html";
+    routedAml.textContent = "Apri la raccolta AML →";
+  }
+
+  const fallback = document.querySelector('.decision-callout a[href*="candidate_decision.yml"]');
+  if (fallback) fallback.hidden = true;
+  const temporaryFallback = document.querySelector('.curator-app-unavailable-actions a[href*="candidate_decision.yml"]');
+  if (temporaryFallback && (state.secureAppUrl || state.apiBaseUrl)) temporaryFallback.hidden = true;
+
+  const issueLink = byId("selected-candidate-issue");
+  if (issueLink) issueLink.textContent = "Audit GitHub ↗";
+
+  const headingCopy = document.querySelector(".editorial-app-heading > p");
+  if (headingCopy) {
+    headingCopy.textContent =
+      "La decisione si prende qui. GitHub resta sotto il cofano come registro di audit e motore di validazione; non è un passaggio operativo separato.";
+  }
+  const confirmation = document.querySelector(".explicit-confirmation span");
+  if (confirmation) {
+    confirmation.textContent =
+      "Confermo che questa è una mia decisione editoriale. Dopo i controlli, la modifica viene applicata automaticamente; non è richiesto un secondo passaggio su GitHub.";
+  }
+  const finalInstruction = document.querySelector(".decision-callout ol li:nth-child(4)");
+  if (finalInstruction) {
+    finalInstruction.textContent =
+      "Resta nella console e continua con la coda: validazione, audit trail e applicazione avvengono automaticamente.";
+  }
 }
 
 function configureSecureWorkspaceLink() {
@@ -323,7 +429,8 @@ function filteredCandidates() {
   return state.candidates.filter((candidate) => {
     const searchMatch = !query || candidateSearchText(candidate).includes(query);
     const laneMatch = !lane || stageCode(candidate) === lane;
-    return searchMatch && laneMatch;
+    const notSubmitted = !state.submitted.has(candidate.candidateId);
+    return searchMatch && laneMatch && notSubmitted;
   });
 }
 
@@ -354,7 +461,7 @@ function renderCandidateList() {
   if (!host) return;
   const rows = filteredCandidates();
   host.replaceChildren(...rows.map(candidateButton));
-  setText("candidate-result-count", `${rows.length} di ${state.candidates.length} schede aperte`);
+  setText("candidate-result-count", `${rows.length} di ${state.candidates.length - state.submitted.size} schede aperte`);
   setHidden("candidate-list-empty", rows.length > 0);
 }
 
@@ -405,6 +512,19 @@ function selectCandidate(candidate) {
   url.searchParams.set("candidate", candidate.candidateId);
   history.replaceState(null, "", `${url.pathname}${url.search}`);
   byId("decision-form")?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function clearCandidateSelection() {
+  state.selected = null;
+  setHidden("candidate-detail", true);
+  setHidden("decision-form", true);
+  setHidden("candidate-empty-state", false);
+  setText("candidate-decision-title", "Seleziona una scheda");
+  const url = new URL(window.location.href);
+  url.searchParams.delete("candidate");
+  history.replaceState(null, "", `${url.pathname}${url.search}`);
+  renderCandidateList();
+  byId("editorial-app")?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 function resetDecisionForm() {
@@ -525,6 +645,7 @@ async function submitDecision(event) {
   event.preventDefault();
   const form = event.currentTarget;
   if (!state.selected || !form.reportValidity()) return;
+  const candidateId = state.selected.candidateId;
   const payload = decisionPayload(form);
   const submit = byId("submit-decision");
   if (submit) {
@@ -538,22 +659,24 @@ async function submitDecision(event) {
       headers: { "Content-Type": "application/json", "Idempotency-Key": payload.submissionId },
       body: JSON.stringify(payload),
     });
-    const issueUrl = safeUrl(result.issueUrl, ["https://github.com"]);
+    state.submitted.add(candidateId);
+    renderCandidateList();
     const resultHost = byId("decision-result");
     if (resultHost) {
       resultHost.replaceChildren();
       const title = document.createElement("strong");
-      title.textContent = result.replayed ? "Decisione già registrata" : "Decisione inviata";
+      title.textContent = result.replayed ? "Decisione già acquisita" : "Decisione acquisita";
       const copy = document.createElement("p");
-      copy.textContent = "GitHub sta validando l’istruzione e preparerà una pull request separata.";
-      resultHost.append(title, copy);
-      if (issueUrl) {
-        const link = document.createElement("a");
-        link.href = issueUrl;
-        link.textContent = `Apri l’istruzione #${result.issueNumber} su GitHub →`;
-        link.rel = "noopener";
-        resultHost.append(link);
-      }
+      copy.textContent =
+        "I controlli e l’applicazione proseguono automaticamente. Non devi aprire GitHub o approvare una seconda volta.";
+      const audit = document.createElement("small");
+      audit.textContent = `Riferimento audit: istruzione #${result.issueNumber}.`;
+      const next = document.createElement("button");
+      next.type = "button";
+      next.className = "toolbar-action";
+      next.textContent = "Continua con la coda";
+      next.addEventListener("click", clearCandidateSelection);
+      resultHost.append(title, copy, audit, next);
       resultHost.hidden = false;
     }
     if (submit) submit.textContent = "Decisione registrata";
@@ -574,6 +697,7 @@ async function loadCandidates() {
   setText("candidate-result-count", "Caricamento della coda…");
   const payload = await apiFetch("/api/candidates");
   state.candidates = Array.isArray(payload.candidates) ? payload.candidates : [];
+  applyRequestedLane();
   renderCandidateList();
   const requested = new URL(window.location.href).searchParams.get("candidate");
   const candidate = state.candidates.find((row) => row.candidateId === requested);
@@ -617,6 +741,7 @@ async function logout() {
     clearSession();
     state.candidates = [];
     state.selected = null;
+    state.submitted.clear();
     setAuthenticationView(false);
     setHidden("curator-login-panel", false);
     renderCandidateList();
@@ -627,7 +752,15 @@ async function logout() {
 
 function wireInterface() {
   byId("candidate-search")?.addEventListener("input", renderCandidateList);
-  byId("candidate-lane-filter")?.addEventListener("change", renderCandidateList);
+  byId("candidate-lane-filter")?.addEventListener("change", () => {
+    const lane = byId("candidate-lane-filter")?.value || "";
+    const url = new URL(window.location.href);
+    if (VALID_LANES.has(lane)) url.searchParams.set("lane", lane);
+    else url.searchParams.delete("lane");
+    url.searchParams.delete("candidate");
+    history.replaceState(null, "", `${url.pathname}${url.search}`);
+    renderCandidateList();
+  });
   byId("decision")?.addEventListener("change", updateConditionalFields);
   byId("secondary-collection")?.addEventListener("change", updateConditionalFields);
   byId("decision-form")?.addEventListener("submit", submitDecision);
@@ -672,6 +805,7 @@ async function initialise() {
   consumeAuthenticationFragment();
   consumeAuthenticationError();
   configureSecureWorkspaceLink();
+  configureDirectCuratorNavigation();
   wireInterface();
   await loadPublicData();
   if (!state.options) return;
