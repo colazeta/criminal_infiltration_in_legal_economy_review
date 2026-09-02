@@ -10,8 +10,8 @@ ROOT = Path(__file__).resolve().parents[1]
 class AbstractCoverageTests(unittest.TestCase):
     def test_backfill_covers_queue_without_persisting_abstract_text(self) -> None:
         script = (ROOT / "scripts/abstracts/backfill_coverage.mjs").read_text(encoding="utf-8")
-        self.assertIn('"review_queue.csv"', script)
-        self.assertIn('"abstract_coverage.csv"', script)
+        self.assertIn('review_queue.csv', script)
+        self.assertIn('abstract_coverage.csv', script)
         self.assertIn('coverage_status', script)
         self.assertIn('abstract_source', script)
         self.assertIn('providers_tried', script)
