@@ -1,0 +1,3 @@
+candidate_id,access_status,access_kind,access_url,evidence_source,evidence_detail,verified_at
+CAND-ACADEMIC-2026-09-01-011,open,public_full_text,https://www.ifo.de/DocDL/cesifo1_wp12219.pdf,Exa assisted web verification,Exact-title search returned the CESifo working-paper PDF and the RePEc record explicitly reports no download restriction.,2026-09-02
+CAND-ACADEMIC-2026-09-01-012,open,public_full_text,https://journals.sagepub.com/doi/pdf/10.1177/17488958241293927?download=true,Web browsing verification,SAGE returned the full article PDF and full article text without an authenticated session; this observed access overrides OpenAlex closed metadata.,2026-09-02

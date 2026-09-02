@@ -7,7 +7,9 @@ on:
       - data/curation/review_queue.csv
       - data/curation/retrieval_coverage.csv
       - data/curation/abstract_coverage.csv
+      - data/curation/access_evidence.csv
       - scripts/access/classify_access.py
+      - scripts/access/reconcile_access_evidence.py
       - scripts/access/sync_issue_access.py
       - .github/workflows/access-coverage.yml
   schedule:
@@ -46,14 +48,19 @@ jobs:
         run: |
           action_date="$(date -u +%F)"
           python scripts/access/classify_access.py --date "$action_date"
+          python scripts/access/reconcile_access_evidence.py
           python scripts/access/classify_access.py --check
+          python scripts/access/reconcile_access_evidence.py --check
 
       - name: Validate governed repository
         run: |
           python scripts/curation/build_legacy_queue.py --check
           python scripts/validation/validate_repository.py
           python -m unittest discover -s tests -p 'test_*.py'
-          python -m py_compile scripts/access/classify_access.py scripts/access/sync_issue_access.py
+          python -m py_compile \
+            scripts/access/classify_access.py \
+            scripts/access/reconcile_access_evidence.py \
+            scripts/access/sync_issue_access.py
 
       - name: Detect access changes
         id: changes
@@ -93,7 +100,7 @@ jobs:
           print(f"- `restricted`: **{counts.get('restricted', 0)}**")
           print(f"- `unknown`: **{counts.get('unknown', 0)}**")
           print()
-          print("`restricted` requires positive closed-access evidence; absence of an OA copy alone is never enough. No article text is persisted and no editorial decision is inferred.")
+          print("`restricted` requires positive closed-access evidence without conflicting full-text evidence. Positive assisted web verification may upgrade a record to `open`. No article text is persisted and no editorial decision is inferred.")
           PY
 
           sync_curator_issues() {
