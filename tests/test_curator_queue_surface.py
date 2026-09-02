@@ -21,15 +21,21 @@ class CuratorQueueSurfaceTests(unittest.TestCase):
         self.assertNotIn(".innerHTML", javascript)
         self.assertNotIn("localStorage", javascript)
 
-    def test_abstract_availability_is_lazy_and_bounded(self) -> None:
+    def test_abstract_availability_is_lazy_bounded_and_multi_source(self) -> None:
         javascript = (ROOT / "site/curator-queue.js").read_text(encoding="utf-8")
         self.assertIn("const MAX_ENRICHMENT_CONCURRENCY = 3", javascript)
         self.assertIn("IntersectionObserver", javascript)
         self.assertIn('rootMargin: "180px 0px"', javascript)
         self.assertIn('/api/enrichment', javascript)
+        self.assertIn('/api/resolved-abstract', javascript)
         self.assertIn("Abstract disponibile", javascript)
-        self.assertIn("Abstract assente", javascript)
+        self.assertIn("Ricerca web necessaria", javascript)
+        self.assertIn("Abstract non trovato", javascript)
         self.assertIn("Abstract non verificato", javascript)
+        self.assertIn("providersTried", javascript)
+        self.assertIn("needs_web_search", javascript)
+        self.assertIn("web_search_exhausted", javascript)
+        self.assertNotIn('badge.textContent = "Abstract assente"', javascript)
 
     def test_queue_uses_authenticated_candidate_projection(self) -> None:
         javascript = (ROOT / "site/curator-queue.js").read_text(encoding="utf-8")
@@ -52,7 +58,9 @@ class CuratorQueueSurfaceTests(unittest.TestCase):
         self.assertIn('site/curator-queue.js', deploy)
         self.assertIn('site/curator-queue.css', deploy)
         self.assertIn('candidate-queue-pager', deploy)
+        self.assertIn('EXA_API_KEY', deploy)
         self.assertGreaterEqual(archive.count('node --check site/curator-queue.js'), 2)
+        self.assertGreaterEqual(archive.count('node --check curator-app/src/scholarly-providers.js'), 2)
 
     def test_queue_styles_prioritise_readability(self) -> None:
         css = (ROOT / "site/curator-queue.css").read_text(encoding="utf-8")
