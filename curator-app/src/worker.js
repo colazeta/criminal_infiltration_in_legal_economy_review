@@ -90,12 +90,9 @@ function safeHttpsUrl(value) {
   }
 }
 
-function parseRetrievalCoverage(body, candidateId) {
-  const source = String(body || "");
-  if (!source.includes(`<!-- curator-candidate:${candidateId} -->`)) return null;
-  const heading = "## Retrieval coverage — mechanical";
+function parseMechanicalSection(source, heading) {
   const start = source.indexOf(heading);
-  if (start < 0) return null;
+  if (start < 0) return {};
   const remainder = source.slice(start + heading.length);
   const nextHeading = remainder.search(/\n##\s/);
   const section = nextHeading >= 0 ? remainder.slice(0, nextHeading) : remainder;
@@ -104,6 +101,15 @@ function parseRetrievalCoverage(body, candidateId) {
     const match = line.match(/^- ([^:]+):\s*(.*)$/);
     if (match) fields[match[1].trim()] = cleanRetrievalValue(match[2]);
   }
+  return fields;
+}
+
+function parseRetrievalCoverage(body, candidateId) {
+  const source = String(body || "");
+  if (!source.includes(`<!-- curator-candidate:${candidateId} -->`)) return null;
+  const fields = parseMechanicalSection(source, "## Retrieval coverage — mechanical");
+  if (!Object.keys(fields).length) return null;
+  const access = parseMechanicalSection(source, "## Access status — mechanical");
   return {
     candidateId,
     resolutionStatus: fields["Resolution status"] || "",
@@ -117,6 +123,12 @@ function parseRetrievalCoverage(body, candidateId) {
     matchMethod: fields["Match method"] || "",
     matchConfidence: fields["Match confidence"] || "",
     checkedAt: fields["Last checked"] || "",
+    accessStatus: access["Access status"] || "",
+    accessKind: access["Access kind"] || "",
+    accessUrl: safeHttpsUrl(access["Access URL"]),
+    accessEvidenceSource: access["Evidence source"] || "",
+    accessEvidenceDetail: access["Evidence detail"] || "",
+    accessCheckedAt: access["Last checked"] || "",
   };
 }
 
