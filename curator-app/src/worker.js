@@ -3,6 +3,7 @@
 import { DurableObject } from "cloudflare:workers";
 
 import { handleEnrichmentRequest } from "./enrichment.js";
+import { handleFreeWebSearchRequest } from "./free-web-search.js";
 import { handleResolvedAbstractRequest } from "./resolved-abstract.js";
 import worker, { SubmissionCoordinatorCore } from "./index.js";
 
@@ -187,6 +188,18 @@ async function authenticatedResolvedAbstract(request, env) {
   return handleResolvedAbstractRequest(request, retrieval);
 }
 
+async function authenticatedFreeWebSearch(request, env) {
+  if (request.method !== "GET") {
+    return new Response(JSON.stringify({ error: { code: "method_not_allowed", message: "Metodo non consentito." } }), {
+      status: 405,
+      headers: { "Cache-Control": "no-store", "Content-Type": "application/json; charset=utf-8" },
+    });
+  }
+  const retrievalResponse = await authenticatedRetrieval(request, env);
+  if (!retrievalResponse.ok) return retrievalResponse;
+  return handleFreeWebSearchRequest(request, env);
+}
+
 export class SubmissionCoordinator extends DurableObject {
   constructor(ctx, env) {
     super(ctx, env);
@@ -215,6 +228,9 @@ export default {
     }
     if (url.pathname === "/api/resolved-abstract") {
       return authenticatedResolvedAbstract(request, env);
+    }
+    if (url.pathname === "/api/free-web-search") {
+      return authenticatedFreeWebSearch(request, env);
     }
     return worker.fetch(request, env);
   },
