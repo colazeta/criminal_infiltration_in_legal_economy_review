@@ -1,0 +1,146 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/vocab/cile-review-record.schema.json",
+  "title": "CILE Review semantic record",
+  "description": "Closed interchange schema for core entities in CILE Review Ontology Profile 0.1.0.",
+  "oneOf": [
+    {"$ref": "#/$defs/ScholarlyWork"},
+    {"$ref": "#/$defs/CandidateRecord"},
+    {"$ref": "#/$defs/Manifestation"},
+    {"$ref": "#/$defs/ScreeningDecision"},
+    {"$ref": "#/$defs/AccessAssessment"},
+    {"$ref": "#/$defs/Evidence"}
+  ],
+  "$defs": {
+    "Base": {
+      "type": "object",
+      "required": ["@id", "@type"],
+      "properties": {
+        "@id": {"type": "string", "minLength": 1},
+        "@type": {"type": "string", "minLength": 1},
+        "wasDerivedFrom": {"type": ["string", "null"]},
+        "generatedAtTime": {"type": ["string", "null"]}
+      }
+    },
+    "ScholarlyWork": {
+      "allOf": [
+        {"$ref": "#/$defs/Base"},
+        {
+          "type": "object",
+          "required": ["workId", "title"],
+          "properties": {
+            "@id": {}, "@type": {"const": "cile:ScholarlyWork"}, "wasDerivedFrom": {}, "generatedAtTime": {},
+            "workId": {"type": "string", "pattern": "^P[0-9]{6}$"},
+            "title": {"type": "string", "minLength": 1},
+            "doi": {"type": ["string", "null"]},
+            "authorsText": {"type": ["string", "null"]},
+            "publicationYear": {"type": ["integer", "null"], "minimum": 1800, "maximum": 2200},
+            "workType": {"type": ["string", "null"]},
+            "canonicalStatus": {"type": ["string", "null"]},
+            "manifestations": {"type": "array", "items": {"type": "string"}, "uniqueItems": true}
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "CandidateRecord": {
+      "allOf": [
+        {"$ref": "#/$defs/Base"},
+        {
+          "type": "object",
+          "required": ["candidateId", "title", "reviewStage", "candidateStatus"],
+          "properties": {
+            "@id": {}, "@type": {"const": "cile:CandidateRecord"}, "wasDerivedFrom": {}, "generatedAtTime": {},
+            "candidateId": {"type": "string", "minLength": 3},
+            "title": {"type": "string", "minLength": 1},
+            "doi": {"type": ["string", "null"]},
+            "authorsText": {"type": ["string", "null"]},
+            "publicationYear": {"type": ["integer", "null"], "minimum": 1800, "maximum": 2200},
+            "reviewStage": {"enum": ["metadata_fix", "manual_review", "abstract_full_text_review", "legacy_rejection_review", "seed_validation", "title_abstract", "full_text", "data_extraction", "appraisal"]},
+            "candidateStatus": {"enum": ["pending", "screened_eligible_core", "screened_eligible_contextual", "needs_full_text", "screened_not_eligible", "duplicate_confirmed", "screened_not_academic", "screened_not_retrievable"]}
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "Manifestation": {
+      "allOf": [
+        {"$ref": "#/$defs/Base"},
+        {
+          "type": "object",
+          "required": ["manifestationId"],
+          "properties": {
+            "@id": {}, "@type": {"const": "cile:Manifestation"}, "wasDerivedFrom": {}, "generatedAtTime": {},
+            "manifestationId": {"type": "string", "minLength": 1},
+            "workId": {"type": ["string", "null"]},
+            "candidateId": {"type": ["string", "null"]},
+            "doi": {"type": ["string", "null"]},
+            "url": {"type": ["string", "null"], "format": "uri"},
+            "accessStatus": {"enum": ["open", "restricted", "unknown", null]},
+            "accessKind": {"type": ["string", "null"]}
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "ScreeningDecision": {
+      "allOf": [
+        {"$ref": "#/$defs/Base"},
+        {
+          "type": "object",
+          "required": ["decisionId", "decision", "reviewer"],
+          "properties": {
+            "@id": {}, "@type": {"const": "cile:ScreeningDecision"}, "wasDerivedFrom": {}, "generatedAtTime": {},
+            "decisionId": {"type": "string", "minLength": 1},
+            "workId": {"type": ["string", "null"]},
+            "candidateId": {"type": ["string", "null"]},
+            "decision": {"enum": ["eligible_core", "eligible_contextual", "maybe_full_text_needed", "needs_full_text", "not_eligible", "duplicate", "not_academic", "not_retrievable"]},
+            "reviewStage": {"type": ["string", "null"]},
+            "exclusionReason": {"type": ["string", "null"]},
+            "confidence": {"enum": ["high", "medium", "low", "unknown", null]},
+            "reviewer": {"type": "string", "minLength": 1},
+            "rationale": {"type": ["string", "null"]},
+            "evidenceLocator": {"type": ["string", "null"]},
+            "isCurrent": {"type": ["boolean", "null"]}
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "AccessAssessment": {
+      "allOf": [
+        {"$ref": "#/$defs/Base"},
+        {
+          "type": "object",
+          "required": ["candidateId", "accessStatus", "evidenceSource"],
+          "properties": {
+            "@id": {}, "@type": {"const": "cile:AccessAssessment"}, "wasDerivedFrom": {}, "generatedAtTime": {},
+            "candidateId": {"type": "string", "minLength": 1},
+            "accessStatus": {"enum": ["open", "restricted", "unknown"]},
+            "accessKind": {"type": "string"},
+            "accessUrl": {"type": ["string", "null"], "format": "uri"},
+            "evidenceSource": {"type": "string", "minLength": 1},
+            "evidenceDetail": {"type": ["string", "null"]}
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "Evidence": {
+      "allOf": [
+        {"$ref": "#/$defs/Base"},
+        {
+          "type": "object",
+          "required": ["evidenceType"],
+          "properties": {
+            "@id": {}, "@type": {"const": "cile:Evidence"}, "wasDerivedFrom": {}, "generatedAtTime": {},
+            "evidenceType": {"enum": ["metadata", "abstract", "full_text", "evidence_span", "repository_record", "search_result", "access_observation", "curator_rationale"]},
+            "sourceUrl": {"type": ["string", "null"], "format": "uri"},
+            "locator": {"type": ["string", "null"]}
+          },
+          "additionalProperties": false
+        }
+      ]
+    }
+  }
+}
