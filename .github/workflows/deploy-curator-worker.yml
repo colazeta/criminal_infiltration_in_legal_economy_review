@@ -76,6 +76,8 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
           CURATOR_CLIENT_SECRET: ${{ secrets.CURATOR_CLIENT_SECRET }}
           CURATOR_SESSION_SECRET: ${{ secrets.CURATOR_SESSION_SECRET }}
+          EXA_API_KEY: ${{ secrets.EXA_API_KEY }}
+          SEMANTIC_SCHOLAR_API_KEY: ${{ secrets.SEMANTIC_SCHOLAR_API_KEY }}
         run: |
           if [ -z "$CURATOR_CLIENT_SECRET" ]; then
             echo "::error::Missing environment secret CURATOR_CLIENT_SECRET"
@@ -87,6 +89,15 @@ jobs:
           fi
           printf '%s' "$CURATOR_CLIENT_SECRET" | npx --yes wrangler@4.128.0 secret put GITHUB_CLIENT_SECRET --config wrangler.generated.jsonc
           printf '%s' "$CURATOR_SESSION_SECRET" | npx --yes wrangler@4.128.0 secret put SESSION_SECRET --config wrangler.generated.jsonc
+          if [ -n "$EXA_API_KEY" ]; then
+            printf '%s' "$EXA_API_KEY" | npx --yes wrangler@4.128.0 secret put EXA_API_KEY --config wrangler.generated.jsonc
+            echo "Exa web-search enrichment enabled." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "EXA_API_KEY not configured: unresolved abstracts will remain needs_web_search rather than being marked absent." >> "$GITHUB_STEP_SUMMARY"
+          fi
+          if [ -n "$SEMANTIC_SCHOLAR_API_KEY" ]; then
+            printf '%s' "$SEMANTIC_SCHOLAR_API_KEY" | npx --yes wrangler@4.128.0 secret put SEMANTIC_SCHOLAR_API_KEY --config wrangler.generated.jsonc
+          fi
           rm -f wrangler.generated.jsonc
 
       - name: Verify production health
@@ -167,12 +178,12 @@ jobs:
           retry_json(f"{origin}/health", {"status": "ok"}, "Curator production health")
           retry_asset(
               "curator-reading.js",
-              ["candidate-abstract-panel", "/api/resolved-abstract"],
+              ["candidate-abstract-panel", "/api/resolved-abstract", "Semantic Scholar", "Exa"],
               "Curator reading surface",
           )
           retry_asset(
               "curator-queue.js",
-              ["candidate-queue-pager", "MAX_ENRICHMENT_CONCURRENCY", "/api/resolved-abstract"],
+              ["candidate-queue-pager", "MAX_ENRICHMENT_CONCURRENCY", "/api/resolved-abstract", "needs_web_search"],
               "Curator queue enhancement",
           )
           retry_asset(
