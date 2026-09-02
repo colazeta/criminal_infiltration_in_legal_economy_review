@@ -50,6 +50,7 @@ jobs:
           node --check site/curator-config.js
           node --check site/curator-reading.js
           node --check site/curator-queue.js
+          node --check site/curator-resolved-link.js
           node --check curator-app/src/index.js
           node --check curator-app/src/enrichment.js
           node --check curator-app/src/worker.js
@@ -104,6 +105,7 @@ jobs:
           node --check site/curator-config.js
           node --check site/curator-reading.js
           node --check site/curator-queue.js
+          node --check site/curator-resolved-link.js
           node --check curator-app/src/index.js
           node --check curator-app/src/enrichment.js
           node --check curator-app/src/worker.js
