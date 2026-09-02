@@ -149,7 +149,7 @@ jobs:
             echo "## Human decisions"
             echo
             echo "- Automatic screening or publication inference: none."
-            echo "- An authorised person still decides eligibility; retrieval resolution only attempts to make the paper reachable."
+            echo "- Unresolved human decisions: an authorised person still decides eligibility; retrieval resolution only attempts to make the paper reachable."
             echo
             echo "Closes #${ISSUE_NUMBER}"
           } > "$body_file"
