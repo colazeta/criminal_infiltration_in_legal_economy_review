@@ -27,6 +27,12 @@
     }
   }
 
+  function selectedIssueNumber() {
+    const href = byId("selected-candidate-issue")?.href || "";
+    const match = href.match(/\/issues\/(\d+)(?:[/?#]|$)/);
+    return match ? Number(match[1]) : null;
+  }
+
   function ensureReadingSurface() {
     const detail = byId("candidate-detail");
     if (!detail) return null;
@@ -146,6 +152,8 @@
   function matchLabel(payload) {
     if (payload.matchType === "doi") return "DOI verificato";
     if (payload.matchType === "title_year") return "Titolo + anno verificati";
+    if (payload.matchType === "resolved_url") return "Paper risolto verificato";
+    if (payload.matchType === "resolved_url_none") return "Paper risolto, abstract non esposto";
     if (payload.matchType === "unavailable") return "Servizio non disponibile";
     return "Nessun match affidabile";
   }
@@ -164,7 +172,7 @@
         "Abstract recuperato al momento della consultazione e mostrato solo nella console autenticata; non viene persistito nel corpus pubblico.";
     } else {
       text.textContent =
-        "Abstract non disponibile nelle fonti bibliografiche interrogate per questo record. Puoi comunque aprire l’articolo o la fonte registrata dalla scheda.";
+        "Abstract non disponibile né nei metadati bibliografici né nelle manifestazioni online del paper già risolte. Puoi comunque aprire l’articolo o la fonte registrata dalla scheda.";
       source.textContent = matchLabel(payload || {});
       note.textContent =
         "L’assenza dell’abstract non è un giudizio sul paper e non modifica lo stage di revisione.";
@@ -177,32 +185,62 @@
     const source = byId("candidate-abstract-source");
     const note = byId("candidate-abstract-note");
     if (text) text.textContent = "Recupero dell’abstract in corso…";
-    if (source) source.textContent = "OpenAlex / Crossref";
+    if (source) source.textContent = "OpenAlex / Crossref / paper risolto";
     if (note) note.textContent = "Il match viene controllato prima di mostrare il testo.";
   }
 
+  async function fetchResolvedAbstract(candidateId, issueNumber, title, token, signal) {
+    if (!issueNumber) return null;
+    const target = new URL(`${apiBaseUrl}/api/resolved-abstract`);
+    target.searchParams.set("candidate", candidateId);
+    target.searchParams.set("issue", String(issueNumber));
+    target.searchParams.set("title", title);
+    const response = await fetch(target, {
+      headers: { Authorization: `Bearer ${token}` },
+      signal,
+    });
+    if (!response.ok) return null;
+    return response.json();
+  }
+
   async function fetchEnrichment(candidateId, title, doi, year) {
-    const key = [candidateId, title, doi, year].join("|");
+    const issueNumber = selectedIssueNumber();
+    const key = [candidateId, issueNumber || "", title, doi, year].join("|");
     if (cache.has(key)) return cache.get(key);
     if (!apiBaseUrl) return null;
     const token = sessionToken();
     if (!token) return null;
 
+    activeController?.abort();
+    activeController = new AbortController();
+    const signal = activeController.signal;
     const target = new URL(`${apiBaseUrl}/api/enrichment`);
     target.searchParams.set("title", title);
     if (doi && doi !== "Non registrato") target.searchParams.set("doi", doi);
     if (year && year !== "Non registrato") target.searchParams.set("year", year);
 
-    activeController?.abort();
-    activeController = new AbortController();
-    const response = await fetch(target, {
-      headers: { Authorization: `Bearer ${token}` },
-      signal: activeController.signal,
-    });
-    if (!response.ok) throw new Error("enrichment_failed");
-    const payload = await response.json();
-    cache.set(key, payload);
-    return payload;
+    let primary = { matchType: "unavailable", abstract: "" };
+    try {
+      const response = await fetch(target, {
+        headers: { Authorization: `Bearer ${token}` },
+        signal,
+      });
+      if (response.ok) primary = await response.json();
+    } catch (error) {
+      if (error?.name === "AbortError") throw error;
+    }
+    let result = primary;
+    if (!String(primary?.abstract || "").trim()) {
+      try {
+        const resolved = await fetchResolvedAbstract(candidateId, issueNumber, title, token, signal);
+        if (String(resolved?.abstract || "").trim()) result = resolved;
+        else if (primary?.matchType === "unavailable" && resolved) result = resolved;
+      } catch (error) {
+        if (error?.name === "AbortError") throw error;
+      }
+    }
+    cache.set(key, result);
+    return result;
   }
 
   async function refreshReadingSurface() {
@@ -245,6 +283,7 @@
     observer.observe(detail, { attributes: true, attributeFilter: ["hidden"] });
     observer.observe(id, { childList: true, characterData: true, subtree: true });
     observer.observe(byId("candidate-provenance") || detail, { childList: true, subtree: true });
+    observer.observe(byId("selected-candidate-issue") || detail, { attributes: true, attributeFilter: ["href"] });
     queueMicrotask(refreshReadingSurface);
   }
 

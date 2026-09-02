@@ -62,13 +62,6 @@
     return card.querySelector("code")?.textContent?.trim() || "";
   }
 
-  function makeText(className, value, fallback = "") {
-    const node = document.createElement("span");
-    node.className = className;
-    node.textContent = value || fallback;
-    return node;
-  }
-
   function makeChip(label, state = "neutral", role = "") {
     const chip = document.createElement("span");
     chip.className = "queue-card-chip";
@@ -217,6 +210,8 @@
   function matchLabel(payload) {
     if (payload?.matchType === "doi") return "DOI verificato";
     if (payload?.matchType === "title_year") return "Titolo + anno verificati";
+    if (payload?.matchType === "resolved_url") return "Paper risolto verificato";
+    if (payload?.matchType === "resolved_url_none") return "Paper risolto, abstract non esposto";
     if (payload?.matchType === "unavailable") return "Servizio non disponibile";
     return "Nessun match affidabile";
   }
@@ -232,13 +227,24 @@
       } else if (payload?.matchType === "unavailable") {
         badge.textContent = "Abstract non verificato";
         badge.dataset.state = "warning";
-        badge.title = "Il servizio bibliografico non ha completato la verifica.";
+        badge.title = "Le fonti bibliografiche e il paper risolto non hanno completato la verifica.";
       } else {
         badge.textContent = "Abstract assente";
         badge.dataset.state = "neutral";
         badge.title = matchLabel(payload || {});
       }
     }
+  }
+
+  async function fetchResolvedAbstract(candidate, token) {
+    if (!candidate?.candidateId || !candidate?.issueNumber) return null;
+    const target = new URL(`${apiBaseUrl}/api/resolved-abstract`);
+    target.searchParams.set("candidate", candidate.candidateId);
+    target.searchParams.set("issue", String(candidate.issueNumber));
+    target.searchParams.set("title", candidate.title || "");
+    const response = await fetch(target, { headers: { Authorization: `Bearer ${token}` } });
+    if (!response.ok) return null;
+    return response.json();
   }
 
   async function fetchEnrichment(candidate) {
@@ -248,9 +254,22 @@
     target.searchParams.set("title", candidate.title || "");
     if (candidate.doi) target.searchParams.set("doi", candidate.doi);
     if (candidate.year) target.searchParams.set("year", candidate.year);
-    const response = await fetch(target, { headers: { Authorization: `Bearer ${token}` } });
-    if (!response.ok) return { matchType: "unavailable", abstract: "" };
-    return response.json();
+    let primary = { matchType: "unavailable", abstract: "" };
+    try {
+      const response = await fetch(target, { headers: { Authorization: `Bearer ${token}` } });
+      if (response.ok) primary = await response.json();
+    } catch {
+      primary = { matchType: "unavailable", abstract: "" };
+    }
+    if (String(primary?.abstract || "").trim()) return primary;
+    try {
+      const resolved = await fetchResolvedAbstract(candidate, token);
+      if (String(resolved?.abstract || "").trim()) return resolved;
+      if (primary?.matchType === "unavailable" && resolved) return resolved;
+    } catch {
+      // Keep the bibliographic result when the resolved-paper fallback fails.
+    }
+    return primary;
   }
 
   function scheduleEnrichment(card) {

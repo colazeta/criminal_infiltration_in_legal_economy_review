@@ -3,6 +3,7 @@
 import { DurableObject } from "cloudflare:workers";
 
 import { handleEnrichmentRequest } from "./enrichment.js";
+import { handleResolvedAbstractRequest } from "./resolved-abstract.js";
 import worker, { SubmissionCoordinatorCore } from "./index.js";
 
 const CURATOR_COMPONENT_ASSETS = new Set([
@@ -173,6 +174,19 @@ async function authenticatedRetrieval(request, env) {
   });
 }
 
+async function authenticatedResolvedAbstract(request, env) {
+  if (request.method !== "GET") {
+    return new Response(JSON.stringify({ error: { code: "method_not_allowed", message: "Metodo non consentito." } }), {
+      status: 405,
+      headers: { "Cache-Control": "no-store", "Content-Type": "application/json; charset=utf-8" },
+    });
+  }
+  const retrievalResponse = await authenticatedRetrieval(request, env);
+  if (!retrievalResponse.ok) return retrievalResponse;
+  const retrieval = await retrievalResponse.json();
+  return handleResolvedAbstractRequest(request, retrieval);
+}
+
 export class SubmissionCoordinator extends DurableObject {
   constructor(ctx, env) {
     super(ctx, env);
@@ -198,6 +212,9 @@ export default {
     }
     if (url.pathname === "/api/retrieval") {
       return authenticatedRetrieval(request, env);
+    }
+    if (url.pathname === "/api/resolved-abstract") {
+      return authenticatedResolvedAbstract(request, env);
     }
     return worker.fetch(request, env);
   },
