@@ -43,6 +43,7 @@ jobs:
           diff -ru "$RUNNER_TEMP/archive" site/data
           python scripts/validation/validate_archive.py
           python scripts/validation/validate_site.py
+          node --check scripts/abstracts/backfill_coverage.mjs
           node --check site/app.js
           node --check site/aml.js
           node --check site/stats.js
@@ -101,6 +102,7 @@ jobs:
           python scripts/curation/build_curator_options.py
           python scripts/validation/validate_archive.py
           python scripts/validation/validate_site.py
+          node --check scripts/abstracts/backfill_coverage.mjs
           node --check site/app.js
           node --check site/aml.js
           node --check site/stats.js
