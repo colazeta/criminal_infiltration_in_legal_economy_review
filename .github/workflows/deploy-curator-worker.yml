@@ -10,6 +10,8 @@ on:
       - "site/curate.html"
       - "site/curator.js"
       - "site/curator-config.js"
+      - "site/curator-reading.js"
+      - "site/curator-reading.css"
       - "site/styles.css"
       - "site/data/curator-options.json"
       - "site/data/curator-stats.json"
@@ -86,21 +88,23 @@ jobs:
 
       - name: Verify production health
         env:
-          CURATOR_HEALTH_URL: https://criminal-infiltration-curator.colazeta-research.workers.dev/health
+          CURATOR_ORIGIN: https://criminal-infiltration-curator.colazeta-research.workers.dev
         run: |
           python - <<'PY'
           import json
           import os
           import time
           import urllib.error
+          import urllib.parse
           import urllib.request
 
-          url = os.environ["CURATOR_HEALTH_URL"]
+          origin = os.environ["CURATOR_ORIGIN"].rstrip("/")
+          health_url = f"{origin}/health"
           last_error = None
           for attempt in range(1, 7):
               try:
                   request = urllib.request.Request(
-                      url,
+                      health_url,
                       headers={"Accept": "application/json", "User-Agent": "curator-production-smoke-test"},
                   )
                   with urllib.request.urlopen(request, timeout=15) as response:
@@ -115,4 +119,26 @@ jobs:
                   time.sleep(5)
           else:
               raise SystemExit(f"Curator production health check failed: {last_error}")
+
+          reading_request = urllib.request.Request(
+              f"{origin}/curator-reading.js",
+              headers={"User-Agent": "curator-production-smoke-test"},
+          )
+          with urllib.request.urlopen(reading_request, timeout=15) as response:
+              source = response.read().decode("utf-8")
+              if response.status != 200 or "candidate-abstract-panel" not in source:
+                  raise SystemExit("Curator reading surface was not served correctly")
+
+          query = urllib.parse.urlencode({"title": "Authentication smoke test"})
+          protected_request = urllib.request.Request(
+              f"{origin}/api/enrichment?{query}",
+              headers={"Accept": "application/json", "User-Agent": "curator-production-smoke-test"},
+          )
+          try:
+              urllib.request.urlopen(protected_request, timeout=15)
+          except urllib.error.HTTPError as error:
+              if error.code != 401:
+                  raise
+          else:
+              raise SystemExit("Curator enrichment endpoint must reject unauthenticated requests")
           PY
