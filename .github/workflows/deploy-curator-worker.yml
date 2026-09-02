@@ -14,6 +14,7 @@ on:
       - "site/curator-reading.css"
       - "site/curator-queue.js"
       - "site/curator-queue.css"
+      - "site/curator-resolved-link.js"
       - "site/styles.css"
       - "site/data/curator-options.json"
       - "site/data/curator-stats.json"
@@ -142,6 +143,20 @@ jobs:
                       time.sleep(delay)
               raise SystemExit(f"{label} failed after {attempts} attempts: {last_error}")
 
+          def require_unauthenticated_401(url, label):
+              request = urllib.request.Request(
+                  url,
+                  headers={**headers, "Accept": "application/json"},
+              )
+              try:
+                  urllib.request.urlopen(request, timeout=15)
+              except urllib.error.HTTPError as error:
+                  if error.code == 401:
+                      print(f"{label} authentication boundary verified.")
+                      return
+                  raise
+              raise SystemExit(f"{label} must reject unauthenticated requests")
+
           retry_json(f"{origin}/health", {"status": "ok"}, "Curator production health")
           retry_asset(
               "curator-reading.js",
@@ -153,17 +168,20 @@ jobs:
               ["candidate-queue-pager", "MAX_ENRICHMENT_CONCURRENCY"],
               "Curator queue enhancement",
           )
-
-          query = urllib.parse.urlencode({"title": "Authentication smoke test"})
-          protected_request = urllib.request.Request(
-              f"{origin}/api/enrichment?{query}",
-              headers={**headers, "Accept": "application/json"},
+          retry_asset(
+              "curator-resolved-link.js",
+              ["/api/retrieval", "resolvedUrl", "Apri full text"],
+              "Curator persisted retrieval link",
           )
-          try:
-              urllib.request.urlopen(protected_request, timeout=15)
-          except urllib.error.HTTPError as error:
-              if error.code != 401:
-                  raise
-          else:
-              raise SystemExit("Curator enrichment endpoint must reject unauthenticated requests")
+
+          enrichment_query = urllib.parse.urlencode({"title": "Authentication smoke test"})
+          require_unauthenticated_401(
+              f"{origin}/api/enrichment?{enrichment_query}",
+              "Curator enrichment endpoint",
+          )
+          retrieval_query = urllib.parse.urlencode({"candidate": "CAND-SMOKE-001", "issue": "1"})
+          require_unauthenticated_401(
+              f"{origin}/api/retrieval?{retrieval_query}",
+              "Curator retrieval endpoint",
+          )
           PY
