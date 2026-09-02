@@ -10,10 +10,11 @@ const CURATOR_COMPONENT_ASSETS = new Set([
   "/curator-reading.css",
   "/curator-queue.js",
   "/curator-queue.css",
+  "/curator-resolved-link.js",
 ]);
 
 function componentLoaderSource() {
-  return `\n(() => {\n  function load(src, marker) {\n    if (document.querySelector('script[data-' + marker + '=\"true\"]')) return;\n    const script = document.createElement(\"script\");\n    script.src = src;\n    script.defer = true;\n    script.dataset[marker.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase())] = \"true\";\n    document.head.append(script);\n  }\n  load(\"./curator-reading.js\", \"curator-reading\");\n  load(\"./curator-queue.js\", \"curator-queue\");\n})();\n`;
+  return `\n(() => {\n  function load(src, marker) {\n    if (document.querySelector('script[data-' + marker + '=\"true\"]')) return;\n    const script = document.createElement(\"script\");\n    script.src = src;\n    script.defer = true;\n    script.dataset[marker.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase())] = \"true\";\n    document.head.append(script);\n  }\n  load(\"./curator-reading.js\", \"curator-reading\");\n  load(\"./curator-queue.js\", \"curator-queue\");\n  load(\"./curator-resolved-link.js\", \"curator-resolved-link\");\n})();\n`;
 }
 
 async function serveCuratorComponentAsset(request, env) {
@@ -43,6 +44,15 @@ async function enrichedConfig(request, env) {
   });
 }
 
+async function requireCuratorSession(request, env) {
+  const sessionUrl = new URL("/api/session", request.url);
+  const validationRequest = new Request(sessionUrl, {
+    method: "GET",
+    headers: request.headers,
+  });
+  return worker.fetch(validationRequest, env);
+}
+
 async function authenticatedEnrichment(request, env) {
   if (request.method !== "GET") {
     return new Response(JSON.stringify({ error: { code: "method_not_allowed", message: "Metodo non consentito." } }), {
@@ -50,14 +60,117 @@ async function authenticatedEnrichment(request, env) {
       headers: { "Content-Type": "application/json; charset=utf-8" },
     });
   }
-  const sessionUrl = new URL("/api/session", request.url);
-  const validationRequest = new Request(sessionUrl, {
-    method: "GET",
-    headers: request.headers,
-  });
-  const validation = await worker.fetch(validationRequest, env);
+  const validation = await requireCuratorSession(request, env);
   if (!validation.ok) return validation;
   return handleEnrichmentRequest(request, env);
+}
+
+function validCandidateId(value) {
+  return /^[A-Z0-9][A-Z0-9-]{2,59}$/.test(String(value || ""));
+}
+
+function cleanRetrievalValue(value) {
+  const clean = String(value || "")
+    .replace(/^<|>$/g, "")
+    .replace(/^`|`$/g, "")
+    .trim();
+  return /^not resolved$/i.test(clean) ? "" : clean;
+}
+
+function safeHttpsUrl(value) {
+  const clean = cleanRetrievalValue(value);
+  if (!clean) return "";
+  try {
+    const url = new URL(clean);
+    return url.protocol === "https:" ? url.toString() : "";
+  } catch {
+    return "";
+  }
+}
+
+function parseRetrievalCoverage(body, candidateId) {
+  const source = String(body || "");
+  if (!source.includes(`<!-- curator-candidate:${candidateId} -->`)) return null;
+  const heading = "## Retrieval coverage — mechanical";
+  const start = source.indexOf(heading);
+  if (start < 0) return null;
+  const remainder = source.slice(start + heading.length);
+  const nextHeading = remainder.search(/\n##\s/);
+  const section = nextHeading >= 0 ? remainder.slice(0, nextHeading) : remainder;
+  const fields = {};
+  for (const line of section.split("\n")) {
+    const match = line.match(/^- ([^:]+):\s*(.*)$/);
+    if (match) fields[match[1].trim()] = cleanRetrievalValue(match[2]);
+  }
+  return {
+    candidateId,
+    resolutionStatus: fields["Resolution status"] || "",
+    bestUrl: safeHttpsUrl(fields["Best URL"]),
+    bestUrlKind: fields["Best URL kind"] || "",
+    fullTextUrl: safeHttpsUrl(fields["Direct full text"]),
+    openAccessUrl: safeHttpsUrl(fields["Open-access location"]),
+    landingUrl: safeHttpsUrl(fields["Landing page"]),
+    doiUrl: safeHttpsUrl(fields["DOI URL"]),
+    resolutionSources: fields["Resolver sources"] || "",
+    matchMethod: fields["Match method"] || "",
+    matchConfidence: fields["Match confidence"] || "",
+    checkedAt: fields["Last checked"] || "",
+  };
+}
+
+async function authenticatedRetrieval(request, env) {
+  if (request.method !== "GET") {
+    return new Response(JSON.stringify({ error: { code: "method_not_allowed", message: "Metodo non consentito." } }), {
+      status: 405,
+      headers: { "Cache-Control": "no-store", "Content-Type": "application/json; charset=utf-8" },
+    });
+  }
+  const validation = await requireCuratorSession(request, env);
+  if (!validation.ok) return validation;
+
+  const url = new URL(request.url);
+  const candidateId = String(url.searchParams.get("candidate") || "").trim();
+  const issueNumber = Number(url.searchParams.get("issue"));
+  if (!validCandidateId(candidateId) || !Number.isInteger(issueNumber) || issueNumber <= 0) {
+    return new Response(JSON.stringify({ error: { code: "invalid_retrieval_target", message: "Scheda di retrieval non valida." } }), {
+      status: 400,
+      headers: { "Cache-Control": "no-store", "Content-Type": "application/json; charset=utf-8" },
+    });
+  }
+
+  const upstream = await fetch(
+    `https://api.github.com/repos/${env.GITHUB_REPOSITORY}/issues/${issueNumber}`,
+    {
+      headers: {
+        Accept: "application/vnd.github+json",
+        "User-Agent": "criminal-infiltration-curator-retrieval",
+        "X-GitHub-Api-Version": "2022-11-28",
+      },
+    },
+  );
+  if (!upstream.ok) {
+    return new Response(JSON.stringify({ error: { code: "retrieval_record_unavailable", message: "Il record di retrieval non è disponibile." } }), {
+      status: 502,
+      headers: { "Cache-Control": "no-store", "Content-Type": "application/json; charset=utf-8" },
+    });
+  }
+  const issue = await upstream.json();
+  const retrieval = parseRetrievalCoverage(issue?.body, candidateId);
+  if (!retrieval) {
+    return new Response(JSON.stringify({ error: { code: "retrieval_record_missing", message: "La copertura di retrieval non è ancora materializzata." } }), {
+      status: 404,
+      headers: { "Cache-Control": "no-store", "Content-Type": "application/json; charset=utf-8" },
+    });
+  }
+  return new Response(JSON.stringify(retrieval), {
+    status: 200,
+    headers: {
+      "Cache-Control": "no-store",
+      "Content-Type": "application/json; charset=utf-8",
+      "Referrer-Policy": "no-referrer",
+      "X-Content-Type-Options": "nosniff",
+    },
+  });
 }
 
 export class SubmissionCoordinator extends DurableObject {
@@ -82,6 +195,9 @@ export default {
     }
     if (url.pathname === "/api/enrichment") {
       return authenticatedEnrichment(request, env);
+    }
+    if (url.pathname === "/api/retrieval") {
+      return authenticatedRetrieval(request, env);
     }
     return worker.fetch(request, env);
   },
