@@ -24,6 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
+      issues: write
       pull-requests: write
     steps:
       - name: Checkout main
@@ -82,6 +83,7 @@ jobs:
         if: steps.changes.outputs.changed == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
           base_sha="$(git rev-parse HEAD)"
           branch="automation/retrieval-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
@@ -113,18 +115,31 @@ jobs:
           print("This update changes retrieval metadata only. It does not make eligibility, exclusion, duplicate, canonicalisation or publication decisions.")
           PY
 
+          sync_curator_issues() {
+            python scripts/retrieval/sync_issue_retrieval.py \
+              --repository "$GITHUB_REPOSITORY"
+          }
+
           # Prefer an audit PR. Some repositories disable the GitHub setting that
-          # allows GITHUB_TOKEN to create PRs. If that policy blocks PR creation,
-          # attempt a guarded fast-forward of the already validated mechanical
-          # commit. Never force-push and never bypass a changed main branch.
+          # allows GITHUB_TOKEN to create PRs. If PR creation or immediate merge
+          # is blocked, attempt a guarded fast-forward of the already validated
+          # mechanical commit. Never force-push and never bypass a changed main.
+          pr_url=""
           set +e
           pr_url="$(gh pr create --base main --head "$branch" --title "Refresh curator retrieval coverage" --body-file "$RUNNER_TEMP/retrieval-body.md" 2>"$RUNNER_TEMP/pr-error.log")"
           pr_status=$?
           set -e
           if [ "$pr_status" -eq 0 ]; then
-            gh pr merge "$pr_url" --merge --delete-branch
-            echo "Retrieval coverage updated through audit PR: $pr_url" >> "$GITHUB_STEP_SUMMARY"
-            exit 0
+            set +e
+            merge_output="$(gh pr merge "$pr_url" --merge --delete-branch 2>&1)"
+            merge_status=$?
+            set -e
+            if [ "$merge_status" -eq 0 ]; then
+              sync_curator_issues
+              echo "Retrieval coverage updated through audit PR: $pr_url" >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            printf '%s\n' "$merge_output" > "$RUNNER_TEMP/pr-merge-error.log"
           fi
 
           git fetch origin main
@@ -135,7 +150,8 @@ jobs:
             push_status=$?
             set -e
             if [ "$push_status" -eq 0 ]; then
-              echo "Retrieval coverage fast-forwarded to main after full validation because repository policy blocked Actions PR creation." >> "$GITHUB_STEP_SUMMARY"
+              sync_curator_issues
+              echo "Retrieval coverage fast-forwarded to main after full validation because repository policy blocked the preferred PR path." >> "$GITHUB_STEP_SUMMARY"
               echo "Audit branch: $branch" >> "$GITHUB_STEP_SUMMARY"
               exit 0
             fi
@@ -143,8 +159,17 @@ jobs:
 
           echo "::warning::Retrieval coverage is fully resolved and validated, but repository policy prevented automatic persistence."
           echo "Validated fallback branch retained: $branch" >> "$GITHUB_STEP_SUMMARY"
-          echo "PR creation error:" >> "$GITHUB_STEP_SUMMARY"
-          sed -n '1,20p' "$RUNNER_TEMP/pr-error.log" >> "$GITHUB_STEP_SUMMARY"
+          if [ -n "$pr_url" ]; then
+            echo "Audit PR retained: $pr_url" >> "$GITHUB_STEP_SUMMARY"
+          fi
+          if [ -s "$RUNNER_TEMP/pr-error.log" ]; then
+            echo "PR creation error:" >> "$GITHUB_STEP_SUMMARY"
+            sed -n '1,20p' "$RUNNER_TEMP/pr-error.log" >> "$GITHUB_STEP_SUMMARY"
+          fi
+          if [ -s "$RUNNER_TEMP/pr-merge-error.log" ]; then
+            echo "PR merge error:" >> "$GITHUB_STEP_SUMMARY"
+            sed -n '1,20p' "$RUNNER_TEMP/pr-merge-error.log" >> "$GITHUB_STEP_SUMMARY"
+          fi
           if [ -s "$RUNNER_TEMP/main-push-error.log" ]; then
             echo "Direct fast-forward error:" >> "$GITHUB_STEP_SUMMARY"
             sed -n '1,20p' "$RUNNER_TEMP/main-push-error.log" >> "$GITHUB_STEP_SUMMARY"
