@@ -1,0 +1,121 @@
+name: Resolve curator paper access
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - data/curation/review_queue.csv
+      - scripts/retrieval/resolve_queue.py
+      - .github/workflows/retrieval-resolution.yml
+  schedule:
+    - cron: "20 5 * * 0"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: curator-retrieval-resolution
+  cancel-in-progress: false
+
+jobs:
+  resolve:
+    if: github.event_name != 'workflow_dispatch' || github.actor == github.repository_owner
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: main
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.11"
+
+      - name: Resolve every queue candidate
+        env:
+          OPENALEX_API_KEY: ${{ secrets.OPENALEX_API_KEY }}
+          UNPAYWALL_EMAIL: ${{ secrets.UNPAYWALL_EMAIL }}
+        run: |
+          action_date="$(date -u +%F)"
+          python scripts/retrieval/resolve_queue.py \
+            --date "$action_date" \
+            --max-age-days 30 \
+            --output "$RUNNER_TEMP/retrieval-summary.json"
+          python scripts/retrieval/resolve_queue.py --check
+
+      - name: Validate governed repository
+        run: |
+          python scripts/curation/build_legacy_queue.py --check
+          python scripts/validation/validate_repository.py
+          python -m unittest discover -s tests -p 'test_*.py'
+          python scripts/build_archive.py --output-dir "$RUNNER_TEMP/archive"
+          python scripts/build_secondary_collections.py --output-dir "$RUNNER_TEMP/archive"
+          python scripts/curation/build_curator_stats.py --output "$RUNNER_TEMP/archive/curator-stats.json"
+          python scripts/curation/build_curator_options.py --output "$RUNNER_TEMP/archive/curator-options.json"
+          python scripts/validation/validate_archive.py
+          python scripts/validation/validate_site.py
+          node --check site/curator.js
+          node --check site/curator-config.js
+          node --check site/curator-reading.js
+          node --check site/curator-queue.js
+          node --check curator-app/src/index.js
+          node --check curator-app/src/enrichment.js
+          node --check curator-app/src/worker.js
+          node --test curator-app/test/*.test.js
+
+      - name: Detect retrieval changes
+        id: changes
+        run: |
+          if git diff --quiet -- data/curation/retrieval_coverage.csv; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create auditable retrieval update
+        if: steps.changes.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          branch="automation/retrieval-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$branch"
+          git add data/curation/retrieval_coverage.csv
+          git commit -m "Refresh curator retrieval coverage"
+          git push origin "$branch"
+
+          python3 - <<'PY' > "$RUNNER_TEMP/retrieval-body.md"
+          import csv
+          import json
+          import os
+          from collections import Counter
+
+          with open("data/curation/retrieval_coverage.csv", newline="", encoding="utf-8-sig") as handle:
+              rows = list(csv.DictReader(handle))
+          counts = Counter(row["resolution_status"] for row in rows)
+          summary_path = os.path.join(os.environ["RUNNER_TEMP"], "retrieval-summary.json")
+          summary = json.load(open(summary_path, encoding="utf-8"))
+          print("## Mechanical retrieval resolution")
+          print()
+          print(f"- Queue candidates covered: **{len(rows)} / {len(rows)}**")
+          print(f"- Rows refreshed in this run: **{summary.get('refreshed', 0)}**")
+          for key in ("full_text", "open_access_landing", "landing_page", "doi_only", "source_link_only", "unresolved"):
+              print(f"- `{key}`: {counts.get(key, 0)}")
+          print()
+          print("This pull request changes retrieval metadata only. It does not make eligibility, exclusion, duplicate, canonicalisation or publication decisions.")
+          PY
+
+          pr_url="$(gh pr create --base main --head "$branch" --title "Refresh curator retrieval coverage" --body-file "$RUNNER_TEMP/retrieval-body.md")"
+          gh pr merge "$pr_url" --merge --delete-branch
+          echo "Retrieval coverage updated: $pr_url" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Report unchanged coverage
+        if: steps.changes.outputs.changed != 'true'
+        run: |
+          echo "Retrieval coverage is already current; no repository write was required." >> "$GITHUB_STEP_SUMMARY"
