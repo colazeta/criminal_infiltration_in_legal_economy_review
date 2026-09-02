@@ -50,6 +50,12 @@ class CuratorReadingSurfaceTests(unittest.TestCase):
         self.assertGreaterEqual(workflow.count('node --check site/curator-reading.js'), 2)
         self.assertGreaterEqual(workflow.count('node --check curator-app/src/enrichment.js'), 2)
 
+    def test_reading_surface_exposes_bibliographic_review_cues(self) -> None:
+        javascript = (ROOT / "site/curator-reading.js").read_text(encoding="utf-8")
+        self.assertIn('selected-candidate-venue', javascript)
+        self.assertIn('candidate-reading-byline', javascript)
+        self.assertIn('Apri articolo', javascript)
+
 
 if __name__ == "__main__":
     unittest.main()
