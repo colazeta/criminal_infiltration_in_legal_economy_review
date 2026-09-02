@@ -41,9 +41,9 @@ REQUIRED_ENUMS = {
 # follow the compound-name families in artifact-contracts.json. This is a closed
 # compatibility list, not a wildcard escape hatch for new fields.
 KNOWN_COMPATIBILITY_HEADERS = {
-    "notes", "version_note", "search_coverage_through", "other_identifiers",
-    "github_issue_number", "resolved_doi", "match_method", "match_score",
-    "provider_errors", "providers_tried",
+    "notes", "version_note", "search_coverage_through", "status", "source", "origin",
+    "other_identifiers", "github_issue_number", "resolved_doi", "match_method",
+    "match_score", "provider_errors", "providers_tried",
 }
 CONTENT_FORBIDDEN_HEADERS = {
     "abstract_text", "full_text", "full_text_text", "article_body",
