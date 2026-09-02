@@ -87,7 +87,7 @@ jobs:
           echo "candidate_id=$candidate_id" >> "$GITHUB_OUTPUT"
           echo "decision=$decision" >> "$GITHUB_OUTPUT"
 
-      - name: Open a visible pull request
+      - name: Create and apply auditable pull request
         env:
           GH_TOKEN: ${{ github.token }}
           BRANCH: ${{ steps.branch.outputs.branch }}
@@ -147,34 +147,41 @@ jobs:
             echo
             echo "- External retrieval performed: none."
             echo "- Automatic eligibility or publication inference: none."
-            echo "- Unresolved human decisions: an authorised person must inspect and merge this PR; metadata verification, canonical promotion and publication remain separate."
+            echo "- Unresolved human decisions for this screening action: none. The authenticated curator already confirmed the instruction; metadata verification, canonical promotion and publication remain separate."
             echo
             echo "Closes #${ISSUE_NUMBER}"
           } > "$body_file"
-          encoded_title="$(python3 -c 'import sys; from urllib.parse import quote; print(quote(sys.argv[1], safe=""))' "Screen ${CANDIDATE_ID}: ${DECISION}")"
-          encoded_body="$(python3 -c 'import sys; from urllib.parse import quote; print(quote(sys.stdin.read(), safe=""))' < "$body_file")"
-          compare_url="https://github.com/${GITHUB_REPOSITORY}/compare/main...${BRANCH}?expand=1&title=${encoded_title}&body=${encoded_body}"
+
           set +e
           pr_url="$(gh pr create --base main --head "$BRANCH" --title "Screen ${CANDIDATE_ID}: ${DECISION}" --body-file "$body_file" 2>pr-error.log)"
           pr_status=$?
           set -e
-          if [ "$pr_status" -eq 0 ]; then
-            gh issue comment "$ISSUE_NUMBER" --body "Decision validated and prepared for review: ${pr_url}"
-          else
-            gh issue comment "$ISSUE_NUMBER" --body "The decision passed validation, but GitHub did not allow the workflow token to open the pull request. [Create the prefilled pull request](${compare_url})."
+          if [ "$pr_status" -ne 0 ]; then
+            gh issue comment "$ISSUE_NUMBER" --body "The curator decision passed validation, but the audit pull request could not be created. No change was applied automatically."
+            echo "::error::Could not create the audit pull request"
+            sed -n '1,20p' pr-error.log
+            exit 1
           fi
+
+          gh issue comment "$ISSUE_NUMBER" --body "Decision validated. Applying the audited change automatically: ${pr_url}"
+          set +e
+          merge_output="$(gh pr merge "$pr_url" --merge --delete-branch 2>&1)"
+          merge_status=$?
+          set -e
+          if [ "$merge_status" -ne 0 ]; then
+            gh issue comment "$ISSUE_NUMBER" --body "The audit pull request was created, but automatic application failed. The candidate remains unresolved in the curator until the workflow is repaired."
+            echo "::error::Could not merge the validated curator pull request automatically"
+            printf '%s\n' "$merge_output"
+            exit 1
+          fi
+
+          gh issue comment "$ISSUE_NUMBER" --body "Decision applied automatically after validation: ${pr_url}"
           {
-            echo "## Candidate change prepared"
+            echo "## Candidate decision applied"
             echo
-            if [ "$pr_status" -eq 0 ]; then
-              echo "Pull request: ${pr_url}"
-            else
-              echo "[Create the prefilled pull request](${compare_url})"
-              echo
-              echo '```text'
-              sed -n '1,20p' pr-error.log
-              echo '```'
-            fi
+            echo "Pull request: ${pr_url}"
+            echo
+            echo "The authenticated curator decision passed the full validation gate and was merged automatically."
             echo
             cat "$body_file"
           } >> "$GITHUB_STEP_SUMMARY"
