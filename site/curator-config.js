@@ -18,3 +18,4 @@ function loadCuratorComponent(src, marker) {
 
 loadCuratorComponent("./curator-reading.js", "curator-reading");
 loadCuratorComponent("./curator-queue.js", "curator-queue");
+loadCuratorComponent("./curator-resolved-link.js", "curator-resolved-link");
