@@ -62,6 +62,27 @@ class AccessEvidenceReconciliationTests(unittest.TestCase):
         self.assertEqual(rows[0]["evidence_source"], "Web browsing verification")
         self.assertEqual(changes["assisted_open"], 1)
 
+    def test_reconciliation_is_idempotent(self) -> None:
+        evidence = {
+            "CAND-TEST-001": {
+                "candidate_id": "CAND-TEST-001",
+                "access_status": "open",
+                "access_kind": "public_full_text",
+                "access_url": "https://publisher.example/paper.pdf",
+                "evidence_source": "Web browsing verification",
+                "evidence_detail": "Full article returned without authentication.",
+                "verified_at": "2026-09-02",
+            }
+        }
+        retrieval = {"CAND-TEST-001": {"full_text_url": "https://publisher.example/full-text"}}
+        once, _ = reconcile_module.reconcile(self.queue, self.coverage, retrieval, evidence)
+        twice, _ = reconcile_module.reconcile(self.queue, once, retrieval, evidence)
+        self.assertEqual(twice, once)
+        self.assertEqual(
+            once[0]["notes"].count("Positive access independently verified by assisted web research."),
+            1,
+        )
+
     def test_assisted_evidence_may_not_force_restricted(self) -> None:
         fields = reconcile_module.EVIDENCE_FIELDS
         rows = [{
