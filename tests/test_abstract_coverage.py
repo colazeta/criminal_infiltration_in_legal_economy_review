@@ -28,6 +28,27 @@ class AbstractCoverageTests(unittest.TestCase):
         self.assertNotIn('TAVILY_API_KEY', workflow)
         self.assertNotIn('EXA_API_KEY', workflow)
 
+    def test_bulk_backfill_extracts_governed_pdfs_locally(self) -> None:
+        script = (ROOT / "scripts/abstracts/backfill_coverage.mjs").read_text(encoding="utf-8")
+        workflow = (ROOT / ".github/workflows/abstract-coverage.yml").read_text(encoding="utf-8")
+        self.assertIn('spawnSync', script)
+        self.assertIn('"pdftotext"', script)
+        self.assertIn('const PDF_PAGE_LIMIT = 5', script)
+        self.assertIn('const MAX_PDF_BYTES = 15 * 1024 * 1024', script)
+        self.assertIn('resolveAbstractFromPdf', script)
+        self.assertIn('plainTextAbstract', script)
+        self.assertIn('titleCoverage', script)
+        self.assertIn('matchType: "resolved_pdf"', script)
+        self.assertIn('poppler-utils', workflow)
+        self.assertIn('command -v pdftotext', workflow)
+
+    def test_verified_availability_is_cached_to_reduce_free_api_pressure(self) -> None:
+        script = (ROOT / "scripts/abstracts/backfill_coverage.mjs").read_text(encoding="utf-8")
+        self.assertIn('const COVERAGE_CACHE_DAYS = 30', script)
+        self.assertIn('const CONCURRENCY = 1', script)
+        self.assertIn('reusableAvailable', script)
+        self.assertIn('650', script)
+
     def test_coverage_is_synced_into_candidate_issues(self) -> None:
         sync = (ROOT / "scripts/abstracts/sync_issue_coverage.py").read_text(encoding="utf-8")
         self.assertIn('## Abstract coverage — mechanical', sync)
