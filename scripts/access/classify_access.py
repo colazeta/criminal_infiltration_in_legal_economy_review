@@ -4,7 +4,7 @@
 This is a mechanical access layer, separate from eligibility and abstract coverage.
 It persists no article text. `restricted` is only assigned when a matched scholarly
 provider explicitly reports closed/non-OA access and no verified open manifestation
-is already known.
+is already known. Observed anonymous full-text access takes precedence over metadata.
 """
 
 from __future__ import annotations
@@ -20,7 +20,7 @@ from datetime import date
 from pathlib import Path
 from typing import Any
 from urllib.error import HTTPError, URLError
-from urllib.parse import quote, urlencode
+from urllib.parse import quote, urlencode, urlsplit
 from urllib.request import Request, urlopen
 
 
@@ -31,6 +31,7 @@ ABSTRACT_PATH = ROOT / "data" / "curation" / "abstract_coverage.csv"
 COVERAGE_PATH = ROOT / "data" / "curation" / "access_coverage.csv"
 OPENALEX_API = "https://api.openalex.org"
 UNPAYWALL_API = "https://api.unpaywall.org/v2"
+PROBE_BYTES = 500_000
 
 FIELDS = [
     "candidate_id",
@@ -110,6 +111,99 @@ def request_json(url: str, attempts: int = 3) -> tuple[Any | None, str]:
         if attempt < attempts:
             time.sleep(attempt * 1.5)
     return None, last_error
+
+
+def safe_probe_url(value: object) -> str:
+    candidate = clean(value, 2000)
+    if not candidate:
+        return ""
+    try:
+        parsed = urlsplit(candidate)
+    except ValueError:
+        return ""
+    if parsed.scheme != "https:" or not parsed.netloc:
+        return ""
+    host = (parsed.hostname or "").lower()
+    if not host or host == "localhost" or host.endswith(".localhost") or host.endswith(".local"):
+        return ""
+    if host == "doi.org" or host.endswith(".doi.org"):
+        return ""
+    ipv4 = host.split(".")
+    if len(ipv4) == 4 and all(part.isdigit() for part in ipv4):
+        octets = [int(part) for part in ipv4]
+        if any(value > 255 for value in octets):
+            return ""
+        if (
+            octets[0] in {0, 10, 127}
+            or (octets[0] == 169 and octets[1] == 254)
+            or (octets[0] == 172 and 16 <= octets[1] <= 31)
+            or (octets[0] == 192 and octets[1] == 168)
+        ):
+            return ""
+    return candidate
+
+
+def extract_document_title(source: str) -> str:
+    patterns = [
+        r'<meta\b[^>]*(?:name|property)=["\'](?:citation_title|dc.title|dcterms.title|og:title)["\'][^>]*content=["\']([^"\']+)',
+        r'<meta\b[^>]*content=["\']([^"\']+)["\'][^>]*(?:name|property)=["\'](?:citation_title|dc.title|dcterms.title|og:title)["\']',
+        r'<article-title\b[^>]*>([\s\S]*?)</article-title>',
+        r'<title\b[^>]*>([\s\S]*?)</title>',
+    ]
+    for pattern in patterns:
+        match = re.search(pattern, source, flags=re.IGNORECASE)
+        if not match:
+            continue
+        title = clean(re.sub(r"<[^>]+>", " ", match.group(1)), 1200)
+        if title:
+            return title
+    return ""
+
+
+def probe_public_full_text(url: object, requested_title: object) -> tuple[bool, str]:
+    """Verify anonymous full-text access without retaining the response body."""
+    target = safe_probe_url(url)
+    if not target:
+        return False, ""
+    request = Request(
+        target,
+        headers={
+            "Accept": "application/pdf,application/xml,text/xml,text/html,application/xhtml+xml,*/*;q=0.2",
+            "Range": f"bytes=0-{PROBE_BYTES - 1}",
+            "User-Agent": "criminal-infiltration-access-classifier/1.0",
+        },
+    )
+    try:
+        with urlopen(request, timeout=25) as response:
+            if response.status not in {200, 206}:
+                return False, f"HTTP {response.status}"
+            content_type = clean(response.headers.get("Content-Type"), 200).lower()
+            payload = response.read(PROBE_BYTES)
+            final_url = clean(response.geturl(), 2000)
+    except HTTPError as exc:
+        return False, f"HTTP {exc.code}"
+    except (URLError, TimeoutError, ValueError) as exc:
+        return False, exc.__class__.__name__
+
+    if "pdf" in content_type or payload.startswith(b"%PDF"):
+        return True, f"Anonymous full-text probe returned PDF ({content_type or 'application/pdf'})."
+
+    if not any(marker in content_type for marker in ("html", "xml", "text/")):
+        return False, f"Unsupported content type: {content_type or 'unknown'}"
+
+    source = payload.decode("utf-8", errors="replace")
+    matched_title = extract_document_title(source)
+    title_score = title_similarity(requested_title, matched_title) if matched_title else 0.0
+    lower = source.lower()
+    path = urlsplit(final_url or target).path.lower()
+    explicit_full_text = (
+        "/full-xml/" in path
+        or ("<article" in lower and any(marker in lower for marker in ("<body", "<sec", "<ref-list", "<back")))
+        or ("<body" in lower and "references" in lower and len(source) >= 20_000)
+    )
+    if explicit_full_text and matched_title and title_score >= 0.72:
+        return True, f"Anonymous full-text probe returned {content_type or 'HTML/XML'} and matched the candidate title (score {title_score:.3f})."
+    return False, f"Public response did not verify full text (title score {title_score:.3f})."
 
 
 def openalex_match(row: dict[str, str]) -> tuple[dict[str, Any] | None, str]:
@@ -193,6 +287,20 @@ def classify_row(
             "Retrieval coverage", "Resolver recorded an explicit open-access location.",
             checked_at, "",
         )
+
+    # Observed anonymous full-text access outranks provider-level OA metadata. This
+    # catches public publisher XML/HTML manifestations such as SAGE full-xml pages.
+    full_text_url = first_url(retrieval.get("full_text_url"))
+    if full_text_url:
+        publicly_accessible, probe_detail = probe_public_full_text(full_text_url, row.get("title"))
+        if publicly_accessible:
+            return access_row(
+                row, "open", "public_full_text", full_text_url,
+                "Full-text probe", probe_detail,
+                checked_at, "",
+            )
+        if probe_detail:
+            notes.append(f"Full-text probe:{probe_detail}")
 
     openalex, oa_error = openalex_match(row)
     if oa_error:
