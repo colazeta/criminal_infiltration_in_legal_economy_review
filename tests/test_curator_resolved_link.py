@@ -8,7 +8,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class CuratorResolvedLinkTests(unittest.TestCase):
-    def test_curator_prefers_persisted_best_url(self) -> None:
+    def test_curator_prefers_persisted_best_url_and_exposes_access_status(self) -> None:
         javascript = (ROOT / "site/curator-resolved-link.js").read_text(encoding="utf-8")
         self.assertIn('/api/retrieval', javascript)
         self.assertIn('dataset.resolvedUrl', javascript)
@@ -17,16 +17,24 @@ class CuratorResolvedLinkTests(unittest.TestCase):
         self.assertIn('sessionStorage.getItem(SESSION_KEY)', javascript)
         self.assertIn('bestUrl', javascript)
         self.assertIn('ensureArticleLink', javascript)
+        self.assertIn('selected-candidate-access-status', javascript)
+        self.assertIn('OPEN', javascript)
+        self.assertIn('RESTRICTED', javascript)
+        self.assertIn('ACCESSO DA VERIFICARE', javascript)
+        self.assertIn('accessEvidenceDetail', javascript)
         self.assertNotIn('.innerHTML', javascript)
         self.assertNotIn('localStorage', javascript)
 
-    def test_worker_retrieval_endpoint_is_authenticated_and_candidate_bound(self) -> None:
+    def test_worker_retrieval_endpoint_is_authenticated_candidate_bound_and_access_aware(self) -> None:
         worker = (ROOT / "curator-app/src/worker.js").read_text(encoding="utf-8")
         self.assertIn('url.pathname === "/api/retrieval"', worker)
         self.assertIn('requireCuratorSession(request, env)', worker)
         self.assertIn('<!-- curator-candidate:${candidateId} -->', worker)
         self.assertIn('## Retrieval coverage — mechanical', worker)
+        self.assertIn('## Access status — mechanical', worker)
         self.assertIn('bestUrl: safeHttpsUrl', worker)
+        self.assertIn('accessStatus:', worker)
+        self.assertIn('accessEvidenceSource:', worker)
         self.assertIn('"/curator-resolved-link.js"', worker)
         self.assertIn('componentLoaderSource', worker)
         self.assertIn('curator-resolved-link', worker)
