@@ -167,12 +167,12 @@ jobs:
           retry_json(f"{origin}/health", {"status": "ok"}, "Curator production health")
           retry_asset(
               "curator-reading.js",
-              ["candidate-abstract-panel"],
+              ["candidate-abstract-panel", "/api/resolved-abstract"],
               "Curator reading surface",
           )
           retry_asset(
               "curator-queue.js",
-              ["candidate-queue-pager", "MAX_ENRICHMENT_CONCURRENCY"],
+              ["candidate-queue-pager", "MAX_ENRICHMENT_CONCURRENCY", "/api/resolved-abstract"],
               "Curator queue enhancement",
           )
           retry_asset(
@@ -190,5 +190,14 @@ jobs:
           retry_unauthenticated_401(
               f"{origin}/api/retrieval?{retrieval_query}",
               "Curator retrieval endpoint",
+          )
+          resolved_abstract_query = urllib.parse.urlencode({
+              "candidate": "CAND-SMOKE-001",
+              "issue": "1",
+              "title": "Authentication smoke test",
+          })
+          retry_unauthenticated_401(
+              f"{origin}/api/resolved-abstract?{resolved_abstract_query}",
+              "Curator resolved abstract endpoint",
           )
           PY
