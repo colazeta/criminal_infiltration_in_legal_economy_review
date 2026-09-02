@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - data/curation/review_queue.csv
+      - data/curation/retrieval_coverage.csv
       - scripts/curation/materialize_queue_issues.py
       - .github/workflows/materialize-curation.yml
   workflow_dispatch:
@@ -35,7 +36,13 @@ jobs:
       - name: Verify deterministic legacy queue
         run: python scripts/curation/build_legacy_queue.py --check
 
-      - name: Create missing candidate issues
+      - name: Verify retrieval coverage when materialised
+        run: |
+          if [ -s data/curation/retrieval_coverage.csv ] && [ "$(wc -l < data/curation/retrieval_coverage.csv)" -gt 1 ]; then
+            python scripts/retrieval/resolve_queue.py --check
+          fi
+
+      - name: Create or reconcile candidate issues
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
