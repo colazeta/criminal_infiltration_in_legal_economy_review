@@ -1,5 +1,7 @@
 "use strict";
 
+import { searchAdditionalProviders } from "./scholarly-providers.js";
+
 const OPENALEX_API = "https://api.openalex.org";
 const CROSSREF_API = "https://api.crossref.org";
 const MAX_ABSTRACT_LENGTH = 12000;
@@ -106,6 +108,7 @@ function resultFromOpenAlex(work, requested, matchType) {
   return {
     abstract,
     abstractSource: abstract ? "OpenAlex" : "",
+    provider: "OpenAlex",
     articleUrl: openAlexArticleUrl(work),
     matchedTitle: title,
     matchedYear: year,
@@ -133,6 +136,7 @@ function resultFromCrossref(message, requested, matchType) {
   return {
     abstract,
     abstractSource: abstract ? "Crossref" : "",
+    provider: "Crossref",
     articleUrl: crossrefArticleUrl(message),
     matchedTitle: title,
     matchedYear: year,
@@ -201,13 +205,32 @@ function betterResult(primary, secondary) {
   return primary || secondary || null;
 }
 
-async function enrichCandidate({ title, doi, year, openAlexApiKey = "" }) {
+function decorated(result, providersTried, providerErrors = [], searchStatus = "found") {
+  return {
+    ...result,
+    providersTried,
+    providerErrors,
+    searchStatus,
+  };
+}
+
+async function enrichCandidate({
+  title,
+  doi,
+  year,
+  openAlexApiKey = "",
+  semanticScholarApiKey = "",
+  exaApiKey = "",
+}) {
   const requested = {
     title: cleanText(title, 1000),
     doi: cleanDoi(doi),
     year: cleanText(year, 10),
   };
   if (!requested.title) throw new Error("missing_title");
+
+  const providersTried = ["OpenAlex", "Crossref"];
+  let baseline = null;
 
   if (requested.doi) {
     const [openAlex, crossref] = await Promise.allSettled([
@@ -220,8 +243,8 @@ async function enrichCandidate({ title, doi, year, openAlexApiKey = "" }) {
     const crResult = crossref.status === "fulfilled"
       ? resultFromCrossref(crossref.value, requested, "doi")
       : null;
-    const best = betterResult(oaResult, crResult);
-    if (best?.abstract) return best;
+    baseline = betterResult(oaResult, crResult);
+    if (baseline?.abstract) return decorated(baseline, providersTried);
   }
 
   const [openAlexSearch, crossrefSearch] = await Promise.allSettled([
@@ -234,16 +257,34 @@ async function enrichCandidate({ title, doi, year, openAlexApiKey = "" }) {
   const crResult = crossrefSearch.status === "fulfilled"
     ? resultFromCrossref(crossrefSearch.value, requested, "title_year")
     : null;
-  return betterResult(oaResult, crResult) || {
+  const titleBaseline = betterResult(oaResult, crResult);
+  if (titleBaseline?.abstract) return decorated(titleBaseline, providersTried);
+  baseline = baseline || titleBaseline;
+
+  const additional = await searchAdditionalProviders({
+    title: requested.title,
+    doi: requested.doi,
+    year: requested.year,
+    semanticScholarApiKey,
+    exaApiKey,
+  });
+  providersTried.push(...additional.providersTried);
+  if (additional.result?.abstract) {
+    return decorated(additional.result, providersTried, additional.providerErrors);
+  }
+
+  const searchStatus = exaApiKey ? "web_search_exhausted" : "needs_web_search";
+  return decorated({
     abstract: "",
     abstractSource: "",
-    articleUrl: requested.doi ? `https://doi.org/${requested.doi}` : "",
-    matchedTitle: "",
-    matchedYear: null,
-    matchedDoi: requested.doi,
-    matchType: "none",
-    matchScore: 0,
-  };
+    provider: "",
+    articleUrl: additional.result?.articleUrl || baseline?.articleUrl || (requested.doi ? `https://doi.org/${requested.doi}` : ""),
+    matchedTitle: additional.result?.matchedTitle || baseline?.matchedTitle || "",
+    matchedYear: additional.result?.matchedYear || baseline?.matchedYear || null,
+    matchedDoi: additional.result?.matchedDoi || baseline?.matchedDoi || requested.doi,
+    matchType: searchStatus,
+    matchScore: additional.result?.matchScore || baseline?.matchScore || 0,
+  }, providersTried, additional.providerErrors, searchStatus);
 }
 
 function json(payload, status = 200) {
@@ -270,18 +311,24 @@ async function handleEnrichmentRequest(request, env = {}) {
       doi,
       year,
       openAlexApiKey: cleanText(env.OPENALEX_API_KEY, 300),
+      semanticScholarApiKey: cleanText(env.SEMANTIC_SCHOLAR_API_KEY, 300),
+      exaApiKey: cleanText(env.EXA_API_KEY, 300),
     });
     return json(result);
   } catch {
     return json({
       abstract: "",
       abstractSource: "",
+      provider: "",
       articleUrl: doi ? `https://doi.org/${doi}` : "",
       matchedTitle: "",
       matchedYear: null,
       matchedDoi: doi,
       matchType: "unavailable",
       matchScore: 0,
+      providersTried: [],
+      providerErrors: [],
+      searchStatus: "unavailable",
     });
   }
 }
