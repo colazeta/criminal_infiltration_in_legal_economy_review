@@ -1,0 +1,154 @@
+{
+  "profile_version": "0.1.0",
+  "governed_roots": ["data/registry", "data/curation"],
+  "header_policy": "Every CSV header must be an explicit semantic field or match an approved field family. New files or genuinely new field concepts require an ontology change first.",
+  "field_families": [
+    ".*_id(s)?$",
+    ".*_(at|date)$",
+    ".*_(status|stage|decision|assessment|confidence|type|relation|basis|kind|scheme|language|origin)$",
+    ".*_(reason|rationale|comment|notes|description|definition|evidence|quote)$",
+    ".*_(url|urls|link|links|locator|snapshot)$",
+    ".*_(version|rank|volume|issue|pages|year)$",
+    "^(new_|unique_|eligible_|candidate_|screening_|metadata_|manual_|abstract_|rejected_|unresolved_|first_|possible_|required_|source_|query_|topic_|duplicate_|secondary_|legacy_|current_|is_|work_|publication_|collection_|taxonomy_|coding_|execution_|cycle_|feed_|parent_|raw_|checksum|title|title_normalised|authors|doi|venue|publisher|abstract|label|code|dimension|scope_fit|value|relation|scheme|language|reason|rationale|confidence|reviewer|curator|coder|actor|decision|operation|rank|volume|issue|pages).*$"
+  ],
+  "artifacts": {
+    "data/registry/papers.csv": {
+      "row_classes": ["ScholarlyWork"],
+      "primary_key": ["paper_id"],
+      "required_fields": ["paper_id", "title", "doi", "authors", "year", "document_type", "canonical_status"],
+      "semantic_fields": {"paper_id": "work_id", "title": "title", "doi": "doi", "authors": "authors_text", "year": "publication_year", "venue": "venue", "publisher": "publisher", "document_type": "work_type", "canonical_status": "canonical_status"}
+    },
+    "data/registry/work_identifiers.csv": {
+      "row_classes": ["Identifier"],
+      "primary_key": ["identifier_id"],
+      "required_fields": ["identifier_id", "paper_id", "scheme", "value", "relation", "is_primary", "verification_status"],
+      "foreign_keys": [{"fields": ["paper_id"], "target": "data/registry/papers.csv", "target_fields": ["paper_id"]}],
+      "semantic_fields": {"identifier_id": "cile:identifierId", "paper_id": "work_id", "scheme": "identifier_scheme", "value": "identifier_value", "relation": "identifier_relation", "source": "source_name", "verified_at": "generated_at_time"}
+    },
+    "data/registry/discovery_events.csv": {
+      "row_classes": ["SearchActivity"],
+      "primary_key": ["event_id"],
+      "required_fields": ["event_id", "paper_id", "execution_id", "source_name", "source_platform", "query_string", "retrieval_status"],
+      "foreign_keys": [{"fields": ["paper_id"], "target": "data/registry/papers.csv", "target_fields": ["paper_id"], "allow_blank": true}],
+      "semantic_fields": {"event_id": "event_id", "paper_id": "work_id", "source_name": "source_name", "query_string": "query_string", "retrieved_at": "retrieved_at", "raw_snapshot": "was_derived_from"}
+    },
+    "data/registry/screening_decisions.csv": {
+      "row_classes": ["ScreeningDecision"],
+      "primary_key": ["decision_id"],
+      "required_fields": ["decision_id", "paper_id", "screening_stage", "decision", "reviewer", "decision_date", "is_current"],
+      "foreign_keys": [{"fields": ["paper_id"], "target": "data/registry/papers.csv", "target_fields": ["paper_id"]}, {"fields": ["exclusion_reason_code"], "target": "data/registry/exclusion_reasons.csv", "target_fields": ["code"], "allow_blank": true}],
+      "controlled_fields": {"screening_stage": "ReviewStageEnum", "decision": "ScreeningDecisionEnum"},
+      "semantic_fields": {"decision_id": "decision_id", "paper_id": "work_id", "screening_stage": "review_stage", "decision": "screening_decision", "exclusion_reason_code": "exclusion_reason", "confidence": "confidence", "reviewer": "was_attributed_to", "decision_date": "generated_at_time", "is_current": "is_current"}
+    },
+    "data/registry/publications.csv": {
+      "row_classes": ["PublicationState"],
+      "primary_key": ["publication_id"],
+      "required_fields": ["publication_id", "paper_id", "publication_version", "publication_status", "is_current"],
+      "foreign_keys": [{"fields": ["paper_id"], "target": "data/registry/papers.csv", "target_fields": ["paper_id"]}, {"fields": ["supersedes_publication_id"], "target": "data/registry/publications.csv", "target_fields": ["publication_id"], "allow_blank": true}],
+      "semantic_fields": {"publication_id": "cile:publicationStateId", "paper_id": "work_id", "publication_version": "version", "topic_code": "topic_code", "is_current": "is_current", "supersedes_publication_id": "supersedes", "source_basis": "was_derived_from"}
+    },
+    "data/registry/secondary_collections.csv": {
+      "row_classes": ["SecondaryCollection"],
+      "primary_key": ["collection_code"],
+      "required_fields": ["collection_code", "label", "description", "eligibility_relation", "collection_version"],
+      "semantic_fields": {"collection_code": "secondary_collection_code", "label": "title", "description": "dcterms:description", "collection_version": "version"}
+    },
+    "data/registry/secondary_publications.csv": {
+      "row_classes": ["PublicationState"],
+      "primary_key": ["secondary_publication_id"],
+      "required_fields": ["secondary_publication_id", "paper_id", "collection_code", "publication_version", "publication_status", "is_current"],
+      "foreign_keys": [{"fields": ["paper_id"], "target": "data/registry/papers.csv", "target_fields": ["paper_id"]}, {"fields": ["collection_code"], "target": "data/registry/secondary_collections.csv", "target_fields": ["collection_code"]}, {"fields": ["supersedes_secondary_publication_id"], "target": "data/registry/secondary_publications.csv", "target_fields": ["secondary_publication_id"], "allow_blank": true}],
+      "semantic_fields": {"secondary_publication_id": "cile:publicationStateId", "paper_id": "work_id", "collection_code": "secondary_collection_code", "publication_version": "version", "is_current": "is_current", "supersedes_secondary_publication_id": "supersedes", "source_basis": "was_derived_from"}
+    },
+    "data/registry/taxonomy.csv": {
+      "row_classes": ["Entity"],
+      "primary_key": ["dimension", "code", "taxonomy_version"],
+      "required_fields": ["dimension", "code", "label", "taxonomy_version"],
+      "semantic_fields": {"dimension": "cile:conceptDimension", "code": "topic_code", "label": "title", "definition": "skos:definition", "parent_code": "skos:broader", "taxonomy_version": "version"}
+    },
+    "data/registry/paper_codes.csv": {
+      "row_classes": ["CodingAssertion"],
+      "primary_key": ["coding_id"],
+      "required_fields": ["coding_id", "paper_id", "dimension", "code", "coding_version", "is_current"],
+      "foreign_keys": [{"fields": ["paper_id"], "target": "data/registry/papers.csv", "target_fields": ["paper_id"]}, {"fields": ["supersedes_coding_id"], "target": "data/registry/paper_codes.csv", "target_fields": ["coding_id"], "allow_blank": true}],
+      "semantic_fields": {"coding_id": "cile:codingAssertionId", "paper_id": "work_id", "code": "topic_code", "evidence_quote": "evidence_locator", "coder": "was_attributed_to", "coded_at": "generated_at_time", "is_current": "is_current", "supersedes_coding_id": "supersedes"}
+    },
+    "data/registry/exclusion_reasons.csv": {
+      "row_classes": ["Entity"],
+      "primary_key": ["code"],
+      "required_fields": ["code", "label", "definition"],
+      "semantic_fields": {"code": "exclusion_reason", "label": "title", "definition": "skos:definition"}
+    },
+    "data/registry/work_relations.csv": {
+      "row_classes": ["WorkRelation"],
+      "primary_key": ["relation_id"],
+      "required_fields": ["relation_id", "source_paper_id", "target_paper_id", "relation", "reason", "evidence", "curator", "decided_at"],
+      "foreign_keys": [{"fields": ["source_paper_id"], "target": "data/registry/papers.csv", "target_fields": ["paper_id"]}, {"fields": ["target_paper_id"], "target": "data/registry/papers.csv", "target_fields": ["paper_id"]}],
+      "semantic_fields": {"relation_id": "cile:workRelationId", "source_paper_id": "cile:sourceWork", "target_paper_id": "cile:targetWork", "relation": "relation_type", "reason": "rationale", "evidence": "evidence_locator", "curator": "was_attributed_to", "decided_at": "generated_at_time"}
+    },
+    "data/registry/editorial_summary.csv": {
+      "row_classes": ["Entity"],
+      "primary_key": ["snapshot_date"],
+      "required_fields": ["snapshot_date", "is_current"],
+      "semantic_fields": {"snapshot_date": "generated_at_time", "is_current": "is_current", "notes": "dcterms:description"}
+    },
+    "data/registry/archive_versions.csv": {
+      "row_classes": ["SystematicReview"],
+      "primary_key": ["version"],
+      "required_fields": ["version", "protocol_version", "schema_version", "is_current"],
+      "semantic_fields": {"version": "version", "release_date": "generated_at_time", "protocol_version": "cile:protocolVersion", "schema_version": "cile:schemaVersion", "persistent_identifier": "cile:persistentIdentifier", "is_current": "is_current"}
+    },
+    "data/registry/execution_metrics.csv": {
+      "row_classes": ["SearchActivity"],
+      "primary_key": ["execution_id"],
+      "required_fields": ["execution_id", "execution_type", "execution_status", "unique_candidates_screened", "unresolved_retrieval_failures"],
+      "semantic_fields": {"execution_id": "event_id", "execution_date": "generated_at_time", "execution_type": "cile:activityType", "execution_status": "cile:activityStatus", "saturation_comment": "dcterms:description"}
+    },
+    "data/curation/review_queue.csv": {
+      "row_classes": ["CandidateRecord"],
+      "primary_key": ["candidate_id"],
+      "required_fields": ["candidate_id", "title", "review_stage", "current_status", "origin", "provenance"],
+      "foreign_keys": [{"fields": ["last_action_id"], "target": "data/curation/actions.csv", "target_fields": ["action_id"], "allow_blank": true}, {"fields": ["exclusion_reason_code"], "target": "data/registry/exclusion_reasons.csv", "target_fields": ["code"], "allow_blank": true}, {"fields": ["secondary_collection_code"], "target": "data/registry/secondary_collections.csv", "target_fields": ["collection_code"], "allow_blank": true}],
+      "controlled_fields": {"review_stage": "ReviewStageEnum", "current_status": "CandidateStatusEnum"},
+      "semantic_fields": {"candidate_id": "candidate_id", "title": "title", "doi": "doi", "authors": "authors_text", "year": "publication_year", "venue": "venue", "work_type": "work_type", "review_stage": "review_stage", "current_status": "candidate_status", "current_decision": "screening_decision", "exclusion_reason_code": "exclusion_reason", "topic_code": "topic_code", "secondary_collection_code": "secondary_collection_code", "provenance": "was_derived_from"}
+    },
+    "data/curation/actions.csv": {
+      "row_classes": ["ReviewEvent", "ScreeningDecision"],
+      "primary_key": ["action_id"],
+      "required_fields": ["action_id", "candidate_id", "github_issue_number", "operation", "screening_stage", "decision", "actor", "decided_at", "previous_status", "new_status"],
+      "foreign_keys": [{"fields": ["candidate_id"], "target": "data/curation/review_queue.csv", "target_fields": ["candidate_id"]}, {"fields": ["exclusion_reason_code"], "target": "data/registry/exclusion_reasons.csv", "target_fields": ["code"], "allow_blank": true}, {"fields": ["secondary_collection_code"], "target": "data/registry/secondary_collections.csv", "target_fields": ["collection_code"], "allow_blank": true}],
+      "semantic_fields": {"action_id": "event_id", "candidate_id": "candidate_id", "screening_stage": "review_stage", "decision": "screening_decision", "exclusion_reason_code": "exclusion_reason", "confidence": "confidence", "rationale": "rationale", "evidence_basis": "evidence_locator", "actor": "was_attributed_to", "decided_at": "generated_at_time", "new_status": "candidate_status"}
+    },
+    "data/curation/retrieval_coverage.csv": {
+      "row_classes": ["RetrievalActivity", "Manifestation"],
+      "primary_key": ["candidate_id"],
+      "required_fields": ["candidate_id", "resolution_status", "best_url_kind", "checked_at"],
+      "foreign_keys": [{"fields": ["candidate_id"], "target": "data/curation/review_queue.csv", "target_fields": ["candidate_id"]}],
+      "semantic_fields": {"candidate_id": "candidate_id", "doi": "doi", "best_url": "source_url", "full_text_url": "source_url", "open_access_url": "access_url", "doi_url": "source_url", "resolved_doi": "doi", "checked_at": "generated_at_time", "resolution_sources": "source_name"}
+    },
+    "data/curation/abstract_coverage.csv": {
+      "row_classes": ["AbstractCoverageAssessment"],
+      "primary_key": ["candidate_id"],
+      "required_fields": ["candidate_id", "coverage_status", "checked_at"],
+      "foreign_keys": [{"fields": ["candidate_id"], "target": "data/curation/review_queue.csv", "target_fields": ["candidate_id"]}],
+      "controlled_fields": {"coverage_status": "AbstractStatusEnum"},
+      "semantic_fields": {"candidate_id": "candidate_id", "doi": "doi", "coverage_status": "abstract_status", "article_url": "source_url", "abstract_source": "source_name", "checked_at": "generated_at_time"}
+    },
+    "data/curation/access_coverage.csv": {
+      "row_classes": ["AccessAssessment"],
+      "primary_key": ["candidate_id"],
+      "required_fields": ["candidate_id", "access_status", "access_kind", "checked_at"],
+      "foreign_keys": [{"fields": ["candidate_id"], "target": "data/curation/review_queue.csv", "target_fields": ["candidate_id"]}],
+      "controlled_fields": {"access_status": "AccessStatusEnum"},
+      "semantic_fields": {"candidate_id": "candidate_id", "doi": "doi", "access_status": "access_status", "access_kind": "access_kind", "access_url": "access_url", "evidence_source": "source_name", "evidence_detail": "evidence_locator", "checked_at": "generated_at_time"}
+    },
+    "data/curation/access_evidence.csv": {
+      "row_classes": ["Evidence", "AccessAssessment"],
+      "primary_key": ["candidate_id"],
+      "required_fields": ["candidate_id", "access_status", "access_kind", "access_url", "evidence_source", "evidence_detail", "verified_at"],
+      "foreign_keys": [{"fields": ["candidate_id"], "target": "data/curation/review_queue.csv", "target_fields": ["candidate_id"]}],
+      "controlled_fields": {"access_status": "AccessStatusEnum"},
+      "semantic_fields": {"candidate_id": "candidate_id", "access_status": "access_status", "access_kind": "access_kind", "access_url": "access_url", "evidence_source": "source_name", "evidence_detail": "evidence_locator", "verified_at": "generated_at_time"}
+    }
+  }
+}
