@@ -43,6 +43,13 @@ class CuratorReadingSurfaceTests(unittest.TestCase):
         self.assertIn('candidate-abstract-panel', workflow)
         self.assertIn('/api/enrichment', workflow)
 
+    def test_archive_ci_syntax_checks_new_modules(self) -> None:
+        workflow = (ROOT / ".github/workflows/archive.yml").read_text(
+            encoding="utf-8"
+        )
+        self.assertGreaterEqual(workflow.count('node --check site/curator-reading.js'), 2)
+        self.assertGreaterEqual(workflow.count('node --check curator-app/src/enrichment.js'), 2)
+
 
 if __name__ == "__main__":
     unittest.main()
