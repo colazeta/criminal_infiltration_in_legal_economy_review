@@ -34,15 +34,47 @@
     return match ? Number(match[1]) : null;
   }
 
+  function ensureActionContainer() {
+    const detail = byId("candidate-detail");
+    if (!detail) return null;
+    let actions = detail.querySelector(".candidate-heading-actions");
+    if (actions) return actions;
+    const heading = detail.querySelector(".candidate-detail-heading");
+    if (!heading) return null;
+    actions = document.createElement("div");
+    actions.className = "candidate-heading-actions";
+    const audit = byId("selected-candidate-issue");
+    if (audit) actions.append(audit);
+    heading.append(actions);
+    return actions;
+  }
+
+  function ensureArticleLink() {
+    let link = byId("selected-candidate-article");
+    if (link) return link;
+    const actions = ensureActionContainer();
+    if (!actions) return null;
+    link = document.createElement("a");
+    link.id = "selected-candidate-article";
+    link.className = "candidate-article-action";
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    link.textContent = "Apri articolo ↗";
+    link.hidden = true;
+    actions.prepend(link);
+    return link;
+  }
+
   function ensureStatusNode() {
     let status = byId("selected-candidate-retrieval-status");
-    if (status) return status;
-    status = document.createElement("small");
-    status.id = "selected-candidate-retrieval-status";
-    status.className = "candidate-retrieval-status";
-    status.hidden = true;
-    const actions = document.querySelector("#candidate-detail .candidate-heading-actions");
-    if (actions) actions.append(status);
+    const actions = ensureActionContainer();
+    if (!status) {
+      status = document.createElement("small");
+      status.id = "selected-candidate-retrieval-status";
+      status.className = "candidate-retrieval-status";
+      status.hidden = true;
+    }
+    if (actions && !status.isConnected) actions.append(status);
     return status;
   }
 
@@ -66,7 +98,7 @@
   }
 
   function clearResolvedLink() {
-    const link = byId("selected-candidate-article");
+    const link = ensureArticleLink();
     if (link) {
       delete link.dataset.resolvedUrl;
       delete link.dataset.resolvedKind;
@@ -86,7 +118,7 @@
       status.hidden = false;
     }
 
-    const link = byId("selected-candidate-article");
+    const link = ensureArticleLink();
     const bestUrl = safeHttpsUrl(payload?.bestUrl);
     if (!link || !bestUrl) return;
     link.dataset.resolvedUrl = bestUrl;
@@ -125,6 +157,8 @@
     const issueNumber = selectedIssueNumber();
     if (!issueNumber) return;
 
+    ensureArticleLink();
+    ensureStatusNode();
     if (candidateId !== activeCandidateId) {
       activeCandidateId = candidateId;
       clearResolvedLink();
