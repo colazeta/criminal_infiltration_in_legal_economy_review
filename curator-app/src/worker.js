@@ -5,13 +5,18 @@ import { DurableObject } from "cloudflare:workers";
 import { handleEnrichmentRequest } from "./enrichment.js";
 import worker, { SubmissionCoordinatorCore } from "./index.js";
 
-const READING_ASSETS = new Set(["/curator-reading.js", "/curator-reading.css"]);
+const CURATOR_COMPONENT_ASSETS = new Set([
+  "/curator-reading.js",
+  "/curator-reading.css",
+  "/curator-queue.js",
+  "/curator-queue.css",
+]);
 
-function readingLoaderSource() {
-  return `\n(() => {\n  if (!document.querySelector('script[data-curator-reading="true"]')) {\n    const script = document.createElement("script");\n    script.src = "./curator-reading.js";\n    script.defer = true;\n    script.dataset.curatorReading = "true";\n    document.head.append(script);\n  }\n})();\n`;
+function componentLoaderSource() {
+  return `\n(() => {\n  function load(src, marker) {\n    if (document.querySelector('script[data-' + marker + '=\"true\"]')) return;\n    const script = document.createElement(\"script\");\n    script.src = src;\n    script.defer = true;\n    script.dataset[marker.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase())] = \"true\";\n    document.head.append(script);\n  }\n  load(\"./curator-reading.js\", \"curator-reading\");\n  load(\"./curator-queue.js\", \"curator-queue\");\n})();\n`;
 }
 
-async function serveReadingAsset(request, env) {
+async function serveCuratorComponentAsset(request, env) {
   if (!env.ASSETS || typeof env.ASSETS.fetch !== "function") {
     return new Response("Asset non disponibile.", { status: 503 });
   }
@@ -31,7 +36,7 @@ async function enrichedConfig(request, env) {
   const response = await worker.fetch(request, env);
   if (!response.ok) return response;
   const headers = new Headers(response.headers);
-  return new Response(`${await response.text()}${readingLoaderSource()}`, {
+  return new Response(`${await response.text()}${componentLoaderSource()}`, {
     status: response.status,
     statusText: response.statusText,
     headers,
@@ -69,8 +74,8 @@ export class SubmissionCoordinator extends DurableObject {
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
-    if (request.method === "GET" && READING_ASSETS.has(url.pathname)) {
-      return serveReadingAsset(request, env);
+    if (request.method === "GET" && CURATOR_COMPONENT_ASSETS.has(url.pathname)) {
+      return serveCuratorComponentAsset(request, env);
     }
     if (url.pathname === "/curator-config.js" && request.method === "GET") {
       return enrichedConfig(request, env);
