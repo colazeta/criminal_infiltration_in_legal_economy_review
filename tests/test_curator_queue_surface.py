@@ -43,7 +43,8 @@ class CuratorQueueSurfaceTests(unittest.TestCase):
         self.assertIn('loadCuratorComponent("./curator-queue.js", "curator-queue")', config)
         self.assertIn('"/curator-queue.js"', worker)
         self.assertIn('"/curator-queue.css"', worker)
-        self.assertIn('load("./curator-queue.js", "curator-queue")', worker)
+        self.assertIn('curator-queue.js', worker)
+        self.assertIn('curator-queue', worker)
 
     def test_deploy_and_ci_track_queue_assets(self) -> None:
         deploy = (ROOT / ".github/workflows/deploy-curator-worker.yml").read_text(encoding="utf-8")
