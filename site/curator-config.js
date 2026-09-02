@@ -7,11 +7,14 @@ window.CURATOR_APP_CONFIG = Object.freeze({
   secureAppUrl: "https://criminal-infiltration-curator.colazeta-research.workers.dev/curate.html",
 });
 
-(() => {
-  if (document.querySelector('script[data-curator-reading="true"]')) return;
+function loadCuratorComponent(src, marker) {
+  if (document.querySelector(`script[data-${marker}="true"]`)) return;
   const script = document.createElement("script");
-  script.src = "./curator-reading.js";
+  script.src = src;
   script.defer = true;
-  script.dataset.curatorReading = "true";
+  script.dataset[marker.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase())] = "true";
   document.head.append(script);
-})();
+}
+
+loadCuratorComponent("./curator-reading.js", "curator-reading");
+loadCuratorComponent("./curator-queue.js", "curator-queue");
