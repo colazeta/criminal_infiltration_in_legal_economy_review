@@ -84,9 +84,10 @@ function result({ provider, title, year, doi, abstract, articleUrl, requested, m
   const similarity = titleSimilarity(requested.title, matchedTitle);
   if (matchType !== "doi" && (similarity < 0.86 || !yearCompatible(requested.year, year))) return null;
   if (matchType === "doi" && requested.doi && matchedDoi && requested.doi.toLowerCase() !== matchedDoi.toLowerCase()) return null;
+  const abstractText = usableAbstract(abstract);
   return {
-    abstract: usableAbstract(abstract),
-    abstractSource: usableAbstract(abstract) ? provider : "",
+    abstract: abstractText,
+    abstractSource: abstractText ? provider : "",
     provider,
     articleUrl: safeHttpsUrl(articleUrl) || (matchedDoi ? `https://doi.org/${matchedDoi}` : ""),
     matchedTitle,
@@ -113,7 +114,8 @@ async function fetchJson(url, headers = {}) {
 async function semanticScholar(requested, apiKey = "") {
   const headers = apiKey ? { "x-api-key": apiKey } : {};
   if (requested.doi) {
-    const target = new URL(`${SEMANTIC_SCHOLAR_API}/paper/DOI:${requested.doi}`);
+    const paperId = encodeURIComponent(`DOI:${requested.doi}`);
+    const target = new URL(`${SEMANTIC_SCHOLAR_API}/paper/${paperId}`);
     target.searchParams.set("fields", "title,year,abstract,url,externalIds,openAccessPdf");
     const paper = await fetchJson(target, headers);
     if (paper) {
