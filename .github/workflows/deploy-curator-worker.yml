@@ -12,6 +12,8 @@ on:
       - "site/curator-config.js"
       - "site/curator-reading.js"
       - "site/curator-reading.css"
+      - "site/curator-queue.js"
+      - "site/curator-queue.css"
       - "site/styles.css"
       - "site/data/curator-options.json"
       - "site/data/curator-stats.json"
@@ -128,6 +130,15 @@ jobs:
               source = response.read().decode("utf-8")
               if response.status != 200 or "candidate-abstract-panel" not in source:
                   raise SystemExit("Curator reading surface was not served correctly")
+
+          queue_request = urllib.request.Request(
+              f"{origin}/curator-queue.js",
+              headers={"User-Agent": "curator-production-smoke-test"},
+          )
+          with urllib.request.urlopen(queue_request, timeout=15) as response:
+              source = response.read().decode("utf-8")
+              if response.status != 200 or "candidate-queue-pager" not in source or "MAX_ENRICHMENT_CONCURRENCY" not in source:
+                  raise SystemExit("Curator queue enhancement was not served correctly")
 
           query = urllib.parse.urlencode({"title": "Authentication smoke test"})
           protected_request = urllib.request.Request(
