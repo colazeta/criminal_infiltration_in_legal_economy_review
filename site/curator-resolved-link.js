@@ -1,0 +1,188 @@
+"use strict";
+
+(() => {
+  const SESSION_KEY = "criminal-infiltration-curator-session";
+  const config = window.CURATOR_APP_CONFIG || {};
+  const apiBaseUrl = String(config.apiBaseUrl || "").replace(/\/$/, "");
+  const cache = new Map();
+  let activeCandidateId = "";
+  let activeController = null;
+  let restoringHref = false;
+
+  const byId = (id) => document.getElementById(id);
+
+  function sessionToken() {
+    try {
+      return sessionStorage.getItem(SESSION_KEY) || "";
+    } catch {
+      return "";
+    }
+  }
+
+  function safeHttpsUrl(value) {
+    try {
+      const url = new URL(String(value || ""));
+      return url.protocol === "https:" ? url.toString() : "";
+    } catch {
+      return "";
+    }
+  }
+
+  function selectedIssueNumber() {
+    const href = byId("selected-candidate-issue")?.href || "";
+    const match = href.match(/\/issues\/(\d+)(?:[/?#]|$)/);
+    return match ? Number(match[1]) : null;
+  }
+
+  function ensureStatusNode() {
+    let status = byId("selected-candidate-retrieval-status");
+    if (status) return status;
+    status = document.createElement("small");
+    status.id = "selected-candidate-retrieval-status";
+    status.className = "candidate-retrieval-status";
+    status.hidden = true;
+    const actions = document.querySelector("#candidate-detail .candidate-heading-actions");
+    if (actions) actions.append(status);
+    return status;
+  }
+
+  function statusLabel(payload) {
+    const labels = {
+      full_text: "Full text risolto",
+      open_access_landing: "Copia open access risolta",
+      landing_page: "Pagina articolo risolta",
+      doi_only: "DOI risolto",
+      source_link_only: "Fonte originale risolta",
+      unresolved: "Paper non risolto",
+    };
+    const base = labels[payload?.resolutionStatus] || "Retrieval verificato";
+    return payload?.checkedAt ? `${base} · ${payload.checkedAt}` : base;
+  }
+
+  function preferredActionLabel(payload) {
+    if (payload?.bestUrlKind === "full_text") return "Apri full text ↗";
+    if (payload?.bestUrlKind === "open_access") return "Apri copia OA ↗";
+    return "Apri articolo ↗";
+  }
+
+  function clearResolvedLink() {
+    const link = byId("selected-candidate-article");
+    if (link) {
+      delete link.dataset.resolvedUrl;
+      delete link.dataset.resolvedKind;
+    }
+    const status = ensureStatusNode();
+    if (status) {
+      status.textContent = "";
+      status.hidden = true;
+    }
+  }
+
+  function applyResolvedLink(payload) {
+    const status = ensureStatusNode();
+    if (status) {
+      status.textContent = statusLabel(payload);
+      status.dataset.state = payload?.resolutionStatus || "unknown";
+      status.hidden = false;
+    }
+
+    const link = byId("selected-candidate-article");
+    const bestUrl = safeHttpsUrl(payload?.bestUrl);
+    if (!link || !bestUrl) return;
+    link.dataset.resolvedUrl = bestUrl;
+    link.dataset.resolvedKind = payload?.bestUrlKind || "";
+    restoringHref = true;
+    link.href = bestUrl;
+    link.textContent = preferredActionLabel(payload);
+    link.hidden = false;
+    restoringHref = false;
+  }
+
+  async function loadRetrieval(candidateId, issueNumber) {
+    const key = `${candidateId}|${issueNumber}`;
+    if (cache.has(key)) return cache.get(key);
+    const token = sessionToken();
+    if (!apiBaseUrl || !token) return null;
+    const target = new URL(`${apiBaseUrl}/api/retrieval`);
+    target.searchParams.set("candidate", candidateId);
+    target.searchParams.set("issue", String(issueNumber));
+    activeController?.abort();
+    activeController = new AbortController();
+    const response = await fetch(target, {
+      headers: { Authorization: `Bearer ${token}` },
+      signal: activeController.signal,
+    });
+    if (!response.ok) throw new Error("retrieval_record_unavailable");
+    const payload = await response.json();
+    cache.set(key, payload);
+    return payload;
+  }
+
+  async function refreshResolvedLink() {
+    const candidateId = byId("selected-candidate-id")?.textContent?.trim() || "";
+    const detail = byId("candidate-detail");
+    if (!candidateId || candidateId === "—" || !detail || detail.hidden) return;
+    const issueNumber = selectedIssueNumber();
+    if (!issueNumber) return;
+
+    if (candidateId !== activeCandidateId) {
+      activeCandidateId = candidateId;
+      clearResolvedLink();
+    }
+
+    try {
+      const payload = await loadRetrieval(candidateId, issueNumber);
+      if (candidateId !== activeCandidateId || !payload) return;
+      applyResolvedLink(payload);
+    } catch (error) {
+      if (error?.name === "AbortError") return;
+      if (candidateId !== activeCandidateId) return;
+      const status = ensureStatusNode();
+      if (status) {
+        status.textContent = "Retrieval persistente non disponibile";
+        status.dataset.state = "unavailable";
+        status.hidden = false;
+      }
+    }
+  }
+
+  function preserveResolvedHref(mutations) {
+    if (restoringHref) return;
+    for (const mutation of mutations) {
+      const link = mutation.target;
+      if (!(link instanceof HTMLAnchorElement) || link.id !== "selected-candidate-article") continue;
+      const resolved = safeHttpsUrl(link.dataset.resolvedUrl);
+      if (!resolved || link.href === resolved) continue;
+      restoringHref = true;
+      link.href = resolved;
+      link.textContent = link.dataset.resolvedKind === "full_text"
+        ? "Apri full text ↗"
+        : link.dataset.resolvedKind === "open_access"
+          ? "Apri copia OA ↗"
+          : "Apri articolo ↗";
+      restoringHref = false;
+    }
+  }
+
+  function initialise() {
+    const detail = byId("candidate-detail");
+    const id = byId("selected-candidate-id");
+    const issue = byId("selected-candidate-issue");
+    if (!detail || !id || !issue) return;
+
+    const selectionObserver = new MutationObserver(() => queueMicrotask(refreshResolvedLink));
+    selectionObserver.observe(detail, { attributes: true, attributeFilter: ["hidden"] });
+    selectionObserver.observe(id, { childList: true, characterData: true, subtree: true });
+    selectionObserver.observe(issue, { attributes: true, attributeFilter: ["href"] });
+
+    const actionObserver = new MutationObserver(preserveResolvedHref);
+    actionObserver.observe(detail, { attributes: true, attributeFilter: ["href"], subtree: true });
+    queueMicrotask(refreshResolvedLink);
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initialise, { once: true });
+  } else {
+    initialise();
+  }
+})();
