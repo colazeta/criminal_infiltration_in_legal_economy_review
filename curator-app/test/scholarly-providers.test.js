@@ -27,8 +27,9 @@ const requested = {
 
 test("Semantic Scholar can supply an abstract by DOI", async (context) => {
   withFetchMock(context, async (url) => {
-    const value = String(url);
-    assert.ok(value.includes("paper/DOI:10.1177/17488958241293927"));
+    const parsed = new URL(String(url));
+    assert.ok(decodeURIComponent(parsed.pathname).includes("/paper/DOI:10.1177/17488958241293927"));
+    assert.ok(parsed.pathname.includes("DOI%3A10.1177%2F17488958241293927"));
     return Response.json({
       title: requested.title,
       year: 2024,
