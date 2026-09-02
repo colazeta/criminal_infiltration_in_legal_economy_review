@@ -50,6 +50,18 @@ jobs:
             --date "$action_date" \
             --output "$RUNNER_TEMP/intake-import.json"
 
+      - name: Resolve paper access for the complete queue
+        env:
+          OPENALEX_API_KEY: ${{ secrets.OPENALEX_API_KEY }}
+          UNPAYWALL_EMAIL: ${{ secrets.UNPAYWALL_EMAIL }}
+        run: |
+          action_date="$(date -u +%F)"
+          python scripts/retrieval/resolve_queue.py \
+            --date "$action_date" \
+            --max-age-days 30 \
+            --output "$RUNNER_TEMP/retrieval-summary.json"
+          python scripts/retrieval/resolve_queue.py --check
+
       - name: Validate the complete archive
         run: |
           python scripts/curation/build_legacy_queue.py --check
@@ -66,7 +78,10 @@ jobs:
           node --check site/stats.js
           node --check site/curator.js
           node --check site/curator-config.js
+          node --check site/curator-reading.js
+          node --check site/curator-queue.js
           node --check curator-app/src/index.js
+          node --check curator-app/src/enrichment.js
           node --check curator-app/src/worker.js
           node --test curator-app/test/*.test.js
           python scripts/report_saturation.py
@@ -102,6 +117,7 @@ jobs:
           issue_url="https://github.com/${GITHUB_REPOSITORY}/issues/${ISSUE_NUMBER}"
           body_file="$RUNNER_TEMP/intake-curation-pr.md"
           candidates="$(python3 -c 'import json, os; data=json.load(open(os.path.join(os.environ["RUNNER_TEMP"], "intake-import.json"), encoding="utf-8")); print("\n".join(f"- `{value}`" for value in data["added"]))')"
+          retrieval="$(python3 -c 'import json, os; data=json.load(open(os.path.join(os.environ["RUNNER_TEMP"], "retrieval-summary.json"), encoding="utf-8")); print(f"{data.get('"'"'total'"'"',0)} covered; {data.get('"'"'full_text'"'"',0)} direct full text; {data.get('"'"'open_access_landing'"'"',0)} OA landing; {data.get('"'"'unresolved'"'"',0)} unresolved")')"
           {
             echo "## Authorised intake source"
             echo
@@ -114,32 +130,15 @@ jobs:
             echo
             echo "${candidates}"
             echo
+            echo "## Retrieval resolution"
+            echo
+            echo "- Complete queue resolver: ${retrieval}."
+            echo "- Resolver order: full text / OA location / publisher or repository landing / DOI / discovery source link / explicit unresolved."
+            echo "- Retrieval metadata is mechanical and cannot determine eligibility or publication."
+            echo
             echo "## Changed files"
             echo
             git diff --name-only main...HEAD | sed 's/^/- `/' | sed 's/$/`/'
-            echo
-            echo "## Validation commands and results"
-            echo
-            echo '```text'
-            echo "PASS python scripts/curation/build_legacy_queue.py --check"
-            echo "PASS python scripts/validation/validate_repository.py"
-            echo "PASS python -m unittest discover -s tests -p 'test_*.py'"
-            echo "PASS python scripts/build_archive.py"
-            echo "PASS python scripts/build_secondary_collections.py"
-            echo "PASS python scripts/curation/build_curator_stats.py"
-            echo "PASS python scripts/curation/build_curator_options.py"
-            echo "PASS python scripts/validation/validate_archive.py"
-            echo "PASS python scripts/validation/validate_site.py"
-            echo "PASS node --check site/app.js"
-            echo "PASS node --check site/aml.js"
-            echo "PASS node --check site/stats.js"
-            echo "PASS node --check site/curator.js"
-            echo "PASS node --check site/curator-config.js"
-            echo "PASS node --check curator-app/src/index.js"
-            echo "PASS node --check curator-app/src/worker.js"
-            echo "PASS node --test curator-app/test/*.test.js"
-            echo "PASS python scripts/report_saturation.py"
-            echo '```'
             echo
             echo "## Record counts after the change"
             echo
@@ -147,38 +146,19 @@ jobs:
             echo "- Materialised queue rows: ${QUEUE_TOTAL}"
             echo "- Canonical or publication rows changed: 0"
             echo
-            echo "## Retrieval and human decisions"
+            echo "## Human decisions"
             echo
-            echo "- External retrieval in this workflow: none; it stages the persisted intake issue only."
             echo "- Automatic screening or publication inference: none."
-            echo "- Unresolved human decisions: an authorised person must inspect and merge this PR, then review each candidate issue; metadata verification, screening, canonical promotion and publication remain separate."
+            echo "- An authorised person still decides eligibility; retrieval resolution only attempts to make the paper reachable."
             echo
             echo "Closes #${ISSUE_NUMBER}"
           } > "$body_file"
-          encoded_title="$(python3 -c 'import sys; from urllib.parse import quote; print(quote(sys.argv[1], safe=""))' "Stage ${BATCH_ID} for curator review")"
-          encoded_body="$(python3 -c 'import sys; from urllib.parse import quote; print(quote(sys.stdin.read(), safe=""))' < "$body_file")"
-          compare_url="https://github.com/${GITHUB_REPOSITORY}/compare/main...${BRANCH}?expand=1&title=${encoded_title}&body=${encoded_body}"
-          set +e
-          pr_url="$(gh pr create --base main --head "$BRANCH" --title "Stage ${BATCH_ID} for curator review" --body-file "$body_file" 2>pr-error.log)"
-          pr_status=$?
-          set -e
-          if [ "$pr_status" -eq 0 ]; then
-            gh issue comment "$ISSUE_NUMBER" --body "Candidates validated and staged for review: ${pr_url}"
-          else
-            gh issue comment "$ISSUE_NUMBER" --body "The intake passed validation, but GitHub did not allow the workflow token to open the pull request. [Create the prefilled pull request](${compare_url})."
-          fi
+          pr_url="$(gh pr create --base main --head "$BRANCH" --title "Stage ${BATCH_ID} for curator review" --body-file "$body_file")"
+          gh issue comment "$ISSUE_NUMBER" --body "Candidates validated, retrieval-resolved and staged for review: ${pr_url}"
           {
             echo "## Intake change prepared"
             echo
-            if [ "$pr_status" -eq 0 ]; then
-              echo "Pull request: ${pr_url}"
-            else
-              echo "[Create the prefilled pull request](${compare_url})"
-              echo
-              echo '```text'
-              sed -n '1,20p' pr-error.log
-              echo '```'
-            fi
+            echo "Pull request: ${pr_url}"
             echo
             cat "$body_file"
           } >> "$GITHUB_STEP_SUMMARY"
