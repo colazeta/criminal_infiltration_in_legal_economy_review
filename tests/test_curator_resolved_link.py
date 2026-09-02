@@ -16,6 +16,7 @@ class CuratorResolvedLinkTests(unittest.TestCase):
         self.assertIn('Apri copia OA', javascript)
         self.assertIn('sessionStorage.getItem(SESSION_KEY)', javascript)
         self.assertIn('bestUrl', javascript)
+        self.assertIn('ensureArticleLink', javascript)
         self.assertNotIn('.innerHTML', javascript)
         self.assertNotIn('localStorage', javascript)
 
@@ -52,6 +53,8 @@ class CuratorResolvedLinkTests(unittest.TestCase):
         self.assertIn('base_sha', workflow)
         self.assertNotIn('--force', workflow)
         self.assertIn('Validated fallback branch retained', workflow)
+        self.assertIn('issues: write', workflow)
+        self.assertGreaterEqual(workflow.count('sync_issue_retrieval.py'), 1)
 
 
 if __name__ == "__main__":
