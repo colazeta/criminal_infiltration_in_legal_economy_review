@@ -102,8 +102,15 @@ def validate_evidence(queue_ids: set[str], fields: list[str], rows: list[dict[st
 
 
 def append_note(existing: str, note: str) -> str:
-    parts = [clean(existing, 1200), clean(note, 1200)]
-    return "; ".join(part for part in parts if part)
+    """Append one semicolon-delimited note exactly once."""
+    current = clean(existing, 1200)
+    candidate = clean(note, 1200)
+    if not candidate:
+        return current
+    parts = [part.strip() for part in current.split("; ") if part.strip()]
+    if candidate in parts:
+        return current
+    return "; ".join([*parts, candidate])
 
 
 def reconcile(
