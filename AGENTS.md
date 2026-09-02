@@ -23,6 +23,12 @@ boundary between discovery, editorial judgement and publication.
    documentation, software, test, CI and site work through validation and merge
    without waiting for an extra ad-hoc approval. This authority never supplies a
    missing scientific judgement or curator instruction.
+8. Treat `ontology/cile-review-profile.yaml` as the normative semantic contract.
+   Never add a governed table, field concept, decision/access/review state,
+   identity relation or domain concept unless the same reviewed change maps it in
+   `ontology/` and passes the ontology validator. A `ScholarlyWork` is not a DOI,
+   URL, PDF or repository copy: alternative identifiers and manifestations must
+   be reconciled around one canonical work whenever identity is established.
 
 ## Task routing and write boundaries
 
@@ -57,7 +63,8 @@ Only governed screening decisions may use `eligible_core` or
 
 ## Required reading by task
 
-- Any registry/publication change: `docs/governance/data-model.md` and
+- Any registry/publication/data-model change: `ontology/README.md`,
+  `ontology/cile-review-profile.yaml`, `docs/governance/data-model.md` and
   `docs/methodology/eligibility.md`.
 - Retrieval or intake: `docs/methodology/discovery.md`,
   `docs/methodology/expansion.md`, the relevant sections of
@@ -65,7 +72,7 @@ Only governed screening decisions may use `eligible_core` or
   `docs/operations/automation.md`. Daily surveillance also requires
   `docs/operations/daily-metrics.md`.
 - Curator-console action: `docs/operations/curation.md`,
-  `docs/operations/github-app.md`,
+  `docs/operations/github-app.md`, `ontology/README.md`,
   `docs/governance/data-model.md` and `docs/methodology/eligibility.md`.
 - Saturation work: `docs/methodology/saturation.md`.
 - Release/deployment: `docs/operations/release.md` and
@@ -80,6 +87,7 @@ workflow changes:
 
 ```bash
 python3 scripts/validation/validate_repository.py
+python3 scripts/ontology/validate_ontology.py
 python3 -m unittest discover -s tests -p 'test_*.py'
 python3 scripts/build_archive.py
 python3 scripts/build_secondary_collections.py
@@ -99,11 +107,12 @@ python3 scripts/report_saturation.py
 ```
 
 The PR body must list changed files, commands and results, record counts,
-external retrieval performed, and unresolved human decisions.
+external retrieval performed, unresolved human decisions and any ontology
+profile/contract change required by the data change.
 
 ## Fail-closed behaviour
 
 Stop without writing when authentication, source authorisation, identity
-resolution, evidence, issue idempotency or the publication gate cannot be
-verified. A failed request is not a zero-result search. An incomplete E1–E3
-cycle is not an assessable saturation cycle.
+resolution, evidence, ontology conformance, issue idempotency or the publication
+gate cannot be verified. A failed request is not a zero-result search. An
+incomplete E1–E3 cycle is not an assessable saturation cycle.

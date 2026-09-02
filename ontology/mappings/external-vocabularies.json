@@ -1,0 +1,63 @@
+{
+  "profile_version": "0.1.0",
+  "policy": "Reuse external terms whenever they already model the concept. CILE terms are permitted only for review-specific governance or criminal-infiltration concepts not adequately represented upstream.",
+  "dependencies": [
+    {
+      "name": "SynthScholar SLR Ontology",
+      "prefix": "slr",
+      "namespace": "https://w3id.org/slr-ontology/",
+      "version": "0.2.0",
+      "repository": "https://github.com/sensein/synthscholar",
+      "source_path": "synthscholar/ontology/slr_ontology.yaml",
+      "license": "Apache-2.0",
+      "role": "systematic-review workflow, review events, model/tool provenance and review-level entities"
+    },
+    {
+      "name": "W3C PROV-O",
+      "prefix": "prov",
+      "namespace": "http://www.w3.org/ns/prov#",
+      "role": "Entity / Activity / Agent provenance and derivation"
+    },
+    {
+      "name": "SPAR FaBiO",
+      "prefix": "fabio",
+      "namespace": "http://purl.org/spar/fabio/",
+      "role": "bibliographic expressions, publication types and manifestations"
+    },
+    {
+      "name": "Bibliographic Ontology",
+      "prefix": "bibo",
+      "namespace": "http://purl.org/ontology/bibo/",
+      "role": "DOI and bibliographic identifiers"
+    },
+    {
+      "name": "W3C Web Annotation",
+      "prefix": "oa",
+      "namespace": "http://www.w3.org/ns/oa#",
+      "role": "grounded evidence spans and source targeting"
+    },
+    {
+      "name": "SKOS",
+      "prefix": "skos",
+      "namespace": "http://www.w3.org/2004/02/skos/core#",
+      "role": "controlled concept schemes including taxonomy and exclusion reasons"
+    },
+    {
+      "name": "RIPE-O",
+      "prefix": "ripe",
+      "namespace": "https://w3id.org/ripe/ripe-o#",
+      "version": "1.0.0",
+      "repository": "https://github.com/RIPE-Observatory/RIPE-O",
+      "license": "CC-BY-4.0",
+      "role": "evidence, questions, assessment answers and provenance of human or automated judgements"
+    }
+  ],
+  "mapping_rules": [
+    "A candidate record is not a scholarly work until a curator-approved promotion creates or links a canonical paper_id.",
+    "A DOI, URL, PDF, XML page, repository copy, publisher landing page or working-paper version is never sufficient by itself to create a second ScholarlyWork.",
+    "Multiple manifestations may belong to one ScholarlyWork; identity reconciliation must preserve manifestation identifiers and provenance.",
+    "ScreeningDecision is an evidence-backed entity attributed to a human reviewer; automated systems may assist but may not become the final eligibility agent.",
+    "AccessAssessment describes a manifestation or the best-known access state. restricted requires positive closed-access evidence without conflicting public-full-text evidence.",
+    "Taxonomy, exclusion reasons and secondary collections are SKOS-like controlled schemes and must not be replaced by free-text shadow vocabularies."
+  ]
+}
