@@ -78,6 +78,19 @@
     return status;
   }
 
+  function ensureAccessNode() {
+    let status = byId("selected-candidate-access-status");
+    const actions = ensureActionContainer();
+    if (!status) {
+      status = document.createElement("small");
+      status.id = "selected-candidate-access-status";
+      status.className = "candidate-retrieval-status candidate-access-status";
+      status.hidden = true;
+    }
+    if (actions && !status.isConnected) actions.append(status);
+    return status;
+  }
+
   function statusLabel(payload) {
     const labels = {
       full_text: "Full text risolto",
@@ -89,6 +102,22 @@
     };
     const base = labels[payload?.resolutionStatus] || "Retrieval verificato";
     return payload?.checkedAt ? `${base} · ${payload.checkedAt}` : base;
+  }
+
+  function accessLabel(payload) {
+    const labels = {
+      open: "OPEN",
+      restricted: "RESTRICTED",
+      unknown: "ACCESSO DA VERIFICARE",
+    };
+    return labels[payload?.accessStatus] || "";
+  }
+
+  function accessTitle(payload) {
+    const detail = String(payload?.accessEvidenceDetail || "").trim();
+    const source = String(payload?.accessEvidenceSource || "").trim();
+    const checked = String(payload?.accessCheckedAt || "").trim();
+    return [source, detail, checked ? `verificato ${checked}` : ""].filter(Boolean).join(" · ");
   }
 
   function preferredActionLabel(payload) {
@@ -108,6 +137,12 @@
       status.textContent = "";
       status.hidden = true;
     }
+    const access = ensureAccessNode();
+    if (access) {
+      access.textContent = "";
+      access.removeAttribute("title");
+      access.hidden = true;
+    }
   }
 
   function applyResolvedLink(payload) {
@@ -116,6 +151,17 @@
       status.textContent = statusLabel(payload);
       status.dataset.state = payload?.resolutionStatus || "unknown";
       status.hidden = false;
+    }
+
+    const access = ensureAccessNode();
+    const label = accessLabel(payload);
+    if (access && label) {
+      access.textContent = label;
+      access.dataset.state = payload.accessStatus;
+      const title = accessTitle(payload);
+      if (title) access.title = title;
+      else access.removeAttribute("title");
+      access.hidden = false;
     }
 
     const link = ensureArticleLink();
@@ -159,6 +205,7 @@
 
     ensureArticleLink();
     ensureStatusNode();
+    ensureAccessNode();
     if (candidateId !== activeCandidateId) {
       activeCandidateId = candidateId;
       clearResolvedLink();
