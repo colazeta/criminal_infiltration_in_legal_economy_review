@@ -116,7 +116,7 @@
     chips.className = "queue-card-chips";
     chips.append(
       makeChip(candidate?.doi ? "DOI" : "senza DOI", candidate?.doi ? "positive" : "neutral", "doi-status"),
-      makeChip("Abstract · verifica", "loading", "abstract-status"),
+      makeChip("Abstract · ricerca", "loading", "abstract-status"),
     );
     if (candidate?.source) chips.append(makeChip(candidate.source, "source", "source"));
 
@@ -207,11 +207,19 @@
     if (count) count.textContent = total ? `${start + 1}–${end} di ${total}` : "0 schede";
   }
 
+  function providerTrace(payload) {
+    const providers = Array.isArray(payload?.providersTried) ? payload.providersTried.filter(Boolean) : [];
+    return providers.length ? `Fonti interrogate: ${providers.join(", ")}.` : "";
+  }
+
   function matchLabel(payload) {
     if (payload?.matchType === "doi") return "DOI verificato";
     if (payload?.matchType === "title_year") return "Titolo + anno verificati";
+    if (payload?.matchType === "web_search") return "Exa / web verificato";
     if (payload?.matchType === "resolved_url") return "Paper risolto verificato";
     if (payload?.matchType === "resolved_url_none") return "Paper risolto, abstract non esposto";
+    if (payload?.matchType === "needs_web_search") return "Serve ricerca web assistita";
+    if (payload?.matchType === "web_search_exhausted") return "Ricerca estesa completata senza abstract";
     if (payload?.matchType === "unavailable") return "Servizio non disponibile";
     return "Nessun match affidabile";
   }
@@ -220,18 +228,27 @@
     for (const card of document.querySelectorAll(`.candidate-card[data-candidate-id="${CSS.escape(candidateId)}"]`)) {
       const badge = card.querySelector('[data-role="abstract-status"]');
       if (!badge) continue;
+      const trace = providerTrace(payload);
       if (String(payload?.abstract || "").trim()) {
         badge.textContent = "Abstract disponibile";
         badge.dataset.state = "positive";
-        badge.title = `${payload.abstractSource || "Fonte bibliografica"} · ${matchLabel(payload)}`;
+        badge.title = `${payload.abstractSource || payload.provider || "Fonte verificata"} · ${matchLabel(payload)}${trace ? ` · ${trace}` : ""}`;
+      } else if (payload?.matchType === "needs_web_search") {
+        badge.textContent = "Ricerca web necessaria";
+        badge.dataset.state = "warning";
+        badge.title = `${matchLabel(payload)}${trace ? ` · ${trace}` : ""}`;
+      } else if (payload?.matchType === "web_search_exhausted") {
+        badge.textContent = "Abstract non trovato";
+        badge.dataset.state = "neutral";
+        badge.title = `${matchLabel(payload)}${trace ? ` · ${trace}` : ""}`;
       } else if (payload?.matchType === "unavailable") {
         badge.textContent = "Abstract non verificato";
         badge.dataset.state = "warning";
-        badge.title = "Le fonti bibliografiche e il paper risolto non hanno completato la verifica.";
+        badge.title = "Il processo multi-source non ha completato la verifica.";
       } else {
-        badge.textContent = "Abstract assente";
-        badge.dataset.state = "neutral";
-        badge.title = matchLabel(payload || {});
+        badge.textContent = "Ricerca da completare";
+        badge.dataset.state = "warning";
+        badge.title = `${matchLabel(payload || {})}${trace ? ` · ${trace}` : ""}`;
       }
     }
   }
@@ -264,10 +281,17 @@
     if (String(primary?.abstract || "").trim()) return primary;
     try {
       const resolved = await fetchResolvedAbstract(candidate, token);
-      if (String(resolved?.abstract || "").trim()) return resolved;
+      if (String(resolved?.abstract || "").trim()) {
+        return {
+          ...resolved,
+          providersTried: [...(primary.providersTried || []), "paper/repository resolved"],
+          providerErrors: primary.providerErrors || [],
+          searchStatus: "found",
+        };
+      }
       if (primary?.matchType === "unavailable" && resolved) return resolved;
     } catch {
-      // Keep the bibliographic result when the resolved-paper fallback fails.
+      // Preserve the multi-source status if the resolved-paper fallback fails.
     }
     return primary;
   }
