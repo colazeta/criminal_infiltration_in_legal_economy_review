@@ -31,7 +31,7 @@ class CuratorReadingSurfaceTests(unittest.TestCase):
     def test_public_config_loads_reading_component_without_api_origin(self) -> None:
         config = (ROOT / "site/curator-config.js").read_text(encoding="utf-8")
         self.assertIn('apiBaseUrl: ""', config)
-        self.assertIn('script.src = "./curator-reading.js"', config)
+        self.assertIn('loadCuratorComponent("./curator-reading.js", "curator-reading")', config)
         self.assertNotIn('OPENALEX_API_KEY', config)
 
     def test_worker_deploy_tracks_reading_assets(self) -> None:
