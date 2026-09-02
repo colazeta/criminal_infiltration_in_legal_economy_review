@@ -1,6 +1,6 @@
 "use strict";
 
-import { searchAdditionalProviders } from "./scholarly-providers.js";
+import { providerManifest, searchFreeScholarlyProviders } from "./scholarly-providers.js";
 
 const OPENALEX_API = "https://api.openalex.org";
 const CROSSREF_API = "https://api.crossref.org";
@@ -158,13 +158,11 @@ async function fetchJson(url) {
   return response.json();
 }
 
-async function openAlexByDoi(doi, apiKey = "") {
-  const target = new URL(`${OPENALEX_API}/works/https://doi.org/${doi}`);
-  if (apiKey) target.searchParams.set("api_key", apiKey);
-  return (await fetchJson(target)) || null;
+async function openAlexByDoi(doi) {
+  return (await fetchJson(`${OPENALEX_API}/works/https://doi.org/${doi}`)) || null;
 }
 
-async function openAlexByTitle(title, year, apiKey = "") {
+async function openAlexByTitle(title, year) {
   const target = new URL(`${OPENALEX_API}/works`);
   target.searchParams.set("search", title);
   target.searchParams.set("per_page", "5");
@@ -173,7 +171,6 @@ async function openAlexByTitle(title, year, apiKey = "") {
     "id,doi,display_name,publication_year,abstract_inverted_index,primary_location,open_access",
   );
   if (year) target.searchParams.set("filter", `publication_year:${year}`);
-  if (apiKey) target.searchParams.set("api_key", apiKey);
   const payload = await fetchJson(target);
   const works = Array.isArray(payload?.results) ? payload.results : [];
   return works
@@ -205,12 +202,13 @@ function betterResult(primary, secondary) {
   return primary || secondary || null;
 }
 
-function decorated(result, providersTried, providerErrors = [], searchStatus = "found") {
+function decorated(result, providersTried, providerErrors = [], searchStatus = "found", providerPlan = []) {
   return {
     ...result,
     providersTried,
     providerErrors,
     searchStatus,
+    providerPlan,
   };
 }
 
@@ -218,9 +216,9 @@ async function enrichCandidate({
   title,
   doi,
   year,
-  openAlexApiKey = "",
   semanticScholarApiKey = "",
-  exaApiKey = "",
+  coreApiKey = "",
+  unpaywallEmail = "",
 }) {
   const requested = {
     title: cleanText(title, 1000),
@@ -229,12 +227,17 @@ async function enrichCandidate({
   };
   if (!requested.title) throw new Error("missing_title");
 
+  const providerPlan = [
+    { id: "openalex", label: "OpenAlex", stage: "primary", billing: "anonymous_free" },
+    { id: "crossref", label: "Crossref", stage: "primary", billing: "none" },
+    ...providerManifest({ semanticScholarApiKey, coreApiKey, unpaywallEmail }),
+  ];
   const providersTried = ["OpenAlex", "Crossref"];
   let baseline = null;
 
   if (requested.doi) {
     const [openAlex, crossref] = await Promise.allSettled([
-      openAlexByDoi(requested.doi, openAlexApiKey),
+      openAlexByDoi(requested.doi),
       crossrefByDoi(requested.doi),
     ]);
     const oaResult = openAlex.status === "fulfilled"
@@ -244,11 +247,11 @@ async function enrichCandidate({
       ? resultFromCrossref(crossref.value, requested, "doi")
       : null;
     baseline = betterResult(oaResult, crResult);
-    if (baseline?.abstract) return decorated(baseline, providersTried);
+    if (baseline?.abstract) return decorated(baseline, providersTried, [], "found", providerPlan);
   }
 
   const [openAlexSearch, crossrefSearch] = await Promise.allSettled([
-    openAlexByTitle(requested.title, requested.year, openAlexApiKey),
+    openAlexByTitle(requested.title, requested.year),
     crossrefByTitle(requested.title, requested.year),
   ]);
   const oaResult = openAlexSearch.status === "fulfilled"
@@ -258,22 +261,22 @@ async function enrichCandidate({
     ? resultFromCrossref(crossrefSearch.value, requested, "title_year")
     : null;
   const titleBaseline = betterResult(oaResult, crResult);
-  if (titleBaseline?.abstract) return decorated(titleBaseline, providersTried);
+  if (titleBaseline?.abstract) return decorated(titleBaseline, providersTried, [], "found", providerPlan);
   baseline = baseline || titleBaseline;
 
-  const additional = await searchAdditionalProviders({
+  const additional = await searchFreeScholarlyProviders({
     title: requested.title,
     doi: requested.doi,
     year: requested.year,
     semanticScholarApiKey,
-    exaApiKey,
+    coreApiKey,
+    unpaywallEmail,
   });
   providersTried.push(...additional.providersTried);
   if (additional.result?.abstract) {
-    return decorated(additional.result, providersTried, additional.providerErrors);
+    return decorated(additional.result, providersTried, additional.providerErrors, "found", providerPlan);
   }
 
-  const searchStatus = exaApiKey ? "web_search_exhausted" : "needs_web_search";
   return decorated({
     abstract: "",
     abstractSource: "",
@@ -282,9 +285,9 @@ async function enrichCandidate({
     matchedTitle: additional.result?.matchedTitle || baseline?.matchedTitle || "",
     matchedYear: additional.result?.matchedYear || baseline?.matchedYear || null,
     matchedDoi: additional.result?.matchedDoi || baseline?.matchedDoi || requested.doi,
-    matchType: searchStatus,
+    matchType: "needs_resolved_document",
     matchScore: additional.result?.matchScore || baseline?.matchScore || 0,
-  }, providersTried, additional.providerErrors, searchStatus);
+  }, providersTried, additional.providerErrors, "needs_resolved_document", providerPlan);
 }
 
 function json(payload, status = 200) {
@@ -310,9 +313,9 @@ async function handleEnrichmentRequest(request, env = {}) {
       title,
       doi,
       year,
-      openAlexApiKey: cleanText(env.OPENALEX_API_KEY, 300),
       semanticScholarApiKey: cleanText(env.SEMANTIC_SCHOLAR_API_KEY, 300),
-      exaApiKey: cleanText(env.EXA_API_KEY, 300),
+      coreApiKey: cleanText(env.CORE_API_KEY, 300),
+      unpaywallEmail: cleanText(env.UNPAYWALL_EMAIL, 320),
     });
     return json(result);
   } catch {
@@ -328,6 +331,7 @@ async function handleEnrichmentRequest(request, env = {}) {
       matchScore: 0,
       providersTried: [],
       providerErrors: [],
+      providerPlan: [],
       searchStatus: "unavailable",
     });
   }

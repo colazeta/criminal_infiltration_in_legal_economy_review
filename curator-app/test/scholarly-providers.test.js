@@ -4,11 +4,15 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  core,
   datacite,
   europePmc,
-  exa,
   plainTextAbstract,
+  providerManifest,
+  searchFreeWebProvider,
   semanticScholar,
+  tavily,
+  unpaywall,
 } from "../src/scholarly-providers.js";
 
 function withFetchMock(context, implementation) {
@@ -25,11 +29,12 @@ const requested = {
   year: "2024",
 };
 
-test("Semantic Scholar can supply an abstract by DOI", async (context) => {
-  withFetchMock(context, async (url) => {
+test("Semantic Scholar can supply an abstract by DOI without requiring a key", async (context) => {
+  withFetchMock(context, async (url, options) => {
     const parsed = new URL(String(url));
     assert.ok(decodeURIComponent(parsed.pathname).includes("/paper/DOI:10.1177/17488958241293927"));
     assert.ok(parsed.pathname.includes("DOI%3A10.1177%2F17488958241293927"));
+    assert.equal(options?.headers?.["x-api-key"], undefined);
     return Response.json({
       title: requested.title,
       year: 2024,
@@ -46,7 +51,7 @@ test("Semantic Scholar can supply an abstract by DOI", async (context) => {
   assert.match(result.abstract, /legitimate businesses/);
 });
 
-test("DataCite abstracts are read from descriptions with descriptionType Abstract", async (context) => {
+test("DataCite abstracts are read from public metadata", async (context) => {
   withFetchMock(context, async (url) => {
     assert.ok(String(url).includes("api.datacite.org/dois/"));
     return Response.json({
@@ -69,6 +74,54 @@ test("DataCite abstracts are read from descriptions with descriptionType Abstrac
   const result = await datacite(requested);
   assert.equal(result.abstractSource, "DataCite");
   assert.match(result.abstract, /mafia investment patterns/);
+});
+
+test("Unpaywall is skipped without the required free contact email", async (context) => {
+  withFetchMock(context, async () => {
+    throw new Error("Unpaywall must not be called without email");
+  });
+  assert.equal(await unpaywall(requested, ""), null);
+});
+
+test("Unpaywall can contribute a free OA location", async (context) => {
+  withFetchMock(context, async (url) => {
+    const parsed = new URL(String(url));
+    assert.equal(parsed.searchParams.get("email"), "curator@example.org");
+    return Response.json({
+      title: requested.title,
+      year: 2024,
+      doi: requested.doi,
+      doi_url: `https://doi.org/${requested.doi}`,
+      best_oa_location: {
+        url_for_pdf: "https://repository.example/paper.pdf",
+        url_for_landing_page: "https://repository.example/item",
+      },
+    });
+  });
+  const result = await unpaywall(requested, "curator@example.org");
+  assert.equal(result.provider, "Unpaywall");
+  assert.equal(result.articleUrl, "https://repository.example/paper.pdf");
+});
+
+test("CORE works keyless and can supply abstracts from repository search", async (context) => {
+  withFetchMock(context, async (url, options) => {
+    const parsed = new URL(String(url));
+    assert.equal(parsed.origin, "https://api.core.ac.uk");
+    assert.equal(parsed.pathname, "/v3/search/works");
+    assert.equal(options?.headers?.Authorization, undefined);
+    return Response.json({
+      results: [{
+        title: requested.title,
+        yearPublished: 2024,
+        doi: requested.doi,
+        abstract: "This article studies legitimate businesses confiscated from mafia groups and their geographic investment patterns across industries.",
+        downloadUrl: "https://core.example/paper.pdf",
+      }],
+    });
+  });
+  const result = await core(requested);
+  assert.equal(result.abstractSource, "CORE");
+  assert.match(result.abstract, /legitimate businesses/);
 });
 
 test("Europe PMC core results can contribute abstracts", async (context) => {
@@ -99,25 +152,51 @@ test("plain-text web extraction requires an explicit abstract section", () => {
   assert.equal(plainTextAbstract("A generic page description without an abstract heading even if it is fairly long and descriptive for readers."), "");
 });
 
-test("Exa web search uses publication category and accepts only strong title matches", async (context) => {
+test("Tavily web fallback is hard-wired to one-credit Basic search", async (context) => {
   withFetchMock(context, async (url, options) => {
-    assert.equal(String(url), "https://api.exa.ai/search");
+    assert.equal(String(url), "https://api.tavily.com/search");
     assert.equal(options.method, "POST");
-    assert.equal(options.headers["x-api-key"], "exa-test-key");
+    assert.equal(options.headers.Authorization, "Bearer tvly-free-test-key");
     const body = JSON.parse(options.body);
-    assert.equal(body.category, "publication");
-    assert.equal(body.numResults, 8);
+    assert.equal(body.search_depth, "basic");
+    assert.equal(body.auto_parameters, false);
+    assert.equal(body.include_answer, false);
+    assert.equal(body.max_results, 5);
     return Response.json({
+      usage: { credits: 1 },
       results: [{
         title: requested.title,
         url: "https://publires.unicatt.it/example",
-        text: "Abstract This article studies legitimate businesses confiscated from mafia groups in Italy to assess whether investment patterns across industries depend on the geographical environment. Introduction We then present data and methods.",
+        raw_content: "Abstract This article studies legitimate businesses confiscated from mafia groups in Italy to assess whether investment patterns across industries depend on the geographical environment. Introduction We then present data and methods.",
       }],
     });
   });
 
-  const result = await exa(requested, "exa-test-key");
-  assert.equal(result.abstractSource, "Exa / web");
-  assert.equal(result.matchType, "web_search");
+  const result = await tavily(requested, "tvly-free-test-key");
+  assert.equal(result.abstractSource, "Tavily / web");
+  assert.equal(result.matchType, "free_web_search");
   assert.match(result.abstract, /legitimate businesses/);
+});
+
+test("Tavily credit guard rejects responses consuming more than one credit", async (context) => {
+  withFetchMock(context, async () => Response.json({ usage: { credits: 2 }, results: [] }));
+  await assert.rejects(() => tavily(requested, "tvly-free-test-key"), /tavily_credit_guard/);
+});
+
+test("free web provider makes no external call when no free key is configured", async (context) => {
+  withFetchMock(context, async () => {
+    throw new Error("web provider must remain disabled without a free key");
+  });
+  const response = await searchFreeWebProvider({ ...requested, tavilyApiKey: "" });
+  assert.equal(response.configured, false);
+  assert.equal(response.creditsUsed, 0);
+  assert.deepEqual(response.providersTried, []);
+});
+
+test("provider manifest exposes only zero-cost or free-hard-cap modules", () => {
+  const manifest = providerManifest({ tavilyApiKey: "tvly-free-test-key", unpaywallEmail: "curator@example.org" });
+  assert.ok(manifest.some((provider) => provider.id === "core" && provider.billing === "none"));
+  assert.ok(manifest.some((provider) => provider.id === "unpaywall" && provider.enabled));
+  assert.ok(manifest.some((provider) => provider.id === "tavily" && provider.billing === "free_hard_cap"));
+  assert.equal(manifest.some((provider) => provider.id === "exa"), false);
 });

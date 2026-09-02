@@ -157,11 +157,12 @@
   function matchLabel(payload) {
     if (payload.matchType === "doi") return "DOI verificato";
     if (payload.matchType === "title_year") return "Titolo + anno verificati";
-    if (payload.matchType === "web_search") return "Exa / web verificato";
+    if (payload.matchType === "free_web_search") return "Tavily Basic verificato";
     if (payload.matchType === "resolved_url") return "Paper risolto verificato";
     if (payload.matchType === "resolved_url_none") return "Paper risolto, abstract non esposto";
-    if (payload.matchType === "needs_web_search") return "Ricerca web assistita necessaria";
-    if (payload.matchType === "web_search_exhausted") return "Ricerca estesa completata senza abstract";
+    if (payload.matchType === "needs_resolved_document") return "Fonti scholarly completate";
+    if (payload.matchType === "needs_web_search") return "Ricerca web gratuita/assistita necessaria";
+    if (payload.matchType === "web_search_exhausted") return "Ricerca web gratuita completata senza abstract";
     if (payload.matchType === "unavailable") return "Servizio non disponibile";
     return "Nessun match affidabile";
   }
@@ -182,16 +183,16 @@
         : "Abstract recuperato al momento della consultazione e mostrato solo nella console autenticata; non viene persistito nel corpus pubblico.";
     } else if (payload?.matchType === "needs_web_search") {
       text.textContent =
-        "La ricerca non è conclusa: le fonti strutturate e le manifestazioni già risolte non hanno restituito l’abstract. Questo record richiede ora ricerca web assistita/Exa, non va classificato come abstract assente.";
+        "La ricerca automatica gratuita non è conclusa o il motore web gratuito non è configurato. Il record resta da cercare e non viene classificato come abstract assente.";
       source.textContent = "Ricerca web necessaria";
       note.textContent = trace
-        ? `Già interrogati: ${trace}. Il prossimo passaggio è Exa/web browsing con match sul titolo/DOI.`
-        : "Il prossimo passaggio è Exa/web browsing con match sul titolo/DOI.";
+        ? `Già interrogati: ${trace}. Il prossimo passaggio resta una ricerca web gratuita/assistita sul titolo e DOI.`
+        : "Il prossimo passaggio resta una ricerca web gratuita/assistita sul titolo e DOI.";
     } else if (payload?.matchType === "web_search_exhausted") {
       text.textContent =
-        "L’abstract non è stato trovato dopo la ricerca multi-source, inclusa la ricerca web automatizzata disponibile. Il paper resta comunque apribile e il risultato non modifica lo stage editoriale.";
-      source.textContent = "Ricerca estesa completata";
-      note.textContent = trace ? `Fonti interrogate: ${trace}.` : "La ricerca estesa non ha prodotto un abstract affidabile.";
+        "L’abstract non è stato trovato dopo l’intera catena automatica gratuita, incluso il motore web gratuito configurato. Questo significa non trovato, non inesistente.";
+      source.textContent = "Ricerca gratuita completata";
+      note.textContent = trace ? `Fonti interrogate: ${trace}.` : "La ricerca gratuita non ha prodotto un abstract affidabile.";
     } else if (payload?.matchType === "unavailable") {
       text.textContent = "La verifica multi-source non è stata completata per un problema tecnico. Non interpretiamo questo stato come assenza dell’abstract.";
       source.textContent = "Verifica incompleta";
@@ -209,9 +210,9 @@
     const text = byId("candidate-abstract-text");
     const source = byId("candidate-abstract-source");
     const note = byId("candidate-abstract-note");
-    if (text) text.textContent = "Ricerca multi-source dell’abstract in corso…";
-    if (source) source.textContent = "OpenAlex · Crossref · Semantic Scholar · DataCite · Europe PMC · Exa · paper risolto";
-    if (note) note.textContent = "Il match viene controllato prima di mostrare il testo.";
+    if (text) text.textContent = "Ricerca modulare gratuita dell’abstract in corso…";
+    if (source) source.textContent = "OpenAlex · Crossref · Semantic Scholar · DataCite · Unpaywall · CORE · Europe PMC · paper risolto · Tavily Basic";
+    if (note) note.textContent = "Le fonti a costo zero vengono interrogate prima; il web gratuito è l’ultimo fallback e parte solo per il paper aperto.";
   }
 
   async function fetchResolvedAbstract(candidateId, issueNumber, title, token, signal) {
@@ -220,6 +221,22 @@
     target.searchParams.set("candidate", candidateId);
     target.searchParams.set("issue", String(issueNumber));
     target.searchParams.set("title", title);
+    const response = await fetch(target, {
+      headers: { Authorization: `Bearer ${token}` },
+      signal,
+    });
+    if (!response.ok) return null;
+    return response.json();
+  }
+
+  async function fetchFreeWebSearch(candidateId, issueNumber, title, doi, year, token, signal) {
+    if (!issueNumber) return null;
+    const target = new URL(`${apiBaseUrl}/api/free-web-search`);
+    target.searchParams.set("candidate", candidateId);
+    target.searchParams.set("issue", String(issueNumber));
+    target.searchParams.set("title", title);
+    if (doi && doi !== "Non registrato") target.searchParams.set("doi", doi);
+    if (year && year !== "Non registrato") target.searchParams.set("year", year);
     const response = await fetch(target, {
       headers: { Authorization: `Bearer ${token}` },
       signal,
@@ -244,7 +261,7 @@
     if (doi && doi !== "Non registrato") target.searchParams.set("doi", doi);
     if (year && year !== "Non registrato") target.searchParams.set("year", year);
 
-    let primary = { matchType: "unavailable", abstract: "" };
+    let primary = { matchType: "unavailable", abstract: "", providersTried: [] };
     try {
       const response = await fetch(target, {
         headers: { Authorization: `Bearer ${token}` },
@@ -254,24 +271,57 @@
     } catch (error) {
       if (error?.name === "AbortError") throw error;
     }
-    let result = primary;
-    if (!String(primary?.abstract || "").trim()) {
-      try {
-        const resolved = await fetchResolvedAbstract(candidateId, issueNumber, title, token, signal);
-        if (String(resolved?.abstract || "").trim()) {
-          result = {
-            ...resolved,
-            providersTried: [...(primary.providersTried || []), "paper/repository resolved"],
-            providerErrors: primary.providerErrors || [],
-            searchStatus: "found",
-          };
-        } else if (primary?.matchType === "unavailable" && resolved) {
-          result = resolved;
-        }
-      } catch (error) {
-        if (error?.name === "AbortError") throw error;
-      }
+    if (String(primary?.abstract || "").trim()) {
+      cache.set(key, primary);
+      return primary;
     }
+
+    let result = primary;
+    try {
+      const resolved = await fetchResolvedAbstract(candidateId, issueNumber, title, token, signal);
+      if (String(resolved?.abstract || "").trim()) {
+        result = {
+          ...resolved,
+          providersTried: [...(primary.providersTried || []), "paper/repository resolved"],
+          providerErrors: primary.providerErrors || [],
+          providerPlan: primary.providerPlan || [],
+          searchStatus: "found",
+        };
+        cache.set(key, result);
+        return result;
+      }
+      if (resolved) {
+        result = {
+          ...primary,
+          articleUrl: resolved.articleUrl || primary.articleUrl,
+          providersTried: [...(primary.providersTried || []), "paper/repository resolved"],
+          providerErrors: primary.providerErrors || [],
+          matchType: "needs_web_search",
+          searchStatus: "needs_web_search",
+        };
+      }
+    } catch (error) {
+      if (error?.name === "AbortError") throw error;
+    }
+
+    try {
+      const freeWeb = await fetchFreeWebSearch(candidateId, issueNumber, title, doi, year, token, signal);
+      if (freeWeb) {
+        const providers = [...(result.providersTried || [])];
+        for (const provider of freeWeb.providersTried || []) if (!providers.includes(provider)) providers.push(provider);
+        result = {
+          ...result,
+          ...freeWeb,
+          articleUrl: freeWeb.articleUrl || result.articleUrl,
+          providersTried: providers,
+          providerErrors: [...(result.providerErrors || []), ...(freeWeb.providerErrors || [])],
+          providerPlan: freeWeb.providerPlan?.length ? freeWeb.providerPlan : result.providerPlan || [],
+        };
+      }
+    } catch (error) {
+      if (error?.name === "AbortError") throw error;
+    }
+
     cache.set(key, result);
     return result;
   }

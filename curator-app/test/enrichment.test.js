@@ -44,10 +44,11 @@ test("title similarity rewards the same bibliographic work", () => {
   assert.ok(titleSimilarity("Mafia infiltration in firms", "Marine biology and coral reefs") < 0.2);
 });
 
-test("DOI enrichment prefers a verified OpenAlex abstract", async (context) => {
+test("DOI enrichment prefers a verified OpenAlex abstract without a billing key", async (context) => {
   withFetchMock(context, async (url) => {
     const value = String(url);
     if (value.startsWith("https://api.openalex.org/works/https://doi.org/10.1000/example")) {
+      assert.equal(new URL(value).searchParams.has("api_key"), false);
       return Response.json({
         doi: "https://doi.org/10.1000/example",
         display_name: "Organised crime and firm ownership",
@@ -78,6 +79,7 @@ test("DOI enrichment prefers a verified OpenAlex abstract", async (context) => {
   assert.equal(result.matchType, "doi");
   assert.equal(result.articleUrl, "https://publisher.example/article");
   assert.deepEqual(result.providersTried, ["OpenAlex", "Crossref"]);
+  assert.equal(result.providerPlan.some((provider) => provider.id === "exa"), false);
 });
 
 test("Crossref abstract is used when the DOI match in OpenAlex has no abstract", async (context) => {
@@ -116,7 +118,7 @@ test("Crossref abstract is used when the DOI match in OpenAlex has no abstract",
   assert.equal(result.abstract, "This study examines criminal infiltration in companies.");
 });
 
-test("unresolved structured search becomes needs_web_search instead of abstract absent", async (context) => {
+test("unresolved free scholarly search hands off to resolved-document stage before web search", async (context) => {
   withFetchMock(context, async (url) => {
     const value = String(url);
     if (value.startsWith("https://api.openalex.org/works?")) {
@@ -151,9 +153,11 @@ test("unresolved structured search becomes needs_web_search instead of abstract 
     year: "2025",
   });
   assert.equal(result.abstract, "");
-  assert.equal(result.matchType, "needs_web_search");
-  assert.equal(result.searchStatus, "needs_web_search");
+  assert.equal(result.matchType, "needs_resolved_document");
+  assert.equal(result.searchStatus, "needs_resolved_document");
   assert.ok(result.providersTried.includes("Semantic Scholar"));
   assert.ok(result.providersTried.includes("DataCite"));
+  assert.ok(result.providersTried.includes("CORE"));
   assert.ok(result.providersTried.includes("Europe PMC"));
+  assert.equal(result.providersTried.includes("Tavily Basic"), false);
 });

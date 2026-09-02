@@ -76,8 +76,10 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
           CURATOR_CLIENT_SECRET: ${{ secrets.CURATOR_CLIENT_SECRET }}
           CURATOR_SESSION_SECRET: ${{ secrets.CURATOR_SESSION_SECRET }}
-          EXA_API_KEY: ${{ secrets.EXA_API_KEY }}
+          TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
           SEMANTIC_SCHOLAR_API_KEY: ${{ secrets.SEMANTIC_SCHOLAR_API_KEY }}
+          CORE_API_KEY: ${{ secrets.CORE_API_KEY }}
+          UNPAYWALL_EMAIL: ${{ secrets.UNPAYWALL_EMAIL }}
         run: |
           if [ -z "$CURATOR_CLIENT_SECRET" ]; then
             echo "::error::Missing environment secret CURATOR_CLIENT_SECRET"
@@ -89,14 +91,30 @@ jobs:
           fi
           printf '%s' "$CURATOR_CLIENT_SECRET" | npx --yes wrangler@4.128.0 secret put GITHUB_CLIENT_SECRET --config wrangler.generated.jsonc
           printf '%s' "$CURATOR_SESSION_SECRET" | npx --yes wrangler@4.128.0 secret put SESSION_SECRET --config wrangler.generated.jsonc
-          if [ -n "$EXA_API_KEY" ]; then
-            printf '%s' "$EXA_API_KEY" | npx --yes wrangler@4.128.0 secret put EXA_API_KEY --config wrangler.generated.jsonc
-            echo "Exa web-search enrichment enabled." >> "$GITHUB_STEP_SUMMARY"
+
+          if [ -n "$TAVILY_API_KEY" ]; then
+            printf '%s' "$TAVILY_API_KEY" | npx --yes wrangler@4.128.0 secret put TAVILY_API_KEY --config wrangler.generated.jsonc
+            echo "Tavily Basic free-tier fallback enabled; runtime hard guard is TAVILY_FREE_ONLY=true." >> "$GITHUB_STEP_SUMMARY"
           else
-            echo "EXA_API_KEY not configured: unresolved abstracts will remain needs_web_search rather than being marked absent." >> "$GITHUB_STEP_SUMMARY"
+            echo "TAVILY_API_KEY not configured: no web-search credits can be consumed; residual records stay needs_web_search." >> "$GITHUB_STEP_SUMMARY"
           fi
           if [ -n "$SEMANTIC_SCHOLAR_API_KEY" ]; then
             printf '%s' "$SEMANTIC_SCHOLAR_API_KEY" | npx --yes wrangler@4.128.0 secret put SEMANTIC_SCHOLAR_API_KEY --config wrangler.generated.jsonc
+            echo "Semantic Scholar free API key enabled." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "Semantic Scholar runs through its public unauthenticated endpoints." >> "$GITHUB_STEP_SUMMARY"
+          fi
+          if [ -n "$CORE_API_KEY" ]; then
+            printf '%s' "$CORE_API_KEY" | npx --yes wrangler@4.128.0 secret put CORE_API_KEY --config wrangler.generated.jsonc
+            echo "CORE free API key enabled for a higher free rate limit." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "CORE runs keyless at the public free rate limit." >> "$GITHUB_STEP_SUMMARY"
+          fi
+          if [ -n "$UNPAYWALL_EMAIL" ]; then
+            printf '%s' "$UNPAYWALL_EMAIL" | npx --yes wrangler@4.128.0 secret put UNPAYWALL_EMAIL --config wrangler.generated.jsonc
+            echo "Unpaywall free API enabled." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "UNPAYWALL_EMAIL not configured: Unpaywall is skipped without affecting the other free providers." >> "$GITHUB_STEP_SUMMARY"
           fi
           rm -f wrangler.generated.jsonc
 
@@ -178,12 +196,12 @@ jobs:
           retry_json(f"{origin}/health", {"status": "ok"}, "Curator production health")
           retry_asset(
               "curator-reading.js",
-              ["candidate-abstract-panel", "/api/resolved-abstract", "Semantic Scholar", "Exa"],
+              ["candidate-abstract-panel", "/api/resolved-abstract", "/api/free-web-search", "CORE", "Tavily Basic"],
               "Curator reading surface",
           )
           retry_asset(
               "curator-queue.js",
-              ["candidate-queue-pager", "MAX_ENRICHMENT_CONCURRENCY", "/api/resolved-abstract", "needs_web_search"],
+              ["candidate-queue-pager", "MAX_ENRICHMENT_CONCURRENCY", "/api/resolved-abstract"],
               "Curator queue enhancement",
           )
           retry_asset(
@@ -210,5 +228,14 @@ jobs:
           retry_unauthenticated_401(
               f"{origin}/api/resolved-abstract?{resolved_abstract_query}",
               "Curator resolved abstract endpoint",
+          )
+          free_web_query = urllib.parse.urlencode({
+              "candidate": "CAND-SMOKE-001",
+              "issue": "1",
+              "title": "Authentication smoke test",
+          })
+          retry_unauthenticated_401(
+              f"{origin}/api/free-web-search?{free_web_query}",
+              "Curator free web-search endpoint",
           )
           PY
