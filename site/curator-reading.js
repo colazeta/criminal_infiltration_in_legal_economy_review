@@ -149,11 +149,19 @@
     else link.removeAttribute("href");
   }
 
+  function providerTrace(payload) {
+    const providers = Array.isArray(payload?.providersTried) ? payload.providersTried.filter(Boolean) : [];
+    return providers.length ? providers.join(" · ") : "";
+  }
+
   function matchLabel(payload) {
     if (payload.matchType === "doi") return "DOI verificato";
     if (payload.matchType === "title_year") return "Titolo + anno verificati";
+    if (payload.matchType === "web_search") return "Exa / web verificato";
     if (payload.matchType === "resolved_url") return "Paper risolto verificato";
     if (payload.matchType === "resolved_url_none") return "Paper risolto, abstract non esposto";
+    if (payload.matchType === "needs_web_search") return "Ricerca web assistita necessaria";
+    if (payload.matchType === "web_search_exhausted") return "Ricerca estesa completata senza abstract";
     if (payload.matchType === "unavailable") return "Servizio non disponibile";
     return "Nessun match affidabile";
   }
@@ -165,17 +173,34 @@
     if (!text || !source || !note) return;
 
     const abstract = String(payload?.abstract || "").trim();
+    const trace = providerTrace(payload);
     if (abstract) {
       text.textContent = abstract;
-      source.textContent = `${payload.abstractSource || "Fonte bibliografica"} · ${matchLabel(payload)}`;
-      note.textContent =
-        "Abstract recuperato al momento della consultazione e mostrato solo nella console autenticata; non viene persistito nel corpus pubblico.";
+      source.textContent = `${payload.abstractSource || payload.provider || "Fonte verificata"} · ${matchLabel(payload)}`;
+      note.textContent = trace
+        ? `Fonti interrogate: ${trace}. Abstract mostrato solo nella console autenticata e non persistito nel corpus pubblico.`
+        : "Abstract recuperato al momento della consultazione e mostrato solo nella console autenticata; non viene persistito nel corpus pubblico.";
+    } else if (payload?.matchType === "needs_web_search") {
+      text.textContent =
+        "La ricerca non è conclusa: le fonti strutturate e le manifestazioni già risolte non hanno restituito l’abstract. Questo record richiede ora ricerca web assistita/Exa, non va classificato come abstract assente.";
+      source.textContent = "Ricerca web necessaria";
+      note.textContent = trace
+        ? `Già interrogati: ${trace}. Il prossimo passaggio è Exa/web browsing con match sul titolo/DOI.`
+        : "Il prossimo passaggio è Exa/web browsing con match sul titolo/DOI.";
+    } else if (payload?.matchType === "web_search_exhausted") {
+      text.textContent =
+        "L’abstract non è stato trovato dopo la ricerca multi-source, inclusa la ricerca web automatizzata disponibile. Il paper resta comunque apribile e il risultato non modifica lo stage editoriale.";
+      source.textContent = "Ricerca estesa completata";
+      note.textContent = trace ? `Fonti interrogate: ${trace}.` : "La ricerca estesa non ha prodotto un abstract affidabile.";
+    } else if (payload?.matchType === "unavailable") {
+      text.textContent = "La verifica multi-source non è stata completata per un problema tecnico. Non interpretiamo questo stato come assenza dell’abstract.";
+      source.textContent = "Verifica incompleta";
+      note.textContent = "Riprova la scheda: il risultato non modifica lo stage editoriale.";
     } else {
       text.textContent =
-        "Abstract non disponibile né nei metadati bibliografici né nelle manifestazioni online del paper già risolte. Puoi comunque aprire l’articolo o la fonte registrata dalla scheda.";
+        "La ricerca dell’abstract non ha ancora prodotto un match affidabile. Il record resta da cercare, non viene classificato automaticamente come abstract assente.";
       source.textContent = matchLabel(payload || {});
-      note.textContent =
-        "L’assenza dell’abstract non è un giudizio sul paper e non modifica lo stage di revisione.";
+      note.textContent = trace ? `Fonti interrogate: ${trace}.` : "La ricerca deve essere completata prima di dichiarare l’abstract non disponibile.";
     }
     if (payload?.articleUrl) setArticleUrl(payload.articleUrl);
   }
@@ -184,8 +209,8 @@
     const text = byId("candidate-abstract-text");
     const source = byId("candidate-abstract-source");
     const note = byId("candidate-abstract-note");
-    if (text) text.textContent = "Recupero dell’abstract in corso…";
-    if (source) source.textContent = "OpenAlex / Crossref / paper risolto";
+    if (text) text.textContent = "Ricerca multi-source dell’abstract in corso…";
+    if (source) source.textContent = "OpenAlex · Crossref · Semantic Scholar · DataCite · Europe PMC · Exa · paper risolto";
     if (note) note.textContent = "Il match viene controllato prima di mostrare il testo.";
   }
 
@@ -233,8 +258,16 @@
     if (!String(primary?.abstract || "").trim()) {
       try {
         const resolved = await fetchResolvedAbstract(candidateId, issueNumber, title, token, signal);
-        if (String(resolved?.abstract || "").trim()) result = resolved;
-        else if (primary?.matchType === "unavailable" && resolved) result = resolved;
+        if (String(resolved?.abstract || "").trim()) {
+          result = {
+            ...resolved,
+            providersTried: [...(primary.providersTried || []), "paper/repository resolved"],
+            providerErrors: primary.providerErrors || [],
+            searchStatus: "found",
+          };
+        } else if (primary?.matchType === "unavailable" && resolved) {
+          result = resolved;
+        }
       } catch (error) {
         if (error?.name === "AbortError") throw error;
       }

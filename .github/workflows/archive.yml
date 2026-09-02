@@ -53,6 +53,7 @@ jobs:
           node --check site/curator-resolved-link.js
           node --check curator-app/src/index.js
           node --check curator-app/src/enrichment.js
+          node --check curator-app/src/scholarly-providers.js
           node --check curator-app/src/resolved-abstract.js
           node --check curator-app/src/worker.js
           node --test curator-app/test/*.test.js
@@ -109,6 +110,7 @@ jobs:
           node --check site/curator-resolved-link.js
           node --check curator-app/src/index.js
           node --check curator-app/src/enrichment.js
+          node --check curator-app/src/scholarly-providers.js
           node --check curator-app/src/resolved-abstract.js
           node --check curator-app/src/worker.js
           node --test curator-app/test/*.test.js
