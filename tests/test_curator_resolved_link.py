@@ -28,7 +28,8 @@ class CuratorResolvedLinkTests(unittest.TestCase):
         self.assertIn('## Retrieval coverage — mechanical', worker)
         self.assertIn('bestUrl: safeHttpsUrl', worker)
         self.assertIn('"/curator-resolved-link.js"', worker)
-        self.assertIn('load(\"./curator-resolved-link.js\"', worker)
+        self.assertIn('componentLoaderSource', worker)
+        self.assertIn('curator-resolved-link', worker)
 
     def test_public_config_loads_component_without_exposing_api_origin(self) -> None:
         config = (ROOT / "site/curator-config.js").read_text(encoding="utf-8")
