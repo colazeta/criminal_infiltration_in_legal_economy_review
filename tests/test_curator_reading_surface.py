@@ -28,7 +28,6 @@ class CuratorReadingSurfaceTests(unittest.TestCase):
         self.assertNotIn('.innerHTML', javascript)
         self.assertNotIn('localStorage', javascript)
         self.assertNotIn('abstract_cache', javascript.lower())
-        self.assertNotIn('Exa', javascript)
 
     def test_worker_requires_curator_session_before_all_enrichment_layers(self) -> None:
         worker = (ROOT / "curator-app/src/worker.js").read_text(encoding="utf-8")
@@ -46,10 +45,8 @@ class CuratorReadingSurfaceTests(unittest.TestCase):
         config = (ROOT / "site/curator-config.js").read_text(encoding="utf-8")
         self.assertIn('apiBaseUrl: ""', config)
         self.assertIn('loadCuratorComponent("./curator-reading.js", "curator-reading")', config)
-        self.assertNotIn('OPENALEX_API_KEY', config)
-        self.assertNotIn('TAVILY_API_KEY', config)
-        self.assertNotIn('CORE_API_KEY', config)
-        self.assertNotIn('JINA_API_KEY', config)
+        for secret in ('OPENALEX_API_KEY', 'TAVILY_API_KEY', 'CORE_API_KEY', 'JINA_API_KEY', 'SERPER_API_KEY', 'EXA_API_KEY'):
+            self.assertNotIn(secret, config)
 
     def test_worker_deploy_tracks_zero_cost_provider_policy(self) -> None:
         workflow = (ROOT / ".github/workflows/deploy-curator-worker.yml").read_text(
@@ -59,11 +56,13 @@ class CuratorReadingSurfaceTests(unittest.TestCase):
         self.assertIn('site/curator-reading.js', workflow)
         self.assertIn('candidate-abstract-panel', workflow)
         self.assertIn('/api/free-web-search', workflow)
-        self.assertIn('TAVILY_API_KEY', workflow)
-        self.assertIn('CORE_API_KEY', workflow)
-        self.assertIn('UNPAYWALL_EMAIL', workflow)
-        self.assertNotIn('EXA_API_KEY', workflow)
+        for secret in ('SERPER_API_KEY', 'EXA_API_KEY', 'TAVILY_API_KEY', 'CORE_API_KEY', 'UNPAYWALL_EMAIL'):
+            self.assertIn(secret, workflow)
+        self.assertIn('SERPER_DEDICATED_FREE_ACCOUNT', workflow)
+        self.assertIn('EXA_DEDICATED_STARTER_ACCOUNT', workflow)
         self.assertIn('"JINA_READER_FREE_ONLY": "true"', wrangler)
+        self.assertIn('"SERPER_FREE_ONLY": "true"', wrangler)
+        self.assertIn('"EXA_FREE_ONLY": "true"', wrangler)
         self.assertIn('"TAVILY_FREE_ONLY": "true"', wrangler)
 
     def test_archive_ci_syntax_checks_zero_cost_modules(self) -> None:
@@ -74,6 +73,7 @@ class CuratorReadingSurfaceTests(unittest.TestCase):
         self.assertGreaterEqual(workflow.count('node --check curator-app/src/enrichment.js'), 2)
         self.assertGreaterEqual(workflow.count('node --check curator-app/src/scholarly-providers.js'), 2)
         self.assertGreaterEqual(workflow.count('node --check curator-app/src/free-web-search.js'), 2)
+        self.assertGreaterEqual(workflow.count('node --check curator-app/src/web-capability-resolver.js'), 2)
 
     def test_reading_surface_exposes_bibliographic_review_cues(self) -> None:
         javascript = (ROOT / "site/curator-reading.js").read_text(encoding="utf-8")

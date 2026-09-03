@@ -4,6 +4,7 @@ import { DurableObject } from "cloudflare:workers";
 
 import { handleEnrichmentRequest } from "./enrichment.js";
 import { handleFreeWebSearchRequest } from "./free-web-search.js";
+import { budgetFor } from "./provider-budget.js";
 import { handleResolvedAbstractRequest } from "./resolved-abstract.js";
 import worker, { SubmissionCoordinatorCore } from "./index.js";
 
@@ -215,10 +216,70 @@ async function authenticatedFreeWebSearch(request, env) {
 export class SubmissionCoordinator extends DurableObject {
   constructor(ctx, env) {
     super(ctx, env);
+    this.ctx = ctx;
     this.core = new SubmissionCoordinatorCore(ctx, env);
+    this.providerBudgetUsage = {};
+    this.providerBudgetLoaded = false;
+    this.providerBudgetLoadPromise = null;
+  }
+
+  async loadProviderBudget() {
+    if (this.providerBudgetLoaded) return;
+    if (!this.providerBudgetLoadPromise) {
+      this.providerBudgetLoadPromise = this.ctx.storage.get("providerBudgetUsage");
+    }
+    const stored = await this.providerBudgetLoadPromise;
+    if (!this.providerBudgetLoaded) {
+      this.providerBudgetUsage = stored && typeof stored === "object" ? stored : {};
+      this.providerBudgetLoaded = true;
+    }
+  }
+
+  async reserveProviderBudget(request) {
+    await this.loadProviderBudget();
+    let payload = {};
+    try {
+      payload = await request.json();
+    } catch {
+      return Response.json({ error: { code: "invalid_budget_request" } }, { status: 400 });
+    }
+    const provider = String(payload.provider || "");
+    const budget = budgetFor(provider);
+    if (!budget) {
+      return Response.json({ error: { code: "provider_budget_unknown" } }, { status: 400 });
+    }
+    const used = Number(this.providerBudgetUsage[provider] || 0);
+    if (used >= budget.maxRequests) {
+      return Response.json({
+        allowed: false,
+        provider,
+        used,
+        limit: budget.maxRequests,
+        remaining: 0,
+        error: { code: "provider_project_budget_exhausted" },
+      }, { status: 429 });
+    }
+    const next = used + 1;
+    this.providerBudgetUsage = { ...this.providerBudgetUsage, [provider]: next };
+    await this.ctx.storage.put("providerBudgetUsage", this.providerBudgetUsage);
+    return Response.json({
+      allowed: true,
+      provider,
+      used: next,
+      limit: budget.maxRequests,
+      remaining: Math.max(0, budget.maxRequests - next),
+    });
   }
 
   fetch(request) {
+    const url = new URL(request.url);
+    if (
+      request.method === "POST" &&
+      url.origin === "https://submission.internal" &&
+      url.pathname === "/provider-budget"
+    ) {
+      return this.reserveProviderBudget(request);
+    }
     return this.core.fetch(request);
   }
 }

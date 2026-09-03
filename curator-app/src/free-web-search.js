@@ -28,16 +28,7 @@ function json(payload, status = 200) {
   });
 }
 
-function emptyResult({
-  doi,
-  providersTried = [],
-  providerErrors = [],
-  searchStatus,
-  providerPlan,
-  providerUsage = [],
-  freeCreditsUsed = 0,
-  freeRequestsUsed = 0,
-}) {
+function emptyResult({ doi, providersTried = [], providerErrors = [], searchStatus, providerPlan, providerUsage = [], freeCreditsUsed = 0, freeRequestsUsed = 0 }) {
   return {
     abstract: "",
     abstractSource: "",
@@ -60,17 +51,22 @@ function emptyResult({
 
 async function handleFreeWebSearchRequest(request, env = {}) {
   const url = new URL(request.url);
+  const candidateId = cleanText(url.searchParams.get("candidate"), 200);
   const title = cleanText(url.searchParams.get("title"), 1000);
   const doi = cleanDoi(url.searchParams.get("doi"));
   const year = cleanText(url.searchParams.get("year"), 10);
   if (!title) return json({ error: { code: "title_required", message: "Titolo mancante." } }, 400);
 
   const providerPlan = webCapabilityManifest(env);
-  const search = await resolveFreeWebCapabilities({ title, doi, year, env });
+  const search = await resolveFreeWebCapabilities({ title, doi, year, candidateId, env });
 
   if (search.result?.abstract) {
+    const matchType = search.result.matchType === "discovered_page_reader"
+      ? "free_web_search"
+      : search.result.matchType;
     return json({
       ...search.result,
+      matchType,
       providersTried: search.providersTried,
       providerErrors: search.providerErrors,
       providerPlan,
