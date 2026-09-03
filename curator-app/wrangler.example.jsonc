@@ -33,6 +33,7 @@
     "SITE_URL": "https://REPLACE_WITH_WORKER_HOST/curate.html",
     "GITHUB_CALLBACK_URL": "https://REPLACE_WITH_WORKER_HOST/auth/callback",
     "GITHUB_CLIENT_ID": "REPLACE_AFTER_GITHUB_APP_REGISTRATION",
+    "JINA_READER_FREE_ONLY": "true",
     "TAVILY_FREE_ONLY": "true"
   }
 }
