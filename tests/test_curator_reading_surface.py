@@ -15,7 +15,12 @@ class CuratorReadingSurfaceTests(unittest.TestCase):
         self.assertIn('/api/free-web-search', javascript)
         self.assertIn('candidate-abstract-panel', javascript)
         self.assertIn('selected-candidate-article', javascript)
-        self.assertIn('OpenAlex · Crossref · Semantic Scholar · DataCite · Unpaywall · CORE · Europe PMC · paper risolto · Tavily Basic', javascript)
+        self.assertIn(
+            'OpenAlex · Crossref · Semantic Scholar · DataCite · Unpaywall · CORE · Europe PMC · paper risolto · Jina Reader · Tavily Basic',
+            javascript,
+        )
+        self.assertIn('free_page_reader', javascript)
+        self.assertIn('Jina Reader', javascript)
         self.assertIn('needs_web_search', javascript)
         self.assertIn('web_search_exhausted', javascript)
         self.assertIn('providersTried', javascript)
@@ -44,6 +49,7 @@ class CuratorReadingSurfaceTests(unittest.TestCase):
         self.assertNotIn('OPENALEX_API_KEY', config)
         self.assertNotIn('TAVILY_API_KEY', config)
         self.assertNotIn('CORE_API_KEY', config)
+        self.assertNotIn('JINA_API_KEY', config)
 
     def test_worker_deploy_tracks_zero_cost_provider_policy(self) -> None:
         workflow = (ROOT / ".github/workflows/deploy-curator-worker.yml").read_text(
@@ -57,6 +63,7 @@ class CuratorReadingSurfaceTests(unittest.TestCase):
         self.assertIn('CORE_API_KEY', workflow)
         self.assertIn('UNPAYWALL_EMAIL', workflow)
         self.assertNotIn('EXA_API_KEY', workflow)
+        self.assertIn('"JINA_READER_FREE_ONLY": "true"', wrangler)
         self.assertIn('"TAVILY_FREE_ONLY": "true"', wrangler)
 
     def test_archive_ci_syntax_checks_zero_cost_modules(self) -> None:

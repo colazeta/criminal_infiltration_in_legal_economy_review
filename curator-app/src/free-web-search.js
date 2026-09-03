@@ -1,6 +1,9 @@
 "use strict";
 
-import { providerManifest, searchFreeWebProvider } from "./scholarly-providers.js";
+import {
+  resolveFreeWebCapabilities,
+  webCapabilityManifest,
+} from "./web-capability-resolver.js";
 
 function cleanText(value, maximum = 1000) {
   return String(value || "").replace(/\s+/g, " ").trim().slice(0, maximum);
@@ -25,7 +28,16 @@ function json(payload, status = 200) {
   });
 }
 
-function emptyResult({ doi, providersTried = [], providerErrors = [], searchStatus, providerPlan }) {
+function emptyResult({
+  doi,
+  providersTried = [],
+  providerErrors = [],
+  searchStatus,
+  providerPlan,
+  providerUsage = [],
+  freeCreditsUsed = 0,
+  freeRequestsUsed = 0,
+}) {
   return {
     abstract: "",
     abstractSource: "",
@@ -39,7 +51,10 @@ function emptyResult({ doi, providersTried = [], providerErrors = [], searchStat
     providersTried,
     providerErrors,
     providerPlan,
+    providerUsage,
     searchStatus,
+    freeCreditsUsed,
+    freeRequestsUsed,
   };
 }
 
@@ -50,42 +65,32 @@ async function handleFreeWebSearchRequest(request, env = {}) {
   const year = cleanText(url.searchParams.get("year"), 10);
   if (!title) return json({ error: { code: "title_required", message: "Titolo mancante." } }, 400);
 
-  const tavilyApiKey = cleanText(env.TAVILY_API_KEY, 300);
-  const freeOnly = cleanText(env.TAVILY_FREE_ONLY, 20).toLowerCase() === "true";
-  const providerPlan = providerManifest({ tavilyApiKey });
+  const providerPlan = webCapabilityManifest(env);
+  const search = await resolveFreeWebCapabilities({ title, doi, year, env });
 
-  if (!freeOnly || !tavilyApiKey) {
-    return json(emptyResult({
-      doi,
-      providerPlan,
-      searchStatus: "needs_web_search",
-      providerErrors: !freeOnly ? ["Tavily Basic:free-only guard not enabled"] : [],
-    }));
-  }
-
-  const search = await searchFreeWebProvider({ title, doi, year, tavilyApiKey });
   if (search.result?.abstract) {
     return json({
       ...search.result,
       providersTried: search.providersTried,
       providerErrors: search.providerErrors,
       providerPlan,
+      providerUsage: search.providerUsage,
       searchStatus: "found",
-      freeCreditsUsed: search.creditsUsed,
+      freeCreditsUsed: search.freeCreditsUsed,
+      freeRequestsUsed: search.freeRequestsUsed,
     });
   }
 
-  const searchStatus = search.providerErrors.length ? "needs_web_search" : "web_search_exhausted";
-  return json({
-    ...emptyResult({
-      doi,
-      providersTried: search.providersTried,
-      providerErrors: search.providerErrors,
-      providerPlan,
-      searchStatus,
-    }),
-    freeCreditsUsed: search.creditsUsed,
-  });
+  return json(emptyResult({
+    doi,
+    providersTried: search.providersTried,
+    providerErrors: search.providerErrors,
+    providerPlan,
+    providerUsage: search.providerUsage,
+    searchStatus: search.searchStatus,
+    freeCreditsUsed: search.freeCreditsUsed,
+    freeRequestsUsed: search.freeRequestsUsed,
+  }));
 }
 
 export { handleFreeWebSearchRequest };

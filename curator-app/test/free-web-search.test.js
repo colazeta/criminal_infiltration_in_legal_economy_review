@@ -23,29 +23,52 @@ function request() {
   return new Request(url);
 }
 
-test("free web endpoint makes no external request without a Tavily free key", async (context) => {
+test("free web endpoint makes no external request when free-only guards are disabled", async (context) => {
   withFetchMock(context, async () => {
-    throw new Error("must not call a web provider without a configured free key");
+    throw new Error("must not call any web provider without an enabled free-only guard");
   });
-  const response = await handleFreeWebSearchRequest(request(), { TAVILY_FREE_ONLY: "true" });
+  const response = await handleFreeWebSearchRequest(request(), {});
   assert.equal(response.status, 200);
   const payload = await response.json();
   assert.equal(payload.searchStatus, "needs_web_search");
   assert.equal(payload.matchType, "needs_web_search");
   assert.deepEqual(payload.providersTried, []);
+  assert.equal(payload.freeCreditsUsed, 0);
+  assert.equal(payload.freeRequestsUsed, 0);
+  assert.equal(payload.providerPlan.find((provider) => provider.id === "exa").automaticEligible, false);
 });
 
-test("free web endpoint refuses to run if the runtime free-only guard is off", async (context) => {
+test("free web endpoint can recover an abstract through the zero-credit Jina Reader layer", async (context) => {
+  withFetchMock(context, async (url) => {
+    assert.match(String(url), /^https:\/\/r\.jina\.ai\/https:\/\/doi\.org\//);
+    return new Response(
+      `Title: ${title}\n\nAbstract This article studies legitimate businesses confiscated from mafia groups in Italy and their investment choices across sectors and territories, with enough detail for a reliable abstract extraction. Introduction The article then presents data and methods.`,
+      { status: 200 },
+    );
+  });
+  const response = await handleFreeWebSearchRequest(request(), {
+    JINA_READER_FREE_ONLY: "true",
+  });
+  const payload = await response.json();
+  assert.equal(payload.searchStatus, "found");
+  assert.equal(payload.matchType, "free_page_reader");
+  assert.equal(payload.provider, "Jina Reader");
+  assert.equal(payload.freeCreditsUsed, 0);
+  assert.equal(payload.freeRequestsUsed, 1);
+});
+
+test("Tavily key alone cannot run while its free-only guard is off", async (context) => {
   withFetchMock(context, async () => {
     throw new Error("must not call Tavily when free-only guard is off");
   });
   const response = await handleFreeWebSearchRequest(request(), {
+    JINA_READER_FREE_ONLY: "false",
     TAVILY_FREE_ONLY: "false",
     TAVILY_API_KEY: "tvly-free-test-key",
   });
   const payload = await response.json();
   assert.equal(payload.searchStatus, "needs_web_search");
-  assert.match(payload.providerErrors.join(" "), /free-only guard/);
+  assert.deepEqual(payload.providersTried, []);
 });
 
 test("configured free Tavily Basic result is returned with one-credit accounting", async (context) => {
@@ -63,6 +86,7 @@ test("configured free Tavily Basic result is returned with one-credit accounting
     });
   });
   const response = await handleFreeWebSearchRequest(request(), {
+    JINA_READER_FREE_ONLY: "false",
     TAVILY_FREE_ONLY: "true",
     TAVILY_API_KEY: "tvly-free-test-key",
   });
@@ -70,5 +94,6 @@ test("configured free Tavily Basic result is returned with one-credit accounting
   assert.equal(payload.searchStatus, "found");
   assert.equal(payload.matchType, "free_web_search");
   assert.equal(payload.freeCreditsUsed, 1);
+  assert.equal(payload.freeRequestsUsed, 1);
   assert.equal(payload.provider, "Tavily Basic");
 });
