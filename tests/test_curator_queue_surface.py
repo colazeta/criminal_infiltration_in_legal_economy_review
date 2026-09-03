@@ -29,6 +29,8 @@ class CuratorQueueSurfaceTests(unittest.TestCase):
         self.assertIn('/api/enrichment', javascript)
         self.assertIn('/api/resolved-abstract', javascript)
         self.assertNotIn('/api/free-web-search', javascript)
+        for provider_marker in ("google.serper.dev", "api.exa.ai", "api.tavily.com", "r.jina.ai"):
+            self.assertNotIn(provider_marker, javascript)
         self.assertIn("Abstract disponibile", javascript)
         self.assertIn("Ricerca web necessaria", javascript)
         self.assertIn("Abstract non trovato", javascript)
@@ -57,9 +59,10 @@ class CuratorQueueSurfaceTests(unittest.TestCase):
         self.assertIn('site/curator-queue.js', deploy)
         self.assertIn('site/curator-queue.css', deploy)
         self.assertIn('candidate-queue-pager', deploy)
-        self.assertIn('TAVILY_API_KEY', deploy)
-        self.assertIn('CORE_API_KEY', deploy)
-        self.assertNotIn('EXA_API_KEY', deploy)
+        for secret in ('SERPER_API_KEY', 'EXA_API_KEY', 'TAVILY_API_KEY', 'CORE_API_KEY'):
+            self.assertIn(secret, deploy)
+        self.assertIn('SERPER_DEDICATED_FREE_ACCOUNT', deploy)
+        self.assertIn('EXA_DEDICATED_STARTER_ACCOUNT', deploy)
         self.assertGreaterEqual(archive.count('node --check site/curator-queue.js'), 2)
         self.assertGreaterEqual(archive.count('node --check curator-app/src/scholarly-providers.js'), 2)
         self.assertGreaterEqual(archive.count('node --check curator-app/src/free-web-search.js'), 2)
