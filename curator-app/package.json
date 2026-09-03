@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "check": "node --check src/index.js && node --check src/worker.js",
+    "check": "node --check src/index.js && node --check src/worker.js && node --check src/web-capability-resolver.js",
     "test": "node --test test/*.test.js"
   }
 }
