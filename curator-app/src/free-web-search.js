@@ -61,8 +61,12 @@ async function handleFreeWebSearchRequest(request, env = {}) {
   const search = await resolveFreeWebCapabilities({ title, doi, year, candidateId, env });
 
   if (search.result?.abstract) {
+    const matchType = search.result.matchType === "discovered_page_reader"
+      ? "free_web_search"
+      : search.result.matchType;
     return json({
       ...search.result,
+      matchType,
       providersTried: search.providersTried,
       providerErrors: search.providerErrors,
       providerPlan,
