@@ -1,46 +1,30 @@
 {
   "id": "https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/vocab/cile-web-retrieval.json",
   "name": "cile-web-retrieval-module",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "extends_profile": "0.1.0",
   "title": "CILE Web Retrieval Ontology Module",
   "description": "Normative extension for capability-aware, zero-spend web retrieval and browsing provenance.",
   "classes": {
-    "WebRetrievalProvider": {
-      "is_a": "prov:Agent",
-      "description": "An external or platform service capable of web search, page reading, rendering, crawling or agentic research."
-    },
-    "ProviderCapability": {
-      "is_a": "skos:Concept",
-      "description": "A bounded web capability such as SERP discovery, known-URL reading, rendered extraction or agentic research."
-    },
-    "ProviderQuota": {
-      "is_a": "prov:Entity",
-      "description": "A dated description of a provider free allowance, reset policy and spending risk."
-    },
-    "WebSearchInvocation": {
-      "is_a": "prov:Activity",
-      "description": "One bounded web-search invocation associated with a provider and candidate."
-    },
-    "PageRetrievalInvocation": {
-      "is_a": "prov:Activity",
-      "description": "One known-URL page reading/extraction invocation."
-    },
-    "BrowserInvocation": {
-      "is_a": "prov:Activity",
-      "description": "One rendered-browser invocation against a candidate-bound public target."
-    },
-    "AgenticResearchInvocation": {
-      "is_a": "prov:Activity",
-      "description": "One bounded multi-step or deep-research web invocation."
-    }
+    "WebRetrievalProvider": {"is_a": "prov:Agent", "description": "An external or platform service capable of web search, page reading, rendering, crawling or agentic research."},
+    "ProviderCapability": {"is_a": "skos:Concept", "description": "A bounded web capability such as SERP discovery, known-URL reading, rendered extraction or agentic research."},
+    "ProviderQuota": {"is_a": "prov:Entity", "description": "A dated description of a provider free allowance, reset policy and spending risk."},
+    "ProviderProjectBudget": {"is_a": "prov:Entity", "description": "A persistent project-side hard cap that bounds automatic provider use below a verified free allowance."},
+    "WebSearchInvocation": {"is_a": "prov:Activity", "description": "One bounded web-search invocation associated with a provider and candidate."},
+    "PageRetrievalInvocation": {"is_a": "prov:Activity", "description": "One known-URL page reading/extraction invocation."},
+    "BrowserInvocation": {"is_a": "prov:Activity", "description": "One rendered-browser invocation against a candidate-bound public target."},
+    "AgenticResearchInvocation": {"is_a": "prov:Activity", "description": "One bounded multi-step or deep-research web invocation."}
   },
   "properties": {
     "usedProvider": {"domain": "prov:Activity", "range": "WebRetrievalProvider", "uri": "cile:usedProvider"},
     "usedCapability": {"domain": "prov:Activity", "range": "ProviderCapability", "uri": "cile:usedCapability"},
     "fallbackFrom": {"domain": "prov:Activity", "range": "prov:Activity", "uri": "cile:fallbackFrom"},
     "freeQuotaConsumed": {"domain": "prov:Activity", "range": "xsd:decimal", "uri": "cile:freeQuotaConsumed"},
+    "freeQuotaUnit": {"domain": "prov:Activity", "range": "xsd:string", "uri": "cile:freeQuotaUnit"},
+    "projectBudgetUsed": {"domain": "ProviderProjectBudget", "range": "xsd:integer", "uri": "cile:projectBudgetUsed"},
+    "projectBudgetLimit": {"domain": "ProviderProjectBudget", "range": "xsd:integer", "uri": "cile:projectBudgetLimit"},
     "freeOnlyGuard": {"domain": "WebRetrievalProvider", "range": "xsd:string", "uri": "cile:freeOnlyGuard"},
+    "dedicatedFreeAccountGuard": {"domain": "WebRetrievalProvider", "range": "xsd:string", "uri": "cile:dedicatedFreeAccountGuard"},
     "automaticAllowed": {"domain": "WebRetrievalProvider", "range": "xsd:boolean", "uri": "cile:automaticAllowed"},
     "paidBalancePossible": {"domain": "WebRetrievalProvider", "range": "xsd:boolean", "uri": "cile:paidBalancePossible"},
     "hardStopBasis": {"domain": "WebRetrievalProvider", "range": "xsd:string", "uri": "cile:hardStopBasis"}
@@ -48,8 +32,9 @@
   "invariants": [
     "An automatic WebRetrievalProvider MUST have an implemented adapter and an explicit free-only runtime guard.",
     "Queue browsing MUST NOT invoke WebSearchInvocation, BrowserInvocation or AgenticResearchInvocation.",
-    "A provider capable of consuming paid balance MUST remain automaticAllowed=false unless a separate technical hard stop proves zero-spend execution.",
-    "Every invocation MUST return provider provenance, capability, and free-quota usage metadata.",
+    "A credit-priced provider MAY be automatic only when a persistent project budget is lower than a verified free allowance and a dedicated free-account guard is required at runtime.",
+    "Discovery providers SHOULD return bounded URLs to a lower-cost page-reading capability rather than request paid content extraction when a free reader is available.",
+    "Every invocation MUST return provider provenance, capability, free-quota unit, and project-budget metadata when applicable.",
     "Failure or quota exhaustion MUST hand off to needs_web_search rather than trigger a paid fallback."
   ]
 }
