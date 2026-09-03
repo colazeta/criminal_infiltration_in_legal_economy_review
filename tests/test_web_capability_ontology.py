@@ -17,6 +17,7 @@ class WebCapabilityOntologyTests(unittest.TestCase):
             "WebRetrievalProvider",
             "ProviderCapability",
             "ProviderQuota",
+            "ProviderProjectBudget",
             "WebSearchInvocation",
             "PageRetrievalInvocation",
             "BrowserInvocation",
@@ -32,18 +33,21 @@ class WebCapabilityOntologyTests(unittest.TestCase):
         self.assertEqual(set(providers), {
             "jina_reader",
             "serper",
-            "tavily_basic",
             "exa",
+            "tavily_basic",
             "firecrawl",
             "cloudflare_browser_run",
         })
-        for provider_id in ("serper", "exa", "firecrawl", "cloudflare_browser_run"):
-            self.assertFalse(providers[provider_id]["automatic_allowed"])
-            self.assertTrue(providers[provider_id]["paid_balance_possible"])
-        for provider_id in ("jina_reader", "tavily_basic"):
+        for provider_id in ("jina_reader", "serper", "exa", "tavily_basic"):
             self.assertTrue(providers[provider_id]["implemented"])
             self.assertTrue(providers[provider_id]["automatic_allowed"])
             self.assertIn("FREE_ONLY", providers[provider_id]["runtime_guard"])
+        for provider_id in ("serper", "exa"):
+            self.assertTrue(providers[provider_id]["paid_balance_possible"])
+            self.assertIn("project_lifetime_request_cap", providers[provider_id])
+            self.assertIn("dedicated_account_guard", providers[provider_id])
+        for provider_id in ("firecrawl", "cloudflare_browser_run"):
+            self.assertFalse(providers[provider_id]["automatic_allowed"])
 
     def test_runtime_registry_matches_governed_provider_ids_and_layers(self) -> None:
         registry = json.loads((ROOT / "ontology/providers/web-capabilities.json").read_text(encoding="utf-8"))
@@ -51,6 +55,13 @@ class WebCapabilityOntologyTests(unittest.TestCase):
         for provider in registry["providers"]:
             self.assertIn(f'id: "{provider["id"]}"', source)
             self.assertIn(f'layer: {provider["layer"]}', source)
+
+    def test_credit_providers_have_persistent_budget_semantics(self) -> None:
+        module = json.loads((ROOT / "ontology/modules/web-retrieval.json").read_text(encoding="utf-8"))
+        self.assertIn("projectBudgetUsed", module["properties"])
+        self.assertIn("projectBudgetLimit", module["properties"])
+        self.assertIn("dedicatedFreeAccountGuard", module["properties"])
+        self.assertTrue(any("persistent project budget" in rule for rule in module["invariants"]))
 
     def test_queue_cannot_consume_web_capabilities(self) -> None:
         queue = (ROOT / "site/curator-queue.js").read_text(encoding="utf-8")
