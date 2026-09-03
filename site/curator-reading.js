@@ -157,7 +157,8 @@
   function matchLabel(payload) {
     if (payload.matchType === "doi") return "DOI verificato";
     if (payload.matchType === "title_year") return "Titolo + anno verificati";
-    if (payload.matchType === "free_web_search") return "Tavily Basic verificato";
+    if (payload.matchType === "free_page_reader") return "Pagina DOI letta con Jina Reader";
+    if (payload.matchType === "free_web_search") return "Ricerca web gratuita verificata";
     if (payload.matchType === "resolved_url") return "Paper risolto verificato";
     if (payload.matchType === "resolved_url_none") return "Paper risolto, abstract non esposto";
     if (payload.matchType === "needs_resolved_document") return "Fonti scholarly completate";
@@ -183,14 +184,14 @@
         : "Abstract recuperato al momento della consultazione e mostrato solo nella console autenticata; non viene persistito nel corpus pubblico.";
     } else if (payload?.matchType === "needs_web_search") {
       text.textContent =
-        "La ricerca automatica gratuita non è conclusa o il motore web gratuito non è configurato. Il record resta da cercare e non viene classificato come abstract assente.";
+        "La cascata automatica gratuita non è conclusa oppure le capability web successive non sono configurate/abilitate. Il record resta da cercare e non viene classificato come abstract assente.";
       source.textContent = "Ricerca web necessaria";
       note.textContent = trace
-        ? `Già interrogati: ${trace}. Il prossimo passaggio resta una ricerca web gratuita/assistita sul titolo e DOI.`
-        : "Il prossimo passaggio resta una ricerca web gratuita/assistita sul titolo e DOI.";
+        ? `Già interrogati: ${trace}. Il prossimo passaggio resta una capability web gratuita/assistita sul titolo e DOI.`
+        : "Il prossimo passaggio resta una capability web gratuita/assistita sul titolo e DOI.";
     } else if (payload?.matchType === "web_search_exhausted") {
       text.textContent =
-        "L’abstract non è stato trovato dopo l’intera catena automatica gratuita, incluso il motore web gratuito configurato. Questo significa non trovato, non inesistente.";
+        "L’abstract non è stato trovato dopo la catena automatica gratuita configurata. Questo significa non trovato, non inesistente.";
       source.textContent = "Ricerca gratuita completata";
       note.textContent = trace ? `Fonti interrogate: ${trace}.` : "La ricerca gratuita non ha prodotto un abstract affidabile.";
     } else if (payload?.matchType === "unavailable") {
@@ -211,8 +212,8 @@
     const source = byId("candidate-abstract-source");
     const note = byId("candidate-abstract-note");
     if (text) text.textContent = "Ricerca modulare gratuita dell’abstract in corso…";
-    if (source) source.textContent = "OpenAlex · Crossref · Semantic Scholar · DataCite · Unpaywall · CORE · Europe PMC · paper risolto · Tavily Basic";
-    if (note) note.textContent = "Le fonti a costo zero vengono interrogate prima; il web gratuito è l’ultimo fallback e parte solo per il paper aperto.";
+    if (source) source.textContent = "OpenAlex · Crossref · Semantic Scholar · DataCite · Unpaywall · CORE · Europe PMC · paper risolto · Jina Reader · Tavily Basic";
+    if (note) note.textContent = "Le fonti a costo zero vengono interrogate per capacità: prima registri scholarly e paper risolto, poi lettura DOI gratuita, infine search credit-based sul solo paper aperto.";
   }
 
   async function fetchResolvedAbstract(candidateId, issueNumber, title, token, signal) {
