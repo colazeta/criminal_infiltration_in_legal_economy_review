@@ -5,6 +5,7 @@ import { DurableObject } from "cloudflare:workers";
 import { handleEnrichmentRequest } from "./enrichment.js";
 import { handleFreeWebSearchRequest } from "./free-web-search.js";
 import { budgetFor } from "./provider-budget.js";
+import { handleProviderReadinessRequest } from "./provider-readiness.js";
 import { handleResolvedAbstractRequest } from "./resolved-abstract.js";
 import worker, { SubmissionCoordinatorCore } from "./index.js";
 
@@ -213,6 +214,18 @@ async function authenticatedFreeWebSearch(request, env) {
   return handleFreeWebSearchRequest(request, env);
 }
 
+async function authenticatedProviderReadiness(request, env) {
+  if (request.method !== "GET") {
+    return new Response(JSON.stringify({ error: { code: "method_not_allowed", message: "Metodo non consentito." } }), {
+      status: 405,
+      headers: { "Cache-Control": "no-store", "Content-Type": "application/json; charset=utf-8" },
+    });
+  }
+  const validation = await requireCuratorSession(request, env);
+  if (!validation.ok) return validation;
+  return handleProviderReadinessRequest(request, env);
+}
+
 export class SubmissionCoordinator extends DurableObject {
   constructor(ctx, env) {
     super(ctx, env);
@@ -271,6 +284,11 @@ export class SubmissionCoordinator extends DurableObject {
     });
   }
 
+  async providerBudgetStatus() {
+    await this.loadProviderBudget();
+    return Response.json({ usage: this.providerBudgetUsage });
+  }
+
   fetch(request) {
     const url = new URL(request.url);
     if (
@@ -279,6 +297,13 @@ export class SubmissionCoordinator extends DurableObject {
       url.pathname === "/provider-budget"
     ) {
       return this.reserveProviderBudget(request);
+    }
+    if (
+      request.method === "GET" &&
+      url.origin === "https://submission.internal" &&
+      url.pathname === "/provider-budget-status"
+    ) {
+      return this.providerBudgetStatus();
     }
     return this.core.fetch(request);
   }
@@ -304,6 +329,9 @@ export default {
     }
     if (url.pathname === "/api/free-web-search") {
       return authenticatedFreeWebSearch(request, env);
+    }
+    if (url.pathname === "/api/web-provider-status") {
+      return authenticatedProviderReadiness(request, env);
     }
     return worker.fetch(request, env);
   },

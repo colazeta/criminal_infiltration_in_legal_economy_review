@@ -61,9 +61,37 @@ async function reserveProjectProviderBudget(env, providerId, candidateId = "") {
   return payload;
 }
 
+async function readProjectProviderBudgets(env) {
+  const snapshot = Object.fromEntries(
+    Object.entries(PROVIDER_PROJECT_BUDGETS).map(([provider, budget]) => [provider, {
+      provider,
+      used: 0,
+      limit: budget.maxRequests,
+      remaining: budget.maxRequests,
+      freeAllowanceBasis: budget.freeAllowanceBasis,
+      maxTheoreticalCostUsd: Number(budget.maxTheoreticalCostUsd || 0),
+      coordinated: false,
+    }]),
+  );
+  const stub = durableStub(env?.SUBMISSIONS, BUDGET_DURABLE_OBJECT_NAME);
+  if (!stub) return snapshot;
+  const response = await stub.fetch("https://submission.internal/provider-budget-status", { method: "GET" });
+  if (!response.ok) return snapshot;
+  const payload = await response.json().catch(() => ({}));
+  const usage = payload?.usage && typeof payload.usage === "object" ? payload.usage : {};
+  for (const [provider, row] of Object.entries(snapshot)) {
+    const used = Math.max(0, Number(usage[provider] || 0));
+    row.used = used;
+    row.remaining = Math.max(0, row.limit - used);
+    row.coordinated = true;
+  }
+  return snapshot;
+}
+
 export {
   BUDGET_DURABLE_OBJECT_NAME,
   PROVIDER_PROJECT_BUDGETS,
   budgetFor,
+  readProjectProviderBudgets,
   reserveProjectProviderBudget,
 };

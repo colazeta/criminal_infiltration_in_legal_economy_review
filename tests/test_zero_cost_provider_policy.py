@@ -67,6 +67,20 @@ class ZeroCostProviderPolicyTests(unittest.TestCase):
         self.assertIn('provider_project_budget_exhausted', worker)
         self.assertIn('this.ctx.storage.put("providerBudgetUsage"', worker)
 
+    def test_provider_readiness_is_authenticated_and_read_only(self) -> None:
+        readiness = (ROOT / "curator-app/src/provider-readiness.js").read_text(encoding="utf-8")
+        budget = (ROOT / "curator-app/src/provider-budget.js").read_text(encoding="utf-8")
+        worker = (ROOT / "curator-app/src/worker.js").read_text(encoding="utf-8")
+        onboarding = (ROOT / "docs/operations/web-provider-onboarding.md").read_text(encoding="utf-8")
+        self.assertIn('url.pathname === "/api/web-provider-status"', worker)
+        self.assertIn('requireCuratorSession(request, env)', worker)
+        self.assertIn('/provider-budget-status', worker)
+        self.assertIn('/provider-budget-status', budget)
+        self.assertNotIn('reserveProjectProviderBudget', readiness)
+        self.assertIn('blockingReasons', readiness)
+        self.assertIn('remaining', readiness)
+        self.assertIn('GET /api/web-provider-status', onboarding)
+
     def test_free_web_search_requires_runtime_guards_and_opened_candidate(self) -> None:
         resolver = (ROOT / "curator-app/src/web-capability-resolver.js").read_text(encoding="utf-8")
         worker = (ROOT / "curator-app/src/worker.js").read_text(encoding="utf-8")
