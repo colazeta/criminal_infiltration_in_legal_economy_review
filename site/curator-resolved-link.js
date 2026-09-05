@@ -93,14 +93,20 @@
 
   function statusLabel(payload) {
     const labels = {
-      full_text: "Full text risolto",
       open_access_landing: "Copia open access risolta",
       landing_page: "Pagina articolo risolta",
       doi_only: "DOI risolto",
       source_link_only: "Fonte originale risolta",
       unresolved: "Paper non risolto",
     };
-    const base = labels[payload?.resolutionStatus] || "Retrieval verificato";
+    let base;
+    if (payload?.resolutionStatus === "full_text") {
+      base = payload?.accessStatus === "open"
+        ? "Full text pubblico verificato"
+        : "Locator full text risolto · accesso non verificato";
+    } else {
+      base = labels[payload?.resolutionStatus] || "Retrieval verificato";
+    }
     return payload?.checkedAt ? `${base} · ${payload.checkedAt}` : base;
   }
 
@@ -121,7 +127,11 @@
   }
 
   function preferredActionLabel(payload) {
-    if (payload?.bestUrlKind === "full_text") return "Apri full text ↗";
+    if (payload?.bestUrlKind === "full_text") {
+      return payload?.accessStatus === "open"
+        ? "Apri full text verificato ↗"
+        : "Apri locator full text ↗";
+    }
     if (payload?.bestUrlKind === "open_access") return "Apri copia OA ↗";
     return "Apri articolo ↗";
   }
@@ -131,6 +141,7 @@
     if (link) {
       delete link.dataset.resolvedUrl;
       delete link.dataset.resolvedKind;
+      delete link.dataset.accessStatus;
     }
     const status = ensureStatusNode();
     if (status) {
@@ -169,6 +180,7 @@
     if (!link || !bestUrl) return;
     link.dataset.resolvedUrl = bestUrl;
     link.dataset.resolvedKind = payload?.bestUrlKind || "";
+    link.dataset.accessStatus = payload?.accessStatus || "";
     restoringHref = true;
     link.href = bestUrl;
     link.textContent = preferredActionLabel(payload);
@@ -236,11 +248,15 @@
       if (!resolved || link.href === resolved) continue;
       restoringHref = true;
       link.href = resolved;
-      link.textContent = link.dataset.resolvedKind === "full_text"
-        ? "Apri full text ↗"
-        : link.dataset.resolvedKind === "open_access"
-          ? "Apri copia OA ↗"
-          : "Apri articolo ↗";
+      if (link.dataset.resolvedKind === "full_text") {
+        link.textContent = link.dataset.accessStatus === "open"
+          ? "Apri full text verificato ↗"
+          : "Apri locator full text ↗";
+      } else if (link.dataset.resolvedKind === "open_access") {
+        link.textContent = "Apri copia OA ↗";
+      } else {
+        link.textContent = "Apri articolo ↗";
+      }
       restoringHref = false;
     }
   }
