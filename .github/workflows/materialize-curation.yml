@@ -7,7 +7,9 @@ on:
       - data/curation/review_queue.csv
       - data/curation/retrieval_coverage.csv
       - scripts/curation/materialize_queue_issues.py
+      - scripts/curation/sync_issue_candidate_record.py
       - scripts/retrieval/sync_issue_retrieval.py
+      - tests/test_sync_issue_candidate_record.py
       - .github/workflows/materialize-curation.yml
   workflow_dispatch:
 
@@ -48,6 +50,13 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
           python scripts/curation/materialize_queue_issues.py \
+            --repository "$GITHUB_REPOSITORY"
+
+      - name: Synchronise queue-owned candidate records and stage labels
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          python -m scripts.curation.sync_issue_candidate_record \
             --repository "$GITHUB_REPOSITORY"
 
       - name: Synchronise paper retrieval metadata
