@@ -112,24 +112,42 @@ class CandidateMetadataReconciliationTests(unittest.TestCase):
         )
         self.assertEqual(repairs, [])
 
-    def test_current_governed_data_exposes_exactly_four_safe_repairs(self) -> None:
+    def test_current_governed_data_supports_exactly_four_pre_or_post_repair_records(self) -> None:
         _, queue_rows = read_csv(ROOT / "data/curation/review_queue.csv")
         _, retrieval_rows = read_csv(ROOT / "data/curation/retrieval_coverage.csv")
         queue = {row["candidate_id"]: row for row in queue_rows}
         retrieval = retrieval_index(retrieval_rows)
         expected = {
-            "CAND-ACADEMIC-2026-09-01-002",
-            "CAND-ACADEMIC-2026-09-01-003",
-            "CAND-ACADEMIC-2026-09-01-004",
-            "CAND-ACADEMIC-2026-09-01-005",
+            "CAND-ACADEMIC-2026-09-01-002": "10.1080/17440572.2025.2567277",
+            "CAND-ACADEMIC-2026-09-01-003": "10.1007/s13278-025-01506-y",
+            "CAND-ACADEMIC-2026-09-01-004": "10.1016/j.ejpoleco.2025.102752",
+            "CAND-ACADEMIC-2026-09-01-005": "10.1007/s10610-025-09654-9",
         }
-        diagnostics = {
-            candidate_id: identity_repair_blockers(queue[candidate_id], retrieval[candidate_id])
-            for candidate_id in expected
-        }
-        self.assertEqual(diagnostics, {candidate_id: [] for candidate_id in expected})
-        actual = {repair["candidate_id"] for repair in find_safe_repairs(queue_rows, retrieval_rows)}
-        self.assertEqual(actual, expected)
+
+        repairable = {repair["candidate_id"] for repair in find_safe_repairs(queue_rows, retrieval_rows)}
+        for candidate_id, expected_doi in expected.items():
+            row = queue[candidate_id]
+            blockers = identity_repair_blockers(row, retrieval[candidate_id])
+            if candidate_id in repairable:
+                self.assertEqual(blockers, [])
+                self.assertEqual(row["doi"], "")
+                self.assertEqual(row["verification_status"], "metadata_partial")
+                self.assertEqual(row["review_stage"], "metadata_fix")
+            else:
+                # The workflow runs this suite after applying repairs, so the
+                # governed integration test must also validate the idempotent
+                # post-repair state rather than demand that repair stays pending.
+                self.assertEqual(row["doi"].lower(), expected_doi.lower())
+                self.assertEqual(row["verification_status"], "metadata_verified")
+                self.assertEqual(row["metadata_confidence"], "high")
+                self.assertEqual(row["review_stage"], "abstract_full_text_review")
+                self.assertEqual(row["current_status"], "pending")
+                self.assertEqual(row["current_decision"], "")
+                self.assertEqual(row["possible_duplicate"], "")
+                self.assertEqual(row["metadata_conflict"], "")
+                self.assertIn("doi_already_present", blockers)
+
+        self.assertTrue(repairable.issubset(set(expected)))
         self.assertIn(
             "missing_dual_source",
             identity_repair_blockers(
