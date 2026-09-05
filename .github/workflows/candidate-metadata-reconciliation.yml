@@ -7,6 +7,7 @@ on:
       - data/curation/review_queue.csv
       - data/curation/retrieval_coverage.csv
       - scripts/curation/reconcile_candidate_metadata.py
+      - tests/test_candidate_metadata_reconciliation.py
       - .github/workflows/candidate-metadata-reconciliation.yml
   schedule:
     - cron: "10 6 * * 0"
