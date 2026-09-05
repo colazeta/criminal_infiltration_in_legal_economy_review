@@ -19,17 +19,27 @@ Membership is not an exclusion decision. Each record carries a `guard_question` 
 For each principal query family:
 
 1. save or convert the returned result metadata to a JSON array containing at least DOI or title/year where available;
-2. run the retrieval benchmark evaluator;
-3. run the near-neighbour evaluator on the same result set;
-4. record benchmark misses, near-neighbour hits, provider indexing limits and any query revision in the cycle issue;
-5. revise terminology when a known benchmark is missed for an explainable reason, but never inject benchmark titles as hidden search shortcuts;
-6. send retrieved records through normal deduplication and human screening regardless of calibration membership.
+2. run the combined calibration preflight on that exact result set;
+3. record benchmark misses, near-neighbour hits, provider indexing limits and any query revision in the cycle issue;
+4. revise terminology when a known benchmark is missed for an explainable reason, but never inject benchmark titles as hidden search shortcuts;
+5. send retrieved records through normal deduplication and human screening regardless of calibration membership.
 
-Example:
+The formal-cycle default is:
+
+```text
+python scripts/metrics/calibrate_cycle_results.py \
+  --results cycle-results.json \
+  --require-interpretable-benchmark \
+  --output cycle-calibration.json
+```
+
+The combined output contains both the positive benchmark recovery report and the near-neighbour drift report, plus explicit lists of benchmark misses and boundary hits that require methodological review. It is intended to be attached or transcribed into the formal cycle audit record.
+
+The lower-level evaluators remain available for debugging a single instrument:
 
 ```text
 python scripts/metrics/evaluate_discovery_benchmark.py --results cycle-results.json
 python scripts/metrics/evaluate_near_neighbours.py --results cycle-results.json
 ```
 
-Neither evaluator changes the corpus, queue, eligibility state, canonical identity or publication state.
+None of these tools changes the corpus, queue, eligibility state, canonical identity, publication state or formal saturation metrics. Calibration output is methodological evidence about the search strategy, not a scientific decision about any retrieved work.
