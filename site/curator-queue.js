@@ -62,6 +62,39 @@
     return card.querySelector("code")?.textContent?.trim() || "";
   }
 
+  function provenanceValue(candidate, label) {
+    const rows = Array.isArray(candidate?.provenance) ? candidate.provenance : [];
+    const match = rows.find((row) => String(row?.label || "").trim() === label);
+    return String(match?.value || "").trim();
+  }
+
+  function triageCode(candidate) {
+    if (!candidate) return "standard";
+    if (candidate.provenanceKind === "daily") {
+      const assessment = provenanceValue(candidate, "Intake assessment");
+      if (assessment === "plausible_core") return "priority_core";
+      if (assessment === "plausible_contextual" || assessment === "uncertain") return "boundary";
+    }
+    const legacyScope = provenanceValue(candidate, "Legacy scope label");
+    if (
+      candidate.provenanceKind === "legacy" &&
+      candidate.stageLabel === "stage:legacy-rejection-review" &&
+      legacyScope === "outside_scope"
+    ) {
+      return "legacy_fast_recheck";
+    }
+    return "standard";
+  }
+
+  function triageChip(code) {
+    const labels = {
+      priority_core: ["Priorità core", "positive"],
+      boundary: ["Confine da valutare", "warning"],
+      legacy_fast_recheck: ["Riesame legacy rapido", "neutral"],
+    };
+    return labels[code] || null;
+  }
+
   function makeChip(label, state = "neutral", role = "") {
     const chip = document.createElement("span");
     chip.className = "queue-card-chip";
@@ -118,6 +151,12 @@
       makeChip(candidate?.doi ? "DOI" : "senza DOI", candidate?.doi ? "positive" : "neutral", "doi-status"),
       makeChip("Abstract · ricerca", "loading", "abstract-status"),
     );
+    const triage = triageCode(candidate);
+    card.dataset.triage = triage;
+    const triageDefinition = triageChip(triage);
+    if (triageDefinition) {
+      chips.append(makeChip(triageDefinition[0], triageDefinition[1], "triage-status"));
+    }
     if (candidate?.source) chips.append(makeChip(candidate.source, "source", "source"));
 
     oldMeta.insertAdjacentElement("afterend", citation);
@@ -127,9 +166,45 @@
     if (!applyCachedAbstractStatus(card, candidateId) && candidate) viewportObserver?.observe(card);
   }
 
-  function currentCards() {
+  function ensureTriageFilter() {
+    const controls = document.querySelector(".candidate-controls");
+    if (!controls || byId("candidate-triage-filter")) return;
+    const label = document.createElement("label");
+    const caption = document.createElement("span");
+    caption.textContent = "Priorità di lavoro";
+    const select = document.createElement("select");
+    select.id = "candidate-triage-filter";
+    const options = [
+      ["", "Tutte le priorità"],
+      ["priority_core", "Priorità core (intake)"],
+      ["boundary", "Confine da valutare"],
+      ["legacy_fast_recheck", "Riesame rapido (segnale legacy)"],
+      ["standard", "Coda standard"],
+    ];
+    for (const [value, text] of options) {
+      const option = document.createElement("option");
+      option.value = value;
+      option.textContent = text;
+      select.append(option);
+    }
+    select.title = "Vista operativa derivata dalla provenienza già registrata; non è una decisione scientifica.";
+    select.addEventListener("change", () => {
+      resetPageRequested = true;
+      applyPagination();
+    });
+    label.append(caption, select);
+    controls.append(label);
+  }
+
+  function allCards() {
     const list = byId("candidate-list");
     return list ? Array.from(list.querySelectorAll(":scope > .candidate-card")) : [];
+  }
+
+  function currentCards() {
+    const triage = String(byId("candidate-triage-filter")?.value || "");
+    const cards = allCards();
+    return triage ? cards.filter((card) => card.dataset.triage === triage) : cards;
   }
 
   function ensurePager() {
@@ -177,7 +252,9 @@
   }
 
   function applyPagination() {
+    const all = allCards();
     const cards = currentCards();
+    const matching = new Set(cards);
     const total = cards.length;
     const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
@@ -192,6 +269,7 @@
 
     const start = (queuePage - 1) * PAGE_SIZE;
     const end = Math.min(start + PAGE_SIZE, total);
+    for (const card of all) card.hidden = !matching.has(card);
     for (const [index, card] of cards.entries()) card.hidden = index < start || index >= end;
 
     const pager = ensurePager();
@@ -326,8 +404,9 @@
   async function refreshQueueCards() {
     const list = byId("candidate-list");
     if (!list) return;
+    ensureTriageFilter();
     await loadCandidates();
-    for (const card of currentCards()) enhanceCard(card);
+    for (const card of allCards()) enhanceCard(card);
     applyPagination();
   }
 
@@ -366,6 +445,7 @@
 
   function initialise() {
     loadQueueStyles();
+    ensureTriageFilter();
     wireFilterReset();
     observeList();
   }
