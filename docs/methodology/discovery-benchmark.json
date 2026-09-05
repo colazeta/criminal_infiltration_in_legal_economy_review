@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "name": "CILE discovery calibration bootstrap",
+  "name": "CILE discovery calibration benchmark",
   "purpose": "Search-strategy calibration only. Membership does not assert eligibility, publication, or canonical identity beyond the cited existing repository signal.",
   "minimum_interpretable_size": 20,
   "records": [
@@ -98,6 +98,70 @@
       "year": 2024,
       "doi": "10.1177/17488958241293927",
       "basis": "daily_plausible_core",
+      "calibration_uses": ["formal_search"]
+    },
+    {
+      "benchmark_id": "B013",
+      "title": "Italian Mafias, Public Procurement and Public Works in Southern Italy",
+      "year": 2013,
+      "doi": "10.1007/978-3-319-01839-3_33",
+      "basis": "legacy_promote_contextual_seed",
+      "calibration_uses": ["formal_search"]
+    },
+    {
+      "benchmark_id": "B014",
+      "title": "12 Task Specialization in Organized Crime Groups: Money Laundering and the Montréal Mafia",
+      "year": 2023,
+      "doi": "10.1515/9780228019886-013",
+      "basis": "legacy_promote_contextual_seed",
+      "calibration_uses": ["formal_search"]
+    },
+    {
+      "benchmark_id": "B015",
+      "title": "Organized crime, money laundering, and the real estate market in Canada",
+      "year": 2004,
+      "doi": "10.1080/0959991042000328801",
+      "basis": "legacy_promote_contextual_seed",
+      "calibration_uses": ["formal_search"]
+    },
+    {
+      "benchmark_id": "B016",
+      "title": "Money laundering and financial crime",
+      "year": 1996,
+      "doi": "10.1007/bf02696272",
+      "basis": "legacy_promote_contextual_seed",
+      "calibration_uses": ["formal_search"]
+    },
+    {
+      "benchmark_id": "B017",
+      "title": "Trade‐Based Money Laundering Techniques: Invoice Fraud",
+      "year": 2015,
+      "doi": "10.1002/9781119125389.ch2",
+      "basis": "legacy_promote_contextual_seed",
+      "calibration_uses": ["formal_search"]
+    },
+    {
+      "benchmark_id": "B018",
+      "title": "The Trade-Based Money Laundering Concept",
+      "year": 2026,
+      "doi": "10.4324/9781003533429-2",
+      "basis": "legacy_promote_contextual_seed",
+      "calibration_uses": ["formal_search"]
+    },
+    {
+      "benchmark_id": "B019",
+      "title": "International trade mispricing: trade-based money laundering and tax evasion",
+      "year": 2013,
+      "doi": "10.4337/9780857934000.00031",
+      "basis": "legacy_promote_contextual_seed",
+      "calibration_uses": ["formal_search"]
+    },
+    {
+      "benchmark_id": "B020",
+      "title": "Organized Crime Networks: an Application of Network Analysis Techniques to the American Mafia",
+      "year": 2012,
+      "doi": "10.1515/1446-9022.1324",
+      "basis": "legacy_promote_contextual_seed",
       "calibration_uses": ["formal_search"]
     }
   ]
