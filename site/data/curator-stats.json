@@ -5,9 +5,9 @@
   "completed": 0,
   "actionCount": 0,
   "byStage": {
-    "metadataFix": 8,
+    "metadataFix": 4,
     "manualReview": 9,
-    "abstractReview": 32,
+    "abstractReview": 36,
     "legacyRejectionReview": 19
   },
   "openByOrigin": {
