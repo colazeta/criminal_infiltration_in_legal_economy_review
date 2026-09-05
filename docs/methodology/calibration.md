@@ -24,10 +24,12 @@ For each principal query family:
 4. revise terminology when a known benchmark is missed for an explainable reason, but never inject benchmark titles as hidden search shortcuts;
 5. send retrieved records through normal deduplication and human screening regardless of calibration membership.
 
+Run repository-internal calibration tools as Python modules from the repository root so package imports resolve identically in local runs and CI.
+
 The formal-cycle default is:
 
 ```text
-python scripts/metrics/calibrate_cycle_results.py \
+python -m scripts.metrics.calibrate_cycle_results \
   --results cycle-results.json \
   --require-interpretable-benchmark \
   --output cycle-calibration.json
@@ -38,8 +40,8 @@ The combined output contains both the positive benchmark recovery report and the
 The lower-level evaluators remain available for debugging a single instrument:
 
 ```text
-python scripts/metrics/evaluate_discovery_benchmark.py --results cycle-results.json
-python scripts/metrics/evaluate_near_neighbours.py --results cycle-results.json
+python -m scripts.metrics.evaluate_discovery_benchmark --results cycle-results.json
+python -m scripts.metrics.evaluate_near_neighbours --results cycle-results.json
 ```
 
 None of these tools changes the corpus, queue, eligibility state, canonical identity, publication state or formal saturation metrics. Calibration output is methodological evidence about the search strategy, not a scientific decision about any retrieved work.
