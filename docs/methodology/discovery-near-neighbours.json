@@ -1,0 +1,115 @@
+{
+  "schema_version": 1,
+  "name": "CILE conceptual near-neighbour calibration set",
+  "purpose": "Boundary calibration only. These records probe whether search queries drift toward adjacent phenomena. Membership is not an eligibility or exclusion decision.",
+  "records": [
+    {
+      "benchmark_id": "NN001",
+      "candidate_id": "E0-D025",
+      "title": "The Scale and Impacts of Money Laundering",
+      "year": 2007,
+      "doi": "10.4337/9781781007624",
+      "phenomenon": "money_laundering",
+      "guard_question": "Does the work establish a sustained relationship between an identifiable criminal interest and a legal-economy target, rather than laundering effects alone?"
+    },
+    {
+      "benchmark_id": "NN002",
+      "candidate_id": "E0R1-C032",
+      "title": "Pecunia Non Olet? The Control of Money-laundering Revisited",
+      "year": null,
+      "doi": "10.1007/978-0-387-39020-8_10",
+      "phenomenon": "money_laundering",
+      "guard_question": "Is legal-economy access, participation, influence, control or embeddedness substantively analysed, rather than money-laundering control in general?"
+    },
+    {
+      "benchmark_id": "NN003",
+      "candidate_id": "E0R1-C037",
+      "title": "Money‐Laundering Primer",
+      "year": 2015,
+      "doi": "10.1002/9781119125389.app1",
+      "phenomenon": "money_laundering",
+      "guard_question": "Is there relational evidence of infiltration beyond a general description of laundering mechanisms?"
+    },
+    {
+      "benchmark_id": "NN004",
+      "candidate_id": "E0R1-C025",
+      "title": "Crime, security and firm performance in South Africa",
+      "year": 2012,
+      "doi": "10.22495/cocv9i4c2art5",
+      "phenomenon": "crime_effect_on_firms",
+      "guard_question": "Does the criminal actor enter or become embedded in the legal-economy target, rather than merely imposing an external crime or security cost?"
+    },
+    {
+      "benchmark_id": "NN005",
+      "candidate_id": "E0R1-C026",
+      "title": "Corporate control and ownership networks",
+      "year": 2018,
+      "doi": "10.22495/cocv15i4art8",
+      "phenomenon": "corporate_governance",
+      "guard_question": "Is an analytically identifiable criminal interest present, rather than ownership/control structure alone?"
+    },
+    {
+      "benchmark_id": "NN006",
+      "candidate_id": "E0R1-C027",
+      "title": "Corporate governance, ownership structure and firm performance of Egyptian listed companies",
+      "year": 2010,
+      "doi": "10.22495/cocv8i1c5p5",
+      "phenomenon": "corporate_governance",
+      "guard_question": "Does the study analyse criminal participation or influence, rather than ordinary governance and ownership?"
+    },
+    {
+      "benchmark_id": "NN007",
+      "candidate_id": "E0R1-C028",
+      "title": "Impact of corporate ownership and control on firm performance: The Nigerian experience",
+      "year": 2012,
+      "doi": "10.22495/cocv9i2art8",
+      "phenomenon": "corporate_governance",
+      "guard_question": "Is criminal control or embeddedness demonstrated, rather than corporate ownership effects in general?"
+    },
+    {
+      "benchmark_id": "NN008",
+      "candidate_id": "E0R1-C029",
+      "title": "Corporate governance and firm networks: An empirical research based on Italy",
+      "year": 2018,
+      "doi": "10.22495/cocv15i2c1p9",
+      "phenomenon": "corporate_networks",
+      "guard_question": "Do the firm networks contain an identified criminal interest and sustained legal-economy relation, rather than network structure alone?"
+    },
+    {
+      "benchmark_id": "NN009",
+      "candidate_id": "CAND-ACADEMIC-2026-09-01-005",
+      "title": "Using Beneficial Ownership Data for Systematic Risk Assessment in Public procurement. The Example of 6 European Countries",
+      "year": 2026,
+      "doi": null,
+      "phenomenon": "corruption_procurement_risk",
+      "guard_question": "Does beneficial-ownership risk measurement identify a criminal interest with sustained influence over a legal-economy target, rather than procurement risk or opacity alone?"
+    },
+    {
+      "benchmark_id": "NN010",
+      "candidate_id": "CAND-ACADEMIC-2026-09-01-006",
+      "title": "Financial architecture of crime: how do factions and militias transform illicit capital into assets?",
+      "year": 2026,
+      "doi": null,
+      "phenomenon": "passive_investment_and_asset_conversion",
+      "guard_question": "Does asset conversion become sustained participation, influence, control or embeddedness in the legal economy, rather than investment of illicit proceeds alone?"
+    },
+    {
+      "benchmark_id": "NN011",
+      "candidate_id": "E0R1-C033",
+      "title": "More Schemes and Facilitators",
+      "year": 2015,
+      "doi": "10.1002/9781119125389.ch8",
+      "phenomenon": "professional_facilitation",
+      "guard_question": "Does facilitation establish a sustained criminal relationship with a legal-economy target, rather than professional assistance to a predicate or laundering scheme?"
+    },
+    {
+      "benchmark_id": "NN012",
+      "candidate_id": "E0R1-C040",
+      "title": "Business Crime versus Organized Crime or Business Crimes as Organized Crime",
+      "year": null,
+      "doi": "10.4324/9781315084565-8",
+      "phenomenon": "corporate_crime",
+      "guard_question": "Does the work identify organised-crime access, participation, influence, control or embeddedness in a legal-economy entity, rather than business offending as such?"
+    }
+  ]
+}
