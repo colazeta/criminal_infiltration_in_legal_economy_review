@@ -41,9 +41,22 @@ function displayPercent(value) {
     : new Intl.NumberFormat("it-IT", { style: "percent", maximumFractionDigits: 1 }).format(value);
 }
 
+function safeRate(numerator, denominator) {
+  if (numerator === null || numerator === undefined || !denominator) return null;
+  return numerator / denominator;
+}
+
 function displayDate(value) {
   if (!value) return "—";
   return dateFormat.format(new Date(`${value}T00:00:00Z`));
+}
+
+function dataAgeDays(value) {
+  if (!value) return null;
+  const last = Date.parse(`${value}T00:00:00Z`);
+  const now = new Date();
+  const today = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+  return Math.max(0, Math.floor((today - last) / (24 * 60 * 60 * 1000)));
 }
 
 function statusLabel(value) {
@@ -82,6 +95,20 @@ function renderSourceTable(rows) {
     const tr = makeStatsElement("tr");
     const name = makeStatsElement("th", null, row.source);
     name.scope = "row";
+    const candidateYield = safeRate(row.candidateHits, row.uniqueResults);
+    const exclusiveShare = safeRate(row.exclusiveCandidates, row.candidateHits);
+    const candidateCell = makeStatsElement(
+      "td",
+      null,
+      `${displayNumber(row.candidateHits)} · resa ${displayPercent(candidateYield)}`,
+    );
+    candidateCell.title = "Candidati intercettati / risultati unici della fonte nelle giornate complete.";
+    const exclusiveCell = makeStatsElement(
+      "td",
+      null,
+      `${displayNumber(row.exclusiveCandidates)} · quota ${displayPercent(exclusiveShare)}`,
+    );
+    exclusiveCell.title = "Quota dei candidati intercettati dalla fonte che non è stata intercettata dall'altra fonte attiva.";
     tr.append(
       name,
       makeStatsElement(
@@ -92,8 +119,8 @@ function renderSourceTable(rows) {
       makeStatsElement("td", null, displayNumber(row.queriesCompleted)),
       makeStatsElement("td", null, displayNumber(row.occurrencesReturned)),
       makeStatsElement("td", null, displayNumber(row.uniqueResults)),
-      makeStatsElement("td", null, displayNumber(row.candidateHits)),
-      makeStatsElement("td", null, displayNumber(row.exclusiveCandidates)),
+      candidateCell,
+      exclusiveCell,
     );
     return tr;
   });
@@ -259,11 +286,17 @@ function renderChart(rows) {
 
 function renderStatus(payload) {
   const last = payload.daily[payload.daily.length - 1];
-  statsElements.status.className = `status-banner status-banner-${last.status}`;
+  const age = dataAgeDays(payload.dataThrough);
+  const stale = age !== null && age > 1;
+  statsElements.status.className = `status-banner status-banner-${stale ? "partial" : last.status}`;
+  const freshness = stale
+    ? ` Il ledger non registra una nuova giornata da ${displayNumber(age)} giorni di calendario: è un'anomalia operativa, non uno zero scientifico.`
+    : "";
   statsElements.status.textContent =
     `Ultima esecuzione: ${displayDate(last.date)}, ${statusLabel(last.status)}. ` +
     `${displayNumber(payload.summary.last30Days.completedRuns)} delle ` +
-    `${displayNumber(payload.summary.last30Days.loggedRuns)} giornate registrate negli ultimi 30 giorni osservati sono complete.`;
+    `${displayNumber(payload.summary.last30Days.loggedRuns)} giornate registrate negli ultimi 30 giorni osservati sono complete.` +
+    freshness;
 }
 
 fetch("./data/research-stats.json")

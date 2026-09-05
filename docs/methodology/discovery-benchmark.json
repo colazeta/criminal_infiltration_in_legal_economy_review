@@ -1,0 +1,104 @@
+{
+  "schema_version": 1,
+  "name": "CILE discovery calibration bootstrap",
+  "purpose": "Search-strategy calibration only. Membership does not assert eligibility, publication, or canonical identity beyond the cited existing repository signal.",
+  "minimum_interpretable_size": 20,
+  "records": [
+    {
+      "benchmark_id": "B001",
+      "title": "How Mafias Migrate: The Case of the `Ndrangheta in Northern Italy",
+      "year": 2006,
+      "doi": "10.1111/j.1540-5893.2006.00260.x",
+      "basis": "canonical_seed",
+      "calibration_uses": ["formal_search"]
+    },
+    {
+      "benchmark_id": "B002",
+      "title": "7 Beyond Mafia: Considerations on Criminal Infiltration in the Legal Economy",
+      "year": 2025,
+      "doi": "10.56687/9781529247145-010",
+      "basis": "canonical_review_record",
+      "calibration_uses": ["formal_search", "recent_surveillance"]
+    },
+    {
+      "benchmark_id": "B003",
+      "title": "The mafia influence in the business context: Infiltration of criminal firms in the public procurement market",
+      "year": 2026,
+      "doi": "10.1007/s10997-026-09789-9",
+      "basis": "daily_plausible_core",
+      "calibration_uses": ["formal_search", "recent_surveillance"]
+    },
+    {
+      "benchmark_id": "B004",
+      "title": "Testing the reliability of OSINT network data for investigating organised crime infiltration of legal-market businesses",
+      "year": 2025,
+      "doi": null,
+      "basis": "daily_plausible_core",
+      "calibration_uses": ["formal_search", "recent_surveillance"]
+    },
+    {
+      "benchmark_id": "B005",
+      "title": "Proxy targeting and multiplex resilience for organized crime network disruption in corporate interlock and communications networks",
+      "year": 2025,
+      "doi": null,
+      "basis": "daily_plausible_core",
+      "calibration_uses": ["formal_search", "recent_surveillance"]
+    },
+    {
+      "benchmark_id": "B006",
+      "title": "Threshold of shadows: Unveiling organised crime in Italian municipal public procurement",
+      "year": 2025,
+      "doi": null,
+      "basis": "daily_plausible_core",
+      "calibration_uses": ["formal_search", "recent_surveillance"]
+    },
+    {
+      "benchmark_id": "B007",
+      "title": "Mafias and Firms",
+      "year": 2026,
+      "doi": null,
+      "basis": "daily_plausible_core",
+      "calibration_uses": ["formal_search", "recent_surveillance"]
+    },
+    {
+      "benchmark_id": "B008",
+      "title": "Organized Crime, Public Procurement and Firms",
+      "year": 2026,
+      "doi": null,
+      "basis": "daily_plausible_core",
+      "calibration_uses": ["formal_search", "recent_surveillance"]
+    },
+    {
+      "benchmark_id": "B009",
+      "title": "Mafia Infiltration and Ownership Dynamics in Italian Companies during Covid-19",
+      "year": 2025,
+      "doi": null,
+      "basis": "daily_plausible_core",
+      "calibration_uses": ["formal_search", "recent_surveillance"]
+    },
+    {
+      "benchmark_id": "B010",
+      "title": "A machine learning approach for the detection of firms linked to organised crime in Italy, based on balance sheet data",
+      "year": 2024,
+      "doi": null,
+      "basis": "daily_plausible_core",
+      "calibration_uses": ["formal_search"]
+    },
+    {
+      "benchmark_id": "B011",
+      "title": "A Loan You Can’t Refuse: Credit Rationing and Organized Crime Infiltration of Distressed Firms",
+      "year": 2025,
+      "doi": null,
+      "basis": "daily_plausible_core",
+      "calibration_uses": ["formal_search", "recent_surveillance"]
+    },
+    {
+      "benchmark_id": "B012",
+      "title": "Bricks or cooks? Geographical and social determinants of the investment choices of mafia-type organized crime",
+      "year": 2024,
+      "doi": "10.1177/17488958241293927",
+      "basis": "daily_plausible_core",
+      "calibration_uses": ["formal_search"]
+    }
+  ]
+}
