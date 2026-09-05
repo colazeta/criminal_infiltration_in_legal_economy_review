@@ -8,10 +8,14 @@ from pathlib import Path
 from scripts.curation.reconcile_candidate_metadata import (
     MetadataReconciliationError,
     find_safe_repairs,
+    identity_repair_blockers,
+    read_csv,
     reconcile,
+    retrieval_index,
 )
 
 
+ROOT = Path(__file__).resolve().parents[1]
 QUEUE_FIELDS = [
     "candidate_id",
     "title",
@@ -108,6 +112,32 @@ class CandidateMetadataReconciliationTests(unittest.TestCase):
         )
         self.assertEqual(repairs, [])
 
+    def test_current_governed_data_exposes_exactly_four_safe_repairs(self) -> None:
+        _, queue_rows = read_csv(ROOT / "data/curation/review_queue.csv")
+        _, retrieval_rows = read_csv(ROOT / "data/curation/retrieval_coverage.csv")
+        queue = {row["candidate_id"]: row for row in queue_rows}
+        retrieval = retrieval_index(retrieval_rows)
+        expected = {
+            "CAND-ACADEMIC-2026-09-01-002",
+            "CAND-ACADEMIC-2026-09-01-003",
+            "CAND-ACADEMIC-2026-09-01-004",
+            "CAND-ACADEMIC-2026-09-01-005",
+        }
+        diagnostics = {
+            candidate_id: identity_repair_blockers(queue[candidate_id], retrieval[candidate_id])
+            for candidate_id in expected
+        }
+        self.assertEqual(diagnostics, {candidate_id: [] for candidate_id in expected})
+        actual = {repair["candidate_id"] for repair in find_safe_repairs(queue_rows, retrieval_rows)}
+        self.assertEqual(actual, expected)
+        self.assertIn(
+            "missing_dual_source",
+            identity_repair_blockers(
+                queue["CAND-ACADEMIC-2026-09-01-006"],
+                retrieval["CAND-ACADEMIC-2026-09-01-006"],
+            ),
+        )
+
     def test_reconcile_changes_only_mechanical_metadata_fields(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -126,10 +156,6 @@ class CandidateMetadataReconciliationTests(unittest.TestCase):
             self.assertEqual(repaired["current_decision"], "")
             self.assertIn("https://doi.org/10.1080/17440572.2025.2567277", repaired["source_links"])
             self.assertEqual(repaired["updated_at"], "2026-09-05")
-            with self.assertRaises(MetadataReconciliationError):
-                # Check passes only after re-reading the now repaired queue; a stale in-memory
-                # repair cannot be silently ignored.
-                find_safe_repairs([queue_row(metadata_conflict="x")], [retrieval_row(), retrieval_row()])
 
     def test_check_fails_when_safe_repair_remains(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

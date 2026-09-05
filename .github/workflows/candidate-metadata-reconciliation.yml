@@ -47,6 +47,11 @@ jobs:
             --date "$action_date" \
             --check
 
+      - name: Refresh deterministic curator exports
+        run: |
+          python scripts/curation/build_curator_stats.py
+          python scripts/curation/build_curator_options.py
+
       - name: Validate governed repository
         run: |
           python scripts/curation/build_legacy_queue.py --check
@@ -55,15 +60,25 @@ jobs:
           python -m unittest discover -s tests -p 'test_*.py'
           python scripts/build_archive.py --output-dir "$RUNNER_TEMP/archive"
           python scripts/build_secondary_collections.py --output-dir "$RUNNER_TEMP/archive"
+          python scripts/metrics/build_research_stats.py --output "$RUNNER_TEMP/archive/research-stats.json"
           python scripts/curation/build_curator_stats.py --output "$RUNNER_TEMP/archive/curator-stats.json"
           python scripts/curation/build_curator_options.py --output "$RUNNER_TEMP/archive/curator-options.json"
+          diff -ru "$RUNNER_TEMP/archive" site/data
           python scripts/validation/validate_archive.py
           python scripts/validation/validate_site.py
+          node --check site/stats.js
+          node --check site/curator.js
+          node --check site/curator-queue.js
+          node --check site/curator-resolved-link.js
+          node --test curator-app/test/*.test.js
 
       - name: Detect candidate metadata changes
         id: changes
         run: |
-          if git diff --quiet -- data/curation/review_queue.csv; then
+          if git diff --quiet -- \
+            data/curation/review_queue.csv \
+            site/data/curator-stats.json \
+            site/data/curator-options.json; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
           else
             echo "changed=true" >> "$GITHUB_OUTPUT"
@@ -78,7 +93,10 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout -b "$branch"
-          git add data/curation/review_queue.csv
+          git add \
+            data/curation/review_queue.csv \
+            site/data/curator-stats.json \
+            site/data/curator-options.json
           git commit -m "Verify candidate identifiers from dual-source retrieval"
           git push origin "$branch"
 
@@ -96,7 +114,7 @@ jobs:
               print(f"  - evidence: {repair['resolution_sources']} / {repair['match_method']} / {repair['match_confidence']}")
               print(f"  - persisted retrieval check: {repair['checked_at']}")
           print()
-          print("This PR changes candidate bibliography/workflow stage only. It makes **zero** eligibility, exclusion, canonicalisation or publication decisions.")
+          print("This PR changes candidate bibliography/workflow stage plus deterministic curator exports only. It makes **zero** eligibility, exclusion, canonicalisation or publication decisions.")
           print("It is intentionally not auto-merged: candidate metadata repair remains a reviewed metadata-verifier action.")
           PY
 
