@@ -1,6 +1,9 @@
 from __future__ import annotations
 
 import json
+import subprocess
+import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -59,6 +62,33 @@ class FormalCycleCalibrationPreflightTests(unittest.TestCase):
         self.assertIn("Neither", report["interpretation"])
         self.assertNotIn("eligible_core", json.dumps(report))
         self.assertNotIn("not_eligible", json.dumps(report))
+
+    def test_documented_module_invocation_runs_from_repository_root(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_path = Path(tmp)
+            results = tmp_path / "results.json"
+            output = tmp_path / "calibration.json"
+            results.write_text("[]\n", encoding="utf-8")
+            completed = subprocess.run(
+                [
+                    sys.executable,
+                    "-m",
+                    "scripts.metrics.calibrate_cycle_results",
+                    "--results",
+                    str(results),
+                    "--require-interpretable-benchmark",
+                    "--output",
+                    str(output),
+                ],
+                cwd=ROOT,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(completed.returncode, 0, completed.stderr)
+            payload = json.loads(output.read_text(encoding="utf-8"))
+            self.assertEqual(payload["benchmark"]["benchmark_size"], 20)
+            self.assertTrue(payload["benchmark"]["interpretable"])
 
 
 if __name__ == "__main__":
