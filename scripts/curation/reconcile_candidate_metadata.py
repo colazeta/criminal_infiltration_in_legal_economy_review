@@ -77,43 +77,55 @@ def retrieval_index(rows: list[dict[str, str]]) -> dict[str, dict[str, str]]:
     return index
 
 
-def dual_source_identity_evidence(queue_row: dict[str, str], retrieval_row: dict[str, str]) -> tuple[str, str] | None:
-    """Return (doi, doi_url) only for a deliberately narrow safe-repair case."""
+def identity_repair_blockers(queue_row: dict[str, str], retrieval_row: dict[str, str]) -> list[str]:
+    """Return explicit reasons why a persisted candidate cannot be mechanically repaired."""
 
+    blockers: list[str] = []
     if clean(queue_row.get("origin")) != "daily_surveillance":
-        return None
+        blockers.append("not_daily_surveillance")
     if clean(queue_row.get("current_status")) != "pending":
-        return None
+        blockers.append("not_pending")
     if clean(queue_row.get("current_decision")):
-        return None
+        blockers.append("existing_decision")
     if clean(queue_row.get("verification_status")) != "metadata_partial":
-        return None
+        blockers.append("not_metadata_partial")
     if clean(queue_row.get("review_stage")) != "metadata_fix":
-        return None
+        blockers.append("not_metadata_fix")
     if clean(queue_row.get("doi")):
-        return None
-    if clean(queue_row.get("metadata_conflict")) or clean(queue_row.get("possible_duplicate")):
-        return None
+        blockers.append("doi_already_present")
+    if clean(queue_row.get("metadata_conflict")):
+        blockers.append("metadata_conflict")
+    if clean(queue_row.get("possible_duplicate")):
+        blockers.append("possible_duplicate")
     if normalise_title(queue_row.get("title")) != normalise_title(retrieval_row.get("title")):
-        return None
+        blockers.append("queue_retrieval_title_mismatch")
 
     confidence = clean(retrieval_row.get("match_confidence"))
     if confidence not in {"medium", "high"}:
-        return None
+        blockers.append("insufficient_match_confidence")
 
     sources = set(split_semicolon(retrieval_row.get("resolution_sources")))
     methods = set(split_semicolon(retrieval_row.get("match_method")))
     if not {"OpenAlex", "Crossref"}.issubset(sources):
-        return None
+        blockers.append("missing_dual_source")
     if not {"OpenAlex:title_year", "Crossref:title_year"}.issubset(methods):
-        return None
+        blockers.append("missing_dual_title_year_match")
 
     doi = normalise_doi(retrieval_row.get("resolved_doi"))
     if not DOI_RE.fullmatch(doi):
-        return None
+        blockers.append("invalid_resolved_doi")
     doi_url = clean(retrieval_row.get("doi_url"))
-    if doi_url.lower() != f"https://doi.org/{doi}".lower():
+    if not doi or doi_url.lower() != f"https://doi.org/{doi}".lower():
+        blockers.append("doi_url_disagreement")
+    return blockers
+
+
+def dual_source_identity_evidence(queue_row: dict[str, str], retrieval_row: dict[str, str]) -> tuple[str, str] | None:
+    """Return (doi, doi_url) only for a deliberately narrow safe-repair case."""
+
+    if identity_repair_blockers(queue_row, retrieval_row):
         return None
+    doi = normalise_doi(retrieval_row.get("resolved_doi"))
     return doi, f"https://doi.org/{doi}"
 
 
