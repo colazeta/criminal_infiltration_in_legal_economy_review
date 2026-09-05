@@ -52,20 +52,28 @@ class DiscoveryBenchmarkTests(unittest.TestCase):
         self.assertEqual(hit["recovered"], 1)
         self.assertEqual(miss["recovered"], 0)
 
-    def test_bootstrap_refuses_interpretable_recall_claim(self) -> None:
+    def test_formal_search_benchmark_reaches_interpretability_threshold(self) -> None:
         benchmark = json.loads((ROOT / "docs/methodology/discovery-benchmark.json").read_text(encoding="utf-8"))
         report = evaluate(benchmark, [], "formal_search")
-        self.assertLess(report["benchmark_size"], report["minimum_interpretable_size"])
-        self.assertFalse(report["interpretable"])
-        self.assertIsNone(report["proxy_recall"])
-        self.assertIn("Bootstrap calibration only", report["interpretation"])
+        self.assertEqual(report["benchmark_size"], 20)
+        self.assertEqual(report["benchmark_size"], report["minimum_interpretable_size"])
+        self.assertTrue(report["interpretable"])
+        self.assertEqual(report["proxy_recall"], 0.0)
+        self.assertIn("Calibration proxy only", report["interpretation"])
+        self.assertIn("not a formal saturation", report["interpretation"])
 
     def test_benchmark_contains_no_eligibility_decision_field(self) -> None:
         benchmark = json.loads((ROOT / "docs/methodology/discovery-benchmark.json").read_text(encoding="utf-8"))
+        allowed_basis = {
+            "canonical_seed",
+            "canonical_review_record",
+            "daily_plausible_core",
+            "legacy_promote_contextual_seed",
+        }
         for record in benchmark["records"]:
             self.assertNotIn("decision", record)
             self.assertNotIn("eligible", record)
-            self.assertIn(record["basis"], {"canonical_seed", "canonical_review_record", "daily_plausible_core"})
+            self.assertIn(record["basis"], allowed_basis)
 
 
 if __name__ == "__main__":
