@@ -52,6 +52,7 @@ jobs:
           node --check site/curator-config.js
           node --check site/curator-consensus.js
           node --check site/curator-reading.js
+          node --check site/curator-assisted-resolution.js
           node --check site/curator-queue.js
           node --check site/curator-resolved-link.js
           node --check curator-app/src/index.js
@@ -119,6 +120,7 @@ jobs:
           node --check site/curator-config.js
           node --check site/curator-consensus.js
           node --check site/curator-reading.js
+          node --check site/curator-assisted-resolution.js
           node --check site/curator-queue.js
           node --check site/curator-resolved-link.js
           node --check curator-app/src/index.js

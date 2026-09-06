@@ -11,6 +11,7 @@ import worker, { SubmissionCoordinatorCore } from "./index.js";
 
 const CURATOR_COMPONENT_ASSETS = new Set([
   "/curator-consensus.js",
+  "/curator-assisted-resolution.js",
   "/curator-reading.js",
   "/curator-reading.css",
   "/curator-queue.js",
@@ -19,7 +20,7 @@ const CURATOR_COMPONENT_ASSETS = new Set([
 ]);
 
 function componentLoaderSource() {
-  return `\n(() => {\n  function load(src, marker) {\n    if (document.querySelector('script[data-' + marker + '=\"true\"]')) return;\n    const script = document.createElement(\"script\");\n    script.src = src;\n    script.async = false;\n    script.dataset[marker.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase())] = \"true\";\n    document.head.append(script);\n  }\n  load(\"./curator-consensus.js\", \"curator-consensus\");\n  load(\"./curator-reading.js\", \"curator-reading\");\n  load(\"./curator-queue.js\", \"curator-queue\");\n  load(\"./curator-resolved-link.js\", \"curator-resolved-link\");\n})();\n`;
+  return `\n(() => {\n  function load(src, marker) {\n    if (document.querySelector('script[data-' + marker + '=\"true\"]')) return;\n    const script = document.createElement(\"script\");\n    script.src = src;\n    script.async = false;\n    script.dataset[marker.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase())] = \"true\";\n    document.head.append(script);\n  }\n  load(\"./curator-consensus.js\", \"curator-consensus\");\n  load(\"./curator-assisted-resolution.js\", \"curator-assisted-resolution\");\n  load(\"./curator-reading.js\", \"curator-reading\");\n  load(\"./curator-queue.js\", \"curator-queue\");\n  load(\"./curator-resolved-link.js\", \"curator-resolved-link\");\n})();\n`;
 }
 
 async function serveCuratorComponentAsset(request, env) {

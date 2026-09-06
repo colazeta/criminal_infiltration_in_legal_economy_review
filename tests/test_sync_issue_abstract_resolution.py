@@ -26,6 +26,21 @@ class SyncIssueAbstractResolutionTests(unittest.TestCase):
         self.assertIn("does **not** assert", section)
         self.assertIn("not a scientific screening decision", section)
 
+    def test_known_noise_explains_non_applicability_without_auto_excluding(self) -> None:
+        record = {
+            "resolutionClass": "known_noise",
+            "standaloneAbstractStatus": "not_applicable_noise",
+            "sourceLabel": "Exact source",
+            "sourceUrl": "https://example.org/noise",
+            "checkedAt": "2026-09-06",
+            "nextAction": "Proceed to controlled exclusion review.",
+            "note": "Verified legacy retrieval noise.",
+        }
+        section = resolution_section(record)
+        self.assertIn("not_applicable_noise", section)
+        self.assertIn("does **not** itself record an exclusion", section)
+        self.assertNotIn("`not_verified_after_targeted_search` means", section)
+
     def test_remove_section_preserves_other_curator_sections(self) -> None:
         body = (
             "## Reading aid — preparatory\n\nAid\n\n"
