@@ -12,6 +12,24 @@
       "note": "The institutional repository exposes an extended abstract; the curator should still verify publication status and the evidence used for the eleven firms."
     },
     {
+      "candidateId": "CAND-ACADEMIC-2026-09-06-002",
+      "kind": "verified_abstract_source",
+      "sourceLabel": "Consensus exact scholarly record",
+      "sourceUrl": "https://consensus.app/papers/details/fe983676dd965240bd3572cc9a9c30c9/?utm_source=chatgpt",
+      "synopsis": "The chapter examines organised crime in legitimate sectors of the Dutch economy and distinguishes parasitic from symbiotic relationships, including forms of criminal influence or control in hospitality, slot machines, construction and waste disposal.",
+      "checkedAt": "2026-09-06",
+      "note": "The exact scholarly search record exposes substantive abstract-level information for this chapter. Canonicalisation should distinguish the original 1998 chapter from its later Routledge reprint manifestation."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-06-007",
+      "kind": "publisher_summary",
+      "sourceLabel": "SAGE Academic Books",
+      "sourceUrl": "https://sk.sagepub.com/book/mono/organized-crime/chpt/organized-crime-legitimate-business",
+      "synopsis": "This dedicated chapter examines the relationship between organised crime and legitimate business, including criminal actors operating as businesspeople, racketeering and protection, criminal control over legal sectors, and the vulnerability of legitimate firms to criminal influence.",
+      "checkedAt": "2026-09-06",
+      "note": "The exact SAGE chapter page provides a substantive chapter description, but no separately labelled author abstract was located. Treat this as publisher-level reading support, not an author abstract."
+    },
+    {
       "candidateId": "E0-D004",
       "kind": "verified_abstract_source",
       "sourceLabel": "Oxford Academic",
