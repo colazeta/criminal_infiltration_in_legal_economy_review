@@ -65,7 +65,23 @@ def read_resolution(path: Path) -> dict[str, dict[str, str]]:
     return result
 
 
+def abstract_status_explanation(record: dict[str, str]) -> str:
+    if record["standaloneAbstractStatus"] == "not_applicable_noise":
+        return (
+            "`not_applicable_noise` means the retrieved object has been identified as legacy "
+            "retrieval/identifier noise, so further abstract hunting is not an appropriate next "
+            "step. This status does **not** itself record an exclusion; the controlled scientific "
+            "or record-management decision remains human."
+        )
+    return (
+        "`not_verified_after_targeted_search` means exactly that a standalone abstract was "
+        "not verified after the current targeted search; it does **not** assert that no abstract "
+        "exists."
+    )
+
+
 def resolution_section(record: dict[str, str]) -> str:
+    explanation = abstract_status_explanation(record)
     return f"""{HEADING}
 
 - Resolution class: {inline(record['resolutionClass'])}
@@ -77,9 +93,8 @@ def resolution_section(record: dict[str, str]) -> str:
 - Note: {clean(record['note'], 1200)}
 
 This is an **assisted retrieval disposition**, not a scientific screening decision.
-`not_verified_after_targeted_search` means exactly that a standalone abstract was
-not verified after the current targeted search; it does **not** assert that no
-abstract exists. Review readiness and abstract availability remain separate fields."""
+{explanation}
+Review readiness and abstract availability remain separate fields."""
 
 
 def remove_section(body: str, heading: str) -> str:
