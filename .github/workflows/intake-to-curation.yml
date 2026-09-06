@@ -4,7 +4,7 @@ run-name: "Stage intake issue #${{ github.event.issue.number }}"
 
 on:
   issues:
-    types: [opened]
+    types: [opened, reopened]
 
 permissions:
   contents: read
@@ -34,6 +34,11 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: Set up Node.js
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: 22
+
       - name: Read authenticated intake issue
         run: |
           python3 -c 'import json, os, pathlib; event=json.load(open(os.environ["GITHUB_EVENT_PATH"], encoding="utf-8")); root=pathlib.Path(os.environ["RUNNER_TEMP"]); root.joinpath("intake-body.md").write_text(event["issue"].get("body") or "", encoding="utf-8"); root.joinpath("intake-title.txt").write_text(event["issue"].get("title") or "", encoding="utf-8")'
@@ -61,6 +66,21 @@ jobs:
             --max-age-days 30 \
             --output "$RUNNER_TEMP/retrieval-summary.json"
           python scripts/retrieval/resolve_queue.py --check
+
+      - name: Backfill abstract coverage for the expanded queue
+        env:
+          SEMANTIC_SCHOLAR_API_KEY: ${{ secrets.SEMANTIC_SCHOLAR_API_KEY }}
+          CORE_API_KEY: ${{ secrets.CORE_API_KEY }}
+          UNPAYWALL_EMAIL: ${{ secrets.UNPAYWALL_EMAIL }}
+        run: |
+          if ! command -v pdftotext >/dev/null 2>&1; then
+            sudo apt-get update -qq
+            sudo apt-get install -y --no-install-recommends poppler-utils
+          fi
+          export ABSTRACT_COVERAGE_DATE="$(date -u +%F)"
+          node scripts/abstracts/backfill_coverage.mjs \
+            --summary "$RUNNER_TEMP/abstract-coverage-summary.json"
+          node scripts/abstracts/backfill_coverage.mjs --check
 
       - name: Validate the complete archive
         run: |
@@ -118,6 +138,7 @@ jobs:
           body_file="$RUNNER_TEMP/intake-curation-pr.md"
           candidates="$(python3 -c 'import json, os; data=json.load(open(os.path.join(os.environ["RUNNER_TEMP"], "intake-import.json"), encoding="utf-8")); print("\n".join(f"- `{value}`" for value in data["added"]))')"
           retrieval="$(python3 -c 'import json, os; data=json.load(open(os.path.join(os.environ["RUNNER_TEMP"], "retrieval-summary.json"), encoding="utf-8")); print(f"{data.get('"'"'total'"'"',0)} covered; {data.get('"'"'full_text'"'"',0)} direct full text; {data.get('"'"'open_access_landing'"'"',0)} OA landing; {data.get('"'"'unresolved'"'"',0)} unresolved")')"
+          abstract_coverage="$(python3 -c 'import json, os; data=json.load(open(os.path.join(os.environ["RUNNER_TEMP"], "abstract-coverage-summary.json"), encoding="utf-8")); print(json.dumps(data, sort_keys=True))')"
           {
             echo "## Authorised intake source"
             echo
@@ -134,7 +155,8 @@ jobs:
             echo
             echo "- Complete queue resolver: ${retrieval}."
             echo "- Resolver order: full text / OA location / publisher or repository landing / DOI / discovery source link / explicit unresolved."
-            echo "- Retrieval metadata is mechanical and cannot determine eligibility or publication."
+            echo "- Abstract coverage: \`${abstract_coverage}\`."
+            echo "- Retrieval and abstract metadata are mechanical and cannot determine eligibility or publication."
             echo
             echo "## Changed files"
             echo
@@ -149,7 +171,7 @@ jobs:
             echo "## Human decisions"
             echo
             echo "- Automatic screening or publication inference: none."
-            echo "- Unresolved human decisions: an authorised person still decides eligibility; retrieval resolution only attempts to make the paper reachable."
+            echo "- Unresolved human decisions: an authorised person still decides eligibility; retrieval and abstract resolution only make the paper reviewable."
             echo
             echo "Closes #${ISSUE_NUMBER}"
           } > "$body_file"
