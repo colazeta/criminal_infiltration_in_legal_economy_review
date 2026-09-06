@@ -6,10 +6,13 @@ on:
     paths:
       - data/curation/review_queue.csv
       - data/curation/retrieval_coverage.csv
+      - data/curation/reading_aids.json
       - scripts/curation/materialize_queue_issues.py
       - scripts/curation/sync_issue_candidate_record.py
+      - scripts/curation/sync_issue_review_support.py
       - scripts/retrieval/sync_issue_retrieval.py
       - tests/test_sync_issue_candidate_record.py
+      - tests/test_review_support.py
       - .github/workflows/materialize-curation.yml
   workflow_dispatch:
 
@@ -64,4 +67,11 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
           python scripts/retrieval/sync_issue_retrieval.py \
+            --repository "$GITHUB_REPOSITORY"
+
+      - name: Synchronise reading aids and review guidance
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          python scripts/curation/sync_issue_review_support.py \
             --repository "$GITHUB_REPOSITORY"
