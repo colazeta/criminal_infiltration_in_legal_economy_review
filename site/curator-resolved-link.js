@@ -402,11 +402,17 @@
     };
   }
 
+  function element(tag, options = {}) {
+    const node = document.createElement(tag);
+    if (options.id) node.id = options.id;
+    if (options.className) node.className = options.className;
+    if (options.text !== undefined) node.textContent = options.text;
+    return node;
+  }
+
   function makeFact(label, state, title = "") {
-    const fact = document.createElement("span");
-    fact.className = "identity-fact";
+    const fact = element("span", { className: "identity-fact", text: label });
     fact.dataset.state = state;
-    fact.textContent = label;
     if (title) fact.title = title;
     return fact;
   }
@@ -414,12 +420,10 @@
   function safeExistingLink(id, label) {
     const source = byId(id);
     if (!(source instanceof HTMLAnchorElement) || source.hidden || !source.href) return null;
-    const link = document.createElement("a");
-    link.className = "identity-action";
+    const link = element("a", { className: "identity-action", text: label });
     link.href = source.href;
     link.target = "_blank";
     link.rel = "noopener noreferrer";
-    link.textContent = label;
     return link;
   }
 
@@ -428,23 +432,25 @@
     if (!detail) return null;
     let panel = byId("candidate-identity-panel");
     if (panel) return panel;
-    panel = document.createElement("section");
-    panel.id = "candidate-identity-panel";
-    panel.className = "candidate-identity-panel";
-    panel.innerHTML = `
-      <div class="identity-panel-heading">
-        <div>
-          <p class="workspace-label">Identity resolution</p>
-          <h4 id="candidate-identity-title">Identità da verificare</h4>
-        </div>
-        <span id="candidate-identity-state" class="identity-state-chip">—</span>
-      </div>
-      <p id="candidate-identity-summary" class="identity-summary"></p>
-      <div id="candidate-identity-facts" class="identity-facts" aria-label="Segnali di identità"></div>
-      <p id="candidate-identity-reason" class="identity-reason"></p>
-      <div id="candidate-identity-actions" class="identity-actions"></div>
-      <p class="identity-boundary">Diagnostica preparatoria: non è una decisione di eligibility, duplicate o canonicalizzazione.</p>
-    `;
+    panel = element("section", { id: "candidate-identity-panel", className: "candidate-identity-panel" });
+    const heading = element("div", { className: "identity-panel-heading" });
+    const titleGroup = element("div");
+    titleGroup.append(
+      element("p", { className: "workspace-label", text: "Identity resolution" }),
+      element("h4", { id: "candidate-identity-title", text: "Identità da verificare" }),
+    );
+    const state = element("span", { id: "candidate-identity-state", className: "identity-state-chip", text: "—" });
+    heading.append(titleGroup, state);
+    const summary = element("p", { id: "candidate-identity-summary", className: "identity-summary" });
+    const facts = element("div", { id: "candidate-identity-facts", className: "identity-facts" });
+    facts.setAttribute("aria-label", "Segnali di identità");
+    const reason = element("p", { id: "candidate-identity-reason", className: "identity-reason" });
+    const actions = element("div", { id: "candidate-identity-actions", className: "identity-actions" });
+    const boundary = element("p", {
+      className: "identity-boundary",
+      text: "Diagnostica preparatoria: non è una decisione di eligibility, duplicate o canonicalizzazione.",
+    });
+    panel.append(heading, summary, facts, reason, actions, boundary);
     detail.querySelector(".candidate-metadata")?.insertAdjacentElement("afterend", panel);
     return panel;
   }
@@ -486,13 +492,10 @@
     const doi = safeExistingLink("selected-candidate-doi-link", "Verifica DOI ↗");
     const audit = safeExistingLink("selected-candidate-issue", "Audit record ↗");
     for (const link of [article, doi, audit]) if (link) actions.append(link);
-    const recalc = document.createElement("button");
+    const recalc = element("button", { className: "identity-action identity-recalc", text: "Ricalcola identità" });
     recalc.type = "button";
-    recalc.className = "identity-action identity-recalc";
-    recalc.textContent = "Ricalcola identità";
     recalc.addEventListener("click", refreshGuidedSurface);
     actions.append(recalc);
-
     document.dispatchEvent(new CustomEvent("curator:identity-state", { detail: currentIdentity }));
   }
 
@@ -517,32 +520,41 @@
     decision.closest("label")?.classList.add("identity-native-decision-field");
     let composer = byId("guided-decision-composer");
     if (composer) return composer;
-    composer = document.createElement("section");
-    composer.id = "guided-decision-composer";
-    composer.className = "guided-decision-composer";
-    composer.innerHTML = `
-      <div class="guided-decision-heading">
-        <div>
-          <p class="workspace-label">Decision gate</p>
-          <h4 id="guided-decision-title">Dall’evidenza all’esito</h4>
-        </div>
-        <span id="guided-decision-gate" class="identity-state-chip">—</span>
-      </div>
-      <div class="decision-progress" aria-label="Progressione della review">
-        <span id="decision-step-identity">1 · Identità</span>
-        <span id="decision-step-evidence">2 · Evidenza</span>
-        <span id="decision-step-outcome">3 · Esito</span>
-      </div>
-      <p id="guided-decision-copy" class="guided-decision-copy"></p>
-      <div id="guided-primary-decisions" class="guided-decision-grid"></div>
-      <details id="guided-exception-decisions" class="guided-exception-decisions">
-        <summary>Gestione record eccezionale</summary>
-        <p>Usa questi esiti solo dopo aver verificato la condizione specifica.</p>
-        <div id="guided-exception-grid" class="guided-decision-grid guided-decision-grid-exception"></div>
-      </details>
-      <p id="guided-decision-message" class="guided-decision-message" role="status" aria-live="polite" hidden></p>
-      <p class="identity-boundary">Le card impostano il medesimo valore governato del select originale; non costituiscono una raccomandazione automatica.</p>
-    `;
+
+    composer = element("section", { id: "guided-decision-composer", className: "guided-decision-composer" });
+    const heading = element("div", { className: "guided-decision-heading" });
+    const titleGroup = element("div");
+    titleGroup.append(
+      element("p", { className: "workspace-label", text: "Decision gate" }),
+      element("h4", { id: "guided-decision-title", text: "Dall’evidenza all’esito" }),
+    );
+    heading.append(titleGroup, element("span", { id: "guided-decision-gate", className: "identity-state-chip", text: "—" }));
+
+    const progress = element("div", { className: "decision-progress" });
+    progress.setAttribute("aria-label", "Progressione della review");
+    progress.append(
+      element("span", { id: "decision-step-identity", text: "1 · Identità" }),
+      element("span", { id: "decision-step-evidence", text: "2 · Evidenza" }),
+      element("span", { id: "decision-step-outcome", text: "3 · Esito" }),
+    );
+
+    const copy = element("p", { id: "guided-decision-copy", className: "guided-decision-copy" });
+    const primary = element("div", { id: "guided-primary-decisions", className: "guided-decision-grid" });
+    const exceptions = element("details", { id: "guided-exception-decisions", className: "guided-exception-decisions" });
+    exceptions.append(
+      element("summary", { text: "Gestione record eccezionale" }),
+      element("p", { text: "Usa questi esiti solo dopo aver verificato la condizione specifica." }),
+      element("div", { id: "guided-exception-grid", className: "guided-decision-grid guided-decision-grid-exception" }),
+    );
+    const message = element("p", { id: "guided-decision-message", className: "guided-decision-message" });
+    message.setAttribute("role", "status");
+    message.setAttribute("aria-live", "polite");
+    message.hidden = true;
+    const boundary = element("p", {
+      className: "identity-boundary",
+      text: "Le card impostano il medesimo valore governato del select originale; non costituiscono una raccomandazione automatica.",
+    });
+    composer.append(heading, progress, copy, primary, exceptions, message, boundary);
     form.querySelector(".decision-form-heading")?.insertAdjacentElement("afterend", composer);
 
     form.addEventListener(
@@ -585,16 +597,14 @@
   }
 
   function makeDecisionChoice(option, contextual = false) {
-    const button = document.createElement("button");
+    const button = element("button", { className: "guided-decision-choice" });
     button.type = "button";
-    button.className = "guided-decision-choice";
     button.dataset.value = option.value;
     if (contextual) button.dataset.contextual = "true";
-    const title = document.createElement("strong");
-    title.textContent = decisionLabelFor(option.value, option.textContent);
-    const description = document.createElement("span");
-    description.textContent = option.title || option.textContent;
-    button.append(title, description);
+    button.append(
+      element("strong", { text: decisionLabelFor(option.value, option.textContent) }),
+      element("span", { text: option.title || option.textContent }),
+    );
     button.addEventListener("click", () => {
       if (currentIdentity?.blocksScreening) {
         showDecisionMessage("L’esito resta disabilitato finché l’identità bibliografica non è risolta.", "warning");
@@ -625,7 +635,7 @@
         .map((option) => makeDecisionChoice(option, duplicateContext && option.value === "duplicate")),
     );
     const details = byId("guided-exception-decisions");
-    if (details && duplicateContext) details.open = true;
+    if (details) details.open = Boolean(duplicateContext);
     syncDecisionSelection();
   }
 
@@ -641,8 +651,8 @@
 
   function evidenceReady() {
     const source = normalise(byId("candidate-abstract-source")?.textContent).toLowerCase();
-    const aidVisible = byId("candidate-reading-aid-panel") && !byId("candidate-reading-aid-panel").hidden;
-    return Boolean(source && !source.includes("da recuperare") && !source.includes("in corso")) || aidVisible;
+    const aid = byId("candidate-reading-aid-panel");
+    return Boolean(source && !source.includes("da recuperare") && !source.includes("in corso")) || Boolean(aid && !aid.hidden);
   }
 
   function applyIdentityToDecision() {
@@ -653,32 +663,24 @@
     const gate = byId("guided-decision-gate");
     gate.textContent = currentIdentity.blocksScreening ? "BLOCCATO DALL’IDENTITÀ" : "SCREENING APERTO";
     gate.dataset.state = currentIdentity.state;
-    const identityStep = byId("decision-step-identity");
-    identityStep.dataset.state = currentIdentity.blocksScreening ? "warning" : "ready";
-    const evidenceStep = byId("decision-step-evidence");
-    evidenceStep.dataset.state = evidenceReady() ? "ready" : "waiting";
+    byId("decision-step-identity").dataset.state = currentIdentity.blocksScreening ? "warning" : "ready";
+    byId("decision-step-evidence").dataset.state = evidenceReady() ? "ready" : "waiting";
     const copy = byId("guided-decision-copy");
     if (currentIdentity.blocksScreening) {
-      copy.textContent =
-        "Questa scheda è ancora un problema di identificazione, non di eligibility. Verifica fonte, DOI e conflitti; poi fai rientrare il record nello screening.";
+      copy.textContent = "Questa scheda è ancora un problema di identificazione, non di eligibility. Verifica fonte, DOI e conflitti; poi fai rientrare il record nello screening.";
     } else if (currentIdentity.state === "duplicate_risk") {
-      copy.textContent =
-        "Prima confronta l’identità del lavoro con il possibile duplicato. Se non è lo stesso lavoro, continua normalmente con lo screening; nessun esito è preselezionato.";
+      copy.textContent = "Prima confronta l’identità del lavoro con il possibile duplicato. Se non è lo stesso lavoro, continua normalmente con lo screening; nessun esito è preselezionato.";
     } else {
-      copy.textContent =
-        "Scegli l’esito dopo aver esaminato l’evidenza. Gli esiti principali sono separati dalla gestione eccezionale del record per ridurre errori di classificazione.";
+      copy.textContent = "Scegli l’esito dopo aver esaminato l’evidenza. Gli esiti principali sono separati dalla gestione eccezionale del record per ridurre errori di classificazione.";
     }
     const submit = byId("submit-decision");
     if (submit && !/Invio|registrata/i.test(submit.textContent || "")) {
       submit.disabled = currentIdentity.blocksScreening;
-      submit.title = currentIdentity.blocksScreening
-        ? "Risolvi prima l’identità bibliografica."
-        : "";
+      submit.title = currentIdentity.blocksScreening ? "Risolvi prima l’identità bibliografica." : "";
     }
     for (const choice of document.querySelectorAll(".guided-decision-choice")) {
       choice.disabled = currentIdentity.blocksScreening;
     }
-    buildDecisionChoices();
   }
 
   function refreshGuidedSurface() {
@@ -695,8 +697,7 @@
 
   function injectStyles() {
     if (byId("curator-identity-styles")) return;
-    const style = document.createElement("style");
-    style.id = "curator-identity-styles";
+    const style = element("style", { id: "curator-identity-styles" });
     style.textContent = `
       .candidate-identity-panel{margin:18px 30px 2px;border:1px solid var(--line);border-left:4px solid var(--green);border-radius:14px;padding:18px 20px;background:#fff;box-shadow:0 8px 22px rgb(23 33 31 / 5%)}
       .candidate-identity-panel[data-state="metadata_repair"],.candidate-identity-panel[data-state="manifestation_ambiguity"]{border-left-color:#b4861d;background:#fffaf0}
