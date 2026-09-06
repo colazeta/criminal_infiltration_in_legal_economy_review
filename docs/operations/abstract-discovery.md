@@ -12,17 +12,32 @@ The resolver is a modular capability cascade rather than a flat provider list. E
 
 The order is deliberately cost-, capability- and quota-aware:
 
-1. **Primary free bibliographic lookup** — OpenAlex and Crossref.
+1. **Primary bibliographic lookup** — OpenAlex and Crossref.
 2. **Free scholarly/repository registry** — Semantic Scholar, DataCite, optional Unpaywall, CORE and Europe PMC.
-3. **Governed resolved-paper layer** — publisher, repository and full-text locators already bound to the candidate are inspected directly.
-4. **Free known-URL reader** — Jina Reader reads the DOI-derived target when `JINA_READER_FREE_ONLY=true`.
-5. **SERP discovery** — Serper may make one bounded search request for the opened candidate, but only with a dedicated-free-account attestation and a successful reservation from the persistent 1,000-request project budget. A discovered public URL is handed back to Jina Reader for content reading.
-6. **Semantic research-paper discovery** — Exa Search may make one `type=fast`, research-paper-category request with at most five results, but only with a dedicated Starter Free attestation and a successful reservation from the persistent 500-request project budget. No Contents, Deep Search or Agent capability is requested. A discovered public URL is handed to Jina Reader.
-7. **Final free content search** — Tavily Basic runs only for the selected unresolved paper when a free-plan key is configured with `TAVILY_FREE_ONLY=true`.
-8. **Registered future capability layers** — Firecrawl and Cloudflare Browser Run remain non-automatic until a separate free-plan boundary is proven.
-9. **Assisted browsing handoff** — unresolved cases become `needs_web_search`. The resolver stops rather than consuming an ungoverned paid balance.
+3. **Zero-cost open metadata/repository reconciliation** — OpenCitations Meta, arXiv, Zenodo, HAL and DOAJ contribute identity, abstract, version/relation and locator observations. They are reconciled field by field; conflicts remain visible.
+4. **Governed resolved-paper layer** — publisher, repository and full-text locators already bound to the candidate are inspected directly.
+5. **Free known-URL reader** — Jina Reader reads the DOI-derived target when `JINA_READER_FREE_ONLY=true`.
+6. **SERP discovery** — Serper may make one bounded search request for the opened candidate, but only with a dedicated-free-account attestation and a successful reservation from the persistent 1,000-request project budget. A discovered public URL is handed back to Jina Reader for content reading.
+7. **Semantic research-paper discovery** — Exa Search may make one `type=fast`, research-paper-category request with at most five results, but only with a dedicated Starter Free attestation and a successful reservation from the persistent 500-request project budget. No Contents, Deep Search or Agent capability is requested. A discovered public URL is handed to Jina Reader.
+8. **Final free content search** — Tavily Basic runs only for the selected unresolved paper when a free-plan key is configured with `TAVILY_FREE_ONLY=true`.
+9. **Registered future capability layers** — Firecrawl and Cloudflare Browser Run remain non-automatic until a separate free-plan boundary is proven.
+10. **Assisted browsing handoff** — unresolved cases become `needs_web_search`. The resolver stops rather than consuming an ungoverned paid balance.
 
 Queue cards never invoke the web-capability resolver. Web reading/search begins only after the curator opens one candidate and cheaper scholarly/resolved-document layers have failed.
+
+The scholarly providers are not web-search fallbacks. They can be used in deterministic backfills and candidate enrichment because they return structured scholarly metadata under the governed source boundary.
+
+## Open scholarly reconciliation
+
+The normalised provider observation schema and field-level consensus rules are documented in [`scholarly-reconciliation.md`](scholarly-reconciliation.md).
+
+The enrichment response may expose:
+
+- `metadataResolution`: selected values, support, alternatives, conflict states and manifestation analysis;
+- `metadataObservations`: compact per-provider observations used by the reconciler;
+- `citationFrontier`: optional E2/E3 DOI-bound frontier from OpenCitations + Semantic Scholar.
+
+None of these objects mutates canonical metadata or decides eligibility.
 
 ## Web capability registry
 
@@ -43,19 +58,21 @@ The normative provider inventory is `ontology/providers/web-capabilities.json`. 
 
 The production path obeys all of the following constraints:
 
-- OpenAlex is called without `OPENALEX_API_KEY` in the curator runtime.
+- OpenAlex is used only within its available free access/allocation; no paid fallback is configured by the curator runtime.
+- Crossref uses its public REST metadata service.
 - Semantic Scholar works keyless; `SEMANTIC_SCHOLAR_API_KEY`, if supplied, only improves the free rate limit.
 - DataCite uses its public unauthenticated API.
 - CORE works keyless at the public free rate; `CORE_API_KEY`, if supplied, only improves the free rate limit.
 - Unpaywall is enabled only when `UNPAYWALL_EMAIL` is configured and remains a free API.
 - Europe PMC uses the public REST API.
+- OpenCitations Meta/Index, arXiv, Zenodo public records, HAL and DOAJ use credential-free public read APIs and stop on rate-limit/provider failure.
 - Jina Reader is permitted only while `JINA_READER_FREE_ONLY=true`; discovered targets must pass the public-HTTPS target filter and title-match validation.
 - Serper requires `SERPER_FREE_ONLY=true`, `SERPER_DEDICATED_FREE_ACCOUNT=true`, an API key and a successful persistent budget reservation. Its adapter performs only one bounded `/search` request and returns URLs for Jina reading.
 - Exa requires `EXA_FREE_ONLY=true`, `EXA_DEDICATED_STARTER_ACCOUNT=true`, an API key and a successful persistent budget reservation. Its adapter uses only `/search`, `type=fast`, category `research paper`, maximum five results. It does not request Contents, Deep Search, Agent, output schema, livecrawl or x402.
 - The Exa response is rejected if its reported request cost exceeds the one-request guard used by the project.
 - Tavily is permitted only when `TAVILY_FREE_ONLY=true` and a free-plan `TAVILY_API_KEY` is configured. Requests remain hard-coded to Basic and one credit maximum.
 - Firecrawl and Cloudflare Browser Run remain technically non-automatic.
-- Exhaustion or provider failure returns `needs_web_search` or `web_search_exhausted`; it never upgrades itself to a paid request.
+- Exhaustion or provider failure returns an explicit incomplete state; it never upgrades itself to a paid request.
 
 ## Persistent project budgets
 
@@ -65,6 +82,8 @@ The Durable Object coordinator stores cumulative provider usage independently of
 - Exa Search stops permanently after 500 reserved automatic calls.
 
 The budget reservation happens before the external provider call. Provider dashboard changes, purchased balance or future account upgrades do not raise these limits.
+
+Credential-free scholarly APIs are governed through bounded request shapes and provider rate limits rather than project spending budgets because they cannot create a charge.
 
 ## Capability and provenance model
 
@@ -79,7 +98,7 @@ The budget reservation happens before the external provider call. Provider dashb
 - `BrowserInvocation`;
 - `AgenticResearchInvocation`.
 
-Every runtime response can expose `providersTried`, `providerErrors`, `providerPlan`, `providerUsage`, `freeCreditsUsed` and `freeRequestsUsed`. Provider usage includes the quota unit and project-budget reservation when applicable.
+Every runtime response can expose `providersTried`, `providerErrors`, `providerPlan`, `providerUsage`, `freeCreditsUsed` and `freeRequestsUsed`. Structured scholarly enrichment additionally exposes field-level source support rather than collapsing provider disagreement.
 
 ## Search states
 
@@ -88,6 +107,8 @@ Every runtime response can expose `providersTried`, `providerErrors`, `providerP
 - `needs_web_search`: the free automated pipeline cannot proceed or remains inconclusive; do not infer absence.
 - `web_search_exhausted`: the configured free search layers completed without a reliable abstract. This means **not found**, not **does not exist**.
 - `unavailable`: a technical failure prevented completion.
+
+Metadata resolution has a separate state space: `verified`, `partial`, `conflict` or `manifestation_ambiguity`. These are bibliographic states, not screening outcomes.
 
 ## Match discipline
 
@@ -98,6 +119,7 @@ Every runtime response can expose `providersTried`, `providerErrors`, `providerP
 - A Serper/Exa-discovered page must itself expose a compatible title before its abstract is accepted.
 - Resolved and discovered URLs are restricted to public HTTPS targets; private/local literal-IP targets are rejected.
 - Free search failure never proves that an abstract does not exist.
+- Distinct DOI manifestations with strongly matching titles are preserved as a manifestation problem instead of being silently deduplicated.
 
 ## Optional free credentials and attestations
 
@@ -109,4 +131,4 @@ Every runtime response can expose `providersTried`, `providerErrors`, `providerP
 - `EXA_API_KEY`: optional; remains unusable automatically unless the dedicated Starter Free Environment variable is true.
 - `TAVILY_API_KEY`: optional free-plan key; the Worker uses it only while `TAVILY_FREE_ONLY=true`.
 
-None of these credentials is required for deployment. Absence of a credential or attestation disables only that provider and never triggers a paid fallback.
+OpenCitations, arXiv, Zenodo public-read, HAL and DOAJ require no project credential in this implementation. None of the optional credentials is required for deployment. Absence of a credential or attestation disables only that provider and never triggers a paid fallback.
