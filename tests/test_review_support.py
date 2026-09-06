@@ -29,13 +29,32 @@ class ReviewSupportTests(unittest.TestCase):
             (ROOT / "data/curation/reading_aids.json").read_text(encoding="utf-8")
         )
         aids = {record["candidateId"]: record for record in payload["records"]}
-        self.assertEqual(unresolved, set(aids))
+        self.assertTrue(unresolved.issubset(set(aids)))
         self.assertTrue(unresolved)
         for candidate_id, record in aids.items():
             self.assertTrue(record["sourceUrl"].startswith("https://"), candidate_id)
             self.assertTrue(record["synopsis"].strip(), candidate_id)
             self.assertNotIn("abstract", {key.lower() for key in record})
             self.assertLessEqual(len(record["synopsis"]), 1500)
+
+    def test_resolved_abstract_source_may_retain_non_decisional_reading_support(self) -> None:
+        with (ROOT / "data/curation/abstract_coverage.csv").open(
+            newline="", encoding="utf-8-sig"
+        ) as handle:
+            coverage = {row["candidate_id"]: row for row in csv.DictReader(handle)}
+        payload = json.loads(
+            (ROOT / "data/curation/reading_aids.json").read_text(encoding="utf-8")
+        )
+        aids = {record["candidateId"]: record for record in payload["records"]}
+        promoted = {
+            candidate_id
+            for candidate_id, row in coverage.items()
+            if row["coverage_status"] == "available"
+            and row["match_type"] == "verified_abstract_source"
+        }
+        for candidate_id in promoted:
+            self.assertIn(candidate_id, aids)
+            self.assertEqual(aids[candidate_id]["kind"], "verified_abstract_source")
 
     def test_guidance_is_candidate_specific_but_never_a_decision(self) -> None:
         with (ROOT / "data/curation/review_queue.csv").open(
