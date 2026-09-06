@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "purpose": "Higher-confidence replacements for preparatory reading aids after targeted assisted retrieval. These records override matching candidate IDs in reading_aids.json without changing any eligibility decision.",
+  "records": [
+    {
+      "candidateId": "E0R1-C015",
+      "kind": "publisher_summary",
+      "sourceLabel": "Nomos eLibrary / Lexington Books",
+      "sourceUrl": "https://www.nomos-elibrary.de/10.5771/9781666967142-1.pdf",
+      "synopsis": "Chapter 1 of Vincent C. Figliomeni's Challenging the Mafia of Calabria is explicitly titled What Is Mafia-Type Organized Crime? and opens Part I, which defines organised crime and traces the emergence of mafia-type organised criminal groups in Southern Italy. The book analyses 'Ndrangheta's power structure, methods and regional influence in order to identify vulnerabilities for disruption.",
+      "checkedAt": "2026-09-06",
+      "note": "Targeted retrieval resolved the work identity and book/chapter context. The source exposes a book-level summary and chapter structure, not a separately labelled chapter abstract; treat this as publisher-level reading support rather than an author abstract."
+    },
+    {
+      "candidateId": "E0R1-C013",
+      "kind": "review_synopsis",
+      "sourceLabel": "Exact DOI scholarly record",
+      "sourceUrl": "https://doi.org/10.31085/2949-138x-2025-2-224-133-140",
+      "synopsis": "The exact DOI resolves to Yu.G. Starovoitova's 2025 contribution To the Issue on Criminal Wrongfulness of Illegal Entrepreneurship in Criminal Law 21st Century Development Strategies. The available exact record verifies authorship, year and venue, but does not expose a substantive abstract or evidence of organised-crime infiltration into the legal economy.",
+      "checkedAt": "2026-09-06",
+      "note": "Identity is now verified more strongly than before, but no reliable abstract/full text was recovered. Do not infer infiltration relevance from the title; screen it as an illegal-entrepreneurship boundary case unless stronger evidence emerges."
+    },
+    {
+      "candidateId": "E0R1-C040",
+      "kind": "publisher_summary",
+      "sourceLabel": "Routledge / exact book contents",
+      "sourceUrl": "https://www.routledge.com/Transnational-Organized-Crime/Beare/p/book/9781409447566",
+      "synopsis": "The exact Routledge volume identifies Part IV, Business Crime Versus Organized Crime or Business Crimes As Organized Crime, as containing Dwight C. Smith's Paragons, Pariahs, and Pirates: A Spectrum-Based Theory of Enterprise. The contribution therefore addresses the conceptual boundary between legitimate business crime and organised criminal enterprise rather than constituting direct firm-infiltration evidence by itself.",
+      "checkedAt": "2026-09-06",
+      "note": "Targeted retrieval improved this from a DOI-only curator synopsis to verified publisher-level work context. Use it principally for conceptual/contextual screening unless the chapter text supports a sustained legal-economy infiltration relationship."
+    }
+  ]
+}
