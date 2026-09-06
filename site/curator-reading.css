@@ -403,3 +403,529 @@
     scroll-margin-top: 62vh;
   }
 }
+
+/* --------------------------------------------------------------------------
+   Authenticated reader mode — deliberately simple.
+   The working surface is: queue -> paper identity -> abstract -> decision.
+   Diagnostic material stays available in the GitHub audit record instead of
+   competing with the paper for visual attention.
+   -------------------------------------------------------------------------- */
+
+.curator-page:has(#curator-session-panel:not([hidden])) {
+  background: #f4f5f2;
+}
+
+.curator-page:has(#curator-session-panel:not([hidden])) .site-header,
+.curator-page:has(#curator-session-panel:not([hidden])) .curator-workspace > :not(.editorial-app) {
+  display: none !important;
+}
+
+.curator-page:has(#curator-session-panel:not([hidden])) main,
+.curator-page:has(#curator-session-panel:not([hidden])) .header-inner {
+  width: min(1500px, calc(100% - 20px));
+}
+
+.curator-page:has(#curator-session-panel:not([hidden])) main {
+  padding: 10px 0 28px;
+}
+
+.curator-page:has(#curator-session-panel:not([hidden])) .curator-workspace,
+.curator-page:has(#curator-session-panel:not([hidden])) .editorial-app {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.curator-page:has(#curator-session-panel:not([hidden])) .curator-session-panel {
+  display: flex;
+  width: max-content;
+  max-width: 100%;
+  gap: 12px;
+  align-items: center;
+  margin: 0 0 8px auto;
+  padding: 6px 9px;
+  border: 1px solid #dfe3dc;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: none;
+  font-size: 0.62rem;
+}
+
+.curator-page:has(#curator-session-panel:not([hidden])) .curator-session-panel p {
+  margin: 0;
+}
+
+.curator-page:has(#curator-session-panel:not([hidden])) .curator-session-panel .text-button {
+  font-size: 0.58rem;
+}
+
+.curator-page:has(#curator-session-panel:not([hidden])) .editorial-console {
+  grid-template-columns: 286px minmax(0, 1fr) !important;
+  gap: 10px !important;
+  align-items: start;
+}
+
+.curator-page:has(#curator-session-panel:not([hidden])) .candidate-browser {
+  position: sticky;
+  top: 10px;
+  height: calc(100vh - 20px);
+  max-height: calc(100vh - 20px);
+  border: 1px solid #dfe3dc;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: none;
+}
+
+.curator-page:has(#curator-session-panel:not([hidden])) .candidate-browser-heading {
+  padding: 12px 12px 7px;
+}
+
+.curator-page:has(#curator-session-panel:not([hidden])) .candidate-browser-heading .workspace-label {
+  display: none;
+}
+
+.curator-page:has(#curator-session-panel:not([hidden])) .candidate-browser-heading h3 {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 720;
+}
+
+.curator-page:has(#curator-session-panel:not([hidden])) #candidate-result-count {
+  color: #727a73;
+  font-size: 0.58rem;
+}
+
+.curator-page:has(#curator-session-panel:not([hidden])) .candidate-controls {
+  grid-template-columns: 1fr !important;
+  gap: 6px;
+  padding: 0 8px 8px;
+}
+
+.curator-page:has(#curator-session-panel:not([hidden])) .candidate-controls label > span {
+  display: none;
+}
+
+.curator-page:has(#curator-session-panel:not([hidden])) .candidate-controls input,
+.curator-page:has(#curator-session-panel:not([hidden])) .candidate-controls select {
+  min-height: 34px;
+  border-radius: 7px;
+  padding: 7px 8px;
+  background: #fafbf9;
+  font-size: 0.67rem;
+}
+
+.curator-page:has(#curator-session-panel:not([hidden])) .candidate-list {
+  padding: 0 7px 8px;
+}
+
+.curator-page:has(#curator-session-panel:not([hidden])) .queue-review-card {
+  gap: 3px;
+  padding: 9px 8px;
+  border: 0;
+  border-bottom: 1px solid #eceee9;
+  border-left: 3px solid transparent;
+  border-radius: 4px;
+  background: #fff;
+  box-shadow: none;
+}
+
+.curator-page:has(#curator-session-panel:not([hidden])) .queue-review-card:hover {
+  transform: none;
+  background: #f7f8f5;
+}
+
+.curator-page:has(#curator-session-panel:not([hidden])) .queue-review-card[data-selected="true"] {
+  border-left-color: var(--green);
+  background: #eef5f1;
+  box-shadow: none;
+}
+
+.curator-page:has(#curator-session-panel:not([hidden])) .queue-card-title {
+  margin-top: 0;
+  font-size: 0.77rem !important;
+  font-weight: 690;
+  line-height: 1.24 !important;
+}
+
+.curator-page:has(#curator-session-panel:not([hidden])) .queue-card-authors,
+.curator-page:has(#curator-session-panel:not([hidden])) .queue-card-citation {
+  font-size: 0.56rem;
+  line-height: 1.25;
+}
+
+.curator-page:has(#curator-session-panel:not([hidden])) .queue-stage-badge,
+.curator-page:has(#curator-session-panel:not([hidden])) .queue-card-chip {
+  padding: 2px 5px;
+  font-size: 0.46rem !important;
+}
+
+.curator-page:has(#curator-session-panel:not([hidden])) .candidate-queue-pager {
+  padding: 7px 8px;
+  background: #fff;
+}
+
+.curator-page:has(#curator-session-panel:not([hidden])) .candidate-decision-panel {
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.curator-page:has(#curator-session-panel:not([hidden])) .candidate-empty-state {
+  min-height: 68vh;
+  border: 1px solid #dfe3dc;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.curator-page:has(#curator-session-panel:not([hidden])) .candidate-detail {
+  display: block;
+  overflow: hidden;
+  border: 1px solid #dfe3dc;
+  border-radius: 10px 10px 0 0;
+  background: #fff;
+}
+
+.curator-page:has(#curator-session-panel:not([hidden])) .candidate-detail-heading {
+  display: flex;
+  gap: 18px;
+  padding: 22px 24px 14px;
+  border: 0;
+  background: #fff;
+}
+
+.curator-page:has(#curator-session-panel:not([hidden])) #selected-provenance-kind,
+.curator-page:has(#curator-session-panel:not([hidden])) #selected-candidate-id {
+  display: inline-block;
+  margin: 0 7px 0 0;
+  color: #778078;
+  font-size: 0.53rem;
+}
+
+.curator-page:has(#curator-session-panel:not([hidden])) #selected-candidate-title {
+  max-width: 980px;
+  margin: 6px 0 0;
+  font-size: clamp(1.55rem, 2.35vw, 2.25rem);
+  font-weight: 500;
+  line-height: 1.08;
+}
+
+.curator-page:has(#curator-session-panel:not([hidden])) .candidate-reading-byline {
+  max-width: 980px;
+  margin: 8px 0 0;
+  font-size: 0.76rem;
+  line-height: 1.4;
+}
+
+.curator-page:has(#curator-session-panel:not([hidden])) .candidate-heading-actions {
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 5px;
+}
+
+.curator-page:has(#curator-session-panel:not([hidden])) .candidate-heading-actions a,
+.curator-page:has(#curator-session-panel:not([hidden])) .candidate-retrieval-status {
+  min-width: 0;
+  max-width: 190px;
+  border-radius: 7px;
+  padding: 6px 8px;
+  font-size: 0.53rem;
+}
+
+/* Authors/year/venue are already in the byline. Keep only DOI + current stage. */
+.curator-page:has(#curator-session-panel:not([hidden])) .candidate-metadata {
+  display: flex !important;
+  gap: 6px;
+  align-items: center;
+  margin: 0;
+  padding: 0 24px 13px;
+  background: #fff;
+}
+
+.curator-page:has(#curator-session-panel:not([hidden])) .candidate-metadata > div {
+  display: none;
+}
+
+.curator-page:has(#curator-session-panel:not([hidden])) .candidate-metadata > div:nth-child(4),
+.curator-page:has(#curator-session-panel:not([hidden])) .candidate-metadata > div:nth-child(6) {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid #e1e4de;
+  border-radius: 999px;
+  padding: 4px 8px;
+  background: #fafbf9;
+}
+
+.curator-page:has(#curator-session-panel:not([hidden])) .candidate-metadata dt {
+  display: none;
+}
+
+.curator-page:has(#curator-session-panel:not([hidden])) .candidate-metadata dd {
+  margin: 0;
+  color: #5f6861;
+  font-size: 0.55rem;
+  line-height: 1.25;
+}
+
+.curator-page:has(#curator-session-panel:not([hidden])) .candidate-metadata > div:nth-child(4) dd {
+  color: var(--green);
+  font-size: 0.55rem;
+}
+
+/* The paper's abstract is the visual centre of the workspace. */
+.curator-page:has(#curator-session-panel:not([hidden])) #candidate-abstract-panel {
+  margin: 0;
+  border: 0;
+  border-top: 1px solid #eceee9;
+  border-radius: 0;
+  background: #fff;
+}
+
+.curator-page:has(#curator-session-panel:not([hidden])) #candidate-abstract-panel .candidate-abstract-heading {
+  align-items: baseline;
+  padding: 16px 24px 3px;
+  border: 0;
+}
+
+.curator-page:has(#curator-session-panel:not([hidden])) #candidate-abstract-panel .workspace-label {
+  display: none;
+}
+
+.curator-page:has(#curator-session-panel:not([hidden])) #candidate-abstract-panel h4 {
+  margin: 0;
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  font-size: 0.69rem;
+  font-weight: 820;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.curator-page:has(#curator-session-panel:not([hidden])) #candidate-abstract-source {
+  max-width: 58%;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: #7a827b;
+  font-size: 0.54rem;
+  font-weight: 650;
+  text-align: right;
+}
+
+.curator-page:has(#curator-session-panel:not([hidden])) #candidate-abstract-text {
+  max-width: 88ch;
+  margin: 0;
+  padding: 10px 24px 18px;
+  color: #1f2521;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.04rem;
+  line-height: 1.72;
+}
+
+.curator-page:has(#curator-session-panel:not([hidden])) #candidate-abstract-note {
+  max-width: 88ch;
+  margin: -8px 0 0;
+  padding: 0 24px 17px;
+  color: #7a827b;
+  font-size: 0.55rem;
+  line-height: 1.4;
+}
+
+/* Hide secondary diagnostic cards from the reading path. Their evidence remains
+   in the audit issue and still powers identity/decision guards. */
+.curator-page:has(#curator-session-panel:not([hidden])) #candidate-reading-aid-panel,
+.curator-page:has(#curator-session-panel:not([hidden])) #candidate-review-guidance-panel,
+.curator-page:has(#curator-session-panel:not([hidden])) #candidate-consensus-panel,
+.curator-page:has(#curator-session-panel:not([hidden])) .candidate-provenance-details {
+  display: none !important;
+}
+
+/* Identity remains visible only when it matters, but as a compact guard. */
+.curator-page:has(#curator-session-panel:not([hidden])) #candidate-identity-panel {
+  margin: 0 24px 13px !important;
+  border-radius: 8px !important;
+  box-shadow: none !important;
+}
+
+/* Assisted resolution appears only on residual abstract cases: keep it compact. */
+.curator-page:has(#curator-session-panel:not([hidden])) #candidate-assisted-resolution-panel {
+  margin: 8px 0 !important;
+  border-radius: 8px !important;
+  padding: 10px 12px !important;
+  box-shadow: none !important;
+}
+
+.curator-page:has(#curator-session-panel:not([hidden])) #candidate-assisted-resolution-panel .assisted-resolution-note,
+.curator-page:has(#curator-session-panel:not([hidden])) #candidate-assisted-resolution-panel .assisted-resolution-boundary {
+  display: none;
+}
+
+/* Decision immediately follows reading. */
+.curator-page:has(#curator-session-panel:not([hidden])) .decision-form {
+  margin: 0 !important;
+  padding: 18px 24px 23px !important;
+  border: 1px solid #dfe3dc !important;
+  border-top: 0 !important;
+  border-radius: 0 0 10px 10px;
+  background: #fff;
+  box-shadow: none;
+  scroll-margin-top: 18px !important;
+}
+
+.curator-page:has(#curator-session-panel:not([hidden])) .decision-form-heading {
+  align-items: baseline;
+  margin-bottom: 10px;
+}
+
+.curator-page:has(#curator-session-panel:not([hidden])) .decision-form-heading h3 {
+  margin: 0;
+  font-size: 0.98rem;
+  font-weight: 760;
+}
+
+.curator-page:has(#curator-session-panel:not([hidden])) .decision-form-heading > p {
+  display: none;
+}
+
+.curator-page:has(#curator-session-panel:not([hidden])) .guided-decision-composer {
+  margin: 0 0 12px;
+  border: 1px solid #e1e4de;
+  border-radius: 8px;
+  background: #fafbf9;
+  box-shadow: none;
+}
+
+.curator-page:has(#curator-session-panel:not([hidden])) .decision-fields {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px 9px;
+}
+
+.curator-page:has(#curator-session-panel:not([hidden])) .decision-fields label {
+  gap: 3px;
+}
+
+.curator-page:has(#curator-session-panel:not([hidden])) .decision-fields label > span {
+  font-size: 0.6rem;
+}
+
+.curator-page:has(#curator-session-panel:not([hidden])) .decision-fields input,
+.curator-page:has(#curator-session-panel:not([hidden])) .decision-fields select,
+.curator-page:has(#curator-session-panel:not([hidden])) .decision-fields textarea {
+  border-radius: 7px;
+  font-size: 0.7rem;
+}
+
+.curator-page:has(#curator-session-panel:not([hidden])) .decision-fields textarea {
+  min-height: 82px;
+  resize: vertical;
+}
+
+.curator-page:has(#curator-session-panel:not([hidden])) .decision-fields small {
+  color: #7a827b;
+  font-size: 0.53rem;
+}
+
+.curator-page:has(#curator-session-panel:not([hidden])) .wide-field {
+  grid-column: 1 / -1;
+}
+
+.curator-page:has(#curator-session-panel:not([hidden])) .explicit-confirmation {
+  margin-top: 10px;
+  font-size: 0.61rem;
+}
+
+.curator-page:has(#curator-session-panel:not([hidden])) #submit-decision {
+  min-height: 37px;
+  margin-top: 10px;
+  border-radius: 7px;
+  padding: 8px 13px;
+  font-size: 0.68rem;
+}
+
+@media (max-width: 1040px) {
+  .curator-page:has(#curator-session-panel:not([hidden])) .editorial-console {
+    grid-template-columns: 250px minmax(0, 1fr) !important;
+  }
+
+  .curator-page:has(#curator-session-panel:not([hidden])) .decision-fields {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 820px) {
+  .curator-page:has(#curator-session-panel:not([hidden])) main {
+    width: min(100% - 14px, 1500px);
+  }
+
+  .curator-page:has(#curator-session-panel:not([hidden])) .editorial-console {
+    grid-template-columns: 1fr !important;
+  }
+
+  .curator-page:has(#curator-session-panel:not([hidden])) .candidate-browser {
+    position: static;
+    height: auto;
+    max-height: 295px;
+  }
+
+  .curator-page:has(#curator-session-panel:not([hidden])) .candidate-list {
+    max-height: 185px;
+  }
+}
+
+@media (max-width: 580px) {
+  .curator-page:has(#curator-session-panel:not([hidden])) .candidate-detail-heading {
+    padding: 16px 14px 12px;
+  }
+
+  .curator-page:has(#curator-session-panel:not([hidden])) #selected-candidate-title {
+    font-size: 1.4rem;
+  }
+
+  .curator-page:has(#curator-session-panel:not([hidden])) .candidate-heading-actions {
+    justify-content: flex-start;
+  }
+
+  .curator-page:has(#curator-session-panel:not([hidden])) .candidate-metadata {
+    padding: 0 14px 11px;
+  }
+
+  .curator-page:has(#curator-session-panel:not([hidden])) #candidate-abstract-panel .candidate-abstract-heading {
+    flex-direction: column;
+    gap: 3px;
+    padding: 14px 14px 2px;
+  }
+
+  .curator-page:has(#curator-session-panel:not([hidden])) #candidate-abstract-source {
+    max-width: 100%;
+    text-align: left;
+    white-space: normal;
+  }
+
+  .curator-page:has(#curator-session-panel:not([hidden])) #candidate-abstract-text {
+    padding: 8px 14px 15px;
+    font-size: 0.97rem;
+    line-height: 1.64;
+  }
+
+  .curator-page:has(#curator-session-panel:not([hidden])) #candidate-abstract-note {
+    padding: 0 14px 14px;
+  }
+
+  .curator-page:has(#curator-session-panel:not([hidden])) #candidate-identity-panel {
+    margin: 0 14px 11px !important;
+  }
+
+  .curator-page:has(#curator-session-panel:not([hidden])) .decision-form {
+    padding: 15px 14px 17px !important;
+  }
+
+  .curator-page:has(#curator-session-panel:not([hidden])) .decision-fields {
+    grid-template-columns: 1fr;
+  }
+}
