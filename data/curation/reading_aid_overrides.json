@@ -28,6 +28,24 @@
       "synopsis": "The exact Routledge volume identifies Part IV, Business Crime Versus Organized Crime or Business Crimes As Organized Crime, as containing Dwight C. Smith's Paragons, Pariahs, and Pirates: A Spectrum-Based Theory of Enterprise. The contribution therefore addresses the conceptual boundary between legitimate business crime and organised criminal enterprise rather than constituting direct firm-infiltration evidence by itself.",
       "checkedAt": "2026-09-06",
       "note": "Targeted retrieval improved this from a DOI-only curator synopsis to verified publisher-level work context. Use it principally for conceptual/contextual screening unless the chapter text supports a sustained legal-economy infiltration relationship."
+    },
+    {
+      "candidateId": "E0R1-C032",
+      "kind": "full_text_intro",
+      "sourceLabel": "The Organized Crime Community — accessible book PDF",
+      "sourceUrl": "http://ndl.ethernet.edu.et/bitstream/123456789/59423/1/Frank%20Bovenkerk.pdf",
+      "synopsis": "Michael Levi's chapter Pecunia Non Olet? The Control of Money-laundering Revisited appears as chapter 10 of The Organized Crime Community (pp. 161–182). Targeted retrieval located an accessible full-book PDF containing the chapter, allowing direct full-text review of its reassessment of money-laundering control rather than relying only on bibliographic summaries.",
+      "checkedAt": "2026-09-06",
+      "note": "A full-text manifestation has been located. The chapter is primarily AML/control-policy analysis; inspect the text for any necessary contextual contribution before stretching it into the infiltration corpus."
+    },
+    {
+      "candidateId": "E0R1-C043",
+      "kind": "publisher_summary",
+      "sourceLabel": "SAGE Publications / Klaus von Lampe author site",
+      "sourceUrl": "https://uk.sagepub.com/en-gb/eur/organized-crime/book237245",
+      "synopsis": "Chapter 3, Organized Crime Research, surveys the study of organised crime as an academic subdiscipline, its history, major contemporary research lines and methodological challenges. The surrounding monograph develops a three-dimensional framework of illegal activities, criminal structures and extra-legal governance extending into legal spheres of society.",
+      "checkedAt": "2026-09-06",
+      "note": "Targeted retrieval found the exact publisher description and chapter structure. This is strong contextual/methodological reading support but not direct infiltration evidence by itself."
     }
   ]
 }
