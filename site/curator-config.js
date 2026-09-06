@@ -11,7 +11,7 @@ function loadCuratorComponent(src, marker) {
   if (document.querySelector(`script[data-${marker}="true"]`)) return;
   const script = document.createElement("script");
   script.src = src;
-  script.defer = true;
+  script.async = false;
   script.dataset[marker.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase())] = "true";
   document.head.append(script);
 }
