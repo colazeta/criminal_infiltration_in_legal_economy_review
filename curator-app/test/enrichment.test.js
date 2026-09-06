@@ -44,12 +44,13 @@ test("title similarity rewards the same bibliographic work", () => {
   assert.ok(titleSimilarity("Mafia infiltration in firms", "Marine biology and coral reefs") < 0.2);
 });
 
-test("DOI enrichment prefers a verified OpenAlex abstract without a billing key", async (context) => {
+test("DOI enrichment keeps a verified OpenAlex abstract while continuing metadata reconciliation", async (context) => {
   withFetchMock(context, async (url) => {
     const value = String(url);
     if (value.startsWith("https://api.openalex.org/works/https://doi.org/10.1000/example")) {
       assert.equal(new URL(value).searchParams.has("api_key"), false);
       return Response.json({
+        id: "https://openalex.org/W123",
         doi: "https://doi.org/10.1000/example",
         display_name: "Organised crime and firm ownership",
         publication_year: 2025,
@@ -59,12 +60,22 @@ test("DOI enrichment prefers a verified OpenAlex abstract without a billing key"
           affects: [2],
           ownership: [3],
         },
-        primary_location: { landing_page_url: "https://publisher.example/article" },
+        authorships: [{ author: { display_name: "Anna Rossi" } }],
+        primary_location: {
+          landing_page_url: "https://publisher.example/article",
+          source: { display_name: "Crime and Markets" },
+        },
         open_access: { oa_url: null },
       });
     }
     if (value.startsWith("https://api.crossref.org/works/10.1000%2Fexample")) {
-      return Response.json({ message: { DOI: "10.1000/example", title: ["Organised crime and firm ownership"] } });
+      return Response.json({ message: {
+        DOI: "10.1000/example",
+        title: ["Organised crime and firm ownership"],
+        published: { "date-parts": [[2025]] },
+        author: [{ given: "Anna", family: "Rossi" }],
+        "container-title": ["Crime and Markets"],
+      } });
     }
     throw new Error(`Unexpected fetch: ${value}`);
   });
@@ -78,7 +89,11 @@ test("DOI enrichment prefers a verified OpenAlex abstract without a billing key"
   assert.equal(result.abstractSource, "OpenAlex");
   assert.equal(result.matchType, "doi");
   assert.equal(result.articleUrl, "https://publisher.example/article");
-  assert.deepEqual(result.providersTried, ["OpenAlex", "Crossref"]);
+  assert.deepEqual(result.providersTried.slice(0, 2), ["OpenAlex", "Crossref"]);
+  assert.ok(result.providersTried.includes("OpenCitations Meta"));
+  assert.ok(result.providersTried.includes("arXiv"));
+  assert.ok(result.metadataResolution);
+  assert.equal(result.metadataResolution.fields.doi.value, "10.1000/example");
   assert.equal(result.providerPlan.some((provider) => provider.id === "exa"), false);
 });
 
@@ -159,5 +174,7 @@ test("unresolved free scholarly search hands off to resolved-document stage befo
   assert.ok(result.providersTried.includes("DataCite"));
   assert.ok(result.providersTried.includes("CORE"));
   assert.ok(result.providersTried.includes("Europe PMC"));
+  assert.ok(result.providersTried.includes("Zenodo"));
+  assert.ok(result.providersTried.includes("HAL"));
   assert.equal(result.providersTried.includes("Tavily Basic"), false);
 });
