@@ -3,8 +3,9 @@
 (() => {
   const HEADING = "## Abstract resolution — assisted";
   const byId = (id) => document.getElementById(id);
-  let controller = null;
-  let activeKey = "";
+  const issueCache = new Map();
+  const originalFetch = window.fetch.bind(window);
+  let activeIssueKey = "";
 
   function clean(value) {
     return String(value || "")
@@ -31,6 +32,23 @@
     return { owner: match[1], repo: match[2], number: Number(match[3]) };
   }
 
+  function issueKey(info) {
+    return info ? `${info.owner}/${info.repo}#${info.number}` : "";
+  }
+
+  function issueKeyFromRequest(input) {
+    try {
+      const raw = typeof input === "string" || input instanceof URL ? String(input) : String(input?.url || "");
+      const url = new URL(raw, window.location.href);
+      if (url.hostname !== "api.github.com") return "";
+      const match = url.pathname.match(/^\/repos\/([^/]+)\/([^/]+)\/issues\/(\d+)$/);
+      if (!match) return "";
+      return `${decodeURIComponent(match[1])}/${decodeURIComponent(match[2])}#${Number(match[3])}`;
+    } catch {
+      return "";
+    }
+  }
+
   function section(body) {
     const source = String(body || "").replace(/\r\n/g, "\n");
     const start = source.indexOf(HEADING);
@@ -47,6 +65,15 @@
       if (match) result[match[1].trim()] = clean(match[2]);
     }
     return result;
+  }
+
+  function parseIssuePayload(payload) {
+    const body = String(payload?.body || "");
+    const parsed = section(body);
+    return {
+      candidateMarker: body.match(/<!--\s*curator-candidate:([^\s]+)\s*-->/)?.[1] || "",
+      resolution: parsed ? fields(parsed) : null,
+    };
   }
 
   function node(tag, options = {}) {
@@ -180,34 +207,30 @@
     }));
   }
 
-  async function refresh() {
-    const candidateId = clean(byId("selected-candidate-id")?.textContent);
+  function renderCurrentFromCache() {
     const detail = byId("candidate-detail");
-    const issue = issueInfo();
-    if (!candidateId || candidateId === "—" || !detail || detail.hidden || !issue) return hidePanel();
-    const key = `${candidateId}|${issue.owner}/${issue.repo}#${issue.number}`;
-    if (key === activeKey && !byId("candidate-assisted-resolution-panel")?.hidden) return;
-    activeKey = key;
-    controller?.abort();
-    controller = new AbortController();
-    try {
-      const response = await fetch(`https://api.github.com/repos/${encodeURIComponent(issue.owner)}/${encodeURIComponent(issue.repo)}/issues/${issue.number}`, {
-        signal: controller.signal,
-        headers: {
-          Accept: "application/vnd.github+json",
-          "X-GitHub-Api-Version": "2022-11-28",
-        },
-      });
-      if (!response.ok) throw new Error(`issue_${response.status}`);
-      const body = String((await response.json())?.body || "");
-      if (activeKey !== key) return;
-      const parsed = section(body);
-      render(parsed ? fields(parsed) : null);
-    } catch (error) {
-      if (error?.name === "AbortError" || activeKey !== key) return;
-      hidePanel();
-    }
+    const candidateId = clean(byId("selected-candidate-id")?.textContent);
+    const info = issueInfo();
+    const key = issueKey(info);
+    activeIssueKey = key;
+    if (!detail || detail.hidden || !candidateId || candidateId === "—" || !key) return hidePanel();
+    const cached = issueCache.get(key);
+    if (!cached || cached.candidateMarker !== candidateId) return hidePanel();
+    render(cached.resolution);
   }
+
+  window.fetch = async function curatorAssistedResolutionFetch(input, init) {
+    const key = issueKeyFromRequest(input);
+    const response = await originalFetch(input, init);
+    if (key && response.ok) {
+      response.clone().json().then((payload) => {
+        const parsed = parseIssuePayload(payload);
+        issueCache.set(key, parsed);
+        if (activeIssueKey === key || issueKey(issueInfo()) === key) queueMicrotask(renderCurrentFromCache);
+      }).catch(() => {});
+    }
+    return response;
+  };
 
   function initialise() {
     injectStyles();
@@ -216,11 +239,11 @@
     const id = byId("selected-candidate-id");
     const issue = byId("selected-candidate-issue");
     if (!detail || !id || !issue) return;
-    const observer = new MutationObserver(() => queueMicrotask(refresh));
+    const observer = new MutationObserver(() => queueMicrotask(renderCurrentFromCache));
     observer.observe(detail, { attributes: true, attributeFilter: ["hidden"] });
     observer.observe(id, { childList: true, characterData: true, subtree: true });
     observer.observe(issue, { attributes: true, attributeFilter: ["href"] });
-    queueMicrotask(refresh);
+    queueMicrotask(renderCurrentFromCache);
   }
 
   if (document.readyState === "loading") {
