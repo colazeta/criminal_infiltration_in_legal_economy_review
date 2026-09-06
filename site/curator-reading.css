@@ -1,12 +1,15 @@
 .reading-candidate-detail {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
   padding: 0;
   background: var(--surface);
 }
 
 .reading-candidate-detail .candidate-detail-heading {
+  grid-column: 1 / -1;
   gap: 24px;
   align-items: flex-start;
-  padding: 28px 30px 22px;
+  padding: 26px 28px 20px;
   border-bottom: 1px solid var(--line);
   background: linear-gradient(180deg, var(--paper-deep), var(--surface));
 }
@@ -19,16 +22,16 @@
 .reading-candidate-detail #selected-candidate-title {
   max-width: 900px;
   margin: 8px 0 0;
-  font-size: clamp(1.45rem, 2.6vw, 2.2rem);
+  font-size: clamp(1.4rem, 2.35vw, 2.05rem);
   line-height: 1.08;
 }
 
 .candidate-reading-byline {
   max-width: 880px;
-  margin: 12px 0 0;
+  margin: 10px 0 0;
   color: var(--ink-soft);
-  font-size: 0.88rem;
-  line-height: 1.55;
+  font-size: 0.82rem;
+  line-height: 1.5;
 }
 
 .candidate-heading-actions {
@@ -40,12 +43,12 @@
 }
 
 .candidate-heading-actions a {
-  min-width: 150px;
+  min-width: 146px;
   border-radius: 999px;
-  padding: 10px 14px;
+  padding: 9px 13px;
   text-align: center;
   text-decoration: none;
-  font-size: 0.73rem;
+  font-size: 0.7rem;
   font-weight: 760;
 }
 
@@ -81,6 +84,7 @@
 
 .reading-candidate-detail .candidate-metadata {
   display: grid;
+  grid-column: 1 / -1;
   grid-template-columns: minmax(0, 1.35fr) minmax(100px, 0.45fr) minmax(0, 1fr);
   gap: 1px;
   margin: 0;
@@ -90,14 +94,18 @@
 
 .reading-candidate-detail .candidate-metadata > div {
   min-width: 0;
-  padding: 17px 20px;
+  padding: 15px 18px;
   background: var(--surface);
 }
 
+.reading-candidate-detail .candidate-metadata > div:nth-child(n + 5) {
+  background: #f6f8f5;
+}
+
 .reading-candidate-detail .candidate-metadata dt {
-  margin-bottom: 5px;
+  margin-bottom: 4px;
   color: var(--ink-soft);
-  font-size: 0.64rem;
+  font-size: 0.61rem;
   font-weight: 800;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -106,75 +114,174 @@
 .reading-candidate-detail .candidate-metadata dd {
   margin: 0;
   overflow-wrap: anywhere;
-  font-size: 0.79rem;
-  line-height: 1.45;
+  font-size: 0.76rem;
+  line-height: 1.42;
+}
+
+.reading-candidate-detail .candidate-metadata > div:nth-child(4) dd {
+  color: var(--green);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.7rem;
+  font-weight: 720;
 }
 
 .candidate-abstract-panel {
-  margin: 24px 30px 12px;
+  margin: 20px 28px 10px;
   border: 1px solid var(--line);
-  border-radius: 16px;
+  border-radius: 14px;
   background: var(--paper-deep);
   overflow: hidden;
 }
 
+#candidate-abstract-panel {
+  grid-column: 1 / -1;
+  margin-bottom: 0;
+}
+
+#candidate-reading-aid-panel {
+  grid-column: 1;
+  margin: 10px 5px 10px 28px;
+}
+
+#candidate-review-guidance-panel {
+  grid-column: 2;
+  margin: 10px 28px 10px 5px;
+  border-color: #b7d1c8;
+  background: #f4faf7;
+}
+
 .candidate-abstract-heading {
   display: flex;
-  gap: 20px;
+  gap: 18px;
   align-items: flex-start;
   justify-content: space-between;
-  padding: 20px 22px 16px;
+  padding: 17px 19px 13px;
   border-bottom: 1px solid var(--line);
 }
 
 .candidate-abstract-heading h4 {
   margin: 3px 0 0;
   font-family: Georgia, "Times New Roman", serif;
-  font-size: 1.45rem;
+  font-size: 1.32rem;
   font-weight: 500;
 }
 
 .candidate-abstract-source {
-  flex: 0 0 auto;
+  max-width: 48%;
+  flex: 0 1 auto;
+  overflow: hidden;
   border: 1px solid var(--line);
   border-radius: 999px;
-  padding: 7px 10px;
+  padding: 6px 9px;
   background: var(--surface);
   color: var(--ink-soft);
-  font-size: 0.64rem;
+  font-size: 0.6rem;
   font-weight: 760;
   letter-spacing: 0.025em;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+#candidate-review-guidance-panel .candidate-abstract-source {
+  border-color: #b7d1c8;
+  background: var(--green-soft);
+  color: var(--green);
 }
 
 .candidate-abstract-text {
-  max-width: 80ch;
+  max-width: 82ch;
   margin: 0;
-  padding: 22px 24px 12px;
+  padding: 18px 20px 10px;
   color: var(--ink);
   font-family: Georgia, "Times New Roman", serif;
-  font-size: 1rem;
-  line-height: 1.72;
+  font-size: 0.96rem;
+  line-height: 1.65;
 }
 
-.candidate-abstract-note {
-  max-width: 90ch;
-  margin: 0;
-  padding: 6px 24px 22px;
-  color: var(--ink-soft);
-  font-size: 0.67rem;
+#candidate-reading-aid-panel .candidate-abstract-text,
+#candidate-review-guidance-panel .candidate-abstract-text {
+  padding: 15px 17px 8px;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 0.78rem;
   line-height: 1.5;
 }
 
+.candidate-abstract-note {
+  max-width: 92ch;
+  margin: 0;
+  padding: 5px 20px 18px;
+  color: var(--ink-soft);
+  font-size: 0.63rem;
+  line-height: 1.45;
+}
+
+#candidate-reading-aid-panel .candidate-abstract-note,
+#candidate-review-guidance-panel .candidate-abstract-note {
+  padding: 4px 17px 14px;
+}
+
 .reading-candidate-detail .candidate-provenance-details {
-  margin: 12px 30px 26px;
+  grid-column: 1 / -1;
+  margin: 8px 28px 20px;
 }
 
 .reading-candidate-detail + .decision-form {
-  margin-top: 20px;
+  margin: 16px 28px 0;
+  padding-top: 20px;
   border-top: 4px solid var(--green);
+  scroll-margin-top: 42vh;
 }
 
-@media (max-width: 920px) {
+.curator-page main,
+.curator-page .header-inner {
+  width: min(1360px, calc(100% - 32px));
+}
+
+.curator-page main {
+  padding-top: 42px;
+  padding-bottom: 72px;
+}
+
+.curator-page .workspace-heading {
+  margin-bottom: 14px;
+}
+
+.curator-page .workspace-heading h1 {
+  font-size: clamp(2.35rem, 4vw, 4rem);
+}
+
+.curator-page .editorial-app-heading {
+  margin-bottom: 14px;
+}
+
+.curator-page .editorial-app-heading h2 {
+  font-size: clamp(1.9rem, 3vw, 2.8rem);
+}
+
+.curator-page:has(#curator-session-panel:not([hidden])) main {
+  padding-top: 22px;
+}
+
+.curator-page:has(#curator-session-panel:not([hidden])) .workspace-heading,
+.curator-page:has(#curator-session-panel:not([hidden])) .editorial-app-heading {
+  display: none;
+}
+
+.curator-page:has(#curator-session-panel:not([hidden])) .editorial-app {
+  margin-top: 0;
+}
+
+.curator-page:has(#curator-session-panel:not([hidden])) .curator-session-panel {
+  margin-bottom: 8px;
+  border-radius: 10px;
+}
+
+@media (max-width: 980px) {
+  .reading-candidate-detail {
+    grid-template-columns: 1fr;
+  }
+
   .reading-candidate-detail .candidate-detail-heading {
     flex-direction: column;
   }
@@ -196,35 +303,103 @@
   .reading-candidate-detail .candidate-metadata {
     grid-template-columns: 1fr 1fr;
   }
+
+  #candidate-abstract-panel,
+  #candidate-reading-aid-panel,
+  #candidate-review-guidance-panel {
+    grid-column: 1;
+    margin: 10px 18px;
+  }
+
+  .curator-page .section-heading > p {
+    display: none;
+  }
 }
 
 @media (max-width: 640px) {
+  .curator-page main,
+  .curator-page .header-inner {
+    width: min(100% - 22px, 1360px);
+  }
+
+  .curator-page main {
+    padding-top: 28px;
+    padding-bottom: 46px;
+  }
+
+  .curator-page .workspace-heading h1 {
+    font-size: 2.35rem;
+  }
+
+  .curator-page nav {
+    max-width: 100%;
+    overflow-x: auto;
+    gap: 0.85rem;
+    padding-bottom: 3px;
+    font-size: 0.68rem;
+    white-space: nowrap;
+  }
+
   .reading-candidate-detail .candidate-detail-heading {
-    padding: 22px 18px 18px;
+    padding: 18px 16px 16px;
+  }
+
+  .reading-candidate-detail #selected-candidate-title {
+    font-size: 1.48rem;
+  }
+
+  .candidate-reading-byline {
+    font-size: 0.76rem;
   }
 
   .reading-candidate-detail .candidate-metadata {
     grid-template-columns: 1fr;
   }
 
-  .candidate-abstract-panel {
-    margin: 18px 14px 10px;
+  .reading-candidate-detail .candidate-metadata > div {
+    padding: 12px 14px;
+  }
+
+  #candidate-abstract-panel,
+  #candidate-reading-aid-panel,
+  #candidate-review-guidance-panel {
+    margin: 9px 10px;
   }
 
   .candidate-abstract-heading {
     flex-direction: column;
+    gap: 8px;
+    padding: 15px 16px 11px;
+  }
+
+  .candidate-abstract-source {
+    max-width: 100%;
+    white-space: normal;
   }
 
   .candidate-abstract-text {
-    padding: 18px 18px 10px;
-    font-size: 0.96rem;
+    padding: 15px 16px 8px;
+    font-size: 0.91rem;
+    line-height: 1.58;
+  }
+
+  #candidate-reading-aid-panel .candidate-abstract-text,
+  #candidate-review-guidance-panel .candidate-abstract-text {
+    padding: 13px 15px 7px;
+    font-size: 0.76rem;
   }
 
   .candidate-abstract-note {
-    padding: 6px 18px 18px;
+    padding: 4px 16px 15px;
   }
 
   .reading-candidate-detail .candidate-provenance-details {
-    margin: 10px 18px 22px;
+    margin: 8px 12px 16px;
+  }
+
+  .reading-candidate-detail + .decision-form {
+    margin: 12px 14px 0;
+    padding-top: 16px;
+    scroll-margin-top: 62vh;
   }
 }
