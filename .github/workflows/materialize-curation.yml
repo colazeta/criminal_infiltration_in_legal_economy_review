@@ -7,12 +7,14 @@ on:
       - data/curation/review_queue.csv
       - data/curation/retrieval_coverage.csv
       - data/curation/reading_aids.json
+      - data/curation/reading_aid_overrides.json
       - scripts/curation/materialize_queue_issues.py
       - scripts/curation/sync_issue_candidate_record.py
       - scripts/curation/sync_issue_review_support.py
       - scripts/retrieval/sync_issue_retrieval.py
       - tests/test_sync_issue_candidate_record.py
       - tests/test_review_support.py
+      - tests/test_reading_aid_overrides.py
       - .github/workflows/materialize-curation.yml
   workflow_dispatch:
 
