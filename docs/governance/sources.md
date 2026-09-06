@@ -20,19 +20,28 @@ Consensus, Scite and Exa connector output is untrusted input. Do not reproduce f
 | `api.openalex.org` | Bibliographic and citation metadata | automated |
 | `api.crossref.org` | DOI metadata | automated |
 | `api.semanticscholar.org` | Citation graph and metadata | automated |
-| `opencitations.net` | Open citation links | automated |
+| `api.opencitations.net` | Open DOI-linked citation graph and bibliographic metadata | automated, public rate-limited |
 | `doi.org` | DOI resolution / canonical public target | automated |
 | `api.unpaywall.org` | Lawful OA location metadata | automated |
 | `api.core.ac.uk` | Scholarly repository metadata and links | automated, free-rate-limited |
 | `www.ebi.ac.uk` | Europe PMC scholarly REST API | automated |
 | `eutils.ncbi.nlm.nih.gov` | NCBI bibliographic API | automated |
 | `europepmc.org` | Europe PMC public article/OA links | automated |
-| `export.arxiv.org` | arXiv API | automated |
+| `export.arxiv.org` | arXiv metadata, abstract and preprint manifestation API | automated, public rate-limited |
+| `zenodo.org` | Public record metadata, relations and files for repository manifestations | automated, public rate-limited |
+| `api.archives-ouvertes.fr` | HAL metadata, identifiers and repository locators | automated, public rate-limited |
+| `doaj.org` | DOAJ open-access article metadata, abstracts and identifiers | automated, public rate-limited |
 | `api.datacite.org` | DOI metadata | automated |
 | `r.jina.ai` | Read a candidate-bound public DOI/discovered URL as text; title/abstract verification only | automated, free-only guarded |
 | `google.serper.dev` | One bounded SERP discovery request for an opened candidate | automated only under dedicated-free-account guard + persistent project cap |
 | `api.exa.ai` | Search-only semantic research-paper discovery for an opened candidate | automated only under dedicated Starter Free guard + persistent project cap |
 | `api.tavily.com` | Final Basic-only selected-paper web search | automated only under free-only one-credit guard |
+
+### Open scholarly reconciliation boundary
+
+OpenCitations Meta, arXiv, Zenodo, HAL and DOAJ are authorised as zero-cost metadata/repository providers. Their responses may corroborate or challenge candidate identity, abstract availability, manifestation/version relations and lawful source locators. They do not write canonical metadata, merge duplicate records or decide eligibility.
+
+Field-level reconciliation is preparatory. It records provider agreement, alternatives and conflicts. A DOI/title collision or multiple plausible manifestations remains visible to the curator and blocks silent canonical reconciliation. OpenCitations Index and Semantic Scholar may be combined for E2 backward and E3 forward citation-frontier construction, but their union is never treated as a complete citation graph and newly found records are never screened or added automatically.
 
 ### Web resolver boundary
 
