@@ -2,7 +2,7 @@ name: Monitor daily surveillance heartbeat
 
 on:
   schedule:
-    - cron: "15 12 * * *"
+    - cron: "20 6 * * *"
   workflow_dispatch:
 
 permissions:
