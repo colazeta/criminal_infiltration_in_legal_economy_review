@@ -10,6 +10,7 @@ import { handleResolvedAbstractRequest } from "./resolved-abstract.js";
 import worker, { SubmissionCoordinatorCore } from "./index.js";
 
 const CURATOR_COMPONENT_ASSETS = new Set([
+  "/curator-consensus.js",
   "/curator-reading.js",
   "/curator-reading.css",
   "/curator-queue.js",
@@ -18,7 +19,7 @@ const CURATOR_COMPONENT_ASSETS = new Set([
 ]);
 
 function componentLoaderSource() {
-  return `\n(() => {\n  function load(src, marker) {\n    if (document.querySelector('script[data-' + marker + '=\"true\"]')) return;\n    const script = document.createElement(\"script\");\n    script.src = src;\n    script.defer = true;\n    script.dataset[marker.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase())] = \"true\";\n    document.head.append(script);\n  }\n  load(\"./curator-reading.js\", \"curator-reading\");\n  load(\"./curator-queue.js\", \"curator-queue\");\n  load(\"./curator-resolved-link.js\", \"curator-resolved-link\");\n})();\n`;
+  return `\n(() => {\n  function load(src, marker) {\n    if (document.querySelector('script[data-' + marker + '=\"true\"]')) return;\n    const script = document.createElement(\"script\");\n    script.src = src;\n    script.defer = true;\n    script.dataset[marker.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase())] = \"true\";\n    document.head.append(script);\n  }\n  load(\"./curator-consensus.js\", \"curator-consensus\");\n  load(\"./curator-reading.js\", \"curator-reading\");\n  load(\"./curator-queue.js\", \"curator-queue\");\n  load(\"./curator-resolved-link.js\", \"curator-resolved-link\");\n})();\n`;
 }
 
 async function serveCuratorComponentAsset(request, env) {
@@ -303,7 +304,7 @@ export class SubmissionCoordinator extends DurableObject {
       url.origin === "https://submission.internal" &&
       url.pathname === "/provider-budget-status"
     ) {
-      return this.providerBudgetStatus();
+      return this.providerBudgetStatus(request);
     }
     return this.core.fetch(request);
   }
