@@ -16,10 +16,10 @@ function loadCuratorComponent(src, marker) {
   document.head.append(script);
 }
 
-// Consensus wraps the enrichment fetch so it can reuse the same response as the reading surface
-// rather than issuing a second scholarly-provider request.
+// Interceptors load before the reading surface so they can clone and reuse the same
+// enrichment / issue responses without issuing duplicate provider or GitHub requests.
 loadCuratorComponent("./curator-consensus.js", "curator-consensus");
-loadCuratorComponent("./curator-reading.js", "curator-reading");
 loadCuratorComponent("./curator-assisted-resolution.js", "curator-assisted-resolution");
+loadCuratorComponent("./curator-reading.js", "curator-reading");
 loadCuratorComponent("./curator-queue.js", "curator-queue");
 loadCuratorComponent("./curator-resolved-link.js", "curator-resolved-link");
