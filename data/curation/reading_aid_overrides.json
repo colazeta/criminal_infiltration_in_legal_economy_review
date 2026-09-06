@@ -3,13 +3,22 @@
   "purpose": "Higher-confidence replacements for preparatory reading aids after targeted assisted retrieval. These records override matching candidate IDs in reading_aids.json without changing any eligibility decision.",
   "records": [
     {
-      "candidateId": "E0R1-C015",
-      "kind": "publisher_summary",
-      "sourceLabel": "Nomos eLibrary / Lexington Books",
-      "sourceUrl": "https://www.nomos-elibrary.de/10.5771/9781666967142-1.pdf",
-      "synopsis": "Chapter 1 of Vincent C. Figliomeni's Challenging the Mafia of Calabria is explicitly titled What Is Mafia-Type Organized Crime? and opens Part I, which defines organised crime and traces the emergence of mafia-type organised criminal groups in Southern Italy. The book analyses 'Ndrangheta's power structure, methods and regional influence in order to identify vulnerabilities for disruption.",
+      "candidateId": "E0R1-C001",
+      "kind": "full_text_intro",
+      "sourceLabel": "Bristol University Press — open chapter PDF",
+      "sourceUrl": "https://bristoluniversitypressdigital.com/downloadpdf/edcollchap-oa/book/9781529247145/ch007.pdf",
+      "synopsis": "The open publisher PDF contains Giovanni Nicolazzo's chapter Beyond Mafia: Considerations on Criminal Infiltration in the Legal Economy and begins directly with the chapter introduction. The chapter argues for a broader interpretation of criminal infiltration beyond a mafia-only frame and develops the legal-economy relationship from the existing literature.",
       "checkedAt": "2026-09-06",
-      "note": "Targeted retrieval resolved the work identity and book/chapter context. The source exposes a book-level summary and chapter structure, not a separately labelled chapter abstract; treat this as publisher-level reading support rather than an author abstract."
+      "note": "Targeted retrieval upgraded this from publisher-level context to directly readable exact chapter text. No separately labelled author abstract was verified; manifestation/duplicate resolution still precedes any canonical treatment."
+    },
+    {
+      "candidateId": "E0R1-C003",
+      "kind": "full_text_intro",
+      "sourceLabel": "Bristol University Press — open chapter PDF",
+      "sourceUrl": "https://bristoluniversitypressdigital.com/downloadpdf/edcollchap-oa/book/9781529247145/ch007.pdf",
+      "synopsis": "The exact open publisher chapter is directly readable. It broadens criminal infiltration beyond conventional organised-crime-group and mafia-only formulations and calls for comparative analysis of different criminal actors and their relationships with the legal economy.",
+      "checkedAt": "2026-09-06",
+      "note": "This is the directly readable Bristol University Press manifestation of the Beyond Mafia chapter. No standalone author abstract was verified; identity reconciliation with the legacy manifestation remains necessary."
     },
     {
       "candidateId": "E0R1-C013",
@@ -21,13 +30,13 @@
       "note": "Identity is now verified more strongly than before, but no reliable abstract/full text was recovered. Do not infer infiltration relevance from the title; screen it as an illegal-entrepreneurship boundary case unless stronger evidence emerges."
     },
     {
-      "candidateId": "E0R1-C040",
+      "candidateId": "E0R1-C015",
       "kind": "publisher_summary",
-      "sourceLabel": "Routledge / exact book contents",
-      "sourceUrl": "https://www.routledge.com/Transnational-Organized-Crime/Beare/p/book/9781409447566",
-      "synopsis": "The exact Routledge volume identifies Part IV, Business Crime Versus Organized Crime or Business Crimes As Organized Crime, as containing Dwight C. Smith's Paragons, Pariahs, and Pirates: A Spectrum-Based Theory of Enterprise. The contribution therefore addresses the conceptual boundary between legitimate business crime and organised criminal enterprise rather than constituting direct firm-infiltration evidence by itself.",
+      "sourceLabel": "Nomos eLibrary / Lexington Books",
+      "sourceUrl": "https://www.nomos-elibrary.de/10.5771/9781666967142-1.pdf",
+      "synopsis": "Chapter 1 of Vincent C. Figliomeni's Challenging the Mafia of Calabria is explicitly titled What Is Mafia-Type Organized Crime? and opens Part I, which defines organised crime and traces the emergence of mafia-type organised criminal groups in Southern Italy. The book analyses 'Ndrangheta's power structure, methods and regional influence in order to identify vulnerabilities for disruption.",
       "checkedAt": "2026-09-06",
-      "note": "Targeted retrieval improved this from a DOI-only curator synopsis to verified publisher-level work context. Use it principally for conceptual/contextual screening unless the chapter text supports a sustained legal-economy infiltration relationship."
+      "note": "Nomos exposes the exact book summary and chapter structure, not a separately labelled chapter abstract. Treat this as publisher-level reading support rather than an author abstract."
     },
     {
       "candidateId": "E0R1-C032",
@@ -39,13 +48,22 @@
       "note": "A full-text manifestation has been located. The chapter is primarily AML/control-policy analysis; inspect the text for any necessary contextual contribution before stretching it into the infiltration corpus."
     },
     {
+      "candidateId": "E0R1-C040",
+      "kind": "publisher_summary",
+      "sourceLabel": "Routledge / exact book contents",
+      "sourceUrl": "https://www.routledge.com/Transnational-Organized-Crime/Beare/p/book/9781409447566",
+      "synopsis": "The exact Routledge volume identifies Part IV, Business Crime Versus Organized Crime or Business Crimes As Organized Crime, as containing Dwight C. Smith's Paragons, Pariahs, and Pirates: A Spectrum-Based Theory of Enterprise. The contribution therefore addresses the conceptual boundary between legitimate business crime and organised criminal enterprise rather than constituting direct firm-infiltration evidence by itself.",
+      "checkedAt": "2026-09-06",
+      "note": "Targeted retrieval improved this from a DOI-only curator synopsis to verified publisher-level work context. No standalone chapter abstract was verified."
+    },
+    {
       "candidateId": "E0R1-C043",
       "kind": "publisher_summary",
-      "sourceLabel": "SAGE Publications / Klaus von Lampe author site",
-      "sourceUrl": "https://uk.sagepub.com/en-gb/eur/organized-crime/book237245",
-      "synopsis": "Chapter 3, Organized Crime Research, surveys the study of organised crime as an academic subdiscipline, its history, major contemporary research lines and methodological challenges. The surrounding monograph develops a three-dimensional framework of illegal activities, criminal structures and extra-legal governance extending into legal spheres of society.",
+      "sourceLabel": "SAGE Academic Books — exact chapter page",
+      "sourceUrl": "https://sk.sagepub.com/book/mono/organized-crime/chpt/organized-crime-research",
+      "synopsis": "The exact SAGE page for Chapter 3, Organized Crime Research, situates the chapter within Klaus von Lampe's systematic treatment of organised crime and its research traditions. The chapter surveys the study of organised crime as an academic field, including scholarly and practitioner contributions, while the surrounding monograph develops the dimensions of illegal activities, criminal structures and extra-legal governance.",
       "checkedAt": "2026-09-06",
-      "note": "Targeted retrieval found the exact publisher description and chapter structure. This is strong contextual/methodological reading support but not direct infiltration evidence by itself."
+      "note": "Targeted retrieval improved this from a generic book-level page to the exact chapter page. The visible Summary is principally book-level and must not be represented as a standalone chapter abstract."
     }
   ]
 }
