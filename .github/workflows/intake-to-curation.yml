@@ -82,6 +82,31 @@ jobs:
             --summary "$RUNNER_TEMP/abstract-coverage-summary.json"
           node scripts/abstracts/backfill_coverage.mjs --check
 
+      - name: Reconcile reading aids for unresolved abstracts
+        run: |
+          action_date="$(date -u +%F)"
+          python scripts/curation/reconcile_reading_aids.py --date "$action_date" \
+            > "$RUNNER_TEMP/reading-aid-summary.json"
+          python scripts/curation/reconcile_reading_aids.py --check
+
+      - name: Classify access for the expanded queue
+        env:
+          UNPAYWALL_EMAIL: ${{ secrets.UNPAYWALL_EMAIL }}
+        run: |
+          action_date="$(date -u +%F)"
+          python scripts/access/classify_access.py --date "$action_date"
+          python scripts/access/reconcile_access_evidence.py
+          python scripts/access/classify_access.py --check
+          python scripts/access/reconcile_access_evidence.py --check
+          python3 - <<'PY' > "$RUNNER_TEMP/access-coverage-summary.json"
+          import csv, json
+          from collections import Counter
+          with open("data/curation/access_coverage.csv", newline="", encoding="utf-8-sig") as handle:
+              rows = list(csv.DictReader(handle))
+          counts = Counter(row["access_status"] for row in rows)
+          print(json.dumps({"total": len(rows), "open": counts.get("open", 0), "restricted": counts.get("restricted", 0), "unknown": counts.get("unknown", 0)}, sort_keys=True))
+          PY
+
       - name: Validate the complete archive
         run: |
           python scripts/curation/build_legacy_queue.py --check
@@ -93,6 +118,10 @@ jobs:
           python scripts/curation/build_curator_options.py
           python scripts/validation/validate_archive.py
           python scripts/validation/validate_site.py
+          python -m py_compile \
+            scripts/curation/reconcile_reading_aids.py \
+            scripts/access/classify_access.py \
+            scripts/access/reconcile_access_evidence.py
           node --check site/app.js
           node --check site/aml.js
           node --check site/stats.js
@@ -138,7 +167,9 @@ jobs:
           body_file="$RUNNER_TEMP/intake-curation-pr.md"
           candidates="$(python3 -c 'import json, os; data=json.load(open(os.path.join(os.environ["RUNNER_TEMP"], "intake-import.json"), encoding="utf-8")); print("\n".join(f"- `{value}`" for value in data["added"]))')"
           retrieval="$(python3 -c 'import json, os; data=json.load(open(os.path.join(os.environ["RUNNER_TEMP"], "retrieval-summary.json"), encoding="utf-8")); print(f"{data.get('"'"'total'"'"',0)} covered; {data.get('"'"'full_text'"'"',0)} direct full text; {data.get('"'"'open_access_landing'"'"',0)} OA landing; {data.get('"'"'unresolved'"'"',0)} unresolved")')"
-          abstract_coverage="$(python3 -c 'import json, os; data=json.load(open(os.path.join(os.environ["RUNNER_TEMP"], "abstract-coverage-summary.json"), encoding="utf-8")); print(json.dumps(data, sort_keys=True))')"
+          abstract_coverage="$(cat "$RUNNER_TEMP/abstract-coverage-summary.json")"
+          reading_aids="$(cat "$RUNNER_TEMP/reading-aid-summary.json")"
+          access_coverage="$(cat "$RUNNER_TEMP/access-coverage-summary.json")"
           {
             echo "## Authorised intake source"
             echo
@@ -151,12 +182,14 @@ jobs:
             echo
             echo "${candidates}"
             echo
-            echo "## Retrieval resolution"
+            echo "## Reviewability coverage"
             echo
-            echo "- Complete queue resolver: ${retrieval}."
-            echo "- Resolver order: full text / OA location / publisher or repository landing / DOI / discovery source link / explicit unresolved."
+            echo "- Retrieval: ${retrieval}."
             echo "- Abstract coverage: \`${abstract_coverage}\`."
-            echo "- Retrieval and abstract metadata are mechanical and cannot determine eligibility or publication."
+            echo "- Reading-aid reconciliation: \`${reading_aids}\`."
+            echo "- Access coverage: \`${access_coverage}\`."
+            echo "- Resolver order: full text / OA location / publisher or repository landing / DOI / discovery source link / explicit unresolved."
+            echo "- Retrieval, abstract, reading-aid and access metadata are preparatory and cannot determine eligibility or publication."
             echo
             echo "## Changed files"
             echo
@@ -171,12 +204,12 @@ jobs:
             echo "## Human decisions"
             echo
             echo "- Automatic screening or publication inference: none."
-            echo "- Unresolved human decisions: an authorised person still decides eligibility; retrieval and abstract resolution only make the paper reviewable."
+            echo "- Unresolved human decisions: an authorised person still decides eligibility; the preceding steps only make each paper reviewable and auditable."
             echo
             echo "Closes #${ISSUE_NUMBER}"
           } > "$body_file"
           pr_url="$(gh pr create --base main --head "$BRANCH" --title "Stage ${BATCH_ID} for curator review" --body-file "$body_file")"
-          gh issue comment "$ISSUE_NUMBER" --body "Candidates validated, retrieval-resolved and staged for review: ${pr_url}"
+          gh issue comment "$ISSUE_NUMBER" --body "Candidates validated, reviewability-resolved and staged for review: ${pr_url}"
           {
             echo "## Intake change prepared"
             echo

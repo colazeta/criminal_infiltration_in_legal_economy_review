@@ -29,7 +29,9 @@ class IntakeAbstractCoverageTests(unittest.TestCase):
         workflow = (ROOT / ".github/workflows/intake-to-curation.yml").read_text(encoding="utf-8")
         self.assertIn("git add data/curation site/data/curator-stats.json", workflow)
         self.assertIn("Abstract coverage:", workflow)
-        self.assertIn("retrieval and abstract resolution only make the paper reviewable", workflow)
+        self.assertIn("Reading-aid reconciliation:", workflow)
+        self.assertIn("Access coverage:", workflow)
+        self.assertIn("the preceding steps only make each paper reviewable and auditable", workflow)
 
 
 if __name__ == "__main__":
