@@ -20,5 +20,6 @@ function loadCuratorComponent(src, marker) {
 // rather than issuing a second scholarly-provider request.
 loadCuratorComponent("./curator-consensus.js", "curator-consensus");
 loadCuratorComponent("./curator-reading.js", "curator-reading");
+loadCuratorComponent("./curator-assisted-resolution.js", "curator-assisted-resolution");
 loadCuratorComponent("./curator-queue.js", "curator-queue");
 loadCuratorComponent("./curator-resolved-link.js", "curator-resolved-link");
