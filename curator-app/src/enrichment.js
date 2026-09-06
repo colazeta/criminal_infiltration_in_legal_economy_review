@@ -1,5 +1,8 @@
 "use strict";
 
+import { citationFrontier } from "./citation-chasing.js";
+import { reconcileMetadata } from "./metadata-reconciliation.js";
+import { openMetadataProviderManifest, searchOpenScholarlyProviders } from "./open-scholarly-providers.js";
 import { providerManifest, searchFreeScholarlyProviders } from "./scholarly-providers.js";
 
 const OPENALEX_API = "https://api.openalex.org";
@@ -88,6 +91,20 @@ function openAlexArticleUrl(work) {
   return "";
 }
 
+function openAlexAuthors(work) {
+  return (Array.isArray(work?.authorships) ? work.authorships : [])
+    .map((entry) => entry?.author?.display_name)
+    .filter(Boolean)
+    .join("; ");
+}
+
+function crossrefAuthors(message) {
+  return (Array.isArray(message?.author) ? message.author : [])
+    .map((author) => cleanText([author?.given, author?.family].filter(Boolean).join(" "), 300))
+    .filter(Boolean)
+    .join("; ");
+}
+
 function crossrefArticleUrl(message) {
   const doi = cleanDoi(message?.DOI || "");
   if (doi) return `https://doi.org/${doi}`;
@@ -113,6 +130,10 @@ function resultFromOpenAlex(work, requested, matchType) {
     matchedTitle: title,
     matchedYear: year,
     matchedDoi: doi,
+    authors: openAlexAuthors(work),
+    venue: cleanText(work?.primary_location?.source?.display_name, 1000),
+    sourceId: cleanText(work?.id, 500),
+    relations: [],
     matchType,
     matchScore: matchType === "doi" ? 1 : Number(similarity.toFixed(3)),
   };
@@ -141,6 +162,11 @@ function resultFromCrossref(message, requested, matchType) {
     matchedTitle: title,
     matchedYear: year,
     matchedDoi: doi,
+    authors: crossrefAuthors(message),
+    venue: cleanText(Array.isArray(message?.["container-title"]) ? message["container-title"][0] : message?.["container-title"], 1000),
+    sourceId: doi ? `doi:${doi}` : "",
+    relations: Object.entries(message?.relation || {}).flatMap(([relation, rows]) =>
+      (Array.isArray(rows) ? rows : []).map((row) => `${relation}:${cleanText(row?.id || row?.["id-type"], 400)}`).filter(Boolean)),
     matchType,
     matchScore: matchType === "doi" ? 1 : Number(similarity.toFixed(3)),
   };
@@ -168,7 +194,7 @@ async function openAlexByTitle(title, year) {
   target.searchParams.set("per_page", "5");
   target.searchParams.set(
     "select",
-    "id,doi,display_name,publication_year,abstract_inverted_index,primary_location,open_access",
+    "id,doi,display_name,publication_year,abstract_inverted_index,primary_location,open_access,authorships",
   );
   if (year) target.searchParams.set("filter", `publication_year:${year}`);
   const payload = await fetchJson(target);
@@ -187,7 +213,7 @@ async function crossrefByTitle(title, year) {
   const target = new URL(`${CROSSREF_API}/works`);
   target.searchParams.set("query.bibliographic", title);
   target.searchParams.set("rows", "5");
-  target.searchParams.set("select", "DOI,title,abstract,URL,published,issued,created");
+  target.searchParams.set("select", "DOI,title,abstract,URL,published,issued,created,author,container-title,relation");
   if (year) target.searchParams.set("filter", `from-pub-date:${year}-01-01,until-pub-date:${year}-12-31`);
   const payload = await fetchJson(target);
   const works = Array.isArray(payload?.message?.items) ? payload.message.items : [];
@@ -196,19 +222,57 @@ async function crossrefByTitle(title, year) {
     .sort((left, right) => right.score - left.score)[0]?.work || null;
 }
 
-function betterResult(primary, secondary) {
-  if (primary?.abstract) return primary;
-  if (secondary?.abstract) return secondary;
-  return primary || secondary || null;
+function scoreResult(result) {
+  if (!result) return -1;
+  return (result.abstract ? 100 : 0) + (result.matchType === "doi" ? 20 : 0) + Number(result.matchScore || 0);
 }
 
-function decorated(result, providersTried, providerErrors = [], searchStatus = "found", providerPlan = []) {
+function bestResult(results) {
+  return results.filter(Boolean).sort((left, right) => scoreResult(right) - scoreResult(left))[0] || null;
+}
+
+function uniqueObservations(observations) {
+  const seen = new Set();
+  const rows = [];
+  for (const observation of observations.filter(Boolean)) {
+    const key = [
+      observation.provider,
+      cleanDoi(observation.matchedDoi || "").toLowerCase(),
+      normaliseTitle(observation.matchedTitle || ""),
+      observation.matchedYear || "",
+    ].join("|");
+    if (seen.has(key)) continue;
+    seen.add(key);
+    rows.push(observation);
+  }
+  return rows;
+}
+
+function compactObservations(observations) {
+  return observations.map((entry) => ({
+    provider: entry.provider,
+    title: entry.matchedTitle || "",
+    year: entry.matchedYear || null,
+    doi: entry.matchedDoi || "",
+    authors: entry.authors || "",
+    venue: entry.venue || "",
+    articleUrl: entry.articleUrl || "",
+    sourceId: entry.sourceId || "",
+    relations: Array.isArray(entry.relations) ? entry.relations.slice(0, 12) : [],
+    hasAbstract: Boolean(entry.abstract),
+    matchType: entry.matchType,
+    matchScore: entry.matchScore,
+  }));
+}
+
+function decorated(result, providersTried, providerErrors = [], searchStatus = "found", providerPlan = [], extras = {}) {
   return {
     ...result,
     providersTried,
     providerErrors,
     searchStatus,
     providerPlan,
+    ...extras,
   };
 }
 
@@ -216,78 +280,108 @@ async function enrichCandidate({
   title,
   doi,
   year,
+  authors = "",
+  venue = "",
   semanticScholarApiKey = "",
   coreApiKey = "",
   unpaywallEmail = "",
+  includeCitationFrontier = false,
 }) {
   const requested = {
     title: cleanText(title, 1000),
     doi: cleanDoi(doi),
     year: cleanText(year, 10),
+    authors: cleanText(authors, 3000),
+    venue: cleanText(venue, 1000),
   };
   if (!requested.title) throw new Error("missing_title");
 
   const providerPlan = [
-    { id: "openalex", label: "OpenAlex", stage: "primary", billing: "anonymous_free" },
+    { id: "openalex", label: "OpenAlex", stage: "primary", billing: "free_daily_credit" },
     { id: "crossref", label: "Crossref", stage: "primary", billing: "none" },
     ...providerManifest({ semanticScholarApiKey, coreApiKey, unpaywallEmail }),
+    ...openMetadataProviderManifest(),
   ];
   const providersTried = ["OpenAlex", "Crossref"];
-  let baseline = null;
+  const providerErrors = [];
+  const baselineObservations = [];
 
   if (requested.doi) {
     const [openAlex, crossref] = await Promise.allSettled([
       openAlexByDoi(requested.doi),
       crossrefByDoi(requested.doi),
     ]);
-    const oaResult = openAlex.status === "fulfilled"
-      ? resultFromOpenAlex(openAlex.value, requested, "doi")
-      : null;
-    const crResult = crossref.status === "fulfilled"
-      ? resultFromCrossref(crossref.value, requested, "doi")
-      : null;
-    baseline = betterResult(oaResult, crResult);
-    if (baseline?.abstract) return decorated(baseline, providersTried, [], "found", providerPlan);
+    if (openAlex.status === "rejected") providerErrors.push(`OpenAlex:${openAlex.reason?.message || "error"}`);
+    if (crossref.status === "rejected") providerErrors.push(`Crossref:${crossref.reason?.message || "error"}`);
+    const oaResult = openAlex.status === "fulfilled" ? resultFromOpenAlex(openAlex.value, requested, "doi") : null;
+    const crResult = crossref.status === "fulfilled" ? resultFromCrossref(crossref.value, requested, "doi") : null;
+    if (oaResult) baselineObservations.push(oaResult);
+    if (crResult) baselineObservations.push(crResult);
   }
 
-  const [openAlexSearch, crossrefSearch] = await Promise.allSettled([
-    openAlexByTitle(requested.title, requested.year),
-    crossrefByTitle(requested.title, requested.year),
+  if (!requested.doi || baselineObservations.length === 0) {
+    const [openAlexSearch, crossrefSearch] = await Promise.allSettled([
+      openAlexByTitle(requested.title, requested.year),
+      crossrefByTitle(requested.title, requested.year),
+    ]);
+    if (openAlexSearch.status === "rejected") providerErrors.push(`OpenAlex:${openAlexSearch.reason?.message || "error"}`);
+    if (crossrefSearch.status === "rejected") providerErrors.push(`Crossref:${crossrefSearch.reason?.message || "error"}`);
+    const oaResult = openAlexSearch.status === "fulfilled" ? resultFromOpenAlex(openAlexSearch.value, requested, "title_year") : null;
+    const crResult = crossrefSearch.status === "fulfilled" ? resultFromCrossref(crossrefSearch.value, requested, "title_year") : null;
+    if (oaResult) baselineObservations.push(oaResult);
+    if (crResult) baselineObservations.push(crResult);
+  }
+
+  const [additional, openAdditional] = await Promise.all([
+    searchFreeScholarlyProviders({
+      title: requested.title,
+      doi: requested.doi,
+      year: requested.year,
+      semanticScholarApiKey,
+      coreApiKey,
+      unpaywallEmail,
+    }),
+    searchOpenScholarlyProviders({
+      title: requested.title,
+      doi: requested.doi,
+      year: requested.year,
+    }),
   ]);
-  const oaResult = openAlexSearch.status === "fulfilled"
-    ? resultFromOpenAlex(openAlexSearch.value, requested, "title_year")
-    : null;
-  const crResult = crossrefSearch.status === "fulfilled"
-    ? resultFromCrossref(crossrefSearch.value, requested, "title_year")
-    : null;
-  const titleBaseline = betterResult(oaResult, crResult);
-  if (titleBaseline?.abstract) return decorated(titleBaseline, providersTried, [], "found", providerPlan);
-  baseline = baseline || titleBaseline;
+  providersTried.push(...additional.providersTried, ...openAdditional.providersTried);
+  providerErrors.push(...additional.providerErrors, ...openAdditional.providerErrors);
 
-  const additional = await searchFreeScholarlyProviders({
-    title: requested.title,
-    doi: requested.doi,
-    year: requested.year,
-    semanticScholarApiKey,
-    coreApiKey,
-    unpaywallEmail,
-  });
-  providersTried.push(...additional.providersTried);
-  if (additional.result?.abstract) {
-    return decorated(additional.result, providersTried, additional.providerErrors, "found", providerPlan);
-  }
+  const observations = uniqueObservations([
+    ...baselineObservations,
+    additional.result,
+    ...openAdditional.observations,
+  ]);
+  const chosen = bestResult(observations);
+  const metadataResolution = reconcileMetadata({ requested, observations });
+  const resolvedDoi = cleanDoi(metadataResolution?.fields?.doi?.value || chosen?.matchedDoi || requested.doi);
+  const citations = includeCitationFrontier && resolvedDoi
+    ? await citationFrontier({ doi: resolvedDoi, semanticScholarApiKey })
+    : null;
+  const searchStatus = chosen?.abstract ? "found" : "needs_resolved_document";
 
-  return decorated({
+  const result = chosen || {
     abstract: "",
     abstractSource: "",
     provider: "",
-    articleUrl: additional.result?.articleUrl || baseline?.articleUrl || (requested.doi ? `https://doi.org/${requested.doi}` : ""),
-    matchedTitle: additional.result?.matchedTitle || baseline?.matchedTitle || "",
-    matchedYear: additional.result?.matchedYear || baseline?.matchedYear || null,
-    matchedDoi: additional.result?.matchedDoi || baseline?.matchedDoi || requested.doi,
+    articleUrl: resolvedDoi ? `https://doi.org/${resolvedDoi}` : "",
+    matchedTitle: metadataResolution?.fields?.title?.value || "",
+    matchedYear: metadataResolution?.fields?.year?.value || null,
+    matchedDoi: resolvedDoi,
+    authors: metadataResolution?.fields?.authors?.value || "",
+    venue: metadataResolution?.fields?.venue?.value || "",
     matchType: "needs_resolved_document",
-    matchScore: additional.result?.matchScore || baseline?.matchScore || 0,
-  }, providersTried, additional.providerErrors, "needs_resolved_document", providerPlan);
+    matchScore: 0,
+  };
+
+  return decorated(result, [...new Set(providersTried)], providerErrors, searchStatus, providerPlan, {
+    metadataResolution,
+    metadataObservations: compactObservations(observations),
+    citationFrontier: citations,
+  });
 }
 
 function json(payload, status = 200) {
@@ -307,15 +401,21 @@ async function handleEnrichmentRequest(request, env = {}) {
   const title = cleanText(url.searchParams.get("title"), 1000);
   const doi = cleanDoi(url.searchParams.get("doi"));
   const year = cleanText(url.searchParams.get("year"), 10);
+  const authors = cleanText(url.searchParams.get("authors"), 3000);
+  const venue = cleanText(url.searchParams.get("venue"), 1000);
+  const includeCitationFrontier = url.searchParams.get("citations") === "1";
   if (!title) return json({ error: { code: "title_required", message: "Titolo mancante." } }, 400);
   try {
     const result = await enrichCandidate({
       title,
       doi,
       year,
+      authors,
+      venue,
       semanticScholarApiKey: cleanText(env.SEMANTIC_SCHOLAR_API_KEY, 300),
       coreApiKey: cleanText(env.CORE_API_KEY, 300),
       unpaywallEmail: cleanText(env.UNPAYWALL_EMAIL, 320),
+      includeCitationFrontier,
     });
     return json(result);
   } catch {
@@ -332,6 +432,9 @@ async function handleEnrichmentRequest(request, env = {}) {
       providersTried: [],
       providerErrors: [],
       providerPlan: [],
+      metadataResolution: null,
+      metadataObservations: [],
+      citationFrontier: null,
       searchStatus: "unavailable",
     });
   }
