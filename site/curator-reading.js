@@ -5,8 +5,10 @@
   const config = window.CURATOR_APP_CONFIG || {};
   const apiBaseUrl = String(config.apiBaseUrl || "").replace(/\/$/, "");
   const cache = new Map();
+  const supportCache = new Map();
   let activeCandidateId = "";
   let activeController = null;
+  let supportController = null;
 
   const byId = (id) => document.getElementById(id);
 
@@ -27,10 +29,58 @@
     }
   }
 
-  function selectedIssueNumber() {
+  function selectedIssueInfo() {
     const href = byId("selected-candidate-issue")?.href || "";
-    const match = href.match(/\/issues\/(\d+)(?:[/?#]|$)/);
-    return match ? Number(match[1]) : null;
+    try {
+      const url = new URL(href);
+      if (url.hostname !== "github.com") return null;
+      const match = url.pathname.match(/^\/([^/]+)\/([^/]+)\/issues\/(\d+)(?:\/|$)/);
+      if (!match) return null;
+      return {
+        owner: match[1],
+        repo: match[2],
+        number: Number(match[3]),
+        href: url.toString(),
+      };
+    } catch {
+      return null;
+    }
+  }
+
+  function selectedIssueNumber() {
+    return selectedIssueInfo()?.number || null;
+  }
+
+  function createPanel(id, titleId, eyebrowText, titleText) {
+    const panel = document.createElement("section");
+    panel.id = id;
+    panel.className = "candidate-abstract-panel";
+    panel.setAttribute("aria-labelledby", titleId);
+
+    const header = document.createElement("div");
+    header.className = "candidate-abstract-heading";
+
+    const titleGroup = document.createElement("div");
+    const eyebrow = document.createElement("p");
+    eyebrow.className = "workspace-label";
+    eyebrow.textContent = eyebrowText;
+    const title = document.createElement("h4");
+    title.id = titleId;
+    title.textContent = titleText;
+    titleGroup.append(eyebrow, title);
+
+    const source = document.createElement("span");
+    source.className = "candidate-abstract-source";
+    header.append(titleGroup, source);
+
+    const body = document.createElement("p");
+    body.className = "candidate-abstract-text";
+
+    const note = document.createElement("p");
+    note.className = "candidate-abstract-note";
+
+    panel.append(header, body, note);
+    return { panel, source, body, note };
   }
 
   function ensureReadingSurface() {
@@ -67,50 +117,61 @@
       byline = document.createElement("p");
       byline.id = "selected-candidate-byline";
       byline.className = "candidate-reading-byline";
-      const title = byId("selected-candidate-title");
-      title?.insertAdjacentElement("afterend", byline);
+      byId("selected-candidate-title")?.insertAdjacentElement("afterend", byline);
     }
 
-    let panel = byId("candidate-abstract-panel");
-    if (!panel) {
-      panel = document.createElement("section");
-      panel.id = "candidate-abstract-panel";
-      panel.className = "candidate-abstract-panel";
-      panel.setAttribute("aria-labelledby", "candidate-abstract-title");
-
-      const header = document.createElement("div");
-      header.className = "candidate-abstract-heading";
-
-      const titleGroup = document.createElement("div");
-      const eyebrow = document.createElement("p");
-      eyebrow.className = "workspace-label";
-      eyebrow.textContent = "Lettura rapida";
-      const title = document.createElement("h4");
-      title.id = "candidate-abstract-title";
-      title.textContent = "Abstract";
-      titleGroup.append(eyebrow, title);
-
-      const source = document.createElement("span");
-      source.id = "candidate-abstract-source";
-      source.className = "candidate-abstract-source";
-      source.textContent = "Da recuperare";
-      header.append(titleGroup, source);
-
-      const body = document.createElement("p");
-      body.id = "candidate-abstract-text";
-      body.className = "candidate-abstract-text";
-      body.textContent = "Seleziona una scheda per recuperare l’abstract.";
-
-      const note = document.createElement("p");
-      note.id = "candidate-abstract-note";
-      note.className = "candidate-abstract-note";
-      note.textContent = "L’abstract è un ausilio alla revisione e non viene scritto nell’archivio pubblico.";
-
-      panel.append(header, body, note);
-      detail.querySelector(".candidate-metadata")?.insertAdjacentElement("afterend", panel);
+    let abstractPanel = byId("candidate-abstract-panel");
+    if (!abstractPanel) {
+      const created = createPanel(
+        "candidate-abstract-panel",
+        "candidate-abstract-title",
+        "Lettura rapida",
+        "Abstract",
+      );
+      abstractPanel = created.panel;
+      created.source.id = "candidate-abstract-source";
+      created.source.textContent = "Da recuperare";
+      created.body.id = "candidate-abstract-text";
+      created.body.textContent = "Seleziona una scheda per recuperare l’abstract.";
+      created.note.id = "candidate-abstract-note";
+      created.note.textContent =
+        "L’abstract è un ausilio alla revisione e non viene scritto nell’archivio pubblico.";
+      detail.querySelector(".candidate-metadata")?.insertAdjacentElement("afterend", abstractPanel);
     }
 
-    return { articleLink, byline, panel };
+    let aidPanel = byId("candidate-reading-aid-panel");
+    if (!aidPanel) {
+      const created = createPanel(
+        "candidate-reading-aid-panel",
+        "candidate-reading-aid-title",
+        "Supporto preparatorio",
+        "Lettura assistita",
+      );
+      aidPanel = created.panel;
+      created.source.id = "candidate-reading-aid-kind";
+      created.body.id = "candidate-reading-aid-text";
+      created.note.id = "candidate-reading-aid-note";
+      aidPanel.hidden = true;
+      abstractPanel.insertAdjacentElement("afterend", aidPanel);
+    }
+
+    let guidancePanel = byId("candidate-review-guidance-panel");
+    if (!guidancePanel) {
+      const created = createPanel(
+        "candidate-review-guidance-panel",
+        "candidate-review-guidance-title",
+        "Prima di decidere",
+        "Come trattare questa scheda",
+      );
+      guidancePanel = created.panel;
+      created.source.id = "candidate-review-gate";
+      created.body.id = "candidate-review-guidance-text";
+      created.note.id = "candidate-review-guidance-note";
+      guidancePanel.hidden = true;
+      aidPanel.insertAdjacentElement("afterend", guidancePanel);
+    }
+
+    return { articleLink, byline, abstractPanel, aidPanel, guidancePanel };
   }
 
   function provenanceArticleUrl() {
@@ -184,18 +245,19 @@
         : "Abstract recuperato al momento della consultazione e mostrato solo nella console autenticata; non viene persistito nel corpus pubblico.";
     } else if (payload?.matchType === "needs_web_search") {
       text.textContent =
-        "La cascata automatica gratuita non è conclusa oppure le capability web successive non sono configurate/abilitate. Il record resta da cercare e non viene classificato come abstract assente.";
-      source.textContent = "Ricerca web necessaria";
+        "La cascata automatica gratuita non ha ancora esposto un abstract affidabile. Usa la lettura assistita qui sotto: il record resta da verificare e non viene classificato come abstract assente.";
+      source.textContent = "Abstract ancora da risolvere";
       note.textContent = trace
-        ? `Già interrogati: ${trace}. Il prossimo passaggio resta una capability web gratuita/assistita sul titolo e DOI.`
-        : "Il prossimo passaggio resta una capability web gratuita/assistita sul titolo e DOI.";
+        ? `Già interrogati: ${trace}. Una synopsis preparatoria non sostituisce l’abstract dell’autore.`
+        : "Una synopsis preparatoria non sostituisce l’abstract dell’autore.";
     } else if (payload?.matchType === "web_search_exhausted") {
       text.textContent =
         "L’abstract non è stato trovato dopo la catena automatica gratuita configurata. Questo significa non trovato, non inesistente.";
       source.textContent = "Ricerca gratuita completata";
       note.textContent = trace ? `Fonti interrogate: ${trace}.` : "La ricerca gratuita non ha prodotto un abstract affidabile.";
     } else if (payload?.matchType === "unavailable") {
-      text.textContent = "La verifica multi-source non è stata completata per un problema tecnico. Non interpretiamo questo stato come assenza dell’abstract.";
+      text.textContent =
+        "La verifica multi-source non è stata completata per un problema tecnico. Non interpretiamo questo stato come assenza dell’abstract.";
       source.textContent = "Verifica incompleta";
       note.textContent = "Riprova la scheda: il risultato non modifica lo stage editoriale.";
     } else {
@@ -212,8 +274,160 @@
     const source = byId("candidate-abstract-source");
     const note = byId("candidate-abstract-note");
     if (text) text.textContent = "Ricerca modulare gratuita dell’abstract in corso…";
-    if (source) source.textContent = "OpenAlex · Crossref · Semantic Scholar · DataCite · Unpaywall · CORE · Europe PMC · paper risolto · Jina Reader · Tavily Basic";
-    if (note) note.textContent = "Le fonti a costo zero vengono interrogate per capacità: prima registri scholarly e paper risolto, poi lettura DOI gratuita, infine search credit-based sul solo paper aperto.";
+    if (source) {
+      source.textContent =
+        "OpenAlex · Crossref · Semantic Scholar · DataCite · Unpaywall · CORE · Europe PMC · paper risolto · Jina Reader · Tavily Basic";
+    }
+    if (note) {
+      note.textContent =
+        "Le fonti a costo zero vengono interrogate per capacità: prima registri scholarly e paper risolto, poi lettura DOI gratuita, infine search credit-based sul solo paper aperto.";
+    }
+  }
+
+  function stripMarkdown(value) {
+    return String(value || "")
+      .replace(/^`|`$/g, "")
+      .replace(/^<|>$/g, "")
+      .replace(/\*\*/g, "")
+      .replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g, "$1")
+      .trim();
+  }
+
+  function markdownSection(body, heading) {
+    const source = String(body || "").replace(/\r\n/g, "\n");
+    const marker = `## ${heading}`;
+    const start = source.indexOf(marker);
+    if (start < 0) return "";
+    const remainder = source.slice(start + marker.length).replace(/^\s*\n/, "");
+    const next = remainder.search(/^##\s/m);
+    return (next >= 0 ? remainder.slice(0, next) : remainder).trim();
+  }
+
+  function bulletFields(section) {
+    const fields = {};
+    for (const line of String(section || "").split("\n")) {
+      const match = line.match(/^- ([^:]+):\s*(.*)$/);
+      if (match) fields[match[1].trim()] = stripMarkdown(match[2]);
+    }
+    return fields;
+  }
+
+  function approachText(section) {
+    const match = String(section || "").match(/\*\*How to approach this record:\*\*\s*(.+?)(?=\n\n|$)/s);
+    return match ? stripMarkdown(match[1].replace(/\s+/g, " ")) : "";
+  }
+
+  function parseReviewSupport(body) {
+    const aidSection = markdownSection(body, "Reading aid — preparatory");
+    const guidanceSection = markdownSection(body, "Review guidance — preparatory");
+    return {
+      aid: aidSection ? bulletFields(aidSection) : null,
+      guidance: guidanceSection ? {
+        ...bulletFields(guidanceSection),
+        approach: approachText(guidanceSection),
+      } : null,
+    };
+  }
+
+  async function fetchReviewSupport(signal) {
+    const issue = selectedIssueInfo();
+    if (!issue) return { aid: null, guidance: null };
+    const key = `${issue.owner}/${issue.repo}#${issue.number}`;
+    if (supportCache.has(key)) return supportCache.get(key);
+    const target = `https://api.github.com/repos/${encodeURIComponent(issue.owner)}/${encodeURIComponent(issue.repo)}/issues/${issue.number}`;
+    const response = await fetch(target, {
+      signal,
+      headers: {
+        Accept: "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+      },
+    });
+    if (!response.ok) throw new Error(`review_support_${response.status}`);
+    const payload = await response.json();
+    const parsed = parseReviewSupport(payload?.body || "");
+    supportCache.set(key, parsed);
+    return parsed;
+  }
+
+  function aidKindLabel(kind) {
+    const labels = {
+      verified_abstract_source: "Abstract/source verificata",
+      publisher_summary: "Summary dell’editore",
+      full_text_intro: "Introduzione/full text",
+      review_synopsis: "Synopsis preparatoria",
+      metadata_warning: "Avviso metadati",
+    };
+    return labels[kind] || kind || "Supporto preparatorio";
+  }
+
+  function renderReviewSupport(payload) {
+    ensureReadingSurface();
+    const aidPanel = byId("candidate-reading-aid-panel");
+    const aidKind = byId("candidate-reading-aid-kind");
+    const aidText = byId("candidate-reading-aid-text");
+    const aidNote = byId("candidate-reading-aid-note");
+    const guidancePanel = byId("candidate-review-guidance-panel");
+    const gate = byId("candidate-review-gate");
+    const guidanceText = byId("candidate-review-guidance-text");
+    const guidanceNote = byId("candidate-review-guidance-note");
+
+    if (payload?.aid) {
+      aidPanel.hidden = false;
+      aidKind.textContent = aidKindLabel(payload.aid["Aid kind"]);
+      aidText.textContent = payload.aid["Review synopsis"] || "Synopsis non disponibile.";
+      const source = payload.aid.Source || "fonte verificata";
+      const checked = payload.aid["Last checked"] || "data non registrata";
+      const note = payload.aid.Note || "";
+      aidNote.replaceChildren();
+      const sourceUrl = safeHttpsUrl(payload.aid["Source URL"]);
+      const prefix = document.createTextNode(`Fonte: ${source} · verificata: ${checked}. `);
+      aidNote.append(prefix);
+      if (sourceUrl) {
+        const link = document.createElement("a");
+        link.href = sourceUrl;
+        link.target = "_blank";
+        link.rel = "noopener noreferrer";
+        link.textContent = "Apri la fonte ↗";
+        aidNote.append(link, document.createTextNode(note ? ` · ${note}` : ""));
+      } else if (note) {
+        aidNote.append(document.createTextNode(note));
+      }
+    } else {
+      aidPanel.hidden = true;
+    }
+
+    if (payload?.guidance) {
+      guidancePanel.hidden = false;
+      gate.textContent = payload.guidance["Current gate"] || "Gate da verificare";
+      const focus = payload.guidance["Candidate-specific focus"] || "Applica il codebook corrente.";
+      const approach = payload.guidance.approach || "Applica il four-part infiltration test senza forzare una decisione binaria.";
+      guidanceText.textContent = `${focus} ${approach}`;
+      const stage = payload.guidance["Suggested screening stage"] || "non registrato";
+      const triage = payload.guidance["Prior triage signal"] || "nessuno";
+      guidanceNote.textContent =
+        `Stage suggerito: ${stage}. Segnale precedente: ${triage}. ` +
+        "La guida non decide per te: eligible_core richiede tutti e quattro gli elementi; se l’evidenza non basta usa maybe_full_text_needed; AML adiacente resta separato dal corpus infiltration.";
+    } else {
+      guidancePanel.hidden = false;
+      gate.textContent = "Guida non sincronizzata";
+      guidanceText.textContent =
+        "La scheda non espone ancora la review guidance governata. Usa il four-part test e non assumere che il segnale di intake equivalga a una decisione.";
+      guidanceNote.textContent = "La decisione resta sempre umana e attribuita.";
+    }
+  }
+
+  async function refreshReviewSupport(candidateId) {
+    supportController?.abort();
+    supportController = new AbortController();
+    const signal = supportController.signal;
+    try {
+      const payload = await fetchReviewSupport(signal);
+      if (activeCandidateId !== candidateId) return;
+      renderReviewSupport(payload);
+    } catch (error) {
+      if (error?.name === "AbortError" || activeCandidateId !== candidateId) return;
+      renderReviewSupport({ aid: null, guidance: null });
+    }
   }
 
   async function fetchResolvedAbstract(candidateId, issueNumber, title, token, signal) {
@@ -309,7 +523,9 @@
       const freeWeb = await fetchFreeWebSearch(candidateId, issueNumber, title, doi, year, token, signal);
       if (freeWeb) {
         const providers = [...(result.providersTried || [])];
-        for (const provider of freeWeb.providersTried || []) if (!providers.includes(provider)) providers.push(provider);
+        for (const provider of freeWeb.providersTried || []) {
+          if (!providers.includes(provider)) providers.push(provider);
+        }
         result = {
           ...result,
           ...freeWeb,
@@ -340,9 +556,12 @@
 
     renderByline();
     setArticleUrl(provenanceArticleUrl());
-    if (candidateId === activeCandidateId && byId("candidate-abstract-text")?.dataset.loaded === "true") return;
-    activeCandidateId = candidateId;
+    const candidateChanged = candidateId !== activeCandidateId;
+    if (candidateChanged) activeCandidateId = candidateId;
+    void refreshReviewSupport(candidateId);
+
     const abstractText = byId("candidate-abstract-text");
+    if (!candidateChanged && abstractText?.dataset.loaded === "true") return;
     if (abstractText) delete abstractText.dataset.loaded;
     renderLoading();
 
@@ -352,8 +571,7 @@
       renderAbstract(payload || {});
       if (abstractText) abstractText.dataset.loaded = "true";
     } catch (error) {
-      if (error?.name === "AbortError") return;
-      if (activeCandidateId !== candidateId) return;
+      if (error?.name === "AbortError" || activeCandidateId !== candidateId) return;
       renderAbstract({ matchType: "unavailable" });
       if (abstractText) abstractText.dataset.loaded = "true";
     }
@@ -367,7 +585,10 @@
     observer.observe(detail, { attributes: true, attributeFilter: ["hidden"] });
     observer.observe(id, { childList: true, characterData: true, subtree: true });
     observer.observe(byId("candidate-provenance") || detail, { childList: true, subtree: true });
-    observer.observe(byId("selected-candidate-issue") || detail, { attributes: true, attributeFilter: ["href"] });
+    observer.observe(byId("selected-candidate-issue") || detail, {
+      attributes: true,
+      attributeFilter: ["href"],
+    });
     queueMicrotask(refreshReadingSurface);
   }
 
@@ -386,6 +607,9 @@
     observeCandidateChanges();
   }
 
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", initialise, { once: true });
-  else initialise();
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initialise, { once: true });
+  } else {
+    initialise();
+  }
 })();
