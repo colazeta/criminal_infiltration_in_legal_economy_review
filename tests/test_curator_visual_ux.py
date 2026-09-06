@@ -15,15 +15,34 @@ class CuratorVisualUXTests(unittest.TestCase):
         self.assertIn('.queue-card-chip[data-state="source"] {\n  display: none;', css)
         self.assertIn("max-height: 240px", css)
 
-    def test_reading_surface_prioritises_identity_abstract_and_guidance(self) -> None:
+    def test_authenticated_reader_is_queue_paper_abstract_decision(self) -> None:
         css = (ROOT / "site/curator-reading.css").read_text(encoding="utf-8")
-        self.assertIn("grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr)", css)
-        self.assertIn("#candidate-abstract-panel {\n  grid-column: 1 / -1;", css)
-        self.assertIn("#candidate-reading-aid-panel {\n  grid-column: 1;", css)
-        self.assertIn("#candidate-review-guidance-panel {\n  grid-column: 2;", css)
-        self.assertIn("font-family: ui-monospace", css)
-        self.assertIn("scroll-margin-top: 42vh", css)
-        self.assertIn("scroll-margin-top: 62vh", css)
+        auth = '.curator-page:has(#curator-session-panel:not([hidden]))'
+        self.assertIn(f"{auth} .site-header", css)
+        self.assertIn(f"{auth} .curator-workspace > :not(.editorial-app)", css)
+        self.assertIn("grid-template-columns: 286px minmax(0, 1fr) !important", css)
+        self.assertIn("The paper's abstract is the visual centre of the workspace", css)
+        self.assertIn("#candidate-abstract-text", css)
+        self.assertIn("font-size: 1.04rem", css)
+        self.assertIn("line-height: 1.72", css)
+        self.assertIn("Decision immediately follows reading", css)
+
+    def test_secondary_diagnostics_do_not_compete_with_abstract(self) -> None:
+        css = (ROOT / "site/curator-reading.css").read_text(encoding="utf-8")
+        self.assertIn("#candidate-reading-aid-panel", css)
+        self.assertIn("#candidate-review-guidance-panel", css)
+        self.assertIn("#candidate-consensus-panel", css)
+        self.assertIn(".candidate-provenance-details", css)
+        self.assertIn("display: none !important", css)
+        self.assertIn("#candidate-identity-panel", css)
+        self.assertIn("#candidate-assisted-resolution-panel", css)
+
+    def test_metadata_collapses_to_doi_and_stage_because_byline_carries_citation(self) -> None:
+        css = (ROOT / "site/curator-reading.css").read_text(encoding="utf-8")
+        self.assertIn("Authors/year/venue are already in the byline", css)
+        self.assertIn(".candidate-metadata > div:nth-child(4)", css)
+        self.assertIn(".candidate-metadata > div:nth-child(6)", css)
+        self.assertIn(".candidate-metadata > div {\n  display: none;", css)
 
     def test_authenticated_workspace_removes_repeated_intro_chrome(self) -> None:
         css = (ROOT / "site/curator-reading.css").read_text(encoding="utf-8")
