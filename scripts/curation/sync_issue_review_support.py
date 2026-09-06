@@ -17,6 +17,7 @@ ROOT = Path(__file__).resolve().parents[2]
 API = "https://api.github.com"
 QUEUE_PATH = ROOT / "data" / "curation" / "review_queue.csv"
 AIDS_PATH = ROOT / "data" / "curation" / "reading_aids.json"
+OVERRIDES_PATH = ROOT / "data" / "curation" / "reading_aid_overrides.json"
 READING_HEADING = "## Reading aid — preparatory"
 GUIDANCE_HEADING = "## Review guidance — preparatory"
 
@@ -103,6 +104,12 @@ def read_aids(path: Path) -> dict[str, dict[str, str]]:
             raise SyncError(f"reading aid {candidate_id} requires an HTTPS source")
         result[candidate_id] = {key: str(value) for key, value in record.items()}
     return result
+
+
+def merged_aids(base_path: Path, overrides_path: Path) -> dict[str, dict[str, str]]:
+    base = read_aids(base_path)
+    overrides = read_aids(overrides_path)
+    return {**base, **overrides}
 
 
 def issue_inventory(repository: str, token: str) -> dict[str, dict]:
@@ -221,9 +228,15 @@ remains the scientific decision, and canonical promotion/publication are separat
 gates after screening."""
 
 
-def sync(repository: str, token: str, queue_path: Path, aids_path: Path) -> dict[str, int]:
+def sync(
+    repository: str,
+    token: str,
+    queue_path: Path,
+    aids_path: Path,
+    overrides_path: Path = OVERRIDES_PATH,
+) -> dict[str, int]:
     queue = read_queue(queue_path)
-    aids = read_aids(aids_path)
+    aids = merged_aids(aids_path, overrides_path)
     queue_ids = {row["candidate_id"] for row in queue}
     unknown_aids = sorted(set(aids) - queue_ids)
     if unknown_aids:
@@ -270,11 +283,12 @@ def main() -> None:
     parser.add_argument("--repository", required=True)
     parser.add_argument("--queue", type=Path, default=QUEUE_PATH)
     parser.add_argument("--aids", type=Path, default=AIDS_PATH)
+    parser.add_argument("--overrides", type=Path, default=OVERRIDES_PATH)
     args = parser.parse_args()
     token = os.environ.get("GITHUB_TOKEN", "").strip()
     if not token:
         raise SystemExit("GITHUB_TOKEN is required")
-    print(json.dumps(sync(args.repository, token, args.queue, args.aids), sort_keys=True))
+    print(json.dumps(sync(args.repository, token, args.queue, args.aids, args.overrides), sort_keys=True))
 
 
 if __name__ == "__main__":
