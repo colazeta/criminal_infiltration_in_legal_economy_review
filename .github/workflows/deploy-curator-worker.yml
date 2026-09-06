@@ -10,6 +10,7 @@ on:
       - "site/curate.html"
       - "site/curator.js"
       - "site/curator-config.js"
+      - "site/curator-consensus.js"
       - "site/curator-reading.js"
       - "site/curator-reading.css"
       - "site/curator-queue.js"
@@ -220,6 +221,11 @@ jobs:
               raise SystemExit(f"{label} failed after {attempts} attempts: {last_error}")
 
           retry_json(f"{origin}/health", {"status": "ok"}, "Curator production health")
+          retry_asset(
+              "curator-consensus.js",
+              ["candidate-consensus-panel", "metadataResolution", "Costruisci E2/E3", "scholarIdentityBlocked"],
+              "Curator scholarly consensus surface",
+          )
           retry_asset(
               "curator-reading.js",
               ["candidate-abstract-panel", "/api/resolved-abstract", "/api/free-web-search", "CORE", "Jina Reader", "Tavily Basic"],
