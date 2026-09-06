@@ -44,6 +44,7 @@ jobs:
           python scripts/validation/validate_archive.py
           python scripts/validation/validate_site.py
           node --check scripts/abstracts/backfill_coverage.mjs
+          node --check scripts/expansion/citation_frontier.mjs
           node --check site/app.js
           node --check site/aml.js
           node --check site/stats.js
@@ -55,6 +56,9 @@ jobs:
           node --check curator-app/src/index.js
           node --check curator-app/src/enrichment.js
           node --check curator-app/src/scholarly-providers.js
+          node --check curator-app/src/open-scholarly-providers.js
+          node --check curator-app/src/metadata-reconciliation.js
+          node --check curator-app/src/citation-chasing.js
           node --check curator-app/src/provider-budget.js
           node --check curator-app/src/provider-readiness.js
           node --check curator-app/src/web-capability-resolver.js
@@ -106,6 +110,7 @@ jobs:
           python scripts/validation/validate_archive.py
           python scripts/validation/validate_site.py
           node --check scripts/abstracts/backfill_coverage.mjs
+          node --check scripts/expansion/citation_frontier.mjs
           node --check site/app.js
           node --check site/aml.js
           node --check site/stats.js
@@ -117,6 +122,9 @@ jobs:
           node --check curator-app/src/index.js
           node --check curator-app/src/enrichment.js
           node --check curator-app/src/scholarly-providers.js
+          node --check curator-app/src/open-scholarly-providers.js
+          node --check curator-app/src/metadata-reconciliation.js
+          node --check curator-app/src/citation-chasing.js
           node --check curator-app/src/provider-budget.js
           node --check curator-app/src/provider-readiness.js
           node --check curator-app/src/web-capability-resolver.js
