@@ -35,9 +35,11 @@ class SurveillanceHeartbeatTests(unittest.TestCase):
         self.assertIn("not** evidence for scientific saturation", body)
         self.assertIn("Do not invent or backfill", body)
 
-    def test_workflow_is_issue_only_and_scheduled_after_external_task(self) -> None:
+    def test_workflow_is_issue_only_and_checks_before_archive_deploy(self) -> None:
         workflow = (ROOT / ".github/workflows/surveillance-heartbeat.yml").read_text(encoding="utf-8")
-        self.assertIn('cron: "15 12 * * *"', workflow)
+        archive_workflow = (ROOT / ".github/workflows/archive.yml").read_text(encoding="utf-8")
+        self.assertIn('cron: "20 6 * * *"', workflow)
+        self.assertIn('cron: "30 6 * * *"', archive_workflow)
         self.assertIn("contents: read", workflow)
         self.assertIn("issues: write", workflow)
         self.assertNotIn("contents: write", workflow)
