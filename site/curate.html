@@ -5,500 +5,186 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="Workspace del curatore per esaminare la coda, registrare decisioni e governare l'archivio Criminal Infiltration."
+      content="Console curatoriale per lo screening della systematic review Criminal Infiltration."
     />
-    <title>Workspace del curatore · Criminal Infiltration Archive</title>
+    <title>Curator · Criminal Infiltration</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>◫</text></svg>" />
     <link rel="stylesheet" href="./styles.css" />
     <script src="./curator-config.js" defer></script>
     <script src="./curator.js" defer></script>
   </head>
   <body class="curator-page">
-    <a class="skip-link" href="#main-content">Vai al contenuto</a>
-
-    <header class="site-header">
-      <div class="header-inner">
-        <a class="brand" href="https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/" aria-label="Torna alla biblioteca">
-          <span class="brand-mark" aria-hidden="true">CI</span>
-          <span>
-            <strong>Criminal Infiltration</strong>
-            <small>Workspace del curatore</small>
-          </span>
-        </a>
-        <nav aria-label="Navigazione principale">
-          <a href="#curator-workflow">Coda</a>
-          <a href="#editorial-app">Decisioni</a>
-          <a href="https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/stats.html">Statistiche</a>
-          <a href="https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/">Biblioteca</a>
-          <a href="https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/aml.html">Raccolta AML</a>
-          <a href="https://github.com/colazeta/criminal_infiltration_in_legal_economy_review">Repository</a>
-        </nav>
-      </div>
-    </header>
+    <a class="skip-link" href="#editorial-console">Vai alla coda</a>
 
     <main id="main-content">
       <section class="curator-workspace" id="curator-workflow" aria-labelledby="page-title">
-        <div class="workspace-heading">
-          <div>
-            <p class="eyebrow">Superficie di lavoro</p>
-            <h1 id="page-title">Coda editoriale e decisioni</h1>
-            <p class="intro-copy">
-              Qui controlli che cosa richiede attenzione, apri le singole schede e
-              registri una decisione sostenuta da evidenza. Intake, screening,
-              archivio canonico e pubblicazione restano passaggi distinti.
-            </p>
-          </div>
-          <aside class="run-health" aria-labelledby="run-health-title">
-            <span class="health-dot" id="run-health-dot" aria-hidden="true"></span>
-            <div>
-              <p class="workspace-label" id="run-health-title">Ultima sorveglianza</p>
-              <strong id="last-run-status">Caricamento…</strong>
-              <p id="last-run-date">—</p>
-            </div>
-          </aside>
-        </div>
-
-        <div class="curator-toolbar" aria-label="Azioni principali">
-          <a
-            class="primary-action"
-            href="#editorial-app"
-          >Lavora sulla coda</a>
-          <a
-            class="toolbar-action"
-            href="https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/issues?q=is%3Aissue+is%3Aopen+label%3A%22curation%3Aqueue%22"
-          >Controlla la coda su GitHub</a>
-          <a
-            class="toolbar-action"
-            href="https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/issues?q=is%3Aissue+%22%5BINTAKE%5D%5BACADEMIC%5D%22+sort%3Acreated-desc"
-          >Controlla i batch di intake</a>
-          <a
-            class="toolbar-action"
-            href="https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/actions/workflows/curation.yml"
-          >Gestisci record canonici</a>
-        </div>
-
-        <section class="editorial-app" id="editorial-app" aria-labelledby="editorial-app-title">
-          <div class="section-heading editorial-app-heading">
-            <div>
-              <p class="eyebrow">GitHub App curatoriale</p>
-              <h2 id="editorial-app-title">Scegli, valuta e invia senza lasciare il sito</h2>
-            </div>
-            <p>
-              L’accesso GitHub identifica il curatore. La decisione crea
-              un’istruzione attribuita; GitHub Actions la convalida e prepara
-              una pull request, senza pubblicare né effettuare merge.
-            </p>
+        <section class="editorial-app" id="editorial-app" aria-labelledby="page-title">
+          <div class="curator-titlebar">
+            <h1 id="page-title">CURATOR</h1>
+            <span>CRIMINAL INFILTRATION REVIEW</span>
           </div>
 
           <div class="curator-app-message" id="curator-app-message" role="status" aria-live="polite" hidden></div>
 
           <div class="curator-app-unavailable" id="curator-app-unavailable" hidden>
-            <div>
-              <strong id="curator-unavailable-title">Backend della GitHub App non ancora attivato</strong>
-              <p id="curator-unavailable-copy">
-                L’interfaccia è pronta, ma l’invio diretto rimane bloccato finché
-                la App non viene registrata e il suo endpoint HTTPS non viene configurato.
-              </p>
-            </div>
-            <div class="curator-app-unavailable-actions">
-              <a class="primary-action" id="curator-secure-app" hidden>Apri la console sicura</a>
-              <a
-                class="toolbar-action"
-                href="https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/issues/new?template=candidate_decision.yml"
-              >Usa temporaneamente il modulo GitHub</a>
-            </div>
+            <strong id="curator-unavailable-title">Console sicura richiesta</strong>
+            <span id="curator-unavailable-copy">Apri l’origine autenticata del curatore.</span>
+            <a class="classic-button" id="curator-secure-app" hidden>APRI CONSOLE</a>
           </div>
 
           <div class="curator-login-panel" id="curator-login-panel" hidden>
-            <div>
-              <p class="workspace-label">Accesso richiesto</p>
-              <h3>Autenticati come curatore</h3>
-              <p>
-                La App richiede soltanto accesso in lettura e scrittura alle issue
-                del repository selezionato. Non inserire password o personal access token.
-              </p>
-            </div>
-            <a class="primary-action" id="curator-login" href="#editorial-app">Accedi con GitHub</a>
+            <span>ACCESSO CURATORE</span>
+            <a class="classic-button" id="curator-login" href="#editorial-app">LOGIN GITHUB</a>
           </div>
 
           <div class="curator-session-panel" id="curator-session-panel" hidden>
-            <p>
-              Sessione attribuita a <strong id="curator-login-name">—</strong>
-            </p>
-            <button class="text-button" id="curator-logout" type="button">Termina sessione</button>
+            <span>USER: <strong id="curator-login-name">—</strong></span>
+            <button class="classic-button" id="curator-logout" type="button">LOGOUT</button>
           </div>
 
           <div class="editorial-console" id="editorial-console" hidden>
             <aside class="candidate-browser" aria-labelledby="candidate-browser-title">
               <div class="candidate-browser-heading">
-                <div>
-                  <p class="workspace-label">Coda autenticata</p>
-                  <h3 id="candidate-browser-title">Schede aperte</h3>
-                </div>
+                <h2 id="candidate-browser-title">QUEUE</h2>
                 <span id="candidate-result-count">—</span>
               </div>
+
               <div class="candidate-controls">
                 <label>
-                  <span>Cerca</span>
+                  <span>SEARCH</span>
                   <input
                     id="candidate-search"
                     type="search"
-                    placeholder="Titolo, autore, DOI o ID"
+                    placeholder="titolo / autore / DOI / ID"
                     autocomplete="off"
                   />
                 </label>
                 <label>
-                  <span>Corsia</span>
+                  <span>FILTER</span>
                   <select id="candidate-lane-filter">
-                    <option value="">Tutte le corsie</option>
-                    <option value="metadata_fix">Metadati</option>
-                    <option value="manual_review">Revisione manuale</option>
-                    <option value="abstract_full_text_review">Abstract / full text</option>
-                    <option value="legacy_rejection_review">Rigetti legacy</option>
+                    <option value="">TUTTI</option>
+                    <option value="metadata_fix">METADATI</option>
+                    <option value="manual_review">MANUALE</option>
+                    <option value="abstract_full_text_review">TESTO</option>
+                    <option value="legacy_rejection_review">LEGACY</option>
                   </select>
                 </label>
               </div>
+
               <div class="candidate-list" id="candidate-list" aria-live="polite"></div>
-              <p class="candidate-list-empty" id="candidate-list-empty" hidden>Nessuna scheda corrisponde ai filtri.</p>
+              <p class="candidate-list-empty" id="candidate-list-empty" hidden>NESSUN RECORD</p>
             </aside>
 
             <section class="candidate-decision-panel" aria-labelledby="candidate-decision-title">
               <div class="candidate-empty-state" id="candidate-empty-state">
-                <span aria-hidden="true">01</span>
-                <h3 id="candidate-decision-title">Seleziona una scheda</h3>
-                <p>
-                  I metadati e la provenienza vengono caricati soltanto dopo
-                  l’autenticazione. Nessun candidato entra nell’export pubblico.
-                </p>
+                <h2 id="candidate-decision-title">SELEZIONA UN RECORD</h2>
               </div>
 
               <article class="candidate-detail" id="candidate-detail" hidden>
                 <div class="candidate-detail-heading">
                   <div>
-                    <p class="workspace-label" id="selected-provenance-kind">—</p>
                     <code id="selected-candidate-id">—</code>
-                    <h3 id="selected-candidate-title">—</h3>
+                    <h2 id="selected-candidate-title">—</h2>
                   </div>
-                  <a id="selected-candidate-issue" href="https://github.com" hidden>Apri la scheda GitHub ↗</a>
+                  <a id="selected-candidate-issue" href="https://github.com" hidden>AUDIT</a>
                 </div>
+
                 <dl class="candidate-metadata">
-                  <div><dt>Autori</dt><dd id="selected-candidate-authors">—</dd></div>
-                  <div><dt>Anno</dt><dd id="selected-candidate-year">—</dd></div>
-                  <div><dt>Sede editoriale</dt><dd id="selected-candidate-venue">—</dd></div>
+                  <div><dt>AUTORI</dt><dd id="selected-candidate-authors">—</dd></div>
+                  <div><dt>ANNO</dt><dd id="selected-candidate-year">—</dd></div>
+                  <div><dt>SEDE</dt><dd id="selected-candidate-venue">—</dd></div>
                   <div>
                     <dt>DOI</dt>
                     <dd>
                       <span id="selected-candidate-doi">—</span>
-                      <a id="selected-candidate-doi-link" href="https://doi.org" hidden>verifica ↗</a>
+                      <a id="selected-candidate-doi-link" href="https://doi.org" hidden>↗</a>
                     </dd>
                   </div>
-                  <div><dt>Fonte</dt><dd id="selected-candidate-source">—</dd></div>
-                  <div><dt>Stage corrente</dt><dd id="selected-candidate-stage">—</dd></div>
+                  <div><dt>FONTE</dt><dd id="selected-candidate-source">—</dd></div>
+                  <div><dt>STAGE</dt><dd id="selected-candidate-stage">—</dd></div>
                 </dl>
-                <details class="candidate-provenance-details">
-                  <summary>Mostra la provenienza registrata</summary>
+
+                <div class="curator-internal-data" hidden>
+                  <span id="selected-provenance-kind">—</span>
                   <dl id="candidate-provenance"></dl>
-                </details>
+                </div>
               </article>
 
               <form class="decision-form" id="decision-form" autocomplete="off" hidden>
                 <div class="decision-form-heading">
-                  <div>
-                    <p class="workspace-label">Decisione per <span id="form-candidate-id">—</span></p>
-                    <h3>Registra l’istruzione editoriale</h3>
-                  </div>
-                  <p>I campi incompatibili vengono esclusi prima dell’invio.</p>
+                  <strong>SCREENING</strong>
+                  <code id="form-candidate-id">—</code>
                 </div>
 
                 <div class="decision-fields">
                   <label>
-                    <span>Stage esaminato</span>
+                    <span>STAGE</span>
                     <select id="screening-stage" required></select>
                   </label>
                   <label>
-                    <span>Decisione</span>
+                    <span>DECISIONE</span>
                     <select id="decision" required></select>
                   </label>
+                  <label>
+                    <span>CONFIDENZA</span>
+                    <select id="confidence" required></select>
+                  </label>
+
                   <label id="exclusion-field" hidden>
-                    <span>Motivo di esclusione</span>
+                    <span>ESCLUSIONE</span>
                     <select id="exclusion-reason"></select>
                   </label>
                   <label id="topic-field" hidden>
-                    <span>Tema governato</span>
+                    <span>TEMA</span>
                     <select id="topic-code"></select>
                   </label>
                   <label id="duplicate-field" hidden>
-                    <span>Candidato o paper prevalente</span>
-                    <input id="duplicate-target" type="text" maxlength="60" placeholder="Candidate ID o paper ID" />
+                    <span>DUPLICATO DI</span>
+                    <input id="duplicate-target" type="text" maxlength="60" />
                   </label>
                   <label id="secondary-collection-field" hidden>
-                    <span>Conserva anche nella raccolta collegata</span>
+                    <span>RACCOLTA SECONDARIA</span>
                     <select id="secondary-collection"></select>
-                    <small>Disponibile solo per un lavoro non eleggibile nel corpus principale.</small>
-                  </label>
-                  <label>
-                    <span>Confidenza</span>
-                    <select id="confidence" required></select>
                   </label>
                   <label class="wide-field" id="secondary-rationale-field" hidden>
-                    <span>Rilevanza per la raccolta collegata</span>
-                    <textarea
-                      id="secondary-rationale"
-                      rows="4"
-                      maxlength="2000"
-                      placeholder="Spiega perché il lavoro è utile per l’antiriciclaggio o la criminalità economico-finanziaria, pur restando fuori dalla review sull’infiltrazione."
-                    ></textarea>
-                    <small>Questa nota indirizza il successivo controllo editoriale; non è un’approvazione alla pubblicazione.</small>
+                    <span>NOTA RACCOLTA SECONDARIA</span>
+                    <textarea id="secondary-rationale" rows="2" maxlength="2000"></textarea>
                   </label>
+
                   <label class="wide-field">
-                    <span>Base di evidenza e punto esaminato</span>
+                    <span>EVIDENZA ESAMINATA</span>
                     <textarea
                       id="evidence-basis"
-                      rows="4"
+                      rows="2"
                       maxlength="2000"
                       required
-                      placeholder="Indica abstract, sezione, pagina o fonte di metadati effettivamente esaminata."
+                      placeholder="abstract / sintesi / sezione / pagina / fonte"
                     ></textarea>
-                    <small>Non incollare passaggi estesi o full text protetto.</small>
                   </label>
                   <label class="wide-field">
-                    <span>Motivazione riferita alla scheda</span>
+                    <span>MOTIVAZIONE</span>
                     <textarea
                       id="decision-rationale"
-                      rows="5"
+                      rows="3"
                       maxlength="2000"
                       required
-                      placeholder="Spiega come l’evidenza sostiene la decisione secondo la regola corrente."
                     ></textarea>
                   </label>
                 </div>
 
-                <label class="explicit-confirmation">
-                  <input id="explicit-confirmation" type="checkbox" required />
-                  <span>
-                    Confermo che questa è una mia decisione editoriale. La App
-                    registrerà <strong>APPLY</strong>; la pull request resterà da revisionare.
-                  </span>
-                </label>
-                <button class="primary-action" id="submit-decision" type="submit">Invia la decisione</button>
+                <div class="decision-submit-row">
+                  <label class="explicit-confirmation">
+                    <input id="explicit-confirmation" type="checkbox" required />
+                    <span>CONFERMO LA DECISIONE</span>
+                  </label>
+                  <button class="classic-button" id="submit-decision" type="submit">SALVA</button>
+                </div>
                 <div class="decision-result" id="decision-result" role="status" aria-live="polite" hidden></div>
               </form>
             </section>
           </div>
         </section>
-
-        <section class="queue-overview" aria-labelledby="queue-overview-title">
-          <div class="compact-heading">
-            <div>
-              <p class="eyebrow">Backlog materializzato</p>
-              <h2 id="queue-overview-title">Ogni conteggio corrisponde a schede identificabili</h2>
-            </div>
-            <p>
-              I segnali del pilot sono conservati per audit, ma non diventano
-              automaticamente decisioni attuali. I nuovi batch validati
-              confluiscono nella coda tramite una pull request separata.
-            </p>
-          </div>
-
-          <div class="queue-metrics" aria-label="Composizione della coda">
-            <article class="queue-total-card">
-              <span id="queue-total">—</span>
-              <strong>schede aperte da lavorare</strong>
-              <p id="queue-origin-summary">Backlog legacy e intake giornalieri validati.</p>
-            </article>
-            <article>
-              <span id="queue-metadata">—</span>
-              <strong>metadati da correggere</strong>
-              <p>Autori o altri campi bibliografici non ancora sufficienti.</p>
-            </article>
-            <article>
-              <span id="queue-manual">—</span>
-              <strong>revisioni manuali</strong>
-              <p>Scope e valore contestuale richiedono una valutazione umana.</p>
-            </article>
-            <article>
-              <span id="queue-abstract">—</span>
-              <strong>abstract o full text</strong>
-              <p>Il solo titolo non consente una decisione difendibile.</p>
-            </article>
-            <article>
-              <span id="queue-legacy-rejected">—</span>
-              <strong>rigetti legacy da verificare</strong>
-              <p>Segnali storici non ancora equivalenti a esclusioni governate.</p>
-            </article>
-            <article>
-              <span id="queue-secondary-aml">—</span>
-              <strong>esclusi instradati ad AML</strong>
-              <p>
-                Restano fuori dal corpus principale; la
-                <a href="./aml.html">pubblicazione secondaria</a> richiede un’approvazione distinta.
-              </p>
-              <p>
-                <a href="https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/issues?q=is%3Aissue+label%3A%22collection%3Abroader-aml%22">
-                  Apri le schede instradate →
-                </a>
-              </p>
-            </article>
-          </div>
-        </section>
-
-        <section class="queue-lanes" aria-labelledby="queue-lanes-title">
-          <div class="section-heading">
-            <div>
-              <p class="eyebrow">Viste operative</p>
-              <h2 id="queue-lanes-title">Entra direttamente nel lavoro da fare</h2>
-            </div>
-            <p>Le stesse corsie sono disponibili nel pannello autenticato; GitHub resta consultabile per audit.</p>
-          </div>
-          <div class="lane-grid">
-            <a
-              class="lane-card lane-metadata"
-              href="https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/issues?q=is%3Aissue+is%3Aopen+label%3A%22stage%3Ametadata-fix%22"
-            >
-              <span>01</span>
-              <strong>Ripara i metadati</strong>
-              <p>Verifica identità, autori, DOI e manifestazioni prima dello screening.</p>
-              <small>Apri questa vista →</small>
-            </a>
-            <a
-              class="lane-card lane-manual"
-              href="https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/issues?q=is%3Aissue+is%3Aopen+label%3A%22stage%3Amanual-review%22"
-            >
-              <span>02</span>
-              <strong>Decidi lo scope</strong>
-              <p>Valuta il contributo diretto o contestuale con la regola corrente.</p>
-              <small>Apri questa vista →</small>
-            </a>
-            <a
-              class="lane-card lane-reading"
-              href="https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/issues?q=is%3Aissue+is%3Aopen+label%3A%22stage%3Aabstract-review%22"
-            >
-              <span>03</span>
-              <strong>Leggi l’evidenza</strong>
-              <p>Passa da titolo a abstract o full text e indica il punto esaminato.</p>
-              <small>Apri questa vista →</small>
-            </a>
-            <a
-              class="lane-card lane-recheck"
-              href="https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/issues?q=is%3Aissue+is%3Aopen+label%3A%22stage%3Alegacy-rejection-review%22"
-            >
-              <span>04</span>
-              <strong>Ricontrolla i rigetti</strong>
-              <p>Conferma o correggi il vecchio triage usando codici ed evidenza attuali.</p>
-              <small>Apri questa vista →</small>
-            </a>
-          </div>
-        </section>
-      </section>
-
-      <section class="decision-workspace" id="curator-actions" aria-labelledby="actions-title">
-        <div class="section-heading">
-          <div>
-            <p class="eyebrow">Decisioni governate</p>
-            <h2 id="actions-title">Una decisione modifica la coda, non pubblica il paper</h2>
-          </div>
-          <p>
-            Ogni istruzione produce una modifica separata, attribuita e da
-            revisionare prima del merge.
-          </p>
-        </div>
-
-        <div class="decision-grid">
-          <article>
-            <span class="decision-index">A</span>
-            <h3>Includi o rinvia</h3>
-            <p>
-              Registra <code>eligible_core</code>, <code>eligible_contextual</code>
-              oppure <code>maybe_full_text_needed</code>, con stage, evidenza,
-              motivazione e livello di confidenza.
-            </p>
-          </article>
-          <article>
-            <span class="decision-index">B</span>
-            <h3>Escludi senza perdere il lavoro</h3>
-            <p>
-              Se il lavoro è fuori perimetro, scegli uno dei motivi governati e
-              spiega perché si applica proprio a quella scheda. Se è pertinente
-              all’antiriciclaggio o alla criminalità economico-finanziaria, puoi
-              indirizzarlo alla raccolta più ampia.
-            </p>
-          </article>
-          <article>
-            <span class="decision-index">C</span>
-            <h3>Conferma un duplicato</h3>
-            <p>
-              Indica il candidato o paper che sopravvive e la prova d’identità.
-              Una somiglianza di titolo non è sufficiente.
-            </p>
-          </article>
-          <article>
-            <span class="decision-index">D</span>
-            <h3>Assegna il tema</h3>
-            <p>
-              I temi sono codici controllati e richiedono evidenza. Possono essere
-              assegnati soltanto insieme a una decisione eleggibile.
-            </p>
-          </article>
-        </div>
-
-        <div class="decision-callout">
-          <div>
-            <p class="eyebrow">Percorso autenticato</p>
-            <h3>Come registrare una decisione</h3>
-          </div>
-          <ol>
-            <li>Accedi con GitHub e scegli una scheda direttamente nel pannello.</li>
-            <li>Compila soltanto i campi resi pertinenti dalla decisione.</li>
-            <li>Conferma: la App registra <strong>APPLY</strong> nell’istruzione attribuita.</li>
-            <li>Controlla la pull request prodotta e decidi se integrarla.</li>
-          </ol>
-          <a
-            class="primary-action"
-            href="https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/issues/new?template=candidate_decision.yml"
-          >Modulo GitHub di riserva</a>
-        </div>
-
-        <details class="canonical-tools">
-          <summary>Operazioni sui record già canonici</summary>
-          <div>
-            <p>
-              Per cambiare il tema di un paper già registrato, escluderlo o unire
-              due record canonici continua a usare il workflow
-              <code>curation.yml</code>. Anche questo flusso prepara una pull
-              request e non effettua auto-merge.
-            </p>
-            <a
-              class="text-action"
-              href="https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/actions/workflows/curation.yml"
-            >Apri la console dei record canonici →</a>
-          </div>
-        </details>
-      </section>
-
-      <section class="curator-boundary" aria-labelledby="boundary-title">
-        <div>
-          <p class="eyebrow">Confine di sicurezza</p>
-          <h2 id="boundary-title">Questa pagina non è il database editoriale</h2>
-        </div>
-        <p>
-          Il documento pubblico contiene soltanto conteggi e codici controllati.
-          Dopo l’accesso, la GitHub App recupera le schede attraverso una sessione
-          temporanea e attribuita; la pagina non raccoglie password o personal
-          access token. Candidati, evidenza e identità restano fuori dall’export
-          pubblico. Promozione canonica e pubblicazione richiedono passaggi
-          successivi e indipendenti.
-        </p>
       </section>
     </main>
-
-    <footer>
-      <p>Decisioni attribuite, versionate e mai fuse automaticamente.</p>
-      <p>
-        <a href="https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/">Biblioteca</a> ·
-        <a href="https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/aml.html">Raccolta AML</a> ·
-        <a href="https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/stats.html">Statistiche</a> ·
-        <a href="https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/blob/main/docs/operations/curation.md">Istruzioni complete</a>
-      </p>
-    </footer>
   </body>
 </html>
