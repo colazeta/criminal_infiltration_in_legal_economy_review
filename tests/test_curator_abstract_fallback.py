@@ -50,7 +50,9 @@ class CuratorAbstractFallbackTests(unittest.TestCase):
         self.assertIn('mode === "locator_only"', module)
         self.assertIn("readVerifiedAbstractLocator", module)
         self.assertIn("JINA_TIMEOUT_MS = 6500", module)
-        self.assertLess(module.index('if (mode === "locator_only")'), module.index("resolveFreeWebCapabilities"))
+        broad_search = "const search = await resolveFreeWebCapabilities"
+        self.assertIn(broad_search, module)
+        self.assertLess(module.index('if (mode === "locator_only")'), module.index(broad_search))
 
     def test_worker_binds_resolved_abstract_to_governed_retrieval(self) -> None:
         worker = (ROOT / "curator-app/src/worker.js").read_text(encoding="utf-8")
