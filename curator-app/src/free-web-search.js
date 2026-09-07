@@ -4,9 +4,11 @@ import {
   resolveFreeWebCapabilities,
   webCapabilityManifest,
 } from "./web-capability-resolver.js";
+import { fetchWithTimeout } from "./network.js";
 import { plainTextAbstract, titleSimilarity } from "./scholarly-providers.js";
 
 const JINA_READER_BASE = "https://r.jina.ai/";
+const JINA_TIMEOUT_MS = 6500;
 
 function cleanText(value, maximum = 1000) {
   return String(value || "").replace(/\s+/g, " ").trim().slice(0, maximum);
@@ -53,7 +55,7 @@ async function readVerifiedAbstractLocator({ title, doi, retrieval, env }) {
   const apiKey = cleanText(env?.JINA_API_KEY, 400);
   if (apiKey) headers.Authorization = `Bearer ${apiKey}`;
 
-  const response = await fetch(`${JINA_READER_BASE}${target}`, { headers });
+  const response = await fetchWithTimeout(`${JINA_READER_BASE}${target}`, { headers }, JINA_TIMEOUT_MS);
   if (response.status === 404) return null;
   if (!response.ok) throw new Error(`jina_verified_locator_${response.status}`);
   const text = (await response.text()).slice(0, 120000);
@@ -116,11 +118,14 @@ async function handleFreeWebSearchRequest(request, env = {}, retrieval = null) {
   const title = cleanText(url.searchParams.get("title"), 1000);
   const doi = cleanDoi(url.searchParams.get("doi"));
   const year = cleanText(url.searchParams.get("year"), 10);
+  const mode = cleanText(url.searchParams.get("mode"), 40);
   if (!title) return json({ error: { code: "title_required", message: "Titolo mancante." } }, 400);
 
   const providerPlan = webCapabilityManifest(env);
   const locatorErrors = [];
+  let locatorTried = false;
   if (retrieval?.abstractCoverageStatus === "available" && retrieval?.abstractArticleUrl) {
+    locatorTried = true;
     try {
       const located = await readVerifiedAbstractLocator({ title, doi, retrieval, env });
       if (located?.abstract) {
@@ -145,6 +150,17 @@ async function handleFreeWebSearchRequest(request, env = {}, retrieval = null) {
     } catch (error) {
       locatorErrors.push(`Verified abstract locator:${error?.message || "error"}`);
     }
+  }
+
+  if (mode === "locator_only") {
+    return json(emptyResult({
+      doi,
+      providersTried: locatorTried ? ["Verified abstract locator", "Jina Reader"] : [],
+      providerErrors: locatorErrors,
+      providerPlan,
+      searchStatus: "needs_web_search",
+      freeRequestsUsed: locatorTried ? 1 : 0,
+    }));
   }
 
   const search = await resolveFreeWebCapabilities({ title, doi, year, candidateId, env });

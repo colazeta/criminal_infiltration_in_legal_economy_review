@@ -18,36 +18,34 @@ class CuratorAssistedResolutionSurfaceTests(unittest.TestCase):
         self.assertIn("not_applicable_noise", source)
         self.assertNotIn("innerHTML", source)
 
-    def test_surface_reuses_existing_issue_fetch_instead_of_duplicate_request(self) -> None:
+    def test_surface_consumes_same_origin_candidate_context_without_fetch_wrapper(self) -> None:
         source = (ROOT / "site/curator-assisted-resolution.js").read_text(encoding="utf-8")
-        self.assertIn("const originalFetch = window.fetch.bind(window)", source)
-        self.assertIn("window.fetch = async function curatorAssistedResolutionFetch", source)
-        self.assertIn("response.clone().json()", source)
-        self.assertIn("issueCache", source)
-        self.assertNotIn("await fetch(`https://api.github.com", source)
+        self.assertIn('document.addEventListener("curator:candidate-context"', source)
+        self.assertIn("event?.detail?.context?.assistedResolution", source)
+        self.assertNotIn("window.fetch =", source)
+        self.assertNotIn("originalFetch", source)
+        self.assertNotIn("api.github.com", source)
+        self.assertNotIn("issueCache", source)
 
-    def test_missing_abstract_promotes_governed_synopsis_into_primary_reading_cell(self) -> None:
-        source = (ROOT / "site/curator-assisted-resolution.js").read_text(encoding="utf-8")
-        self.assertIn("Reading aid — preparatory", source)
-        self.assertIn('Review synopsis', source)
-        self.assertIn("candidate-abstract-text", source)
-        self.assertIn("candidate-abstract-source", source)
-        self.assertIn("Sintesi per lo screening", source)
-        self.assertIn("Sintesi generata da fonti verificate", source)
-        self.assertIn("Sintesi dai metadati verificati", source)
-        self.assertIn("non abstract dell’autore", source)
-        self.assertIn('panel.dataset.evidenceMode = "synthesis"', source)
-        self.assertIn('panel.dataset.evidenceMode = "abstract"', source)
+    def test_primary_synthesis_is_owned_by_reading_surface(self) -> None:
+        assisted = (ROOT / "site/curator-assisted-resolution.js").read_text(encoding="utf-8")
+        reading = (ROOT / "site/curator-reading.js").read_text(encoding="utf-8")
+        self.assertNotIn("promoteAidToMainSurface", assisted)
+        self.assertNotIn("candidate-abstract-text", assisted)
+        self.assertIn("promoteSynthesis", reading)
+        self.assertIn('panel.dataset.evidenceMode = "synthesis"', reading)
+        self.assertIn('panel.dataset.evidenceMode = "abstract"', reading)
+        self.assertIn("Sintesi da fonti verificate", reading)
+        self.assertIn("Sintesi dai metadati verificati", reading)
 
-    def test_actual_abstract_has_priority_over_generated_synthesis(self) -> None:
-        source = (ROOT / "site/curator-assisted-resolution.js").read_text(encoding="utf-8")
-        self.assertIn("function actualAbstractVisible()", source)
-        self.assertIn("if (actualAbstractVisible())", source)
-        self.assertIn('title.textContent = "Abstract"', source)
-        self.assertIn("abstract recuperato", source)
-        self.assertIn("abstract mostrato solo nella console autenticata", source)
+    def test_actual_abstract_has_priority_over_synthesis(self) -> None:
+        reading = (ROOT / "site/curator-reading.js").read_text(encoding="utf-8")
+        self.assertIn("function renderAbstract(payload)", reading)
+        self.assertIn('panel.dataset.evidenceMode = "abstract"', reading)
+        self.assertIn('title.textContent = "Abstract"', reading)
+        self.assertIn("abstractCache", reading)
 
-    def test_interceptor_loads_before_reading_surface_in_public_and_secure_configs(self) -> None:
+    def test_component_still_loads_before_reading_surface_but_no_longer_intercepts_it(self) -> None:
         public = (ROOT / "site/curator-config.js").read_text(encoding="utf-8")
         worker = (ROOT / "curator-app/src/worker.js").read_text(encoding="utf-8")
         self.assertLess(public.index("curator-assisted-resolution.js"), public.index("curator-reading.js"))
@@ -57,7 +55,7 @@ class CuratorAssistedResolutionSurfaceTests(unittest.TestCase):
         )
         self.assertIn('"/curator-assisted-resolution.js"', worker)
 
-    def test_deploy_smoke_checks_new_component(self) -> None:
+    def test_deploy_smoke_checks_component(self) -> None:
         workflow = (ROOT / ".github/workflows/deploy-curator-worker.yml").read_text(encoding="utf-8")
         self.assertIn('"site/curator-assisted-resolution.js"', workflow)
         self.assertIn('"curator-assisted-resolution.js"', workflow)

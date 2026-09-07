@@ -3,7 +3,6 @@
 (() => {
   const SESSION_KEY = "criminal-infiltration-curator-session";
   const PAGE_SIZE = 12;
-  const MAX_ENRICHMENT_CONCURRENCY = 3;
   const config = window.CURATOR_APP_CONFIG || {};
   const apiBaseUrl = String(config.apiBaseUrl || "").replace(/\/$/, "");
 
@@ -12,11 +11,6 @@
   let candidatePromise = null;
   let candidateMap = new Map();
   let listObserver = null;
-  let viewportObserver = null;
-  let activeEnrichments = 0;
-  const enrichmentQueue = [];
-  const enrichmentPending = new Set();
-  const enrichmentCache = new Map();
 
   const byId = (id) => document.getElementById(id);
 
@@ -86,35 +80,26 @@
     return "standard";
   }
 
-  function triageChip(code) {
-    const labels = {
-      priority_core: ["Priorità core", "positive"],
-      boundary: ["Confine da valutare", "warning"],
-      legacy_fast_recheck: ["Riesame legacy rapido", "neutral"],
-    };
-    return labels[code] || null;
-  }
-
-  function makeChip(label, state = "neutral", role = "") {
-    const chip = document.createElement("span");
-    chip.className = "queue-card-chip";
-    chip.dataset.state = state;
-    if (role) chip.dataset.role = role;
-    chip.textContent = label;
-    return chip;
-  }
-
-  function applyCachedAbstractStatus(card, candidateId) {
-    const cached = enrichmentCache.get(candidateId);
-    if (!cached) return false;
-    renderAbstractBadge(candidateId, cached);
-    return true;
+  function ensureGridHeader() {
+    const list = byId("candidate-list");
+    if (!list || byId("candidate-grid-header")) return;
+    const header = document.createElement("div");
+    header.id = "candidate-grid-header";
+    header.className = "candidate-grid-header";
+    for (const label of ["ID", "TITOLO", "AUTORI", "ANNO / SEDE", "STAGE"]) {
+      const cell = document.createElement("span");
+      cell.textContent = label;
+      header.append(cell);
+    }
+    list.insertAdjacentElement("beforebegin", header);
   }
 
   function enhanceCard(card) {
+    if (!(card instanceof HTMLElement) || card.dataset.queueEnhanced === "true") return;
     const candidateId = cardCandidateId(card);
     if (!candidateId) return;
     card.dataset.candidateId = candidateId;
+    card.dataset.queueEnhanced = "true";
 
     const candidate = candidateMap.get(candidateId);
     const top = card.querySelector(".candidate-card-top");
@@ -138,7 +123,7 @@
     const citation = document.createElement("span");
     citation.className = "queue-card-citation";
     const citationParts = [candidate?.year, candidate?.venue].filter(Boolean);
-    citation.textContent = citationParts.join(" · ") || "Anno e sede editoriale da verificare";
+    citation.textContent = citationParts.join(" · ") || "Anno e sede da verificare";
 
     const doi = document.createElement("span");
     doi.className = "queue-card-doi";
@@ -147,23 +132,11 @@
 
     const chips = document.createElement("span");
     chips.className = "queue-card-chips";
-    chips.append(
-      makeChip(candidate?.doi ? "DOI" : "senza DOI", candidate?.doi ? "positive" : "neutral", "doi-status"),
-      makeChip("Abstract · ricerca", "loading", "abstract-status"),
-    );
-    const triage = triageCode(candidate);
-    card.dataset.triage = triage;
-    const triageDefinition = triageChip(triage);
-    if (triageDefinition) {
-      chips.append(makeChip(triageDefinition[0], triageDefinition[1], "triage-status"));
-    }
-    if (candidate?.source) chips.append(makeChip(candidate.source, "source", "source"));
 
+    card.dataset.triage = triageCode(candidate);
     oldMeta.insertAdjacentElement("afterend", citation);
     citation.insertAdjacentElement("afterend", doi);
     doi.insertAdjacentElement("afterend", chips);
-
-    if (!applyCachedAbstractStatus(card, candidateId) && candidate) viewportObserver?.observe(card);
   }
 
   function ensureTriageFilter() {
@@ -171,15 +144,15 @@
     if (!controls || byId("candidate-triage-filter")) return;
     const label = document.createElement("label");
     const caption = document.createElement("span");
-    caption.textContent = "Priorità di lavoro";
+    caption.textContent = "PRIORITÀ";
     const select = document.createElement("select");
     select.id = "candidate-triage-filter";
     const options = [
-      ["", "Tutte le priorità"],
-      ["priority_core", "Priorità core (intake)"],
-      ["boundary", "Confine da valutare"],
-      ["legacy_fast_recheck", "Riesame rapido (segnale legacy)"],
-      ["standard", "Coda standard"],
+      ["", "TUTTE LE PRIORITÀ"],
+      ["priority_core", "PRIORITÀ CORE"],
+      ["boundary", "CONFINE DA VALUTARE"],
+      ["legacy_fast_recheck", "RIESAME RAPIDO"],
+      ["standard", "CODA STANDARD"],
     ];
     for (const [value, text] of options) {
       const option = document.createElement("option");
@@ -187,7 +160,7 @@
       option.textContent = text;
       select.append(option);
     }
-    select.title = "Vista operativa derivata dalla provenienza già registrata; non è una decisione scientifica.";
+    select.title = "Vista derivata dalla provenienza registrata; non è una decisione scientifica.";
     select.addEventListener("change", () => {
       resetPageRequested = true;
       applyPagination();
@@ -221,12 +194,12 @@
     previous.type = "button";
     previous.id = "candidate-page-previous";
     previous.className = "candidate-page-button";
-    previous.textContent = "← Precedenti";
+    previous.textContent = "← PRECEDENTI";
     previous.addEventListener("click", () => {
       if (queuePage <= 1) return;
       queuePage -= 1;
       applyPagination();
-      list.scrollTo({ top: 0, behavior: "smooth" });
+      list.scrollTo({ top: 0 });
     });
 
     const info = document.createElement("span");
@@ -237,13 +210,13 @@
     next.type = "button";
     next.id = "candidate-page-next";
     next.className = "candidate-page-button";
-    next.textContent = "Successivi →";
+    next.textContent = "SUCCESSIVI →";
     next.addEventListener("click", () => {
       const pages = Math.max(1, Math.ceil(currentCards().length / PAGE_SIZE));
       if (queuePage >= pages) return;
       queuePage += 1;
       applyPagination();
-      list.scrollTo({ top: 0, behavior: "smooth" });
+      list.scrollTo({ top: 0 });
     });
 
     pager.append(previous, info, next);
@@ -279,177 +252,37 @@
     if (previous) previous.disabled = queuePage <= 1;
     if (next) next.disabled = queuePage >= pages;
     const info = byId("candidate-page-info");
-    if (info) info.textContent = total ? `${start + 1}–${end} di ${total}` : "0 risultati";
-
+    if (info) info.textContent = total ? `${start + 1}–${end} / ${total}` : "0 RISULTATI";
     const count = byId("candidate-result-count");
-    if (count) count.textContent = total ? `${start + 1}–${end} di ${total}` : "0 schede";
+    if (count) count.textContent = total ? `${start + 1}–${end} / ${total}` : "0 RECORD";
   }
 
-  function providerTrace(payload) {
-    const providers = Array.isArray(payload?.providersTried) ? payload.providersTried.filter(Boolean) : [];
-    return providers.length ? `Fonti interrogate: ${providers.join(", ")}.` : "";
-  }
-
-  function matchLabel(payload) {
-    if (payload?.matchType === "doi") return "DOI verificato";
-    if (payload?.matchType === "title_year") return "Titolo + anno verificati";
-    if (payload?.matchType === "web_search") return "Exa / web verificato";
-    if (payload?.matchType === "resolved_url") return "Paper risolto verificato";
-    if (payload?.matchType === "resolved_url_none") return "Paper risolto, abstract non esposto";
-    if (payload?.matchType === "needs_web_search") return "Serve ricerca web assistita";
-    if (payload?.matchType === "web_search_exhausted") return "Ricerca estesa completata senza abstract";
-    if (payload?.matchType === "unavailable") return "Servizio non disponibile";
-    return "Nessun match affidabile";
-  }
-
-  function renderAbstractBadge(candidateId, payload) {
-    for (const card of document.querySelectorAll(`.candidate-card[data-candidate-id="${CSS.escape(candidateId)}"]`)) {
-      const badge = card.querySelector('[data-role="abstract-status"]');
-      if (!badge) continue;
-      const trace = providerTrace(payload);
-      if (String(payload?.abstract || "").trim()) {
-        badge.textContent = "Abstract disponibile";
-        badge.dataset.state = "positive";
-        badge.title = `${payload.abstractSource || payload.provider || "Fonte verificata"} · ${matchLabel(payload)}${trace ? ` · ${trace}` : ""}`;
-      } else if (payload?.matchType === "needs_web_search") {
-        badge.textContent = "Ricerca web necessaria";
-        badge.dataset.state = "warning";
-        badge.title = `${matchLabel(payload)}${trace ? ` · ${trace}` : ""}`;
-      } else if (payload?.matchType === "web_search_exhausted") {
-        badge.textContent = "Abstract non trovato";
-        badge.dataset.state = "neutral";
-        badge.title = `${matchLabel(payload)}${trace ? ` · ${trace}` : ""}`;
-      } else if (payload?.matchType === "unavailable") {
-        badge.textContent = "Abstract non verificato";
-        badge.dataset.state = "warning";
-        badge.title = "Il processo multi-source non ha completato la verifica.";
-      } else {
-        badge.textContent = "Ricerca da completare";
-        badge.dataset.state = "warning";
-        badge.title = `${matchLabel(payload || {})}${trace ? ` · ${trace}` : ""}`;
-      }
-    }
-  }
-
-  async function fetchResolvedAbstract(candidate, token) {
-    if (!candidate?.candidateId || !candidate?.issueNumber) return null;
-    const target = new URL(`${apiBaseUrl}/api/resolved-abstract`);
-    target.searchParams.set("candidate", candidate.candidateId);
-    target.searchParams.set("issue", String(candidate.issueNumber));
-    target.searchParams.set("title", candidate.title || "");
-    const response = await fetch(target, { headers: { Authorization: `Bearer ${token}` } });
-    if (!response.ok) return null;
-    return response.json();
-  }
-
-  async function fetchEnrichment(candidate) {
-    const token = sessionToken();
-    if (!token || !apiBaseUrl) return { matchType: "unavailable", abstract: "" };
-    const target = new URL(`${apiBaseUrl}/api/enrichment`);
-    target.searchParams.set("title", candidate.title || "");
-    if (candidate.doi) target.searchParams.set("doi", candidate.doi);
-    if (candidate.year) target.searchParams.set("year", candidate.year);
-    let primary = { matchType: "unavailable", abstract: "" };
-    try {
-      const response = await fetch(target, { headers: { Authorization: `Bearer ${token}` } });
-      if (response.ok) primary = await response.json();
-    } catch {
-      primary = { matchType: "unavailable", abstract: "" };
-    }
-    if (String(primary?.abstract || "").trim()) return primary;
-    try {
-      const resolved = await fetchResolvedAbstract(candidate, token);
-      if (String(resolved?.abstract || "").trim()) {
-        return {
-          ...resolved,
-          providersTried: [...(primary.providersTried || []), "paper/repository resolved"],
-          providerErrors: primary.providerErrors || [],
-          searchStatus: "found",
-        };
-      }
-      if (primary?.matchType === "unavailable" && resolved) return resolved;
-    } catch {
-      // Preserve the multi-source status if the resolved-paper fallback fails.
-    }
-    return primary;
-  }
-
-  function scheduleEnrichment(card) {
-    const candidateId = card.dataset.candidateId || cardCandidateId(card);
-    const candidate = candidateMap.get(candidateId);
-    if (!candidate || enrichmentCache.has(candidateId) || enrichmentPending.has(candidateId)) return;
-    enrichmentPending.add(candidateId);
-    enrichmentQueue.push({ candidateId, candidate });
-    pumpEnrichmentQueue();
-  }
-
-  function pumpEnrichmentQueue() {
-    while (activeEnrichments < MAX_ENRICHMENT_CONCURRENCY && enrichmentQueue.length) {
-      const task = enrichmentQueue.shift();
-      activeEnrichments += 1;
-      fetchEnrichment(task.candidate)
-        .catch(() => ({ matchType: "unavailable", abstract: "" }))
-        .then((payload) => {
-          enrichmentCache.set(task.candidateId, payload);
-          renderAbstractBadge(task.candidateId, payload);
-        })
-        .finally(() => {
-          enrichmentPending.delete(task.candidateId);
-          activeEnrichments -= 1;
-          pumpEnrichmentQueue();
-        });
-    }
-  }
-
-  async function refreshQueueCards() {
-    const list = byId("candidate-list");
-    if (!list) return;
-    ensureTriageFilter();
+  async function refreshQueue() {
     await loadCandidates();
+    ensureGridHeader();
+    ensureTriageFilter();
     for (const card of allCards()) enhanceCard(card);
     applyPagination();
   }
 
-  function createViewportObserver() {
-    const list = byId("candidate-list");
-    if (!list || typeof IntersectionObserver === "undefined") return null;
-    return new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (!entry.isIntersecting || entry.target.hidden) continue;
-          viewportObserver?.unobserve(entry.target);
-          scheduleEnrichment(entry.target);
-        }
-      },
-      { root: list, rootMargin: "180px 0px", threshold: 0.01 },
-    );
-  }
-
   function observeList() {
     const list = byId("candidate-list");
-    if (!list) return;
-    viewportObserver = createViewportObserver();
-    listObserver = new MutationObserver(() => queueMicrotask(refreshQueueCards));
+    if (!list || listObserver) return;
+    listObserver = new MutationObserver(() => queueMicrotask(refreshQueue));
     listObserver.observe(list, { childList: true });
-    queueMicrotask(refreshQueueCards);
-  }
-
-  function resetPageBeforeFiltering() {
-    resetPageRequested = true;
-  }
-
-  function wireFilterReset() {
-    byId("candidate-search")?.addEventListener("input", resetPageBeforeFiltering, { capture: true });
-    byId("candidate-lane-filter")?.addEventListener("change", resetPageBeforeFiltering, { capture: true });
   }
 
   function initialise() {
     loadQueueStyles();
+    ensureGridHeader();
     ensureTriageFilter();
-    wireFilterReset();
     observeList();
+    queueMicrotask(refreshQueue);
   }
 
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", initialise, { once: true });
-  else initialise();
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initialise, { once: true });
+  } else {
+    initialise();
+  }
 })();
