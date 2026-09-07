@@ -38,6 +38,39 @@ test("free web endpoint makes no external request when free-only guards are disa
   assert.equal(payload.providerPlan.find((provider) => provider.id === "exa").automaticEligible, false);
 });
 
+test("free web endpoint reuses a verified abstract PDF locator before searching again", async (context) => {
+  let calls = 0;
+  const pdfUrl = "https://repository.example/paper.pdf";
+  withFetchMock(context, async (url) => {
+    calls += 1;
+    assert.equal(String(url), `https://r.jina.ai/${pdfUrl}`);
+    return new Response(
+      `Title: ${title}\n\nAbstract This article studies more than one thousand legitimate businesses confiscated from mafia groups and analyses their sectoral and territorial investment choices using firm-level evidence. Introduction The paper then presents data and methods.`,
+      { status: 200 },
+    );
+  });
+  const response = await handleFreeWebSearchRequest(
+    request(),
+    { JINA_READER_FREE_ONLY: "true" },
+    {
+      abstractCoverageStatus: "available",
+      abstractSource: "repository.example PDF",
+      abstractArticleUrl: pdfUrl,
+      abstractMatchType: "resolved_pdf",
+    },
+  );
+  const payload = await response.json();
+  assert.equal(calls, 1);
+  assert.equal(payload.searchStatus, "found");
+  assert.equal(payload.matchType, "resolved_url");
+  assert.equal(payload.provider, "Jina Reader");
+  assert.equal(payload.articleUrl, pdfUrl);
+  assert.match(payload.abstractSource, /repository\.example PDF/);
+  assert.deepEqual(payload.providersTried, ["Verified abstract locator", "Jina Reader"]);
+  assert.equal(payload.freeCreditsUsed, 0);
+  assert.equal(payload.freeRequestsUsed, 1);
+});
+
 test("free web endpoint can recover an abstract through the zero-credit Jina Reader layer", async (context) => {
   withFetchMock(context, async (url) => {
     assert.match(String(url), /^https:\/\/r\.jina\.ai\/https:\/\/doi\.org\//);
