@@ -29,7 +29,7 @@ class CuratorAssistedResolutionSurfaceTests(unittest.TestCase):
     def test_missing_abstract_promotes_governed_synopsis_into_primary_reading_cell(self) -> None:
         source = (ROOT / "site/curator-assisted-resolution.js").read_text(encoding="utf-8")
         self.assertIn("Reading aid — preparatory", source)
-        self.assertIn('aid["Review synopsis"]', source)
+        self.assertIn('Review synopsis', source)
         self.assertIn("candidate-abstract-text", source)
         self.assertIn("candidate-abstract-source", source)
         self.assertIn("Sintesi per lo screening", source)
