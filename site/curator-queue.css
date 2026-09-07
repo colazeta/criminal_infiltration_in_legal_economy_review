@@ -1,24 +1,25 @@
-/* Classic record queue: narrow, flat, dense. */
+/* Classic master table: queue above, selected record below. */
 
 .curator-page .editorial-console {
   display: grid;
-  grid-template-columns: 280px minmax(0, 1fr);
-  gap: 4px;
-  align-items: start;
-  overflow: visible;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: clamp(220px, 29vh, 285px) minmax(0, 1fr);
+  gap: 3px;
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
   border: 0;
   background: transparent;
   box-shadow: none;
 }
 
 .curator-page .candidate-browser {
-  position: sticky;
-  top: 4px;
-  display: flex;
-  height: calc(100vh - 58px);
-  max-height: calc(100vh - 58px);
+  position: static;
+  display: grid;
+  grid-template-rows: 22px auto 18px minmax(0, 1fr) auto;
   min-height: 0;
-  flex-direction: column;
+  height: auto;
+  max-height: none;
   overflow: hidden;
   border: 1px solid #707070;
   border-radius: 0;
@@ -28,7 +29,9 @@
 
 .curator-page .candidate-decision-panel {
   min-width: 0;
-  overflow: visible;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
   border: 1px solid #707070;
   border-radius: 0;
   background: #fff;
@@ -37,11 +40,11 @@
 
 .curator-page .candidate-browser-heading {
   display: flex;
-  min-height: 24px;
   align-items: center;
   justify-content: space-between;
-  gap: 6px;
-  padding: 3px 5px;
+  gap: 8px;
+  min-height: 22px;
+  padding: 2px 5px;
   border-bottom: 1px solid #707070;
   background: #d4d0c8;
 }
@@ -58,9 +61,10 @@
 
 .curator-page .candidate-controls {
   display: grid;
-  grid-template-columns: 1fr 92px;
-  gap: 3px;
-  padding: 4px;
+  grid-template-columns: minmax(260px, 2fr) minmax(130px, .7fr) minmax(180px, .9fr);
+  gap: 4px;
+  align-items: end;
+  padding: 3px 4px 4px;
   border-bottom: 1px solid #888;
   background: #eeeeee;
 }
@@ -80,7 +84,7 @@
 .curator-page .candidate-controls input,
 .curator-page .candidate-controls select {
   width: 100%;
-  min-height: 23px;
+  min-height: 22px;
   border: 1px solid #777;
   border-radius: 0;
   padding: 2px 4px;
@@ -90,28 +94,73 @@
   box-shadow: none;
 }
 
+/* Fixed master-table headings. */
+.curator-page .candidate-grid-header,
+.queue-review-card {
+  grid-template-columns:
+    86px
+    minmax(260px, 2.4fr)
+    minmax(170px, 1.15fr)
+    minmax(210px, 1.25fr)
+    minmax(125px, .75fr);
+}
+
+.curator-page .candidate-grid-header {
+  display: grid;
+  min-height: 18px;
+  align-items: center;
+  border-bottom: 1px solid #707070;
+  background: #d4d0c8;
+}
+
+.curator-page .candidate-grid-header span {
+  min-width: 0;
+  height: 100%;
+  overflow: hidden;
+  padding: 3px 5px 2px;
+  border-right: 1px solid #9a9a9a;
+  color: #222;
+  font: bold 8px Arial, Helvetica, sans-serif;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.curator-page .candidate-grid-header span:last-child {
+  border-right: 0;
+}
+
 .curator-page .candidate-list {
+  min-height: 0;
   max-height: none;
-  flex: 1 1 auto;
   overflow: auto;
+  overscroll-behavior: contain;
   padding: 0;
   background: #fff;
+  scrollbar-gutter: stable;
 }
 
 .queue-review-card {
-  display: block;
+  display: grid;
+  width: 100%;
+  min-height: 24px;
   margin: 0;
-  padding: 4px 5px;
+  padding: 0;
+  align-items: stretch;
   border: 0;
-  border-bottom: 1px solid #aaa;
+  border-bottom: 1px solid #b8b8b8;
   border-radius: 0;
   background: #fff;
+  color: #000;
+  text-align: left;
   box-shadow: none;
   transition: none;
 }
 
-.queue-review-card:hover {
+.queue-review-card:hover,
+.queue-review-card:focus-visible {
   transform: none;
+  outline: 1px dotted #000;
+  outline-offset: -2px;
   background: #eeeeee;
 }
 
@@ -121,54 +170,79 @@
   box-shadow: none;
 }
 
+/* Flatten the original card markup into one data-grid row. */
 .queue-review-card .candidate-card-top {
-  display: flex;
-  gap: 4px;
-  align-items: baseline;
-  justify-content: space-between;
+  display: contents;
 }
 
 .queue-review-card .candidate-card-top code {
-  max-width: 50%;
+  grid-column: 1;
+  grid-row: 1;
+  min-width: 0;
   overflow: hidden;
+  padding: 5px 5px 3px;
+  border-right: 1px solid #c0c0c0;
   color: #555;
-  font: 8px "Courier New", Courier, monospace;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.queue-stage-badge {
-  display: inline;
-  max-width: 50%;
-  overflow: hidden;
-  border: 0;
-  border-radius: 0;
-  padding: 0;
-  background: transparent;
-  color: #555 !important;
-  font: 8px Arial, Helvetica, sans-serif !important;
-  font-weight: normal !important;
-  text-align: right;
+  font: 9px "Courier New", Courier, monospace;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .queue-card-title {
+  grid-column: 2;
+  grid-row: 1;
   display: block;
-  margin: 2px 0 0;
+  min-width: 0;
+  margin: 0;
   overflow: hidden;
+  padding: 4px 6px 3px;
+  border-right: 1px solid #c0c0c0;
   color: #000;
-  font: bold 10px/1.2 Arial, Helvetica, sans-serif !important;
+  font: bold 10px/1.35 Arial, Helvetica, sans-serif !important;
   text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.queue-card-authors {
+  grid-column: 3;
+  grid-row: 1;
+}
+
+.queue-card-citation {
+  grid-column: 4;
+  grid-row: 1;
 }
 
 .queue-card-authors,
 .queue-card-citation {
   display: block;
-  margin-top: 1px;
+  min-width: 0;
+  margin: 0;
   overflow: hidden;
+  padding: 5px 5px 3px;
+  border-right: 1px solid #c0c0c0;
   color: #444;
-  font: 8px/1.2 Arial, Helvetica, sans-serif;
+  font: 9px/1.3 Arial, Helvetica, sans-serif;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.queue-stage-badge {
+  grid-column: 5;
+  grid-row: 1;
+  display: block;
+  min-width: 0;
+  max-width: none;
+  overflow: hidden;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  padding: 5px 5px 3px;
+  background: transparent;
+  color: #444 !important;
+  font: 9px/1.3 Arial, Helvetica, sans-serif !important;
+  font-weight: normal !important;
+  text-align: left;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -183,24 +257,26 @@
 .queue-review-card[data-selected="true"] .queue-card-authors,
 .queue-review-card[data-selected="true"] .queue-card-citation,
 .queue-review-card[data-selected="true"] .queue-stage-badge {
+  border-right-color: #6464a8;
   color: #fff !important;
 }
 
 .candidate-queue-pager {
   display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  gap: 3px;
+  grid-template-columns: auto 1fr auto;
+  gap: 5px;
   align-items: center;
-  padding: 3px 4px;
+  min-height: 24px;
+  padding: 2px 4px;
   border-top: 1px solid #707070;
   background: #d4d0c8;
 }
 
 .candidate-page-button {
-  min-height: 22px;
+  min-height: 20px;
   border: 1px solid #555;
   border-radius: 0;
-  padding: 2px 5px;
+  padding: 1px 8px;
   background: #e6e6e6;
   color: #000080;
   font: 9px Arial, Helvetica, sans-serif;
@@ -217,30 +293,52 @@
   cursor: default;
 }
 
-.candidate-page-info,
-.curator-page .candidate-list-empty {
+.candidate-page-info {
+  justify-self: center;
   color: #333;
-  font: 8px Arial, Helvetica, sans-serif;
+  font: 9px Arial, Helvetica, sans-serif;
   white-space: nowrap;
 }
 
 .curator-page .candidate-list-empty {
-  margin: 6px;
+  margin: 4px;
+  color: #333;
+  font: 9px Arial, Helvetica, sans-serif;
+}
+
+@media (max-width: 1050px) {
+  .curator-page .candidate-controls {
+    grid-template-columns: minmax(220px, 1.5fr) minmax(120px, .7fr) minmax(150px, .8fr);
+  }
+
+  .curator-page .candidate-grid-header,
+  .queue-review-card {
+    grid-template-columns: 78px minmax(220px, 2fr) minmax(140px, 1fr) minmax(170px, 1.1fr) 120px;
+  }
 }
 
 @media (max-width: 820px) {
   .curator-page .editorial-console {
-    grid-template-columns: 1fr;
+    grid-template-rows: minmax(240px, 38vh) minmax(0, 1fr);
   }
 
-  .curator-page .candidate-browser {
-    position: static;
-    height: auto;
-    max-height: 260px;
+  .curator-page .candidate-controls {
+    grid-template-columns: 1fr 1fr;
   }
 
-  .curator-page .candidate-list {
-    max-height: 190px;
+  .curator-page .candidate-controls label:last-child {
+    grid-column: 1 / -1;
+  }
+
+  .curator-page .candidate-grid-header,
+  .queue-review-card {
+    grid-template-columns: 72px minmax(190px, 2fr) minmax(130px, 1fr) minmax(150px, 1fr) 110px;
+    min-width: 720px;
+  }
+
+  .curator-page .candidate-list,
+  .curator-page .candidate-grid-header {
+    overflow-x: auto;
   }
 }
 
@@ -249,12 +347,8 @@
     grid-template-columns: 1fr;
   }
 
-  .curator-page .candidate-browser {
-    max-height: 240px;
-  }
-
-  .curator-page .candidate-list {
-    max-height: 160px;
+  .curator-page .candidate-controls label:last-child {
+    grid-column: auto;
   }
 
   .candidate-queue-pager {
@@ -264,6 +358,5 @@
   .candidate-page-info {
     grid-column: 1 / -1;
     grid-row: 1;
-    text-align: center;
   }
 }

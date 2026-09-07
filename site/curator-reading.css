@@ -1,6 +1,6 @@
 /*
   CURATOR: deliberately plain 1990s database UI.
-  One window, one queue, one record, one decision form.
+  Full-viewport master table above a scrollable record form.
   No cards, pills, shadows, gradients, marketing copy or dashboard chrome.
 */
 
@@ -20,9 +20,16 @@
   box-sizing: border-box;
 }
 
+html,
+body.curator-page {
+  height: 100%;
+}
+
 .curator-page {
-  min-height: 100vh;
+  height: 100dvh;
+  min-height: 0;
   margin: 0;
+  overflow: hidden;
   background: var(--classic-bg);
   color: var(--classic-text);
   font-family: Arial, Helvetica, sans-serif;
@@ -47,7 +54,21 @@
 }
 
 .curator-page main {
-  padding: 4px;
+  height: 100dvh;
+  min-height: 0;
+  padding: 2px;
+  overflow: hidden;
+}
+
+.curator-page .curator-workspace,
+.curator-page .editorial-app {
+  height: 100%;
+  min-height: 0;
+}
+
+.curator-page .editorial-app {
+  display: flex;
+  flex-direction: column;
 }
 
 .curator-page .skip-link {
@@ -64,15 +85,16 @@
   background: #fff;
 }
 
-/* Single application title bar. */
+/* Application title bar. */
 .curator-titlebar {
   display: flex;
   min-height: 24px;
+  flex: 0 0 24px;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
   border: 1px solid #000;
-  padding: 3px 6px;
+  padding: 2px 5px;
   background: var(--classic-blue);
   color: #fff;
 }
@@ -89,16 +111,17 @@
   font-weight: normal;
 }
 
-/* Login / routing / session are status rows, not cards. */
+/* Login / routing / session are terse status rows. */
 .curator-page .curator-login-panel,
 .curator-page .curator-app-unavailable,
 .curator-page .curator-session-panel,
 .curator-page .curator-app-message {
+  flex: 0 0 auto;
   margin: 0;
   border: 1px solid var(--classic-border);
   border-top: 0;
   border-radius: 0;
-  padding: 5px 6px;
+  padding: 3px 5px;
   background: var(--classic-header);
   color: #000;
   box-shadow: none;
@@ -109,6 +132,7 @@
 .curator-page .curator-app-unavailable,
 .curator-page .curator-session-panel {
   display: flex;
+  min-height: 26px;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
@@ -116,10 +140,7 @@
 
 .curator-page .curator-app-unavailable span,
 .curator-page .curator-login-panel span,
-.curator-page .curator-session-panel span {
-  margin: 0;
-}
-
+.curator-page .curator-session-panel span,
 .curator-page .curator-app-message p {
   margin: 0;
 }
@@ -131,10 +152,10 @@
 .candidate-page-button,
 .candidate-article-action,
 .candidate-heading-actions #selected-candidate-issue {
-  min-height: 22px;
+  min-height: 20px;
   border: 1px solid #555;
   border-radius: 0;
-  padding: 2px 7px;
+  padding: 1px 7px;
   background: #e6e6e6;
   color: var(--classic-blue);
   font: 10px Arial, Helvetica, sans-serif;
@@ -154,6 +175,7 @@
 /* Record panel. */
 .curator-page .candidate-decision-panel {
   min-width: 0;
+  min-height: 0;
   border: 1px solid var(--classic-border) !important;
   border-radius: 0 !important;
   background: var(--classic-panel) !important;
@@ -161,14 +183,12 @@
 }
 
 .curator-page .candidate-empty-state {
-  min-height: 180px;
+  min-height: 100%;
   display: grid;
   place-items: center;
   padding: 12px;
   border: 0;
-  border-radius: 0;
   background: #fff;
-  box-shadow: none;
 }
 
 .curator-page .candidate-empty-state h2 {
@@ -183,9 +203,7 @@
   margin: 0;
   padding: 0;
   border: 0;
-  border-radius: 0;
   background: #fff;
-  box-shadow: none;
 }
 
 .curator-page .candidate-detail-heading {
@@ -194,7 +212,7 @@
   justify-content: space-between;
   gap: 8px;
   margin: 0;
-  padding: 6px 7px;
+  padding: 5px 6px;
   border: 0;
   border-bottom: 1px solid var(--classic-border);
   background: var(--classic-header);
@@ -207,7 +225,7 @@
 
 .curator-page #selected-candidate-id {
   display: block;
-  margin: 0 0 2px;
+  margin: 0 0 1px;
   color: #444;
   font: 9px "Courier New", Courier, monospace;
 }
@@ -215,10 +233,9 @@
 .curator-page #selected-candidate-title {
   margin: 0;
   color: #000;
-  font: bold 14px/1.2 Arial, Helvetica, sans-serif;
+  font: bold 14px/1.15 Arial, Helvetica, sans-serif;
 }
 
-/* Authors/year/venue are already in the metadata row: do not repeat them. */
 .candidate-reading-byline {
   display: none !important;
 }
@@ -235,10 +252,10 @@
 .candidate-article-action,
 .candidate-heading-actions #selected-candidate-issue {
   min-width: 0;
-  padding: 2px 5px;
+  padding: 1px 5px;
 }
 
-/* Retrieval state remains machine-readable for guards but is not visual chrome. */
+/* Retrieval status stays machine-readable only. */
 .candidate-retrieval-status,
 .candidate-access-status {
   display: none !important;
@@ -247,7 +264,7 @@
 /* Literal six-cell bibliographic row. */
 .curator-page .candidate-metadata {
   display: grid !important;
-  grid-template-columns: 1.25fr 0.35fr 1fr 1fr 0.7fr 0.75fr !important;
+  grid-template-columns: 1.25fr .35fr 1fr 1fr .7fr .75fr !important;
   gap: 0 !important;
   margin: 0 !important;
   padding: 0 !important;
@@ -258,7 +275,7 @@
 
 .curator-page .candidate-metadata > div {
   min-width: 0;
-  padding: 4px 5px !important;
+  padding: 3px 5px !important;
   border-right: 1px solid var(--classic-grid);
   background: #fff !important;
 }
@@ -268,7 +285,7 @@
 }
 
 .curator-page .candidate-metadata dt {
-  margin: 0 0 2px;
+  margin: 0 0 1px;
   color: #444;
   font: bold 8px Arial, Helvetica, sans-serif;
 }
@@ -286,13 +303,12 @@
   font-family: "Courier New", Courier, monospace;
 }
 
-/* Primary reading cell: abstract when available, otherwise governed synthesis. */
+/* Main reading cell: large enough to read, never large enough to waste the viewport. */
 .candidate-abstract-panel,
 .curator-page #candidate-abstract-panel {
   display: block !important;
   margin: 0 !important;
   border: 0 !important;
-  border-radius: 0 !important;
   background: #fff !important;
   box-shadow: none !important;
 }
@@ -304,7 +320,7 @@
   justify-content: space-between;
   gap: 8px;
   margin: 0;
-  padding: 4px 6px;
+  padding: 3px 6px;
   border: 0;
   border-bottom: 1px solid var(--classic-border);
   background: var(--classic-subhead);
@@ -321,37 +337,39 @@
 }
 
 .candidate-abstract-source {
-  max-width: 58%;
+  max-width: 65%;
   overflow: hidden;
   color: #444;
-  font: 9px Arial, Helvetica, sans-serif;
+  font: 8px Arial, Helvetica, sans-serif;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .candidate-abstract-text,
 .curator-page #candidate-abstract-text {
-  min-height: 120px;
+  min-height: 86px;
+  max-height: 28vh;
   max-width: none;
   margin: 0;
-  padding: 10px 12px;
+  overflow: auto;
+  padding: 8px 10px;
   color: #000;
-  font: 13px/1.5 Arial, Helvetica, sans-serif;
+  font: 12px/1.45 Arial, Helvetica, sans-serif;
   white-space: pre-wrap;
 }
 
 .candidate-abstract-note,
 .curator-page #candidate-abstract-note {
   margin: 0;
-  padding: 3px 6px;
+  padding: 2px 6px;
   border-top: 1px solid #ccc;
   border-bottom: 1px solid var(--classic-border);
   background: #f4f4f4;
   color: #555;
-  font: 8px/1.25 Arial, Helvetica, sans-serif;
+  font: 8px/1.2 Arial, Helvetica, sans-serif;
 }
 
-/* All secondary explanation panels disappear from the operating surface. */
+/* Secondary diagnostics never occupy the operating surface. */
 .curator-page #candidate-reading-aid-panel,
 .curator-page #candidate-review-guidance-panel,
 .curator-page #candidate-consensus-panel,
@@ -361,7 +379,7 @@
   display: none !important;
 }
 
-/* Identity warning exists only when it can actually block or redirect a decision. */
+/* Identity appears only when it can block or redirect screening. */
 .curator-page #candidate-detail[data-identity-blocked="false"]:not([data-identity-state="duplicate_risk"]) #candidate-identity-panel {
   display: none !important;
 }
@@ -370,8 +388,7 @@
   margin: 0 !important;
   border: 0 !important;
   border-bottom: 1px solid var(--classic-border) !important;
-  border-radius: 0 !important;
-  padding: 5px 6px !important;
+  padding: 4px 6px !important;
   background: #fff4c8 !important;
   box-shadow: none !important;
 }
@@ -387,7 +404,7 @@
 
 .curator-page #candidate-identity-panel h4 {
   margin: 0 !important;
-  font: bold 10px Arial, Helvetica, sans-serif !important;
+  font: bold 9px Arial, Helvetica, sans-serif !important;
 }
 
 .curator-page .identity-state-chip,
@@ -396,7 +413,7 @@
   min-height: 0 !important;
   border: 1px solid #777 !important;
   border-radius: 0 !important;
-  padding: 2px 4px !important;
+  padding: 1px 4px !important;
   background: #eee !important;
   color: #000 !important;
   font: 8px Arial, Helvetica, sans-serif !important;
@@ -405,21 +422,20 @@
 
 .curator-page .identity-summary,
 .curator-page .identity-reason {
-  margin: 3px 0 0 !important;
+  margin: 2px 0 0 !important;
   color: #222 !important;
-  font: 8px/1.25 Arial, Helvetica, sans-serif !important;
+  font: 8px/1.2 Arial, Helvetica, sans-serif !important;
 }
 
 .curator-page #candidate-identity-panel .identity-boundary {
   display: none !important;
 }
 
-/* Decision form is a compact data-entry grid. */
+/* Decision form: compact, fixed-function data entry. */
 .curator-page .decision-form {
   margin: 0 !important;
   padding: 0 !important;
   border: 0 !important;
-  border-radius: 0 !important;
   background: #fff !important;
   box-shadow: none !important;
 }
@@ -430,28 +446,27 @@
   justify-content: space-between;
   gap: 8px;
   margin: 0;
-  padding: 4px 6px;
+  padding: 3px 6px;
   border-bottom: 1px solid var(--classic-border);
   background: var(--classic-header);
-  font: 10px Arial, Helvetica, sans-serif;
+  font: 9px Arial, Helvetica, sans-serif;
 }
 
 .curator-page .decision-form-heading strong {
-  font: bold 10px Arial, Helvetica, sans-serif;
+  font: bold 9px Arial, Helvetica, sans-serif;
 }
 
 .curator-page .decision-form-heading code {
   color: #444;
-  font: 9px "Courier New", Courier, monospace;
+  font: 8px "Courier New", Courier, monospace;
 }
 
-/* Guided decisions still drive the governed native select, but all explanatory chrome is removed. */
+/* Guided choices still drive the governed native select. */
 .curator-page .guided-decision-composer {
   margin: 0 !important;
   border: 0 !important;
   border-bottom: 1px solid var(--classic-border) !important;
-  border-radius: 0 !important;
-  padding: 4px !important;
+  padding: 3px !important;
   background: #eee !important;
   box-shadow: none !important;
 }
@@ -475,10 +490,10 @@
 }
 
 .curator-page .guided-decision-choice {
-  min-height: 32px !important;
+  min-height: 28px !important;
   border: 1px solid #777 !important;
   border-radius: 0 !important;
-  padding: 3px 4px !important;
+  padding: 2px 4px !important;
   background: #fff !important;
   color: #000 !important;
   text-align: left !important;
@@ -506,7 +521,7 @@
 }
 
 .curator-page .guided-exception-decisions {
-  margin: 3px 0 0 !important;
+  margin: 2px 0 0 !important;
   border: 0 !important;
   padding: 0 !important;
   background: transparent !important;
@@ -514,18 +529,17 @@
 
 .curator-page .guided-exception-decisions summary {
   color: var(--classic-blue) !important;
-  font: 9px Arial, Helvetica, sans-serif !important;
+  font: 8px Arial, Helvetica, sans-serif !important;
   cursor: pointer;
 }
 
 .curator-page .guided-decision-message {
-  margin: 3px 0 0 !important;
+  margin: 2px 0 0 !important;
   border: 1px solid #999 !important;
-  border-radius: 0 !important;
-  padding: 3px 4px !important;
+  padding: 2px 4px !important;
   background: #ffffdf !important;
   color: #222 !important;
-  font: 8px/1.25 Arial, Helvetica, sans-serif !important;
+  font: 8px/1.2 Arial, Helvetica, sans-serif !important;
 }
 
 .curator-page .decision-fields {
@@ -539,9 +553,9 @@
 .curator-page .decision-fields label {
   display: grid;
   min-width: 0;
-  gap: 2px;
+  gap: 1px;
   margin: 0;
-  padding: 4px;
+  padding: 3px;
   border-right: 1px solid var(--classic-grid);
   border-bottom: 1px solid var(--classic-grid);
   background: #fff;
@@ -560,10 +574,10 @@
 .curator-page .decision-fields select,
 .curator-page .decision-fields textarea {
   width: 100%;
-  min-height: 24px;
+  min-height: 22px;
   border: 1px solid #777;
   border-radius: 0;
-  padding: 3px 4px;
+  padding: 2px 4px;
   background: #fff;
   color: #000;
   font: 10px Arial, Helvetica, sans-serif;
@@ -571,7 +585,7 @@
 }
 
 .curator-page .decision-fields textarea {
-  min-height: 48px;
+  min-height: 42px;
   resize: vertical;
 }
 
@@ -586,17 +600,19 @@
 
 .curator-page .decision-submit-row {
   display: flex;
+  min-height: 31px;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  padding: 4px 5px;
+  padding: 3px 5px;
   background: var(--classic-header);
 }
 
-.curator-page .explicit-confirmation {
-  display: flex;
+/* Reset the global form styling: this must look like a native desktop checkbox. */
+.curator-page .classic-confirmation {
+  display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
   margin: 0;
   padding: 0;
   border: 0;
@@ -604,8 +620,26 @@
   font: 9px Arial, Helvetica, sans-serif;
 }
 
+.curator-page .classic-confirmation input[type="checkbox"] {
+  appearance: auto;
+  width: 13px !important;
+  height: 13px !important;
+  min-width: 13px !important;
+  min-height: 13px !important;
+  flex: 0 0 13px;
+  margin: 0;
+  padding: 0;
+  border: initial;
+  box-shadow: none;
+}
+
+.curator-page .classic-confirmation span {
+  margin: 0;
+  white-space: nowrap;
+}
+
 .curator-page #submit-decision {
-  min-width: 64px;
+  min-width: 70px;
   font-weight: bold;
 }
 
@@ -617,8 +651,7 @@
   margin: 0;
   border: 0;
   border-top: 1px solid var(--classic-border);
-  border-radius: 0;
-  padding: 5px;
+  padding: 4px 5px;
   background: #fff;
   box-shadow: none;
   font: 9px Arial, Helvetica, sans-serif;
@@ -645,7 +678,7 @@
 
 @media (max-width: 820px) {
   .curator-page main {
-    padding: 2px;
+    padding: 1px;
   }
 
   .curator-titlebar span {
@@ -678,9 +711,10 @@
 
   .candidate-abstract-text,
   .curator-page #candidate-abstract-text {
-    min-height: 90px;
-    padding: 8px;
-    font-size: 12px;
+    min-height: 72px;
+    max-height: 24vh;
+    padding: 7px;
+    font-size: 11px;
   }
 
   .curator-page .guided-decision-grid,
