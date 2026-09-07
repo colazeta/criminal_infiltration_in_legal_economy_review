@@ -23,46 +23,73 @@ class CuratorVisualUXTests(unittest.TestCase):
         for required in (
             'class="curator-titlebar"',
             'id="editorial-console"',
+            'class="candidate-grid-header"',
             'id="candidate-list"',
             'id="candidate-detail"',
             'id="decision-form"',
         ):
             self.assertIn(required, html)
 
-    def test_queue_is_a_narrow_flat_record_list(self) -> None:
+    def test_queue_is_a_full_width_master_table_not_a_sidebar(self) -> None:
         css = (ROOT / "site/curator-queue.css").read_text(encoding="utf-8")
-        self.assertIn("grid-template-columns: 280px minmax(0, 1fr)", css)
-        self.assertIn("position: sticky", css)
-        self.assertIn("border-radius: 0", css)
-        self.assertIn("box-shadow: none", css)
-        self.assertIn("border-bottom: 1px solid #aaa", css)
+        self.assertIn("Classic master table: queue above, selected record below", css)
+        self.assertIn("grid-template-columns: minmax(0, 1fr)", css)
+        self.assertIn("grid-template-rows: clamp(220px, 29vh, 285px) minmax(0, 1fr)", css)
+        self.assertNotIn("grid-template-columns: 280px minmax(0, 1fr)", css)
+        self.assertNotIn("position: sticky", css)
+        self.assertIn(".candidate-grid-header", css)
+        self.assertIn("display: contents", css)
+        self.assertIn("white-space: nowrap", css)
         self.assertIn("background: #000080", css)
-        self.assertIn(".queue-card-chips {\n  display: none;", css)
 
-    def test_shell_is_one_classic_database_window(self) -> None:
+    def test_master_table_has_fixed_columns_for_scannability(self) -> None:
+        css = (ROOT / "site/curator-queue.css").read_text(encoding="utf-8")
+        for selector in (
+            ".queue-card-title",
+            ".queue-card-authors",
+            ".queue-card-citation",
+            ".queue-stage-badge",
+        ):
+            self.assertIn(selector, css)
+        self.assertIn("86px", css)
+        self.assertIn("minmax(260px, 2.4fr)", css)
+        self.assertIn("text-overflow: ellipsis", css)
+
+    def test_shell_is_viewport_bound_like_a_desktop_application(self) -> None:
         css = (ROOT / "site/curator-reading.css").read_text(encoding="utf-8")
-        self.assertIn("One window, one queue, one record, one decision form", css)
-        self.assertIn(".curator-titlebar", css)
+        self.assertIn("Full-viewport master table above a scrollable record form", css)
+        self.assertIn("height: 100dvh", css)
+        self.assertIn("overflow: hidden", css)
+        self.assertIn("display: flex", css)
+        self.assertIn("flex-direction: column", css)
         self.assertIn("background: var(--classic-blue)", css)
-        self.assertIn("border-radius: 0", css)
-        self.assertIn("box-shadow: none", css)
         self.assertNotIn("linear-gradient", css)
         self.assertNotIn("border-radius: 999", css)
 
     def test_paper_record_is_literal_tabular_structure(self) -> None:
         css = (ROOT / "site/curator-reading.css").read_text(encoding="utf-8")
-        self.assertIn("grid-template-columns: 1.25fr 0.35fr 1fr 1fr 0.7fr 0.75fr", css)
+        self.assertIn("grid-template-columns: 1.25fr .35fr 1fr 1fr .7fr .75fr", css)
         self.assertIn("border-right: 1px solid var(--classic-grid)", css)
         self.assertIn('font-family: "Courier New", Courier, monospace', css)
         self.assertIn("Literal six-cell bibliographic row", css)
 
-    def test_abstract_or_synthesis_is_the_single_large_reading_cell(self) -> None:
+    def test_abstract_or_synthesis_is_bounded_not_a_blank_half_screen(self) -> None:
         css = (ROOT / "site/curator-reading.css").read_text(encoding="utf-8")
-        self.assertIn("abstract when available, otherwise governed synthesis", css)
+        self.assertIn("never large enough to waste the viewport", css)
         self.assertIn("#candidate-abstract-text", css)
-        self.assertIn("min-height: 120px", css)
-        self.assertIn("font: 13px/1.5 Arial, Helvetica, sans-serif", css)
+        self.assertIn("min-height: 86px", css)
+        self.assertIn("max-height: 28vh", css)
+        self.assertIn("overflow: auto", css)
         self.assertIn("white-space: pre-wrap", css)
+
+    def test_native_confirmation_checkbox_is_not_stretched_by_global_form_css(self) -> None:
+        html = (ROOT / "site/curate.html").read_text(encoding="utf-8")
+        css = (ROOT / "site/curator-reading.css").read_text(encoding="utf-8")
+        self.assertIn('class="classic-confirmation"', html)
+        self.assertIn('.classic-confirmation input[type="checkbox"]', css)
+        self.assertIn("width: 13px !important", css)
+        self.assertIn("height: 13px !important", css)
+        self.assertIn("appearance: auto", css)
 
     def test_secondary_diagnostics_are_not_visible(self) -> None:
         css = (ROOT / "site/curator-reading.css").read_text(encoding="utf-8")
@@ -80,7 +107,7 @@ class CuratorVisualUXTests(unittest.TestCase):
 
     def test_guided_decision_keeps_function_but_drops_explanatory_chrome(self) -> None:
         css = (ROOT / "site/curator-reading.css").read_text(encoding="utf-8")
-        self.assertIn("Guided decisions still drive the governed native select", css)
+        self.assertIn("Guided choices still drive the governed native select", css)
         self.assertIn(".guided-decision-choice", css)
         self.assertIn("grid-template-columns: repeat(4, minmax(0, 1fr))", css)
         self.assertIn(".guided-decision-copy", css)
