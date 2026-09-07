@@ -8,26 +8,26 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class CuratorReadingSurfaceTests(unittest.TestCase):
-    def test_reading_surface_keeps_abstract_ephemeral_authenticated_and_zero_cost(self) -> None:
+    def test_reading_surface_is_authenticated_bounded_and_synthesis_first(self) -> None:
         javascript = (ROOT / "site/curator-reading.js").read_text(encoding="utf-8")
+        self.assertIn('/api/retrieval', javascript)
         self.assertIn('/api/enrichment', javascript)
         self.assertIn('/api/resolved-abstract', javascript)
         self.assertIn('/api/free-web-search', javascript)
         self.assertIn('candidate-abstract-panel', javascript)
         self.assertIn('selected-candidate-article', javascript)
-        self.assertIn(
-            'OpenAlex · Crossref · Semantic Scholar · DataCite · Unpaywall · CORE · Europe PMC · paper risolto · Jina Reader · Tavily Basic',
-            javascript,
-        )
+        self.assertIn('promoteSynthesis(context)', javascript)
+        self.assertIn('metadataFallback', javascript)
+        self.assertIn('mode", "locator_only', javascript)
         self.assertIn('free_page_reader', javascript)
-        self.assertIn('Jina Reader', javascript)
         self.assertIn('needs_web_search', javascript)
-        self.assertIn('web_search_exhausted', javascript)
         self.assertIn('providersTried', javascript)
+        self.assertIn('timedSignal', javascript)
+        self.assertIn('activeController?.abort("candidate_changed")', javascript)
         self.assertIn('sessionStorage.getItem(SESSION_KEY)', javascript)
+        self.assertNotIn('https://api.github.com', javascript)
         self.assertNotIn('.innerHTML', javascript)
         self.assertNotIn('localStorage', javascript)
-        self.assertNotIn('abstract_cache', javascript.lower())
 
     def test_worker_requires_curator_session_before_all_enrichment_layers(self) -> None:
         worker = (ROOT / "curator-app/src/worker.js").read_text(encoding="utf-8")
@@ -41,16 +41,21 @@ class CuratorReadingSurfaceTests(unittest.TestCase):
         self.assertIn('"/curator-reading.js"', worker)
         self.assertIn('"/curator-reading.css"', worker)
 
-    def test_runtime_reuses_materialised_abstract_locator_without_persisting_text(self) -> None:
+    def test_runtime_reuses_materialised_context_and_abstract_locator(self) -> None:
         worker = (ROOT / "curator-app/src/worker.js").read_text(encoding="utf-8")
         free_web = (ROOT / "curator-app/src/free-web-search.js").read_text(encoding="utf-8")
         self.assertIn('## Abstract coverage — mechanical', worker)
         self.assertIn('abstractCoverageStatus', worker)
         self.assertIn('abstractArticleUrl', worker)
         self.assertIn('abstractMatchType', worker)
+        self.assertIn('reviewSupport', worker)
+        self.assertIn('candidateIssueCache', worker)
+        self.assertIn('candidateIssueInFlight', worker)
         self.assertIn('Verified abstract locator', free_web)
         self.assertIn('JINA_READER_FREE_ONLY', free_web)
         self.assertIn('verified_abstract_locator_read', free_web)
+        self.assertIn('mode === "locator_only"', free_web)
+        self.assertIn('fetchWithTimeout', free_web)
         self.assertNotIn('abstract_cache', free_web.lower())
 
     def test_public_config_loads_reading_component_without_provider_secrets(self) -> None:
@@ -77,7 +82,7 @@ class CuratorReadingSurfaceTests(unittest.TestCase):
         self.assertIn('"EXA_FREE_ONLY": "true"', wrangler)
         self.assertIn('"TAVILY_FREE_ONLY": "true"', wrangler)
 
-    def test_archive_ci_syntax_checks_zero_cost_modules(self) -> None:
+    def test_archive_ci_syntax_checks_runtime_modules(self) -> None:
         workflow = (ROOT / ".github/workflows/archive.yml").read_text(
             encoding="utf-8"
         )
@@ -93,6 +98,8 @@ class CuratorReadingSurfaceTests(unittest.TestCase):
         self.assertIn('candidate-reading-byline', javascript)
         self.assertIn('Apri articolo', javascript)
         self.assertNotIn('Abstract assente', javascript)
+        self.assertIn('Sintesi per lo screening', javascript)
+        self.assertIn('Fallback descrittivo limitato ai metadati', javascript)
 
     def test_abstract_never_enters_static_public_payloads(self) -> None:
         for relative in (
