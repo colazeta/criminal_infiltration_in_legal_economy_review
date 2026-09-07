@@ -6,49 +6,61 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class CuratorVisualUXTests(unittest.TestCase):
-    def test_queue_is_persistent_dense_and_separate_from_reading_surface(self) -> None:
+    def test_queue_is_a_flat_classic_row_list(self) -> None:
         css = (ROOT / "site/curator-queue.css").read_text(encoding="utf-8")
+        self.assertIn("grid-template-columns: 320px minmax(0, 1fr)", css)
         self.assertIn("position: sticky", css)
-        self.assertIn("height: min(820px, calc(100vh - 24px))", css)
-        self.assertIn("grid-template-columns: minmax(390px, 0.92fr) minmax(0, 1.62fr)", css)
-        self.assertIn(".queue-card-doi {\n  display: none;", css)
-        self.assertIn('.queue-card-chip[data-state="source"] {\n  display: none;', css)
-        self.assertIn("max-height: 240px", css)
+        self.assertIn("border-radius: 0", css)
+        self.assertIn("box-shadow: none", css)
+        self.assertIn("border-bottom: 1px solid #aaa", css)
+        self.assertIn('background: #000080', css)
+        self.assertIn(".queue-card-chips {\n  display: none;", css)
 
-    def test_authenticated_reader_is_queue_paper_abstract_decision(self) -> None:
+    def test_paper_record_is_literal_tabular_structure(self) -> None:
         css = (ROOT / "site/curator-reading.css").read_text(encoding="utf-8")
         auth = '.curator-page:has(#curator-session-panel:not([hidden]))'
         self.assertIn(f"{auth} .site-header", css)
-        self.assertIn(f"{auth} .curator-workspace > :not(.editorial-app)", css)
-        self.assertIn("grid-template-columns: 286px minmax(0, 1fr) !important", css)
-        self.assertIn("The paper's abstract is the visual centre of the workspace", css)
-        self.assertIn("#candidate-abstract-text", css)
-        self.assertIn("font-size: 1.04rem", css)
-        self.assertIn("line-height: 1.72", css)
-        self.assertIn("Decision immediately follows reading", css)
+        self.assertIn("closer to a 1990s database form", css)
+        self.assertIn("grid-template-columns: 1.25fr 0.35fr 1fr 1fr 0.7fr 0.75fr", css)
+        self.assertIn("border-right: 1px solid var(--curator-classic-grid)", css)
+        self.assertIn("font-family: \"Courier New\", Courier, monospace", css)
+        self.assertIn("border-radius: 0 !important", css)
+        self.assertIn("box-shadow: none !important", css)
 
-    def test_secondary_diagnostics_do_not_compete_with_abstract(self) -> None:
+    def test_textual_abstract_is_the_main_record_cell(self) -> None:
         css = (ROOT / "site/curator-reading.css").read_text(encoding="utf-8")
-        self.assertIn("#candidate-reading-aid-panel", css)
-        self.assertIn("#candidate-review-guidance-panel", css)
-        self.assertIn("#candidate-consensus-panel", css)
-        self.assertIn(".candidate-provenance-details", css)
+        self.assertIn("The actual textual abstract is the main cell", css)
+        self.assertIn("#candidate-abstract-text", css)
+        self.assertIn("min-height: 130px", css)
+        self.assertIn("font: 14px/1.55 Arial, Helvetica, sans-serif", css)
+        self.assertIn("white-space: pre-wrap", css)
+
+    def test_secondary_diagnostics_are_removed_from_normal_reading_path(self) -> None:
+        css = (ROOT / "site/curator-reading.css").read_text(encoding="utf-8")
+        for selector in (
+            "#candidate-reading-aid-panel",
+            "#candidate-review-guidance-panel",
+            "#candidate-consensus-panel",
+            ".candidate-provenance-details",
+        ):
+            self.assertIn(selector, css)
         self.assertIn("display: none !important", css)
-        self.assertIn("#candidate-identity-panel", css)
+        self.assertIn("data-identity-blocked=\"false\"", css)
         self.assertIn("#candidate-assisted-resolution-panel", css)
 
-    def test_metadata_collapses_to_doi_and_stage_because_byline_carries_citation(self) -> None:
+    def test_guided_decision_function_is_flattened_not_removed(self) -> None:
         css = (ROOT / "site/curator-reading.css").read_text(encoding="utf-8")
-        self.assertIn("Authors/year/venue are already in the byline", css)
-        self.assertIn(".candidate-metadata > div:nth-child(4)", css)
-        self.assertIn(".candidate-metadata > div:nth-child(6)", css)
-        self.assertIn(".candidate-metadata > div {\n  display: none;", css)
+        self.assertIn("Guided decision controls are flattened, not removed", css)
+        self.assertIn(".guided-decision-composer", css)
+        self.assertIn(".guided-decision-choice", css)
+        self.assertIn("grid-template-columns: repeat(4, minmax(0, 1fr))", css)
+        self.assertIn('background: var(--curator-classic-blue) !important', css)
 
     def test_authenticated_workspace_removes_repeated_intro_chrome(self) -> None:
         css = (ROOT / "site/curator-reading.css").read_text(encoding="utf-8")
-        selector = '.curator-page:has(#curator-session-panel:not([hidden])) .workspace-heading'
+        selector = '.curator-page:has(#curator-session-panel:not([hidden])) .site-header'
         self.assertIn(selector, css)
-        self.assertIn("display: none", css)
+        self.assertIn("display: none !important", css)
 
 
 if __name__ == "__main__":
