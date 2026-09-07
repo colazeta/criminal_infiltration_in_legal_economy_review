@@ -19,6 +19,10 @@ const CURATOR_COMPONENT_ASSETS = new Set([
   "/curator-resolved-link.js",
 ]);
 
+const CANDIDATE_ISSUE_CACHE_MS = 2 * 60 * 1000;
+const candidateIssueCache = new Map();
+const candidateIssueInFlight = new Map();
+
 function componentLoaderSource() {
   return `\n(() => {\n  function load(src, marker) {\n    if (document.querySelector('script[data-' + marker + '=\"true\"]')) return;\n    const script = document.createElement(\"script\");\n    script.src = src;\n    script.async = false;\n    script.dataset[marker.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase())] = \"true\";\n    document.head.append(script);\n  }\n  load(\"./curator-consensus.js\", \"curator-consensus\");\n  load(\"./curator-assisted-resolution.js\", \"curator-assisted-resolution\");\n  load(\"./curator-reading.js\", \"curator-reading\");\n  load(\"./curator-queue.js\", \"curator-queue\");\n  load(\"./curator-resolved-link.js\", \"curator-resolved-link\");\n})();\n`;
 }
@@ -79,6 +83,7 @@ function cleanRetrievalValue(value) {
   const clean = String(value || "")
     .replace(/^<|>$/g, "")
     .replace(/^`|`$/g, "")
+    .replace(/\*\*/g, "")
     .trim();
   return /^not resolved$/i.test(clean) ? "" : clean;
 }
@@ -94,18 +99,35 @@ function safeHttpsUrl(value) {
   }
 }
 
-function parseMechanicalSection(source, heading) {
+function sectionSource(source, heading) {
   const start = source.indexOf(heading);
-  if (start < 0) return {};
-  const remainder = source.slice(start + heading.length);
-  const nextHeading = remainder.search(/\n##\s/);
-  const section = nextHeading >= 0 ? remainder.slice(0, nextHeading) : remainder;
+  if (start < 0) return "";
+  const remainder = source.slice(start + heading.length).replace(/^\s*\n/, "");
+  const nextHeading = remainder.search(/^##\s/m);
+  return (nextHeading >= 0 ? remainder.slice(0, nextHeading) : remainder).trim();
+}
+
+function parseMechanicalSection(source, heading) {
+  const section = sectionSource(source, heading);
+  if (!section) return {};
   const fields = {};
   for (const line of section.split("\n")) {
     const match = line.match(/^- ([^:]+):\s*(.*)$/);
     if (match) fields[match[1].trim()] = cleanRetrievalValue(match[2]);
   }
   return fields;
+}
+
+function parseReviewSupport(source) {
+  const aid = parseMechanicalSection(source, "## Reading aid — preparatory");
+  const guidanceSection = sectionSource(source, "## Review guidance — preparatory");
+  const guidance = guidanceSection ? parseMechanicalSection(source, "## Review guidance — preparatory") : {};
+  const approach = guidanceSection.match(/\*\*How to approach this record:\*\*\s*(.+?)(?=\n\n|$)/s)?.[1] || "";
+  if (approach) guidance.approach = cleanRetrievalValue(approach.replace(/\s+/g, " "));
+  return {
+    aid: Object.keys(aid).length ? aid : null,
+    guidance: Object.keys(guidance).length ? guidance : null,
+  };
 }
 
 function parseRetrievalCoverage(body, candidateId) {
@@ -115,6 +137,8 @@ function parseRetrievalCoverage(body, candidateId) {
   if (!Object.keys(fields).length) return null;
   const access = parseMechanicalSection(source, "## Access status — mechanical");
   const abstractCoverage = parseMechanicalSection(source, "## Abstract coverage — mechanical");
+  const reviewSupport = parseReviewSupport(source);
+  const assistedResolution = parseMechanicalSection(source, "## Abstract resolution — assisted");
   return {
     candidateId,
     resolutionStatus: fields["Resolution status"] || "",
@@ -139,7 +163,49 @@ function parseRetrievalCoverage(body, candidateId) {
     abstractArticleUrl: safeHttpsUrl(abstractCoverage["Article URL"]),
     abstractMatchType: abstractCoverage["Match type"] || "",
     abstractCheckedAt: abstractCoverage["Last checked"] || "",
+    reviewSupport,
+    assistedResolution: Object.keys(assistedResolution).length ? assistedResolution : null,
   };
+}
+
+async function fetchWithTimeout(input, init = {}, timeoutMs = 6000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort("timeout"), timeoutMs);
+  try {
+    return await fetch(input, { ...init, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function fetchCandidateIssue(env, issueNumber) {
+  const key = `${env.GITHUB_REPOSITORY}#${issueNumber}`;
+  const cached = candidateIssueCache.get(key);
+  if (cached && cached.expiresAt > Date.now()) return cached.issue;
+  if (candidateIssueInFlight.has(key)) return candidateIssueInFlight.get(key);
+
+  const promise = (async () => {
+    const upstream = await fetchWithTimeout(
+      `https://api.github.com/repos/${env.GITHUB_REPOSITORY}/issues/${issueNumber}`,
+      {
+        headers: {
+          Accept: "application/vnd.github+json",
+          "User-Agent": "criminal-infiltration-curator-retrieval",
+          "X-GitHub-Api-Version": "2022-11-28",
+        },
+      },
+    );
+    if (!upstream.ok) throw new Error(`github_issue_${upstream.status}`);
+    const issue = await upstream.json();
+    candidateIssueCache.set(key, { issue, expiresAt: Date.now() + CANDIDATE_ISSUE_CACHE_MS });
+    return issue;
+  })();
+  candidateIssueInFlight.set(key, promise);
+  try {
+    return await promise;
+  } finally {
+    candidateIssueInFlight.delete(key);
+  }
 }
 
 async function authenticatedRetrieval(request, env) {
@@ -162,23 +228,15 @@ async function authenticatedRetrieval(request, env) {
     });
   }
 
-  const upstream = await fetch(
-    `https://api.github.com/repos/${env.GITHUB_REPOSITORY}/issues/${issueNumber}`,
-    {
-      headers: {
-        Accept: "application/vnd.github+json",
-        "User-Agent": "criminal-infiltration-curator-retrieval",
-        "X-GitHub-Api-Version": "2022-11-28",
-      },
-    },
-  );
-  if (!upstream.ok) {
+  let issue;
+  try {
+    issue = await fetchCandidateIssue(env, issueNumber);
+  } catch {
     return new Response(JSON.stringify({ error: { code: "retrieval_record_unavailable", message: "Il record di retrieval non è disponibile." } }), {
       status: 502,
       headers: { "Cache-Control": "no-store", "Content-Type": "application/json; charset=utf-8" },
     });
   }
-  const issue = await upstream.json();
   const retrieval = parseRetrievalCoverage(issue?.body, candidateId);
   if (!retrieval) {
     return new Response(JSON.stringify({ error: { code: "retrieval_record_missing", message: "La copertura di retrieval non è ancora materializzata." } }), {
