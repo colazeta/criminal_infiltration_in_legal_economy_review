@@ -38,9 +38,9 @@ class ResidualAbstractResolutionTests(unittest.TestCase):
         }
         counts = Counter(record["resolutionClass"] for record in self.records)
         self.assertEqual(set(counts), allowed)
-        self.assertEqual(counts["full_text_or_intro_ready"], 5)
+        self.assertEqual(counts["full_text_or_intro_ready"], 6)
         self.assertEqual(counts["publisher_summary_ready"], 12)
-        self.assertEqual(counts["metadata_only"], 2)
+        self.assertEqual(counts["metadata_only"], 1)
         self.assertEqual(counts["known_noise"], 4)
         for record in self.records:
             self.assertIn(record["resolutionClass"], allowed)
@@ -53,7 +53,14 @@ class ResidualAbstractResolutionTests(unittest.TestCase):
             self.assertTrue(record["sourceLabel"].strip())
             self.assertTrue(record["nextAction"].strip())
             self.assertTrue(record["note"].strip())
-            self.assertEqual(record["checkedAt"], "2026-09-06")
+            self.assertIn(record["checkedAt"], {"2026-09-06", "2026-09-07"})
+
+        refreshed = {
+            record["candidateId"]: record["checkedAt"]
+            for record in self.records
+            if record["candidateId"] in {"E0R1-C013", "E0R1-C031"}
+        }
+        self.assertEqual(refreshed, {"E0R1-C013": "2026-09-07", "E0R1-C031": "2026-09-07"})
 
     def test_known_noise_is_limited_to_verified_legacy_noise(self) -> None:
         noise = {
@@ -69,7 +76,7 @@ class ResidualAbstractResolutionTests(unittest.TestCase):
             for record in self.records
             if record["resolutionClass"] in {"full_text_or_intro_ready", "publisher_summary_ready"}
         }
-        self.assertEqual(len(ready), 17)
+        self.assertEqual(len(ready), 18)
         unresolved = {
             row["candidate_id"]
             for row in self.coverage
