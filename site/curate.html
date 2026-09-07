@@ -56,12 +56,39 @@
       }
 
       .curator-page .curator-titlebar,
+      .curator-page .curator-menubar,
       .curator-page .curator-app-message,
       .curator-page .curator-app-unavailable,
       .curator-page .curator-login-panel,
       .curator-page .curator-session-panel {
         flex: 0 0 auto;
         min-width: 0;
+      }
+
+      .curator-page .curator-menubar {
+        display: flex;
+        min-height: 22px;
+        overflow-x: auto;
+        border: 1px solid #707070;
+        border-top: 0;
+        background: #d4d0c8;
+        white-space: nowrap;
+      }
+
+      .curator-page .curator-menubar a {
+        flex: 0 0 auto;
+        min-height: 21px;
+        padding: 4px 8px 3px;
+        border-right: 1px solid #8d8d8d;
+        color: #000;
+        font: 10px Arial, Helvetica, sans-serif;
+        text-decoration: none;
+      }
+
+      .curator-page .curator-menubar a:hover,
+      .curator-page .curator-menubar a[aria-current="page"] {
+        background: #000080;
+        color: #fff;
       }
 
       .curator-page #editorial-console {
@@ -146,6 +173,13 @@
             <h1 id="page-title">CURATOR</h1>
             <span>CRIMINAL INFILTRATION REVIEW</span>
           </div>
+          <nav class="curator-menubar" aria-label="Navigazione del progetto">
+            <a href="./">ARCHIVE</a>
+            <a href="./aml.html">AML</a>
+            <a href="./stats.html">STATS</a>
+            <a href="./curate.html" aria-current="page">CURATOR</a>
+            <a href="https://github.com/colazeta/criminal_infiltration_in_legal_economy_review" rel="noreferrer">REPOSITORY</a>
+          </nav>
 
           <div class="curator-app-message" id="curator-app-message" role="status" aria-live="polite" hidden></div>
 
