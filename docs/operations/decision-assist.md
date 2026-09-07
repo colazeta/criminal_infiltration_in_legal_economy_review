@@ -23,27 +23,57 @@ The assist then applies the current four-part CILE test:
 A core recommendation requires positive evidence for all four. Missing evidence produces a
 `SERVE ALTRO TESTO` recommendation rather than an inferred inclusion.
 
-## What the curator sees
+## Guided operating workflow
 
-The primary assist block contains:
+The primary curator experience is not the raw decision form. The console presents a three-step
+classic data-entry workflow before exposing the governed form:
+
+1. **VALUTAZIONE** — assistant proposal, confidence, evidence sufficiency and a reasoned reading
+   of the paper;
+2. **PUNTO CRITICO** — the first unsupported/uncertain CILE criterion, or the decisive reason when
+   all four criteria are supported, followed by the complete four-part test, strongest countercase
+   and evidence that would change the recommendation;
+3. **DECISIONE** — a concise recommendation summary and the explicit actions `ACCETTA E PREPARA`,
+   `MODIFICA`, `APPROFONDISCI` and `MOSTRA EVIDENZA`.
+
+The assistant panel is inserted immediately after the bibliographic metadata. The abstract or
+screening synthesis is hidden from the default operating path and becomes an audit surface through
+`MOSTRA EVIDENZA`. This means the curator can inspect source evidence whenever desired without
+having to read it from scratch before every decision.
+
+The governed decision form is also hidden while the workflow is in guided mode. It opens only when
+the curator:
+
+- accepts the assistant proposal and asks the console to prepare the fields; or
+- explicitly chooses `MODIFICA` to make a manual decision.
+
+This is a presentation/workflow layer only. The underlying recommendation engine, source evidence,
+identity gates and human decision form remain separate.
+
+## What the assistant provides
+
+The recommendation contains:
 
 - recommendation family (`CORE`, `CONTEXTUAL`, `SERVE ALTRO TESTO`, etc.);
 - confidence;
 - whether the available evidence is sufficient;
 - a reasoned assistant judgement;
-- the decisive reason.
-
-The expandable audit block adds:
-
+- the decisive reason;
 - one rationale for each of the four CILE criteria;
 - the strongest plausible countercase;
 - what evidence would change the recommendation;
 - evidence basis;
 - substantive reading summary/focus.
 
+The guided workflow deliberately shows these elements progressively rather than as one long dossier.
+High-confidence cases ask the curator to check the decisive point and countercase rather than reread
+the paper. Insufficient-evidence cases explicitly direct the curator to `APPROFONDISCI` rather than
+asking for an unsupported decision.
+
 ## Human boundary
 
-`APPLICA AL FORM` only pre-fills compatible governed controls. It never:
+`ACCETTA E PREPARA` delegates to the existing `APPLICA AL FORM` capability and only pre-fills
+compatible governed controls. It never:
 
 - checks the explicit confirmation box;
 - calls `/api/decisions`;
@@ -53,6 +83,7 @@ The expandable audit block adds:
 - changes publication state.
 
 The curator must review the prefilled form, explicitly confirm it and press `SALVA`.
+`MODIFICA` opens the same form without applying the assistant proposal.
 The resulting GitHub instruction and review PR remain governed by the existing candidate
 curation workflow.
 
@@ -60,6 +91,18 @@ The assist is ephemeral. No recommendation is written to `data/curation/`, `data
 or public exports. This keeps `assistant recommendation` distinct from the attributable
 human `ScreeningDecision`, consistent with the ontology rule that automated/model
 activities may recommend or prepare but do not become the final eligibility agent.
+
+## Evidence as audit surface
+
+The abstract/synthesis is no longer the mandatory first reading surface in guided mode. It remains
+available unchanged and is opened or closed by the curator. `MOSTRA EVIDENZA` therefore changes only
+presentation; it does not trigger retrieval and does not alter the recommendation.
+
+The bottom status bar reports three operational facts:
+
+- current evidence mode (`ABSTRACT`, `SYNTHESIS`, `METADATA`, etc.);
+- whether an identity gate is open;
+- whether the governed form is still closed or has been opened for review.
 
 ## Conservative reasoning policy
 
@@ -76,15 +119,38 @@ proof of absence. The system prefers `SERVE ALTRO TESTO` unless the available ev
 contains an explicit boundary signal or the materialised retrieval state identifies known
 noise.
 
+Identity/manifestation gates override the guided decision path: `ACCETTA E PREPARA` is disabled while
+a blocking identity state remains unresolved.
+
 ## `APPROFONDISCI`
 
-`APPROFONDISCI` is a curator-triggered retrieval action. It may use the existing same-origin
-free-web fallback under the repository's zero-cost provider guards. The request is bounded
-in time and only concerns the currently opened candidate. A recovered author abstract
-replaces the provisional synthesis in the reading surface and causes the recommendation to
-be recalculated.
+`APPROFONDISCI` is a curator-triggered retrieval action. The guided workflow does not add a second
+network path: it delegates to the existing bounded assist action. That action may use the existing
+same-origin free-web fallback under the repository's zero-cost provider guards. The request is
+bounded in time and only concerns the currently opened candidate. A recovered author abstract
+replaces the provisional synthesis in the reading surface and causes the recommendation to be
+recalculated.
 
 No retrieval result is silently persisted as an abstract or screening outcome.
+
+## Performance boundary
+
+The guided workflow performs no `fetch` of its own. It reads the already rendered recommendation,
+identity state and evidence mode. Its mutation observer ignores mutations produced by the guided
+panel itself so rendering cannot create a feedback loop or additional provider load.
+
+## Visual contract
+
+The guided surface preserves the classic curator UI:
+
+- rectangular tables and controls;
+- Arial and Courier;
+- grey Windows-style headers;
+- navy selected/primary state;
+- one-pixel borders;
+- no cards, rounded pills, shadows, gradients, transitions or decorative animation.
+
+The design objective is a fast 1990s database workstation, not a modern SaaS dashboard.
 
 ## Topic limitation
 
