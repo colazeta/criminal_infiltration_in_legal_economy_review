@@ -78,9 +78,9 @@
       "standaloneAbstractStatus": "not_verified_after_targeted_search",
       "sourceLabel": "Exact DOI scholarly record",
       "sourceUrl": "https://doi.org/10.31085/2949-138x-2025-2-224-133-140",
-      "checkedAt": "2026-09-06",
-      "nextAction": "Perform a rapid title/metadata boundary review; retrieve full text only if plausible infiltration relevance survives that check.",
-      "note": "Authorship, year, venue and DOI are resolved, but targeted searches did not recover a reliable exact abstract or substantive text."
+      "checkedAt": "2026-09-07",
+      "nextAction": "Use the metadata-bounded synthesis for a rapid scope check; retrieve full text only if plausible infiltration relevance survives that check.",
+      "note": "Renewed targeted searching verified identity but still did not recover reliable substantive text. Do not infer organised-crime infiltration relevance from the title."
     },
     {
       "candidateId": "E0R1-C015",
@@ -144,13 +144,13 @@
     },
     {
       "candidateId": "E0R1-C031",
-      "resolutionClass": "metadata_only",
+      "resolutionClass": "full_text_or_intro_ready",
       "standaloneAbstractStatus": "not_verified_after_targeted_search",
-      "sourceLabel": "Springer Nature",
-      "sourceUrl": "https://link.springer.com/article/10.1007/BF02696272",
-      "checkedAt": "2026-09-06",
-      "nextAction": "Perform a rapid metadata/title boundary review; obtain full text only if the item appears potentially necessary to the infiltration review.",
-      "note": "The exact 1996 Trends in Organized Crime item is verified, but the publisher and targeted searches did not expose a substantive abstract."
+      "sourceLabel": "Springer Nature — exact article PDF",
+      "sourceUrl": "https://link.springer.com/content/pdf/10.1007/bf02696272.pdf",
+      "checkedAt": "2026-09-07",
+      "nextAction": "Screen the exact Springer source text; further abstract hunting is unnecessary unless a separately labelled author abstract emerges.",
+      "note": "Parallel Search recovered the exact article PDF, so this record is directly reviewable even though no standalone abstract has been verified."
     },
     {
       "candidateId": "E0R1-C032",
