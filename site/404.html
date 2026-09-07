@@ -4,22 +4,19 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Page not found · Criminal Infiltration Literature Archive</title>
-    <style>
-      body { margin: 0; background: #f4f1e9; color: #17211f; font: 1rem/1.55 system-ui, sans-serif; }
-      main { width: min(720px, calc(100% - 40px)); margin: 12vh auto; }
-      section { padding: 3rem; border: 1px solid #d8d1c3; border-radius: 18px; background: #fffdf7; }
-      h1 { margin: 0 0 1rem; font: 3rem/1 Georgia, serif; }
-      p { color: #4f5c58; }
-      a { color: #183f38; font-weight: 700; }
-      a:focus-visible { outline: 3px solid #fff; outline-offset: 3px; box-shadow: 0 0 0 6px #17211f; }
-    </style>
+    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./classic-site.css" />
   </head>
-  <body>
+  <body class="classic-site classic-404">
     <main>
-      <section>
-        <p>404</p>
-        <h1>Page not found</h1>
-        <p><a id="home-link" href="/">Return to the publication archive</a>.</p>
+      <section class="error-window" role="alert" aria-labelledby="error-title">
+        <div class="error-titlebar">CRIMINAL INFILTRATION · ERROR 404</div>
+        <div class="error-body">
+          <p class="eyebrow">HTTP 404</p>
+          <h1 id="error-title">Page not found</h1>
+          <p>The requested resource is not available in this archive.</p>
+          <p><a id="home-link" href="/">Return to the publication archive</a>.</p>
+        </div>
       </section>
     </main>
     <script>
