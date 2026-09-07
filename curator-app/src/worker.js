@@ -114,6 +114,7 @@ function parseRetrievalCoverage(body, candidateId) {
   const fields = parseMechanicalSection(source, "## Retrieval coverage — mechanical");
   if (!Object.keys(fields).length) return null;
   const access = parseMechanicalSection(source, "## Access status — mechanical");
+  const abstractCoverage = parseMechanicalSection(source, "## Abstract coverage — mechanical");
   return {
     candidateId,
     resolutionStatus: fields["Resolution status"] || "",
@@ -133,6 +134,11 @@ function parseRetrievalCoverage(body, candidateId) {
     accessEvidenceSource: access["Evidence source"] || "",
     accessEvidenceDetail: access["Evidence detail"] || "",
     accessCheckedAt: access["Last checked"] || "",
+    abstractCoverageStatus: abstractCoverage["Coverage status"] || "",
+    abstractSource: abstractCoverage["Abstract source"] || "",
+    abstractArticleUrl: safeHttpsUrl(abstractCoverage["Article URL"]),
+    abstractMatchType: abstractCoverage["Match type"] || "",
+    abstractCheckedAt: abstractCoverage["Last checked"] || "",
   };
 }
 
@@ -213,7 +219,8 @@ async function authenticatedFreeWebSearch(request, env) {
   }
   const retrievalResponse = await authenticatedRetrieval(request, env);
   if (!retrievalResponse.ok) return retrievalResponse;
-  return handleFreeWebSearchRequest(request, env);
+  const retrieval = await retrievalResponse.json();
+  return handleFreeWebSearchRequest(request, env, retrieval);
 }
 
 async function authenticatedProviderReadiness(request, env) {
