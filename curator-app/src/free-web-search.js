@@ -4,6 +4,7 @@ import {
   resolveFreeWebCapabilities,
   webCapabilityManifest,
 } from "./web-capability-resolver.js";
+import { fetchWithTimeout } from "./network.js";
 import { plainTextAbstract, titleSimilarity } from "./scholarly-providers.js";
 
 const JINA_READER_BASE = "https://r.jina.ai/";
@@ -41,16 +42,6 @@ function readerTitle(text) {
   return cleanText(match?.[1], 1000);
 }
 
-async function fetchWithTimeout(input, init = {}, timeoutMs = JINA_TIMEOUT_MS) {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort("timeout"), timeoutMs);
-  try {
-    return await fetch(input, { ...init, signal: controller.signal });
-  } finally {
-    clearTimeout(timer);
-  }
-}
-
 async function readVerifiedAbstractLocator({ title, doi, retrieval, env }) {
   if (!enabledGuard(env, "JINA_READER_FREE_ONLY")) return null;
   if (cleanText(retrieval?.abstractCoverageStatus, 40) !== "available") return null;
@@ -64,7 +55,7 @@ async function readVerifiedAbstractLocator({ title, doi, retrieval, env }) {
   const apiKey = cleanText(env?.JINA_API_KEY, 400);
   if (apiKey) headers.Authorization = `Bearer ${apiKey}`;
 
-  const response = await fetchWithTimeout(`${JINA_READER_BASE}${target}`, { headers });
+  const response = await fetchWithTimeout(`${JINA_READER_BASE}${target}`, { headers }, JINA_TIMEOUT_MS);
   if (response.status === 404) return null;
   if (!response.ok) throw new Error(`jina_verified_locator_${response.status}`);
   const text = (await response.text()).slice(0, 120000);
