@@ -36,10 +36,22 @@ class CuratorReadingSurfaceTests(unittest.TestCase):
         self.assertIn('new URL("/api/session", request.url)', worker)
         self.assertIn('if (!validation.ok) return validation', worker)
         self.assertIn('handleEnrichmentRequest(request, env)', worker)
-        self.assertIn('handleFreeWebSearchRequest(request, env)', worker)
+        self.assertIn('handleFreeWebSearchRequest(request, env, retrieval)', worker)
         self.assertIn('authenticatedRetrieval(request, env)', worker)
         self.assertIn('"/curator-reading.js"', worker)
         self.assertIn('"/curator-reading.css"', worker)
+
+    def test_runtime_reuses_materialised_abstract_locator_without_persisting_text(self) -> None:
+        worker = (ROOT / "curator-app/src/worker.js").read_text(encoding="utf-8")
+        free_web = (ROOT / "curator-app/src/free-web-search.js").read_text(encoding="utf-8")
+        self.assertIn('## Abstract coverage — mechanical', worker)
+        self.assertIn('abstractCoverageStatus', worker)
+        self.assertIn('abstractArticleUrl', worker)
+        self.assertIn('abstractMatchType', worker)
+        self.assertIn('Verified abstract locator', free_web)
+        self.assertIn('JINA_READER_FREE_ONLY', free_web)
+        self.assertIn('verified_abstract_locator_read', free_web)
+        self.assertNotIn('abstract_cache', free_web.lower())
 
     def test_public_config_loads_reading_component_without_provider_secrets(self) -> None:
         config = (ROOT / "site/curator-config.js").read_text(encoding="utf-8")
