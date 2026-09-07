@@ -229,18 +229,18 @@ jobs:
           )
           retry_asset(
               "curator-reading.js",
-              ["candidate-abstract-panel", "/api/resolved-abstract", "/api/free-web-search", "CORE", "Jina Reader", "Tavily Basic"],
+              ["candidate-abstract-panel", "/api/retrieval", "locator_only", "promoteSynthesis", "metadataFallback"],
               "Curator reading surface",
           )
           retry_asset(
               "curator-assisted-resolution.js",
-              ["candidate-assisted-resolution-panel", "full_text_or_intro_ready", "publisher_summary_ready", "metadata_only", "known_noise"],
+              ["candidate-assisted-resolution-panel", "curator:candidate-context", "full_text_or_intro_ready", "publisher_summary_ready", "metadata_only", "known_noise"],
               "Curator assisted abstract-resolution surface",
           )
           retry_asset(
               "curator-queue.js",
-              ["candidate-queue-pager", "MAX_ENRICHMENT_CONCURRENCY", "/api/resolved-abstract"],
-              "Curator queue enhancement",
+              ["candidate-queue-pager", "candidate-grid-header", "/api/candidates", "candidate-triage-filter"],
+              "Curator queue navigation surface",
           )
           retry_asset(
               "curator-resolved-link.js",
