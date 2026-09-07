@@ -26,6 +26,27 @@ class CuratorAssistedResolutionSurfaceTests(unittest.TestCase):
         self.assertIn("issueCache", source)
         self.assertNotIn("await fetch(`https://api.github.com", source)
 
+    def test_missing_abstract_promotes_governed_synopsis_into_primary_reading_cell(self) -> None:
+        source = (ROOT / "site/curator-assisted-resolution.js").read_text(encoding="utf-8")
+        self.assertIn("Reading aid — preparatory", source)
+        self.assertIn('Review synopsis', source)
+        self.assertIn("candidate-abstract-text", source)
+        self.assertIn("candidate-abstract-source", source)
+        self.assertIn("Sintesi per lo screening", source)
+        self.assertIn("Sintesi generata da fonti verificate", source)
+        self.assertIn("Sintesi dai metadati verificati", source)
+        self.assertIn("non abstract dell’autore", source)
+        self.assertIn('panel.dataset.evidenceMode = "synthesis"', source)
+        self.assertIn('panel.dataset.evidenceMode = "abstract"', source)
+
+    def test_actual_abstract_has_priority_over_generated_synthesis(self) -> None:
+        source = (ROOT / "site/curator-assisted-resolution.js").read_text(encoding="utf-8")
+        self.assertIn("function actualAbstractVisible()", source)
+        self.assertIn("if (actualAbstractVisible())", source)
+        self.assertIn('title.textContent = "Abstract"', source)
+        self.assertIn("abstract recuperato", source)
+        self.assertIn("abstract mostrato solo nella console autenticata", source)
+
     def test_interceptor_loads_before_reading_surface_in_public_and_secure_configs(self) -> None:
         public = (ROOT / "site/curator-config.js").read_text(encoding="utf-8")
         worker = (ROOT / "curator-app/src/worker.js").read_text(encoding="utf-8")

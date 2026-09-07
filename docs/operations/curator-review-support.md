@@ -20,10 +20,24 @@ The allowed conceptual distinction is important:
 - `verified_abstract_source`: the located source exposes an abstract or equivalent substantive abstract field;
 - `publisher_summary`: the publisher exposes a description/summary but not a distinct author abstract;
 - `full_text_intro`: the paper/chapter itself is available and its introductory text supports a reading synopsis;
-- `review_synopsis`: a conservative curator-oriented synopsis can be made from verified source context, but no standalone abstract was located;
-- `metadata_warning`: the record appears noisy, misidentified or insufficiently resolved, so the aid warns the curator instead of inventing an abstract.
+- `review_synopsis`: a conservative curator-oriented synopsis can be generated from verified source context when no standalone abstract was located;
+- `metadata_warning`: only metadata or identity evidence is sufficiently reliable, so the synopsis is limited to what is known and what cannot yet be established.
 
-A publisher summary, introduction or review synopsis must never be labelled as the author's abstract. When an actual abstract is available, the authenticated curator may retrieve and display it ephemerally at review time.
+### Mandatory evidence fallback
+
+A review card must never end at `abstract not found` with no substantive reading support. The authenticated curator follows this display cascade:
+
+1. author abstract, when verified and retrievable;
+2. exact publisher summary or description;
+3. source-grounded synopsis from the full text or introduction;
+4. curator-generated synthesis from verified source context;
+5. metadata-bounded synthesis stating only verified identity/scope facts and the unresolved evidentiary gap.
+
+The first available level is displayed in the **same primary reading cell** used for the abstract. The curator must not have to open a secondary diagnostic panel to discover it.
+
+Every fallback is labelled by evidence type and source. A publisher summary, introduction, generated synthesis or metadata-bounded synthesis must never be labelled as the author's abstract. A generated synthesis must paraphrase verified evidence and may not add claims not supported by its source basis. When an actual abstract becomes available, it always supersedes the synthesis in the primary reading cell.
+
+This rule concerns reviewability only. It does not convert weak evidence into eligibility evidence: if the available synthesis cannot support the codebook boundary, the curator should escalate to full text or use `maybe_full_text_needed` rather than infer missing facts.
 
 ## 2. Decision guidance
 

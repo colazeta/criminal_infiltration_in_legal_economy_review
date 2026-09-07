@@ -1,11 +1,13 @@
 "use strict";
 
 (() => {
-  const HEADING = "## Abstract resolution — assisted";
+  const RESOLUTION_HEADING = "## Abstract resolution — assisted";
+  const READING_HEADING = "## Reading aid — preparatory";
   const byId = (id) => document.getElementById(id);
   const issueCache = new Map();
   const originalFetch = window.fetch.bind(window);
   let activeIssueKey = "";
+  let refreshQueued = false;
 
   function clean(value) {
     return String(value || "")
@@ -49,11 +51,11 @@
     }
   }
 
-  function section(body) {
+  function section(body, heading) {
     const source = String(body || "").replace(/\r\n/g, "\n");
-    const start = source.indexOf(HEADING);
+    const start = source.indexOf(heading);
     if (start < 0) return "";
-    const remainder = source.slice(start + HEADING.length).replace(/^\s*\n/, "");
+    const remainder = source.slice(start + heading.length).replace(/^\s*\n/, "");
     const next = remainder.search(/^##\s/m);
     return (next >= 0 ? remainder.slice(0, next) : remainder).trim();
   }
@@ -69,10 +71,12 @@
 
   function parseIssuePayload(payload) {
     const body = String(payload?.body || "");
-    const parsed = section(body);
+    const resolution = section(body, RESOLUTION_HEADING);
+    const aid = section(body, READING_HEADING);
     return {
       candidateMarker: body.match(/<!--\s*curator-candidate:([^\s]+)\s*-->/)?.[1] || "",
-      resolution: parsed ? fields(parsed) : null,
+      resolution: resolution ? fields(resolution) : null,
+      aid: aid ? fields(aid) : null,
     };
   }
 
@@ -110,28 +114,28 @@
     return value || "Stato abstract non registrato";
   }
 
+  function aidLabel(value) {
+    const labels = {
+      verified_abstract_source: "Sintesi da fonte con abstract verificato",
+      publisher_summary: "Summary dell’editore",
+      full_text_intro: "Sintesi da full text / introduzione",
+      review_synopsis: "Sintesi generata da fonti verificate",
+      metadata_warning: "Sintesi dai metadati verificati",
+    };
+    return labels[value] || "Sintesi preparatoria";
+  }
+
   function injectStyles() {
     if (byId("curator-assisted-resolution-styles")) return;
     const style = node("style", { id: "curator-assisted-resolution-styles" });
     style.textContent = `
-      .candidate-assisted-resolution{margin:2px 30px 20px;border:1px solid var(--line);border-left:4px solid #876b2b;border-radius:14px;padding:16px 18px;background:#fffdf7;box-shadow:0 7px 18px rgb(23 33 31 / 4%)}
-      .candidate-assisted-resolution[data-state="full_text_or_intro_ready"]{border-left-color:var(--green);background:#f8fcfa}
-      .candidate-assisted-resolution[data-state="publisher_summary_ready"]{border-left-color:#55746d;background:#fbfdfc}
-      .candidate-assisted-resolution[data-state="metadata_only"]{border-left-color:#b4861d;background:#fffaf0}
-      .candidate-assisted-resolution[data-state="known_noise"]{border-left-color:var(--rust);background:#fff8f4}
-      .assisted-resolution-heading{display:flex;gap:16px;align-items:flex-start;justify-content:space-between}
-      .assisted-resolution-heading h4{margin:3px 0 0;font-family:Georgia,"Times New Roman",serif;font-size:1.08rem;font-weight:500}
-      .assisted-resolution-chip{display:inline-flex;flex:0 0 auto;border:1px solid var(--line);border-radius:999px;padding:5px 8px;background:#fff;color:var(--ink-soft);font-size:.57rem;font-weight:820;letter-spacing:.035em}
-      .candidate-assisted-resolution[data-state="full_text_or_intro_ready"] .assisted-resolution-chip{background:var(--green-soft);color:var(--green)}
-      .candidate-assisted-resolution[data-state="metadata_only"] .assisted-resolution-chip{background:#fff4cf;color:#6c5510}
-      .candidate-assisted-resolution[data-state="known_noise"] .assisted-resolution-chip{background:#fbe9e2;color:#7a321f}
-      .assisted-resolution-abstract{margin:11px 0 5px;color:var(--ink-soft);font-size:.64rem;font-weight:760}
-      .assisted-resolution-action{margin:0;max-width:92ch;font-size:.77rem;line-height:1.5}
-      .assisted-resolution-note{margin:7px 0 0;color:var(--ink-soft);font-size:.66rem;line-height:1.45}
-      .assisted-resolution-source{display:inline-flex;margin-top:11px;color:var(--green);font-size:.63rem;font-weight:760;text-decoration:none}
-      .assisted-resolution-boundary{margin:10px 0 0;color:var(--ink-soft);font-size:.58rem;line-height:1.4}
-      @media(max-width:920px){.candidate-assisted-resolution{margin:2px 18px 18px}}
-      @media(max-width:640px){.candidate-assisted-resolution{margin:2px 14px 16px;padding:14px}.assisted-resolution-heading{flex-direction:column;gap:7px}}
+      .candidate-assisted-resolution{margin:0;border:1px solid #8b8b8b;border-top:0;padding:9px 10px;background:#fff;box-shadow:none;border-radius:0}
+      .assisted-resolution-heading{display:flex;gap:10px;align-items:flex-start;justify-content:space-between}
+      .assisted-resolution-heading h4{margin:1px 0 0;font:700 12px Arial,sans-serif}
+      .assisted-resolution-chip{border:1px solid #777;padding:2px 5px;background:#eee;color:#111;font:700 10px Arial,sans-serif;border-radius:0}
+      .assisted-resolution-abstract,.assisted-resolution-action,.assisted-resolution-note,.assisted-resolution-boundary{margin:5px 0 0;font:11px/1.35 Arial,sans-serif}
+      .assisted-resolution-note,.assisted-resolution-boundary,.assisted-resolution-abstract{color:#555}
+      .assisted-resolution-source{display:inline-block;margin-top:6px;font:700 11px Arial,sans-serif}
     `;
     document.head.append(style);
   }
@@ -141,10 +145,7 @@
     if (panel) return panel;
     const detail = byId("candidate-detail");
     if (!detail) return null;
-    panel = node("section", {
-      id: "candidate-assisted-resolution-panel",
-      className: "candidate-assisted-resolution",
-    });
+    panel = node("section", { id: "candidate-assisted-resolution-panel", className: "candidate-assisted-resolution" });
     panel.hidden = true;
     const heading = node("div", { className: "assisted-resolution-heading" });
     const titleGroup = node("div");
@@ -164,7 +165,7 @@
     source.rel = "noopener noreferrer";
     const boundary = node("p", {
       className: "assisted-resolution-boundary",
-      text: "Questo stato descrive la reviewability del record e la prossima azione di retrieval. Non è un abstract, una decisione di eligibility o una decisione di esclusione.",
+      text: "Stato preparatorio: non è una decisione scientifica e non trasforma una sintesi in abstract dell’autore.",
     });
     panel.append(heading, abstractState, action, note, source, boundary);
     const form = byId("decision-form");
@@ -180,7 +181,7 @@
     delete panel.dataset.state;
   }
 
-  function render(payload) {
+  function renderResolution(payload) {
     const panel = ensurePanel();
     if (!panel || !payload) return hidePanel();
     const resolutionClass = payload["Resolution class"] || "";
@@ -207,6 +208,62 @@
     }));
   }
 
+  function actualAbstractVisible() {
+    const note = clean(byId("candidate-abstract-note")?.textContent).toLowerCase();
+    return note.includes("abstract recuperato") || note.includes("abstract mostrato solo nella console autenticata");
+  }
+
+  function mainSurfaceNeedsSynthesis() {
+    if (actualAbstractVisible()) return false;
+    const text = clean(byId("candidate-abstract-text")?.textContent).toLowerCase();
+    if (!text || text.includes("ricerca modulare gratuita") || text.includes("seleziona una scheda")) return false;
+    const missingSignals = [
+      "la cascata automatica gratuita",
+      "l’abstract non è stato trovato",
+      "la verifica multi-source non è stata completata",
+      "la ricerca dell’abstract non ha ancora prodotto",
+      "abstract standalone non verificato",
+    ];
+    return missingSignals.some((signal) => text.includes(signal)) || byId("candidate-abstract-panel")?.dataset.evidenceMode === "synthesis";
+  }
+
+  function promoteAidToMainSurface(aid) {
+    const panel = byId("candidate-abstract-panel");
+    const title = byId("candidate-abstract-title");
+    const source = byId("candidate-abstract-source");
+    const text = byId("candidate-abstract-text");
+    const note = byId("candidate-abstract-note");
+    if (!panel || !title || !source || !text || !note) return;
+
+    if (actualAbstractVisible()) {
+      panel.dataset.evidenceMode = "abstract";
+      title.textContent = "Abstract";
+      return;
+    }
+
+    const synopsis = clean(aid?.["Review synopsis"]);
+    if (!synopsis || !mainSurfaceNeedsSynthesis()) return;
+
+    const kind = clean(aid["Aid kind"]);
+    const sourceLabel = clean(aid.Source) || "fonte verificata";
+    const sourceUrl = safeHttps(aid["Source URL"]);
+    const limitation = clean(aid.Note);
+    panel.dataset.evidenceMode = "synthesis";
+    panel.dataset.synthesisKind = kind || "review_synopsis";
+    title.textContent = "Sintesi per lo screening";
+    source.textContent = `${aidLabel(kind)} · ${sourceLabel}`;
+    text.textContent = synopsis;
+    note.textContent = limitation
+      ? `Sintesi sostitutiva, non abstract dell’autore. ${limitation}`
+      : "Sintesi sostitutiva generata da evidenza verificata; non è l’abstract dell’autore.";
+
+    const article = byId("selected-candidate-article");
+    if (sourceUrl && article instanceof HTMLAnchorElement && article.hidden) {
+      article.href = sourceUrl;
+      article.hidden = false;
+    }
+  }
+
   function renderCurrentFromCache() {
     const detail = byId("candidate-detail");
     const candidateId = clean(byId("selected-candidate-id")?.textContent);
@@ -216,7 +273,17 @@
     if (!detail || detail.hidden || !candidateId || candidateId === "—" || !key) return hidePanel();
     const cached = issueCache.get(key);
     if (!cached || cached.candidateMarker !== candidateId) return hidePanel();
-    render(cached.resolution);
+    renderResolution(cached.resolution);
+    promoteAidToMainSurface(cached.aid);
+  }
+
+  function queueRefresh() {
+    if (refreshQueued) return;
+    refreshQueued = true;
+    queueMicrotask(() => {
+      refreshQueued = false;
+      renderCurrentFromCache();
+    });
   }
 
   window.fetch = async function curatorAssistedResolutionFetch(input, init) {
@@ -226,7 +293,7 @@
       response.clone().json().then((payload) => {
         const parsed = parseIssuePayload(payload);
         issueCache.set(key, parsed);
-        if (activeIssueKey === key || issueKey(issueInfo()) === key) queueMicrotask(renderCurrentFromCache);
+        if (activeIssueKey === key || issueKey(issueInfo()) === key) queueRefresh();
       }).catch(() => {});
     }
     return response;
@@ -239,11 +306,11 @@
     const id = byId("selected-candidate-id");
     const issue = byId("selected-candidate-issue");
     if (!detail || !id || !issue) return;
-    const observer = new MutationObserver(() => queueMicrotask(renderCurrentFromCache));
-    observer.observe(detail, { attributes: true, attributeFilter: ["hidden"] });
+    const observer = new MutationObserver(queueRefresh);
+    observer.observe(detail, { attributes: true, childList: true, characterData: true, subtree: true });
     observer.observe(id, { childList: true, characterData: true, subtree: true });
     observer.observe(issue, { attributes: true, attributeFilter: ["href"] });
-    queueMicrotask(renderCurrentFromCache);
+    queueRefresh();
   }
 
   if (document.readyState === "loading") {
