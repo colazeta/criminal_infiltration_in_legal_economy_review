@@ -390,7 +390,7 @@ loadCuratorComponent("./curator-resolved-link.js", "curator-resolved-link");
   }
 
   function decisionSummary(data) {
-    if (data.blocked) return `Non propongo ancora un'approvazione operativa: l'identità del record deve essere risolta prima dello screening.`;
+    if (data.blocked) return "Non propongo ancora un'approvazione operativa: l'identità del record deve essere risolta prima dello screening.";
     if (!data.proposalReady) return `La mia posizione attuale è ${data.proposal}. Non posso ancora trasformarla in campi di decisione: l'evidenza o i campi governati sono incompleti.`;
     return `Propongo ${data.proposal}, con confidenza ${data.confidence}. Se condividi il ragionamento, ACCETTA E PREPARA compilerà il form governato; tu vedrai e confermerai ogni campo prima del salvataggio.`;
   }
@@ -524,7 +524,11 @@ loadCuratorComponent("./curator-resolved-link.js", "curator-resolved-link");
   function observe() {
     const detail = byId("candidate-detail");
     if (!detail) return;
-    const observer = new MutationObserver(queueRender);
+    const observer = new MutationObserver((mutations) => {
+      const guided = byId("candidate-guided-assist-panel");
+      const onlyGuidedMutations = Boolean(guided) && mutations.every((mutation) => guided.contains(mutation.target));
+      if (!onlyGuidedMutations) queueRender();
+    });
     observer.observe(detail, {
       subtree: true,
       childList: true,
