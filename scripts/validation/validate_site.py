@@ -478,7 +478,7 @@ def validate_assets() -> None:
     if re.search(r"\.innerHTML\s*=|insertAdjacentHTML", stats_javascript):
         fail("stats.js must not inject ledger data as HTML")
     for required in (
-        'fetch("./data/research-stats.json")',
+        'fetch("./data/research-stats.json", { cache: "no-store" })',
         "replaceChildren",
         "textContent",
         "completed.length < 8",
@@ -496,6 +496,10 @@ def main() -> None:
     metric_days = validate_statistics()
     curator_stats = validate_curator_statistics()
     curator_options = validate_curator_options()
+    from scripts.curation.build_paper_register import build_payload as build_register
+    actual_register = json.loads((SITE / "data/paper-register.json").read_text())
+    if actual_register != build_register(ROOT):
+        fail("Public paper register is stale or exposes unexpected fields")
     validate_assets()
     print(
         "[OK] Static site validation passed: "

@@ -85,7 +85,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout -b "$branch"
-          git add data/curation site/data/curator-stats.json
+          git add data/curation site/data/curator-stats.json site/data/paper-register.json
           git commit -m "Screen ${candidate_id}: ${decision}"
           git push origin "$branch"
           echo "branch=$branch" >> "$GITHUB_OUTPUT"

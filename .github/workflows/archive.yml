@@ -148,6 +148,7 @@ jobs:
             --input "$RUNNER_TEMP/surveillance-ledger.json" \
             --as-of "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
           python scripts/curation/build_curator_stats.py
+          python scripts/curation/build_paper_register.py
           python scripts/curation/build_curator_options.py
           python scripts/validation/validate_archive.py
           python scripts/validation/validate_site.py

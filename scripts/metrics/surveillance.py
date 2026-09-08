@@ -19,7 +19,7 @@ SCHEMA_VERSION = 1  # Public aggregate format; independent from the run contract
 RUN_SCHEMA_VERSION = 2
 ROME = ZoneInfo("Europe/Rome")
 ACTIVE_SOURCES = frozenset({"Exa"})
-SOURCE_SETS = {1: frozenset({"Consensus", "Exa"}), 2: ACTIVE_SOURCES}
+SOURCE_SETS = {1: frozenset({"Consensus", "Exa"}), 2: ACTIVE_SOURCES, 3: ACTIVE_SOURCES}
 REPOSITORY_FULL_NAME = "colazeta/criminal_infiltration_in_legal_economy_review"
 STATUS_VALUES = {"completed", "partial", "failed"}
 SOURCE_STATUS_VALUES = {"completed", "failed", "not_run"}
@@ -270,7 +270,7 @@ def validate_run(run: dict[str, Any]) -> dict[str, Any]:
         completed = count(source["queries_completed"], f"{label}.queries_completed")
         if planned < 1:
             raise MetricsError(f"{label}: an expected source requires a planned query")
-        if version == 2 and planned < 7:
+        if version >= 2 and planned < 7:
             raise MetricsError(f"{label}: Exa must plan all seven W1–W7 windows")
         if completed > planned:
             raise MetricsError(f"{label}: completed queries exceed planned queries")
@@ -329,7 +329,7 @@ def validate_run(run: dict[str, Any]) -> dict[str, Any]:
         if completed_sources == 0
         else "partial"
     )
-    if version == 2 and completed_sources == 0:
+    if version >= 2 and completed_sources == 0:
         expected_status = "partial" if any(s["queries_completed"] for s in normalised_sources) else "failed"
     if status != expected_status:
         raise MetricsError("run: status disagrees with source completion")
@@ -521,7 +521,7 @@ def build_public_payload(
     validated = [validate_run(run) for run in runs]
     if any(is_extra(r["batch_id"]) for r in validated):
         raise MetricsError("Extra executions require the separate extraRuns projection")
-    if len({run["schema_version"] for run in validated}) > 1:
+    if len({1 if run["schema_version"] == 1 else 2 for run in validated}) > 1:
         raise MetricsError("Keep historical and current source policies in separate projections")
     validated.sort(key=lambda row: row["run_date"])
     batch_ids = [row["batch_id"] for row in validated]

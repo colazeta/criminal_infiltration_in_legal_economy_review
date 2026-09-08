@@ -34,9 +34,9 @@
           <p class="eyebrow">Open-access evidence map</p>
           <h1 id="page-title">Research on criminal infiltration in the legal economy</h1>
           <p class="intro-copy">
-            Search the papers that have completed the review. Every visible record
-            has verified open full text, a checked identity, a documented relevance decision, a supported
-            topic and an explicit approval for publication.
+            Consulta il registro dei lavori individuati e segui la loro analisi.
+            I paper vengono registrati prima dell’attribuzione delle etichette;
+            metadati, accesso e valutazione scientifica hanno stati distinti.
           </p>
         </div>
         <aside class="scope-note" aria-label="Coverage notice">
@@ -44,8 +44,7 @@
           <div>
             <strong>Open access only</strong>
             <p>
-              Every included publication has lawful, verified open full text, either from its publisher or an institutional repository. Accepted manuscripts are labelled by version. Candidates,
-              unresolved records and duplicates remain in the review workspace.
+              Every included publication has lawful, verified open full text, either from its publisher or an institutional repository. Accepted manuscripts are labelled by version. Il registro operativo comprende anche lavori da verificare: la loro presenza non certifica ancora l’accesso aperto o l’inclusione scientifica.
               Approved AML-related exclusions appear only in the
               <a href="./aml.html">separate broader collection</a>.
             </p>
@@ -72,11 +71,19 @@
         </article>
       </section>
 
+      <section class="archive" id="register" aria-labelledby="register-title">
+        <div class="section-heading"><h2 id="register-title">Registro dei paper</h2></div>
+        <p>I lavori trovati entrano nel registro prima dell’analisi individuale. Etichette, inclusione ed esclusione vengono attribuite dal curatore. L’accesso ancora da verificare è indicato esplicitamente.</p>
+        <label class="search-field">Cerca titolo, autore o DOI <input id="register-search" type="search" autocomplete="off"></label>
+        <p id="register-count" aria-live="polite">Caricamento del registro…</p>
+        <div class="table-scroll"><table class="daily-table"><thead><tr><th>Pubblicazione</th><th>Revisione</th><th>Accesso</th><th>Consultazione</th></tr></thead><tbody id="registered-papers"></tbody></table></div>
+      </section>
+
       <section class="archive" id="archive" aria-labelledby="archive-title">
         <div class="section-heading">
           <div>
             <p class="eyebrow">Reviewed collection</p>
-            <h2 id="archive-title">Paper archive</h2>
+            <h2 id="archive-title">Corpus valutato</h2>
           </div>
           <p>
             Search results that still need a decision are kept separate from these
@@ -219,5 +226,6 @@
         <a href="https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/blob/main/INDEX.md">Project guide</a>
       </p>
     </footer>
-  </body>
+    <script src="./paper-register.js" defer></script>
+</body>
 </html>

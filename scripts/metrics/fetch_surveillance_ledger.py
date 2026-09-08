@@ -29,12 +29,12 @@ from surveillance import (
 
 
 MARKER = "<!-- surveillance-run:v2 -->"
-MARKERS = {1: "<!-- surveillance-run:v1 -->", 2: MARKER}
+MARKERS = {1: "<!-- surveillance-run:v1 -->", 2: MARKER, 3: "<!-- surveillance-run:v3 -->"}
 LEDGER_COMMENT = re.compile(
     r"\ADaily surveillance batch "
     rf"(?P<batch>{BATCH_PATTERN}): "
     r"(?P<status>completed|partial|failed)\.\n\n"
-    + r"<!-- surveillance-run:v(?P<version>[12]) -->"
+    + r"<!-- surveillance-run:v(?P<version>[123]) -->"
     + r"\n```json\n(?P<payload>\{.*\})\n```\s*\Z",
     re.DOTALL,
 )
@@ -231,12 +231,12 @@ def verify_search_manifest(run: dict, section: str) -> dict[str, str]:
                 raise MetricsError("run.intake_issue: search query IDs must be unique")
             required_text(query["query_text"], f"{query_label}.query_text", 2000)
             query_sources[query_id] = source_name
-            if run["schema_version"] == 2:
+            if run["schema_version"] >= 2:
                 window = re.fullmatch(r"EXA-(W[1-7])-Q[1-9][0-9]*", query_id)
                 if not window:
                     raise MetricsError(f"{query_label}: Exa query must identify a W1–W7 window")
                 windows.add(window.group(1))
-        if run["schema_version"] == 2 and windows != {f"W{i}" for i in range(1, 8)}:
+        if run["schema_version"] >= 2 and windows != {f"W{i}" for i in range(1, 8)}:
             raise MetricsError("run.intake_issue: Exa W1–W7 coverage is incomplete")
     if seen_sources != set(run_sources):
         raise MetricsError("run.intake_issue: Search log source set is incomplete")
@@ -276,14 +276,14 @@ def verify_candidate_manifest(
     expected_id = re.compile(rf"CAND-{re.escape(run['batch_id'])}-[0-9]{{3}}")
     for index, candidate in enumerate(candidates):
         label = f"run.intake_issue.candidates[{index}]"
-        if not isinstance(candidate, dict) or set(candidate) != (CANDIDATE_RECORD_FIELDS | ({"open_access"} if run["schema_version"] == 2 else set())):
+        if not isinstance(candidate, dict) or set(candidate) != (CANDIDATE_RECORD_FIELDS | ({"open_access"} if run["schema_version"] >= 2 else set())):
             raise MetricsError(f"{label}: candidate record fields are invalid")
         candidate_id = required_text(candidate["candidate_id"], f"{label}.candidate_id", 80)
         if not expected_id.fullmatch(candidate_id):
             raise MetricsError(f"{label}.candidate_id: invalid batch-scoped ID")
         candidate_ids.append(candidate_id)
         required_text(candidate["title"], f"{label}.title", 500)
-        text_list(candidate["authors"], f"{label}.authors", minimum=1, maximum=50)
+        text_list(candidate["authors"], f"{label}.authors", minimum=0 if run["schema_version"] == 3 else 1, maximum=50)
         year = candidate["year"]
         if year is not None and (
             isinstance(year, bool)
@@ -347,10 +347,10 @@ def verify_candidate_manifest(
             not in CANDIDATE_VERIFICATION_STATUSES
         ):
             raise MetricsError(f"{label}.verification_status: invalid value")
-        if run["schema_version"] == 2:
+        if run["schema_version"] >= 2:
             try:
                 validate_intake_access(candidate["open_access"], candidate, date.fromisoformat(run["run_date"]),
-                    observed_by=min(issue_created, parse_datetime(run["window_end"], "run.window_end")) if issue_created else parse_datetime(run["window_end"], "run.window_end"))
+                    allow_pending=run["schema_version"] == 3, observed_by=min(issue_created, parse_datetime(run["window_end"], "run.window_end")) if issue_created else parse_datetime(run["window_end"], "run.window_end"))
             except ValueError as exc:
                 raise MetricsError(f"{label}: {exc}") from exc
         optional_text(candidate["possible_duplicate"], f"{label}.possible_duplicate", 500)
@@ -538,7 +538,7 @@ def fetch_validated_runs(repository, ledger_issue, allowed_author, token, cycle=
                 raise MetricsError("New ledger comment replays a retired run date") from exc
         if any(previous["batch_id"] == run["batch_id"] for previous in runs):
             raise MetricsError("ledger contains a duplicate batch")
-        if cycle and run["schema_version"] != RUN_SCHEMA_VERSION:
+        if cycle and run["schema_version"] not in (2, 3):
             raise MetricsError("Active cycle requires the Exa-only v2 run contract")
         verify_ledger_comment_time(run, comment)
         if repository_issues is None:
@@ -583,7 +583,7 @@ def fetch_validated_runs(repository, ledger_issue, allowed_author, token, cycle=
                 except ValueError as exc:
                     raise MetricsError(str(exc)) from exc
             verify_intake_issue(run, intake_cache[number], allowed_authors, ledger_issue)
-            if cycle and run["schema_version"] == 2:
+            if cycle and run["schema_version"] >= 2:
                 section = issue_form_value(intake_cache[number]["body"], "Candidate records")
                 candidates = json.loads(CANDIDATE_JSON_BLOCK.fullmatch(section).group(1))["candidates"]
                 for candidate in candidates:

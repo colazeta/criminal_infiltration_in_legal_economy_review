@@ -11,9 +11,8 @@ boundary between discovery, editorial judgement and publication.
 
 1. Never invent or silently repair metadata, identifiers, abstracts, citations,
    evidence or screening outcomes.
-2. Never promote, publish, merge or mark a candidate eligible automatically.
-3. Never expose candidate metadata, reviewer identity, internal notes, evidence
-   quotations, secrets or copyrighted full text in public exports.
+2. Never assign scientific eligibility or canonical identity automatically. The owner-authorised operational register publishes the closed bibliographic candidate projection before individual review; this is not scientific inclusion.
+3. Never expose reviewer identity, internal notes, evidence quotations, secrets or copyrighted full text. Candidate bibliography may appear only in the closed operational register authorised by the owner; it must retain unverified metadata/access and pending review states.
 4. Never use an unapproved source, connector or returned domain. Check
    `docs/governance/sources.md` before retrieval.
 5. Never overwrite decision history. Add a new decision and retire the former
@@ -120,3 +119,7 @@ Stop without writing when authentication, source authorisation, identity
 resolution, evidence, ontology conformance, issue idempotency or the publication
 gate cannot be verified. A failed request is not a zero-result search. An
 incomplete E1–E3 cycle is not an assessable saturation cycle.
+
+## Automatic operational registration — owner instruction, 2026-09-08
+
+Read docs/operations/paper-register.md. New surveillance uses run/intake v3. Register newly discovered plausible scholarly records before individual review, even when OA verification is pending. Do not fabricate missing metadata or an OA receipt. Use existing CandidateRecord and pending status; canonical identity, controlled labels and scientific decisions remain separate. The owner authorises reviewed maintenance and mechanical persistence of this provisional register.

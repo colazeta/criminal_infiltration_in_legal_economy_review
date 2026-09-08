@@ -1,0 +1,28 @@
+{
+  "profile_version": "0.3.0",
+  "authority": "Owner instruction, 2026-09-08: papers enter the visible operational register before individual analysis and labelling.",
+  "class": "CandidateRecord",
+  "source": "data/curation/review_queue.csv",
+  "public_artifact": "site/data/paper-register.json",
+  "public_fields": {
+    "id": "candidate_id",
+    "title": "title",
+    "authors": "authors_text",
+    "year": "publication_year",
+    "venue": "venue",
+    "doi": "doi",
+    "sourceLinks": "was_derived_from",
+    "metadataStatus": "v2_verification_status",
+    "reviewStatus": "candidate_status",
+    "accessStatus": "oa_access_status",
+    "registeredAt": "generated_at_time"
+  },
+  "run_schema": "schema/surveillance-run-v3.schema.json",
+  "run_version": 3,
+  "pending_access_fields": {
+    "candidate_id": "candidate_id",
+    "access_status": "oa_access_status"
+  },
+  "pending_access_value": "unknown",
+  "semantics": "Public bibliographic registration is not canonical identity, scientific inclusion or verified OA. Pending metadata and access remain explicit; existing scientific decisions and the OA-only assessed corpus gate are preserved. Snapshot v1 keeps full OA receipts; snapshot v2 may carry an unknown observation without an invented verification timestamp or checksum."
+}

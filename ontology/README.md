@@ -126,3 +126,7 @@ Evidence concepts. The ontology validator checks those mappings and requires
 one preserved receipt per active daily candidate. Scientific profile 0.3.0 and
 controlled vocabulary are unchanged; an intake attestation is not a curator
 publication receipt. See `../docs/operations/intake-open-access.md`.
+
+## Operational register amendment
+
+The owner instruction of 2026-09-08 authorises a visible bibliographic projection of CandidateRecord before screening. See modules/paper-register.json and ../docs/operations/paper-register.md. This reuses existing candidate, unknown-access and provenance concepts; no scientific vocabulary is changed. The old mandatory verified-OA intake rule remains only for v2 history. New v3 intake allows explicit unknown access.

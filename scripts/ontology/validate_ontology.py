@@ -462,6 +462,17 @@ def validate_all(*, quiet: bool = False) -> dict[str, int | str]:
     check_private_v2_contract(profile)
     check_surveillance_source_policy(profile)
     check_intake_access_contract(profile)
+    registration = load_json(ROOT / "ontology/modules/paper-register.json")
+    from scripts.curation.build_paper_register import FIELDS as REGISTER_FIELDS
+    if (registration["profile_version"] != profile["version"] or registration["class"] != "CandidateRecord"
+            or set(registration["public_fields"]) != REGISTER_FIELDS
+            or set(registration["public_fields"].values()) - set(profile["slots"])
+            or registration["pending_access_value"] not in profile["enums"]["OpenAccessVerificationEnum"]["permissible_values"]):
+        fail("unmapped_paper_register")
+    registration_schema = load_json(ROOT / registration["run_schema"])
+    if registration_schema["properties"]["schema_version"]["const"] != 3 or registration_schema["properties"]["expected_sources"]["items"]["enum"] != ["Exa"]:
+        fail("invalid_registration_surveillance_schema")
+
     cycle_contract = load_json(ROOT / "ontology/modules/archive-cycle.json")
     cycle = load_json(ROOT / cycle_contract["artifact"])
     if cycle_contract["profile_version"] != profile["version"] or cycle_contract["class"] not in profile["classes"]:

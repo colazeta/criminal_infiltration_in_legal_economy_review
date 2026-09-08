@@ -127,7 +127,7 @@ def parse_search_manifest(body: str, batch_id: str) -> dict[str, str]:
     commit = manifest["repository_commit"]
     if (
         type(manifest["schema_version"]) is not int
-        or manifest["schema_version"] != 2
+        or manifest["schema_version"] not in (2, 3)
         or manifest["batch_id"] != batch_id
         or not isinstance(commit, str)
         or not re.fullmatch(r"[0-9a-f]{40}", commit)
@@ -181,7 +181,7 @@ def parse_manifest(body: str, query_sources: dict[str, str] | None = None) -> di
     batch_id = manifest["batch_id"]
     if (
         type(manifest["schema_version"]) is not int
-        or manifest["schema_version"] != 2
+        or manifest["schema_version"] not in (2, 3)
         or not isinstance(batch_id, str)
     ):
         raise IntakeImportError("Candidate manifest version or batch is invalid")
@@ -206,7 +206,7 @@ def parse_manifest(body: str, query_sources: dict[str, str] | None = None) -> di
         seen.add(candidate_id)
         required(candidate["title"], f"{label}.title")
         authors = candidate["authors"]
-        if not isinstance(authors, list) or not authors or len(authors) > 50:
+        if not isinstance(authors, list) or (not authors and manifest["schema_version"] == 2) or len(authors) > 50:
             raise IntakeImportError(f"{label}.authors is invalid")
         authors = [required(author, f"{label}.authors[]", 300) for author in authors]
         if len(authors) != len(set(authors)):
@@ -282,7 +282,7 @@ def parse_manifest(body: str, query_sources: dict[str, str] | None = None) -> di
             } != set(validated_sources):
                 raise IntakeImportError(f"{label}.query_ids disagrees with sources")
         try:
-            validate_intake_access(candidate["open_access"], candidate, batch_day(batch_id))
+            validate_intake_access(candidate["open_access"], candidate, batch_day(batch_id), allow_pending=manifest["schema_version"] == 3)
         except ValueError as exc:
             raise IntakeImportError(f"{label}: {exc}") from exc
         if candidate["verification_status"] not in VERIFICATION:
@@ -309,6 +309,8 @@ def parse_intake_issue(body: str, title: str) -> dict[str, object]:
         raise IntakeImportError("Issue title disagrees with the batch ID")
     query_sources = parse_search_manifest(body, batch_id)
     manifest = parse_manifest(body, query_sources)
+    if manifest["schema_version"] != parse_json_section(body, "Search and provenance log")["schema_version"]:
+        raise IntakeImportError("Search and candidate versions disagree")
     if manifest["batch_id"] != batch_id:
         raise IntakeImportError("Candidate manifest disagrees with the batch ID")
     safeguards = issue_form_value(body, "Safeguards")
@@ -362,7 +364,7 @@ def import_candidates(
             if run is None:
                 raise ValueError("validated completed ledger run required before queue import")
         if run is not None:
-            if run["batch_id"] != manifest["batch_id"] or run["status"] != "completed" or run["intake_issue"]["number"] != int(issue_number):
+            if run["schema_version"] != manifest["schema_version"] or run["batch_id"] != manifest["batch_id"] or run["status"] != "completed" or run["intake_issue"]["number"] != int(issue_number):
                 raise ValueError("completed ledger run does not identify this intake")
             started = datetime.fromisoformat(run["window_start"].replace("Z", "+00:00"))
             ended = datetime.fromisoformat(run["window_end"].replace("Z", "+00:00"))
@@ -370,7 +372,7 @@ def import_candidates(
                 raise ValueError("issue creation is outside validated run window")
         if created_at is not None:
             for candidate in manifest["candidates"]:
-                validate_intake_access(candidate["open_access"], candidate, batch_date, observed_by=created_at)
+                validate_intake_access(candidate["open_access"], candidate, batch_date, observed_by=created_at, allow_pending=manifest["schema_version"] == 3)
     except (ValueError, TypeError) as exc:
         raise IntakeImportError(str(exc)) from exc
     if date.fromisoformat(imported_at) < batch_date:
@@ -515,7 +517,7 @@ def import_candidates(
     # Prepare both projections before writing. The immutable receipt is created
     # exclusively; a failed queue replacement removes only our new receipt.
     snapshot = {
-        "schema_version": 1, "batch_id": manifest["batch_id"],
+        "schema_version": 2 if manifest["schema_version"] == 3 else 1, "batch_id": manifest["batch_id"],
         "source_issue_number": int(issue_number),
         "source_body_sha256": hashlib.sha256(body.encode("utf-8")).hexdigest(),
         "receipts": [candidate["open_access"] for candidate in candidates],

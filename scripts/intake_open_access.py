@@ -36,7 +36,11 @@ def validate_cycle(batch_date, issue_number, created_at, cycle, *, batch_id=None
         raise ValueError("issue creation disagrees with archive cycle/batch")
 
 
-def validate_intake_access(receipt, candidate, batch_date, *, observed_by=None):
+def validate_intake_access(receipt, candidate, batch_date, *, observed_by=None, allow_pending=False):
+    if allow_pending and isinstance(receipt, dict) and receipt.get("access_status") == "unknown":
+        if set(receipt) != {"candidate_id", "access_status"} or receipt["candidate_id"] != candidate["candidate_id"]:
+            raise ValueError("pending access requires only candidate_id and unknown status; no invented receipt")
+        return receipt
     if not isinstance(receipt, dict) or set(receipt) != FIELDS:
         raise ValueError("open_access requires the exact OA-1 receipt fields")
     for field, value in receipt.items():
@@ -74,7 +78,7 @@ def validate_snapshots(root: Path, queue=None):
         if not isinstance(snapshot, dict) or set(snapshot) != SNAPSHOT_FIELDS:
             raise ValueError("invalid intake access snapshot fields")
         batch = snapshot["batch_id"]
-        if type(snapshot["schema_version"]) is not int or snapshot["schema_version"] != 1:
+        if type(snapshot["schema_version"]) is not int or snapshot["schema_version"] not in (1, 2):
             raise ValueError("invalid intake access snapshot version")
         if not isinstance(batch, str) or not re.fullmatch(BATCH_PATTERN, batch) or path.name != batch + ".json":
             raise ValueError("invalid intake access snapshot batch")
@@ -96,7 +100,7 @@ def validate_snapshots(root: Path, queue=None):
                 raise ValueError("intake access source disagrees with queue provenance")
             # Later metadata corrections may change queue links; the original
             # receipt is immutable and is not silently rewritten to follow them.
-            validate_intake_access(receipt, {"candidate_id": cid, "source_links": [receipt.get("full_text_url")]}, batch_date)
+            validate_intake_access(receipt, {"candidate_id": cid, "source_links": [receipt.get("full_text_url")]}, batch_date, allow_pending=snapshot["schema_version"] == 2)
             seen.add(cid)
     if seen != set(daily):
         raise ValueError("daily candidate missing preserved OA intake receipt")

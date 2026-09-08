@@ -120,6 +120,8 @@ def main() -> None:
         json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
     )
+    from build_paper_register import build_payload as build_register
+    output.with_name("paper-register.json").write_text(json.dumps(build_register(root), ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(
         f"[OK] Wrote aggregate curator stats: {payload['open']} open, "
         f"{payload['completed']} completed."
