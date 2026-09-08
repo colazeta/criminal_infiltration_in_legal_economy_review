@@ -196,7 +196,7 @@ function renderChart(rows) {
     makeSvgElement(
       "desc",
       { id: "chart-svg-description" },
-      "Barre larghe e vuote per i risultati unici; barre strette e piene per i candidati inviati alla revisione; una croce indica una giornata parziale o fallita.",
+      "Barre larghe e vuote per i risultati unici; barre strette e piene per i candidati inviati alla revisione; una croce indica una giornata mancante o incompleta.",
     ),
   );
 
@@ -322,12 +322,14 @@ fetch("./data/research-stats.json")
     }
     statsElements.content.hidden = false;
     renderStatus(payload);
-    renderChart(payload.daily);
     const calendarRows = payload.calendar?.rows;
-    const due30 = calendarRows ? calendarWindow(calendarRows, 30).filter((row) => row.status !== "planned").length : null;
-    renderSourceTable(payload.sources.map((row) => due30 === null ? row : { ...row, expectedRuns: due30 }));
+    // Provider volumes retain the ledger's explicit observed window. Do not pair
+    // that window's numerator with a different calendar window's denominator.
+    renderSourceTable(payload.sources);
     const observed = new Map(payload.daily.map((row) => [row.date, row]));
-    renderDailyTable(calendarRows ? calendarRows.map((row) => ({ ...observed.get(row.date), ...row })) : payload.daily);
+    const dailyRows = calendarRows ? calendarRows.map((row) => ({ ...observed.get(row.date), ...row })) : payload.daily;
+    renderChart(dailyRows);
+    renderDailyTable(dailyRows);
   })
   .catch(() => {
     statsElements.error.hidden = false;
