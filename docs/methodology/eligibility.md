@@ -80,3 +80,9 @@ comment.
   an abstract/full-text evidence locator.
 - Multiple identifiers/manifestations map to one work; DOI equality is neither a
   necessary nor sufficient test of work identity.
+
+## Open-access scope
+
+From 2026-09-08, [OA-1](open-access.md) adds a separate lawful full-text access
+requirement. It does not change the four criteria or supply a human judgement.
+V2 proposals use `CILE-4PT-OA-v3`; legacy decisions retain their original protocol.

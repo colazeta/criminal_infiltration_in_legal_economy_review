@@ -79,6 +79,8 @@ class PublicationGateTests(unittest.TestCase):
         ]
         self.topics = {"topic": "Topic"}
 
+        self.access = [{"assessment_id": "OA-TEST", "paper_id": "P1", "full_text_url": "https://example.org/full.pdf", "version_type": "accepted", "host_type": "repository", "license_uri": "", "rights_basis": "Synthetic authorised manuscript", "rights_evidence_url": "https://example.org/rights", "access_status": "verified_open", "verification_method": "anonymous_full_text_verified", "full_text_sha256": "a" * 64, "verified_at": "2026-09-08T00:00:00Z", "supersedes_id": ""}]
+
     def records(self):
         return build_records(
             copy.deepcopy(self.papers),
@@ -87,12 +89,41 @@ class PublicationGateTests(unittest.TestCase):
             copy.deepcopy(self.publications),
             copy.deepcopy(self.identifiers),
             copy.deepcopy(self.topics),
+            copy.deepcopy(self.access),
         )
 
     def test_valid_record_is_published_with_exact_allowlist(self) -> None:
         records = self.records()
         self.assertEqual(["P1"], [record["id"] for record in records])
         self.assertEqual(PUBLIC_RECORD_FIELDS, tuple(records[0]))
+
+    def test_open_access_is_required_even_after_scientific_approval(self):
+        self.access = []
+        with self.assertRaisesRegex(ArchiveBuildError, "open-access full text required"):
+            self.records()
+
+    def test_free_abstract_preprint_or_locator_cannot_pass_oa_gate(self):
+        for field, value in [("access_status", "unknown"), ("version_type", "preprint"),
+                             ("full_text_sha256", ""), ("verification_method", "abstract_only"),
+                             ("rights_evidence_url", ""), ("rights_basis", "")]:
+            with self.subTest(field=field):
+                original = self.access[0][field]
+                self.access[0][field] = value
+                with self.assertRaises(ArchiveBuildError):
+                    self.records()
+                self.access[0][field] = original
+
+    def test_access_revocation_preserves_history_and_blocks_publication(self):
+        newer = dict(self.access[0], assessment_id="OA-REVOKED", supersedes_id="OA-TEST", access_status="revoked")
+        self.access.append(newer)
+        with self.assertRaisesRegex(ArchiveBuildError, "open-access full text required"):
+            self.records()
+        self.assertEqual("verified_open", self.access[0]["access_status"])
+
+    def test_open_access_receipt_for_another_work_does_not_transfer(self):
+        self.access[0]["paper_id"] = "P2"
+        with self.assertRaisesRegex(ArchiveBuildError, "open-access full text required"):
+            self.records()
 
     def test_withheld_record_is_not_published(self) -> None:
         self.publications[0]["publication_status"] = "withheld"

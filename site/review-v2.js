@@ -17,7 +17,7 @@
       return payload;
     } finally { clearTimeout(timer); }
   }
-  const blockerLabels = { private_database_not_bound: "Database privato da collegare", private_evidence_store_not_bound: "Archivio privato delle evidenze da collegare", durable_queue_not_bound: "Coda durevole da collegare", consensus_runner_adapter_not_approved: "Adapter server Consensus da configurare e verificare", exa_budget_readiness_required: "Disponibilità e budget Exa da verificare", approved_daily_query_manifest_required: "Manifesto delle query giornaliere da confermare", review_not_activated: "Avvio V2 subordinato a snapshot, ripristino e collaudo delle fonti", schema_not_applied: "Schema del database da applicare" };
+  const blockerLabels = { open_access_schema_not_applied: "Schema delle verifiche OA da applicare", review_protocol_mismatch: "Protocollo della review da allineare al perimetro OA", private_database_not_bound: "Database privato da collegare", private_evidence_store_not_bound: "Archivio privato delle evidenze da collegare", durable_queue_not_bound: "Coda durevole da collegare", consensus_runner_adapter_not_approved: "Adapter server Consensus da configurare e verificare", exa_budget_readiness_required: "Disponibilità e budget Exa da verificare", approved_daily_query_manifest_required: "Manifesto delle query giornaliere da confermare", review_not_activated: "Avvio V2 subordinato a snapshot, ripristino e collaudo delle fonti", schema_not_applied: "Schema del database da applicare" };
   function list() {
     const query = $("v2-filter").value.toLowerCase();
     $("v2-candidates").replaceChildren(...candidates.filter((c) => c.title.toLowerCase().includes(query)).map((c) => {
@@ -56,7 +56,7 @@
       const data = await api(`candidate?id=${encodeURIComponent(id)}`); if (serial !== generation) return;
       current = data; const article = $("v2-detail"); article.replaceChildren(el("h1", data.candidate.title));
       const tabs = el("div"); tabs.className = "v2-actions"; const pane = el("section");
-      for (const [label, render] of [["PUBBLICAZIONE", bibliography], ["EVIDENZE", evidence], ["QUATTRO CRITERI", decision], ["CRONOLOGIA", history]]) {
+      for (const [label, render] of [["PUBBLICAZIONE", bibliography], ["EVIDENZE", evidence], ["OPEN ACCESS", access], ["QUATTRO CRITERI", decision], ["CRONOLOGIA", history]]) {
         const button = el("button", label); button.addEventListener("click", () => { pane.replaceChildren(); render(pane, data); }); tabs.append(button);
       }
       article.append(tabs, pane); bibliography(pane, data); message(`${id} · Versione record ${data.candidate.record_version} · Identità: ${data.candidate.identity_state}`);
@@ -82,6 +82,30 @@
     table(pane, data.spans, ["span_id", "locator", "evidence_kind", "identity_state"]);
     if (!data.evidence.length) pane.append(el("p", "Nessuna fonte acquisita. Un collegamento al PDF non vale come testo verificato."));
   }
+  function access(pane, data) {
+    pane.append(el("h2", "Verifica del testo integrale open access"), el("p", "Registra la verifica solo dopo aver aperto la copia integrale senza autenticazione e controllato identità, versione e autorizzazione al deposito. L’accesso non approva l’eleggibilità."));
+    table(pane, data.access_history || [], ["assessment_id", "access_status", "version_type", "host_type", "full_text_url", "rights_evidence_url", "verified_at"]);
+    const form = el("form"), controls = {}; form.className = "v2-form";
+    for (const [name, label, options] of [["access_status", "Esito dell’accesso", ["unknown", "verified_open", "restricted", "revoked"]], ["evidence_id", "ID del testo integrale conservato"], ["full_text_url", "URL della copia integrale"], ["version_type", "Versione verificata", ["accepted", "version_of_record"]], ["host_type", "Responsabile della copia", ["repository", "publisher"]], ["rights_evidence_url", "URL della dichiarazione di licenza o deposito"], ["license_uri", "URI della licenza, se dichiarata"], ["rights_basis", "Base documentata per accesso e uso"]]) {
+      const labelNode = el("label", label), input = el(options ? "select" : "input");
+      if (options) options.forEach((value) => { const option = el("option", value); option.value = value; input.append(option); });
+      labelNode.append(input); form.append(labelNode); controls[name] = input;
+    }
+    const attestation = el("input"); attestation.type = "checkbox";
+    const label = el("label", "Ho verificato personalmente accesso anonimo, testo completo, identità, versione e diritti della copia."); label.prepend(attestation); form.append(label);
+    const button = el("button", "REGISTRA VERIFICA DI ACCESSO"); button.type = "submit"; form.append(button); pane.append(form);
+    const assessmentId = crypto.randomUUID();
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault(); button.disabled = true;
+      try {
+        if (current !== data) throw Error("Riapri la scheda corrente.");
+        const payload = Object.fromEntries(Object.entries(controls).map(([key, control]) => [key, control.value.trim() || null]));
+        if (payload.access_status === "verified_open" && !attestation.checked) throw Error("La verifica esplicita è necessaria per attestare open access.");
+        Object.assign(payload, { assessment_id: assessmentId, candidate_id: data.candidate.candidate_id, expected_version: data.candidate.record_version, supersedes_id: data.access_history?.at(-1)?.assessment_id || null, verification_method: payload.access_status === "verified_open" ? "anonymous_full_text_verified" : "access_observation" });
+        await api("access-assessments", payload); await open(data.candidate.candidate_id); message("Accesso registrato; nessuna decisione scientifica creata.");
+      } catch (error) { message(error.message); button.disabled = false; }
+    });
+  }
   function history(pane, data) {
     pane.append(el("h2", "Decisioni umane e supersessioni")); table(pane, data.decisions, ["decision", "rationale", "human_login", "pr_number", "created_at", "supersedes_id"]);
   }
@@ -95,7 +119,8 @@
       wrapper.append(control); form.append(wrapper); controls[name] = control; return control;
     }
     criteria.forEach(([key, label]) => { field(`${key}-outcome`, label, ["UNCERTAIN", "YES", "NO"]); field(`${key}-rationale`, "Motivazione specifica"); field(`${key}-spans`, "ID dei passi, separati da virgola"); });
-    field("decision", "Esito proposto", ["needs_full_text", "eligible_core", "eligible_contextual", "not_eligible", "duplicate", "not_academic", "not_retrievable"]);
+    field("decision", "Esito proposto", ["needs_full_text", ...(data.access ? ["eligible_core", "eligible_contextual"] : []), "not_eligible", "duplicate", "not_academic", "not_retrievable"]);
+    if (!data.access) pane.append(el("p", "Inclusione sospesa: occorre una verifica corrente del testo integrale open access."));
     field("stage", "Livello di lettura", ["title_abstract", "full_text", "seed_validation"]); field("confidence", "Confidenza", ["low", "medium", "high"]);
     field("rationale", "Motivazione complessiva"); field("exclusion_reason", "Codice di esclusione, se applicabile"); field("duplicate_target", "ID del duplicato prevalente, se applicabile");
     const button = el("button", "SALVA PROPOSTA PER REVISIONE UMANA"); button.type = "submit"; form.append(button); pane.append(form);
@@ -107,6 +132,7 @@
         const value = (key) => controls[key].value.trim();
         const payload = { proposal_id: proposalId, review_id: data.review.review_id, candidate_id: data.candidate.candidate_id, expected_version: data.candidate.record_version, protocol_version: data.review.protocol_version,
           decision: value("decision"), stage: value("stage"), confidence: value("confidence"), rationale: value("rationale"), exclusion_reason: value("exclusion_reason"), duplicate_target: value("duplicate_target"),
+          access_assessment_id: data.access?.assessment_id || null,
           supersedes_id: data.decisions.at(-1)?.decision_id || null,
           criteria: criteria.map(([key]) => ({ criterion_id: key, outcome: value(`${key}-outcome`), rationale: value(`${key}-rationale`), evidence_span_ids: value(`${key}-spans`).split(",").map((s) => s.trim()).filter(Boolean) })) };
         const result = await api("proposals", payload);

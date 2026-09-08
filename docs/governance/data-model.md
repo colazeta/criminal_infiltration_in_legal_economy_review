@@ -205,3 +205,9 @@ cannot be verified.
 ## Review V2
 
 The additive private model is specified in [review-v2-model.md](review-v2-model.md). It separates bibliographic identity and content versions from review membership, requires four source-bound criterion assessments and exact-payload human approval, and starts without scientific data. This legacy CSV model remains readable until verified cutover.
+
+## Open-access mapping
+
+The owner-approved OA-1 access scope is specified in [open-access.md](../methodology/open-access.md). Both public collections require a current verified lawful full-text assessment. V2 records access history separately from scientific screening.
+
+OA export contracts are core schema 3 and secondary schema 2. Historical archive/protocol version metadata remains the source release; no corpus release is invented by a software change.

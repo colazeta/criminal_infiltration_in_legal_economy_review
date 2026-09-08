@@ -1,8 +1,8 @@
 import { fetchWithTimeout } from "./network.js";
 
 export const CRITERIA = Object.freeze(["criminal_actor", "legal_economy", "sustained_relation", "substantive_analysis"]);
-export const V2_PROTOCOL = "CILE-4PT-v2";
-export const V2_ONTOLOGY = "0.2.0";
+export const V2_PROTOCOL = "CILE-4PT-OA-v3";
+export const V2_ONTOLOGY = "0.3.0";
 const DECISIONS = new Set(["eligible_core", "eligible_contextual", "needs_full_text", "not_eligible", "duplicate", "not_academic", "not_retrievable"]);
 const SCIENTIFIC_KINDS = new Set(["abstract", "full_text", "full_text_excerpt", "publisher_summary"]);
 const EXCLUSION_REASONS = new Set(["TOPIC_OFF_SCOPE", "NO_CRIMINAL_ACTOR_OR_INTEREST", "NO_LEGAL_ECONOMY_LINK", "NO_INFILTRATION_RELATION", "MENTION_ONLY_NOT_ANALYTICAL", "ADJACENT_PHENOMENON_ONLY", "CRIME_DOMAIN_MISMATCH", "DOCUMENT_TYPE_EXCLUDED", "LANGUAGE_EXCLUDED", "DUPLICATE_RECORD", "NOT_ACADEMIC_SOURCE", "FULL_TEXT_UNAVAILABLE"]);
@@ -32,8 +32,8 @@ function https(value) {
   if (url.protocol !== "https:" || url.username || url.password) throw new V2Error("invalid_source_url");
   return url.href;
 }
-export function validateProposal(input, { candidate, review, spans, actor }) {
-  exact(input, ["proposal_id", "review_id", "candidate_id", "expected_version", "protocol_version", "decision", "stage", "confidence", "rationale", "exclusion_reason", "duplicate_target", "criteria", "supersedes_id"], "proposal");
+export function validateProposal(input, { candidate, review, spans, actor, access }) {
+  exact(input, ["proposal_id", "review_id", "candidate_id", "expected_version", "protocol_version", "decision", "stage", "confidence", "rationale", "exclusion_reason", "duplicate_target", "criteria", "supersedes_id", "access_assessment_id"], "proposal");
   if (!/^[a-zA-Z0-9-]{8,80}$/.test(input.proposal_id)) throw new V2Error("invalid_proposal_id");
   if (input.review_id !== review.review_id || input.candidate_id !== candidate.candidate_id || candidate.review_id !== review.review_id) throw new V2Error("review_mismatch");
   if (review.phase !== "active") throw new V2Error("review_not_active", 409);
@@ -57,6 +57,8 @@ export function validateProposal(input, { candidate, review, spans, actor }) {
     }
   }
   if (["eligible_core", "eligible_contextual"].includes(input.decision) && (candidate.identity_state !== "verified" || !candidate.work_id)) throw new V2Error("identity_unresolved");
+  if (["eligible_core", "eligible_contextual"].includes(input.decision) && (!access || access.access_status !== "verified_open" || access.review_id !== review.review_id || access.candidate_id !== candidate.candidate_id || input.access_assessment_id !== access.assessment_id)) throw new V2Error("current_open_access_assessment_required");
+  if (input.access_assessment_id !== null) text(input.access_assessment_id, "access_assessment_id", 100);
   if (input.decision === "eligible_core" && input.criteria.some((c) => c.outcome !== "YES")) throw new V2Error("core_requires_four_yes");
   if (input.decision === "eligible_contextual" && !input.criteria.some((c) => c.evidence_span_ids.length)) throw new V2Error("contextual_evidence_required");
   if (input.decision === "not_eligible" && !input.criteria.some((c) => c.outcome === "NO")) throw new V2Error("exclusion_requires_supported_no");
@@ -88,17 +90,24 @@ export async function readiness(env) {
   if (!env.EXA_API_KEY || env.EXA_FREE_ONLY !== "true" || env.EXA_DEDICATED_STARTER_ACCOUNT !== "true") blockers.push("exa_budget_readiness_required");
   let review = null;
   if (env.REVIEW_DB) {
-    try { review = await env.REVIEW_DB.prepare("SELECT review_id,phase,start_date,protocol_version,ontology_version FROM reviews WHERE phase = 'active'").first(); }
+    try {
+      review = await env.REVIEW_DB.prepare("SELECT review_id,phase,start_date,protocol_version,ontology_version FROM reviews WHERE phase = 'active'").first();
+      const accessSchema = await env.REVIEW_DB.prepare("SELECT name FROM sqlite_master WHERE type='view' AND name='v2_open_access_candidates'").first();
+      if (!accessSchema) blockers.push("open_access_schema_not_applied");
+      if (review && (review.protocol_version !== V2_PROTOCOL || review.ontology_version !== V2_ONTOLOGY)) blockers.push("review_protocol_mismatch");
+    }
     catch { blockers.push("schema_not_applied"); }
   }
   if (!review) blockers.push("review_not_activated");
   return { schema_version: 2, ontology_version: V2_ONTOLOGY, protocol_version: V2_PROTOCOL, review, blockers, ready: blockers.length === 0,
+    access_policy: "open_access_only", access_policy_version: "OA-1",
     assistant_mode: "observation_disabled_pending_calibration", seed_status: "proposed_unapproved" };
 }
 async function activeReview(env) {
   if (!env.REVIEW_DB) throw new V2Error("private_database_not_bound", 503);
   const review = await env.REVIEW_DB.prepare("SELECT * FROM reviews WHERE phase = 'active'").first();
   if (!review) throw new V2Error("review_not_activated", 409);
+  if (review.protocol_version !== V2_PROTOCOL || review.ontology_version !== V2_ONTOLOGY) throw new V2Error("review_protocol_mismatch", 409);
   return review;
 }
 async function candidateContext(db, review, candidateId) {
@@ -107,7 +116,8 @@ async function candidateContext(db, review, candidateId) {
   const spans = await rows(db, `SELECT s.*,e.candidate_id,e.identity_state,e.evidence_kind,e.content_sha256,e.source_url
     FROM evidence_spans s JOIN evidence_sources e USING(review_id,evidence_id)
     WHERE s.review_id=? AND e.candidate_id=?`, review.review_id, candidateId);
-  return { review, candidate, spans };
+  const access = await stmt(db, "SELECT * FROM v2_open_access_candidates WHERE review_id=? AND candidate_id=?", review.review_id, candidateId).first();
+  return { review, candidate, spans, access };
 }
 async function github(path, token, method = "GET", body = undefined) {
   const response = await fetchWithTimeout(`https://api.github.com${path}`, { method, body: body === undefined ? undefined : JSON.stringify(body), headers: { Authorization: `Bearer ${token}`, Accept: "application/vnd.github+json", "Content-Type": "application/json", "User-Agent": "cile-v2-approval", "X-GitHub-Api-Version": "2022-11-28" } });
@@ -196,7 +206,43 @@ export async function handleV2(request, env, session) {
       const contributions = work ? await rows(db, "SELECT c.*,a.display_name FROM contributions c JOIN agents a USING(agent_id) JOIN expressions e USING(expression_id) WHERE e.work_id=? ORDER BY c.position", work.work_id) : [];
       const evidence = await rows(db, "SELECT evidence_id,evidence_kind,identity_state,source_url,content_sha256,observed_at FROM evidence_sources WHERE review_id=? AND candidate_id=?", review.review_id, context.candidate.candidate_id);
       const decisions = await rows(db, "SELECT d.*,r.human_login,r.pr_number FROM screening_decisions_v2 d JOIN approval_receipts r USING(receipt_id) WHERE d.review_id=? AND d.candidate_id=? ORDER BY d.created_at", review.review_id, context.candidate.candidate_id);
-      return response({ ...context, work, expressions, contributions, evidence, decisions });
+      const access_history = await rows(db, "SELECT * FROM access_assessments_v2 WHERE review_id=? AND candidate_id=? ORDER BY rowid", review.review_id, context.candidate.candidate_id);
+      return response({ ...context, work, expressions, contributions, evidence, decisions, access_history });
+    }
+    if (path === "/api/v2/access-assessments" && request.method === "POST") {
+      const input = await body(request);
+      const fields = ["assessment_id", "candidate_id", "evidence_id", "full_text_url", "version_type", "host_type", "license_uri", "rights_basis", "rights_evidence_url", "access_status", "verification_method", "supersedes_id"];
+      exact(input, [...fields, "expected_version"], "access_assessment");
+      text(input.assessment_id, "assessment_id", 100); text(input.rights_basis, "rights_basis");
+      if (!["verified_open", "restricted", "unknown", "revoked"].includes(input.access_status)) throw new V2Error("invalid_access_status");
+      const previous = await stmt(db, "SELECT * FROM access_assessments_v2 WHERE assessment_id=?", input.assessment_id).first();
+      if (previous) {
+        if (previous.review_id !== review.review_id || fields.some((key) => input[key] !== previous[key])) throw new V2Error("access_assessment_conflict", 409);
+        return response({ assessment_id: previous.assessment_id, replayed: true });
+      }
+      const context = await candidateContext(db, review, input.candidate_id);
+      if (input.expected_version !== context.candidate.record_version) throw new V2Error("stale_candidate", 409);
+      const latest = await stmt(db, `SELECT assessment_id FROM access_assessments_v2 a WHERE review_id=? AND candidate_id=?
+        AND NOT EXISTS (SELECT 1 FROM access_assessments_v2 n WHERE n.supersedes_id=a.assessment_id)`, review.review_id, input.candidate_id).first();
+      if ((latest?.assessment_id || null) !== input.supersedes_id) throw new V2Error("stale_access_assessment", 409);
+      if (input.access_status === "verified_open") {
+        if (!["accepted", "version_of_record"].includes(input.version_type) || !["publisher", "repository"].includes(input.host_type)
+          || input.verification_method !== "anonymous_full_text_verified") throw new V2Error("lawful_full_text_verification_required");
+        https(input.full_text_url); https(input.rights_evidence_url); if (input.license_uri) https(input.license_uri);
+        const source = await stmt(db, "SELECT * FROM evidence_sources WHERE review_id=? AND candidate_id=? AND evidence_id=?", review.review_id, input.candidate_id, input.evidence_id).first();
+        if (!source || source.evidence_kind !== "full_text" || source.identity_state !== "verified" || source.source_url !== input.full_text_url) throw new V2Error("verified_full_text_source_required");
+        const object = await env.REVIEW_EVIDENCE?.get(source.storage_key);
+        if (!object || await sha256(await object.text()) !== source.content_sha256) throw new V2Error("full_text_integrity_failure", 409);
+      } else if (input.verification_method !== "access_observation") throw new V2Error("invalid_access_observation");
+      await db.batch([
+        stmt(db, `INSERT INTO access_assessments_v2 VALUES (?,?,
+          (SELECT candidate_id FROM review_candidates WHERE review_id=? AND candidate_id=? AND record_version=?),?,?,?,?,?,?,?,?,?,?,?,?)`,
+          input.assessment_id, review.review_id, review.review_id, input.candidate_id, input.expected_version,
+          input.evidence_id, input.full_text_url, input.version_type, input.host_type, input.license_uri, input.rights_basis,
+          input.rights_evidence_url, input.access_status, input.verification_method, new Date().toISOString(), session.login, input.supersedes_id),
+        stmt(db, "UPDATE review_candidates SET record_version=record_version+1 WHERE review_id=? AND candidate_id=?", review.review_id, input.candidate_id),
+      ]);
+      return response({ assessment_id: input.assessment_id, replayed: false, scientific_decision: "not_created" }, 201);
     }
     if (path === "/api/v2/evidence" && request.method === "GET") {
       const source = await stmt(db, "SELECT * FROM evidence_sources WHERE review_id=? AND evidence_id=?", review.review_id, url.searchParams.get("id")).first();

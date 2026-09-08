@@ -93,6 +93,7 @@ function amlPaperCard(record) {
 
   const footer = amlElement("div", "paper-footer");
   footer.append(amlElement("span", null, `Source: ${record.sourceBasis}`));
+  if (record.openAccess?.status === "verified_open") footer.append(amlLink("Read open full text · " + (record.openAccess.version === "accepted" ? "accepted manuscript" : "version of record"), record.openAccess.fullTextUrl, "paper-link"));
   if (record.links?.doi) footer.append(amlLink("Open DOI ↗", record.links.doi, "paper-link"));
   article.append(top, title, citation, details, footer);
   return article;
@@ -186,6 +187,7 @@ fetch("./data/secondary-collections.json")
     return response.json();
   })
   .then((payload) => {
+    if (payload.records.some((r) => r.openAccess?.status !== "verified_open" || !/^https:\/\//.test(r.openAccess.fullTextUrl || ""))) throw new Error("OA publication gate failed");
     amlState.payload = payload;
     document.querySelector("#aml-record-count").textContent = payload.counts.records;
     document.querySelector("#aml-collection-count").textContent = payload.collections.length;

@@ -1,7 +1,7 @@
 {
   "id": "https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/vocab/cile-review.ttl",
   "name": "cile-review-profile",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "title": "CILE Review Ontology Profile",
   "description": "Application ontology for the Criminal Infiltration in the Legal Economy living systematic review. It profiles SLR Ontology, PROV-O, FaBiO/BIBO, Web Annotation, SKOS and RIPE-O while defining only the domain and governance concepts that are specific to this review.",
   "prefixes": {
@@ -961,6 +961,43 @@
       "range": "string",
       "slot_uri": "cile:restoreVerifiedAt",
       "description": "Byte-hashed preservation manifest, external-state completeness and restore receipt. Field: restore verified at."
+    },
+    "oa_assessment_id": {
+      "slot_uri": "cile:assessmentId",
+      "description": "Identificatore immutabile della verifica di accesso, distinto dal giudizio scientifico."
+    },
+    "oa_full_text_url": {
+      "slot_uri": "cile:fullTextUrl",
+      "description": "Indirizzo della copia integrale verificata senza autenticazione."
+    },
+    "oa_host_type": {
+      "slot_uri": "cile:hostType",
+      "description": "Editore o repository responsabile della copia aperta."
+    },
+    "oa_rights_evidence_url": {
+      "slot_uri": "cile:rightsEvidenceUrl",
+      "description": "Fonte editoriale o istituzionale che documenta licenza o deposito autorizzato."
+    },
+    "oa_access_status": {
+      "slot_uri": "cile:accessStatus",
+      "description": "Stato della verifica OA: verified_open, restricted, unknown oppure revoked.",
+      "range": "OpenAccessVerificationEnum"
+    },
+    "oa_verification_method": {
+      "slot_uri": "cile:verificationMethod",
+      "description": "Verifica attestata dell’accesso anonimo al testo integrale, oppure osservazione senza ammissione."
+    },
+    "oa_verified_at": {
+      "slot_uri": "cile:verifiedAt",
+      "description": "Data e ora della verifica: accessibilità osservata, non garanzia perpetua."
+    },
+    "oa_full_text_sha256": {
+      "slot_uri": "cile:contentSha256",
+      "description": "Impronta dei byte integrali effettivamente verificati."
+    },
+    "oa_access_assessment_id": {
+      "slot_uri": "cile:accessAssessmentId",
+      "description": "Verifica OA esatta vincolata alla proposta scientifica."
     }
   },
   "enums": {
@@ -1101,6 +1138,14 @@
         "effects_and_disruption": {
           "description": "conseguenze e rimozione delle relazioni criminali"
         }
+      }
+    },
+    "OpenAccessVerificationEnum": {
+      "permissible_values": {
+        "verified_open": {},
+        "restricted": {},
+        "unknown": {},
+        "revoked": {}
       }
     }
   },

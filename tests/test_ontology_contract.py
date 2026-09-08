@@ -17,7 +17,7 @@ SPEC.loader.exec_module(ontology)
 class OntologyContractTests(unittest.TestCase):
     def test_entire_governed_repository_conforms(self) -> None:
         result = ontology.validate_all(quiet=True)
-        self.assertEqual(result["profile_version"], "0.2.0")
+        self.assertEqual(result["profile_version"], "0.3.0")
         self.assertGreaterEqual(result["governed_artifacts"], 20)
         self.assertGreaterEqual(result["candidates"], 68)
 

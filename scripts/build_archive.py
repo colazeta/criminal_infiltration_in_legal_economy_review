@@ -9,6 +9,11 @@ publication gate. Editorial and legacy files are never read.
 
 from __future__ import annotations
 
+try:
+    from .open_access import current_receipts, public_access
+except ImportError:
+    from open_access import current_receipts, public_access
+
 import argparse
 import csv
 import json
@@ -49,6 +54,7 @@ PUBLIC_RECORD_FIELDS = (
     "language",
     "doi",
     "links",
+    "openAccess",
     "topicCode",
     "topicLabel",
     "scopeFit",
@@ -254,7 +260,12 @@ def build_records(
     publications: list[dict[str, str]],
     identifiers: list[dict[str, str]],
     topic_labels: dict[str, str],
+    access_assessments: list[dict[str, str]] | None = None,
 ) -> list[dict[str, Any]]:
+    try:
+        access_by_work = current_receipts(access_assessments)
+    except ValueError as exc:
+        raise ArchiveBuildError(str(exc)) from exc
     papers_by_id = {(row.get("paper_id") or "").strip(): row for row in papers}
     if len(papers_by_id) != len(papers):
         raise ArchiveBuildError("Duplicate canonical paper_id")
@@ -314,6 +325,10 @@ def build_records(
             problems.append("papers.csv DOI and primary identifier disagree")
         if not identifiers_by_id.get(paper_id):
             problems.append("no identifier record")
+        try:
+            access = public_access(access_by_work.get(paper_id))
+        except ValueError as exc:
+            problems.append(str(exc))
         if problems:
             raise ArchiveBuildError(f"{paper_id}: " + "; ".join(problems))
 
@@ -339,6 +354,7 @@ def build_records(
             "language": (paper.get("language") or "").strip(),
             "doi": doi,
             "links": {"doi": f"https://doi.org/{doi}"},
+            "openAccess": access,
             "topicCode": topic_code,
             "topicLabel": topic_labels[topic_code],
             "scopeFit": (publication.get("scope_fit") or "").strip(),
@@ -397,7 +413,8 @@ def build_payload(root: Path = ROOT) -> dict[str, Any]:
         if (row.get("dimension") or "").strip() == "topic"
     }
     records = build_records(
-        papers, events, decisions, publications, identifiers, topic_labels
+        papers, events, decisions, publications, identifiers, topic_labels,
+        registry_rows(root, "open_access_assessments.csv")
     )
     current_publications = current_publication_rows(publications)
     summary = current_singleton(summaries, "editorial_summary.csv")
@@ -413,7 +430,7 @@ def build_payload(root: Path = ROOT) -> dict[str, Any]:
     contextual = len(records) - core
 
     return {
-        "schemaVersion": int(version["schema_version"]),
+        "schemaVersion": 3,
         "archiveVersion": version["version"],
         "protocolVersion": version["protocol_version"],
         "releaseDate": version["release_date"],
@@ -424,7 +441,8 @@ def build_payload(root: Path = ROOT) -> dict[str, Any]:
         "methodology": {
             "includedDefinition": (
                 "Records pass the canonical, discovery, current eligibility and "
-                "explicit publication-manifest gates."
+                "explicit publication-manifest gates, plus verified lawful open-access full text. "
+                "Coverage is limited to open-access scholarship; access is separate from scientific eligibility."
             ),
             "editorialDefinition": (
                 "Aggregate editorial counts are published separately; candidate "
@@ -466,6 +484,7 @@ def write_outputs(payload: dict[str, Any], output_dir: Path) -> None:
         writer.writeheader()
         for record in payload["records"]:
             safe = dict(record)
+            safe["openAccess"] = json.dumps(record["openAccess"], ensure_ascii=False, sort_keys=True)
             for field in csv_fields:
                 value = safe.get(field)
                 if isinstance(value, str) and value.startswith(("=", "+", "-", "@")):

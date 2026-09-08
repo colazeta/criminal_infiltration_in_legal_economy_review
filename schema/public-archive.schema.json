@@ -16,14 +16,33 @@
     "records"
   ],
   "properties": {
-    "schemaVersion": { "type": "integer", "minimum": 1 },
-    "archiveVersion": { "type": "string" },
-    "protocolVersion": { "type": "string" },
-    "releaseDate": { "type": "string", "format": "date" },
-    "searchCoverageThrough": { "type": "string", "format": "date" },
-    "sourceSnapshot": { "type": "string", "format": "date" },
-    "methodology": { "type": "object" },
-    "counts": { "type": "object" },
+    "schemaVersion": {
+      "const": 3
+    },
+    "archiveVersion": {
+      "type": "string"
+    },
+    "protocolVersion": {
+      "type": "string"
+    },
+    "releaseDate": {
+      "type": "string",
+      "format": "date"
+    },
+    "searchCoverageThrough": {
+      "type": "string",
+      "format": "date"
+    },
+    "sourceSnapshot": {
+      "type": "string",
+      "format": "date"
+    },
+    "methodology": {
+      "type": "object"
+    },
+    "counts": {
+      "type": "object"
+    },
     "records": {
       "type": "array",
       "items": {
@@ -47,6 +66,7 @@
           "language",
           "doi",
           "links",
+          "openAccess",
           "topicCode",
           "topicLabel",
           "scopeFit",
@@ -57,38 +77,140 @@
           "sourceBasis"
         ],
         "properties": {
-          "id": { "type": "string" },
-          "section": { "const": "included" },
-          "status": { "const": "included" },
-          "statusLabel": { "type": "string" },
-          "statusDescription": { "type": "string" },
-          "title": { "type": "string" },
-          "authors": { "type": "string" },
-          "year": { "type": ["integer", "null"] },
-          "venue": { "type": "string" },
-          "publisher": { "type": "string" },
-          "volume": { "type": "string" },
-          "issue": { "type": "string" },
-          "pages": { "type": "string" },
-          "documentType": { "type": "string" },
-          "language": { "type": "string" },
-          "doi": { "type": "string" },
+          "id": {
+            "type": "string"
+          },
+          "section": {
+            "const": "included"
+          },
+          "status": {
+            "const": "included"
+          },
+          "statusLabel": {
+            "type": "string"
+          },
+          "statusDescription": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "authors": {
+            "type": "string"
+          },
+          "year": {
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "venue": {
+            "type": "string"
+          },
+          "publisher": {
+            "type": "string"
+          },
+          "volume": {
+            "type": "string"
+          },
+          "issue": {
+            "type": "string"
+          },
+          "pages": {
+            "type": "string"
+          },
+          "documentType": {
+            "type": "string"
+          },
+          "language": {
+            "type": "string"
+          },
+          "doi": {
+            "type": "string"
+          },
           "links": {
             "type": "object",
             "additionalProperties": false,
-            "required": ["doi"],
-            "properties": { "doi": { "type": "string", "format": "uri" } }
+            "required": [
+              "doi"
+            ],
+            "properties": {
+              "doi": {
+                "type": "string",
+                "format": "uri"
+              }
+            }
           },
-          "topicCode": { "type": "string" },
-          "topicLabel": { "type": "string" },
-          "scopeFit": { "type": "string" },
-          "metadataConfidence": { "type": "string" },
-          "reason": { "type": "string" },
+          "topicCode": {
+            "type": "string"
+          },
+          "topicLabel": {
+            "type": "string"
+          },
+          "scopeFit": {
+            "type": "string"
+          },
+          "metadataConfidence": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
           "screeningDecision": {
-            "enum": ["eligible_core", "eligible_contextual"]
+            "enum": [
+              "eligible_core",
+              "eligible_contextual"
+            ]
           },
-          "screeningStage": { "type": "string" },
-          "sourceBasis": { "type": "string" }
+          "screeningStage": {
+            "type": "string"
+          },
+          "sourceBasis": {
+            "type": "string"
+          },
+          "openAccess": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "status",
+              "fullTextUrl",
+              "version",
+              "host",
+              "licence",
+              "verifiedAt"
+            ],
+            "properties": {
+              "status": {
+                "const": "verified_open"
+              },
+              "fullTextUrl": {
+                "type": "string",
+                "format": "uri"
+              },
+              "version": {
+                "enum": [
+                  "accepted",
+                  "version_of_record"
+                ]
+              },
+              "host": {
+                "enum": [
+                  "publisher",
+                  "repository"
+                ]
+              },
+              "licence": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "verifiedAt": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          }
         }
       }
     }

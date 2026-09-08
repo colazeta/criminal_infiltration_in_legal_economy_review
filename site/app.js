@@ -102,6 +102,7 @@ function paperCard(record) {
   footer.append(
     makeElement("span", null, `Source: ${record.sourceBasis || "canonical registry"}`),
   );
+  if (record.openAccess?.status === "verified_open") footer.append(makeLink("Read open full text · " + (record.openAccess.version === "accepted" ? "accepted manuscript" : "version of record"), record.openAccess.fullTextUrl, "paper-link"));
   if (record.links?.doi) {
     footer.append(makeLink("Open DOI ↗", record.links.doi, "paper-link"));
   }
@@ -222,6 +223,7 @@ fetch("./data/archive.json")
     return response.json();
   })
   .then((payload) => {
+    if (payload.records.some((r) => r.openAccess?.status !== "verified_open" || !/^https:\/\//.test(r.openAccess.fullTextUrl || ""))) throw new Error("OA publication gate failed");
     state.payload = payload;
     populateFilters(payload.records);
     populateMetrics(payload);

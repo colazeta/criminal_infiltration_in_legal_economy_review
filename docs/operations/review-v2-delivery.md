@@ -59,3 +59,7 @@ Rollback before activation reverts application code while retaining any empty
 provisioned resources. Rollback after activation preserves V2 history and pauses
 its writers before restoring the legacy public pointer. Never restore a dump
 over an active database or reset global provider-budget counters.
+
+## OA-1 amendment — 2026-09-08
+
+The owner requested OA-only mapping and authorised restart if feasible. Profile 0.3.0 adds a 33rd private table for attributed, append-only access verification; migration 0001 remains byte-identical. Legacy public builders now require a current OA receipt. The public scope and private curator access form are implemented. No database reset or V2 activation is implied: the D1 permission failure, source adapter and complete preservation/restore gates remain unresolved. Full candidate seed/evidence material is delivered separately, outside the technical repository changes.

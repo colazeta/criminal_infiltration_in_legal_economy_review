@@ -1,5 +1,5 @@
 {
-  "profile_version": "0.2.0",
+  "profile_version": "0.3.0",
   "governed_roots": ["data/registry", "data/curation"],
   "header_policy": "Every CSV header must be an explicit semantic field or match an approved field family. New files or genuinely new field concepts require an ontology change first.",
   "field_families": [
@@ -149,6 +149,68 @@
       "foreign_keys": [{"fields": ["candidate_id"], "target": "data/curation/review_queue.csv", "target_fields": ["candidate_id"]}],
       "controlled_fields": {"access_status": "AccessStatusEnum"},
       "semantic_fields": {"candidate_id": "candidate_id", "access_status": "access_status", "access_kind": "access_kind", "access_url": "access_url", "evidence_source": "source_name", "evidence_detail": "evidence_locator", "verified_at": "generated_at_time"}
+    },
+    "data/registry/open_access_assessments.csv": {
+      "row_classes": [
+        "AccessAssessment"
+      ],
+      "primary_key": [
+        "assessment_id"
+      ],
+      "required_fields": [
+        "assessment_id",
+        "paper_id",
+        "full_text_url",
+        "version_type",
+        "host_type",
+        "license_uri",
+        "rights_basis",
+        "rights_evidence_url",
+        "access_status",
+        "verification_method",
+        "full_text_sha256",
+        "verified_at",
+        "supersedes_id"
+      ],
+      "foreign_keys": [
+        {
+          "fields": [
+            "paper_id"
+          ],
+          "target": "data/registry/papers.csv",
+          "target_fields": [
+            "paper_id"
+          ]
+        },
+        {
+          "fields": [
+            "supersedes_id"
+          ],
+          "target": "data/registry/open_access_assessments.csv",
+          "target_fields": [
+            "assessment_id"
+          ],
+          "allow_blank": true
+        }
+      ],
+      "controlled_fields": {
+        "access_status": "OpenAccessVerificationEnum"
+      },
+      "semantic_fields": {
+        "assessment_id": "oa_assessment_id",
+        "paper_id": "work_id",
+        "full_text_url": "oa_full_text_url",
+        "version_type": "v2_version_type",
+        "host_type": "oa_host_type",
+        "license_uri": "v2_license_uri",
+        "rights_basis": "v2_rights_basis",
+        "rights_evidence_url": "oa_rights_evidence_url",
+        "access_status": "oa_access_status",
+        "verification_method": "oa_verification_method",
+        "full_text_sha256": "oa_full_text_sha256",
+        "verified_at": "oa_verified_at",
+        "supersedes_id": "v2_supersedes_id"
+      }
     }
   }
 }
