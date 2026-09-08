@@ -53,6 +53,14 @@ verification; they never mean confirmed OA or scientifically included papers.
 The statistics HTML also contains a deployment-time aggregate summary so the last
 extra execution is readable before the separate JSON request succeeds.
 
+After successful mechanical intake persistence, the archive workflow is triggered
+by completion of `Stage daily intake in curator queue` on main. This is required
+because writes using the repository's GITHUB_TOKEN do not trigger another push
+workflow. Only a successful same-repository run can trigger this refresh; the
+normal repository, ontology, deterministic-export and live-ledger gates still
+run. A failed import cannot be represented as a completed registration. The
+public count is rebuilt from the persisted queue, not copied from intake totals.
+
 ## Rollback
 
 Pause new v3 writers before rollback. Preserve original issues, snapshots and
