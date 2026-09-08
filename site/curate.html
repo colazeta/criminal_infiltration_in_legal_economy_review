@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="./curator-reading.css" data-curator-reading="true" />
     <link rel="stylesheet" href="./curator-queue.css" data-curator-queue="true" />
     <link rel="stylesheet" href="./curator-shell.css" />
+    <link rel="stylesheet" href="./application.css" />
     <script src="./curator-config.js" defer></script>
     <script src="./curator.js" defer></script>
   </head>
@@ -23,18 +24,11 @@
       <section class="curator-workspace" id="curator-workflow" aria-labelledby="page-title">
         <section class="editorial-app" id="editorial-app" aria-labelledby="page-title">
           <div class="curator-titlebar">
-            <h1 id="page-title">CURATOR</h1>
-            <span>CRIMINAL INFILTRATION REVIEW</span>
+            <a href="https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/" class="curator-brand">Criminal Infiltration <span>Literature review</span></a>
+            <h1 id="page-title">Curatore</h1>
           </div>
-          <nav class="curator-menubar" aria-label="Navigazione del progetto">
-            <a href="https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/">ARCHIVE</a>
-            <a href="./aml.html">AML</a>
-            <a href="./stats.html">STATS</a>
-            <a href="./model.html">MODELLO</a>
-            <a href="https://criminal-infiltration-curator.colazeta-research.workers.dev/review-v2.html">REVIEW V2</a>
-            <a href="./curate.html" aria-current="page">CURATOR</a>
-            <a href="https://github.com/colazeta/criminal_infiltration_in_legal_economy_review" rel="noreferrer">REPOSITORY</a>
-          </nav>
+          <nav class="curator-menubar" aria-label="Navigazione principale" lang="it"><a href="https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/index.html">Archivio</a><a href="https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/aml.html">Raccolta AML</a><a href="https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/stats.html">Statistiche</a><a href="https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/model.html">Modello</a><a href="./curate.html" aria-current="page">Curatore</a></nav>
+          <div class="page-tools curator-tools"><span>Coda editoriale</span><a href="https://criminal-infiltration-curator.colazeta-research.workers.dev/review-v2.html">Review V2</a><a href="https://github.com/colazeta/criminal_infiltration_in_legal_economy_review" rel="noreferrer">Repository</a></div>
 
           <div class="curator-app-message" id="curator-app-message" role="status" aria-live="polite" hidden></div>
 
@@ -57,13 +51,13 @@
           <div class="editorial-console" id="editorial-console" hidden>
             <aside class="candidate-browser" aria-labelledby="candidate-browser-title">
               <div class="candidate-browser-heading">
-                <h2 id="candidate-browser-title">QUEUE</h2>
+                <h2 id="candidate-browser-title">Coda dei candidati</h2>
                 <span id="candidate-result-count">—</span>
               </div>
 
               <div class="candidate-controls">
                 <label>
-                  <span>SEARCH</span>
+                  <span>Cerca</span>
                   <input
                     id="candidate-search"
                     type="search"
@@ -97,7 +91,7 @@
 
             <section class="candidate-decision-panel" aria-labelledby="candidate-decision-title">
               <div class="candidate-empty-state" id="candidate-empty-state">
-                <h2 id="candidate-decision-title">SELEZIONA UN RECORD</h2>
+                <h2 id="candidate-decision-title">Seleziona un record</h2>
               </div>
 
               <article class="candidate-detail" id="candidate-detail" hidden>

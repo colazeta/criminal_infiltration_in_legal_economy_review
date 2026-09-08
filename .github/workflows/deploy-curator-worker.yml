@@ -26,6 +26,7 @@ on:
       - "site/curator-queue.css"
       - "site/curator-resolved-link.js"
       - "site/styles.css"
+      - "site/application.css"
       - "site/data/curator-options.json"
       - "site/data/curator-stats.json"
       - "site/data/research-stats.json"

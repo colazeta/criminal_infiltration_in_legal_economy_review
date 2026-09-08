@@ -20,7 +20,7 @@ test("assembled Worker delivers its guided module and external CSP-compatible st
   const scripts = [];
   vm.runInNewContext(await response.text(), { window: {}, document: { querySelector: () => null, createElement: () => ({ dataset: {} }), head: { append: (s) => scripts.push(s.src) } } });
   assert.ok(scripts.includes("./curator-guided.js"));
-  for (const path of [...scripts, "./curator-guided.css", "./curator-shell.css", "./review-v2.html", "./model.css"]) {
+  for (const path of [...scripts, "./curator-guided.css", "./curator-shell.css", "./application.css", "./review-v2.html", "./model.css"]) {
     assert.equal((await worker.fetch(new Request(new URL(path, "https://test.workers.dev/")), env)).status, 200, path);
   }
   const v2 = await worker.fetch(new Request("https://test.workers.dev/review-v2.html"), env);
