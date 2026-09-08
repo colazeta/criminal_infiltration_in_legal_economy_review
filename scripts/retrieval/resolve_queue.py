@@ -427,7 +427,7 @@ def validate_coverage(queue_rows: list[dict[str, str]], rows: list[dict[str, str
         raise ResolutionError("retrieval_coverage.csv header does not match the governed schema")
     queue_ids = [row.get("candidate_id", "") for row in queue_rows]
     coverage_ids = [row.get("candidate_id", "") for row in rows]
-    if not queue_ids or "" in queue_ids or len(queue_ids) != len(set(queue_ids)):
+    if "" in queue_ids or len(queue_ids) != len(set(queue_ids)):
         raise ResolutionError("review_queue.csv candidate IDs are invalid")
     if coverage_ids != queue_ids:
         raise ResolutionError("retrieval coverage must contain exactly one row per queue candidate in queue order")
@@ -461,9 +461,12 @@ def write_coverage(path: Path, rows: list[dict[str, str]]) -> None:
 
 def resolve_all(queue_path: Path, coverage_path: Path, checked_at: str, max_age_days: int, refresh_all: bool) -> dict[str, int]:
     queue_fields, queue_rows = read_csv(queue_path)
-    if not queue_fields or not queue_rows:
-        raise ResolutionError("review_queue.csv is missing or empty")
+    if not queue_fields or "candidate_id" not in queue_fields:
+        raise ResolutionError("review_queue.csv is missing its governed header")
     coverage_fields, old_rows = read_csv(coverage_path)
+    if not queue_rows:
+        validate_coverage(queue_rows, old_rows, coverage_fields)
+        return {**{status: 0 for status in STATUSES}, "total": 0, "refreshed": 0}
     old = {row.get("candidate_id", ""): row for row in old_rows} if coverage_fields == FIELDS else {}
 
     resolved: list[dict[str, str]] = []
@@ -509,8 +512,8 @@ def main() -> None:
         raise SystemExit("--date must use YYYY-MM-DD") from exc
 
     queue_fields, queue_rows = read_csv(args.queue)
-    if not queue_fields or not queue_rows:
-        raise SystemExit("review queue is missing or empty")
+    if not queue_fields or "candidate_id" not in queue_fields:
+        raise SystemExit("review queue is missing its governed header")
 
     if args.check:
         coverage_fields, rows = read_csv(args.coverage)

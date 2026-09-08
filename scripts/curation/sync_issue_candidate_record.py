@@ -87,6 +87,8 @@ def synchronise(
     *,
     dry_run: bool = False,
 ) -> int:
+    if not rows:
+        return 0
     issues = existing_issues(repository, token)
     writes = 0
     for row in rows:

@@ -75,3 +75,14 @@ D1 authentication remains an infrastructure problem for private V2 activation.
 It does not prevent resetting the current Git-backed archive, which is the
 scope executed by this release. The existing daily task receives the same
 cycle boundary; the personal broader AML digest keeps its separate scope.
+
+## Production completion
+
+PR #194 merged the reset. Pages and the curator Worker deployed successfully;
+79 candidate issues and the former research-gap issue #165 were closed without
+editing their bodies/comments. The daily automation now reads the active cycle
+boundary, retaining its existing 07:00 Europe/Rome schedule. The first auxiliary
+retrieval/materialisation jobs revealed remaining nonempty-queue assumptions;
+they are corrected to validate headers and complete with no external writes
+when the queue is empty. Assisted-resolution synchronisation is restricted to
+active queue members, preserving retired issue evidence.

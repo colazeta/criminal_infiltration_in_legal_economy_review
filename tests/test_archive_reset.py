@@ -62,3 +62,61 @@ class ArchiveResetTests(unittest.TestCase):
         with patch('fetch_surveillance_ledger.api_get', return_value=([comment], {})) as request:
             self.assertEqual(fetch_validated_runs('colazeta/criminal_infiltration_in_legal_economy_review', 30, ['colazeta'], 'test', CYCLE), [])
             self.assertEqual(request.call_count, 1)
+
+class EmptyArchiveJobTests(unittest.TestCase):
+    def setUp(self):
+        import tempfile
+        self.temp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temp.cleanup)
+        self.root = Path(self.temp.name)
+        folder = self.root / 'data/curation'
+        folder.mkdir(parents=True)
+        for name in ('review_queue.csv', 'retrieval_coverage.csv'):
+            with (ROOT / 'data/curation' / name).open() as source:
+                headers = next(csv.reader(source))
+            with (folder / name).open('w', newline='') as target:
+                csv.writer(target).writerow(headers)
+        for name in ('reading_aids.json', 'reading_aid_overrides.json', 'residual_abstract_resolution.json'):
+            payload = json.loads((ROOT / 'data/curation' / name).read_text())
+            payload['records'] = []
+            (folder / name).write_text(json.dumps(payload))
+
+    def test_empty_queues_validate_and_make_no_provider_or_github_calls(self):
+        from scripts.curation import materialize_queue_issues as materializer
+        from scripts.curation import sync_issue_candidate_record as candidate_sync
+        from scripts.curation import sync_issue_review_support as support
+        from scripts.curation import sync_issue_abstract_resolution as residual
+        from scripts.retrieval import resolve_queue as retrieval
+        queue = self.root / 'data/curation/review_queue.csv'
+        self.assertEqual(materializer.read_queue(queue), [])
+        self.assertEqual(support.read_queue(queue), [])
+        with patch.object(materializer, 'api_request') as writes, patch.object(materializer, 'existing_issues') as reads:
+            self.assertEqual(materializer.materialise('unused', 'unused', [], []), (0, 0))
+            writes.assert_not_called(); reads.assert_not_called()
+        with patch.object(candidate_sync, 'existing_issues') as reads:
+            self.assertEqual(candidate_sync.synchronise('unused', 'unused', []), 0)
+            reads.assert_not_called()
+        with patch.object(support, 'issue_inventory') as reads:
+            result = support.sync('unused', 'unused', queue, self.root / 'data/curation/reading_aids.json', self.root / 'data/curation/reading_aid_overrides.json')
+            self.assertEqual(result['updated'], 0); reads.assert_not_called()
+        with patch.object(residual, 'ROOT', self.root), patch.object(residual, 'issue_inventory') as reads, patch.object(residual, 'api_request') as writes:
+            self.assertEqual(residual.sync('unused', 'unused', self.root / 'data/curation/residual_abstract_resolution.json')['removed'], 0)
+            reads.assert_not_called(); writes.assert_not_called()
+        with patch.object(retrieval, 'resolve_row') as provider:
+            result = retrieval.resolve_all(queue, self.root / 'data/curation/retrieval_coverage.csv', '2026-09-08', 30, False)
+            self.assertEqual(result['total'], 0); provider.assert_not_called()
+
+    def test_absent_headers_and_orphan_coverage_still_fail(self):
+        import tempfile
+        from scripts.curation import materialize_queue_issues as materializer
+        from scripts.curation import sync_issue_review_support as support
+        from scripts.retrieval import resolve_queue as retrieval
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / 'empty.csv'; path.write_text('')
+            with self.assertRaises(materializer.GitHubError): materializer.read_queue(path)
+            with self.assertRaises(support.SyncError): support.read_queue(path)
+            with self.assertRaises(retrieval.ResolutionError): retrieval.resolve_all(path, path, '2026-09-08', 30, False)
+        with self.assertRaises(retrieval.ResolutionError):
+            retrieval.validate_coverage([], [{'candidate_id':'retired'}], retrieval.FIELDS)
+        with self.assertRaises(materializer.GitHubError):
+            materializer.materialise('unused', 'unused', [], [{'action_id':'orphan'}])
