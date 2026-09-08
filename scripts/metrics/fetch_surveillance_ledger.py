@@ -15,7 +15,7 @@ from urllib.parse import urlsplit
 from urllib.request import Request, urlopen
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from scripts.intake_open_access import validate_intake_access
+from scripts.intake_open_access import validate_intake_access, validate_cycle
 
 from surveillance import (
     REPOSITORY_FULL_NAME,
@@ -243,7 +243,7 @@ def verify_search_manifest(run: dict, section: str) -> dict[str, str]:
 
 
 def verify_candidate_manifest(
-    run: dict, section: str, query_sources: dict[str, str]
+    run: dict, section: str, query_sources: dict[str, str], *, issue_created=None
 ) -> None:
     """Require one structured candidate object for every persisted intake count."""
     match = CANDIDATE_JSON_BLOCK.fullmatch(section.strip())
@@ -349,7 +349,7 @@ def verify_candidate_manifest(
         if run["schema_version"] == 2:
             try:
                 validate_intake_access(candidate["open_access"], candidate, date.fromisoformat(run["run_date"]),
-                    observed_by=parse_datetime(run["window_end"], "run.window_end"))
+                    observed_by=min(issue_created, parse_datetime(run["window_end"], "run.window_end")) if issue_created else parse_datetime(run["window_end"], "run.window_end"))
             except ValueError as exc:
                 raise MetricsError(f"{label}: {exc}") from exc
         optional_text(candidate["possible_duplicate"], f"{label}.possible_duplicate", 500)
@@ -495,7 +495,7 @@ def verify_intake_issue(
     if values["Batch ID"] != batch_id:
         raise MetricsError("run.intake_issue: issue batch ID disagrees with run")
     query_sources = verify_search_manifest(run, values["Search and provenance log"])
-    verify_candidate_manifest(run, values["Candidate records"], query_sources)
+    verify_candidate_manifest(run, values["Candidate records"], query_sources, issue_created=issue_created)
     verify_safeguards(values["Safeguards"])
 
 
@@ -569,6 +569,12 @@ def fetch_validated_runs(repository, ledger_issue, allowed_author, token, cycle=
                 if not isinstance(issue, dict):
                     raise MetricsError("GitHub intake issue response is not an object")
                 intake_cache[number] = issue
+            if cycle:
+                try:
+                    validate_cycle(date.fromisoformat(run["run_date"]), number,
+                        parse_datetime(intake_cache[number].get("created_at"), "intake created_at"), cycle)
+                except ValueError as exc:
+                    raise MetricsError(str(exc)) from exc
             verify_intake_issue(run, intake_cache[number], allowed_authors, ledger_issue)
         runs.append(run)
 

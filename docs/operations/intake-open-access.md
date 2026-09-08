@@ -44,8 +44,8 @@ actor and workflow remain the attribution trail. The metadata-only snapshot is
 created exclusively, never overwritten by a repeated import. The queue and
 snapshot are committed together by the intake workflow. Ordinary queue-write
 failure removes only the snapshot newly created by that attempt. An interrupted
-local process with an orphan snapshot fails closed and requires reconciliation
-before retry; it must not overwrite preserved evidence.
+local process can resume using a byte-identical orphan snapshot; a different
+snapshot fails closed and must not be overwritten.
 
 The ontology validator requires one receipt per active daily candidate and
 rejects orphan/duplicate receipts, missing coverage and incompatible source
@@ -65,3 +65,55 @@ Rollback must preserve every newly written receipt and candidate. Do not deploy
 the older permissive importer over the new intake: pause intake and apply a
 reviewed compatible repair. The scientific profile and controlled vocabulary
 remain unchanged.
+
+## Second audit hardening — 2026-09-08
+
+The current automated intake evidence path accepts only the existing
+`zenodo.org` repository permission for record metadata/rights and file bytes.
+This deliberately does not upgrade metadata APIs, DOI redirects, discovery
+results, Jina text extraction or arbitrary publisher domains to file-acquisition
+permission. Both the original full-text locator and rights evidence must remain
+on that authorised origin (HTTPS, standard port, no credentials). Other source
+links may remain discovery locators, never authority to fetch them. Follow no
+redirect to an unapproved origin. Extending this boundary requires the reviewed
+source amendment specified in `sources.md`. This is a coverage limitation, not
+evidence that other publications are closed access. No new domain is authorised
+by this repair; no external scholarly retrieval was performed.
+
+The production import now requires the authenticated issue creation timestamp
+and a completed, validated ledger run. Verification must precede issue creation,
+which must fall inside that run window and on its Rome batch date. Issue number,
+reset timestamp and daily start date all enforce the active cycle. The pure
+manifest parser checks syntax and evidence fields; it is not the production
+lifecycle gate. The CLI requires run context and the workflow obtains it from
+the authenticated ledger reader. Discovery must write its terminal ledger
+without waiting for queue import. Only absent ledger data are polled: eight
+checks at 15-second intervals (105 seconds total waiting). Invalid evidence or
+authentication fails immediately. If the ledger arrives later, reopen the owner
+issue after repair; do not create a second issue or rerun discovery for that batch.
+
+Receipts are written completely to a temporary file and atomically published
+without overwriting an existing path. A byte-identical orphan from a killed
+attempt is reused; a different orphan blocks retry. Committed receipts cannot
+be modified or deleted: `validate_intake_history.py` compares their actual bytes
+against the authenticated PR base or pre-push revision, with full Git history in
+CI. The staging workflow compares against HEAD before committing. A missing Git
+base fails closed. The ordinary snapshot validator checks internal structure;
+it does not independently recover an issue body from its SHA-256. The history
+gate supplies cross-revision immutability, not proof of scholarly truth.
+
+The ontology module now declares explicit physical transformations: the integer
+issue number becomes one repository issue URI; schema version becomes text;
+receipts are structural containment of individual AccessAssessment records,
+not a scalar `prov:wasDerivedFrom` value. The validator checks range and
+cardinality and rejects undeclared transformations. No scientific class,
+controlled vocabulary or screening decision changes.
+
+Calendar validation derives absent-day status from its timezone-aware clock,
+rejects fabricated completed/planned states, and recalculates totals only after
+that check. The website flags a projection older than 26 hours (24-hour cadence
+plus two hours of refresh grace), including an empty pre-start baseline. This
+client-clock warning does not invent ledger rows for later days. Intake counts
+mean issues created, not successful queue import; queue import still has a
+separate workflow outcome. Neither scheduled execution nor successful external
+provider calls are guaranteed by these repairs.

@@ -79,14 +79,14 @@ def intake_body(
         "candidates": [
             {
                 "candidate_id": candidate_id,
-                "open_access": synthetic_oa(candidate_id, "https://example.org/record", batch_id.removeprefix("ACADEMIC-")),
+                "open_access": synthetic_oa(candidate_id, "https://zenodo.org/record", batch_id.removeprefix("ACADEMIC-")),
                 "title": "A new candidate study",
                 "authors": ["Ada Researcher", "Bruno Scholar"],
                 "year": 2026,
                 "venue": "Journal of Evidence",
                 "work_type": "peer_reviewed",
                 "identifiers": {"doi": "https://doi.org/10.1000/example", "other": []},
-                "source_links": ["https://example.org/record"],
+                "source_links": ["https://zenodo.org/record"],
                 "sources": sources,
                 "query_ids": query_ids,
                 "verification_status": verification_status,
@@ -395,7 +395,7 @@ class DailyIntakeQueueTests(unittest.TestCase):
         )
         self.assertIn("Daily intake provenance — not a decision", body)
         self.assertIn("Required human action", body)
-        self.assertIn("https://example.org/record", body)
+        self.assertIn("https://zenodo.org/record", body)
         self.assertNotIn("marked eligible", body)
 
     def test_verified_daily_intake_goes_to_evidence_review(self) -> None:

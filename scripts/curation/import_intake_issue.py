@@ -17,14 +17,14 @@ import os
 import sys
 import tempfile
 import re
-from datetime import date
+from datetime import date, datetime
 from pathlib import Path
 from urllib.parse import urlsplit
 
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
-from scripts.intake_open_access import validate_intake_access
+from scripts.intake_open_access import validate_intake_access, validate_cycle
 CANDIDATE_FIELDS = {
     "open_access",
     "candidate_id",
@@ -339,6 +339,7 @@ def import_candidates(
     issue_title: str,
     issue_number: str,
     imported_at: str,
+    *, issue_created_at: str | None = None, run: dict | None = None,
 ) -> dict[str, object]:
     try:
         imported_at = date.fromisoformat(imported_at).isoformat()
@@ -353,6 +354,24 @@ def import_candidates(
             raise IntakeImportError("This intake belongs to the retired archive")
     manifest = parse_intake_issue(body, issue_title)
     batch_date = date.fromisoformat(str(manifest["batch_id"]).removeprefix("ACADEMIC-"))
+    try:
+        created_at = datetime.fromisoformat(issue_created_at.replace("Z", "+00:00")) if issue_created_at else None
+        if cycle_path.exists():
+            validate_cycle(batch_date, issue_number, created_at, cycle)
+            if run is None:
+                raise ValueError("validated completed ledger run required before queue import")
+        if run is not None:
+            if run["batch_id"] != manifest["batch_id"] or run["status"] != "completed" or run["intake_issue"]["number"] != int(issue_number):
+                raise ValueError("completed ledger run does not identify this intake")
+            started = datetime.fromisoformat(run["window_start"].replace("Z", "+00:00"))
+            ended = datetime.fromisoformat(run["window_end"].replace("Z", "+00:00"))
+            if created_at is None or not started <= created_at <= ended:
+                raise ValueError("issue creation is outside validated run window")
+        if created_at is not None:
+            for candidate in manifest["candidates"]:
+                validate_intake_access(candidate["open_access"], candidate, batch_date, observed_by=created_at)
+    except (ValueError, TypeError) as exc:
+        raise IntakeImportError(str(exc)) from exc
     if date.fromisoformat(imported_at) < batch_date:
         raise IntakeImportError("Import date cannot precede the intake batch")
     path = root / "data" / "curation" / "review_queue.csv"
@@ -483,9 +502,23 @@ def import_candidates(
         temporary = Path(handle.name)
         handle.write(buffer.getvalue())
     try:
-        with snapshot_path.open("x", encoding="utf-8") as handle:
-            created = True
-            handle.write(json.dumps(snapshot, ensure_ascii=False, sort_keys=True, indent=2) + "\n")
+        snapshot_bytes = (json.dumps(snapshot, ensure_ascii=False, sort_keys=True, indent=2) + "\n").encode("utf-8")
+        # Publish complete bytes atomically; a killed process can never leave a
+        # half-written visible receipt. Reuse an identical orphan on retry.
+        with tempfile.NamedTemporaryFile(dir=snapshot_path.parent, delete=False) as evidence:
+            evidence_temp = Path(evidence.name)
+            evidence.write(snapshot_bytes)
+            evidence.flush()
+            os.fsync(evidence.fileno())
+        try:
+            try:
+                os.link(evidence_temp, snapshot_path)
+                created = True
+            except FileExistsError:
+                if snapshot_path.read_bytes() != snapshot_bytes:
+                    raise
+        finally:
+            evidence_temp.unlink(missing_ok=True)
         os.replace(temporary, path)
     except BaseException:
         if created:
@@ -507,7 +540,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--issue-body-file", type=Path, required=True)
     parser.add_argument("--issue-title-file", type=Path, required=True)
     parser.add_argument("--issue-number", required=True)
+    parser.add_argument("--issue-created-at", required=True)
     parser.add_argument("--date", dest="imported_at", required=True)
+    parser.add_argument("--run-file", type=Path, required=True)
     parser.add_argument("--output", type=Path)
     return parser.parse_args()
 
@@ -520,6 +555,8 @@ def main() -> None:
         args.issue_title_file.read_text(encoding="utf-8"),
         args.issue_number,
         args.imported_at,
+        issue_created_at=args.issue_created_at,
+        run=json.loads(args.run_file.read_text()),
     )
     if args.output:
         args.output.write_text(

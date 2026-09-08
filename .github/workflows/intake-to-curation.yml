@@ -17,6 +17,7 @@ jobs:
   prepare-change:
     if: >-
       github.actor == github.repository_owner &&
+      github.event.issue.user.login == github.repository_owner &&
       startsWith(github.event.issue.title, '[INTAKE][ACADEMIC] ')
     runs-on: ubuntu-latest
     permissions:
@@ -43,8 +44,14 @@ jobs:
         run: |
           python3 -c 'import json, os, pathlib; event=json.load(open(os.environ["GITHUB_EVENT_PATH"], encoding="utf-8")); root=pathlib.Path(os.environ["RUNNER_TEMP"]); root.joinpath("intake-body.md").write_text(event["issue"].get("body") or "", encoding="utf-8"); root.joinpath("intake-title.txt").write_text(event["issue"].get("title") or "", encoding="utf-8")'
 
+      - name: Require authenticated completed ledger
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/curation/fetch_intake_run.py
+
       - name: Stage validated candidates without screening
         env:
+          ISSUE_CREATED_AT: ${{ github.event.issue.created_at }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
         run: |
           action_date="$(date -u +%F)"
@@ -52,6 +59,8 @@ jobs:
             --issue-body-file "$RUNNER_TEMP/intake-body.md" \
             --issue-title-file "$RUNNER_TEMP/intake-title.txt" \
             --issue-number "$ISSUE_NUMBER" \
+            --issue-created-at "$ISSUE_CREATED_AT" \
+            --run-file "$RUNNER_TEMP/intake-run.json" \
             --date "$action_date" \
             --output "$RUNNER_TEMP/intake-import.json"
 
@@ -112,6 +121,7 @@ jobs:
           python scripts/curation/build_legacy_queue.py --check
           python scripts/validation/validate_repository.py
           python scripts/ontology/validate_ontology.py
+          python scripts/validation/validate_intake_history.py --base HEAD
           python -m unittest discover -s tests -p 'test_*.py'
           python scripts/build_archive.py
           python scripts/build_secondary_collections.py
@@ -164,6 +174,7 @@ jobs:
           BATCH_ID: ${{ steps.branch.outputs.batch_id }}
           ADDED_COUNT: ${{ steps.branch.outputs.added_count }}
           QUEUE_TOTAL: ${{ steps.branch.outputs.queue_total }}
+          ISSUE_CREATED_AT: ${{ github.event.issue.created_at }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
         run: |
           run_url="https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"

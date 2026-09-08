@@ -174,7 +174,7 @@ espone soltanto conteggi, stato tecnico, data e
 l'informazione che una issue è stata creata; non ne pubblica il collegamento.
 
 Una issue di intake valida attiva inoltre un flusso repository separato che
-prepara, senza auto-merge, il suo ingresso nella coda editoriale. Questo secondo
+valida il ledger completo prima di preparare il suo ingresso nella coda editoriale. Questo secondo
 passaggio conserva la provenienza ma non modifica i conteggi del ledger, non
 assegna eleggibilità e non pubblica metadati dei candidati.
 
@@ -200,3 +200,10 @@ online l'ultimo rilascio valido.
 - Pagina pubblica: `site/stats.html`
 
 La specifica implementata e i gate di avvio V2 sono descritti in [Review V2 delivery](review-v2-delivery.md).
+
+
+La proiezione pubblicata segnala un ritardo superiore a 26 ore anche senza righe
+iniziali. Il calendario non può dichiarare completata una data senza ledger né
+lasciarla pianificata dopo le 07:20 locali. I conteggi intake misurano issue
+create: il completamento della ricerca non certifica l'importazione nella coda,
+che resta verificabile nel workflow separato.

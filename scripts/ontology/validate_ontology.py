@@ -435,10 +435,12 @@ def check_intake_access_contract(profile: dict[str, Any]) -> None:
         fail("unmapped_intake_access_class")
     if set(module["receipt_fields"]) != FIELDS or set(module["snapshot_fields"]) != SNAPSHOT_FIELDS:
         fail("unmapped_intake_access_fields")
-    slots = set(module["receipt_fields"].values()) | set(module["snapshot_fields"].values())
+    slots = set(module["receipt_fields"].values()) | {v["slot"] for v in module["snapshot_fields"].values() if "slot" in v}
     if slots - set(profile["slots"]) or set(schema["required"]) != FIELDS or set(schema["properties"]) != FIELDS or schema["additionalProperties"] is not False:
         fail("intake_access_schema_mapping_drift")
+    from scripts.intake_open_access import validate_snapshot_mapping
     try:
+        validate_snapshot_mapping(module, profile)
         validate_snapshots(ROOT)
     except (ValueError, KeyError, TypeError) as exc:
         fail(f"intake_access_provenance:{exc}")
