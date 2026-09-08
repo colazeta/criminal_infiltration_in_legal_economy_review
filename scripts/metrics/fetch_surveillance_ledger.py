@@ -7,10 +7,15 @@ import argparse
 import json
 import os
 import re
+import sys
+from datetime import date
 from pathlib import Path
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlsplit
 from urllib.request import Request, urlopen
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from scripts.intake_open_access import validate_intake_access
 
 from surveillance import (
     REPOSITORY_FULL_NAME,
@@ -270,7 +275,7 @@ def verify_candidate_manifest(
     expected_id = re.compile(rf"CAND-{re.escape(run['batch_id'])}-[0-9]{{3}}")
     for index, candidate in enumerate(candidates):
         label = f"run.intake_issue.candidates[{index}]"
-        if not isinstance(candidate, dict) or set(candidate) != CANDIDATE_RECORD_FIELDS:
+        if not isinstance(candidate, dict) or set(candidate) != (CANDIDATE_RECORD_FIELDS | ({"open_access"} if run["schema_version"] == 2 else set())):
             raise MetricsError(f"{label}: candidate record fields are invalid")
         candidate_id = required_text(candidate["candidate_id"], f"{label}.candidate_id", 80)
         if not expected_id.fullmatch(candidate_id):
@@ -341,6 +346,12 @@ def verify_candidate_manifest(
             not in CANDIDATE_VERIFICATION_STATUSES
         ):
             raise MetricsError(f"{label}.verification_status: invalid value")
+        if run["schema_version"] == 2:
+            try:
+                validate_intake_access(candidate["open_access"], candidate, date.fromisoformat(run["run_date"]),
+                    observed_by=parse_datetime(run["window_end"], "run.window_end"))
+            except ValueError as exc:
+                raise MetricsError(f"{label}: {exc}") from exc
         optional_text(candidate["possible_duplicate"], f"{label}.possible_duplicate", 500)
         optional_text(candidate["metadata_conflict"], f"{label}.metadata_conflict", 500)
         duplicate_notes += candidate["possible_duplicate"] is not None

@@ -1,0 +1,32 @@
+{
+  "profile_version": "0.3.0",
+  "schema": "schema/intake-open-access.schema.json",
+  "artifact_pattern": "data/curation/intake_access/ACADEMIC-YYYY-MM-DD.json",
+  "classes": [
+    "AccessAssessment",
+    "CandidateRecord",
+    "Evidence"
+  ],
+  "receipt_fields": {
+    "candidate_id": "candidate_id",
+    "full_text_url": "oa_full_text_url",
+    "version_type": "v2_version_type",
+    "host_type": "oa_host_type",
+    "license_uri": "v2_license_uri",
+    "rights_basis": "v2_rights_basis",
+    "rights_evidence_url": "oa_rights_evidence_url",
+    "access_status": "oa_access_status",
+    "verification_method": "oa_verification_method",
+    "full_text_sha256": "oa_full_text_sha256",
+    "verified_at": "oa_verified_at"
+  },
+  "snapshot_fields": {
+    "schema_version": "version",
+    "batch_id": "event_id",
+    "source_issue_number": "was_derived_from",
+    "source_body_sha256": "v2_content_sha256",
+    "receipts": "was_derived_from"
+  },
+  "authority": "OA-1 intake requirement; technical enforcement after the owner-requested audit.",
+  "semantics": "Attributed discovery attestations, preserved with candidate provenance; never curator OA approval, canonical work creation or scientific eligibility."
+}

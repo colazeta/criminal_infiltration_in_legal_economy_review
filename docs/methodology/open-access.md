@@ -58,8 +58,10 @@ Search broadly enough to find green OA copies; do not rely solely on an API's OA
 filter. Preserve raw occurrences before applying the admission check. A retained
 discovery occurrence with unverified access is not an included publication.
 For the repository intake lane, candidate hits and proposed seed admissions now
-require documented OA; record source/query limits and this scope change in the
-existing diagnostic fields. Do not change raw result totals into OA totals.
+require a structured `open_access` attestation under
+[intake-open-access.md](../operations/intake-open-access.md). Both the queue importer
+and metrics verifier reject absent or incomplete receipts. Record source/query
+limits and this scope change in the existing diagnostic fields. Do not change raw result totals into OA totals.
 
 Following the owner's source amendment of 2026-09-08, daily discovery uses only
 Exa for W1–W7. Ledger idempotency, failed/partial day visibility and the
@@ -82,17 +84,21 @@ neither an old receipt nor a successful deployment guarantees perpetual access.
 
 ## Restart and rollback
 
-The clean restart remains operationally blocked by the existing D1 inventory
-HTTP 401 and the previously documented private-resource and source-runner gates.
-No reset is executed by these technical changes. Before cutover, preserve the
-complete Git and external state and verify an isolated restore. Start a new
-review namespace and T0 with zero decisions/codings/publications and a separately
-admitted OA candidate frontier. Do not import legacy eligibility or assign it
-from seed membership. Retain the entire legacy namespace, issue/PR/review and
-ledger history, identifiers, evidence, automation configuration and provider
-budget counters. A rollback pauses V2 writers, preserves their history and
-restores the legacy read pointer; it never overwrites an active database.
+The active archive reset was completed on 2026-09-08 in release 0.3.0 under the
+owner's explicit instruction. Registries and the candidate queue started empty;
+legacy snapshots and scientific histories were preserved. See
+[archive-reset.md](../operations/archive-reset.md) for the exact scope and rollback.
+
+Private D1 Review V2 activation is a separate, unfinished operation. The earlier
+D1 inventory HTTP 401 was an observed access blocker, not evidence that the
+already completed archive reset was undone. The deployment explicitly keeps the
+V2 runner disabled. Provisioning, inventory, restore, access and queue readiness
+must be verified before any activation; this intake fix does not activate it.
+
+Rollback of the active archive follows the reset runbook. Future V2 rollback
+must first pause its writers and preserve new history before switching readers;
+it never overwrites an active database.
 
 The prepared research dossier is delivered privately and is not embedded in a
-technical PR or static candidate export. Until cutover succeeds, it is a seed
-and expansion preparation, not an activated V2 corpus or scientific decision.
+technical PR or static candidate export. It remains seed and expansion preparation, not an activated private V2 corpus
+or a scientific decision.

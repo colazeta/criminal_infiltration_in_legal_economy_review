@@ -1,8 +1,10 @@
 # Review V2 delivery and verification
 
-Technical implementation after the owner approved the audit plan. The existing
-data rows and their historical decisions remain byte-identical. No seed is
-approved, no new scientific decision is created and no T0 is assigned.
+Technical implementation after the owner approved the audit plan. The active
+archive was subsequently reset in release 0.3.0 on 2026-09-08; original rows and
+decisions are preserved in the legacy snapshot. Private V2 activation remains
+separate and its runner is disabled. No seed or new scientific decision is
+approved. See [archive-reset.md](archive-reset.md) for the completed reset.
 
 | Delivered surface | Verification |
 |---|---|

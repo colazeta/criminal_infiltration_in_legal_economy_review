@@ -6,6 +6,7 @@ import re
 import sys
 import unittest
 from pathlib import Path
+from oa_fixtures import synthetic_oa
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -86,6 +87,9 @@ def candidate_issue(run: dict, number: int = 31) -> dict:
                 "required_human_action": "Verify metadata and screen eligibility.",
             }
         )
+    if run["schema_version"] == 2:
+        for candidate in candidates:
+            candidate["open_access"] = synthetic_oa(candidate["candidate_id"], candidate["source_links"][0], run["run_date"])
     manifest = {
         "schema_version": run["schema_version"],
         "batch_id": batch_id,
