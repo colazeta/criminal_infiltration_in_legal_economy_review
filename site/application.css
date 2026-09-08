@@ -171,11 +171,11 @@ body.classic-site :is(.section-heading, .compact-heading, .chart-heading) { padd
 body.classic-site :is(.section-heading h2, .compact-heading h3, .chart-heading h3) { font-size: 14px; }
 body.classic-site :is(.section-heading > p, .compact-heading > p, .chart-heading p) { font-size: 12px; line-height: 1.4; }
 body.classic-site .controls { grid-template-columns: minmax(240px, 2fr) repeat(3, minmax(100px, .65fr)) minmax(160px, .9fr) auto; gap: 8px; padding: 10px; align-items: end; }
-body.classic-site .aml-controls { grid-template-columns: minmax(220px, 2fr) repeat(2, minmax(120px, 1fr)) auto; }
+body.classic-site .aml-controls { grid-template-columns: minmax(220px, 2fr) repeat(2, minmax(120px, 1fr)) minmax(160px, 1fr) auto; }
 body.classic-site .controls label { gap: 4px; }
 body.classic-site .controls label span { font-size: 11px; text-transform: none; }
 body.classic-site :is(.results-meta, .status-banner, .chart-note) { padding: 7px 10px; font-size: 12px; line-height: 1.45; }
-body.classic-site .status-banner { display: block; border-top: 1px solid var(--classic-border); margin-bottom: 10px; }
+body.classic-site .status-banner { border-radius: 0; display: block; border-top: 1px solid var(--classic-border); margin-bottom: 10px; }
 body.classic-site #run-status:empty { display: none; }
 body.classic-site :is(.empty-state, .error-state) { padding: 22px 16px; }
 body.classic-site .empty-state h3 { font-size: 15px; margin-bottom: 6px; }
@@ -238,8 +238,8 @@ body.curator-page .candidate-browser { grid-template-rows: auto auto auto minmax
 body.curator-page .candidate-browser-heading { min-height: 32px; padding: 6px 10px; }
 body.curator-page .candidate-controls { gap: 6px; padding: 8px; }
 body.curator-page :is(.candidate-detail-heading, .guided-assist-title) { padding: 8px 10px; }
-body.curator-page :is(.consensus-panel, .consensus-panel *) { border-radius: 0; box-shadow: none; font-family: var(--ui-font); }
-body.curator-page .consensus-panel { border: 1px solid var(--classic-border); }
+body.curator-page :is(.candidate-consensus-panel, .candidate-consensus-panel *) { border-radius: 0; box-shadow: none; font-family: var(--ui-font); }
+body.curator-page .candidate-consensus-panel { border: 1px solid var(--classic-border); }
 body.curator-page :is(.consensus-value, .consensus-heading h4, .consensus-frontier strong) { font: bold 14px/1.4 var(--ui-font); }
 body.curator-page :is(.consensus-summary, .consensus-providers, .consensus-alternatives, .consensus-manifestation, .consensus-boundary, .consensus-frontier span) { font-size: 12px; line-height: 1.5; }
 body.curator-page :is(.consensus-state, .consensus-field-status) { font-size: 11px; }
@@ -280,4 +280,14 @@ body.classic-site :is(a, button, input, select, textarea, summary):focus-visible
 body.curator-page :is(a, button, input, select, textarea, summary):focus-visible {
   outline: 2px solid var(--classic-blue);
   outline-offset: 2px;
+}
+
+body.model-page .group-controls button[aria-pressed="true"] {
+  background: var(--classic-blue);
+  color: white;
+}
+@media (max-width: 560px) {
+  body.classic-site :is(input, select, button),
+  body.model-page :is(input, select, button),
+  body.curator-page :is(input, select, button) { min-height: 40px; font-size: 16px; }
 }
