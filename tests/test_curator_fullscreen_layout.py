@@ -18,7 +18,7 @@ class CuratorFullscreenLayoutTests(unittest.TestCase):
         styles = self.page.index('href="./styles.css"')
         reading = self.page.index('href="./curator-reading.css"')
         queue = self.page.index('href="./curator-queue.css"')
-        shell = self.page.index('id="curator-fullscreen-shell"')
+        shell = self.page.index('href="./curator-shell.css"')
         scripts = self.page.index('src="./curator-config.js"')
         self.assertLess(styles, reading)
         self.assertLess(reading, queue)
@@ -32,13 +32,7 @@ class CuratorFullscreenLayoutTests(unittest.TestCase):
         self.assertIn('link[data-curator-queue="true"]', self.queue)
 
     def test_fullscreen_shell_owns_viewport_and_remaining_height(self) -> None:
-        match = re.search(
-            r'<style id="curator-fullscreen-shell">(?P<css>.*?)</style>',
-            self.page,
-            flags=re.S,
-        )
-        self.assertIsNotNone(match)
-        css = match.group("css")
+        css = (ROOT / "site/curator-shell.css").read_text()
         for marker in (
             "CURATOR_FULLSCREEN_SHELL_V1",
             "body.curator-page > main#main-content",
@@ -58,12 +52,7 @@ class CuratorFullscreenLayoutTests(unittest.TestCase):
         self.assertNotIn("max-width: 1180", css)
 
     def test_page_scroll_is_suppressed_and_internal_panes_own_scrolling(self) -> None:
-        match = re.search(
-            r'<style id="curator-fullscreen-shell">(?P<css>.*?)</style>',
-            self.page,
-            flags=re.S,
-        )
-        css = match.group("css")
+        css = (ROOT / "site/curator-shell.css").read_text()
         self.assertRegex(css, r'html,\s*body\.curator-page\s*\{[^}]*overflow:\s*hidden')
         self.assertRegex(
             css,
@@ -73,12 +62,7 @@ class CuratorFullscreenLayoutTests(unittest.TestCase):
         self.assertIn("overscroll-behavior: contain", css)
 
     def test_fullscreen_contract_has_small_viewport_overrides(self) -> None:
-        match = re.search(
-            r'<style id="curator-fullscreen-shell">(?P<css>.*?)</style>',
-            self.page,
-            flags=re.S,
-        )
-        css = match.group("css")
+        css = (ROOT / "site/curator-shell.css").read_text()
         self.assertIn("@media (max-height: 640px)", css)
         self.assertIn("@media (max-width: 820px)", css)
 

@@ -17,7 +17,7 @@ SPEC.loader.exec_module(ontology)
 class OntologyContractTests(unittest.TestCase):
     def test_entire_governed_repository_conforms(self) -> None:
         result = ontology.validate_all(quiet=True)
-        self.assertEqual(result["profile_version"], "0.1.0")
+        self.assertEqual(result["profile_version"], "0.2.0")
         self.assertGreaterEqual(result["governed_artifacts"], 20)
         self.assertGreaterEqual(result["candidates"], 68)
 
@@ -28,7 +28,7 @@ class OntologyContractTests(unittest.TestCase):
             self.assertIn(prefix, prefixes)
         self.assertEqual(profile["classes"]["HumanAgent"]["class_uri"], "foaf:Person")
         self.assertEqual(profile["classes"]["EvidenceSpan"]["class_uri"], "oa:Annotation")
-        self.assertIn("slr:IncludedSource", profile["classes"]["ScholarlyWork"]["exact_mappings"])
+        self.assertNotIn("slr:IncludedSource", profile["classes"]["ScholarlyWork"].get("exact_mappings", []))
 
     def test_work_and_manifestation_are_distinct_semantic_classes(self) -> None:
         profile = json.loads((ROOT / "ontology/cile-review-profile.yaml").read_text(encoding="utf-8"))

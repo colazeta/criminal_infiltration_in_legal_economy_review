@@ -201,3 +201,7 @@ stable ID. Daily statistics are a separate deployment input: GitHub Actions
 fetches the public ledger, accepts only authorised and schema-valid aggregate
 comments, and fails without replacing the last valid deployment when the ledger
 cannot be verified.
+
+## Review V2
+
+The additive private model is specified in [review-v2-model.md](review-v2-model.md). It separates bibliographic identity and content versions from review membership, requires four source-bound criterion assessments and exact-payload human approval, and starts without scientific data. This legacy CSV model remains readable until verified cutover.

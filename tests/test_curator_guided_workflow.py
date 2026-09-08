@@ -9,7 +9,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 class CuratorGuidedWorkflowTests(unittest.TestCase):
     def source(self) -> str:
-        return (ROOT / "site/curator-config.js").read_text(encoding="utf-8")
+        return (ROOT / "site/curator-guided.js").read_text(encoding="utf-8")
 
     def test_guided_flow_has_three_explicit_steps(self) -> None:
         source = self.source()
@@ -23,7 +23,7 @@ class CuratorGuidedWorkflowTests(unittest.TestCase):
         self.assertIn('COSA MI FAREBBE CAMBIARE IDEA', source)
 
     def test_assistant_precedes_evidence_and_form_in_operating_path(self) -> None:
-        source = self.source()
+        source = self.source() + (ROOT / "site/curator-guided.css").read_text()
         self.assertIn('metadata.insertAdjacentElement("afterend", panel)', source)
         self.assertIn('assist-guided-ready:not([data-assist-evidence-open="true"]) #candidate-abstract-panel', source)
         self.assertIn('assist-guided-ready[data-assist-flow="guided"] #decision-form', source)
@@ -66,8 +66,7 @@ class CuratorGuidedWorkflowTests(unittest.TestCase):
         self.assertIn('if (!onlyGuidedMutations) queueRender()', source)
 
     def test_visual_contract_remains_classic_and_flat(self) -> None:
-        source = self.source()
-        guided = source[source.index('style.textContent = `'):]
+        guided = (ROOT / "site/curator-guided.css").read_text()
         self.assertIn('background:#000080', guided)
         self.assertIn('background:#d4d0c8', guided)
         self.assertIn('border-radius:0', guided)

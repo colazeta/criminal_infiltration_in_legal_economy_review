@@ -88,6 +88,7 @@ workflow changes:
 ```bash
 python3 scripts/validation/validate_repository.py
 python3 scripts/ontology/validate_ontology.py
+python3 scripts/ontology/build_model_browser.py
 python3 -m unittest discover -s tests -p 'test_*.py'
 python3 scripts/build_archive.py
 python3 scripts/build_secondary_collections.py
@@ -100,6 +101,9 @@ node --check site/aml.js
 node --check site/stats.js
 node --check site/curator.js
 node --check site/curator-config.js
+node --check site/curator-guided.js
+node --check site/model.js
+node --check site/review-v2.js
 node --check curator-app/src/index.js
 node --check curator-app/src/worker.js
 node --test curator-app/test/*.test.js

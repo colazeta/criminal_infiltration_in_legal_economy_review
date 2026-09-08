@@ -7,6 +7,8 @@ import argparse
 import json
 from pathlib import Path
 
+from daily_calendar import calendar_projection
+
 from surveillance import (
     REPOSITORY_FULL_NAME,
     MetricsError,
@@ -38,10 +40,14 @@ def main() -> None:
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--repository", default=DEFAULT_REPOSITORY)
     parser.add_argument("--ledger-issue", type=int, default=DEFAULT_LEDGER_ISSUE)
+    parser.add_argument("--as-of", help="Explicit timezone-aware projection time; never infer successful days")
     args = parser.parse_args()
     payload = build_public_payload(
         read_runs(args.input), args.ledger_issue, args.repository
     )
+    if args.as_of:
+        payload["schemaVersion"] = 2
+        payload["calendar"] = calendar_projection(read_runs(args.input), args.as_of)
     validate_public_payload(payload)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(

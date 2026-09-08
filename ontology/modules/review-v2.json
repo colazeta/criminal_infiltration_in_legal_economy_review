@@ -1,0 +1,1836 @@
+{
+  "profile_version": "0.2.0",
+  "storage": "private D1; bodies in private R2",
+  "migration": "curator-app/migrations/0001_review_v2.sql",
+  "tables": {
+    "reviews": {
+      "class": "SystematicReview",
+      "description": "Review identity, versioned protocol and explicit activation boundary.",
+      "fields": {
+        "review_id": {
+          "slot": "v2_review_id",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "title": {
+          "slot": "v2_title",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "protocol_version": {
+          "slot": "v2_protocol_version",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "ontology_version": {
+          "slot": "v2_ontology_version",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "phase": {
+          "slot": "v2_phase",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "timezone": {
+          "slot": "v2_timezone",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "start_date": {
+          "slot": "v2_start_date",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "activated_at": {
+          "slot": "v2_activated_at",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "legacy_snapshot_id": {
+          "slot": "v2_legacy_snapshot_id",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "created_at": {
+          "slot": "v2_created_at",
+          "nullable": false,
+          "sql_type": "TEXT"
+        }
+      }
+    },
+    "scholarly_works": {
+      "class": "ScholarlyWork",
+      "description": "Neutral intellectual work, never an included source by definition.",
+      "fields": {
+        "work_id": {
+          "slot": "v2_work_id",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "title": {
+          "slot": "v2_title",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "work_type": {
+          "slot": "v2_work_type",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "original_language": {
+          "slot": "v2_original_language",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "created_at": {
+          "slot": "v2_created_at",
+          "nullable": false,
+          "sql_type": "TEXT"
+        }
+      }
+    },
+    "agents": {
+      "class": "Agent",
+      "description": "Named people, organisations and software, without inferred identity.",
+      "fields": {
+        "agent_id": {
+          "slot": "v2_agent_id",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "agent_type": {
+          "slot": "v2_agent_type",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "display_name": {
+          "slot": "v2_display_name",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "family_name": {
+          "slot": "v2_family_name",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "given_name": {
+          "slot": "v2_given_name",
+          "nullable": true,
+          "sql_type": "TEXT"
+        }
+      }
+    },
+    "publication_venues": {
+      "class": "PublicationVenue",
+      "description": "Journal, edited volume, series or conference containing an expression.",
+      "fields": {
+        "venue_id": {
+          "slot": "v2_venue_id",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "title": {
+          "slot": "v2_title",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "venue_type": {
+          "slot": "v2_venue_type",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "publisher_id": {
+          "slot": "v2_publisher_id",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "parent_venue_id": {
+          "slot": "v2_parent_venue_id",
+          "nullable": true,
+          "sql_type": "TEXT"
+        }
+      }
+    },
+    "expressions": {
+      "class": "Expression",
+      "description": "Content/language version with version-specific bibliographic coordinates.",
+      "fields": {
+        "expression_id": {
+          "slot": "v2_expression_id",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "work_id": {
+          "slot": "v2_work_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "version_type": {
+          "slot": "v2_version_type",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "version_label": {
+          "slot": "v2_version_label",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "language": {
+          "slot": "v2_language",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "publication_date": {
+          "slot": "v2_publication_date",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "date_precision": {
+          "slot": "v2_date_precision",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "venue_id": {
+          "slot": "v2_venue_id",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "volume": {
+          "slot": "v2_volume",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "issue": {
+          "slot": "v2_issue",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "page_start": {
+          "slot": "v2_page_start",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "page_end": {
+          "slot": "v2_page_end",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "article_number": {
+          "slot": "v2_article_number",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "edition": {
+          "slot": "v2_edition",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "source_url": {
+          "slot": "v2_source_url",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "observed_at": {
+          "slot": "v2_observed_at",
+          "nullable": false,
+          "sql_type": "TEXT"
+        }
+      }
+    },
+    "contributions": {
+      "class": "Contribution",
+      "description": "Ordered author/editor/translator role and attributed affiliation.",
+      "fields": {
+        "contribution_id": {
+          "slot": "v2_contribution_id",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "expression_id": {
+          "slot": "v2_expression_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "agent_id": {
+          "slot": "v2_agent_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "role": {
+          "slot": "v2_role",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "position": {
+          "slot": "v2_position",
+          "nullable": false,
+          "sql_type": "INTEGER"
+        },
+        "credit_role_uri": {
+          "slot": "v2_credit_role_uri",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "affiliation_id": {
+          "slot": "v2_affiliation_id",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "source_url": {
+          "slot": "v2_source_url",
+          "nullable": false,
+          "sql_type": "TEXT"
+        }
+      }
+    },
+    "document_sections": {
+      "class": "DocumentSection",
+      "description": "Ordered, located parts of a scientific publication; no section is assumed to exist.",
+      "fields": {
+        "section_id": {
+          "slot": "v2_section_id",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "expression_id": {
+          "slot": "v2_expression_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "section_type": {
+          "slot": "v2_section_type",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "heading": {
+          "slot": "v2_heading",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "position": {
+          "slot": "v2_position",
+          "nullable": false,
+          "sql_type": "INTEGER"
+        },
+        "parent_section_id": {
+          "slot": "v2_parent_section_id",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "source_url": {
+          "slot": "v2_source_url",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "locator": {
+          "slot": "v2_locator",
+          "nullable": false,
+          "sql_type": "TEXT"
+        }
+      }
+    },
+    "publication_declarations": {
+      "class": "PublicationDeclaration",
+      "description": "Source-attributed funding, ethics, conflict and availability declarations.",
+      "fields": {
+        "declaration_id": {
+          "slot": "v2_declaration_id",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "expression_id": {
+          "slot": "v2_expression_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "declaration_type": {
+          "slot": "v2_declaration_type",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "statement": {
+          "slot": "v2_statement",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "source_url": {
+          "slot": "v2_source_url",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "locator": {
+          "slot": "v2_locator",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "observed_at": {
+          "slot": "v2_observed_at",
+          "nullable": false,
+          "sql_type": "TEXT"
+        }
+      }
+    },
+    "manifestations": {
+      "class": "Manifestation",
+      "description": "Located digital embodiment, acquired bytes and rights distinct from a locator.",
+      "fields": {
+        "manifestation_id": {
+          "slot": "v2_manifestation_id",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "expression_id": {
+          "slot": "v2_expression_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "source_url": {
+          "slot": "v2_source_url",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "media_type": {
+          "slot": "v2_media_type",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "content_sha256": {
+          "slot": "v2_content_sha256",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "storage_key": {
+          "slot": "v2_storage_key",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "license_uri": {
+          "slot": "v2_license_uri",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "rights_basis": {
+          "slot": "v2_rights_basis",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "access_status": {
+          "slot": "v2_access_status",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "acquisition_status": {
+          "slot": "v2_acquisition_status",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "observed_at": {
+          "slot": "v2_observed_at",
+          "nullable": false,
+          "sql_type": "TEXT"
+        }
+      }
+    },
+    "bibliographic_identifiers": {
+      "class": "Identifier",
+      "description": "A sourced identifier of exactly one bibliographic entity; equality does not infer a merge.",
+      "fields": {
+        "identifier_id": {
+          "slot": "v2_identifier_id",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "work_id": {
+          "slot": "v2_work_id",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "expression_id": {
+          "slot": "v2_expression_id",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "manifestation_id": {
+          "slot": "v2_manifestation_id",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "agent_id": {
+          "slot": "v2_agent_id",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "venue_id": {
+          "slot": "v2_venue_id",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "scheme": {
+          "slot": "v2_scheme",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "value": {
+          "slot": "v2_value",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "source_url": {
+          "slot": "v2_source_url",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "observed_at": {
+          "slot": "v2_observed_at",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "verification_status": {
+          "slot": "v2_verification_status",
+          "nullable": false,
+          "sql_type": "TEXT"
+        }
+      }
+    },
+    "metadata_assertions": {
+      "class": "MetadataAssertion",
+      "description": "Immutable field assertion preserving conflicting source values.",
+      "fields": {
+        "assertion_id": {
+          "slot": "v2_assertion_id",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "work_id": {
+          "slot": "v2_work_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "expression_id": {
+          "slot": "v2_expression_id",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "field_uri": {
+          "slot": "v2_field_uri",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "value_json": {
+          "slot": "v2_value_json",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "source_url": {
+          "slot": "v2_source_url",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "observed_at": {
+          "slot": "v2_observed_at",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "attributed_to": {
+          "slot": "v2_attributed_to",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "assertion_status": {
+          "slot": "v2_assertion_status",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "supersedes_id": {
+          "slot": "v2_supersedes_id",
+          "nullable": true,
+          "sql_type": "TEXT"
+        }
+      }
+    },
+    "citation_relations": {
+      "class": "CitationRelation",
+      "description": "Directional citing/cited relation with reference evidence, not a similarity recommendation.",
+      "fields": {
+        "citation_id": {
+          "slot": "v2_citation_id",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "citing_work_id": {
+          "slot": "v2_citing_work_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "cited_work_id": {
+          "slot": "v2_cited_work_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "expression_id": {
+          "slot": "v2_expression_id",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "source_url": {
+          "slot": "v2_source_url",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "locator": {
+          "slot": "v2_locator",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "observed_at": {
+          "slot": "v2_observed_at",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "verification_status": {
+          "slot": "v2_verification_status",
+          "nullable": false,
+          "sql_type": "TEXT"
+        }
+      }
+    },
+    "work_relations_v2": {
+      "class": "WorkRelation",
+      "description": "Attributed identity, derivation or correction relation.",
+      "fields": {
+        "relation_id": {
+          "slot": "v2_relation_id",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "subject_work_id": {
+          "slot": "v2_subject_work_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "object_work_id": {
+          "slot": "v2_object_work_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "relation_type": {
+          "slot": "v2_relation_type",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "source_url": {
+          "slot": "v2_source_url",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "rationale": {
+          "slot": "v2_rationale",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "attributed_to": {
+          "slot": "v2_attributed_to",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "observed_at": {
+          "slot": "v2_observed_at",
+          "nullable": false,
+          "sql_type": "TEXT"
+        }
+      }
+    },
+    "review_candidates": {
+      "class": "CandidateRecord",
+      "description": "Membership in one review with optimistic concurrency; no inherited legacy decision.",
+      "fields": {
+        "review_id": {
+          "slot": "v2_review_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "candidate_id": {
+          "slot": "v2_candidate_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "work_id": {
+          "slot": "v2_work_id",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "title": {
+          "slot": "v2_title",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "identity_state": {
+          "slot": "v2_identity_state",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "stage": {
+          "slot": "v2_stage",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "record_version": {
+          "slot": "v2_record_version",
+          "nullable": false,
+          "sql_type": "INTEGER"
+        },
+        "origin_event_id": {
+          "slot": "v2_origin_event_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "created_at": {
+          "slot": "v2_created_at",
+          "nullable": false,
+          "sql_type": "TEXT"
+        }
+      }
+    },
+    "legacy_references": {
+      "class": "LegacyReference",
+      "description": "Historical cross-reference only, excluded from V2 deduplication and eligibility.",
+      "fields": {
+        "review_id": {
+          "slot": "v2_review_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "candidate_id": {
+          "slot": "v2_candidate_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "legacy_id": {
+          "slot": "v2_legacy_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "snapshot_id": {
+          "slot": "v2_snapshot_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "match_basis": {
+          "slot": "v2_match_basis",
+          "nullable": false,
+          "sql_type": "TEXT"
+        }
+      }
+    },
+    "retrieval_attempts": {
+      "class": "RetrievalActivity",
+      "description": "Immutable outcome of a real retrieval attempt including failure.",
+      "fields": {
+        "attempt_id": {
+          "slot": "v2_attempt_id",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "review_id": {
+          "slot": "v2_review_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "candidate_id": {
+          "slot": "v2_candidate_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "source_url": {
+          "slot": "v2_source_url",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "provider": {
+          "slot": "v2_provider",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "started_at": {
+          "slot": "v2_started_at",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "finished_at": {
+          "slot": "v2_finished_at",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "status": {
+          "slot": "v2_status",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "http_status": {
+          "slot": "v2_http_status",
+          "nullable": true,
+          "sql_type": "INTEGER"
+        },
+        "error_code": {
+          "slot": "v2_error_code",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "duration_ms": {
+          "slot": "v2_duration_ms",
+          "nullable": false,
+          "sql_type": "INTEGER"
+        },
+        "content_sha256": {
+          "slot": "v2_content_sha256",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "retry_parent_id": {
+          "slot": "v2_retry_parent_id",
+          "nullable": true,
+          "sql_type": "TEXT"
+        }
+      }
+    },
+    "evidence_sources": {
+      "class": "Evidence",
+      "description": "Private acquired source with identity, kind, rights and content hash.",
+      "fields": {
+        "review_id": {
+          "slot": "v2_review_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "evidence_id": {
+          "slot": "v2_evidence_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "candidate_id": {
+          "slot": "v2_candidate_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "manifestation_id": {
+          "slot": "v2_manifestation_id",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "attempt_id": {
+          "slot": "v2_attempt_id",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "source_url": {
+          "slot": "v2_source_url",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "evidence_kind": {
+          "slot": "v2_evidence_kind",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "identity_state": {
+          "slot": "v2_identity_state",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "content_sha256": {
+          "slot": "v2_content_sha256",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "storage_key": {
+          "slot": "v2_storage_key",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "rights_basis": {
+          "slot": "v2_rights_basis",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "observed_at": {
+          "slot": "v2_observed_at",
+          "nullable": false,
+          "sql_type": "TEXT"
+        }
+      }
+    },
+    "evidence_spans": {
+      "class": "EvidenceSpan",
+      "description": "Offsets and locator over one immutable source snapshot.",
+      "fields": {
+        "review_id": {
+          "slot": "v2_review_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "span_id": {
+          "slot": "v2_span_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "evidence_id": {
+          "slot": "v2_evidence_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "locator": {
+          "slot": "v2_locator",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "start_offset": {
+          "slot": "v2_start_offset",
+          "nullable": false,
+          "sql_type": "INTEGER"
+        },
+        "end_offset": {
+          "slot": "v2_end_offset",
+          "nullable": false,
+          "sql_type": "INTEGER"
+        },
+        "text_sha256": {
+          "slot": "v2_text_sha256",
+          "nullable": false,
+          "sql_type": "TEXT"
+        }
+      }
+    },
+    "decision_proposals": {
+      "class": "DecisionProposal",
+      "description": "Immutable preparatory four-criterion payload, awaiting exact-hash human PR approval.",
+      "fields": {
+        "proposal_id": {
+          "slot": "v2_proposal_id",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "review_id": {
+          "slot": "v2_review_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "candidate_id": {
+          "slot": "v2_candidate_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "expected_version": {
+          "slot": "v2_expected_version",
+          "nullable": false,
+          "sql_type": "INTEGER"
+        },
+        "protocol_version": {
+          "slot": "v2_protocol_version",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "payload_json": {
+          "slot": "v2_payload_json",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "payload_sha256": {
+          "slot": "v2_payload_sha256",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "proposed_by": {
+          "slot": "v2_proposed_by",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "created_at": {
+          "slot": "v2_created_at",
+          "nullable": false,
+          "sql_type": "TEXT"
+        }
+      }
+    },
+    "approval_receipts": {
+      "class": "ApprovalReceipt",
+      "description": "Verified human GitHub review of the exact proposal and head commit.",
+      "fields": {
+        "receipt_id": {
+          "slot": "v2_receipt_id",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "proposal_id": {
+          "slot": "v2_proposal_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "review_id": {
+          "slot": "v2_review_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "candidate_id": {
+          "slot": "v2_candidate_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "expected_version": {
+          "slot": "v2_expected_version",
+          "nullable": false,
+          "sql_type": "INTEGER"
+        },
+        "payload_sha256": {
+          "slot": "v2_payload_sha256",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "repository": {
+          "slot": "v2_repository",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "pr_number": {
+          "slot": "v2_pr_number",
+          "nullable": false,
+          "sql_type": "INTEGER"
+        },
+        "reviewed_commit": {
+          "slot": "v2_reviewed_commit",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "human_login": {
+          "slot": "v2_human_login",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "human_review_id": {
+          "slot": "v2_human_review_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "approved_at": {
+          "slot": "v2_approved_at",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "imported_at": {
+          "slot": "v2_imported_at",
+          "nullable": false,
+          "sql_type": "TEXT"
+        }
+      }
+    },
+    "screening_decisions_v2": {
+      "class": "ScreeningDecision",
+      "description": "Human-approved scientific outcome with append-only supersession.",
+      "fields": {
+        "decision_id": {
+          "slot": "v2_decision_id",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "receipt_id": {
+          "slot": "v2_receipt_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "review_id": {
+          "slot": "v2_review_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "candidate_id": {
+          "slot": "v2_candidate_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "decision": {
+          "slot": "v2_decision",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "rationale": {
+          "slot": "v2_rationale",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "protocol_version": {
+          "slot": "v2_protocol_version",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "supersedes_id": {
+          "slot": "v2_supersedes_id",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "created_at": {
+          "slot": "v2_created_at",
+          "nullable": false,
+          "sql_type": "TEXT"
+        }
+      }
+    },
+    "criterion_assessments": {
+      "class": "CriterionAssessment",
+      "description": "YES/NO/UNCERTAIN with source spans and specific reasoning.",
+      "fields": {
+        "decision_id": {
+          "slot": "v2_decision_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "criterion_id": {
+          "slot": "v2_criterion_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "outcome": {
+          "slot": "v2_outcome",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "rationale": {
+          "slot": "v2_rationale",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "evidence_span_ids_json": {
+          "slot": "v2_evidence_span_ids_json",
+          "nullable": false,
+          "sql_type": "TEXT"
+        }
+      }
+    },
+    "coding_assertions_v2": {
+      "class": "CodingAssertion",
+      "description": "Evidence-grounded, versioned multidimensional coding.",
+      "fields": {
+        "coding_id": {
+          "slot": "v2_coding_id",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "decision_id": {
+          "slot": "v2_decision_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "dimension": {
+          "slot": "v2_dimension",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "code": {
+          "slot": "v2_code",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "vocabulary_version": {
+          "slot": "v2_vocabulary_version",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "rationale": {
+          "slot": "v2_rationale",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "evidence_span_ids_json": {
+          "slot": "v2_evidence_span_ids_json",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "supersedes_id": {
+          "slot": "v2_supersedes_id",
+          "nullable": true,
+          "sql_type": "TEXT"
+        }
+      }
+    },
+    "assistant_observations": {
+      "class": "AssistantRecommendation",
+      "description": "Model observation with input hash and prompt/model version; never a decision.",
+      "fields": {
+        "observation_id": {
+          "slot": "v2_observation_id",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "review_id": {
+          "slot": "v2_review_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "candidate_id": {
+          "slot": "v2_candidate_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "model_id": {
+          "slot": "v2_model_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "prompt_version": {
+          "slot": "v2_prompt_version",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "protocol_version": {
+          "slot": "v2_protocol_version",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "input_sha256": {
+          "slot": "v2_input_sha256",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "output_json": {
+          "slot": "v2_output_json",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "evidence_span_ids_json": {
+          "slot": "v2_evidence_span_ids_json",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "created_at": {
+          "slot": "v2_created_at",
+          "nullable": false,
+          "sql_type": "TEXT"
+        }
+      }
+    },
+    "publication_approvals_v2": {
+      "class": "PublicationState",
+      "description": "Independent human approval of public fields and publication state.",
+      "fields": {
+        "publication_id": {
+          "slot": "v2_publication_id",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "decision_id": {
+          "slot": "v2_decision_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "approved_payload_json": {
+          "slot": "v2_approved_payload_json",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "payload_sha256": {
+          "slot": "v2_payload_sha256",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "human_login": {
+          "slot": "v2_human_login",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "reviewed_commit": {
+          "slot": "v2_reviewed_commit",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "pr_number": {
+          "slot": "v2_pr_number",
+          "nullable": false,
+          "sql_type": "INTEGER"
+        },
+        "approved_at": {
+          "slot": "v2_approved_at",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "publication_status": {
+          "slot": "v2_publication_status",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "supersedes_id": {
+          "slot": "v2_supersedes_id",
+          "nullable": true,
+          "sql_type": "TEXT"
+        }
+      }
+    },
+    "search_days": {
+      "class": "SearchDay",
+      "description": "Every expected Rome calendar day, including absent and failed execution.",
+      "fields": {
+        "review_id": {
+          "slot": "v2_review_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "scheduled_date": {
+          "slot": "v2_scheduled_date",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "timezone": {
+          "slot": "v2_timezone",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "protocol_version": {
+          "slot": "v2_protocol_version",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "query_manifest_json": {
+          "slot": "v2_query_manifest_json",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "status": {
+          "slot": "v2_status",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "deadline_at": {
+          "slot": "v2_deadline_at",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "created_at": {
+          "slot": "v2_created_at",
+          "nullable": false,
+          "sql_type": "TEXT"
+        }
+      }
+    },
+    "run_attempts": {
+      "class": "RunAttempt",
+      "description": "Leased execution attempt for a scheduled day; actual timestamps can cross midnight.",
+      "fields": {
+        "attempt_id": {
+          "slot": "v2_attempt_id",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "review_id": {
+          "slot": "v2_review_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "scheduled_date": {
+          "slot": "v2_scheduled_date",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "attempt_number": {
+          "slot": "v2_attempt_number",
+          "nullable": false,
+          "sql_type": "INTEGER"
+        },
+        "started_at": {
+          "slot": "v2_started_at",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "finished_at": {
+          "slot": "v2_finished_at",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "lease_until": {
+          "slot": "v2_lease_until",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "status": {
+          "slot": "v2_status",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "error_code": {
+          "slot": "v2_error_code",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "retry_after": {
+          "slot": "v2_retry_after",
+          "nullable": true,
+          "sql_type": "TEXT"
+        }
+      }
+    },
+    "query_executions": {
+      "class": "QueryExecution",
+      "description": "Immutable source/query attempt; exactly one successful checkpoint may count.",
+      "fields": {
+        "execution_id": {
+          "slot": "v2_execution_id",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "attempt_id": {
+          "slot": "v2_attempt_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "review_id": {
+          "slot": "v2_review_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "scheduled_date": {
+          "slot": "v2_scheduled_date",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "provider": {
+          "slot": "v2_provider",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "query_id": {
+          "slot": "v2_query_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "status": {
+          "slot": "v2_status",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "started_at": {
+          "slot": "v2_started_at",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "finished_at": {
+          "slot": "v2_finished_at",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "occurrences_returned": {
+          "slot": "v2_occurrences_returned",
+          "nullable": true,
+          "sql_type": "INTEGER"
+        },
+        "result_storage_key": {
+          "slot": "v2_result_storage_key",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "error_code": {
+          "slot": "v2_error_code",
+          "nullable": true,
+          "sql_type": "TEXT"
+        }
+      }
+    },
+    "discovery_occurrences": {
+      "class": "DiscoveryRecord",
+      "description": "Every source occurrence, including rediscovery and duplicate occurrences.",
+      "fields": {
+        "occurrence_id": {
+          "slot": "v2_occurrence_id",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "review_id": {
+          "slot": "v2_review_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "execution_id": {
+          "slot": "v2_execution_id",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "candidate_id": {
+          "slot": "v2_candidate_id",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "provider": {
+          "slot": "v2_provider",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "source_url": {
+          "slot": "v2_source_url",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "rank": {
+          "slot": "v2_rank",
+          "nullable": true,
+          "sql_type": "INTEGER"
+        },
+        "metadata_json": {
+          "slot": "v2_metadata_json",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "observed_at": {
+          "slot": "v2_observed_at",
+          "nullable": false,
+          "sql_type": "TEXT"
+        }
+      }
+    },
+    "outbox": {
+      "class": "OutboxMessage",
+      "description": "Transactional delivery intent; external delivery is idempotent and at least once.",
+      "fields": {
+        "outbox_id": {
+          "slot": "v2_outbox_id",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "review_id": {
+          "slot": "v2_review_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "kind": {
+          "slot": "v2_kind",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "payload_json": {
+          "slot": "v2_payload_json",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "created_at": {
+          "slot": "v2_created_at",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "delivered_at": {
+          "slot": "v2_delivered_at",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "attempts": {
+          "slot": "v2_attempts",
+          "nullable": false,
+          "sql_type": "INTEGER"
+        },
+        "last_error": {
+          "slot": "v2_last_error",
+          "nullable": true,
+          "sql_type": "TEXT"
+        }
+      }
+    },
+    "operational_events": {
+      "class": "ReviewEvent",
+      "description": "Append-only technical event, independent from scientific outcomes.",
+      "fields": {
+        "event_id": {
+          "slot": "v2_event_id",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "review_id": {
+          "slot": "v2_review_id",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "event_type": {
+          "slot": "v2_event_type",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "payload_json": {
+          "slot": "v2_payload_json",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "attributed_to": {
+          "slot": "v2_attributed_to",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "created_at": {
+          "slot": "v2_created_at",
+          "nullable": false,
+          "sql_type": "TEXT"
+        }
+      }
+    },
+    "legacy_snapshots": {
+      "class": "LegacySnapshot",
+      "description": "Byte-hashed preservation manifest, external-state completeness and restore receipt.",
+      "fields": {
+        "snapshot_id": {
+          "slot": "v2_snapshot_id",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "git_commit": {
+          "slot": "v2_git_commit",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "manifest_sha256": {
+          "slot": "v2_manifest_sha256",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "storage_key": {
+          "slot": "v2_storage_key",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "external_state_complete": {
+          "slot": "v2_external_state_complete",
+          "nullable": false,
+          "sql_type": "INTEGER"
+        },
+        "restore_verified_at": {
+          "slot": "v2_restore_verified_at",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "created_at": {
+          "slot": "v2_created_at",
+          "nullable": false,
+          "sql_type": "TEXT"
+        }
+      }
+    }
+  },
+  "states": {
+    "phase": [
+      "prepared",
+      "active",
+      "paused",
+      "legacy"
+    ],
+    "work_type": [
+      "journal_article",
+      "book_chapter",
+      "book",
+      "working_paper",
+      "preprint",
+      "conference_paper",
+      "report",
+      "thesis",
+      "other",
+      "unknown"
+    ],
+    "agent_type": [
+      "person",
+      "organization",
+      "software"
+    ],
+    "venue_type": [
+      "journal",
+      "edited_book",
+      "series",
+      "conference",
+      "repository",
+      "other"
+    ],
+    "version_type": [
+      "preprint",
+      "submitted",
+      "accepted",
+      "version_of_record",
+      "revised",
+      "translation",
+      "unknown"
+    ],
+    "date_precision": [
+      "year",
+      "month",
+      "day"
+    ],
+    "role": [
+      "author",
+      "editor",
+      "translator",
+      "contributor",
+      "funder"
+    ],
+    "section_type": [
+      "abstract",
+      "introduction",
+      "background",
+      "methods",
+      "results",
+      "discussion",
+      "conclusion",
+      "limitations",
+      "references",
+      "appendix",
+      "other"
+    ],
+    "declaration_type": [
+      "funding",
+      "conflict_of_interest",
+      "ethics",
+      "data_availability",
+      "code_availability",
+      "acknowledgement",
+      "correction",
+      "retraction"
+    ],
+    "access_status": [
+      "open",
+      "restricted",
+      "unknown"
+    ],
+    "acquisition_status": [
+      "locator_only",
+      "acquired",
+      "failed"
+    ],
+    "scheme": [
+      "doi",
+      "isbn",
+      "issn",
+      "orcid",
+      "ror",
+      "handle",
+      "arxiv",
+      "pmid",
+      "url",
+      "other"
+    ],
+    "verification_status": [
+      "proposed",
+      "verified",
+      "disputed"
+    ],
+    "assertion_status": [
+      "proposed",
+      "verified",
+      "disputed"
+    ],
+    "relation_type": [
+      "duplicate_of",
+      "derived_from",
+      "corrects",
+      "retracts"
+    ],
+    "identity_state": [
+      "unresolved",
+      "verified",
+      "conflict"
+    ],
+    "stage": [
+      "metadata",
+      "reading",
+      "screening",
+      "extraction"
+    ],
+    "status": [
+      "completed",
+      "failed",
+      "unsupported",
+      "identity_conflict",
+      "planned",
+      "running",
+      "partial",
+      "missing",
+      "cancelled_authorized",
+      "expired",
+      "not_run"
+    ],
+    "evidence_kind": [
+      "abstract",
+      "publisher_summary",
+      "full_text",
+      "full_text_excerpt",
+      "metadata",
+      "triage_note",
+      "model_summary"
+    ],
+    "decision": [
+      "eligible_core",
+      "eligible_contextual",
+      "needs_full_text",
+      "not_eligible",
+      "duplicate",
+      "not_academic",
+      "not_retrievable"
+    ],
+    "criterion_id": [
+      "criminal_actor",
+      "legal_economy",
+      "sustained_relation",
+      "substantive_analysis"
+    ],
+    "outcome": [
+      "YES",
+      "NO",
+      "UNCERTAIN"
+    ],
+    "dimension": [
+      "topic",
+      "infiltration_relation",
+      "criminal_actor",
+      "legal_economy_object",
+      "method",
+      "geography",
+      "sector"
+    ],
+    "publication_status": [
+      "published",
+      "withheld"
+    ],
+    "kind": [
+      "search_day",
+      "scientific_pr",
+      "public_export"
+    ],
+    "external_state_complete": []
+  },
+  "invariants": [
+    "No migration inserts review, candidate, seed, screening or publication data.",
+    "A ScholarlyWork is independent of review membership.",
+    "Four criteria require separate source-bound human assessments.",
+    "Legacy matches never suppress new_to_v2.",
+    "Topics and infiltration relations are multi-label; infiltration relations are not ordinal.",
+    "Unknown search counts are null; completed zero-result queries are measured zeros.",
+    "Run attempts are immutable after leaving running; an expired third attempt resolves its day to completed, partial or failed from preserved checkpoints, never an indefinite running state.",
+    "Activation requires an existing immutable snapshot receipt with complete external state and a verified restore."
+  ],
+  "append_only_tables": [
+    "metadata_assertions",
+    "citation_relations",
+    "work_relations_v2",
+    "legacy_references",
+    "retrieval_attempts",
+    "evidence_sources",
+    "evidence_spans",
+    "decision_proposals",
+    "approval_receipts",
+    "screening_decisions_v2",
+    "criterion_assessments",
+    "coding_assertions_v2",
+    "assistant_observations",
+    "publication_approvals_v2",
+    "query_executions",
+    "discovery_occurrences",
+    "operational_events",
+    "legacy_snapshots"
+  ],
+  "infrastructure_tables": {
+    "cile_schema_versions": {
+      "class": "ReviewProtocol",
+      "fields": {
+        "version": "dcterms:hasVersion",
+        "sha256": "cile:contentSha256"
+      },
+      "purpose": "Technical receipt for a verified applied SQL migration; not a review instance."
+    }
+  }
+}

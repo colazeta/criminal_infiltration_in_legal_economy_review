@@ -10,6 +10,13 @@ on:
       - "site/curate.html"
       - "site/curator.js"
       - "site/curator-config.js"
+      - "site/curator-guided.js"
+      - "site/curator-guided.css"
+      - "site/curator-shell.css"
+      - "site/review-v2*"
+      - "site/model*"
+      - "scripts/review_v2/**"
+      - "site/classic-site.css"
       - "site/curator-consensus.js"
       - "site/curator-reading.js"
       - "site/curator-reading.css"
@@ -47,6 +54,36 @@ jobs:
         with:
           node-version: 22
 
+      - name: Validate the exact checkout before production changes
+        working-directory: .
+        run: |
+          python3 scripts/validation/validate_repository.py
+          python3 scripts/ontology/validate_ontology.py
+          python3 scripts/ontology/build_model_browser.py
+          git diff --exit-code -- site/vocab/review-v2-model.json
+          python3 -m unittest discover -s tests -p 'test_*.py'
+          python3 scripts/build_archive.py
+          python3 scripts/build_secondary_collections.py
+          python3 scripts/curation/build_curator_stats.py
+          python3 scripts/curation/build_curator_options.py
+          python3 scripts/validation/validate_archive.py
+          python3 scripts/validation/validate_site.py
+          node --test curator-app/test/*.test.js
+          node --check site/curator-guided.js
+
+      - name: Prepare empty private Review V2 resources
+        id: v2_storage
+        continue-on-error: true
+        working-directory: .
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+        run: python3 scripts/review_v2/prepare_cloudflare.py --output "$RUNNER_TEMP/v2-bindings.json"
+
+      - name: Record unavailable V2 infrastructure
+        if: steps.v2_storage.outcome == 'failure'
+        run: echo "V2 infrastructure is blocked. Legacy remains active; validated safety fixes still deploy. No reset or V2 activation occurred." >> "$GITHUB_STEP_SUMMARY"
+
       - name: Prepare production configuration
         env:
           CURATOR_CLIENT_ID: ${{ secrets.CURATOR_CLIENT_ID }}
@@ -60,6 +97,7 @@ jobs:
           fi
           python - <<'PY'
           import os
+          import json
           from pathlib import Path
 
           source = Path("wrangler.example.jsonc").read_text()
@@ -69,14 +107,14 @@ jobs:
           exa_confirmed = "true" if os.environ.get("EXA_DEDICATED_STARTER_ACCOUNT", "").lower() == "true" else "false"
           source = source.replace("REPLACE_SERPER_DEDICATED_FREE_ACCOUNT", serper_confirmed)
           source = source.replace("REPLACE_EXA_DEDICATED_STARTER_ACCOUNT", exa_confirmed)
-          Path("wrangler.generated.jsonc").write_text(source)
+          config = json.loads(source)
+          bindings = Path(os.environ["RUNNER_TEMP"]) / "v2-bindings.json"
+          if bindings.exists():
+              config.update(json.loads(bindings.read_text()))
+          config["vars"]["REVIEW_V2_RUNNER_ENABLED"] = "false"
+          config["vars"]["DEPLOY_COMMIT"] = os.environ["GITHUB_SHA"]
+          Path("wrangler.generated.jsonc").write_text(json.dumps(config, indent=2))
           PY
-
-      - name: Deploy Worker and public assets
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
-        run: npx --yes wrangler@4.128.0 deploy --config wrangler.generated.jsonc
 
       - name: Configure Worker secrets
         env:
@@ -150,7 +188,13 @@ jobs:
           else
             echo "UNPAYWALL_EMAIL not configured: Unpaywall is skipped without affecting the other free providers." >> "$GITHUB_STEP_SUMMARY"
           fi
-          rm -f wrangler.generated.jsonc
+
+      - name: Deploy Worker and public assets
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+        run: npx --yes wrangler@4.128.0 deploy --config wrangler.generated.jsonc
+
 
       - name: Verify production health
         env:
@@ -222,6 +266,9 @@ jobs:
               raise SystemExit(f"{label} failed after {attempts} attempts: {last_error}")
 
           retry_json(f"{origin}/health", {"status": "ok"}, "Curator production health")
+          retry_json(f"{origin}/version", {"commit": os.environ["GITHUB_SHA"], "ontology": "0.2.0"}, "Exact deployed commit")
+          retry_asset("curator-guided.js", ["CILE-GUIDED-v1", "criticalPoint(data)"], "Guided operating module")
+          retry_asset("curator-config.js", ["curator-guided.js"], "Guided module loader")
           retry_asset(
               "curator-consensus.js",
               ["candidate-consensus-panel", "metadataResolution", "Costruisci E2/E3", "scholarIdentityBlocked"],
@@ -247,6 +294,8 @@ jobs:
               ["/api/retrieval", "resolvedUrl", "Apri full text"],
               "Curator persisted retrieval link",
           )
+
+          retry_unauthenticated_401(f"{origin}/api/v2/status", "Private Review V2 boundary")
 
           enrichment_query = urllib.parse.urlencode({"title": "Authentication smoke test"})
           retry_unauthenticated_401(f"{origin}/api/enrichment?{enrichment_query}", "Curator enrichment endpoint")

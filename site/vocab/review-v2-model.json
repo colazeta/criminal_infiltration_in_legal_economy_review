@@ -1,0 +1,2432 @@
+{
+  "version": "0.2.0",
+  "entities": [
+    {
+      "table": "reviews",
+      "label": "Review e protocollo",
+      "class": "SystematicReview",
+      "description": "Review identity, versioned protocol and explicit activation boundary.",
+      "group": "review",
+      "fields": [
+        {
+          "name": "review_id",
+          "description": "Namespace della review; impedisce di ereditare decisioni da un altro corpus.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:reviewId"
+        },
+        {
+          "name": "title",
+          "description": "Titolo attestato dalla fonte, senza completamenti inferiti.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "dcterms:title"
+        },
+        {
+          "name": "protocol_version",
+          "description": "Review identity, versioned protocol and explicit activation boundary. Field: protocol version.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:protocolVersion"
+        },
+        {
+          "name": "ontology_version",
+          "description": "Review identity, versioned protocol and explicit activation boundary. Field: ontology version.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:ontologyVersion"
+        },
+        {
+          "name": "phase",
+          "description": "Review identity, versioned protocol and explicit activation boundary. Field: phase.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:phase"
+        },
+        {
+          "name": "timezone",
+          "description": "Review identity, versioned protocol and explicit activation boundary. Field: timezone.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:timezone"
+        },
+        {
+          "name": "start_date",
+          "description": "Review identity, versioned protocol and explicit activation boundary. Field: start date.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "cile:startDate"
+        },
+        {
+          "name": "activated_at",
+          "description": "Review identity, versioned protocol and explicit activation boundary. Field: activated at.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "cile:activatedAt"
+        },
+        {
+          "name": "legacy_snapshot_id",
+          "description": "Review identity, versioned protocol and explicit activation boundary. Field: legacy snapshot id.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "cile:legacySnapshotId"
+        },
+        {
+          "name": "created_at",
+          "description": "Data e ora della registrazione, distinta dalla data di pubblicazione.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "prov:generatedAtTime"
+        }
+      ],
+      "appendOnly": false,
+      "constraints": [
+        "legacy_snapshot_id → legacy_snapshots.snapshot_id"
+      ]
+    },
+    {
+      "table": "scholarly_works",
+      "label": "Opera scientifica",
+      "class": "ScholarlyWork",
+      "description": "Neutral intellectual work, never an included source by definition.",
+      "group": "bibliography",
+      "fields": [
+        {
+          "name": "work_id",
+          "description": "Identità intellettuale dell’opera, indipendente dall’inclusione nella review.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:workId"
+        },
+        {
+          "name": "title",
+          "description": "Titolo attestato dalla fonte, senza completamenti inferiti.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "dcterms:title"
+        },
+        {
+          "name": "work_type",
+          "description": "Tipo documentale: articolo, capitolo, libro, working paper, preprint, atti, rapporto o tesi.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:workType"
+        },
+        {
+          "name": "original_language",
+          "description": "Lingua originale documentata; resta vuota quando non è nota.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "dcterms:language"
+        },
+        {
+          "name": "created_at",
+          "description": "Data e ora della registrazione, distinta dalla data di pubblicazione.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "prov:generatedAtTime"
+        }
+      ],
+      "appendOnly": false,
+      "constraints": [
+        "Vincoli di dominio e integrità definiti dallo schema SQL versionato."
+      ]
+    },
+    {
+      "table": "agents",
+      "label": "Autori e organizzazioni",
+      "class": "Agent",
+      "description": "Named people, organisations and software, without inferred identity.",
+      "group": "bibliography",
+      "fields": [
+        {
+          "name": "agent_id",
+          "description": "Identità della persona, organizzazione o software; omonimie non fuse automaticamente.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:agentId"
+        },
+        {
+          "name": "agent_type",
+          "description": "Persona, organizzazione oppure software, con responsabilità distinte.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:agentType"
+        },
+        {
+          "name": "display_name",
+          "description": "Nome attestato completo per la visualizzazione.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "foaf:name"
+        },
+        {
+          "name": "family_name",
+          "description": "Cognome o componente familiare del nome, solo se attestato.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "foaf:familyName"
+        },
+        {
+          "name": "given_name",
+          "description": "Nome personale, senza espandere iniziali per inferenza.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "foaf:givenName"
+        }
+      ],
+      "appendOnly": false,
+      "constraints": [
+        "Vincoli di dominio e integrità definiti dallo schema SQL versionato."
+      ]
+    },
+    {
+      "table": "publication_venues",
+      "label": "Rivista, volume e collana",
+      "class": "PublicationVenue",
+      "description": "Journal, edited volume, series or conference containing an expression.",
+      "group": "bibliography",
+      "fields": [
+        {
+          "name": "venue_id",
+          "description": "Rivista, libro collettaneo, collana, congresso o repository che contiene la versione.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:venueId"
+        },
+        {
+          "name": "title",
+          "description": "Titolo attestato dalla fonte, senza completamenti inferiti.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "dcterms:title"
+        },
+        {
+          "name": "venue_type",
+          "description": "Journal, edited volume, series or conference containing an expression. Field: venue type.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:venueType"
+        },
+        {
+          "name": "publisher_id",
+          "description": "Organizzazione responsabile della pubblicazione.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "dcterms:publisher"
+        },
+        {
+          "name": "parent_venue_id",
+          "description": "Journal, edited volume, series or conference containing an expression. Field: parent venue id.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "cile:parentVenueId"
+        }
+      ],
+      "appendOnly": false,
+      "constraints": [
+        "parent_venue_id → publication_venues.venue_id",
+        "publisher_id → agents.agent_id"
+      ]
+    },
+    {
+      "table": "expressions",
+      "label": "Versione della pubblicazione",
+      "class": "Expression",
+      "description": "Content/language version with version-specific bibliographic coordinates.",
+      "group": "bibliography",
+      "fields": [
+        {
+          "name": "expression_id",
+          "description": "Versione del contenuto: manoscritto accettato, versione editoriale, revisione o traduzione.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:expressionId"
+        },
+        {
+          "name": "work_id",
+          "description": "Identità intellettuale dell’opera, indipendente dall’inclusione nella review.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:workId"
+        },
+        {
+          "name": "version_type",
+          "description": "Stato editoriale della versione; non determina l’eleggibilità scientifica.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:versionType"
+        },
+        {
+          "name": "version_label",
+          "description": "Denominazione della versione riportata dalla fonte.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "cile:versionLabel"
+        },
+        {
+          "name": "language",
+          "description": "Lingua di questa specifica versione del testo.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "dcterms:language"
+        },
+        {
+          "name": "publication_date",
+          "description": "Data di pubblicazione attestata, conservando la precisione disponibile.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "dcterms:issued"
+        },
+        {
+          "name": "date_precision",
+          "description": "Anno, mese o giorno: non si inventano componenti mancanti della data.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "cile:datePrecision"
+        },
+        {
+          "name": "venue_id",
+          "description": "Rivista, libro collettaneo, collana, congresso o repository che contiene la versione.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "cile:venueId"
+        },
+        {
+          "name": "volume",
+          "description": "Volume della rivista o serie come indicato nella citazione.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "bibo:volume"
+        },
+        {
+          "name": "issue",
+          "description": "Fascicolo, distinto dal volume.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "bibo:issue"
+        },
+        {
+          "name": "page_start",
+          "description": "Prima pagina, anche con numerazione romana o alfanumerica.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "bibo:pageStart"
+        },
+        {
+          "name": "page_end",
+          "description": "Ultima pagina; non viene calcolata se non è attestata.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "bibo:pageEnd"
+        },
+        {
+          "name": "article_number",
+          "description": "Numero o identificatore editoriale dell’articolo, alternativo alla paginazione.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "cile:articleNumber"
+        },
+        {
+          "name": "edition",
+          "description": "Edizione della pubblicazione, distinta dal file scaricato.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "bibo:edition"
+        },
+        {
+          "name": "source_url",
+          "description": "Indirizzo della fonte da cui deriva l’informazione; non prova da solo l’acquisizione del testo.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "dcterms:source"
+        },
+        {
+          "name": "observed_at",
+          "description": "Momento in cui la fonte è stata osservata.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "prov:generatedAtTime"
+        }
+      ],
+      "appendOnly": false,
+      "constraints": [
+        "venue_id → publication_venues.venue_id",
+        "work_id → scholarly_works.work_id"
+      ]
+    },
+    {
+      "table": "contributions",
+      "label": "Autori, ruoli e affiliazioni",
+      "class": "Contribution",
+      "description": "Ordered author/editor/translator role and attributed affiliation.",
+      "group": "bibliography",
+      "fields": [
+        {
+          "name": "contribution_id",
+          "description": "Ordered author/editor/translator role and attributed affiliation. Field: contribution id.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:contributionId"
+        },
+        {
+          "name": "expression_id",
+          "description": "Versione del contenuto: manoscritto accettato, versione editoriale, revisione o traduzione.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:expressionId"
+        },
+        {
+          "name": "agent_id",
+          "description": "Identità della persona, organizzazione o software; omonimie non fuse automaticamente.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:agentId"
+        },
+        {
+          "name": "role",
+          "description": "Autore, curatore editoriale, traduttore, collaboratore o finanziatore.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:role"
+        },
+        {
+          "name": "position",
+          "description": "Ordine dichiarato nella pubblicazione; l’ordine degli autori viene conservato.",
+          "type": "INTEGER",
+          "nullable": false,
+          "semantic": "cile:position"
+        },
+        {
+          "name": "credit_role_uri",
+          "description": "Ruolo CRediT attestato dalla fonte, quando presente.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "cile:creditRoleUri"
+        },
+        {
+          "name": "affiliation_id",
+          "description": "Affiliazione dell’autore per questa specifica pubblicazione.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "cile:affiliationId"
+        },
+        {
+          "name": "source_url",
+          "description": "Indirizzo della fonte da cui deriva l’informazione; non prova da solo l’acquisizione del testo.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "dcterms:source"
+        }
+      ],
+      "appendOnly": false,
+      "constraints": [
+        "affiliation_id → agents.agent_id",
+        "agent_id → agents.agent_id",
+        "expression_id → expressions.expression_id"
+      ]
+    },
+    {
+      "table": "document_sections",
+      "label": "Sezioni del paper",
+      "class": "DocumentSection",
+      "description": "Ordered, located parts of a scientific publication; no section is assumed to exist.",
+      "group": "bibliography",
+      "fields": [
+        {
+          "name": "section_id",
+          "description": "Ordered, located parts of a scientific publication; no section is assumed to exist. Field: section id.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:sectionId"
+        },
+        {
+          "name": "expression_id",
+          "description": "Versione del contenuto: manoscritto accettato, versione editoriale, revisione o traduzione.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:expressionId"
+        },
+        {
+          "name": "section_type",
+          "description": "Abstract, introduzione, contesto, metodi, risultati, discussione, conclusioni, limiti, riferimenti o appendice.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:sectionType"
+        },
+        {
+          "name": "heading",
+          "description": "Intestazione della sezione così come compare nel testo.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "cile:heading"
+        },
+        {
+          "name": "position",
+          "description": "Ordine dichiarato nella pubblicazione; l’ordine degli autori viene conservato.",
+          "type": "INTEGER",
+          "nullable": false,
+          "semantic": "cile:position"
+        },
+        {
+          "name": "parent_section_id",
+          "description": "Ordered, located parts of a scientific publication; no section is assumed to exist. Field: parent section id.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "cile:parentSectionId"
+        },
+        {
+          "name": "source_url",
+          "description": "Indirizzo della fonte da cui deriva l’informazione; non prova da solo l’acquisizione del testo.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "dcterms:source"
+        },
+        {
+          "name": "locator",
+          "description": "Pagina, sezione o riferimento preciso che permette di ritrovare il passo.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:locator"
+        }
+      ],
+      "appendOnly": false,
+      "constraints": [
+        "parent_section_id → document_sections.section_id",
+        "expression_id → expressions.expression_id"
+      ]
+    },
+    {
+      "table": "publication_declarations",
+      "label": "Dichiarazioni della pubblicazione",
+      "class": "PublicationDeclaration",
+      "description": "Source-attributed funding, ethics, conflict and availability declarations.",
+      "group": "bibliography",
+      "fields": [
+        {
+          "name": "declaration_id",
+          "description": "Source-attributed funding, ethics, conflict and availability declarations. Field: declaration id.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:declarationId"
+        },
+        {
+          "name": "expression_id",
+          "description": "Versione del contenuto: manoscritto accettato, versione editoriale, revisione o traduzione.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:expressionId"
+        },
+        {
+          "name": "declaration_type",
+          "description": "Finanziamenti, conflitti di interesse, etica, disponibilità di dati/codice, rettifica o ritrattazione.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:declarationType"
+        },
+        {
+          "name": "statement",
+          "description": "Dichiarazione attribuita alla fonte; assenza e negazione esplicita restano diverse.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:statement"
+        },
+        {
+          "name": "source_url",
+          "description": "Indirizzo della fonte da cui deriva l’informazione; non prova da solo l’acquisizione del testo.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "dcterms:source"
+        },
+        {
+          "name": "locator",
+          "description": "Pagina, sezione o riferimento preciso che permette di ritrovare il passo.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:locator"
+        },
+        {
+          "name": "observed_at",
+          "description": "Momento in cui la fonte è stata osservata.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "prov:generatedAtTime"
+        }
+      ],
+      "appendOnly": false,
+      "constraints": [
+        "expression_id → expressions.expression_id"
+      ]
+    },
+    {
+      "table": "manifestations",
+      "label": "Copie digitali e accesso",
+      "class": "Manifestation",
+      "description": "Located digital embodiment, acquired bytes and rights distinct from a locator.",
+      "group": "bibliography",
+      "fields": [
+        {
+          "name": "manifestation_id",
+          "description": "Copia o rappresentazione digitale di una versione del contenuto.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:manifestationId"
+        },
+        {
+          "name": "expression_id",
+          "description": "Versione del contenuto: manoscritto accettato, versione editoriale, revisione o traduzione.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:expressionId"
+        },
+        {
+          "name": "source_url",
+          "description": "Indirizzo della fonte da cui deriva l’informazione; non prova da solo l’acquisizione del testo.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "dcterms:source"
+        },
+        {
+          "name": "media_type",
+          "description": "Formato effettivamente osservato: per esempio PDF, HTML o testo.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "dcterms:format"
+        },
+        {
+          "name": "content_sha256",
+          "description": "Impronta dei byte conservati per riconoscere cambiamenti e verificare il ripristino.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "cile:contentSha256"
+        },
+        {
+          "name": "storage_key",
+          "description": "Riferimento interno al documento privato; non è un URL pubblico.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "cile:storageKey"
+        },
+        {
+          "name": "license_uri",
+          "description": "Licenza dichiarata per questa copia, senza dedurla dalla sola accessibilità.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "dcterms:license"
+        },
+        {
+          "name": "rights_basis",
+          "description": "Base documentata per conservare e usare il materiale.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "dcterms:rights"
+        },
+        {
+          "name": "access_status",
+          "description": "Accesso aperto verificato, limitato o ignoto.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:accessStatus"
+        },
+        {
+          "name": "acquisition_status",
+          "description": "Solo collegamento, documento acquisito oppure acquisizione fallita.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:acquisitionStatus"
+        },
+        {
+          "name": "observed_at",
+          "description": "Momento in cui la fonte è stata osservata.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "prov:generatedAtTime"
+        }
+      ],
+      "appendOnly": false,
+      "constraints": [
+        "expression_id → expressions.expression_id"
+      ]
+    },
+    {
+      "table": "bibliographic_identifiers",
+      "label": "DOI e altri identificatori",
+      "class": "Identifier",
+      "description": "A sourced identifier of exactly one bibliographic entity; equality does not infer a merge.",
+      "group": "bibliography",
+      "fields": [
+        {
+          "name": "identifier_id",
+          "description": "A sourced identifier of exactly one bibliographic entity; equality does not infer a merge. Field: identifier id.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:identifierId"
+        },
+        {
+          "name": "work_id",
+          "description": "Identità intellettuale dell’opera, indipendente dall’inclusione nella review.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "cile:workId"
+        },
+        {
+          "name": "expression_id",
+          "description": "Versione del contenuto: manoscritto accettato, versione editoriale, revisione o traduzione.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "cile:expressionId"
+        },
+        {
+          "name": "manifestation_id",
+          "description": "Copia o rappresentazione digitale di una versione del contenuto.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "cile:manifestationId"
+        },
+        {
+          "name": "agent_id",
+          "description": "Identità della persona, organizzazione o software; omonimie non fuse automaticamente.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "cile:agentId"
+        },
+        {
+          "name": "venue_id",
+          "description": "Rivista, libro collettaneo, collana, congresso o repository che contiene la versione.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "cile:venueId"
+        },
+        {
+          "name": "scheme",
+          "description": "Sistema identificativo: DOI, ISBN, ISSN, ORCID, ROR, handle, arXiv, PMID o URL stabile.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:scheme"
+        },
+        {
+          "name": "value",
+          "description": "Valore dell’identificatore; la sua uguaglianza non implica automaticamente identità fra opere.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:value"
+        },
+        {
+          "name": "source_url",
+          "description": "Indirizzo della fonte da cui deriva l’informazione; non prova da solo l’acquisizione del testo.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "dcterms:source"
+        },
+        {
+          "name": "observed_at",
+          "description": "Momento in cui la fonte è stata osservata.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "prov:generatedAtTime"
+        },
+        {
+          "name": "verification_status",
+          "description": "Proposto, verificato o contestato, con fonte conservata.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:verificationStatus"
+        }
+      ],
+      "appendOnly": false,
+      "constraints": [
+        "venue_id → publication_venues.venue_id",
+        "agent_id → agents.agent_id",
+        "manifestation_id → manifestations.manifestation_id",
+        "expression_id → expressions.expression_id",
+        "work_id → scholarly_works.work_id"
+      ]
+    },
+    {
+      "table": "metadata_assertions",
+      "label": "Metadati e fonti discordanti",
+      "class": "MetadataAssertion",
+      "description": "Immutable field assertion preserving conflicting source values.",
+      "group": "bibliography",
+      "fields": [
+        {
+          "name": "assertion_id",
+          "description": "Immutable field assertion preserving conflicting source values. Field: assertion id.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:assertionId"
+        },
+        {
+          "name": "work_id",
+          "description": "Identità intellettuale dell’opera, indipendente dall’inclusione nella review.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:workId"
+        },
+        {
+          "name": "expression_id",
+          "description": "Versione del contenuto: manoscritto accettato, versione editoriale, revisione o traduzione.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "cile:expressionId"
+        },
+        {
+          "name": "field_uri",
+          "description": "Proprietà semantica cui si riferisce l’asserzione di metadato.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:fieldUri"
+        },
+        {
+          "name": "value_json",
+          "description": "Valore attestato dalla fonte, compresi valori in conflitto con altre fonti.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:valueJson"
+        },
+        {
+          "name": "source_url",
+          "description": "Indirizzo della fonte da cui deriva l’informazione; non prova da solo l’acquisizione del testo.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "dcterms:source"
+        },
+        {
+          "name": "observed_at",
+          "description": "Momento in cui la fonte è stata osservata.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "prov:generatedAtTime"
+        },
+        {
+          "name": "attributed_to",
+          "description": "Agente responsabile dell’asserzione o dell’attività.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "prov:wasAttributedTo"
+        },
+        {
+          "name": "assertion_status",
+          "description": "Immutable field assertion preserving conflicting source values. Field: assertion status.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:assertionStatus"
+        },
+        {
+          "name": "supersedes_id",
+          "description": "Registrazione precedente sostituita da questa, conservata nello storico.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "prov:wasRevisionOf"
+        }
+      ],
+      "appendOnly": true,
+      "constraints": [
+        "supersedes_id → metadata_assertions.assertion_id",
+        "expression_id → expressions.expression_id",
+        "work_id → scholarly_works.work_id"
+      ]
+    },
+    {
+      "table": "citation_relations",
+      "label": "Citazioni bibliografiche",
+      "class": "CitationRelation",
+      "description": "Directional citing/cited relation with reference evidence, not a similarity recommendation.",
+      "group": "bibliography",
+      "fields": [
+        {
+          "name": "citation_id",
+          "description": "Directional citing/cited relation with reference evidence, not a similarity recommendation. Field: citation id.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:citationId"
+        },
+        {
+          "name": "citing_work_id",
+          "description": "Opera che contiene il riferimento bibliografico.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:citingWorkId"
+        },
+        {
+          "name": "cited_work_id",
+          "description": "Opera citata: una similarità tematica non vale come citazione.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cito:cites"
+        },
+        {
+          "name": "expression_id",
+          "description": "Versione del contenuto: manoscritto accettato, versione editoriale, revisione o traduzione.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "cile:expressionId"
+        },
+        {
+          "name": "source_url",
+          "description": "Indirizzo della fonte da cui deriva l’informazione; non prova da solo l’acquisizione del testo.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "dcterms:source"
+        },
+        {
+          "name": "locator",
+          "description": "Pagina, sezione o riferimento preciso che permette di ritrovare il passo.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:locator"
+        },
+        {
+          "name": "observed_at",
+          "description": "Momento in cui la fonte è stata osservata.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "prov:generatedAtTime"
+        },
+        {
+          "name": "verification_status",
+          "description": "Proposto, verificato o contestato, con fonte conservata.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:verificationStatus"
+        }
+      ],
+      "appendOnly": true,
+      "constraints": [
+        "expression_id → expressions.expression_id",
+        "cited_work_id → scholarly_works.work_id",
+        "citing_work_id → scholarly_works.work_id"
+      ]
+    },
+    {
+      "table": "work_relations_v2",
+      "label": "Correzioni e relazioni fra opere",
+      "class": "WorkRelation",
+      "description": "Attributed identity, derivation or correction relation.",
+      "group": "bibliography",
+      "fields": [
+        {
+          "name": "relation_id",
+          "description": "Attributed identity, derivation or correction relation. Field: relation id.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:relationId"
+        },
+        {
+          "name": "subject_work_id",
+          "description": "Attributed identity, derivation or correction relation. Field: subject work id.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:subjectWorkId"
+        },
+        {
+          "name": "object_work_id",
+          "description": "Attributed identity, derivation or correction relation. Field: object work id.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:objectWorkId"
+        },
+        {
+          "name": "relation_type",
+          "description": "Attributed identity, derivation or correction relation. Field: relation type.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:relationType"
+        },
+        {
+          "name": "source_url",
+          "description": "Indirizzo della fonte da cui deriva l’informazione; non prova da solo l’acquisizione del testo.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "dcterms:source"
+        },
+        {
+          "name": "rationale",
+          "description": "Motivazione specifica e attribuita della valutazione.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:rationale"
+        },
+        {
+          "name": "attributed_to",
+          "description": "Agente responsabile dell’asserzione o dell’attività.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "prov:wasAttributedTo"
+        },
+        {
+          "name": "observed_at",
+          "description": "Momento in cui la fonte è stata osservata.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "prov:generatedAtTime"
+        }
+      ],
+      "appendOnly": true,
+      "constraints": [
+        "object_work_id → scholarly_works.work_id",
+        "subject_work_id → scholarly_works.work_id"
+      ]
+    },
+    {
+      "table": "review_candidates",
+      "label": "Candidati nella review",
+      "class": "CandidateRecord",
+      "description": "Membership in one review with optimistic concurrency; no inherited legacy decision.",
+      "group": "review",
+      "fields": [
+        {
+          "name": "review_id",
+          "description": "Namespace della review; impedisce di ereditare decisioni da un altro corpus.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:reviewId"
+        },
+        {
+          "name": "candidate_id",
+          "description": "Record candidato in questa review, senza eleggibilità implicita.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:candidateId"
+        },
+        {
+          "name": "work_id",
+          "description": "Identità intellettuale dell’opera, indipendente dall’inclusione nella review.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "cile:workId"
+        },
+        {
+          "name": "title",
+          "description": "Titolo attestato dalla fonte, senza completamenti inferiti.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "dcterms:title"
+        },
+        {
+          "name": "identity_state",
+          "description": "Membership in one review with optimistic concurrency; no inherited legacy decision. Field: identity state.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:identityState"
+        },
+        {
+          "name": "stage",
+          "description": "Membership in one review with optimistic concurrency; no inherited legacy decision. Field: stage.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:stage"
+        },
+        {
+          "name": "record_version",
+          "description": "Versione usata per rifiutare modifiche o approvazioni su dati superati.",
+          "type": "INTEGER",
+          "nullable": false,
+          "semantic": "cile:recordVersion"
+        },
+        {
+          "name": "origin_event_id",
+          "description": "Membership in one review with optimistic concurrency; no inherited legacy decision. Field: origin event id.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:originEventId"
+        },
+        {
+          "name": "created_at",
+          "description": "Data e ora della registrazione, distinta dalla data di pubblicazione.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "prov:generatedAtTime"
+        }
+      ],
+      "appendOnly": false,
+      "constraints": [
+        "work_id → scholarly_works.work_id",
+        "review_id → reviews.review_id"
+      ]
+    },
+    {
+      "table": "legacy_references",
+      "label": "Riferimenti allo storico",
+      "class": "LegacyReference",
+      "description": "Historical cross-reference only, excluded from V2 deduplication and eligibility.",
+      "group": "review",
+      "fields": [
+        {
+          "name": "review_id",
+          "description": "Namespace della review; impedisce di ereditare decisioni da un altro corpus.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:reviewId"
+        },
+        {
+          "name": "candidate_id",
+          "description": "Record candidato in questa review, senza eleggibilità implicita.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:candidateId"
+        },
+        {
+          "name": "legacy_id",
+          "description": "Historical cross-reference only, excluded from V2 deduplication and eligibility. Field: legacy id.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:legacyId"
+        },
+        {
+          "name": "snapshot_id",
+          "description": "Historical cross-reference only, excluded from V2 deduplication and eligibility. Field: snapshot id.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:snapshotId"
+        },
+        {
+          "name": "match_basis",
+          "description": "Historical cross-reference only, excluded from V2 deduplication and eligibility. Field: match basis.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:matchBasis"
+        }
+      ],
+      "appendOnly": true,
+      "constraints": [
+        "review_id → review_candidates.review_id",
+        "candidate_id → review_candidates.candidate_id"
+      ]
+    },
+    {
+      "table": "retrieval_attempts",
+      "label": "Tentativi di acquisizione",
+      "class": "RetrievalActivity",
+      "description": "Immutable outcome of a real retrieval attempt including failure.",
+      "group": "review",
+      "fields": [
+        {
+          "name": "attempt_id",
+          "description": "Immutable outcome of a real retrieval attempt including failure. Field: attempt id.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:attemptId"
+        },
+        {
+          "name": "review_id",
+          "description": "Namespace della review; impedisce di ereditare decisioni da un altro corpus.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:reviewId"
+        },
+        {
+          "name": "candidate_id",
+          "description": "Record candidato in questa review, senza eleggibilità implicita.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:candidateId"
+        },
+        {
+          "name": "source_url",
+          "description": "Indirizzo della fonte da cui deriva l’informazione; non prova da solo l’acquisizione del testo.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "dcterms:source"
+        },
+        {
+          "name": "provider",
+          "description": "Immutable outcome of a real retrieval attempt including failure. Field: provider.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:provider"
+        },
+        {
+          "name": "started_at",
+          "description": "Immutable outcome of a real retrieval attempt including failure. Field: started at.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:startedAt"
+        },
+        {
+          "name": "finished_at",
+          "description": "Immutable outcome of a real retrieval attempt including failure. Field: finished at.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:finishedAt"
+        },
+        {
+          "name": "status",
+          "description": "Immutable outcome of a real retrieval attempt including failure. Field: status.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:status"
+        },
+        {
+          "name": "http_status",
+          "description": "Immutable outcome of a real retrieval attempt including failure. Field: http status.",
+          "type": "INTEGER",
+          "nullable": true,
+          "semantic": "cile:httpStatus"
+        },
+        {
+          "name": "error_code",
+          "description": "Immutable outcome of a real retrieval attempt including failure. Field: error code.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "cile:errorCode"
+        },
+        {
+          "name": "duration_ms",
+          "description": "Immutable outcome of a real retrieval attempt including failure. Field: duration ms.",
+          "type": "INTEGER",
+          "nullable": false,
+          "semantic": "cile:durationMs"
+        },
+        {
+          "name": "content_sha256",
+          "description": "Impronta dei byte conservati per riconoscere cambiamenti e verificare il ripristino.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "cile:contentSha256"
+        },
+        {
+          "name": "retry_parent_id",
+          "description": "Immutable outcome of a real retrieval attempt including failure. Field: retry parent id.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "cile:retryParentId"
+        }
+      ],
+      "appendOnly": true,
+      "constraints": [
+        "review_id → review_candidates.review_id",
+        "candidate_id → review_candidates.candidate_id",
+        "retry_parent_id → retrieval_attempts.attempt_id"
+      ]
+    },
+    {
+      "table": "evidence_sources",
+      "label": "Fonti di evidenza",
+      "class": "Evidence",
+      "description": "Private acquired source with identity, kind, rights and content hash.",
+      "group": "review",
+      "fields": [
+        {
+          "name": "review_id",
+          "description": "Namespace della review; impedisce di ereditare decisioni da un altro corpus.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:reviewId"
+        },
+        {
+          "name": "evidence_id",
+          "description": "Private acquired source with identity, kind, rights and content hash. Field: evidence id.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:evidenceId"
+        },
+        {
+          "name": "candidate_id",
+          "description": "Record candidato in questa review, senza eleggibilità implicita.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:candidateId"
+        },
+        {
+          "name": "manifestation_id",
+          "description": "Copia o rappresentazione digitale di una versione del contenuto.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "cile:manifestationId"
+        },
+        {
+          "name": "attempt_id",
+          "description": "Immutable outcome of a real retrieval attempt including failure. Field: attempt id.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "cile:attemptId"
+        },
+        {
+          "name": "source_url",
+          "description": "Indirizzo della fonte da cui deriva l’informazione; non prova da solo l’acquisizione del testo.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "dcterms:source"
+        },
+        {
+          "name": "evidence_kind",
+          "description": "Private acquired source with identity, kind, rights and content hash. Field: evidence kind.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:evidenceKind"
+        },
+        {
+          "name": "identity_state",
+          "description": "Membership in one review with optimistic concurrency; no inherited legacy decision. Field: identity state.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:identityState"
+        },
+        {
+          "name": "content_sha256",
+          "description": "Impronta dei byte conservati per riconoscere cambiamenti e verificare il ripristino.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:contentSha256"
+        },
+        {
+          "name": "storage_key",
+          "description": "Riferimento interno al documento privato; non è un URL pubblico.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:storageKey"
+        },
+        {
+          "name": "rights_basis",
+          "description": "Base documentata per conservare e usare il materiale.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "dcterms:rights"
+        },
+        {
+          "name": "observed_at",
+          "description": "Momento in cui la fonte è stata osservata.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "prov:generatedAtTime"
+        }
+      ],
+      "appendOnly": true,
+      "constraints": [
+        "review_id → review_candidates.review_id",
+        "candidate_id → review_candidates.candidate_id",
+        "attempt_id → retrieval_attempts.attempt_id",
+        "manifestation_id → manifestations.manifestation_id"
+      ]
+    },
+    {
+      "table": "evidence_spans",
+      "label": "Passi e locator",
+      "class": "EvidenceSpan",
+      "description": "Offsets and locator over one immutable source snapshot.",
+      "group": "review",
+      "fields": [
+        {
+          "name": "review_id",
+          "description": "Namespace della review; impedisce di ereditare decisioni da un altro corpus.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:reviewId"
+        },
+        {
+          "name": "span_id",
+          "description": "Offsets and locator over one immutable source snapshot. Field: span id.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:spanId"
+        },
+        {
+          "name": "evidence_id",
+          "description": "Private acquired source with identity, kind, rights and content hash. Field: evidence id.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:evidenceId"
+        },
+        {
+          "name": "locator",
+          "description": "Pagina, sezione o riferimento preciso che permette di ritrovare il passo.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:locator"
+        },
+        {
+          "name": "start_offset",
+          "description": "Offsets and locator over one immutable source snapshot. Field: start offset.",
+          "type": "INTEGER",
+          "nullable": false,
+          "semantic": "cile:startOffset"
+        },
+        {
+          "name": "end_offset",
+          "description": "Offsets and locator over one immutable source snapshot. Field: end offset.",
+          "type": "INTEGER",
+          "nullable": false,
+          "semantic": "cile:endOffset"
+        },
+        {
+          "name": "text_sha256",
+          "description": "Offsets and locator over one immutable source snapshot. Field: text sha256.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:textSha256"
+        }
+      ],
+      "appendOnly": true,
+      "constraints": [
+        "review_id → evidence_sources.review_id",
+        "evidence_id → evidence_sources.evidence_id"
+      ]
+    },
+    {
+      "table": "decision_proposals",
+      "label": "Proposte scientifiche",
+      "class": "DecisionProposal",
+      "description": "Immutable preparatory four-criterion payload, awaiting exact-hash human PR approval.",
+      "group": "review",
+      "fields": [
+        {
+          "name": "proposal_id",
+          "description": "Immutable preparatory four-criterion payload, awaiting exact-hash human PR approval. Field: proposal id.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:proposalId"
+        },
+        {
+          "name": "review_id",
+          "description": "Namespace della review; impedisce di ereditare decisioni da un altro corpus.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:reviewId"
+        },
+        {
+          "name": "candidate_id",
+          "description": "Record candidato in questa review, senza eleggibilità implicita.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:candidateId"
+        },
+        {
+          "name": "expected_version",
+          "description": "Immutable preparatory four-criterion payload, awaiting exact-hash human PR approval. Field: expected version.",
+          "type": "INTEGER",
+          "nullable": false,
+          "semantic": "cile:expectedVersion"
+        },
+        {
+          "name": "protocol_version",
+          "description": "Review identity, versioned protocol and explicit activation boundary. Field: protocol version.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:protocolVersion"
+        },
+        {
+          "name": "payload_json",
+          "description": "Immutable preparatory four-criterion payload, awaiting exact-hash human PR approval. Field: payload json.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:payloadJson"
+        },
+        {
+          "name": "payload_sha256",
+          "description": "Immutable preparatory four-criterion payload, awaiting exact-hash human PR approval. Field: payload sha256.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:payloadSha256"
+        },
+        {
+          "name": "proposed_by",
+          "description": "Immutable preparatory four-criterion payload, awaiting exact-hash human PR approval. Field: proposed by.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "prov:wasAttributedTo"
+        },
+        {
+          "name": "created_at",
+          "description": "Data e ora della registrazione, distinta dalla data di pubblicazione.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "prov:generatedAtTime"
+        }
+      ],
+      "appendOnly": true,
+      "constraints": [
+        "review_id → review_candidates.review_id",
+        "candidate_id → review_candidates.candidate_id"
+      ]
+    },
+    {
+      "table": "approval_receipts",
+      "label": "Approvazioni umane",
+      "class": "ApprovalReceipt",
+      "description": "Verified human GitHub review of the exact proposal and head commit.",
+      "group": "review",
+      "fields": [
+        {
+          "name": "receipt_id",
+          "description": "Verified human GitHub review of the exact proposal and head commit. Field: receipt id.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:receiptId"
+        },
+        {
+          "name": "proposal_id",
+          "description": "Immutable preparatory four-criterion payload, awaiting exact-hash human PR approval. Field: proposal id.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:proposalId"
+        },
+        {
+          "name": "review_id",
+          "description": "Namespace della review; impedisce di ereditare decisioni da un altro corpus.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:reviewId"
+        },
+        {
+          "name": "candidate_id",
+          "description": "Record candidato in questa review, senza eleggibilità implicita.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:candidateId"
+        },
+        {
+          "name": "expected_version",
+          "description": "Immutable preparatory four-criterion payload, awaiting exact-hash human PR approval. Field: expected version.",
+          "type": "INTEGER",
+          "nullable": false,
+          "semantic": "cile:expectedVersion"
+        },
+        {
+          "name": "payload_sha256",
+          "description": "Immutable preparatory four-criterion payload, awaiting exact-hash human PR approval. Field: payload sha256.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:payloadSha256"
+        },
+        {
+          "name": "repository",
+          "description": "Verified human GitHub review of the exact proposal and head commit. Field: repository.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:repository"
+        },
+        {
+          "name": "pr_number",
+          "description": "Verified human GitHub review of the exact proposal and head commit. Field: pr number.",
+          "type": "INTEGER",
+          "nullable": false,
+          "semantic": "cile:prNumber"
+        },
+        {
+          "name": "reviewed_commit",
+          "description": "Verified human GitHub review of the exact proposal and head commit. Field: reviewed commit.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:reviewedCommit"
+        },
+        {
+          "name": "human_login",
+          "description": "Verified human GitHub review of the exact proposal and head commit. Field: human login.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "prov:wasAttributedTo"
+        },
+        {
+          "name": "human_review_id",
+          "description": "Verified human GitHub review of the exact proposal and head commit. Field: human review id.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:humanReviewId"
+        },
+        {
+          "name": "approved_at",
+          "description": "Verified human GitHub review of the exact proposal and head commit. Field: approved at.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:approvedAt"
+        },
+        {
+          "name": "imported_at",
+          "description": "Verified human GitHub review of the exact proposal and head commit. Field: imported at.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:importedAt"
+        }
+      ],
+      "appendOnly": true,
+      "constraints": [
+        "review_id → review_candidates.review_id",
+        "candidate_id → review_candidates.candidate_id",
+        "proposal_id → decision_proposals.proposal_id"
+      ]
+    },
+    {
+      "table": "screening_decisions_v2",
+      "label": "Decisioni di screening",
+      "class": "ScreeningDecision",
+      "description": "Human-approved scientific outcome with append-only supersession.",
+      "group": "review",
+      "fields": [
+        {
+          "name": "decision_id",
+          "description": "Human-approved scientific outcome with append-only supersession. Field: decision id.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:decisionId"
+        },
+        {
+          "name": "receipt_id",
+          "description": "Verified human GitHub review of the exact proposal and head commit. Field: receipt id.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:receiptId"
+        },
+        {
+          "name": "review_id",
+          "description": "Namespace della review; impedisce di ereditare decisioni da un altro corpus.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:reviewId"
+        },
+        {
+          "name": "candidate_id",
+          "description": "Record candidato in questa review, senza eleggibilità implicita.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:candidateId"
+        },
+        {
+          "name": "decision",
+          "description": "Human-approved scientific outcome with append-only supersession. Field: decision.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:decision"
+        },
+        {
+          "name": "rationale",
+          "description": "Motivazione specifica e attribuita della valutazione.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:rationale"
+        },
+        {
+          "name": "protocol_version",
+          "description": "Review identity, versioned protocol and explicit activation boundary. Field: protocol version.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:protocolVersion"
+        },
+        {
+          "name": "supersedes_id",
+          "description": "Registrazione precedente sostituita da questa, conservata nello storico.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "prov:wasRevisionOf"
+        },
+        {
+          "name": "created_at",
+          "description": "Data e ora della registrazione, distinta dalla data di pubblicazione.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "prov:generatedAtTime"
+        }
+      ],
+      "appendOnly": true,
+      "constraints": [
+        "review_id → review_candidates.review_id",
+        "candidate_id → review_candidates.candidate_id",
+        "supersedes_id → screening_decisions_v2.decision_id",
+        "receipt_id → approval_receipts.receipt_id"
+      ]
+    },
+    {
+      "table": "criterion_assessments",
+      "label": "Quattro criteri di eleggibilità",
+      "class": "CriterionAssessment",
+      "description": "YES/NO/UNCERTAIN with source spans and specific reasoning.",
+      "group": "review",
+      "fields": [
+        {
+          "name": "decision_id",
+          "description": "Human-approved scientific outcome with append-only supersession. Field: decision id.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:decisionId"
+        },
+        {
+          "name": "criterion_id",
+          "description": "Uno dei quattro criteri separati del test di inclusione.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:criterionId"
+        },
+        {
+          "name": "outcome",
+          "description": "YES, NO oppure UNCERTAIN: la mancanza di testo non equivale a NO.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:outcome"
+        },
+        {
+          "name": "rationale",
+          "description": "Motivazione specifica e attribuita della valutazione.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:rationale"
+        },
+        {
+          "name": "evidence_span_ids_json",
+          "description": "Passi delle fonti che sostengono la valutazione.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:evidenceSpanIdsJson"
+        }
+      ],
+      "appendOnly": true,
+      "constraints": [
+        "decision_id → screening_decisions_v2.decision_id"
+      ]
+    },
+    {
+      "table": "coding_assertions_v2",
+      "label": "Codifica analitica",
+      "class": "CodingAssertion",
+      "description": "Evidence-grounded, versioned multidimensional coding.",
+      "group": "review",
+      "fields": [
+        {
+          "name": "coding_id",
+          "description": "Evidence-grounded, versioned multidimensional coding. Field: coding id.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:codingId"
+        },
+        {
+          "name": "decision_id",
+          "description": "Human-approved scientific outcome with append-only supersession. Field: decision id.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:decisionId"
+        },
+        {
+          "name": "dimension",
+          "description": "Evidence-grounded, versioned multidimensional coding. Field: dimension.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:dimension"
+        },
+        {
+          "name": "code",
+          "description": "Evidence-grounded, versioned multidimensional coding. Field: code.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:code"
+        },
+        {
+          "name": "vocabulary_version",
+          "description": "Evidence-grounded, versioned multidimensional coding. Field: vocabulary version.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:vocabularyVersion"
+        },
+        {
+          "name": "rationale",
+          "description": "Motivazione specifica e attribuita della valutazione.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:rationale"
+        },
+        {
+          "name": "evidence_span_ids_json",
+          "description": "Passi delle fonti che sostengono la valutazione.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:evidenceSpanIdsJson"
+        },
+        {
+          "name": "supersedes_id",
+          "description": "Registrazione precedente sostituita da questa, conservata nello storico.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "prov:wasRevisionOf"
+        }
+      ],
+      "appendOnly": true,
+      "constraints": [
+        "supersedes_id → coding_assertions_v2.coding_id",
+        "decision_id → screening_decisions_v2.decision_id"
+      ]
+    },
+    {
+      "table": "assistant_observations",
+      "label": "Osservazioni dell’assistente",
+      "class": "AssistantRecommendation",
+      "description": "Model observation with input hash and prompt/model version; never a decision.",
+      "group": "review",
+      "fields": [
+        {
+          "name": "observation_id",
+          "description": "Model observation with input hash and prompt/model version; never a decision. Field: observation id.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:observationId"
+        },
+        {
+          "name": "review_id",
+          "description": "Namespace della review; impedisce di ereditare decisioni da un altro corpus.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:reviewId"
+        },
+        {
+          "name": "candidate_id",
+          "description": "Record candidato in questa review, senza eleggibilità implicita.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:candidateId"
+        },
+        {
+          "name": "model_id",
+          "description": "Model observation with input hash and prompt/model version; never a decision. Field: model id.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:modelId"
+        },
+        {
+          "name": "prompt_version",
+          "description": "Model observation with input hash and prompt/model version; never a decision. Field: prompt version.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:promptVersion"
+        },
+        {
+          "name": "protocol_version",
+          "description": "Review identity, versioned protocol and explicit activation boundary. Field: protocol version.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:protocolVersion"
+        },
+        {
+          "name": "input_sha256",
+          "description": "Model observation with input hash and prompt/model version; never a decision. Field: input sha256.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:inputSha256"
+        },
+        {
+          "name": "output_json",
+          "description": "Model observation with input hash and prompt/model version; never a decision. Field: output json.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:outputJson"
+        },
+        {
+          "name": "evidence_span_ids_json",
+          "description": "Passi delle fonti che sostengono la valutazione.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:evidenceSpanIdsJson"
+        },
+        {
+          "name": "created_at",
+          "description": "Data e ora della registrazione, distinta dalla data di pubblicazione.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "prov:generatedAtTime"
+        }
+      ],
+      "appendOnly": true,
+      "constraints": [
+        "review_id → review_candidates.review_id",
+        "candidate_id → review_candidates.candidate_id"
+      ]
+    },
+    {
+      "table": "publication_approvals_v2",
+      "label": "Pubblicazione sul sito",
+      "class": "PublicationState",
+      "description": "Independent human approval of public fields and publication state.",
+      "group": "review",
+      "fields": [
+        {
+          "name": "publication_id",
+          "description": "Independent human approval of public fields and publication state. Field: publication id.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:publicationId"
+        },
+        {
+          "name": "decision_id",
+          "description": "Human-approved scientific outcome with append-only supersession. Field: decision id.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:decisionId"
+        },
+        {
+          "name": "approved_payload_json",
+          "description": "Independent human approval of public fields and publication state. Field: approved payload json.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:approvedPayloadJson"
+        },
+        {
+          "name": "payload_sha256",
+          "description": "Immutable preparatory four-criterion payload, awaiting exact-hash human PR approval. Field: payload sha256.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:payloadSha256"
+        },
+        {
+          "name": "human_login",
+          "description": "Verified human GitHub review of the exact proposal and head commit. Field: human login.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "prov:wasAttributedTo"
+        },
+        {
+          "name": "reviewed_commit",
+          "description": "Verified human GitHub review of the exact proposal and head commit. Field: reviewed commit.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:reviewedCommit"
+        },
+        {
+          "name": "pr_number",
+          "description": "Verified human GitHub review of the exact proposal and head commit. Field: pr number.",
+          "type": "INTEGER",
+          "nullable": false,
+          "semantic": "cile:prNumber"
+        },
+        {
+          "name": "approved_at",
+          "description": "Verified human GitHub review of the exact proposal and head commit. Field: approved at.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:approvedAt"
+        },
+        {
+          "name": "publication_status",
+          "description": "Independent human approval of public fields and publication state. Field: publication status.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:publicationStatus"
+        },
+        {
+          "name": "supersedes_id",
+          "description": "Registrazione precedente sostituita da questa, conservata nello storico.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "prov:wasRevisionOf"
+        }
+      ],
+      "appendOnly": true,
+      "constraints": [
+        "supersedes_id → publication_approvals_v2.publication_id",
+        "decision_id → screening_decisions_v2.decision_id"
+      ]
+    },
+    {
+      "table": "search_days",
+      "label": "Calendario delle ricerche",
+      "class": "SearchDay",
+      "description": "Every expected Rome calendar day, including absent and failed execution.",
+      "group": "review",
+      "fields": [
+        {
+          "name": "review_id",
+          "description": "Namespace della review; impedisce di ereditare decisioni da un altro corpus.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:reviewId"
+        },
+        {
+          "name": "scheduled_date",
+          "description": "Giorno previsto nel calendario di Roma, distinto dal momento reale dell’esecuzione.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:scheduledDate"
+        },
+        {
+          "name": "timezone",
+          "description": "Review identity, versioned protocol and explicit activation boundary. Field: timezone.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:timezone"
+        },
+        {
+          "name": "protocol_version",
+          "description": "Review identity, versioned protocol and explicit activation boundary. Field: protocol version.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:protocolVersion"
+        },
+        {
+          "name": "query_manifest_json",
+          "description": "Every expected Rome calendar day, including absent and failed execution. Field: query manifest json.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:queryManifestJson"
+        },
+        {
+          "name": "status",
+          "description": "Immutable outcome of a real retrieval attempt including failure. Field: status.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:status"
+        },
+        {
+          "name": "deadline_at",
+          "description": "Every expected Rome calendar day, including absent and failed execution. Field: deadline at.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:deadlineAt"
+        },
+        {
+          "name": "created_at",
+          "description": "Data e ora della registrazione, distinta dalla data di pubblicazione.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "prov:generatedAtTime"
+        }
+      ],
+      "appendOnly": false,
+      "constraints": [
+        "review_id → reviews.review_id"
+      ]
+    },
+    {
+      "table": "run_attempts",
+      "label": "Esecuzioni e recuperi",
+      "class": "RunAttempt",
+      "description": "Leased execution attempt for a scheduled day; actual timestamps can cross midnight.",
+      "group": "review",
+      "fields": [
+        {
+          "name": "attempt_id",
+          "description": "Immutable outcome of a real retrieval attempt including failure. Field: attempt id.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:attemptId"
+        },
+        {
+          "name": "review_id",
+          "description": "Namespace della review; impedisce di ereditare decisioni da un altro corpus.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:reviewId"
+        },
+        {
+          "name": "scheduled_date",
+          "description": "Giorno previsto nel calendario di Roma, distinto dal momento reale dell’esecuzione.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:scheduledDate"
+        },
+        {
+          "name": "attempt_number",
+          "description": "Leased execution attempt for a scheduled day; actual timestamps can cross midnight. Field: attempt number.",
+          "type": "INTEGER",
+          "nullable": false,
+          "semantic": "cile:attemptNumber"
+        },
+        {
+          "name": "started_at",
+          "description": "Immutable outcome of a real retrieval attempt including failure. Field: started at.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:startedAt"
+        },
+        {
+          "name": "finished_at",
+          "description": "Immutable outcome of a real retrieval attempt including failure. Field: finished at.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "cile:finishedAt"
+        },
+        {
+          "name": "lease_until",
+          "description": "Leased execution attempt for a scheduled day; actual timestamps can cross midnight. Field: lease until.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:leaseUntil"
+        },
+        {
+          "name": "status",
+          "description": "Immutable outcome of a real retrieval attempt including failure. Field: status.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:status"
+        },
+        {
+          "name": "error_code",
+          "description": "Immutable outcome of a real retrieval attempt including failure. Field: error code.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "cile:errorCode"
+        },
+        {
+          "name": "retry_after",
+          "description": "Leased execution attempt for a scheduled day; actual timestamps can cross midnight. Field: retry after.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "cile:retryAfter"
+        }
+      ],
+      "appendOnly": false,
+      "constraints": [
+        "review_id → search_days.review_id",
+        "scheduled_date → search_days.scheduled_date"
+      ]
+    },
+    {
+      "table": "query_executions",
+      "label": "Query e risultati misurati",
+      "class": "QueryExecution",
+      "description": "Immutable source/query attempt; exactly one successful checkpoint may count.",
+      "group": "review",
+      "fields": [
+        {
+          "name": "execution_id",
+          "description": "Immutable source/query attempt; exactly one successful checkpoint may count. Field: execution id.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:executionId"
+        },
+        {
+          "name": "attempt_id",
+          "description": "Immutable outcome of a real retrieval attempt including failure. Field: attempt id.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:attemptId"
+        },
+        {
+          "name": "review_id",
+          "description": "Namespace della review; impedisce di ereditare decisioni da un altro corpus.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:reviewId"
+        },
+        {
+          "name": "scheduled_date",
+          "description": "Giorno previsto nel calendario di Roma, distinto dal momento reale dell’esecuzione.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:scheduledDate"
+        },
+        {
+          "name": "provider",
+          "description": "Immutable outcome of a real retrieval attempt including failure. Field: provider.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:provider"
+        },
+        {
+          "name": "query_id",
+          "description": "Immutable source/query attempt; exactly one successful checkpoint may count. Field: query id.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:queryId"
+        },
+        {
+          "name": "status",
+          "description": "Immutable outcome of a real retrieval attempt including failure. Field: status.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:status"
+        },
+        {
+          "name": "started_at",
+          "description": "Immutable outcome of a real retrieval attempt including failure. Field: started at.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:startedAt"
+        },
+        {
+          "name": "finished_at",
+          "description": "Immutable outcome of a real retrieval attempt including failure. Field: finished at.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:finishedAt"
+        },
+        {
+          "name": "occurrences_returned",
+          "description": "Risultati della singola query: null se non misurati, zero se realmente misurati e assenti.",
+          "type": "INTEGER",
+          "nullable": true,
+          "semantic": "cile:occurrencesReturned"
+        },
+        {
+          "name": "result_storage_key",
+          "description": "Immutable source/query attempt; exactly one successful checkpoint may count. Field: result storage key.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "cile:resultStorageKey"
+        },
+        {
+          "name": "error_code",
+          "description": "Immutable outcome of a real retrieval attempt including failure. Field: error code.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "cile:errorCode"
+        }
+      ],
+      "appendOnly": true,
+      "constraints": [
+        "review_id → search_days.review_id",
+        "scheduled_date → search_days.scheduled_date",
+        "attempt_id → run_attempts.attempt_id"
+      ]
+    },
+    {
+      "table": "discovery_occurrences",
+      "label": "Occorrenze di discovery",
+      "class": "DiscoveryRecord",
+      "description": "Every source occurrence, including rediscovery and duplicate occurrences.",
+      "group": "review",
+      "fields": [
+        {
+          "name": "occurrence_id",
+          "description": "Every source occurrence, including rediscovery and duplicate occurrences. Field: occurrence id.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:occurrenceId"
+        },
+        {
+          "name": "review_id",
+          "description": "Namespace della review; impedisce di ereditare decisioni da un altro corpus.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:reviewId"
+        },
+        {
+          "name": "execution_id",
+          "description": "Immutable source/query attempt; exactly one successful checkpoint may count. Field: execution id.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "cile:executionId"
+        },
+        {
+          "name": "candidate_id",
+          "description": "Record candidato in questa review, senza eleggibilità implicita.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "cile:candidateId"
+        },
+        {
+          "name": "provider",
+          "description": "Immutable outcome of a real retrieval attempt including failure. Field: provider.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:provider"
+        },
+        {
+          "name": "source_url",
+          "description": "Indirizzo della fonte da cui deriva l’informazione; non prova da solo l’acquisizione del testo.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "dcterms:source"
+        },
+        {
+          "name": "rank",
+          "description": "Every source occurrence, including rediscovery and duplicate occurrences. Field: rank.",
+          "type": "INTEGER",
+          "nullable": true,
+          "semantic": "cile:rank"
+        },
+        {
+          "name": "metadata_json",
+          "description": "Every source occurrence, including rediscovery and duplicate occurrences. Field: metadata json.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:metadataJson"
+        },
+        {
+          "name": "observed_at",
+          "description": "Momento in cui la fonte è stata osservata.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "prov:generatedAtTime"
+        }
+      ],
+      "appendOnly": true,
+      "constraints": [
+        "review_id → review_candidates.review_id",
+        "candidate_id → review_candidates.candidate_id",
+        "execution_id → query_executions.execution_id",
+        "review_id → reviews.review_id"
+      ]
+    },
+    {
+      "table": "outbox",
+      "label": "Operazioni da consegnare",
+      "class": "OutboxMessage",
+      "description": "Transactional delivery intent; external delivery is idempotent and at least once.",
+      "group": "review",
+      "fields": [
+        {
+          "name": "outbox_id",
+          "description": "Transactional delivery intent; external delivery is idempotent and at least once. Field: outbox id.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:outboxId"
+        },
+        {
+          "name": "review_id",
+          "description": "Namespace della review; impedisce di ereditare decisioni da un altro corpus.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:reviewId"
+        },
+        {
+          "name": "kind",
+          "description": "Transactional delivery intent; external delivery is idempotent and at least once. Field: kind.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:kind"
+        },
+        {
+          "name": "payload_json",
+          "description": "Immutable preparatory four-criterion payload, awaiting exact-hash human PR approval. Field: payload json.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:payloadJson"
+        },
+        {
+          "name": "created_at",
+          "description": "Data e ora della registrazione, distinta dalla data di pubblicazione.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "prov:generatedAtTime"
+        },
+        {
+          "name": "delivered_at",
+          "description": "Transactional delivery intent; external delivery is idempotent and at least once. Field: delivered at.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "cile:deliveredAt"
+        },
+        {
+          "name": "attempts",
+          "description": "Transactional delivery intent; external delivery is idempotent and at least once. Field: attempts.",
+          "type": "INTEGER",
+          "nullable": false,
+          "semantic": "cile:attempts"
+        },
+        {
+          "name": "last_error",
+          "description": "Transactional delivery intent; external delivery is idempotent and at least once. Field: last error.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "cile:lastError"
+        }
+      ],
+      "appendOnly": false,
+      "constraints": [
+        "review_id → reviews.review_id"
+      ]
+    },
+    {
+      "table": "operational_events",
+      "label": "Registro operativo",
+      "class": "ReviewEvent",
+      "description": "Append-only technical event, independent from scientific outcomes.",
+      "group": "review",
+      "fields": [
+        {
+          "name": "event_id",
+          "description": "Append-only technical event, independent from scientific outcomes. Field: event id.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:eventId"
+        },
+        {
+          "name": "review_id",
+          "description": "Namespace della review; impedisce di ereditare decisioni da un altro corpus.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "cile:reviewId"
+        },
+        {
+          "name": "event_type",
+          "description": "Append-only technical event, independent from scientific outcomes. Field: event type.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:eventType"
+        },
+        {
+          "name": "payload_json",
+          "description": "Immutable preparatory four-criterion payload, awaiting exact-hash human PR approval. Field: payload json.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:payloadJson"
+        },
+        {
+          "name": "attributed_to",
+          "description": "Agente responsabile dell’asserzione o dell’attività.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "prov:wasAttributedTo"
+        },
+        {
+          "name": "created_at",
+          "description": "Data e ora della registrazione, distinta dalla data di pubblicazione.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "prov:generatedAtTime"
+        }
+      ],
+      "appendOnly": true,
+      "constraints": [
+        "review_id → reviews.review_id"
+      ]
+    },
+    {
+      "table": "legacy_snapshots",
+      "label": "Conservazione e ripristino",
+      "class": "LegacySnapshot",
+      "description": "Byte-hashed preservation manifest, external-state completeness and restore receipt.",
+      "group": "review",
+      "fields": [
+        {
+          "name": "snapshot_id",
+          "description": "Historical cross-reference only, excluded from V2 deduplication and eligibility. Field: snapshot id.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:snapshotId"
+        },
+        {
+          "name": "git_commit",
+          "description": "Byte-hashed preservation manifest, external-state completeness and restore receipt. Field: git commit.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:gitCommit"
+        },
+        {
+          "name": "manifest_sha256",
+          "description": "Byte-hashed preservation manifest, external-state completeness and restore receipt. Field: manifest sha256.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:manifestSha256"
+        },
+        {
+          "name": "storage_key",
+          "description": "Riferimento interno al documento privato; non è un URL pubblico.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:storageKey"
+        },
+        {
+          "name": "external_state_complete",
+          "description": "Byte-hashed preservation manifest, external-state completeness and restore receipt. Field: external state complete.",
+          "type": "INTEGER",
+          "nullable": false,
+          "semantic": "cile:externalStateComplete"
+        },
+        {
+          "name": "restore_verified_at",
+          "description": "Byte-hashed preservation manifest, external-state completeness and restore receipt. Field: restore verified at.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "cile:restoreVerifiedAt"
+        },
+        {
+          "name": "created_at",
+          "description": "Data e ora della registrazione, distinta dalla data di pubblicazione.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "prov:generatedAtTime"
+        }
+      ],
+      "appendOnly": true,
+      "constraints": [
+        "Vincoli di dominio e integrità definiti dallo schema SQL versionato."
+      ]
+    }
+  ]
+}

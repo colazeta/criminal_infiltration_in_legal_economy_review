@@ -1,0 +1,7 @@
+code,label,definition,parent_code,profile_version
+access,Access,Sustained access by a criminal actor or interest to a legal-economy entity market resource or decision channel,,0.1.0
+participation,Participation,Sustained participation in a legal-economy entity market or transaction system,access,0.1.0
+influence,Influence,Capacity to shape decisions behaviour allocation or market outcomes without requiring formal control,participation,0.1.0
+control,Control,De facto or de jure capacity to direct a legal-economy entity activity or decision process,influence,0.1.0
+ownership,Ownership,Direct indirect or beneficial ownership used as the legal or economic basis for sustained criminal participation or control,influence,0.1.0
+embeddedness,Embeddedness,Durable integration into legal economic relationships networks institutions or governance structures,participation,0.1.0

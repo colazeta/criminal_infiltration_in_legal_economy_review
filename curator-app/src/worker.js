@@ -7,9 +7,12 @@ import { handleFreeWebSearchRequest } from "./free-web-search.js";
 import { budgetFor } from "./provider-budget.js";
 import { handleProviderReadinessRequest } from "./provider-readiness.js";
 import { handleResolvedAbstractRequest } from "./resolved-abstract.js";
-import worker, { SubmissionCoordinatorCore } from "./index.js";
+import { superviseDays, consumeDays } from "./daily-runner.js";
+import { handleV2 } from "./review-v2.js";
+import worker, { SubmissionCoordinatorCore, authenticateCuratorRequest } from "./index.js";
 
 const CURATOR_COMPONENT_ASSETS = new Set([
+  "/curator-guided.js",
   "/curator-consensus.js",
   "/curator-assisted-resolution.js",
   "/curator-reading.js",
@@ -24,7 +27,7 @@ const candidateIssueCache = new Map();
 const candidateIssueInFlight = new Map();
 
 function componentLoaderSource() {
-  return `\n(() => {\n  function load(src, marker) {\n    if (document.querySelector('script[data-' + marker + '=\"true\"]')) return;\n    const script = document.createElement(\"script\");\n    script.src = src;\n    script.async = false;\n    script.dataset[marker.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase())] = \"true\";\n    document.head.append(script);\n  }\n  load(\"./curator-consensus.js\", \"curator-consensus\");\n  load(\"./curator-assisted-resolution.js\", \"curator-assisted-resolution\");\n  load(\"./curator-reading.js\", \"curator-reading\");\n  load(\"./curator-queue.js\", \"curator-queue\");\n  load(\"./curator-resolved-link.js\", \"curator-resolved-link\");\n})();\n`;
+  return `\n(() => {\n  function load(src, marker) {\n    if (document.querySelector('script[data-' + marker + '=\"true\"]')) return;\n    const script = document.createElement(\"script\");\n    script.src = src;\n    script.async = false;\n    script.dataset[marker.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase())] = \"true\";\n    document.head.append(script);\n  }\n  load(\"./curator-consensus.js\", \"curator-consensus\");\n  load(\"./curator-assisted-resolution.js\", \"curator-assisted-resolution\");\n  load(\"./curator-reading.js\", \"curator-reading\");\n  load(\"./curator-queue.js\", \"curator-queue\");\n  load(\"./curator-resolved-link.js\", \"curator-resolved-link\");\n  load(\"./curator-guided.js\", \"curator-guided\");\n})();\n`;
 }
 
 async function serveCuratorComponentAsset(request, env) {
@@ -377,8 +380,19 @@ export class SubmissionCoordinator extends DurableObject {
 }
 
 export default {
+  async scheduled(controller, env) { return superviseDays(env, controller.scheduledTime); },
+  async queue(batch, env) { return consumeDays(batch, env); },
   async fetch(request, env) {
     const url = new URL(request.url);
+    if (url.pathname === "/version" && request.method === "GET") return Response.json({ commit: env.DEPLOY_COMMIT || null, ontology: "0.2.0" }, { headers: { "Cache-Control": "no-store" } });
+    if (url.pathname.startsWith("/api/v2/")) {
+      try { return await handleV2(request, env, await authenticateCuratorRequest(request, env)); }
+      catch (error) { return Response.json({ error: { code: error.code || "authentication_required" } }, { status: error.status || 401, headers: { "Cache-Control": "no-store" } }); }
+    }
+    if (["/index.html", "/aml.html", "/stats.html", "/model.html"].includes(url.pathname)) {
+      const base = "https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/";
+      return Response.redirect(new URL(url.pathname.slice(1), base).href, 302);
+    }
     if (request.method === "GET" && CURATOR_COMPONENT_ASSETS.has(url.pathname)) {
       return serveCuratorComponentAsset(request, env);
     }

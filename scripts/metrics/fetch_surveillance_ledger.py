@@ -476,23 +476,10 @@ def verify_intake_issue(
     verify_safeguards(values["Safeguards"])
 
 
-def main() -> None:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--repository", required=True)
-    parser.add_argument("--issue", required=True, type=int)
-    parser.add_argument("--allowed-author", action="append", required=True)
-    parser.add_argument("--output", type=Path, required=True)
-    parser.add_argument("--token-env", default="GITHUB_TOKEN")
-    args = parser.parse_args()
-    if args.repository != REPOSITORY_FULL_NAME:
-        raise MetricsError("repository must match the governed repository")
-    token = os.environ.get(args.token_env)
-    if not token:
-        raise MetricsError(f"Missing token environment variable {args.token_env}")
-
+def fetch_validated_runs(repository, ledger_issue, allowed_author, token):
     url = (
-        f"https://api.github.com/repos/{args.repository}/issues/"
-        f"{args.issue}/comments?per_page=100"
+        f"https://api.github.com/repos/{repository}/issues/"
+        f"{ledger_issue}/comments?per_page=100"
     )
     comments: list[dict] = []
     while url:
@@ -507,7 +494,7 @@ def main() -> None:
     runs = []
     intake_cache: dict[int, dict] = {}
     commit_cache: dict[str, dict] = {}
-    allowed_authors = set(args.allowed_author)
+    allowed_authors = set(allowed_author)
     for comment in comments:
         body = comment.get("body") or ""
         author = ((comment.get("user") or {}).get("login") or "").strip()
@@ -520,7 +507,7 @@ def main() -> None:
         if repository_issues is None:
             repository_issues = []
             issues_url = (
-                f"https://api.github.com/repos/{args.repository}/issues"
+                f"https://api.github.com/repos/{repository}/issues"
                 "?state=all&per_page=100"
             )
             while issues_url:
@@ -533,7 +520,7 @@ def main() -> None:
         repository_commit = run["repository_commit"]
         if repository_commit not in commit_cache:
             compare_url = (
-                f"https://api.github.com/repos/{args.repository}/compare/"
+                f"https://api.github.com/repos/{repository}/compare/"
                 f"{repository_commit}...main"
             )
             comparison, _ = api_get(compare_url, token)
@@ -546,14 +533,33 @@ def main() -> None:
             number = intake["number"]
             if number not in intake_cache:
                 issue_url = (
-                    f"https://api.github.com/repos/{args.repository}/issues/{number}"
+                    f"https://api.github.com/repos/{repository}/issues/{number}"
                 )
                 issue, _ = api_get(issue_url, token)
                 if not isinstance(issue, dict):
                     raise MetricsError("GitHub intake issue response is not an object")
                 intake_cache[number] = issue
-            verify_intake_issue(run, intake_cache[number], allowed_authors, args.issue)
+            verify_intake_issue(run, intake_cache[number], allowed_authors, ledger_issue)
         runs.append(run)
+
+    return runs
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--repository", required=True)
+    parser.add_argument("--issue", required=True, type=int)
+    parser.add_argument("--allowed-author", action="append", required=True)
+    parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--token-env", default="GITHUB_TOKEN")
+    args = parser.parse_args()
+    if args.repository != REPOSITORY_FULL_NAME:
+        raise MetricsError("repository must match the governed repository")
+    token = os.environ.get(args.token_env)
+    if not token:
+        raise MetricsError(f"Missing token environment variable {args.token_env}")
+
+    runs = fetch_validated_runs(args.repository, args.issue, args.allowed_author, token)
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(

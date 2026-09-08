@@ -59,13 +59,13 @@ class CuratorAssistedResolutionSurfaceTests(unittest.TestCase):
         self.assertNotIn("form.submit", source)
         self.assertNotIn("requestSubmit", source)
 
-    def test_core_recommendation_requires_all_four_positive_signals(self) -> None:
-        source = (ROOT / "site/curator-assisted-resolution.js").read_text(encoding="utf-8")
-        self.assertIn("criminalYes && legalYes && relationYes && sustainedYes && analyticalYes", source)
-        self.assertIn('decision: "eligible_core"', source)
+    def test_lexical_assist_abstains_from_eligibility(self) -> None:
+        source = (ROOT / "site/curator-assisted-resolution.js").read_text()
+        self.assertNotIn('decision: "eligible_core"', source)
+        self.assertNotIn('decision: "not_academic"', source)
+        self.assertNotIn('confidence: "high"', source)
         self.assertIn('decision: "maybe_full_text_needed"', source)
-        self.assertIn("Il codebook vieta di decidere eligibility dal titolo", source)
-        self.assertIn("snapshot.evidenceMode === \"metadata\"", source)
+        self.assertIn('evidenceMode === "abstract" ? text : ""', source)
 
     def test_identity_gate_blocks_recommendation_application(self) -> None:
         source = (ROOT / "site/curator-assisted-resolution.js").read_text(encoding="utf-8")

@@ -668,7 +668,7 @@ async function submitDecision(event) {
       title.textContent = result.replayed ? "Decisione già acquisita" : "Decisione acquisita";
       const copy = document.createElement("p");
       copy.textContent =
-        "I controlli e l’applicazione proseguono automaticamente. Non devi aprire GitHub o approvare una seconda volta.";
+        "I controlli e l’applicazione proseguono automaticamente. La proposta richiede la revisione umana della PR prima di essere applicata.";
       const audit = document.createElement("small");
       audit.textContent = `Riferimento audit: istruzione #${result.issueNumber}.`;
       const next = document.createElement("button");

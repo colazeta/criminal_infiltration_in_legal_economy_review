@@ -19,6 +19,11 @@ jobs:
   quality:
     runs-on: ubuntu-latest
     steps:
+      - name: Set up Node.js
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: 22
+
       - name: Checkout
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
@@ -30,6 +35,9 @@ jobs:
       - name: Validate repository and tests
         run: |
           python scripts/validation/validate_repository.py
+          python scripts/ontology/validate_ontology.py
+          python scripts/ontology/build_model_browser.py
+          git diff --exit-code -- site/vocab/review-v2-model.json
           python -m unittest discover -s tests -p 'test_*.py'
           python scripts/report_saturation.py
 
@@ -82,6 +90,11 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
+      - name: Set up Node.js
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: 22
+
       - name: Checkout
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
@@ -106,7 +119,8 @@ jobs:
           python scripts/build_archive.py
           python scripts/build_secondary_collections.py
           python scripts/metrics/build_research_stats.py \
-            --input "$RUNNER_TEMP/surveillance-ledger.json"
+            --input "$RUNNER_TEMP/surveillance-ledger.json" \
+            --as-of "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
           python scripts/curation/build_curator_stats.py
           python scripts/curation/build_curator_options.py
           python scripts/validation/validate_archive.py

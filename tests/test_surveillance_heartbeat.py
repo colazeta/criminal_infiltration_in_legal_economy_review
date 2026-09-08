@@ -23,7 +23,7 @@ class SurveillanceHeartbeatTests(unittest.TestCase):
 
     def test_comment_requires_governed_marker_and_exact_batch(self) -> None:
         body = f'''Daily surveillance batch ACADEMIC-2026-09-05: completed.\n\n{SURVEILLANCE_MARKER}\n```json\n{{"batch_id":"ACADEMIC-2026-09-05"}}\n```'''
-        self.assertTrue(comment_has_batch(body, "ACADEMIC-2026-09-05"))
+        self.assertFalse(comment_has_batch(body, "ACADEMIC-2026-09-05"))  # Incomplete JSON is not a valid run.
         self.assertFalse(comment_has_batch(body, "ACADEMIC-2026-09-04"))
         self.assertFalse(comment_has_batch('{"batch_id":"ACADEMIC-2026-09-05"}', "ACADEMIC-2026-09-05"))
 

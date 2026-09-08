@@ -7,7 +7,7 @@ import argparse
 import json
 import os
 import re
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from typing import Any
 from urllib.error import HTTPError
 from urllib.parse import urlencode
@@ -34,13 +34,13 @@ def rome_today(now: datetime | None = None) -> date:
 
 
 def comment_has_batch(body: str, batch_id: str) -> bool:
-    """Require the governed marker and an exact JSON batch-id field."""
-
-    text = str(body or "")
-    if SURVEILLANCE_MARKER not in text:
+    """Malformed or unvalidated JSON never establishes a heartbeat."""
+    try:
+        from fetch_surveillance_ledger import extract_run
+        run = extract_run(str(body or ""))
+        return run is not None and run["batch_id"] == batch_id
+    except (ValueError, TypeError, KeyError):
         return False
-    pattern = rf'"batch_id"\s*:\s*"{re.escape(batch_id)}"'
-    return re.search(pattern, text) is not None
 
 
 def incident_body(batch_id: str, checked_at: datetime) -> str:
@@ -110,8 +110,9 @@ def paginated(repository: str, resource: str, token: str, **params: str) -> list
 
 
 def ledger_has_batch(repository: str, ledger_issue: int, token: str, batch_id: str) -> bool:
-    comments = paginated(repository, f"issues/{ledger_issue}/comments", token)
-    return any(comment_has_batch(str(comment.get("body", "")), batch_id) for comment in comments)
+    from fetch_surveillance_ledger import fetch_validated_runs
+    runs = fetch_validated_runs(repository, ledger_issue, [repository.split("/")[0]], token)
+    return any(run["batch_id"] == batch_id for run in runs)
 
 
 def find_open_incident(repository: str, token: str) -> dict[str, Any] | None:
@@ -129,7 +130,13 @@ def find_open_incident(repository: str, token: str) -> dict[str, Any] | None:
 
 def reconcile(repository: str, ledger_issue: int, token: str, day: date, *, dry_run: bool = False) -> str:
     batch_id = batch_id_for(day)
-    present = ledger_has_batch(repository, ledger_issue, token, batch_id)
+    from fetch_surveillance_ledger import fetch_validated_runs
+    from daily_calendar import START
+    runs = fetch_validated_runs(repository, ledger_issue, [repository.split("/")[0]], token)
+    represented = {run["run_date"] for run in runs}
+    gaps = [(START + timedelta(days=i)).isoformat() for i in range((day - START).days + 1)
+            if (START + timedelta(days=i)).isoformat() not in represented]
+    present = not gaps
     incident = find_open_incident(repository, token)
 
     if present:
@@ -144,7 +151,7 @@ def reconcile(repository: str, ledger_issue: int, token: str, day: date, *, dry_
             )
         return f"recovered:{batch_id}"
 
-    body = incident_body(batch_id, datetime.now(tz=ROME))
+    body = incident_body(batch_id, datetime.now(tz=ROME)) + "\n\nCalendar gaps still unresolved: " + ", ".join(gaps)
     if incident is None:
         if not dry_run:
             api_request(

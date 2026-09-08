@@ -1,5 +1,7 @@
 "use strict";
 
+import { fetchWithTimeout } from "./network.js";
+
 const MAX_DOCUMENT_LENGTH = 2_000_000;
 const MAX_ABSTRACT_LENGTH = 12_000;
 const MIN_ABSTRACT_LENGTH = 60;
@@ -72,14 +74,12 @@ function metaValues(source) {
   const generic = new Map();
   const preferredKeys = new Set([
     "citation_abstract",
-    "dc.description",
     "dcterms.abstract",
-    "dcterms.description",
     "eprints.abstract",
     "bepress_citation_abstract",
     "abstract",
   ]);
-  const genericKeys = new Set(["description", "og:description", "twitter:description"]);
+  const genericKeys = new Set(["dc.description", "dcterms.description", "description", "og:description", "twitter:description"]);
   for (const match of String(source || "").matchAll(/<meta\b[^>]*>/gi)) {
     const fields = attributes(match[0]);
     const key = String(fields.name || fields.property || fields.itemprop || "").toLowerCase();
@@ -99,7 +99,7 @@ function jsonLdCandidates(value) {
       for (const item of node) visit(item);
       return;
     }
-    for (const key of ["abstract", "description"]) {
+    for (const key of ["abstract"]) {
       if (typeof node[key] === "string") results.push(node[key]);
     }
     if (node["@graph"]) visit(node["@graph"]);
@@ -149,9 +149,28 @@ function extractAbstractFromDocument(source) {
   if (xml) return xml;
   const jsonLd = extractJsonLdAbstract(source);
   if (jsonLd) return jsonLd;
-  for (const value of meta.generic.values()) {
-    const abstract = usableAbstract(value);
-    if (abstract) return abstract;
+  return "";
+}
+
+// A publisher description remains a summary; it never enters the abstract channel.
+function extractDocumentEvidence(source) {
+  const abstract = extractAbstractFromDocument(source);
+  if (abstract) return { text: abstract, kind: "abstract" };
+  for (const value of metaValues(source).generic.values()) {
+    const summary = usableAbstract(value);
+    if (summary) return { text: summary, kind: "publisher_summary" };
+  }
+  return { text: "", kind: "none" };
+}
+
+function extractDocumentDoi(source) {
+  for (const match of String(source || "").matchAll(/<meta\b[^>]*>/gi)) {
+    const fields = attributes(match[0]);
+    const key = String(fields.name || fields.property || "").toLowerCase();
+    if (["citation_doi", "dc.identifier", "dc.identifier.doi", "prism.doi"].includes(key)) {
+      const value = String(fields.content || "").replace(/^https?:\/\/(?:dx\.)?doi\.org\//i, "").replace(/^doi:\s*/i, "").trim().toLowerCase();
+      if (/^10\.\d{4,9}\/\S+$/.test(value)) return value;
+    }
   }
   return "";
 }
@@ -220,7 +239,7 @@ function retrievalUrls(retrieval) {
 }
 
 async function fetchResolvedDocument(url) {
-  const response = await fetch(url, {
+  const response = await fetchWithTimeout(url, {
     redirect: "follow",
     headers: {
       Accept: "text/html,application/xhtml+xml,application/xml,text/xml;q=0.9,*/*;q=0.2",
@@ -239,7 +258,7 @@ async function fetchResolvedDocument(url) {
   };
 }
 
-async function resolveAbstractFromRetrieval({ title, retrieval }) {
+async function resolveAbstractFromRetrieval({ title, doi = "", retrieval }) {
   const requestedTitle = cleanText(title, 1000);
   const urls = retrievalUrls(retrieval);
   let successfulDocument = false;
@@ -255,8 +274,10 @@ async function resolveAbstractFromRetrieval({ title, retrieval }) {
     const abstract = extractAbstractFromDocument(document.source);
     if (!abstract) continue;
     const matchedTitle = extractDocumentTitle(document.source);
-    const score = matchedTitle ? titleSimilarity(requestedTitle, matchedTitle) : 1;
-    if (matchedTitle && score < 0.72) continue;
+    const score = titleSimilarity(requestedTitle, matchedTitle);
+    const matchedDoi = extractDocumentDoi(document.source);
+    const expectedDoi = String(doi || "").replace(/^https?:\/\/doi\.org\//i, "").toLowerCase();
+    if (!matchedTitle || score < 0.9 || (expectedDoi && matchedDoi && expectedDoi !== matchedDoi)) continue;
     let source = "Paper risolto";
     try {
       source = new URL(document.url).hostname.replace(/^www\./, "");
@@ -269,7 +290,8 @@ async function resolveAbstractFromRetrieval({ title, retrieval }) {
       articleUrl: document.url,
       matchedTitle,
       matchedYear: null,
-      matchedDoi: "",
+      matchedDoi,
+      evidenceKind: "abstract",
       matchType: "resolved_url",
       matchScore: Number(score.toFixed(3)),
     };
@@ -302,13 +324,15 @@ async function handleResolvedAbstractRequest(request, retrieval) {
   const url = new URL(request.url);
   const title = cleanText(url.searchParams.get("title"), 1000);
   if (!title) return json({ error: { code: "title_required", message: "Titolo mancante." } }, 400);
-  const result = await resolveAbstractFromRetrieval({ title, retrieval });
+  const result = await resolveAbstractFromRetrieval({ title, doi: url.searchParams.get("doi") || "", retrieval });
   return json(result);
 }
 
 export {
   extractAbstractFromDocument,
   extractDocumentTitle,
+  extractDocumentEvidence,
+  extractDocumentDoi,
   handleResolvedAbstractRequest,
   resolveAbstractFromRetrieval,
   safePublicHttpsUrl,

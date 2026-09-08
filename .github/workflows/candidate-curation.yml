@@ -24,6 +24,11 @@ jobs:
       issues: write
       pull-requests: write
     steps:
+      - name: Set up Node.js
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: 22
+
       - name: Checkout main
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
@@ -87,7 +92,7 @@ jobs:
           echo "candidate_id=$candidate_id" >> "$GITHUB_OUTPUT"
           echo "decision=$decision" >> "$GITHUB_OUTPUT"
 
-      - name: Create and apply auditable pull request
+      - name: Create scientific pull request for human review
         env:
           GH_TOKEN: ${{ github.token }}
           BRANCH: ${{ steps.branch.outputs.branch }}
@@ -147,7 +152,7 @@ jobs:
             echo
             echo "- External retrieval performed: none."
             echo "- Automatic eligibility or publication inference: none."
-            echo "- Unresolved human decisions for this screening action: none. The authenticated curator already confirmed the instruction; metadata verification, canonical promotion and publication remain separate."
+            echo "- Unresolved human decisions: review of the exact PR diff is required before merge; metadata verification, canonical promotion and publication remain separate."
             echo
             echo "Closes #${ISSUE_NUMBER}"
           } > "$body_file"
@@ -163,25 +168,8 @@ jobs:
             exit 1
           fi
 
-          gh issue comment "$ISSUE_NUMBER" --body "Decision validated. Applying the audited change automatically: ${pr_url}"
-          set +e
-          merge_output="$(gh pr merge "$pr_url" --merge --delete-branch 2>&1)"
-          merge_status=$?
-          set -e
-          if [ "$merge_status" -ne 0 ]; then
-            gh issue comment "$ISSUE_NUMBER" --body "The audit pull request was created, but automatic application failed. The candidate remains unresolved in the curator until the workflow is repaired."
-            echo "::error::Could not merge the validated curator pull request automatically"
-            printf '%s\n' "$merge_output"
-            exit 1
-          fi
-
-          gh issue comment "$ISSUE_NUMBER" --body "Decision applied automatically after validation: ${pr_url}"
+          gh issue comment "$ISSUE_NUMBER" --body "Decision proposal validated: ${pr_url}. An authorised human must review the exact diff and merge it; the current candidate is unchanged until then."
           {
-            echo "## Candidate decision applied"
-            echo
-            echo "Pull request: ${pr_url}"
-            echo
-            echo "The authenticated curator decision passed the full validation gate and was merged automatically."
-            echo
+            echo "Candidate decision awaiting human PR review: ${pr_url}"
             cat "$body_file"
           } >> "$GITHUB_STEP_SUMMARY"

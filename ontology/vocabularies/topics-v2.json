@@ -1,0 +1,80 @@
+{
+  "profile_version": "0.2.0",
+  "review_scope": "v2_only",
+  "assignment_policy": "multi_label_human_evidence_required",
+  "legacy_recoding": false,
+  "topics": [
+    {
+      "code": "conceptual_foundations",
+      "definition": "definizione e spiegazione dell'infiltrazione",
+      "inclusion": "Il costrutto o una tipologia sono oggetto centrale",
+      "exclusion": "Rassegna generica di criminalità economica",
+      "examples": "Definizione operativa di Riccardi–Berlusconi / panoramica AML generica",
+      "boundary": "Può accompagnare measurement_identification."
+    },
+    {
+      "code": "firm_entry_ownership_governance",
+      "definition": "ingresso e posizioni nelle imprese",
+      "inclusion": "Fondazione, acquisizione, prestanome o governo societario criminalmente connessi",
+      "exclusion": "Sole conseguenze su un territorio senza relazione d'impresa",
+      "examples": "Indicatore di entrata nella governance in Mirenda et al. / soli tassi regionali di reato",
+      "boundary": "Distinto da effects; ownership resta una relazione."
+    },
+    {
+      "code": "market_coordination_competition",
+      "definition": "organizzazione e condizionamento dei mercati legali",
+      "inclusion": "Cartelli, barriere, allocazione di clienti o concorrenza collegati all'attore criminale",
+      "exclusion": "Cartello industriale senza interesse criminale identificato",
+      "examples": "Cartelli protetti descritti da Gambetta–Reuter / collusione ordinaria non collegata a criminalità",
+      "boundary": "Può accompagnare procurement."
+    },
+    {
+      "code": "procurement_institutional_capture",
+      "definition": "appalti e decisioni amministrative economiche",
+      "inclusion": "Condizionamento di gare, esecuzione, subappalti o amministrazioni con rapporto criminale sostenuto",
+      "exclusion": "Corruzione isolata o politica priva di oggetto economico pertinente",
+      "examples": "Ravenda et al. / sola compravendita di voti",
+      "boundary": "Non è un settore industriale; costruzioni va in Sector."
+    },
+    {
+      "code": "territorial_expansion_embeddedness",
+      "definition": "trasferimento e radicamento economico",
+      "inclusion": "Meccanismi di inserimento in nuovi territori/reti economiche",
+      "exclusion": "Migrazione criminale senza analisi dell'economia legale",
+      "examples": "Reti studiate da Dagnes et al. / semplice arresto all'estero",
+      "boundary": "Sostituzione/allargamento di criminal_transplantation da approvare."
+    },
+    {
+      "code": "facilitators_professional_networks",
+      "definition": "intermediazione stabile e professioni",
+      "inclusion": "Professionisti/intermediari sostengono l'accesso o il controllo criminale",
+      "exclusion": "Assistenza professionale ordinaria o singola infrazione senza relazione continuativa",
+      "examples": "Rete durevole di prestanome e consulenti / errore contabile isolato",
+      "boundary": "Può combinarsi con governance ed embeddedness."
+    },
+    {
+      "code": "firm_operations_finance",
+      "definition": "uso operativo e finanziario dell'impresa infiltrata",
+      "inclusion": "Contabilità, lavoro, finanziamento o riciclaggio sono analizzati dentro una relazione criminale identificata",
+      "exclusion": "Rilevamento AML senza impresa/relazione dimostrata",
+      "examples": "Bilanci di imprese infiltrate / classificatore generico di transazioni sospette",
+      "boundary": "Non rende tutto il riciclaggio core; effetti in altro topic."
+    },
+    {
+      "code": "measurement_identification",
+      "definition": "definizioni empiriche, dati e validazione",
+      "inclusion": "Misurare o identificare l'infiltrazione è un contributo sostanziale",
+      "exclusion": "Proxy usato senza discussione metodologica specifica",
+      "examples": "Valutazione dell'indicatore di governance / algoritmo antifrode generico",
+      "boundary": "Method descrive il metodo; questo topic descrive l'oggetto metodologico."
+    },
+    {
+      "code": "effects_and_disruption",
+      "definition": "conseguenze e rimozione delle relazioni criminali",
+      "inclusion": "Effetti su imprese/mercati o interventi che interrompono una relazione documentata",
+      "exclusion": "Valutazione generale di repressione senza nesso economico analizzato",
+      "examples": "Slutzky–Zeume / arresti e criminalità generale soltanto",
+      "boundary": "Distinguere effetto sull'impresa infiltrata ed effetto sui concorrenti."
+    }
+  ]
+}
