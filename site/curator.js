@@ -307,10 +307,10 @@ function configureSecureWorkspaceLink() {
     else link.removeAttribute("href");
   }
   if (target) {
-    setText("curator-unavailable-title", "Apri la console curatoriale isolata");
+    setText("curator-unavailable-title", "Accedi alla coda editoriale");
     setText(
       "curator-unavailable-copy",
-      "La sessione autenticata vive su un’origine dedicata. La pagina pubblica non riceve bearer, token anti-CSRF o metadati dei candidati.",
+      "Apri la console e accedi con il tuo account GitHub per esaminare i candidati e registrare le decisioni.",
     );
   }
 }
