@@ -79,9 +79,12 @@ def safe_link(value: str) -> str:
 
 def read_queue(path: Path) -> list[dict[str, str]]:
     with path.open(newline="", encoding="utf-8-sig") as handle:
-        rows = [dict(row) for row in csv.DictReader(handle)]
+        reader = csv.DictReader(handle)
+        if not reader.fieldnames or "candidate_id" not in reader.fieldnames:
+            raise SyncError("review queue is missing its governed header")
+        rows = [dict(row) for row in reader]
     ids = [row.get("candidate_id", "") for row in rows]
-    if not ids or any(not value for value in ids) or len(ids) != len(set(ids)):
+    if any(not value for value in ids) or len(ids) != len(set(ids)):
         raise SyncError("review queue candidate IDs are missing or duplicated")
     return rows
 
@@ -241,6 +244,8 @@ def sync(
     unknown_aids = sorted(set(aids) - queue_ids)
     if unknown_aids:
         raise SyncError(f"reading aids refer to unknown candidates: {', '.join(unknown_aids)}")
+    if not queue:
+        return {"queue": 0, "guidance": 0, "reading_aids": 0, "updated": 0, "missing_issues": 0}
     issues = issue_inventory(repository, token)
     updated = 0
     missing = 0

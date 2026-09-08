@@ -15,6 +15,7 @@ from scripts.curation.sync_issue_review_support import (
     clean,
     inline,
     issue_inventory,
+    read_queue,
     replace_section,
     safe_link,
 )
@@ -111,7 +112,12 @@ def remove_section(body: str, heading: str) -> str:
 
 def sync(repository: str, token: str, resolution_path: Path = RESOLUTION_PATH) -> dict[str, int]:
     records = read_resolution(resolution_path)
-    issues = issue_inventory(repository, token)
+    queue_ids = {row["candidate_id"] for row in read_queue(ROOT / "data/curation/review_queue.csv")}
+    if set(records) - queue_ids:
+        raise SyncError("Residual resolution records are outside the active queue")
+    if not queue_ids:
+        return {"registered": 0, "materialized": 0, "removed": 0, "updated": 0, "missing_issues": 0}
+    issues = {key: value for key, value in issue_inventory(repository, token).items() if key in queue_ids}
     missing = sorted(set(records) - set(issues))
     if missing:
         raise SyncError(f"residual abstract-resolution records lack curator issues: {', '.join(missing)}")

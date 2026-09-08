@@ -69,14 +69,16 @@ class GitHubError(RuntimeError):
 
 def read_queue(path: Path) -> list[dict[str, str]]:
     with path.open(newline="", encoding="utf-8-sig") as handle:
-        rows = [dict(row) for row in csv.DictReader(handle)]
+        reader = csv.DictReader(handle)
+        if not reader.fieldnames or "candidate_id" not in reader.fieldnames:
+            raise GitHubError("Curator queue is missing its governed header")
+        rows = [dict(row) for row in reader]
     candidate_ids = {row.get("candidate_id", "") for row in rows}
     if (
-        len(rows) < 55
-        or "" in candidate_ids
+        "" in candidate_ids
         or len(candidate_ids) != len(rows)
     ):
-        raise GitHubError("Expected at least 55 unique candidates in the curator queue")
+        raise GitHubError("Curator queue requires nonblank unique candidate IDs")
     return rows
 
 
@@ -446,6 +448,10 @@ def materialise(
     rows: list[dict[str, str]],
     actions: list[dict[str, str]],
 ) -> tuple[int, int]:
+    if not rows:
+        if actions:
+            raise GitHubError("An empty queue cannot have orphan curator actions")
+        return 0, 0
     ensure_labels(repository, token)
     action_index = actions_by_id(actions)
     validate_action_links(rows, action_index)
