@@ -1,0 +1,157 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "reviewId",
+    "timezone",
+    "scheduledLocalTime",
+    "asOf",
+    "coverageStart",
+    "lastLedgerDate",
+    "rows",
+    "expectedDays",
+    "completedDays",
+    "missingDays",
+    "completionRate",
+    "sourceCompletionRate30"
+  ],
+  "properties": {
+    "reviewId": {
+      "const": "legacy"
+    },
+    "timezone": {
+      "const": "Europe/Rome"
+    },
+    "scheduledLocalTime": {
+      "const": "07:00"
+    },
+    "asOf": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "coverageStart": {
+      "const": "2026-08-31"
+    },
+    "lastLedgerDate": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "rows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "date",
+          "status",
+          "ledgerPresent",
+          "startedAt",
+          "finishedAt",
+          "attemptCount",
+          "queriesPlanned",
+          "queriesCompleted",
+          "completedSources",
+          "expectedSources",
+          "failureCodes"
+        ],
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "status": {
+            "enum": [
+              "planned",
+              "completed",
+              "partial",
+              "failed",
+              "missing"
+            ]
+          },
+          "ledgerPresent": {
+            "type": "boolean"
+          },
+          "startedAt": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "finishedAt": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "attemptCount": {
+            "type": "null"
+          },
+          "queriesPlanned": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "queriesCompleted": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "completedSources": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "expectedSources": {
+            "const": 2
+          },
+          "failureCodes": {
+            "type": "array",
+            "items": {
+              "enum": [
+                "quota_exceeded",
+                "rate_limited",
+                "timeout",
+                "authentication_failed",
+                "provider_unavailable",
+                "not_run",
+                "budget_exhausted",
+                "other_provider_failure"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "expectedDays": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "completedDays": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "missingDays": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "completionRate": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 1
+    },
+    "sourceCompletionRate30": {
+      "type": [
+        "number",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 1
+    }
+  }
+}

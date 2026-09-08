@@ -64,6 +64,9 @@ function statusLabel(value) {
     completed: "completa",
     partial: "parziale",
     failed: "fallita",
+    missing: "mancante",
+    planned: "prevista",
+    running: "in corso",
   }[value] || value;
 }
 
@@ -85,7 +88,7 @@ function populateKpis(payload) {
   setText("#unique-results-7", displayNumber(payload.summary.last7Days.uniqueResults));
   setText(
     "#source-completion-30",
-    displayPercent(payload.summary.last30Days.sourceCompletionRate),
+    displayPercent(payload.calendar?.sourceCompletionRate30 ?? payload.summary.last30Days.sourceCompletionRate),
   );
   setText("#data-through", displayDate(payload.dataThrough));
 }
@@ -128,7 +131,7 @@ function renderSourceTable(rows) {
 }
 
 function intakeCell(row) {
-  return makeStatsElement("td", null, row.intakeIssueCreated ? "creata" : "nessuna");
+  return makeStatsElement("td", null, ["missing", "planned"].includes(row.status) ? "—" : row.intakeIssueCreated ? "creata" : "nessuna");
 }
 
 function renderDailyTable(rows) {
@@ -141,6 +144,7 @@ function renderDailyTable(rows) {
       const status = makeStatsElement("span", `status-pill status-${row.status}`, statusLabel(row.status));
       const statusCell = makeStatsElement("td");
       statusCell.append(status);
+      if (row.failureCodes?.length) statusCell.append(makeStatsElement("small", "daily-failure-code", ` · ${row.failureCodes.join(", ")}`));
       tr.append(
         date,
         statusCell,
@@ -285,6 +289,12 @@ function renderChart(rows) {
 }
 
 function renderStatus(payload) {
+  if (payload.calendar) {
+    const calendar = payload.calendar;
+    statsElements.status.className = "status-banner";
+    statsElements.status.textContent = `Calendario Europe/Rome · avvio previsto 07:00. ${calendar.completedDays} / ${calendar.expectedDays} giorni attesi completi; ${calendar.missingDays} mancanti. Ultimo ledger: ${displayDate(calendar.lastLedgerDate)}. Proiezione: ${new Date(calendar.asOf).toLocaleString("it-IT", { timeZone: "Europe/Rome" })}. Tentativi e retry legacy: non misurati.`;
+    return;
+  }
   const last = payload.daily[payload.daily.length - 1];
   const age = dataAgeDays(payload.dataThrough);
   const stale = age !== null && age > 1;
@@ -306,15 +316,18 @@ fetch("./data/research-stats.json")
   })
   .then((payload) => {
     populateKpis(payload);
-    if (!payload.daily.length) {
+    if (!payload.daily.length && !payload.calendar?.rows.length) {
       statsElements.empty.hidden = false;
       return;
     }
     statsElements.content.hidden = false;
     renderStatus(payload);
     renderChart(payload.daily);
-    renderSourceTable(payload.sources);
-    renderDailyTable(payload.daily);
+    const calendarRows = payload.calendar?.rows;
+    const due30 = calendarRows ? calendarWindow(calendarRows, 30).filter((row) => row.status !== "planned").length : null;
+    renderSourceTable(payload.sources.map((row) => due30 === null ? row : { ...row, expectedRuns: due30 }));
+    const observed = new Map(payload.daily.map((row) => [row.date, row]));
+    renderDailyTable(calendarRows ? calendarRows.map((row) => ({ ...observed.get(row.date), ...row })) : payload.daily);
   })
   .catch(() => {
     statsElements.error.hidden = false;

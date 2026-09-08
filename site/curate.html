@@ -12,154 +12,7 @@
     <link rel="stylesheet" href="./styles.css" />
     <link rel="stylesheet" href="./curator-reading.css" data-curator-reading="true" />
     <link rel="stylesheet" href="./curator-queue.css" data-curator-queue="true" />
-    <style id="curator-fullscreen-shell">
-      /* CURATOR_FULLSCREEN_SHELL_V1 — critical geometry, static at first paint. */
-      html,
-      body.curator-page {
-        width: 100%;
-        height: 100%;
-        min-width: 0;
-        min-height: 0;
-        margin: 0;
-        padding: 0;
-        overflow: hidden;
-      }
-
-      body.curator-page > main#main-content {
-        position: fixed;
-        inset: 0;
-        width: auto;
-        height: auto;
-        min-width: 0;
-        min-height: 0;
-        max-width: none;
-        margin: 0;
-        padding: 0;
-        overflow: hidden;
-      }
-
-      .curator-page #curator-workflow,
-      .curator-page #editorial-app {
-        width: 100%;
-        height: 100%;
-        min-width: 0;
-        min-height: 0;
-        max-width: none;
-        margin: 0;
-        padding: 0;
-        overflow: hidden;
-      }
-
-      .curator-page #editorial-app {
-        display: flex;
-        flex-direction: column;
-      }
-
-      .curator-page .curator-titlebar,
-      .curator-page .curator-menubar,
-      .curator-page .curator-app-message,
-      .curator-page .curator-app-unavailable,
-      .curator-page .curator-login-panel,
-      .curator-page .curator-session-panel {
-        flex: 0 0 auto;
-        min-width: 0;
-      }
-
-      .curator-page .curator-menubar {
-        display: flex;
-        min-height: 22px;
-        overflow-x: auto;
-        border: 1px solid #707070;
-        border-top: 0;
-        background: #d4d0c8;
-        white-space: nowrap;
-      }
-
-      .curator-page .curator-menubar a {
-        flex: 0 0 auto;
-        min-height: 21px;
-        padding: 4px 8px 3px;
-        border-right: 1px solid #8d8d8d;
-        color: #000;
-        font: 10px Arial, Helvetica, sans-serif;
-        text-decoration: none;
-      }
-
-      .curator-page .curator-menubar a:hover,
-      .curator-page .curator-menubar a[aria-current="page"] {
-        background: #000080;
-        color: #fff;
-      }
-
-      .curator-page #editorial-console {
-        display: grid;
-        grid-template-columns: minmax(0, 1fr);
-        grid-template-rows: clamp(180px, 30%, 275px) minmax(0, 1fr);
-        flex: 1 1 0%;
-        width: 100%;
-        height: 0;
-        min-width: 0;
-        min-height: 0;
-        max-width: none;
-        margin: 0;
-        padding: 0;
-        gap: 3px;
-        overflow: hidden;
-        border: 0;
-        border-radius: 0;
-        background: transparent;
-        box-shadow: none;
-      }
-
-      .curator-page #editorial-console[hidden] {
-        display: none !important;
-      }
-
-      .curator-page #editorial-console > .candidate-browser,
-      .curator-page #editorial-console > .candidate-decision-panel {
-        width: 100%;
-        min-width: 0;
-        min-height: 0;
-        max-width: none;
-        margin: 0;
-        border-radius: 0;
-        box-shadow: none;
-      }
-
-      .curator-page #editorial-console > .candidate-browser {
-        overflow: hidden;
-      }
-
-      .curator-page #editorial-console > .candidate-decision-panel {
-        overflow: auto;
-        overscroll-behavior: contain;
-      }
-
-      .curator-page #candidate-list,
-      .curator-page #candidate-detail,
-      .curator-page #candidate-guided-assist-panel,
-      .curator-page #decision-form {
-        min-width: 0;
-        max-width: none;
-      }
-
-      .curator-page #candidate-list {
-        min-height: 0;
-        overscroll-behavior: contain;
-      }
-
-      @media (max-height: 640px) {
-        .curator-page #editorial-console {
-          grid-template-rows: clamp(150px, 27%, 210px) minmax(0, 1fr);
-        }
-      }
-
-      @media (max-width: 820px) {
-        .curator-page #editorial-console {
-          grid-template-rows: clamp(200px, 36%, 270px) minmax(0, 1fr);
-        }
-      }
-    </style>
+    <link rel="stylesheet" href="./curator-shell.css" />
     <script src="./curator-config.js" defer></script>
     <script src="./curator.js" defer></script>
   </head>
@@ -174,9 +27,11 @@
             <span>CRIMINAL INFILTRATION REVIEW</span>
           </div>
           <nav class="curator-menubar" aria-label="Navigazione del progetto">
-            <a href="./">ARCHIVE</a>
+            <a href="https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/">ARCHIVE</a>
             <a href="./aml.html">AML</a>
             <a href="./stats.html">STATS</a>
+            <a href="./model.html">MODELLO</a>
+            <a href="https://criminal-infiltration-curator.colazeta-research.workers.dev/review-v2.html">REVIEW V2</a>
             <a href="./curate.html" aria-current="page">CURATOR</a>
             <a href="https://github.com/colazeta/criminal_infiltration_in_legal_economy_review" rel="noreferrer">REPOSITORY</a>
           </nav>

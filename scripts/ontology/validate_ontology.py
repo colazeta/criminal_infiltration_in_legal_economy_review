@@ -103,7 +103,7 @@ def enum_values(profile: dict[str, Any], enum_name: str) -> set[str]:
 
 
 def check_profile(profile: dict[str, Any], external: dict[str, Any]) -> None:
-    if profile.get("version") != "0.1.0":
+    if profile.get("version") != "0.2.0":
         fail(f"unexpected_profile_version:{profile.get('version')}")
     prefixes = profile.get("prefixes")
     classes = profile.get("classes")
@@ -267,9 +267,9 @@ def check_serialisations(profile: dict[str, Any]) -> None:
     if source != PUBLIC_TTL_PATH.read_text(encoding="utf-8"):
         fail("public_ontology_turtle_drift")
     for marker in (
-        'owl:versionInfo "0.1.0"', "cile:ScholarlyWork a owl:Class",
+        'owl:versionInfo "0.2.0"', "cile:ScholarlyWork a owl:Class",
         "cile:Manifestation a owl:Class", "cile:ScreeningDecision a owl:Class",
-        "cile:AccessAssessment a owl:Class", "skos:exactMatch slr:IncludedSource",
+        "cile:AccessAssessment a owl:Class", "skos:relatedMatch fabio:Work",
         "skos:relatedMatch ripe:Answer",
     ):
         if marker not in source:
@@ -372,11 +372,42 @@ def check_candidate_coverage(data: dict[str, list[dict[str, str]]]) -> None:
                 fail(f"coverage_persists_content:{path_name}:{field}")
 
 
+def check_private_v2_contract(profile: dict[str, Any]) -> None:
+    import sqlite3
+    module = load_json(ROOT / "ontology/modules/review-v2.json")
+    if module["profile_version"] != profile["version"]:
+        fail("v2_profile_version_mismatch")
+    connection = sqlite3.connect(":memory:")
+    connection.executescript((ROOT / module["migration"]).read_text())
+    tables = {row[0] for row in connection.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+    if tables != set(module["tables"]):
+        fail("unmapped_private_v2_table")
+    for table, contract in module["tables"].items():
+        if contract["class"] not in profile["classes"]:
+            fail(f"unknown_v2_class:{table}")
+        fields = {row[1] for row in connection.execute(f'PRAGMA table_info("{table}")')}
+        if fields != set(contract["fields"]):
+            fail(f"unmapped_private_v2_field:{table}")
+        for field in contract["fields"].values():
+            if field["slot"] not in profile["slots"]:
+                fail(f"unknown_private_v2_slot:{table}")
+        if connection.execute(f'SELECT count(*) FROM "{table}"').fetchone()[0]:
+            fail(f"v2_migration_must_start_empty:{table}")
+    for table in module["append_only_tables"]:
+        for action in ("update", "delete"):
+            if not connection.execute("SELECT 1 FROM sqlite_master WHERE type='trigger' AND name=?", (f"{table}_no_{action}",)).fetchone():
+                fail(f"missing_append_only_guard:{table}:{action}")
+    if "slr:IncludedSource" in profile["classes"]["ScholarlyWork"].get("exact_mappings", []):
+        fail("work_is_not_an_inclusion")
+    connection.close()
+
+
 def validate_all(*, quiet: bool = False) -> dict[str, int | str]:
     profile = load_json(PROFILE_PATH)
     external = load_json(EXTERNAL_PATH)
     contracts = load_json(CONTRACT_PATH)
     check_profile(profile, external)
+    check_private_v2_contract(profile)
     check_vocabulary(profile)
     check_serialisations(profile)
     data = check_contracts(profile, contracts)

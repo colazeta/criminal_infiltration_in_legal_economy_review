@@ -1,0 +1,129 @@
+@prefix cile: <https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/vocab/cile-review.ttl#> .
+@prefix slr: <https://w3id.org/slr-ontology/> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix fabio: <http://purl.org/spar/fabio/> .
+@prefix bibo: <http://purl.org/ontology/bibo/> .
+@prefix oa: <http://www.w3.org/ns/oa#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix ripe: <https://w3id.org/ripe/ripe-o#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/vocab/cile-review.ttl>
+    a owl:Ontology ;
+    dcterms:title "CILE Review Ontology Profile" ;
+    dcterms:description "Application ontology for the Criminal Infiltration in the Legal Economy living systematic review." ;
+    owl:versionInfo "0.1.0" ;
+    dcterms:source <https://github.com/sensein/synthscholar> ,
+                   <https://github.com/RIPE-Observatory/RIPE-O> .
+
+cile:CandidateRecord a owl:Class ;
+    rdfs:subClassOf prov:Entity ;
+    rdfs:label "Candidate record" ;
+    skos:definition "A discovered review candidate that has not yet been promoted to a canonical scholarly work." .
+
+cile:ScholarlyWork a owl:Class ;
+    rdfs:subClassOf prov:Entity ;
+    rdfs:label "Scholarly work" ;
+    skos:definition "The canonical intellectual work represented once in the governed registry, independent of its identifiers and manifestations." ;
+    skos:exactMatch slr:IncludedSource ;
+    skos:relatedMatch fabio:Expression .
+
+cile:CriminalInfiltrationStudy a owl:Class ;
+    rdfs:subClassOf cile:ScholarlyWork ;
+    rdfs:label "Criminal infiltration study" .
+
+cile:Manifestation a owl:Class ;
+    rdfs:subClassOf prov:Entity ;
+    rdfs:label "Manifestation" ;
+    skos:definition "A retrievable or identifiable manifestation of one scholarly work, such as a publisher version, repository copy, working-paper version, PDF, XML or HTML full text." ;
+    skos:relatedMatch fabio:Manifestation .
+
+cile:Identifier a owl:Class ;
+    rdfs:subClassOf prov:Entity ;
+    rdfs:label "Identifier" ;
+    skos:definition "A DOI or other identifier attached to a work or one of its manifestations." .
+
+cile:SearchActivity a owl:Class ;
+    rdfs:subClassOf prov:Activity ;
+    rdfs:label "Search activity" .
+
+cile:RetrievalActivity a owl:Class ;
+    rdfs:subClassOf prov:Activity ;
+    rdfs:label "Retrieval activity" .
+
+cile:ScreeningActivity a owl:Class ;
+    rdfs:subClassOf prov:Activity ;
+    rdfs:label "Screening activity" .
+
+cile:ScreeningDecision a owl:Class ;
+    rdfs:subClassOf prov:Entity ;
+    rdfs:label "Screening decision" ;
+    skos:definition "An evidence-backed review decision attributed to a reviewer and preserved as versioned provenance." ;
+    skos:relatedMatch ripe:Answer .
+
+cile:Evidence a owl:Class ;
+    rdfs:subClassOf prov:Entity ;
+    rdfs:label "Evidence" ;
+    skos:relatedMatch ripe:Evidence .
+
+cile:EvidenceSpan a owl:Class ;
+    rdfs:subClassOf cile:Evidence , oa:Annotation ;
+    rdfs:label "Evidence span" .
+
+cile:AbstractCoverageAssessment a owl:Class ;
+    rdfs:subClassOf cile:Evidence ;
+    rdfs:label "Abstract coverage assessment" .
+
+cile:AccessAssessment a owl:Class ;
+    rdfs:subClassOf cile:Evidence ;
+    rdfs:label "Access assessment" ;
+    skos:definition "A dated assessment of whether an open full-text manifestation is verified, access is positively restricted, or evidence remains insufficient/conflicting." .
+
+cile:CodingAssertion a owl:Class ;
+    rdfs:subClassOf prov:Entity ;
+    rdfs:label "Coding assertion" .
+
+cile:PublicationState a owl:Class ;
+    rdfs:subClassOf prov:Entity ;
+    rdfs:label "Publication state" .
+
+cile:WorkRelation a owl:Class ;
+    rdfs:subClassOf prov:Entity ;
+    rdfs:label "Work relation" .
+
+cile:ResearchQuestion a owl:Class ;
+    rdfs:subClassOf prov:Entity ;
+    rdfs:label "Research question" .
+
+cile:reviewId a owl:DatatypeProperty ; rdfs:range xsd:string .
+cile:candidateId a owl:DatatypeProperty ; rdfs:domain cile:CandidateRecord ; rdfs:range xsd:string .
+cile:workId a owl:DatatypeProperty ; rdfs:domain cile:ScholarlyWork ; rdfs:range xsd:string .
+cile:manifestationId a owl:DatatypeProperty ; rdfs:domain cile:Manifestation ; rdfs:range xsd:string .
+cile:hasManifestation a owl:ObjectProperty ; rdfs:domain cile:ScholarlyWork ; rdfs:range cile:Manifestation .
+cile:hasIdentifier a owl:ObjectProperty ; rdfs:domain cile:ScholarlyWork ; rdfs:range cile:Identifier .
+cile:identifierScheme a owl:DatatypeProperty ; rdfs:domain cile:Identifier ; rdfs:range xsd:string .
+cile:identifierRelation a owl:DatatypeProperty ; rdfs:domain cile:Identifier ; rdfs:range xsd:string .
+cile:reviewStage a owl:DatatypeProperty ; rdfs:range xsd:string .
+cile:candidateStatus a owl:DatatypeProperty ; rdfs:domain cile:CandidateRecord ; rdfs:range xsd:string .
+cile:screeningDecision a owl:DatatypeProperty ; rdfs:domain cile:ScreeningDecision ; rdfs:range xsd:string .
+cile:exclusionReason a owl:ObjectProperty ; rdfs:domain cile:ScreeningDecision ; rdfs:range skos:Concept .
+cile:evidenceLocator a owl:DatatypeProperty ; rdfs:range xsd:string .
+cile:accessStatus a owl:DatatypeProperty ; rdfs:domain cile:AccessAssessment ; rdfs:range xsd:string .
+cile:accessKind a owl:DatatypeProperty ; rdfs:domain cile:AccessAssessment ; rdfs:range xsd:string .
+cile:accessUrl a owl:DatatypeProperty ; rdfs:domain cile:AccessAssessment ; rdfs:range xsd:anyURI .
+cile:abstractStatus a owl:DatatypeProperty ; rdfs:domain cile:AbstractCoverageAssessment ; rdfs:range xsd:string .
+cile:infiltrationRelation a owl:ObjectProperty ; rdfs:domain cile:CriminalInfiltrationStudy ; rdfs:range skos:Concept .
+
+cile:InfiltrationRelationScheme a skos:ConceptScheme ;
+    skos:prefLabel "CILE infiltration relations" .
+
+cile:access a skos:Concept ; skos:inScheme cile:InfiltrationRelationScheme ; skos:prefLabel "Access" ; skos:definition "Sustained access by a criminal actor or interest to a legal-economy entity, market, resource or decision channel." .
+cile:participation a skos:Concept ; skos:inScheme cile:InfiltrationRelationScheme ; skos:prefLabel "Participation" ; skos:broader cile:access .
+cile:influence a skos:Concept ; skos:inScheme cile:InfiltrationRelationScheme ; skos:prefLabel "Influence" ; skos:broader cile:participation .
+cile:control a skos:Concept ; skos:inScheme cile:InfiltrationRelationScheme ; skos:prefLabel "Control" ; skos:broader cile:influence .
+cile:ownership a skos:Concept ; skos:inScheme cile:InfiltrationRelationScheme ; skos:prefLabel "Ownership" ; skos:broader cile:influence .
+cile:embeddedness a skos:Concept ; skos:inScheme cile:InfiltrationRelationScheme ; skos:prefLabel "Embeddedness" ; skos:broader cile:participation .

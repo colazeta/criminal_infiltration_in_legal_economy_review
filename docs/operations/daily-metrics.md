@@ -123,9 +123,7 @@ fonte.
 
 ## Finestre temporali
 
-La pagina mostra finestre di 7 e 30 giorni ancorate all'ultima giornata presente
-nel ledger, non all'orologio del browser. Questo rende il risultato riproducibile
-e impedisce che un sito non aggiornato sposti silenziosamente le finestre.
+La proiezione v2 del calendario copre ogni giorno dal 31 agosto 2026 alla data esplicita di build (`--as-of`), in Europe/Rome. Il ledger originale resta distinto. La completezza include i giorni attesi mancanti; l’assenza non diventa zero. L’ultima data del ledger e quella della proiezione sono mostrate separatamente. I volumi legacy restano definiti dal loro contratto v1; i tentativi legacy non sono misurati.
 
 Il grafico compare soltanto dopo almeno otto giornate complete. Prima di quella
 soglia vengono mostrate schede e tabella: pochi punti non vengono presentati
@@ -191,3 +189,5 @@ online l'ultimo rilascio valido.
 - Recupero del ledger: `scripts/metrics/fetch_surveillance_ledger.py`
 - Generazione JSON: `scripts/metrics/build_research_stats.py`
 - Pagina pubblica: `site/stats.html`
+
+La specifica implementata e i gate di avvio V2 sono descritti in [Review V2 delivery](review-v2-delivery.md).

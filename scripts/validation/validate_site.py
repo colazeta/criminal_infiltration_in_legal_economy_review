@@ -102,9 +102,11 @@ def validate_pages() -> None:
         "404.html": "en",
         "curate.html": "it",
         "stats.html": "it",
+        "model.html": "it",
+        "review-v2.html": "it",
     }
     if {path.name for path in pages} != set(expected_languages):
-        fail("Expected index.html, aml.html, stats.html, curate.html and 404.html only")
+        fail("Unexpected HTML page outside the governed site route inventory")
     parsed: dict[Path, PageParser] = {
         path: parse_page(path, expected_languages[path.name]) for path in pages
     }

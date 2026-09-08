@@ -46,7 +46,7 @@ class ClassicSiteUiTests(unittest.TestCase):
         self.assertIn("border-collapse: collapse", source)
 
     def test_curator_uses_same_classic_navigation_language_without_global_skin(self) -> None:
-        source = (SITE / "curate.html").read_text(encoding="utf-8")
+        source = (SITE / "curate.html").read_text(encoding="utf-8") + (SITE / "curator-shell.css").read_text()
         self.assertIn('class="curator-menubar"', source)
         self.assertIn('aria-current="page">CURATOR</a>', source)
         self.assertIn("background: #000080", source)

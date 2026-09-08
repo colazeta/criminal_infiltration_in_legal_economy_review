@@ -1,0 +1,57 @@
+name: Prepare Review V2 scientific approval
+on:
+  issues:
+    types: [opened]
+permissions:
+  contents: read
+concurrency:
+  group: review-v2-proposal-${{ github.event.issue.number }}
+  cancel-in-progress: false
+jobs:
+  prepare:
+    if: github.actor == github.repository_owner && startsWith(github.event.issue.title, '[V2 PROPOSAL] ')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout current review code
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: "3.11"
+      - name: Validate the hash-only manifest
+        run: python3 scripts/review_v2/prepare_proposal.py
+      - name: Prepare a branch and human-review PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          branch="scientific-proposal/${GITHUB_RUN_ID}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$branch"
+          git add scientific-approvals
+          git commit -m "Prepare hash-bound human screening approval"
+          git push origin "$branch"
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          event = json.loads(Path(os.environ["GITHUB_EVENT_PATH"]).read_text())
+          from scripts.review_v2.prepare_proposal import parse
+          proposal = parse(event["issue"]["body"])
+          body = (
+              "This PR requests human review of the exact private screening proposal.\n\n"
+              "Inspect all four criteria and the source snapshots in the authenticated console:\n"
+              f"https://criminal-infiltration-curator.colazeta-research.workers.dev/review-v2.html?proposal={proposal['proposal_id']}\n\n"
+              f"Payload SHA-256: `{proposal['payload_sha256']}`.\n\n"
+              "Changed files: one hash-only scientific-approvals manifest. No candidate metadata, evidence text, registry or publication rows.\n\n"
+              "Validation: strict envelope, owner identity, protocol version and SHA-256 format. External scholarly retrieval: none.\n\n"
+              "Unresolved human decisions: inspect the private immutable proposal, approve this exact PR head, then merge. The importer refuses absent, stale or bot approval. Publication remains independent.\n\n"
+              f"Closes #{os.environ['ISSUE_NUMBER']}\n"
+          )
+          Path(os.environ["RUNNER_TEMP"], "proposal-pr.md").write_text(body)
+          PY
+          gh pr create --base main --head "$branch" --title "Review V2: human screening approval" --body-file "$RUNNER_TEMP/proposal-pr.md"
+          # Deliberately no gh pr merge: scientific review remains a human action.

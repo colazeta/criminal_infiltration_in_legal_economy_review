@@ -1,0 +1,99 @@
+{
+  "profile_version": "0.2.0",
+  "schema": "schema/daily-calendar.schema.json",
+  "class": "SearchDay",
+  "fields": {
+    "reviewId": {
+      "semantic_uri": "cile:reviewId",
+      "definition": "reviewId in the legacy Rome calendar projection; absent execution is never a measured zero."
+    },
+    "timezone": {
+      "semantic_uri": "cile:timezone",
+      "definition": "timezone in the legacy Rome calendar projection; absent execution is never a measured zero."
+    },
+    "scheduledLocalTime": {
+      "semantic_uri": "cile:scheduledLocalTime",
+      "definition": "scheduledLocalTime in the legacy Rome calendar projection; absent execution is never a measured zero."
+    },
+    "asOf": {
+      "semantic_uri": "cile:asOf",
+      "definition": "asOf in the legacy Rome calendar projection; absent execution is never a measured zero."
+    },
+    "coverageStart": {
+      "semantic_uri": "cile:coverageStart",
+      "definition": "coverageStart in the legacy Rome calendar projection; absent execution is never a measured zero."
+    },
+    "lastLedgerDate": {
+      "semantic_uri": "cile:lastLedgerDate",
+      "definition": "lastLedgerDate in the legacy Rome calendar projection; absent execution is never a measured zero."
+    },
+    "rows": {
+      "semantic_uri": "cile:rows",
+      "definition": "rows in the legacy Rome calendar projection; absent execution is never a measured zero."
+    },
+    "expectedDays": {
+      "semantic_uri": "cile:expectedDays",
+      "definition": "expectedDays in the legacy Rome calendar projection; absent execution is never a measured zero."
+    },
+    "completedDays": {
+      "semantic_uri": "cile:completedDays",
+      "definition": "completedDays in the legacy Rome calendar projection; absent execution is never a measured zero."
+    },
+    "missingDays": {
+      "semantic_uri": "cile:missingDays",
+      "definition": "missingDays in the legacy Rome calendar projection; absent execution is never a measured zero."
+    },
+    "completionRate": {
+      "semantic_uri": "cile:completionRate",
+      "definition": "completionRate in the legacy Rome calendar projection; absent execution is never a measured zero."
+    },
+    "sourceCompletionRate30": {
+      "semantic_uri": "cile:sourceCompletionRate30",
+      "definition": "sourceCompletionRate30 in the legacy Rome calendar projection; absent execution is never a measured zero."
+    },
+    "date": {
+      "semantic_uri": "cile:date",
+      "definition": "date in the legacy Rome calendar projection; absent execution is never a measured zero."
+    },
+    "status": {
+      "semantic_uri": "cile:status",
+      "definition": "status in the legacy Rome calendar projection; absent execution is never a measured zero."
+    },
+    "ledgerPresent": {
+      "semantic_uri": "cile:ledgerPresent",
+      "definition": "ledgerPresent in the legacy Rome calendar projection; absent execution is never a measured zero."
+    },
+    "startedAt": {
+      "semantic_uri": "cile:startedAt",
+      "definition": "startedAt in the legacy Rome calendar projection; absent execution is never a measured zero."
+    },
+    "finishedAt": {
+      "semantic_uri": "cile:finishedAt",
+      "definition": "finishedAt in the legacy Rome calendar projection; absent execution is never a measured zero."
+    },
+    "attemptCount": {
+      "semantic_uri": "cile:attemptCount",
+      "definition": "attemptCount in the legacy Rome calendar projection; absent execution is never a measured zero."
+    },
+    "queriesPlanned": {
+      "semantic_uri": "cile:queriesPlanned",
+      "definition": "queriesPlanned in the legacy Rome calendar projection; absent execution is never a measured zero."
+    },
+    "queriesCompleted": {
+      "semantic_uri": "cile:queriesCompleted",
+      "definition": "queriesCompleted in the legacy Rome calendar projection; absent execution is never a measured zero."
+    },
+    "completedSources": {
+      "semantic_uri": "cile:completedSources",
+      "definition": "completedSources in the legacy Rome calendar projection; absent execution is never a measured zero."
+    },
+    "expectedSources": {
+      "semantic_uri": "cile:expectedSources",
+      "definition": "expectedSources in the legacy Rome calendar projection; absent execution is never a measured zero."
+    },
+    "failureCodes": {
+      "semantic_uri": "cile:failureCodes",
+      "definition": "failureCodes in the legacy Rome calendar projection; absent execution is never a measured zero."
+    }
+  }
+}

@@ -2,7 +2,7 @@
 
 (() => {
   const SESSION_KEY = "criminal-infiltration-curator-session";
-  const ASSIST_VERSION = "CILE-ASSIST-v1";
+  const ASSIST_VERSION = "CILE-ASSIST-v2-abstention";
   const config = window.CURATOR_APP_CONFIG || {};
   const apiBaseUrl = String(config.apiBaseUrl || "").replace(/\/$/, "");
   const byId = (id) => document.getElementById(id);
@@ -282,23 +282,6 @@
     return panel;
   }
 
-  const PATTERNS = Object.freeze({
-    criminal: /\b(mafia|mafias|mafia-type|camorra|cosa nostra|ndrangheta|organized crime|organised crime|criminal organi[sz]ation|criminal group|criminal network|criminal firms?|mafia-related|mafia affiliated)\b/i,
-    legalEconomy: /\b(firms?|companies|company|business(?:es)?|enterprises?|public procurement|procurement|contracts?|markets?|sectors?|industr(?:y|ies)|corporate|ownership|shareholders?|legitimate (?:business|industry|economy)|legal economy|real estate|construction|waste|hospitality|assets?|professions?)\b/i,
-    relation: /\b(infiltrat\w*|influence\w*|control\w*|ownership|participat\w*|embedded\w*|interlock\w*|penetrat\w*|takeover|entry into|criminal-linked|linked to organi[sz]ed crime|mafia-related firms?|criminal firms?)\b/i,
-    sustained: /\b(sustained|durable|long[- ]term|stable|structural|systematic|embedded\w*|control\w*|ownership|interlock\w*)\b/i,
-    analytical: /\b(analy[sz]\w*|examin\w*|stud(?:y|ies|ied)|estimat\w*|evaluat\w*|test\w*|investigat\w*|assess\w*|empirical|evidence|data|model\w*|case analysis|network\w*|classifier|effect\w*|impact\w*|determinant\w*|dynamics)\b/i,
-    contextual: /\b(concept\w*|theor\w*|framework|method\w*|risk assessment|indicator\w*|detection|screening|typolog\w*|definition|measurement|beneficial ownership)\b/i,
-    adjacent: /\b(money laundering|laundering|shell compan\w*|corruption|bribery|violence|drug trafficking|illicit capital|tax evasion|fraud|professional facilitation)\b/i,
-    explicitNegative: /\b(outside (?:the )?scope|not (?:an )?infiltration|no infiltration relation|does not (?:analyse|analyze|examine)|mention only|adjacent phenomenon|no criminal actor|no legal[- ]economy link)\b/i,
-    conceptualTopic: /\b(concept\w*|theor\w*|definition|defin\w*|framework)\b/i,
-    transplantationTopic: /\b(migrat\w*|transplant\w*|relocat\w*|territorial expansion|new territor\w*|establish\w* in new)\b/i,
-  });
-
-  function signal(text, pattern) {
-    return pattern.test(text);
-  }
-
   function evidenceSnapshot() {
     const panel = byId("candidate-abstract-panel");
     const evidenceMode = panel?.dataset.evidenceMode || "";
@@ -308,7 +291,7 @@
     const aid = currentContext?.reviewSupport?.aid || null;
     const guidance = currentContext?.reviewSupport?.guidance || null;
     const synopsis = clean(aid?.["Review synopsis"]);
-    const substantiveText = evidenceMode === "abstract" || evidenceMode === "synthesis" ? text : synopsis;
+    const substantiveText = evidenceMode === "abstract" ? text : ""; // Generated notes cannot corroborate themselves.
     return {
       evidenceMode,
       text,
@@ -342,160 +325,33 @@
     return { high: "ALTA", medium: "MEDIA", low: "BASSA" }[value] || "—";
   }
 
-  function topicSuggestion(text) {
-    if (signal(text, PATTERNS.transplantationTopic)) return "criminal_transplantation";
-    if (signal(text, PATTERNS.conceptualTopic)) return "conceptual_foundations";
-    return "";
-  }
-
-  function screeningStage(snapshot) {
-    if (snapshot.evidenceMode === "abstract") return "title_abstract";
-    if (clean(snapshot.aid?.["Aid kind"]) === "full_text_intro") return "full_text";
-    return "";
-  }
-
   function buildRecommendation() {
-    const candidateId = selectedCandidateId();
-    const detail = byId("candidate-detail");
     const snapshot = evidenceSnapshot();
-    const evidence = snapshot.normalised;
-    const resolutionClass = clean(currentContext?.assistedResolution?.["Resolution class"]);
-    const priorSignal = normalise(snapshot.guidance?.["Prior triage signal"]);
-    const focus = clean(snapshot.guidance?.["Candidate-specific focus"]);
-    const approach = clean(snapshot.guidance?.approach);
-    const identityBlocked = detail?.dataset.identityBlocked === "true" || detail?.dataset.scholarIdentityBlocked === "true";
-    const duplicateRisk = detail?.dataset.identityState === "duplicate_risk" || detail?.dataset.scholarIdentityState === "manifestation_ambiguity";
-
-    const criminalYes = Boolean(evidence && signal(evidence, PATTERNS.criminal));
-    const legalYes = Boolean(evidence && signal(evidence, PATTERNS.legalEconomy));
-    const relationYes = Boolean(evidence && signal(evidence, PATTERNS.relation));
-    const sustainedYes = Boolean(evidence && (signal(evidence, PATTERNS.sustained) || /infiltrat\w*/i.test(evidence)));
-    const analyticalYes = Boolean(evidence && signal(evidence, PATTERNS.analytical));
-    const contextualSignal = Boolean(evidence && signal(evidence, PATTERNS.contextual));
-    const adjacentSignal = Boolean(evidence && signal(evidence, PATTERNS.adjacent));
-    const explicitNegative = Boolean(evidence && signal(evidence, PATTERNS.explicitNegative));
-    const substantiveEvidence = snapshot.evidenceMode === "abstract" || snapshot.evidenceMode === "synthesis" || Boolean(snapshot.synopsis);
-
+    const detail = byId("candidate-detail");
+    const blocked = detail?.dataset.identityBlocked === "true" || detail?.dataset.scholarIdentityBlocked === "true"
+      || detail?.dataset.identityState === "duplicate_risk" || detail?.dataset.scholarIdentityState === "manifestation_ambiguity";
     const criteria = [
-      criterion(1, "Attore/interesse criminale identificabile", criminalYes ? "SÌ" : substantiveEvidence ? "INCERTO" : "INCERTO",
-        criminalYes ? "L’evidenza disponibile identifica esplicitamente un attore o interesse criminale." : "L’evidenza corrente non basta a confermare in modo esplicito un attore/interesse criminale."),
-      criterion(2, "Entità o contesto dell’economia legale", legalYes ? "SÌ" : substantiveEvidence ? "INCERTO" : "INCERTO",
-        legalYes ? "L’evidenza colloca l’analisi in imprese, mercati, procurement, asset o altri contesti dell’economia legale." : "Il collegamento con un’entità o contesto dell’economia legale non è ancora sufficientemente esplicito."),
-      criterion(3, "Relazione sostenuta: accesso/partecipazione/influenza/controllo/embeddedness", relationYes && sustainedYes ? "SÌ" : "INCERTO",
-        relationYes && sustainedYes ? "Sono presenti segnali espliciti di infiltrazione, influenza, controllo, ownership o embeddedness, non soltanto prossimità tematica." : "Non considero ancora dimostrata una relazione sostenuta: è il principale punto da verificare nel testo."),
-      criterion(4, "Analisi sostanziale della relazione", analyticalYes && relationYes ? "SÌ" : "INCERTO",
-        analyticalYes && relationYes ? "La relazione criminalità–economia legale appare oggetto di analisi, studio, stima o valutazione sostanziale." : "Non è ancora chiaro se la relazione sia davvero analizzata o soltanto menzionata/contestualizzata."),
-    ];
-
+      "Attore/interesse criminale identificabile",
+      "Entità o contesto dell’economia legale",
+      "Relazione sostenuta: accesso/partecipazione/influenza/controllo/embeddedness",
+      "Analisi sostanziale della relazione",
+    ].map((label, index) => criterion(index + 1, label, "INCERTO",
+      "Occorre un giudizio sul passo della fonte. La presenza di parole chiave, anche in una negazione, non dimostra il criterio."));
     const base = {
-      candidateId,
-      kind: "full_text",
-      decision: "maybe_full_text_needed",
-      confidence: "medium",
-      sufficient: false,
-      criteria,
-      exclusionReason: "",
-      topic: "",
-      secondaryCollection: "",
-      screeningStage: screeningStage(snapshot),
-      judgment: "L’evidenza disponibile non consente ancora di chiudere in modo difendibile il four-part test. Propongo di trattare il record come caso da approfondire, concentrando la verifica sulla relazione sostenuta con l’economia legale e sulla sua centralità analitica.",
-      decisive: "Il punto decisivo non è la presenza del tema criminale in sé, ma se accesso, partecipazione, influenza, controllo o embeddedness nell’economia legale costituiscano una relazione sostenuta e realmente analizzata.",
-      countercase: "Se il full text dimostra chiaramente tutti e quattro i criteri, il record dovrebbe passare al nucleo core; se invece resta soltanto un fenomeno adiacente o una menzione, l’esito dovrebbe essere di esclusione o, quando giustificato, contestuale.",
-      changeMind: "Mi basta evidenza esplicita sulla natura sostenuta della relazione e sul fatto che essa sia un oggetto sostanziale dell’analisi.",
+      candidateId: selectedCandidateId(), kind: "full_text", decision: "maybe_full_text_needed",
+      confidence: "low", sufficient: false, criteria,
+      exclusionReason: "", topic: "", secondaryCollection: "",
+      screeningStage: snapshot.evidenceMode === "abstract" ? "title_abstract" : "",
+      judgment: "Valutazione aperta. Questo controllo preparatorio non attribuisce eleggibilità da parole chiave o note di triage.",
+      decisive: "Documentare separatamente i quattro criteri con passi identificabili della fonte e una valutazione umana.",
+      countercase: "Un segnale lessicale può essere negato, incidentale o riferito a un altro lavoro. Anche rumore di retrieval non significa fonte non accademica.",
+      changeMind: "Lettura attribuita di una fonte verificata, con motivazione e locator per ciascun criterio.",
       evidenceBasis: evidenceBasis(snapshot),
-      substantiveReading: substantiveReading(snapshot, focus, approach),
-      formRationale: "",
+      substantiveReading: substantiveReading(snapshot, "", ""), formRationale: "",
     };
-
-    if (identityBlocked || duplicateRisk) {
-      return {
-        ...base,
-        kind: "identity",
-        decision: "",
-        confidence: "low",
-        judgment: "Non formulerei ancora una proposta di screening: l’identità bibliografica o la manifestazione del lavoro è ancora abbastanza incerta da poter contaminare la decisione scientifica.",
-        decisive: "Prima viene l’identity gate: devo sapere quale lavoro o manifestazione stiamo effettivamente valutando.",
-        countercase: "Una volta risolta l’identità, il four-part test può essere applicato normalmente alla migliore evidenza disponibile.",
-        changeMind: "La risoluzione del conflitto bibliografico o del rischio duplicato sblocca immediatamente lo screening.",
-      };
-    }
-
-    if (resolutionClass === "known_noise") {
-      return {
-        ...base,
-        kind: "not_academic",
-        decision: "not_academic",
-        confidence: "high",
-        sufficient: true,
-        exclusionReason: "NOT_ACADEMIC_SOURCE",
-        judgment: "Il record è già classificato nel layer di retrieval come rumore noto. Non spenderei ulteriore tempo di screening sostanziale salvo un conflitto con i metadati correnti.",
-        decisive: "Il problema qui è il tipo di record, non il four-part infiltration test.",
-        countercase: "Riaprirei la valutazione soltanto se emergesse che il record rappresenta in realtà una pubblicazione accademica distinta e correttamente identificata.",
-        changeMind: "Una manifestazione accademica verificata dello stesso lavoro renderebbe necessario rimuovere il trattamento da rumore e procedere allo screening normale.",
-      };
-    }
-
-    if (criminalYes && legalYes && relationYes && sustainedYes && analyticalYes) {
-      const strongSource = snapshot.evidenceMode === "abstract" || clean(snapshot.aid?.["Aid kind"]) === "full_text_intro";
-      const confidence = strongSource ? "high" : "medium";
-      const topic = topicSuggestion(evidence);
-      return {
-        ...base,
-        kind: "core",
-        decision: "eligible_core",
-        confidence,
-        sufficient: true,
-        topic,
-        judgment: "Ritengo il lavoro un candidato convincente per il nucleo core. L’evidenza disponibile identifica un attore criminale, un contesto dell’economia legale, una relazione di infiltrazione/influenza/controllo sufficientemente sostenuta e un’analisi sostanziale di quella relazione. Non sembra quindi un semplice paper su criminalità organizzata, riciclaggio o corruzione in senso generico.",
-        decisive: "Il motivo decisivo è che la relazione tra attore criminale ed economia legale appare essa stessa oggetto dell’analisi, e non un dettaglio incidentale o soltanto un contesto di sfondo.",
-        countercase: "L’alternativa più plausibile sarebbe contextual se il full text mostrasse che imprese o mercati sono usati soltanto come contesto/metodo e non come relazione di infiltrazione direttamente analizzata.",
-        changeMind: "Cambierei la raccomandazione se il full text riducesse infiltrazione/influenza/controllo a una menzione, a un proxy non validato o a un fenomeno episodico senza relazione sostenuta.",
-      };
-    }
-
-    if (priorSignal.includes("plausible_contextual") && criminalYes && legalYes && contextualSignal && !(relationYes && sustainedYes && analyticalYes)) {
-      const topic = topicSuggestion(evidence);
-      return {
-        ...base,
-        kind: "contextual",
-        decision: "eligible_contextual",
-        confidence: "medium",
-        sufficient: true,
-        topic,
-        judgment: "La mia lettura preliminare è contestuale: il lavoro sembra offrire un contributo concettuale, metodologico o comparativo utile alla review, ma l’evidenza disponibile non dimostra ancora una relazione diretta e sostenuta di infiltrazione nell’economia legale.",
-        decisive: "Il valore per la review sembra risiedere nel modo in cui il lavoro definisce, misura o rende osservabile il fenomeno, più che in evidenza diretta di infiltrazione.",
-        countercase: "Potrebbe diventare core se il full text mostra che la relazione sostenuta con imprese, mercati o procurement è direttamente analizzata e non soltanto strumentale al metodo.",
-        changeMind: "Un’evidenza diretta di accesso/partecipazione/influenza/controllo analizzata come oggetto centrale mi farebbe alzare la proposta a core; l’assenza di un contributo specifico alla review la farebbe invece scendere fuori perimetro.",
-      };
-    }
-
-    if (explicitNegative || (adjacentSignal && !relationYes && snapshot.evidenceMode === "abstract")) {
-      return {
-        ...base,
-        kind: "not_eligible",
-        decision: "not_eligible",
-        confidence: explicitNegative ? "high" : "medium",
-        sufficient: true,
-        exclusionReason: explicitNegative ? "NO_INFILTRATION_RELATION" : "ADJACENT_PHENOMENON_ONLY",
-        secondaryCollection: adjacentSignal ? "broader_aml" : "",
-        judgment: "L’evidenza disponibile punta fuori dal perimetro core: il lavoro tratta un fenomeno adiacente o esplicitamente non dimostra la relazione di infiltrazione richiesta dal codebook. Non userei la semplice presenza di criminalità economica come sostituto del requisito di accesso/partecipazione/influenza/controllo sostenuti.",
-        decisive: "Manca proprio il nesso di infiltrazione sostenuta nell’economia legale, che è il criterio discriminante della review.",
-        countercase: "Riconsidererei il record se una sezione del full text mostrasse che la relazione sostenuta è effettivamente analizzata e non soltanto richiamata.",
-        changeMind: "Servirebbe evidenza positiva e specifica del criterio 3 insieme a un’analisi sostanziale del criterio 4.",
-      };
-    }
-
-    if (!substantiveEvidence || snapshot.evidenceMode === "metadata") {
-      return {
-        ...base,
-        confidence: "high",
-        judgment: "Non prenderei una scorciatoia sulla base del solo titolo o dei metadati. La proposta corretta è ottenere evidenza sostanziale prima di classificare il paper.",
-        decisive: "Il codebook vieta di decidere eligibility dal titolo: senza abstract, sintesi verificata o full text non abbiamo una base sufficiente.",
-        countercase: "Nessuna alternativa scientifica è preferibile finché manca evidenza sostanziale; il primo compito è il retrieval.",
-        changeMind: "Una sintesi verificata, un abstract o una sezione di full text sufficiente a valutare i quattro criteri.",
-      };
-    }
-
+    if (blocked) return { ...base, kind: "identity", decision: "",
+      decisive: "Prima viene l’identity gate: verificare opera e versione." };
+    if (snapshot.evidenceMode === "metadata") base.decisive = "Il codebook vieta di decidere eligibility dal titolo. Recuperare la fonte.";
     return base;
   }
 

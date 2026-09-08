@@ -1,3 +1,4 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix cile: <https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/vocab/cile-review.ttl#> .
 @prefix slr: <https://w3id.org/slr-ontology/> .
 @prefix prov: <http://www.w3.org/ns/prov#> .
@@ -16,7 +17,7 @@
     a owl:Ontology ;
     dcterms:title "CILE Review Ontology Profile" ;
     dcterms:description "Application ontology for the Criminal Infiltration in the Legal Economy living systematic review." ;
-    owl:versionInfo "0.1.0" ;
+    owl:versionInfo "0.2.0" ;
     dcterms:source <https://github.com/sensein/synthscholar> ,
                    <https://github.com/RIPE-Observatory/RIPE-O> .
 
@@ -29,8 +30,7 @@ cile:ScholarlyWork a owl:Class ;
     rdfs:subClassOf prov:Entity ;
     rdfs:label "Scholarly work" ;
     skos:definition "The canonical intellectual work represented once in the governed registry, independent of its identifiers and manifestations." ;
-    skos:exactMatch slr:IncludedSource ;
-    skos:relatedMatch fabio:Expression .
+    skos:relatedMatch fabio:Work .
 
 cile:CriminalInfiltrationStudy a owl:Class ;
     rdfs:subClassOf cile:ScholarlyWork ;
@@ -122,8 +122,157 @@ cile:InfiltrationRelationScheme a skos:ConceptScheme ;
     skos:prefLabel "CILE infiltration relations" .
 
 cile:access a skos:Concept ; skos:inScheme cile:InfiltrationRelationScheme ; skos:prefLabel "Access" ; skos:definition "Sustained access by a criminal actor or interest to a legal-economy entity, market, resource or decision channel." .
-cile:participation a skos:Concept ; skos:inScheme cile:InfiltrationRelationScheme ; skos:prefLabel "Participation" ; skos:broader cile:access .
-cile:influence a skos:Concept ; skos:inScheme cile:InfiltrationRelationScheme ; skos:prefLabel "Influence" ; skos:broader cile:participation .
-cile:control a skos:Concept ; skos:inScheme cile:InfiltrationRelationScheme ; skos:prefLabel "Control" ; skos:broader cile:influence .
-cile:ownership a skos:Concept ; skos:inScheme cile:InfiltrationRelationScheme ; skos:prefLabel "Ownership" ; skos:broader cile:influence .
-cile:embeddedness a skos:Concept ; skos:inScheme cile:InfiltrationRelationScheme ; skos:prefLabel "Embeddedness" ; skos:broader cile:participation .
+cile:participation a skos:Concept ; skos:inScheme cile:InfiltrationRelationScheme ; skos:prefLabel "Participation" .
+cile:influence a skos:Concept ; skos:inScheme cile:InfiltrationRelationScheme ; skos:prefLabel "Influence" .
+cile:control a skos:Concept ; skos:inScheme cile:InfiltrationRelationScheme ; skos:prefLabel "Control" .
+cile:ownership a skos:Concept ; skos:inScheme cile:InfiltrationRelationScheme ; skos:prefLabel "Ownership" .
+cile:embeddedness a skos:Concept ; skos:inScheme cile:InfiltrationRelationScheme ; skos:prefLabel "Embeddedness" .
+
+cile:Expression a owl:Class ; rdfs:subClassOf prov:Entity ; skos:relatedMatch fabio:Expression .
+
+# Additive V2 concepts and governed physical-property meanings
+cile:PublicationVenue a owl:Class ; rdfs:subClassOf prov:Entity ; rdfs:label "PublicationVenue" .
+cile:Contribution a owl:Class ; rdfs:subClassOf prov:Entity ; rdfs:label "Contribution" .
+cile:DocumentSection a owl:Class ; rdfs:subClassOf prov:Entity ; rdfs:label "DocumentSection" .
+cile:PublicationDeclaration a owl:Class ; rdfs:subClassOf prov:Entity ; rdfs:label "PublicationDeclaration" .
+cile:MetadataAssertion a owl:Class ; rdfs:subClassOf prov:Entity ; rdfs:label "MetadataAssertion" .
+cile:CitationRelation a owl:Class ; rdfs:subClassOf prov:Entity ; rdfs:label "CitationRelation" .
+cile:LegacyReference a owl:Class ; rdfs:subClassOf prov:Entity ; rdfs:label "LegacyReference" .
+cile:DecisionProposal a owl:Class ; rdfs:subClassOf prov:Entity ; rdfs:label "DecisionProposal" .
+cile:ApprovalReceipt a owl:Class ; rdfs:subClassOf prov:Entity ; rdfs:label "ApprovalReceipt" .
+cile:CriterionAssessment a owl:Class ; rdfs:subClassOf prov:Entity ; rdfs:label "CriterionAssessment" .
+cile:AssistantRecommendation a owl:Class ; rdfs:subClassOf prov:Entity ; rdfs:label "AssistantRecommendation" .
+cile:SearchDay a owl:Class ; rdfs:subClassOf prov:Entity ; rdfs:label "SearchDay" .
+cile:RunAttempt a owl:Class ; rdfs:subClassOf prov:Entity ; rdfs:label "RunAttempt" .
+cile:QueryExecution a owl:Class ; rdfs:subClassOf prov:Entity ; rdfs:label "QueryExecution" .
+cile:DiscoveryRecord a owl:Class ; rdfs:subClassOf prov:Entity ; rdfs:label "DiscoveryRecord" .
+cile:OutboxMessage a owl:Class ; rdfs:subClassOf prov:Entity ; rdfs:label "OutboxMessage" .
+cile:LegacySnapshot a owl:Class ; rdfs:subClassOf prov:Entity ; rdfs:label "LegacySnapshot" .
+cile:reviewId a rdf:Property ; rdfs:label "review_id" .
+cile:protocolVersion a rdf:Property ; rdfs:label "protocol_version" .
+cile:ontologyVersion a rdf:Property ; rdfs:label "ontology_version" .
+cile:phase a rdf:Property ; rdfs:label "phase" .
+cile:timezone a rdf:Property ; rdfs:label "timezone" .
+cile:startDate a rdf:Property ; rdfs:label "start_date" .
+cile:activatedAt a rdf:Property ; rdfs:label "activated_at" .
+cile:legacySnapshotId a rdf:Property ; rdfs:label "legacy_snapshot_id" .
+cile:workId a rdf:Property ; rdfs:label "work_id" .
+cile:workType a rdf:Property ; rdfs:label "work_type" .
+cile:agentId a rdf:Property ; rdfs:label "agent_id" .
+cile:agentType a rdf:Property ; rdfs:label "agent_type" .
+cile:venueId a rdf:Property ; rdfs:label "venue_id" .
+cile:venueType a rdf:Property ; rdfs:label "venue_type" .
+cile:parentVenueId a rdf:Property ; rdfs:label "parent_venue_id" .
+cile:expressionId a rdf:Property ; rdfs:label "expression_id" .
+cile:versionType a rdf:Property ; rdfs:label "version_type" .
+cile:versionLabel a rdf:Property ; rdfs:label "version_label" .
+cile:datePrecision a rdf:Property ; rdfs:label "date_precision" .
+cile:articleNumber a rdf:Property ; rdfs:label "article_number" .
+cile:contributionId a rdf:Property ; rdfs:label "contribution_id" .
+cile:role a rdf:Property ; rdfs:label "role" .
+cile:position a rdf:Property ; rdfs:label "position" .
+cile:creditRoleUri a rdf:Property ; rdfs:label "credit_role_uri" .
+cile:affiliationId a rdf:Property ; rdfs:label "affiliation_id" .
+cile:sectionId a rdf:Property ; rdfs:label "section_id" .
+cile:sectionType a rdf:Property ; rdfs:label "section_type" .
+cile:heading a rdf:Property ; rdfs:label "heading" .
+cile:parentSectionId a rdf:Property ; rdfs:label "parent_section_id" .
+cile:locator a rdf:Property ; rdfs:label "locator" .
+cile:declarationId a rdf:Property ; rdfs:label "declaration_id" .
+cile:declarationType a rdf:Property ; rdfs:label "declaration_type" .
+cile:statement a rdf:Property ; rdfs:label "statement" .
+cile:manifestationId a rdf:Property ; rdfs:label "manifestation_id" .
+cile:contentSha256 a rdf:Property ; rdfs:label "content_sha256" .
+cile:storageKey a rdf:Property ; rdfs:label "storage_key" .
+cile:accessStatus a rdf:Property ; rdfs:label "access_status" .
+cile:acquisitionStatus a rdf:Property ; rdfs:label "acquisition_status" .
+cile:identifierId a rdf:Property ; rdfs:label "identifier_id" .
+cile:scheme a rdf:Property ; rdfs:label "scheme" .
+cile:value a rdf:Property ; rdfs:label "value" .
+cile:verificationStatus a rdf:Property ; rdfs:label "verification_status" .
+cile:assertionId a rdf:Property ; rdfs:label "assertion_id" .
+cile:fieldUri a rdf:Property ; rdfs:label "field_uri" .
+cile:valueJson a rdf:Property ; rdfs:label "value_json" .
+cile:assertionStatus a rdf:Property ; rdfs:label "assertion_status" .
+cile:citationId a rdf:Property ; rdfs:label "citation_id" .
+cile:citingWorkId a rdf:Property ; rdfs:label "citing_work_id" .
+cile:relationId a rdf:Property ; rdfs:label "relation_id" .
+cile:subjectWorkId a rdf:Property ; rdfs:label "subject_work_id" .
+cile:objectWorkId a rdf:Property ; rdfs:label "object_work_id" .
+cile:relationType a rdf:Property ; rdfs:label "relation_type" .
+cile:rationale a rdf:Property ; rdfs:label "rationale" .
+cile:candidateId a rdf:Property ; rdfs:label "candidate_id" .
+cile:identityState a rdf:Property ; rdfs:label "identity_state" .
+cile:stage a rdf:Property ; rdfs:label "stage" .
+cile:recordVersion a rdf:Property ; rdfs:label "record_version" .
+cile:originEventId a rdf:Property ; rdfs:label "origin_event_id" .
+cile:legacyId a rdf:Property ; rdfs:label "legacy_id" .
+cile:snapshotId a rdf:Property ; rdfs:label "snapshot_id" .
+cile:matchBasis a rdf:Property ; rdfs:label "match_basis" .
+cile:attemptId a rdf:Property ; rdfs:label "attempt_id" .
+cile:provider a rdf:Property ; rdfs:label "provider" .
+cile:startedAt a rdf:Property ; rdfs:label "started_at" .
+cile:finishedAt a rdf:Property ; rdfs:label "finished_at" .
+cile:status a rdf:Property ; rdfs:label "status" .
+cile:httpStatus a rdf:Property ; rdfs:label "http_status" .
+cile:errorCode a rdf:Property ; rdfs:label "error_code" .
+cile:durationMs a rdf:Property ; rdfs:label "duration_ms" .
+cile:retryParentId a rdf:Property ; rdfs:label "retry_parent_id" .
+cile:evidenceId a rdf:Property ; rdfs:label "evidence_id" .
+cile:evidenceKind a rdf:Property ; rdfs:label "evidence_kind" .
+cile:spanId a rdf:Property ; rdfs:label "span_id" .
+cile:startOffset a rdf:Property ; rdfs:label "start_offset" .
+cile:endOffset a rdf:Property ; rdfs:label "end_offset" .
+cile:textSha256 a rdf:Property ; rdfs:label "text_sha256" .
+cile:proposalId a rdf:Property ; rdfs:label "proposal_id" .
+cile:expectedVersion a rdf:Property ; rdfs:label "expected_version" .
+cile:payloadJson a rdf:Property ; rdfs:label "payload_json" .
+cile:payloadSha256 a rdf:Property ; rdfs:label "payload_sha256" .
+cile:receiptId a rdf:Property ; rdfs:label "receipt_id" .
+cile:repository a rdf:Property ; rdfs:label "repository" .
+cile:prNumber a rdf:Property ; rdfs:label "pr_number" .
+cile:reviewedCommit a rdf:Property ; rdfs:label "reviewed_commit" .
+cile:humanReviewId a rdf:Property ; rdfs:label "human_review_id" .
+cile:approvedAt a rdf:Property ; rdfs:label "approved_at" .
+cile:importedAt a rdf:Property ; rdfs:label "imported_at" .
+cile:decisionId a rdf:Property ; rdfs:label "decision_id" .
+cile:decision a rdf:Property ; rdfs:label "decision" .
+cile:criterionId a rdf:Property ; rdfs:label "criterion_id" .
+cile:outcome a rdf:Property ; rdfs:label "outcome" .
+cile:evidenceSpanIdsJson a rdf:Property ; rdfs:label "evidence_span_ids_json" .
+cile:codingId a rdf:Property ; rdfs:label "coding_id" .
+cile:dimension a rdf:Property ; rdfs:label "dimension" .
+cile:code a rdf:Property ; rdfs:label "code" .
+cile:vocabularyVersion a rdf:Property ; rdfs:label "vocabulary_version" .
+cile:observationId a rdf:Property ; rdfs:label "observation_id" .
+cile:modelId a rdf:Property ; rdfs:label "model_id" .
+cile:promptVersion a rdf:Property ; rdfs:label "prompt_version" .
+cile:inputSha256 a rdf:Property ; rdfs:label "input_sha256" .
+cile:outputJson a rdf:Property ; rdfs:label "output_json" .
+cile:publicationId a rdf:Property ; rdfs:label "publication_id" .
+cile:approvedPayloadJson a rdf:Property ; rdfs:label "approved_payload_json" .
+cile:publicationStatus a rdf:Property ; rdfs:label "publication_status" .
+cile:scheduledDate a rdf:Property ; rdfs:label "scheduled_date" .
+cile:queryManifestJson a rdf:Property ; rdfs:label "query_manifest_json" .
+cile:deadlineAt a rdf:Property ; rdfs:label "deadline_at" .
+cile:attemptNumber a rdf:Property ; rdfs:label "attempt_number" .
+cile:leaseUntil a rdf:Property ; rdfs:label "lease_until" .
+cile:retryAfter a rdf:Property ; rdfs:label "retry_after" .
+cile:executionId a rdf:Property ; rdfs:label "execution_id" .
+cile:queryId a rdf:Property ; rdfs:label "query_id" .
+cile:occurrencesReturned a rdf:Property ; rdfs:label "occurrences_returned" .
+cile:resultStorageKey a rdf:Property ; rdfs:label "result_storage_key" .
+cile:occurrenceId a rdf:Property ; rdfs:label "occurrence_id" .
+cile:rank a rdf:Property ; rdfs:label "rank" .
+cile:metadataJson a rdf:Property ; rdfs:label "metadata_json" .
+cile:outboxId a rdf:Property ; rdfs:label "outbox_id" .
+cile:kind a rdf:Property ; rdfs:label "kind" .
+cile:deliveredAt a rdf:Property ; rdfs:label "delivered_at" .
+cile:attempts a rdf:Property ; rdfs:label "attempts" .
+cile:lastError a rdf:Property ; rdfs:label "last_error" .
+cile:eventId a rdf:Property ; rdfs:label "event_id" .
+cile:eventType a rdf:Property ; rdfs:label "event_type" .
+cile:gitCommit a rdf:Property ; rdfs:label "git_commit" .
+cile:manifestSha256 a rdf:Property ; rdfs:label "manifest_sha256" .
+cile:externalStateComplete a rdf:Property ; rdfs:label "external_state_complete" .
+cile:restoreVerifiedAt a rdf:Property ; rdfs:label "restore_verified_at" .

@@ -1,6 +1,6 @@
 # CILE Review Ontology Profile
 
-**Current profile:** `0.1.0`
+**Current profile:** `0.2.0`
 
 This directory is the semantic contract for the living systematic review on **Criminal Infiltration in the Legal Economy (CILE)**. The contract is normative: physical CSV/JSON structures may evolve, but every governed artifact must remain mapped to this ontology and must pass `scripts/ontology/validate_ontology.py`.
 
@@ -99,3 +99,7 @@ The public namespace is the Pages-hosted Turtle resource:
 ## Change discipline
 
 Ontology changes are versioned. Any PR that adds a new governed table, a new decision/access/review state, a new identity relation or a new domain concept must change the ontology/profile in the same PR. A data change that requires an undeclared concept is therefore rejected before publication.
+
+## Review V2 implementation
+
+The [publication and review model](../docs/governance/review-v2-model.md) separates Work, Expression and Manifestation, with ordered contributors, venues, sections, declarations and evidence-grounded review records. The private D1 contract is `modules/review-v2.json`. See the [model explorer](../site/model.html). Migration alone creates no review or scientific data. Historical profile 0.1.0 is preserved in `legacy/0.1.0/`.

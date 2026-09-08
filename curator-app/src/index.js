@@ -1,5 +1,7 @@
 "use strict";
 
+import { fetchWithTimeout } from "./network.js";
+
 const GITHUB_API = "https://api.github.com";
 const GITHUB_OAUTH = "https://github.com/login/oauth";
 const API_VERSION = "2026-03-10";
@@ -8,6 +10,11 @@ const SESSION_SECONDS = 8 * 60 * 60;
 const STATE_SECONDS = 10 * 60;
 const CURATOR_ASSETS = new Set([
   "/curate.html",
+  "/review-v2.html",
+  "/review-v2.js",
+  "/model.css",
+  "/curator-shell.css",
+  "/curator-guided.css",
   "/curate",
   "/curator.js",
   "/styles.css",
@@ -203,7 +210,7 @@ function curatorAssetHeaders(headers, path) {
   result.set("Permissions-Policy", "camera=(), geolocation=(), microphone=()");
   result.set("Referrer-Policy", "no-referrer");
   result.set("X-Content-Type-Options", "nosniff");
-  if (path === "/curate.html") {
+  if (path === "/curate.html" || path === "/review-v2.html") {
     result.set("Cache-Control", "no-store");
     result.set(
       "Content-Security-Policy",
@@ -312,7 +319,7 @@ async function githubRequest(path, token, init = {}) {
     "User-Agent": "criminal-infiltration-curator-app",
     ...(init.headers || {}),
   };
-  const response = await fetch(`${GITHUB_API}${path}`, { ...init, headers });
+  const response = await fetchWithTimeout(`${GITHUB_API}${path}`, { ...init, headers });
   if (!response.ok) {
     if (response.status === 401) {
       throw new CuratorAppError(401, "github_session_expired", "La sessione GitHub è scaduta.");
@@ -332,7 +339,7 @@ async function githubRequest(path, token, init = {}) {
 async function revokeToken(config, token) {
   const credentials = btoa(`${config.clientId}:${config.clientSecret}`);
   try {
-    await fetch(`${GITHUB_API}/applications/${encodeURIComponent(config.clientId)}/token`, {
+    await fetchWithTimeout(`${GITHUB_API}/applications/${encodeURIComponent(config.clientId)}/token`, {
       method: "DELETE",
       headers: {
         Accept: "application/vnd.github+json",
@@ -389,7 +396,7 @@ async function exchangeCode(config, code, verifier) {
     code_verifier: verifier,
     repository_id: config.repositoryId,
   });
-  const response = await fetch(`${GITHUB_OAUTH}/access_token`, {
+  const response = await fetchWithTimeout(`${GITHUB_OAUTH}/access_token`, {
     method: "POST",
     headers: {
       Accept: "application/json",
@@ -971,6 +978,20 @@ async function route(request, env) {
     return handleApi(request, env, config, url.pathname);
   }
   throw new CuratorAppError(404, "route_not_found", "Endpoint non disponibile.");
+}
+
+const checkedSessions = new Map();
+export async function authenticateCuratorRequest(request, env) {
+  const config = configuration(env);
+  requireSiteOrigin(request, config);
+  const session = await authenticatedSession(request, config, request.method !== "GET");
+  if ((checkedSessions.get(session.sealed) || 0) < Date.now()) {
+    const user = await githubRequest("/user", session.token);
+    if (user?.login !== config.curatorLogin) throw new CuratorAppError(403, "curator_not_authorized", "Account non autorizzato.");
+    if (checkedSessions.size > 100) checkedSessions.clear();
+    checkedSessions.set(session.sealed, Date.now() + 60000);
+  }
+  return session;
 }
 
 export {

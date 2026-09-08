@@ -1,5 +1,5 @@
 {
-  "profile_version": "0.1.0",
+  "profile_version": "0.2.0",
   "policy": "Reuse external terms whenever they already model the concept. CILE terms are permitted only for review-specific governance or criminal-infiltration concepts not adequately represented upstream.",
   "dependencies": [
     {

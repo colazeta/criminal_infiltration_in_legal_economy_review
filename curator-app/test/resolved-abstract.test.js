@@ -6,6 +6,7 @@ import test from "node:test";
 import {
   extractAbstractFromDocument,
   extractDocumentTitle,
+  extractDocumentEvidence,
   resolveAbstractFromRetrieval,
   safePublicHttpsUrl,
 } from "../src/resolved-abstract.js";
@@ -78,4 +79,19 @@ test("resolved-paper fetch refuses local and private literal targets", () => {
   assert.equal(safePublicHttpsUrl("https://10.0.0.5/article"), "");
   assert.equal(safePublicHttpsUrl("https://192.168.1.2/article"), "");
   assert.equal(safePublicHttpsUrl("https://publisher.example/article"), "https://publisher.example/article");
+});
+
+test("generic descriptions are publisher summaries, never author abstracts", () => {
+  const source = '<meta name="dc.description" content="A publisher promotional description of this important new book covering economic institutions, markets and criminal governance.">';
+  assert.equal(extractAbstractFromDocument(source), "");
+  assert.equal(extractDocumentEvidence(source).kind, "publisher_summary");
+  assert.equal(extractAbstractFromDocument('<script type="application/ld+json">{"description":"A promotional description of a new book on economic institutions, criminal governance and public markets."}</script>'), "");
+});
+test("missing title and an explicitly conflicting DOI both reject identity", async (context) => {
+  let source = '<meta name="citation_abstract" content="This study examines criminal infiltration in companies using administrative and judicial data on firm ownership and control.">';
+  withFetchMock(context, async () => new Response(source, { headers: { "content-type": "text/html" } }));
+  const args = { title: "Criminal infiltration and companies", doi: "10.1234/expected", retrieval: { landingUrl: "https://publisher.example/article" } };
+  assert.equal((await resolveAbstractFromRetrieval(args)).abstract, "");
+  source += '<meta name="citation_title" content="Criminal infiltration and companies"><meta name="citation_doi" content="10.1234/wrong">';
+  assert.equal((await resolveAbstractFromRetrieval(args)).abstract, "");
 });
