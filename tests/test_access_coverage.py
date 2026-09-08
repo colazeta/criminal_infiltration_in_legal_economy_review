@@ -118,6 +118,25 @@ class AccessCoverageTests(unittest.TestCase):
         self.assertEqual(result["access_status"], "unknown")
         self.assertIn("OpenAlex:HTTP 429", result["notes"])
 
+    def test_open_signal_without_locator_does_not_block_registration(self) -> None:
+        classifier.openalex_match = lambda row: ({"open_access": {"is_oa": True, "oa_status": "green"}}, "")
+        classifier.unpaywall_match = lambda row, email: ({"is_oa": True}, "")
+        result = classifier.classify_row(self.row, {}, {}, "2026-09-08")
+        self.assertEqual(result["access_status"], "unknown")
+        self.assertIn("OpenAlex:open_signal_without_access_locator", result["notes"])
+        self.assertIn("Unpaywall:open_signal_without_access_locator", result["notes"])
+        classifier.validate_coverage([self.row], [result], classifier.FIELDS)
+        result["access_status"] = "open"
+        with self.assertRaisesRegex(classifier.AccessCoverageError, "missing_open_access_locator"):
+            classifier.validate_coverage([self.row], [result], classifier.FIELDS)
+
+    def test_missing_openalex_locator_allows_unpaywall_fallback(self) -> None:
+        classifier.openalex_match = lambda row: ({"open_access": {"is_oa": True}}, "")
+        classifier.unpaywall_match = lambda row, email: ({"is_oa": True, "best_oa_location": {"url": "https://repository.example/paper"}}, "")
+        result = classifier.classify_row(self.row, {}, {}, "2026-09-08")
+        self.assertEqual(result["access_status"], "open")
+        self.assertEqual(result["access_url"], "https://repository.example/paper")
+
     def test_probe_rejects_non_public_targets(self) -> None:
         self.assertEqual(classifier.safe_probe_url("https://localhost/paper"), "")
         self.assertEqual(classifier.safe_probe_url("https://192.168.1.2/paper"), "")

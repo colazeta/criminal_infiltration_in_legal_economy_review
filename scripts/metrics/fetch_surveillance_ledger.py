@@ -419,6 +419,8 @@ def verify_ledger_comment_time(run: dict, comment: dict) -> None:
     """Bind the daily payload to a ledger comment created after that day's run."""
     created = parse_datetime(comment.get("created_at"), "ledger comment.created_at")
     updated = parse_datetime(comment.get("updated_at"), "ledger comment.updated_at")
+    if run["schema_version"] == 2 and created >= parse_datetime("2026-09-08T20:05:10Z", "v3 release cutoff"):
+        raise MetricsError("ledger comment: new surveillance requires v3; v2 is retained history only")
     ended = parse_datetime(run["window_end"], "run.window_end")
     if (
         created != updated
