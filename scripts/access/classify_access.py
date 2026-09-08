@@ -273,11 +273,13 @@ def classify_row(
     # and parsed the governed PDF without credentials.
     if abstract.get("coverage_status") == "available" and abstract.get("match_type") == "resolved_pdf":
         url = first_url(abstract.get("article_url"), retrieval.get("full_text_url"), retrieval.get("best_url"))
-        return access_row(
-            row, "open", "public_full_text", url,
-            "Governed PDF fetch", "Unauthenticated PDF download and local text extraction succeeded.",
-            checked_at, "",
-        )
+        if url:
+            return access_row(
+                row, "open", "public_full_text", url,
+                "Governed PDF fetch", "Unauthenticated PDF download and local text extraction succeeded.",
+                checked_at, "",
+            )
+        notes.append("Governed PDF fetch:missing_access_locator")
 
     # Existing resolver already labels OA locations from OpenAlex/Unpaywall.
     oa_url = first_url(retrieval.get("open_access_url"))
@@ -317,12 +319,14 @@ def classify_row(
             best.get("pdf_url"),
             best.get("landing_page_url"),
         )
-        if is_oa or oa_status in {"gold", "green", "hybrid", "bronze"}:
+        if oa_url and (is_oa or oa_status in {"gold", "green", "hybrid", "bronze"}):
             return access_row(
                 row, "open", f"openalex_{oa_status or 'oa'}", oa_url,
                 "OpenAlex", f"OpenAlex open_access reports is_oa=true / oa_status={oa_status or 'open'}.",
                 checked_at, "; ".join(notes),
             )
+        if not oa_url and (is_oa or oa_status in {"gold", "green", "hybrid", "bronze"}):
+            notes.append("OpenAlex:open_signal_without_access_locator")
         oa_closed = oa_status == "closed" or ("is_oa" in open_access and not bool(open_access.get("is_oa")))
         if oa_closed:
             oa_detail = f"OpenAlex open_access reports is_oa=false / oa_status={oa_status or 'closed'}."
@@ -337,11 +341,13 @@ def classify_row(
         if bool(unpaywall.get("is_oa")):
             best = unpaywall.get("best_oa_location") if isinstance(unpaywall.get("best_oa_location"), dict) else {}
             url = first_url(best.get("url_for_pdf"), best.get("url_for_landing_page"), best.get("url"), unpaywall.get("doi_url"))
-            return access_row(
-                row, "open", "unpaywall_oa", url,
-                "Unpaywall", "Unpaywall reports is_oa=true.",
-                checked_at, "; ".join(notes),
-            )
+            if url:
+                return access_row(
+                    row, "open", "unpaywall_oa", url,
+                    "Unpaywall", "Unpaywall reports is_oa=true.",
+                    checked_at, "; ".join(notes),
+                )
+            notes.append("Unpaywall:open_signal_without_access_locator")
         if "is_oa" in unpaywall and not bool(unpaywall.get("is_oa")):
             up_closed = True
             up_detail = "Unpaywall reports is_oa=false."
@@ -404,6 +410,8 @@ def validate_coverage(queue: list[dict[str, str]], coverage: list[dict[str, str]
             raise AccessCoverageError(f"missing_checked_at:{row.get('candidate_id')}")
         if status in {"open", "restricted"} and not row.get("evidence_source"):
             raise AccessCoverageError(f"missing_access_evidence:{row.get('candidate_id')}")
+        if status == "open" and not first_url(row.get("access_url")):
+            raise AccessCoverageError(f"missing_open_access_locator:{row.get('candidate_id')}")
         counts[status] += 1
     return {"total": len(coverage), **counts}
 

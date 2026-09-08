@@ -120,7 +120,7 @@
     "source_class": "SearchActivity",
     "source_slot": "source_name",
     "protocol_version": "CILE-DAILY-v4",
-    "authority": "Owner instruction 2026-09-08: Exa-only automatic provisional registration before individual analysis; retain v1/v2 history.",
+    "authority": "Owner instruction 2026-09-08: Exa-only automatic provisional registration before individual analysis; retain v1/v2 history. V2 is retained only for immutable GitHub ledger comments created before 2026-09-08T20:05:10Z, the PR #204 v3 release merge; later writers require v3.",
     "retained_v2_schema": "schema/surveillance-run-v2.schema.json"
   },
   "extraordinary_executions": {

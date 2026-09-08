@@ -11,7 +11,7 @@ def render_statistics_page(path,payload):
         count=lambda v:'non misurato' if v is None else str(v)
         text=(f"Ultima esecuzione straordinaria: {datetime.fromisoformat(last['startedAt']).astimezone(ZoneInfo('Europe/Rome')).strftime('%d/%m/%Y %H:%M')} Europe/Rome. "
               f"Query: {last['queriesCompleted']}/{last['queriesPlanned']}. Occorrenze: {count(last['occurrencesReturned'])}. "
-              f"Risultati: {count(last['uniqueResults'])}. Registrati nel run: {count(last['intakeCandidates'])}. Stato: {last['status']}.")
+              f"Risultati: {count(last['uniqueResults'])}. Candidati inviati alla coda: {count(last['intakeCandidates'])}. Stato: {last['status']}.")
     else:
         text='Nessuna esecuzione straordinaria registrata. Le giornate programmate sono riportate separatamente.'
     content=path.read_text()

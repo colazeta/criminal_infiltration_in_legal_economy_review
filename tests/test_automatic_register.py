@@ -8,7 +8,7 @@ from pathlib import Path
 from test_extraordinary_runs import extra, extra_issue, ROOT, CYCLE
 from scripts.curation.import_intake_issue import import_candidates, parse_intake_issue, IntakeImportError
 from scripts.intake_open_access import validate_snapshots
-from scripts.metrics.fetch_surveillance_ledger import verify_intake_issue, extract_run
+from scripts.metrics.fetch_surveillance_ledger import verify_intake_issue, extract_run, verify_ledger_comment_time
 from scripts.metrics.surveillance import validate_run, MetricsError
 from scripts.curation.build_paper_register import build_payload, render_page
 from scripts.metrics.render_statistics_html import render_statistics_page
@@ -83,4 +83,14 @@ class AutomaticRegisterTests(unittest.TestCase):
             path=Path(folder)/'stats.html';path.write_text('<p id="latest-execution" class="status-banner">Pending</p>')
             render_statistics_page(path,{'extraRuns':project_extra_runs([run],CYCLE)})
             self.assertIn('Query: 7/7',path.read_text())
-            self.assertIn('Registrati nel run: 3',path.read_text())
+            self.assertIn('Candidati inviati alla coda: 3',path.read_text())
+
+    def test_v2_comment_cannot_be_newly_authored_after_v3_release(self):
+        run=extra()
+        old={'created_at':'2026-09-08T18:33:03Z','updated_at':'2026-09-08T18:33:03Z'}
+        verify_ledger_comment_time(run,old)
+        fresh={'created_at':'2026-09-08T20:05:10Z','updated_at':'2026-09-08T20:05:10Z'}
+        with self.assertRaisesRegex(ValueError,'new surveillance requires v3'):
+            verify_ledger_comment_time(run,fresh)
+        run['schema_version']=3
+        verify_ledger_comment_time(run,fresh)
