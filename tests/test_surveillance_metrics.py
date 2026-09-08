@@ -31,7 +31,8 @@ from surveillance import (  # noqa: E402
 REPOSITORY = "colazeta/criminal_infiltration_in_legal_economy_review"
 
 
-def candidate_issue(run: dict, number: int = 31) -> dict:
+def candidate_issue(run: dict, number: int | None = None) -> dict:
+    number = number if number is not None else run["intake_issue"]["number"]
     batch_id = run["batch_id"]
     consensus_queries = [
         {"query_id": f"CONSENSUS-W{ordinal}-Q1", "query_text": f"Consensus query {ordinal}"}
@@ -89,6 +90,7 @@ def candidate_issue(run: dict, number: int = 31) -> dict:
         )
     if run["schema_version"] == 2:
         for candidate in candidates:
+            candidate["source_links"] = ["https://zenodo.org/synthetic/" + candidate["candidate_id"]]
             candidate["open_access"] = synthetic_oa(candidate["candidate_id"], candidate["source_links"][0], run["run_date"])
     manifest = {
         "schema_version": run["schema_version"],
@@ -179,6 +181,7 @@ def exa_run(day: str = "2026-09-09") -> dict:
     """Synthetic v2 fixture; the original fixture above remains historical v1."""
     run = completed_run(day)
     run["schema_version"] = 2
+    run["intake_issue"].update(number=201, url=f"https://github.com/{REPOSITORY}/issues/201")
     run["expected_sources"] = ["Exa"]
     source = run["sources"][1]
     source.update(queries_planned=7, queries_completed=7, candidate_hits=3, exclusive_candidates=3)

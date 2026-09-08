@@ -291,8 +291,11 @@ function renderChart(rows) {
 function renderStatus(payload) {
   if (payload.calendar) {
     const calendar = payload.calendar;
-    statsElements.status.className = "status-banner";
-    statsElements.status.textContent = `Calendario Europe/Rome · avvio previsto 07:00. ${calendar.completedDays} / ${calendar.expectedDays} giorni attesi completi; ${calendar.missingDays} mancanti. Ultimo ledger: ${displayDate(calendar.lastLedgerDate)}. Proiezione: ${new Date(calendar.asOf).toLocaleString("it-IT", { timeZone: "Europe/Rome" })}. Tentativi e retry: non misurati dal ledger esterno.`;
+    const ageMs = Date.now() - Date.parse(calendar.asOf);
+    const stale = !Number.isFinite(ageMs) || ageMs > 26 * 60 * 60 * 1000;
+    statsElements.status.className = `status-banner${stale ? " status-banner-partial" : ""}`;
+    statsElements.status.textContent = `Calendario Europe/Rome · avvio previsto 07:00. ${calendar.completedDays} / ${calendar.expectedDays} giorni attesi completi; ${calendar.missingDays} mancanti. Ultimo ledger: ${displayDate(calendar.lastLedgerDate)}. Proiezione: ${new Date(calendar.asOf).toLocaleString("it-IT", { timeZone: "Europe/Rome" })}. Tentativi e retry: non misurati dal ledger esterno. Intake: issue create, non conferma di importazione nella coda.`;
+    if (stale) statsElements.status.textContent += " ATTENZIONE: proiezione non aggiornata da oltre 26 ore o data non valida. Le giornate successive non sono verificate; controllare il deploy.";
     return;
   }
   const last = payload.daily[payload.daily.length - 1];
@@ -316,6 +319,7 @@ fetch("./data/research-stats.json")
   })
   .then((payload) => {
     populateKpis(payload);
+    if (payload.calendar) renderStatus(payload);
     if (!payload.daily.length && !payload.calendar?.rows.length) {
       statsElements.empty.hidden = false;
       return;

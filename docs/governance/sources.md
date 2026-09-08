@@ -54,3 +54,13 @@ The resolver never accepts an arbitrary user-supplied target for this path. Queu
 ## Expansion
 
 A reviewed PR must state the source, purpose, data returned, automation mode, rate/terms risk and first approved execution. Until merged, the source is not authorised. Authentication, project-budget or rate-limit failure stops that provider; there is no silent paid fallback.
+
+### OA intake acquisition enforcement
+
+The intake receipt validator currently admits the existing `zenodo.org`
+repository record-and-file permission only, including record rights metadata.
+It rejects other full-text and rights origins until a reviewed source amendment
+covers their acquisition purpose. This does not narrow Exa discovery queries or
+classify other origins as paywalled. Metadata-only services and Jina remain
+insufficient for a full-byte receipt; redirects cannot broaden origin authority.
+See [the intake operational contract](../operations/intake-open-access.md).

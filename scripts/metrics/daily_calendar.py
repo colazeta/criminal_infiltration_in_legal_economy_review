@@ -28,6 +28,8 @@ def calendar_projection(runs, as_of, start=START, review_id="legacy"):
     if as_of.tzinfo is None:
         raise ValueError("calendar clock must be timezone-aware")
     as_of = as_of.astimezone(ROME)
+    if any(date.fromisoformat(r["run_date"]) > as_of.date() for r in runs):
+        raise ValueError("run follows calendar clock")
     by_date = {r["run_date"]: r for r in runs}
     if len(by_date) != len(runs):
         raise ValueError("duplicate calendar batch")
@@ -83,7 +85,7 @@ def validate_calendar(calendar, daily):
     if [r.get("date") for r in calendar["rows"]] != expected_dates:
         raise ValueError("calendar must represent every day exactly once")
     logged = {r["date"]: r for r in daily}
-    if any(date.fromisoformat(key) < start for key in logged):
+    if len(logged) != len(daily) or any(key not in expected_dates for key in logged):
         raise ValueError("daily data belong to a retired calendar")
     if calendar["lastLedgerDate"] != max(logged, default=None):
         raise ValueError("calendar freshness mismatch")
@@ -91,6 +93,11 @@ def validate_calendar(calendar, daily):
         if set(row) != FIELDS or row["status"] not in {"completed", "partial", "failed", "missing", "planned"}:
             raise ValueError("invalid calendar row")
         source = logged.get(row["date"])
+        due_at = datetime.combine(date.fromisoformat(row["date"]), time(7, 20), ROME)
+        if not source and row["status"] != ("missing" if end >= due_at else "planned"):
+            raise ValueError("calendar status disagrees with ledger absence and clock")
+        if not source and row["failureCodes"] != []:
+            raise ValueError("missing day cannot invent provider failures")
         if type(row["ledgerPresent"]) is not bool or row["ledgerPresent"] != bool(source):
             raise ValueError("calendar ledger presence mismatch")
         if source and (source["status"] != row["status"] or source["completedSourceCount"] != row["completedSources"] or source["expectedSourceCount"] != expected_sources):
