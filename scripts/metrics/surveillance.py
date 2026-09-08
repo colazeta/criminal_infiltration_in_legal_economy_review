@@ -654,7 +654,10 @@ def validate_public_payload(payload: dict[str, Any]) -> dict[str, Any]:
     if not isinstance(payload, dict):
         raise MetricsError("public statistics: expected an object")
     if payload.get("schemaVersion") == 2:
-        from daily_calendar import validate_calendar
+        if __package__:
+            from .daily_calendar import validate_calendar
+        else:
+            from daily_calendar import validate_calendar
         require_exact_fields(payload, PUBLIC_FIELDS | {"calendar"}, "public statistics v2")
         legacy = {k: v for k, v in payload.items() if k != "calendar"}
         legacy["schemaVersion"] = SCHEMA_VERSION
