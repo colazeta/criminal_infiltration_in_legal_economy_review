@@ -29,6 +29,20 @@ aggregate ledger's effective date, 2026-08-31, through the projection date, last
 observed ledger date, complete/partial/failed/missing/planned status, query
 coverage and safe failure categories. Legacy retry counts remain unknown.
 
+The first release was verified in production on 2026-09-08. The public model
+browser exposes 32 definitions; the daily projection shows nine dates, one
+complete, three partial and five missing. Both Pages and the Worker passed
+release checks after fixing the package import used by site validation.
+The existing deployment credential can update the Worker but the D1 inventory
+request returns HTTP 401. No V2 resources or review rows were created by that
+blocked preparation. D1/R2/Queues provisioning still needs a credential with the
+required resource permissions; account permissions were not changed.
+
+Calendar coverage uses every expected day. Provider volume tables retain the
+legacy ledger window ending at its last observed date and explicitly label that
+scope. Their numerator and denominator are never combined with a different
+calendar window. Charts and daily tables use the same complete calendar.
+
 The Worker's future supervisor runs every 15 minutes when enabled. Expected
 search time is 07:00 Rome; failed attempts become eligible for retry after
 20 minutes then 60 minutes, respecting a longer Retry-After. Duplicate queue
