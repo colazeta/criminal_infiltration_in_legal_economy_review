@@ -19,7 +19,9 @@ class OntologyContractTests(unittest.TestCase):
         result = ontology.validate_all(quiet=True)
         self.assertEqual(result["profile_version"], "0.3.0")
         self.assertGreaterEqual(result["governed_artifacts"], 20)
-        self.assertGreaterEqual(result["candidates"], 68)
+        import csv
+        with (ROOT / "data/curation/review_queue.csv").open() as source:
+            self.assertEqual(result["candidates"], len(list(csv.DictReader(source))))
 
     def test_profile_reuses_external_ontologies_instead_of_reinventing_them(self) -> None:
         profile = json.loads((ROOT / "ontology/cile-review-profile.yaml").read_text(encoding="utf-8"))

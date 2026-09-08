@@ -7,7 +7,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 class ReadingAidOverrideTests(unittest.TestCase):
     def test_overrides_are_complete_and_non_decisional(self) -> None:
-        payload = json.loads((ROOT / "data/curation/reading_aid_overrides.json").read_text(encoding="utf-8"))
+        payload = json.loads((ROOT / "data/legacy/pre-oa-reset-2026-09-08/curation/reading_aid_overrides.json").read_text(encoding="utf-8"))
         self.assertEqual(payload["schemaVersion"], 1)
         records = payload["records"]
         self.assertTrue(records)
@@ -22,7 +22,7 @@ class ReadingAidOverrideTests(unittest.TestCase):
     def test_targeted_retrieval_upgrades_known_hard_cases(self) -> None:
         records = {
             row["candidateId"]: row
-            for row in json.loads((ROOT / "data/curation/reading_aid_overrides.json").read_text(encoding="utf-8"))["records"]
+            for row in json.loads((ROOT / "data/legacy/pre-oa-reset-2026-09-08/curation/reading_aid_overrides.json").read_text(encoding="utf-8"))["records"]
         }
         self.assertEqual(records["E0R1-C015"]["kind"], "publisher_summary")
         self.assertEqual(records["E0R1-C040"]["kind"], "publisher_summary")

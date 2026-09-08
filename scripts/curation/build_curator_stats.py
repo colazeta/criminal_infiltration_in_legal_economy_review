@@ -38,7 +38,7 @@ def build_payload(root: Path = ROOT) -> dict[str, object]:
     queue = read_rows(root / "data" / "curation" / "review_queue.csv")
     actions = read_rows(root / "data" / "curation" / "actions.csv")
     candidate_ids = [row.get("candidate_id", "") for row in queue]
-    if not queue or "" in candidate_ids or len(candidate_ids) != len(set(candidate_ids)):
+    if "" in candidate_ids or len(candidate_ids) != len(set(candidate_ids)):
         raise CuratorStatsError("Curator queue candidate IDs are empty or duplicated")
 
     by_stage = {value: 0 for value in STAGE_KEYS.values()}

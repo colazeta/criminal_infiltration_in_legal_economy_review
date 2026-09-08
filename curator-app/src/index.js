@@ -1,6 +1,7 @@
 "use strict";
 
 import { fetchWithTimeout } from "./network.js";
+import { isActiveArchiveIssue } from "./archive-cycle.js";
 
 const GITHUB_API = "https://api.github.com";
 const GITHUB_OAUTH = "https://github.com/login/oauth";
@@ -573,7 +574,7 @@ async function listCandidates(config, token) {
       throw new CuratorAppError(502, "github_api_error", "GitHub ha restituito una coda non valida.");
     }
     for (const issue of issues) {
-      if (issue.pull_request) continue;
+      if (issue.pull_request || !isActiveArchiveIssue(issue)) continue;
       const candidate = parseCandidateIssue(issue);
       if (candidate) candidates.push(candidate);
     }
@@ -742,6 +743,7 @@ async function verifyCandidate(config, token, values) {
   const marker = `<!-- curator-candidate:${values.candidateId} -->`;
   if (
     issue?.pull_request ||
+    !isActiveArchiveIssue(issue) ||
     issue?.state !== "open" ||
     !labels.includes("curation:queue") ||
     !String(issue?.body || "").includes(marker)
@@ -767,11 +769,11 @@ async function findSubmission(config, token, login, submissionId) {
 }
 
 async function createDecisionValues(config, session, values) {
+  await verifyCandidate(config, session.token, values);
   const existing = await findSubmission(config, session.token, session.login, values.submissionId);
   if (existing) {
     return { issueNumber: Number(existing.number), issueUrl: String(existing.html_url), replayed: true };
   }
-  await verifyCandidate(config, session.token, values);
   const issue = await githubRequest(`/repos/${config.repository}/issues`, session.token, {
     method: "POST",
     headers: { "Content-Type": "application/json" },

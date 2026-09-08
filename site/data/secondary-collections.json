@@ -1,9 +1,9 @@
 {
   "schemaVersion": 2,
-  "archiveVersion": "0.2.0",
-  "releaseDate": "2026-08-30",
-  "searchCoverageThrough": "2026-04-29",
-  "sourceSnapshot": "2026-08-30",
+  "archiveVersion": "0.3.0",
+  "releaseDate": "2026-09-08",
+  "searchCoverageThrough": "",
+  "sourceSnapshot": "2026-09-08",
   "methodology": {
     "collectionDefinition": "Secondary collections retain reviewed scholarly work that is useful outside the systematic review's narrower eligibility boundary.",
     "coreBoundary": "Every record here has a current not_eligible decision and remains withheld from the criminal-infiltration review corpus.",

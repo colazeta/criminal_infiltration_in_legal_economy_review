@@ -1,0 +1,17 @@
+{
+  "profile_version": "0.3.0",
+  "artifact": "config/archive-cycle.json",
+  "class": "ReviewEvent",
+  "fields": {
+    "schema_version": "version",
+    "review_id": "review_id",
+    "reset_at": "generated_at_time",
+    "protocol_version": "v2_protocol_version",
+    "access_policy": "v2_protocol_version",
+    "legacy_snapshot_ref": "v2_legacy_snapshot_id",
+    "legacy_commit": "identifier_value",
+    "legacy_issue_ceiling": "identifier_value",
+    "daily_start_date": "v2_start_date"
+  },
+  "definition": "Owner-authorised operational reset boundary. It creates no scientific decision or private V2 review row. The issue ceiling and reset timestamp exclude retired intake; the first daily date is the next scheduled search after reset."
+}

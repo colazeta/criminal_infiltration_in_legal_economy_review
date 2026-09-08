@@ -350,7 +350,7 @@ def validate_assets() -> None:
         fail("Site must render untrusted metadata through DOM text nodes")
     for required in (
         "No publications are currently public",
-        "pending publication review, withholding, or withdrawal",
+        "restarted from zero under the open-access policy",
         "No publications match these filters",
     ):
         if required not in javascript:

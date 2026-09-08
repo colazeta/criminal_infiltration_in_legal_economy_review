@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "review_id": "oa-2026-09-08",
+  "reset_at": "2026-09-08T08:29:28Z",
+  "protocol_version": "CILE-4PT-OA-v3",
+  "access_policy": "OA-1",
+  "legacy_snapshot_ref": "legacy/pre-oa-reset-2026-09-08",
+  "legacy_commit": "f8d04e521fc2316acf82d339546a1b8e58f49db0",
+  "legacy_issue_ceiling": 193,
+  "daily_start_date": "2026-09-09"
+}

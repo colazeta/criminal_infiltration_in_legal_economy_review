@@ -211,3 +211,11 @@ The additive private model is specified in [review-v2-model.md](review-v2-model.
 The owner-approved OA-1 access scope is specified in [open-access.md](../methodology/open-access.md). Both public collections require a current verified lawful full-text assessment. V2 records access history separately from scientific screening.
 
 OA export contracts are core schema 3 and secondary schema 2. Historical archive/protocol version metadata remains the source release; no corpus release is invented by a software change.
+
+## Active archive reset — 2026-09-08
+
+Release 0.3.0 starts the active archive from zero under OA-1. Previous data and
+decisions are retained in `data/legacy/pre-oa-reset-2026-09-08/` and the preserved
+Git branch. Old issue/ledger data do not populate the active cycle. Private D1
+V2 activation remains separate. See `docs/operations/archive-reset.md` for the
+exact scope, first scheduled date and rollback procedure.

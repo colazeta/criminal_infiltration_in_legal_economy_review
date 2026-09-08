@@ -56,3 +56,11 @@ either public builder.
 The GitHub issue materialiser keeps open work visible, links merged actions to
 the originating queue issue and closes only those issues whose current queue
 status represents a completed screening outcome.
+
+## Active archive reset — 2026-09-08
+
+Release 0.3.0 starts the active archive from zero under OA-1. Previous data and
+decisions are retained in `data/legacy/pre-oa-reset-2026-09-08/` and the preserved
+Git branch. Old issue/ledger data do not populate the active cycle. Private D1
+V2 activation remains separate. See `docs/operations/archive-reset.md` for the
+exact scope, first scheduled date and rollback procedure.

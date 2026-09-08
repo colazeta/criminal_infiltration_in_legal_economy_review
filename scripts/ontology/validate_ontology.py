@@ -409,6 +409,12 @@ def validate_all(*, quiet: bool = False) -> dict[str, int | str]:
     contracts = load_json(CONTRACT_PATH)
     check_profile(profile, external)
     check_private_v2_contract(profile)
+    cycle_contract = load_json(ROOT / "ontology/modules/archive-cycle.json")
+    cycle = load_json(ROOT / cycle_contract["artifact"])
+    if cycle_contract["profile_version"] != profile["version"] or cycle_contract["class"] not in profile["classes"]:
+        fail("invalid_archive_cycle_contract")
+    if set(cycle) != set(cycle_contract["fields"]) or set(cycle_contract["fields"].values()) - set(profile["slots"]):
+        fail("unmapped_archive_cycle_fields")
     check_vocabulary(profile)
     check_serialisations(profile)
     data = check_contracts(profile, contracts)

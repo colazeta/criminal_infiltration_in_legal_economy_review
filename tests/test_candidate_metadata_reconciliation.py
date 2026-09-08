@@ -113,8 +113,8 @@ class CandidateMetadataReconciliationTests(unittest.TestCase):
         self.assertEqual(repairs, [])
 
     def test_current_governed_data_supports_exactly_four_pre_or_post_repair_records(self) -> None:
-        _, queue_rows = read_csv(ROOT / "data/curation/review_queue.csv")
-        _, retrieval_rows = read_csv(ROOT / "data/curation/retrieval_coverage.csv")
+        _, queue_rows = read_csv(ROOT / "data/legacy/pre-oa-reset-2026-09-08/curation/review_queue.csv")
+        _, retrieval_rows = read_csv(ROOT / "data/legacy/pre-oa-reset-2026-09-08/curation/retrieval_coverage.csv")
         queue = {row["candidate_id"]: row for row in queue_rows}
         retrieval = retrieval_index(retrieval_rows)
         expected = {

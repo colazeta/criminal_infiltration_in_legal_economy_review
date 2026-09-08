@@ -17,7 +17,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 class ReviewSupportTests(unittest.TestCase):
     def test_every_unresolved_abstract_has_a_non_decisional_reading_aid(self) -> None:
-        with (ROOT / "data/curation/abstract_coverage.csv").open(
+        with (ROOT / "data/legacy/pre-oa-reset-2026-09-08/curation/abstract_coverage.csv").open(
             newline="", encoding="utf-8-sig"
         ) as handle:
             unresolved = {
@@ -26,7 +26,7 @@ class ReviewSupportTests(unittest.TestCase):
                 if row["coverage_status"] == "needs_web_search"
             }
         payload = json.loads(
-            (ROOT / "data/curation/reading_aids.json").read_text(encoding="utf-8")
+            (ROOT / "data/legacy/pre-oa-reset-2026-09-08/curation/reading_aids.json").read_text(encoding="utf-8")
         )
         aids = {record["candidateId"]: record for record in payload["records"]}
         self.assertTrue(unresolved.issubset(set(aids)))
@@ -38,12 +38,12 @@ class ReviewSupportTests(unittest.TestCase):
             self.assertLessEqual(len(record["synopsis"]), 1500)
 
     def test_resolved_abstract_source_may_retain_non_decisional_reading_support(self) -> None:
-        with (ROOT / "data/curation/abstract_coverage.csv").open(
+        with (ROOT / "data/legacy/pre-oa-reset-2026-09-08/curation/abstract_coverage.csv").open(
             newline="", encoding="utf-8-sig"
         ) as handle:
             coverage = {row["candidate_id"]: row for row in csv.DictReader(handle)}
         payload = json.loads(
-            (ROOT / "data/curation/reading_aids.json").read_text(encoding="utf-8")
+            (ROOT / "data/legacy/pre-oa-reset-2026-09-08/curation/reading_aids.json").read_text(encoding="utf-8")
         )
         aids = {record["candidateId"]: record for record in payload["records"]}
         promoted = {
@@ -57,7 +57,7 @@ class ReviewSupportTests(unittest.TestCase):
             self.assertEqual(aids[candidate_id]["kind"], "verified_abstract_source")
 
     def test_guidance_is_candidate_specific_but_never_a_decision(self) -> None:
-        with (ROOT / "data/curation/review_queue.csv").open(
+        with (ROOT / "data/legacy/pre-oa-reset-2026-09-08/curation/review_queue.csv").open(
             newline="", encoding="utf-8-sig"
         ) as handle:
             row = next(
@@ -76,7 +76,7 @@ class ReviewSupportTests(unittest.TestCase):
 
     def test_reading_aid_is_explicitly_not_an_author_abstract(self) -> None:
         payload = json.loads(
-            (ROOT / "data/curation/reading_aids.json").read_text(encoding="utf-8")
+            (ROOT / "data/legacy/pre-oa-reset-2026-09-08/curation/reading_aids.json").read_text(encoding="utf-8")
         )
         section = reading_section(payload["records"][0])
         self.assertIn(READING_HEADING, section)

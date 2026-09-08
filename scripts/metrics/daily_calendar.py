@@ -1,6 +1,11 @@
 """A calendar is an expectation, never a fabricated surveillance ledger record."""
 from datetime import date, datetime, time, timedelta
 from zoneinfo import ZoneInfo
+from pathlib import Path
+import json
+
+CYCLE = json.loads((Path(__file__).resolve().parents[2] / "config/archive-cycle.json").read_text())
+SCOPES = {"legacy": date(2026, 8, 31), CYCLE["review_id"]: date.fromisoformat(CYCLE["daily_start_date"])}
 
 ROME = ZoneInfo("Europe/Rome")
 START = date(2026, 8, 31)  # Effective date of the governed aggregate metrics ledger.
@@ -8,7 +13,11 @@ ERRORS = {"quota_exceeded", "rate_limited", "timeout", "authentication_failed", 
 FIELDS = {"date", "status", "ledgerPresent", "startedAt", "finishedAt", "attemptCount", "queriesPlanned", "queriesCompleted", "completedSources", "expectedSources", "failureCodes"}
 
 
-def calendar_projection(runs, as_of, start=START):
+def calendar_projection(runs, as_of, start=START, review_id="legacy"):
+    if SCOPES.get(review_id) != start:
+        raise ValueError("calendar scope/start mismatch")
+    if any(date.fromisoformat(r["run_date"]) < start for r in runs):
+        raise ValueError("run predates this calendar")
     if isinstance(as_of, str):
         as_of = datetime.fromisoformat(as_of.replace("Z", "+00:00"))
     if as_of.tzinfo is None:
@@ -43,7 +52,7 @@ def calendar_projection(runs, as_of, start=START):
     recent = [r for r in due_rows if date.fromisoformat(r["date"]) >= as_of.date() - timedelta(days=29)]
     completed = sum(r["status"] == "completed" for r in due_rows)
     return {
-        "reviewId": "legacy", "timezone": "Europe/Rome", "scheduledLocalTime": "07:00",
+        "reviewId": review_id, "timezone": "Europe/Rome", "scheduledLocalTime": "07:00",
         "asOf": as_of.isoformat(), "coverageStart": start.isoformat(), "lastLedgerDate": max(by_date, default=None),
         "rows": rows, "expectedDays": len(due_rows), "completedDays": completed,
         "missingDays": sum(r["status"] == "missing" for r in rows),
@@ -56,18 +65,20 @@ def validate_calendar(calendar, daily):
     expected_keys = {"reviewId", "timezone", "scheduledLocalTime", "asOf", "coverageStart", "lastLedgerDate", "rows", "expectedDays", "completedDays", "missingDays", "completionRate", "sourceCompletionRate30"}
     if not isinstance(calendar, dict) or set(calendar) != expected_keys:
         raise ValueError("invalid calendar fields")
-    if (calendar["reviewId"], calendar["timezone"], calendar["scheduledLocalTime"]) != ("legacy", "Europe/Rome", "07:00"):
+    if calendar["reviewId"] not in SCOPES or (calendar["timezone"], calendar["scheduledLocalTime"]) != ("Europe/Rome", "07:00"):
         raise ValueError("invalid calendar scope")
     end = datetime.fromisoformat(calendar["asOf"])
     if end.tzinfo is None:
         raise ValueError("calendar asOf needs timezone")
     start = date.fromisoformat(calendar["coverageStart"])
-    if start != START:
+    if start != SCOPES[calendar["reviewId"]]:
         raise ValueError("unexpected calendar coverage start")
     expected_dates = [(start + timedelta(days=i)).isoformat() for i in range((end.astimezone(ROME).date() - start).days + 1)]
     if [r.get("date") for r in calendar["rows"]] != expected_dates:
         raise ValueError("calendar must represent every day exactly once")
     logged = {r["date"]: r for r in daily}
+    if any(date.fromisoformat(key) < start for key in logged):
+        raise ValueError("daily data belong to a retired calendar")
     if calendar["lastLedgerDate"] != max(logged, default=None):
         raise ValueError("calendar freshness mismatch")
     for row in calendar["rows"]:

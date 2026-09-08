@@ -1,0 +1,285 @@
+{
+  "schemaVersion": 1,
+  "purpose": "Non-decisional curator reading aids for candidates whose mechanical abstract cascade did not expose a standalone abstract. These records store only short paraphrased synopses and source locators; they do not replace the source, screening, or a human decision.",
+  "records": [
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-01-013",
+      "kind": "verified_abstract_source",
+      "sourceLabel": "IRIS Università degli Studi di Palermo",
+      "sourceUrl": "https://iris.unipa.it/handle/10447/710250",
+      "synopsis": "The chapter studies Italian judicial administration and judicial control measures designed to interrupt organised-crime influence while allowing firms to continue operating, using an organisational-resilience perspective and firm-level evidence.",
+      "checkedAt": "2026-09-06",
+      "note": "The institutional repository exposes an extended abstract; the curator should still verify publication status and the evidence used for the eleven firms."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-06-002",
+      "kind": "verified_abstract_source",
+      "sourceLabel": "Consensus exact scholarly record",
+      "sourceUrl": "https://consensus.app/papers/details/fe983676dd965240bd3572cc9a9c30c9/?utm_source=chatgpt",
+      "synopsis": "The chapter examines organised crime in legitimate sectors of the Dutch economy and distinguishes parasitic from symbiotic relationships, including forms of criminal influence or control in hospitality, slot machines, construction and waste disposal.",
+      "checkedAt": "2026-09-06",
+      "note": "The exact scholarly search record exposes substantive abstract-level information for this chapter. Canonicalisation should distinguish the original 1998 chapter from its later Routledge reprint manifestation."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-06-007",
+      "kind": "publisher_summary",
+      "sourceLabel": "SAGE Academic Books",
+      "sourceUrl": "https://sk.sagepub.com/book/mono/organized-crime/chpt/organized-crime-legitimate-business",
+      "synopsis": "This dedicated chapter examines the relationship between organised crime and legitimate business, including criminal actors operating as businesspeople, racketeering and protection, criminal control over legal sectors, and the vulnerability of legitimate firms to criminal influence.",
+      "checkedAt": "2026-09-06",
+      "note": "The exact SAGE chapter page provides a substantive chapter description, but no separately labelled author abstract was located. Treat this as publisher-level reading support, not an author abstract."
+    },
+    {
+      "candidateId": "E0-D004",
+      "kind": "verified_abstract_source",
+      "sourceLabel": "Oxford Academic",
+      "sourceUrl": "https://academic.oup.com/edited-volume/38662",
+      "synopsis": "The handbook surveys major forms, structures and settings of organised crime and the principal efforts to prevent and control it, including gangs, opportunistic structures, state involvement and gendered participation.",
+      "checkedAt": "2026-09-06",
+      "note": "Book-level abstract/description. Final inclusion should normally be assessed at chapter level where the contribution is specific."
+    },
+    {
+      "candidateId": "E0R1-C001",
+      "kind": "publisher_summary",
+      "sourceLabel": "Bristol University Press",
+      "sourceUrl": "https://bristoluniversitypressdigital.com/edcollchap-oa/book/9781529247145/ch007.xml",
+      "synopsis": "The chapter broadens the concept of criminal infiltration beyond a mafia-only frame and argues for comparative analysis of different criminal actors and their relationships with the legal economy.",
+      "checkedAt": "2026-09-06",
+      "note": "The source is the open publisher manifestation of the same chapter family; verify work identity before resolving the legacy DOI manifestation."
+    },
+    {
+      "candidateId": "E0R1-C003",
+      "kind": "publisher_summary",
+      "sourceLabel": "Bristol University Press",
+      "sourceUrl": "https://bristoluniversitypressdigital.com/edcollchap-oa/book/9781529247145/ch007.xml",
+      "synopsis": "The chapter broadens the concept of criminal infiltration beyond a mafia-only frame and argues for comparative analysis of different criminal actors and their relationships with the legal economy.",
+      "checkedAt": "2026-09-06",
+      "note": "This appears to be another manifestation of the Beyond Mafia chapter; identity/duplicate review precedes substantive screening."
+    },
+    {
+      "candidateId": "E0R1-C009",
+      "kind": "publisher_summary",
+      "sourceLabel": "Edward Elgar Online",
+      "sourceUrl": "https://www.elgaronline.com/abstract/9781848443167.xml",
+      "synopsis": "This chapter applies a stage-model perspective to criminal entrepreneurs, treating criminal careers and organised illegal business as processes that can be analysed with entrepreneurship concepts.",
+      "checkedAt": "2026-09-06",
+      "note": "The publisher page describes the book and identifies this chapter; use the chapter/full text for the final scope decision."
+    },
+    {
+      "candidateId": "E0R1-C010",
+      "kind": "publisher_summary",
+      "sourceLabel": "Edward Elgar Online",
+      "sourceUrl": "https://www.elgaronline.com/abstract/9781848443167.xml",
+      "synopsis": "This chapter examines strategic planning in criminal entrepreneurship, framing illegal organisations through business strategy, information and knowledge-management concepts and applied cases.",
+      "checkedAt": "2026-09-06",
+      "note": "No separate publisher abstract was located; this is a source-grounded reading synopsis, not an author abstract."
+    },
+    {
+      "candidateId": "E0R1-C011",
+      "kind": "publisher_summary",
+      "sourceLabel": "Edward Elgar Online",
+      "sourceUrl": "https://www.elgaronline.com/abstract/9781848443167.xml",
+      "synopsis": "This chapter treats knowledge management as an analytical lens for criminal entrepreneurship and organised illegal business, focusing on how knowledge supports criminal business activity and its investigation.",
+      "checkedAt": "2026-09-06",
+      "note": "No separate publisher abstract was located; this is a source-grounded reading synopsis, not an author abstract."
+    },
+    {
+      "candidateId": "E0R1-C012",
+      "kind": "publisher_summary",
+      "sourceLabel": "Edward Elgar Online",
+      "sourceUrl": "https://www.elgaronline.com/abstract/9781848443167.xml",
+      "synopsis": "The chapter applies value-chain, value-shop and value-network configurations to criminal entrepreneurship, using them to distinguish flows of goods, knowledge work and actor connections in organised illegal business.",
+      "checkedAt": "2026-09-06",
+      "note": "A closely related scholarly article exposes a fuller abstract, but the final decision must be based on this chapter manifestation or verified work identity."
+    },
+    {
+      "candidateId": "E0R1-C013",
+      "kind": "metadata_warning",
+      "sourceLabel": "DOI record requiring verification",
+      "sourceUrl": "https://doi.org/10.31085/2949-138x-2025-2-224-133-140",
+      "synopsis": "The recorded title concerns the criminal wrongfulness of illegal entrepreneurship. Independent assisted searching did not recover a reliable exact scholarly abstract for this DOI, so the record should be treated as an identity/metadata check before any scope judgement.",
+      "checkedAt": "2026-09-06",
+      "note": "Do not infer relevance from the title or from nearby illegal-entrepreneurship literature."
+    },
+    {
+      "candidateId": "E0R1-C014",
+      "kind": "verified_abstract_source",
+      "sourceLabel": "Springer Nature",
+      "sourceUrl": "https://link.springer.com/chapter/10.1007/978-3-319-01839-3_33",
+      "synopsis": "The chapter reconstructs mafia strategies and techniques for infiltrating public procurement and public works from Italian judicial cases in Southern Italy, directly examining a legal-economy access mechanism.",
+      "checkedAt": "2026-09-06",
+      "note": "Publisher chapter page provides the substantive description; inspect the full chapter for the criminal-interest and sustained-influence evidence."
+    },
+    {
+      "candidateId": "E0R1-C015",
+      "kind": "metadata_warning",
+      "sourceLabel": "DOI record requiring verification",
+      "sourceUrl": "https://doi.org/10.5040/9781978748965.ch-001",
+      "synopsis": "The candidate is recorded as a conceptual chapter on what constitutes mafia-type organised crime, but assisted searching did not resolve the exact DOI to a sufficiently reliable publisher abstract or chapter description.",
+      "checkedAt": "2026-09-06",
+      "note": "Verify the manifestation and author/book metadata first; do not use generic mafia definitions as a substitute for the chapter."
+    },
+    {
+      "candidateId": "E0R1-C017",
+      "kind": "full_text_intro",
+      "sourceLabel": "Springer Nature",
+      "sourceUrl": "https://link.springer.com/chapter/10.1007/0-306-48132-4_9",
+      "synopsis": "The chapter critiques academic interpretations of Philadelphia's Black Mafia and examines how African-American organised crime has been represented in the scholarly literature.",
+      "checkedAt": "2026-09-06",
+      "note": "The publisher exposes the chapter and its opening text; the synopsis is not a separately labelled author abstract."
+    },
+    {
+      "candidateId": "E0R1-C018",
+      "kind": "verified_abstract_source",
+      "sourceLabel": "DeSci Nodes",
+      "sourceUrl": "https://nodes.desci.com/dpid/619/v1",
+      "synopsis": "The work presents a meta-analytic approach to government-versus-mafia dynamics using systems, chaos and complexity concepts to synthesise organised-crime research.",
+      "checkedAt": "2026-09-06",
+      "note": "The source explicitly exposes an Abstract section; scholarly status and methodological quality still require human review."
+    },
+    {
+      "candidateId": "E0R1-C019",
+      "kind": "full_text_intro",
+      "sourceLabel": "De Gruyter Brill",
+      "sourceUrl": "https://www.degruyterbrill.com/document/doi/10.1515/9780228019886-013/html",
+      "synopsis": "The chapter examines task specialisation in organised crime through the Montréal Mafia, focusing on how money-laundering functions are organised and allocated within or around the group.",
+      "checkedAt": "2026-09-06",
+      "note": "Use the chapter itself to decide whether the legal-economy relationship is infiltration or only an adjacent laundering mechanism."
+    },
+    {
+      "candidateId": "E0R1-C020",
+      "kind": "publisher_summary",
+      "sourceLabel": "Bloomsbury",
+      "sourceUrl": "https://www.bloomsbury.com/us/all-is-clouded-by-desire-9780275983307/",
+      "synopsis": "The chapter sits within a study of global banking and money laundering and focuses on Benex and the so-called Red Mafia as part of the book's analysis of banks, illicit finance and Russian criminal networks.",
+      "checkedAt": "2026-09-06",
+      "note": "The publisher page verifies the chapter context but does not expose a standalone chapter abstract."
+    },
+    {
+      "candidateId": "E0R1-C024",
+      "kind": "publisher_summary",
+      "sourceLabel": "De Gruyter Brill / Harvard University Press",
+      "sourceUrl": "https://www.degruyterbrill.com/document/doi/10.4159/9780674974340-007/html",
+      "synopsis": "The chapter analyses collusion between law-enforcement actors and organised crime within the book's study of China's crony capitalism, making the institutional-criminal relationship rather than firm infiltration its immediate focus.",
+      "checkedAt": "2026-09-06",
+      "note": "Publisher page confirms the exact chapter; inspect the text before deciding whether this is contextual or outside the infiltration boundary."
+    },
+    {
+      "candidateId": "E0R1-C030",
+      "kind": "full_text_intro",
+      "sourceLabel": "Critical Reflections on Transnational Organized Crime",
+      "sourceUrl": "https://www.researchgate.net/publication/316484592_5_Against_Transnational_Organized_Crime",
+      "synopsis": "The chapter critically examines the international mobilisation against transnational organised crime and the institutional and policy responses constructed around the idea of a global organised-crime threat.",
+      "checkedAt": "2026-09-06",
+      "note": "The chapter is principally about governance and control responses; assess only as contextual evidence if it makes a necessary contribution to the infiltration construct."
+    },
+    {
+      "candidateId": "E0R1-C031",
+      "kind": "publisher_summary",
+      "sourceLabel": "Springer Nature",
+      "sourceUrl": "https://link.springer.com/article/10.1007/BF02696272",
+      "synopsis": "This early Trends in Organized Crime item addresses money laundering and financial crime. The publisher record verifies the item, but the current source surface does not expose enough substantive text to infer an infiltration relationship.",
+      "checkedAt": "2026-09-06",
+      "note": "Treat as adjacent AML unless full text supplies sustained legal-economy access, participation, influence, control or embeddedness."
+    },
+    {
+      "candidateId": "E0R1-C032",
+      "kind": "publisher_summary",
+      "sourceLabel": "Springer Nature",
+      "sourceUrl": "https://link.springer.com/chapter/10.1007/978-0-387-39020-8_10",
+      "synopsis": "The chapter revisits the control of money laundering within organised-crime policy and evaluates the logic and effectiveness of anti-money-laundering responses rather than directly analysing criminal infiltration of firms.",
+      "checkedAt": "2026-09-06",
+      "note": "Likely adjacent/contextual; verify the chapter before assigning any exclusion or secondary AML routing."
+    },
+    {
+      "candidateId": "E0R1-C034",
+      "kind": "verified_abstract_source",
+      "sourceLabel": "Wiley Online Library",
+      "sourceUrl": "https://onlinelibrary.wiley.com/doi/10.1002/9781119125389.ch2",
+      "synopsis": "The chapter explains trade-based money laundering through invoice fraud and manipulation of supporting trade documents, centred on deliberate mispricing and related techniques.",
+      "checkedAt": "2026-09-06",
+      "note": "Wiley exposes a chapter Summary. This is normally adjacent AML unless a sustained legal-economy infiltration relationship is analysed."
+    },
+    {
+      "candidateId": "E0R1-C036",
+      "kind": "verified_abstract_source",
+      "sourceLabel": "RePEc/IDEAS",
+      "sourceUrl": "https://ideas.repec.org/h/elg/eechap/14442_20.html",
+      "synopsis": "The chapter examines international trade mispricing as a mechanism for trade-based money laundering and tax evasion, placing the practice within the broader development of money-laundering research and regulation.",
+      "checkedAt": "2026-09-06",
+      "note": "The scholarly index exposes an Abstract section for the exact chapter."
+    },
+    {
+      "candidateId": "E0R1-C037",
+      "kind": "publisher_summary",
+      "sourceLabel": "Wiley Online Library",
+      "sourceUrl": "https://onlinelibrary.wiley.com/doi/10.1002/9781119125389.app1",
+      "synopsis": "This appendix is a primer on money laundering within a book devoted to trade-based money laundering; its role is introductory AML background rather than direct evidence of criminal infiltration in the legal economy.",
+      "checkedAt": "2026-09-06",
+      "note": "Wiley verifies the exact appendix but does not expose a substantive standalone abstract in the current source surface."
+    },
+    {
+      "candidateId": "E0R1-C040",
+      "kind": "review_synopsis",
+      "sourceLabel": "DOI / bibliographic record",
+      "sourceUrl": "https://doi.org/10.4324/9781315084565-8",
+      "synopsis": "The chapter's analytical value is the boundary between business/corporate crime and organised crime. For this review, the key question is whether it contributes a necessary conceptual distinction or actually analyses organised-crime relationships with legitimate business.",
+      "checkedAt": "2026-09-06",
+      "note": "No reliable standalone abstract was recovered; this synopsis is explicitly a curator aid, not a source abstract."
+    },
+    {
+      "candidateId": "E0R1-C042",
+      "kind": "verified_abstract_source",
+      "sourceLabel": "Springer Nature",
+      "sourceUrl": "https://link.springer.com/chapter/10.1007/978-3-319-31608-6_1",
+      "synopsis": "The chapter asks what determines organised crime and develops a theoretical framework for causal explanation, motivated by the breadth of legal and institutional reforms adopted against organised crime.",
+      "checkedAt": "2026-09-06",
+      "note": "Springer and an author-shared copy expose the substantive abstract."
+    },
+    {
+      "candidateId": "E0R1-C043",
+      "kind": "publisher_summary",
+      "sourceLabel": "SAGE Academic Books",
+      "sourceUrl": "https://sk.sagepub.com/book/mono/organized-crime/toc",
+      "synopsis": "This chapter concerns the research and conceptual study of organised crime within a monograph that emphasises classificatory patterns and dynamics rather than particular historical manifestations.",
+      "checkedAt": "2026-09-06",
+      "note": "No standalone chapter abstract was recovered; use the source chapter if this conceptual background appears necessary."
+    },
+    {
+      "candidateId": "E0R1-C049",
+      "kind": "metadata_warning",
+      "sourceLabel": "JSTOR / NYU Press",
+      "sourceUrl": "https://www.jstor.org/stable/j.ctv1n6pv6d",
+      "synopsis": "This chapter belongs to Shortlisted: Women in the Shadows of the Supreme Court and concerns women considered for appointment to the US Supreme Court. It is unrelated to organised crime or criminal infiltration.",
+      "checkedAt": "2026-09-06",
+      "note": "This is strong evidence of legacy retrieval noise; record the human exclusion rather than spending time on infiltration screening."
+    },
+    {
+      "candidateId": "E0R1-C051",
+      "kind": "metadata_warning",
+      "sourceLabel": "Bibliographic/web verification",
+      "sourceUrl": "https://search.worldcat.org/title/1438665214",
+      "synopsis": "The retrieved record is a promotional/download artefact for David Szalay's novel Flesh, not a scholarly organised-crime work. The title and source indicate a legacy false positive rather than a paper lacking an abstract.",
+      "checkedAt": "2026-09-06",
+      "note": "Human action should normally be not_academic after confirming the candidate identity."
+    },
+    {
+      "candidateId": "E0R1-C052",
+      "kind": "metadata_warning",
+      "sourceLabel": "JSTOR / NYU Press",
+      "sourceUrl": "https://www.jstor.org/stable/j.ctv1n6pv6d",
+      "synopsis": "This chapter belongs to Shortlisted: Women in the Shadows of the Supreme Court and concerns the first woman appearing on presidential Supreme Court shortlists. It is unrelated to organised crime or the legal-economy infiltration construct.",
+      "checkedAt": "2026-09-06",
+      "note": "Strong legacy-noise signal; confirm and record the controlled exclusion rather than searching for an organised-crime abstract."
+    },
+    {
+      "candidateId": "E0R1-C053",
+      "kind": "metadata_warning",
+      "sourceLabel": "JSTOR / NYU Press",
+      "sourceUrl": "https://www.jstor.org/stable/j.ctv1n6pv6d",
+      "synopsis": "This chapter belongs to Shortlisted: Women in the Shadows of the Supreme Court and discusses tokenism after women were shortlisted for the Court. It is unrelated to organised crime or criminal infiltration.",
+      "checkedAt": "2026-09-06",
+      "note": "Strong legacy-noise signal; confirm and record the controlled exclusion rather than searching for an organised-crime abstract."
+    }
+  ]
+}
