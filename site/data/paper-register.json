@@ -1,4 +1,327 @@
 {
   "schemaVersion": 1,
-  "records": []
+  "records": [
+    {
+      "id": "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-001",
+      "title": "The Economic Effects of Mafia: Firm Level Evidence",
+      "authors": "Litterio Mirenda; Sauro Mocetti; Lucia Rizzica",
+      "year": 2022,
+      "venue": "American Economic Review",
+      "doi": "10.1257/aer.20201015",
+      "sourceLinks": [
+        "https://ideas.repec.org/a/aea/aecrev/v112y2022i8p2748-73.html"
+      ],
+      "metadataStatus": "metadata_partial",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-08",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-002",
+      "title": "The Economic Impact of Organized Crime Infiltration in the Legal Economy: Evidence from the Judicial Administration of Organized Crime Firms",
+      "authors": "Francesca Calamunci; Francesco Drago",
+      "year": 2020,
+      "venue": "IZA Discussion Papers",
+      "doi": "",
+      "sourceLinks": [
+        "https://docs.iza.org/dp13028.pdf"
+      ],
+      "metadataStatus": "metadata_partial",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-08",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-003",
+      "title": "Mafias and Firms",
+      "authors": "Jaime Arellano-Bover; Marco De Simoni; Luigi Guiso; Rocco Macchiavello; Domenico J. Marchetti; Mounu Prem",
+      "year": 2024,
+      "venue": "CESifo Working Paper No. 11043",
+      "doi": "",
+      "sourceLinks": [
+        "https://hdl.handle.net/10419/296132",
+        "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4793899"
+      ],
+      "metadataStatus": "metadata_partial",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-08",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-004",
+      "title": "Mafia Infiltration and Ownership Dynamics in Italian Companies Amidst",
+      "authors": "Roberta De Luca; Rosalia Greco; Giovanni Immordino; Tommaso Oliviero",
+      "year": 2024,
+      "venue": "",
+      "doi": "",
+      "sourceLinks": [
+        "https://www.aiel.it/Files/Administrator/Submissions/Documents/submission638500802500193978.pdf"
+      ],
+      "metadataStatus": "metadata_partial",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-08",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-005",
+      "title": "Accounting for Crime: Detecting Mafia-connected Firms Using Machine Learning",
+      "authors": "Francesco Ambrosini; Michele Fabrizi; Antonio Parbonetti",
+      "year": 2024,
+      "venue": "",
+      "doi": "",
+      "sourceLinks": [
+        "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4912709"
+      ],
+      "metadataStatus": "metadata_partial",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-08",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-006",
+      "title": "Anti‐Mafia Police Actions, Criminal Firms, and Peer Firm Tax Avoidance",
+      "authors": "Justin Chircop; Michele Fabrizi; Patrizia Malaspina; Antonio Parbonetti",
+      "year": 2022,
+      "venue": "",
+      "doi": "10.1111/1475-679x.12455",
+      "sourceLinks": [
+        "https://doi.org/10.1111/1475-679x.12455"
+      ],
+      "metadataStatus": "metadata_partial",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-08",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-007",
+      "title": "The mafia influence in the business context: Infiltration of criminal firms in the public procurement market",
+      "authors": "Andrea Bafundi; Camilla Ciappei; Michele Fabrizi; Antonio Parbonetti",
+      "year": 2026,
+      "venue": "",
+      "doi": "10.1007/s10997-026-09789-9",
+      "sourceLinks": [
+        "https://doi.org/10.1007/s10997-026-09789-9"
+      ],
+      "metadataStatus": "metadata_partial",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-08",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-008",
+      "title": "Organized Crime, Public Procurement and Firms",
+      "authors": "",
+      "year": null,
+      "venue": "",
+      "doi": "",
+      "sourceLinks": [
+        "https://elena-stella.com/papers/stella_jmp.pdf"
+      ],
+      "metadataStatus": "metadata_partial",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-08",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-009",
+      "title": "The extra‐legal governance of corruption: Tracing the organization of corruption in public procurement",
+      "authors": "Mihály Fazekas; Salvatore Sberna; Alberto Vannucci",
+      "year": 2021,
+      "venue": "",
+      "doi": "10.1111/gove.12648",
+      "sourceLinks": [
+        "https://doi.org/10.1111/gove.12648"
+      ],
+      "metadataStatus": "metadata_partial",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-08",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-010",
+      "title": "Threshold of shadows: Unveiling organised crime in Italian municipal public procurement",
+      "authors": "Stefania Fontana; Giorgio d’Agostino",
+      "year": 2025,
+      "venue": "",
+      "doi": "10.1016/j.ejpoleco.2025.102752",
+      "sourceLinks": [
+        "https://doi.org/10.1016/j.ejpoleco.2025.102752"
+      ],
+      "metadataStatus": "metadata_partial",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-08",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-011",
+      "title": "Mafia and bricks: unfair competition in local markets and policy interventions",
+      "authors": "",
+      "year": 2019,
+      "venue": "",
+      "doi": "10.1007/s11187-019-00250-w",
+      "sourceLinks": [
+        "https://link.springer.com/article/10.1007/s11187-019-00250-w"
+      ],
+      "metadataStatus": "metadata_partial",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-08",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-012",
+      "title": "How Mafias Migrate: Transplantation, Functional Diversification, and Separation",
+      "authors": "Federico Varese",
+      "year": 2020,
+      "venue": "",
+      "doi": "10.1086/708870",
+      "sourceLinks": [
+        "https://doi.org/10.1086/708870"
+      ],
+      "metadataStatus": "metadata_partial",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-08",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-013",
+      "title": "Bricks or cooks? Geographical and social determinants of the investment choices of mafia-type organized crime",
+      "authors": "Michele Riccardi; Mario A. Maggioni",
+      "year": 2024,
+      "venue": "",
+      "doi": "10.1177/17488958241293927",
+      "sourceLinks": [
+        "https://doi.org/10.1177/17488958241293927"
+      ],
+      "metadataStatus": "metadata_partial",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-08",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-014",
+      "title": "Understanding and Detecting Criminal Firms",
+      "authors": "Francesco Ambrosini",
+      "year": 2023,
+      "venue": "",
+      "doi": "",
+      "sourceLinks": [
+        "https://hdl.handle.net/11577/3478856"
+      ],
+      "metadataStatus": "metadata_partial",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-08",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-015",
+      "title": "A machine learning approach for the detection of firms linked to organised crime in Italy",
+      "authors": "",
+      "year": 2024,
+      "venue": "UIF, Quaderni dell'antiriciclaggio, n. 22",
+      "doi": "",
+      "sourceLinks": [
+        "https://uif.bancaditalia.it/pubblicazioni/quaderni/2024/quaderno-22-2024/quaderno-22-2024.pdf"
+      ],
+      "metadataStatus": "metadata_partial",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-08",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-016",
+      "title": "Evaluating risks-based communities of Mafia companies: a complex networks perspective",
+      "authors": "Nicola Giuseppe Castellano; Roy Cerqueti; Bruno Maria Franceschetti",
+      "year": 2021,
+      "venue": "",
+      "doi": "10.1007/s11156-021-00984-3",
+      "sourceLinks": [
+        "https://doi.org/10.1007/s11156-021-00984-3"
+      ],
+      "metadataStatus": "metadata_partial",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-08",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-017",
+      "title": "Oltre le mafie imprenditrici, oltre l’Italia: una mappatura dei fattori di rischio di infiltrazione della criminalità organizzata nelle imprese in Europa",
+      "authors": "Michele Ricciardi; Verena Zoppei; Daniela Andreatta; Antonio Bosisio; Georgiana Musat; Benjámin Villányi",
+      "year": 2019,
+      "venue": "",
+      "doi": "10.13130/cross-11822",
+      "sourceLinks": [
+        "https://doi.org/10.13130/cross-11822",
+        "https://publicatt.unicatt.it/handle/10807/223768"
+      ],
+      "metadataStatus": "metadata_partial",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-08",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-018",
+      "title": "/’impatto di corruzione e ma¿a suJli appalti puEElici un’esplorazione empirica",
+      "authors": "",
+      "year": null,
+      "venue": "",
+      "doi": "",
+      "sourceLinks": [
+        "https://publicatt.unicatt.it/retrieve/handle/10807/117902/191792/Milani%20et%20al%202018%20L%27impatto%20di%20corruzione%20e%20mafia%20sugli%20appalti%20pubblici.pdf"
+      ],
+      "metadataStatus": "identifier_unresolved",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-08",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-019",
+      "title": "Regulatory certification, informal governance, and productivity under weak state capacity",
+      "authors": "Claudia Cantabene; Alessandro De Iudicibus; Iacopo Grassi",
+      "year": 2026,
+      "venue": "Economics of Governance",
+      "doi": "10.1007/s10101-026-00388-w",
+      "sourceLinks": [
+        "https://link.springer.com/article/10.1007/s10101-026-00388-w"
+      ],
+      "metadataStatus": "metadata_partial",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-08",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-020",
+      "title": "Mafia Infiltration and Ownership Dynamics in Italian Companies during Covid-19",
+      "authors": "",
+      "year": null,
+      "venue": "CSEF Working Paper No. 750",
+      "doi": "",
+      "sourceLinks": [
+        "https://www.csef.it/WP/wp750.pdf"
+      ],
+      "metadataStatus": "metadata_partial",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-08",
+      "topicCode": ""
+    }
+  ]
 }

@@ -1,5 +1,42 @@
 {
   "schemaVersion": 1,
   "purpose": "Non-decisional curator reading aids for candidates whose mechanical abstract cascade did not expose a standalone abstract. These records store only short paraphrased synopses and source locators; they do not replace the source, screening, or a human decision.",
-  "records": []
+  "records": [
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-005",
+      "kind": "review_synopsis",
+      "sourceLabel": "Exa intake evidence",
+      "sourceUrl": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4912709",
+      "synopsis": "Il risultato descrive una ricerca potenzialmente pertinente alle relazioni tra criminalità organizzata, imprese o mercati legali; la pertinenza va valutata dal revisore.",
+      "checkedAt": "2026-09-08",
+      "note": "Source-grounded intake synopsis used because the mechanical cascade did not expose a standalone abstract. Verify the linked scholarly source before screening; this is not an author abstract and cannot determine eligibility."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-011",
+      "kind": "review_synopsis",
+      "sourceLabel": "Exa intake evidence",
+      "sourceUrl": "https://link.springer.com/article/10.1007/s11187-019-00250-w",
+      "synopsis": "Il risultato descrive una ricerca potenzialmente pertinente alle relazioni tra criminalità organizzata, imprese o mercati legali; la pertinenza va valutata dal revisore.",
+      "checkedAt": "2026-09-08",
+      "note": "Source-grounded intake synopsis used because the mechanical cascade did not expose a standalone abstract. Verify the linked scholarly source before screening; this is not an author abstract and cannot determine eligibility."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-014",
+      "kind": "review_synopsis",
+      "sourceLabel": "Exa intake evidence",
+      "sourceUrl": "https://hdl.handle.net/11577/3478856",
+      "synopsis": "Il risultato descrive una ricerca potenzialmente pertinente alle relazioni tra criminalità organizzata, imprese o mercati legali; la pertinenza va valutata dal revisore.",
+      "checkedAt": "2026-09-08",
+      "note": "Source-grounded intake synopsis used because the mechanical cascade did not expose a standalone abstract. Verify the linked scholarly source before screening; this is not an author abstract and cannot determine eligibility."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-018",
+      "kind": "review_synopsis",
+      "sourceLabel": "Exa intake evidence",
+      "sourceUrl": "https://publicatt.unicatt.it/retrieve/handle/10807/117902/191792/Milani%20et%20al%202018%20L%27impatto%20di%20corruzione%20e%20mafia%20sugli%20appalti%20pubblici.pdf",
+      "synopsis": "Il risultato descrive una ricerca potenzialmente pertinente alle relazioni tra criminalità organizzata, imprese o mercati legali; la pertinenza va valutata dal revisore.",
+      "checkedAt": "2026-09-08",
+      "note": "Source-grounded intake synopsis used because the mechanical cascade did not expose a standalone abstract. Verify the linked scholarly source before screening; this is not an author abstract and cannot determine eligibility."
+    }
+  ]
 }

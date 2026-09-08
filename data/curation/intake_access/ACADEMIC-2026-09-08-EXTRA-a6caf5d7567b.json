@@ -1,0 +1,88 @@
+{
+  "batch_id": "ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b",
+  "receipts": [
+    {
+      "access_status": "unknown",
+      "candidate_id": "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-001"
+    },
+    {
+      "access_status": "unknown",
+      "candidate_id": "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-002"
+    },
+    {
+      "access_status": "unknown",
+      "candidate_id": "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-003"
+    },
+    {
+      "access_status": "unknown",
+      "candidate_id": "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-004"
+    },
+    {
+      "access_status": "unknown",
+      "candidate_id": "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-005"
+    },
+    {
+      "access_status": "unknown",
+      "candidate_id": "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-006"
+    },
+    {
+      "access_status": "unknown",
+      "candidate_id": "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-007"
+    },
+    {
+      "access_status": "unknown",
+      "candidate_id": "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-008"
+    },
+    {
+      "access_status": "unknown",
+      "candidate_id": "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-009"
+    },
+    {
+      "access_status": "unknown",
+      "candidate_id": "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-010"
+    },
+    {
+      "access_status": "unknown",
+      "candidate_id": "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-011"
+    },
+    {
+      "access_status": "unknown",
+      "candidate_id": "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-012"
+    },
+    {
+      "access_status": "unknown",
+      "candidate_id": "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-013"
+    },
+    {
+      "access_status": "unknown",
+      "candidate_id": "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-014"
+    },
+    {
+      "access_status": "unknown",
+      "candidate_id": "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-015"
+    },
+    {
+      "access_status": "unknown",
+      "candidate_id": "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-016"
+    },
+    {
+      "access_status": "unknown",
+      "candidate_id": "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-017"
+    },
+    {
+      "access_status": "unknown",
+      "candidate_id": "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-018"
+    },
+    {
+      "access_status": "unknown",
+      "candidate_id": "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-019"
+    },
+    {
+      "access_status": "unknown",
+      "candidate_id": "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-020"
+    }
+  ],
+  "schema_version": 2,
+  "source_body_sha256": "22faaa2842a78ca51e7da63a9990f6692e5c0f23bd58e440b626defe2ce59d22",
+  "source_issue_number": 205
+}
