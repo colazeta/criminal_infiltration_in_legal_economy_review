@@ -144,7 +144,7 @@ class LegacyQueueTests(unittest.TestCase):
         )
         self.assertNotIn("E0-D001", {row["candidate_id"] for row in rows})
         self.assertNotIn("E0R1-C002", {row["candidate_id"] for row in rows})
-        with (ROOT / "data/curation/review_queue.csv").open(
+        with (ROOT / "data/legacy/pre-oa-reset-2026-09-08/curation/review_queue.csv").open(
             newline="", encoding="utf-8-sig"
         ) as handle:
             committed = [
@@ -206,7 +206,7 @@ class CandidateDecisionTests(unittest.TestCase):
             "data/registry/exclusion_reasons.csv",
             "data/registry/secondary_collections.csv",
         ):
-            source = ROOT / relative
+            source = ROOT / "data/legacy/pre-oa-reset-2026-09-08" / Path(relative).relative_to("data")
             target = self.root / relative
             shutil.copyfile(source, target)
         self.registry_before = {
@@ -360,7 +360,7 @@ class DailyIntakeQueueTests(unittest.TestCase):
         self.root = Path(self.temporary.name)
         (self.root / "data/curation").mkdir(parents=True)
         shutil.copyfile(
-            ROOT / "data/curation/review_queue.csv",
+            ROOT / "data/legacy/pre-oa-reset-2026-09-08/curation/review_queue.csv",
             self.root / "data/curation/review_queue.csv",
         )
         self.queue_before = len(self.rows())

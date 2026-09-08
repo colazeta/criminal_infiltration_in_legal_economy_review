@@ -131,8 +131,7 @@ def validate_registries() -> dict[str, list[dict[str, str]]]:
     exclusion_reasons = data["exclusion_reasons.csv"]
     relations = data["work_relations.csv"]
 
-    if not papers:
-        fail("papers.csv is empty")
+    # An owner-authorised new archive may be empty; all foreign-key and publication gates still apply.
     require_unique([row.get("paper_id", "").strip() for row in papers], "papers.csv")
     require_unique(
         [row.get("identifier_id", "").strip() for row in identifiers],

@@ -63,3 +63,11 @@ over an active database or reset global provider-budget counters.
 ## OA-1 amendment — 2026-09-08
 
 The owner requested OA-only mapping and authorised restart if feasible. Profile 0.3.0 adds a 33rd private table for attributed, append-only access verification; migration 0001 remains byte-identical. Legacy public builders now require a current OA receipt. The public scope and private curator access form are implemented. No database reset or V2 activation is implied: the D1 permission failure, source adapter and complete preservation/restore gates remain unresolved. Full candidate seed/evidence material is delivered separately, outside the technical repository changes.
+
+## Active archive reset — 2026-09-08
+
+Release 0.3.0 starts the active archive from zero under OA-1. Previous data and
+decisions are retained in `data/legacy/pre-oa-reset-2026-09-08/` and the preserved
+Git branch. Old issue/ledger data do not populate the active cycle. Private D1
+V2 activation remains separate. See `docs/operations/archive-reset.md` for the
+exact scope, first scheduled date and rollback procedure.

@@ -476,7 +476,7 @@ def verify_intake_issue(
     verify_safeguards(values["Safeguards"])
 
 
-def fetch_validated_runs(repository, ledger_issue, allowed_author, token):
+def fetch_validated_runs(repository, ledger_issue, allowed_author, token, cycle=None):
     url = (
         f"https://api.github.com/repos/{repository}/issues/"
         f"{ledger_issue}/comments?per_page=100"
@@ -489,6 +489,7 @@ def fetch_validated_runs(repository, ledger_issue, allowed_author, token):
         comments.extend(page)
         url = next_link(links)
 
+    boundary = parse_datetime(cycle["reset_at"], "archive reset") if cycle else None
     repository_issues: list[dict] | None = None
 
     runs = []
@@ -500,9 +501,13 @@ def fetch_validated_runs(repository, ledger_issue, allowed_author, token):
         author = ((comment.get("user") or {}).get("login") or "").strip()
         if author not in allowed_authors:
             continue
+        if boundary and parse_datetime(comment.get("created_at"), "ledger created_at") < boundary:
+            continue
         run = extract_run(body)
         if run is None:
             continue
+        if cycle and run["run_date"] < cycle["daily_start_date"]:
+            raise MetricsError("New ledger comment replays a retired run date")
         verify_ledger_comment_time(run, comment)
         if repository_issues is None:
             repository_issues = []
@@ -559,7 +564,8 @@ def main() -> None:
     if not token:
         raise MetricsError(f"Missing token environment variable {args.token_env}")
 
-    runs = fetch_validated_runs(args.repository, args.issue, args.allowed_author, token)
+    cycle = json.loads((Path(__file__).resolve().parents[2] / "config/archive-cycle.json").read_text())
+    runs = fetch_validated_runs(args.repository, args.issue, args.allowed_author, token, cycle)
 
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(

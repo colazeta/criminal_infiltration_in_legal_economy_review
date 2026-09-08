@@ -148,3 +148,11 @@ The current archive release metadata are in
 `data/registry/archive_versions.csv`, `CITATION.cff` and `CHANGELOG.md`.
 Release `0.2.0` is a prerelease foundation. A persistent DOI and an open reuse
 licence remain explicit release decisions; no rights are silently granted.
+
+## Active archive reset — 2026-09-08
+
+Release 0.3.0 starts the active archive from zero under OA-1. Previous data and
+decisions are retained in `data/legacy/pre-oa-reset-2026-09-08/` and the preserved
+Git branch. Old issue/ledger data do not populate the active cycle. Private D1
+V2 activation remains separate. See `docs/operations/archive-reset.md` for the
+exact scope, first scheduled date and rollback procedure.

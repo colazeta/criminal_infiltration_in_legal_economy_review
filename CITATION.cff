@@ -6,9 +6,9 @@ authors:
   - family-names: Nicolazzo
     given-names: Giovanni
 repository-code: "https://github.com/colazeta/criminal_infiltration_in_legal_economy_review"
-url: "https://criminal-infiltration-archive.colazeta.chatgpt.site"
-version: 0.2.0
-date-released: 2026-08-30
+url: "https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/"
+version: 0.3.0
+date-released: 2026-09-08
 keywords:
   - criminal infiltration
   - legal economy

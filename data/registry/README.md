@@ -45,3 +45,11 @@ Routine curator changes should be prepared through the
 [curator desk](../../docs/operations/curation.md), rather than by editing several
 CSV files independently. The workflow preserves the earlier decision and
 publication rows before it prepares a visible change.
+
+## Active archive reset — 2026-09-08
+
+Release 0.3.0 starts the active archive from zero under OA-1. Previous data and
+decisions are retained in `data/legacy/pre-oa-reset-2026-09-08/` and the preserved
+Git branch. Old issue/ledger data do not populate the active cycle. Private D1
+V2 activation remains separate. See `docs/operations/archive-reset.md` for the
+exact scope, first scheduled date and rollback procedure.

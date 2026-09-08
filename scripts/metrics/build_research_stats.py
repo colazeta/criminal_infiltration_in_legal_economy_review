@@ -7,7 +7,8 @@ import argparse
 import json
 from pathlib import Path
 
-from daily_calendar import calendar_projection
+from daily_calendar import calendar_projection, CYCLE
+from datetime import date, datetime
 
 from surveillance import (
     REPOSITORY_FULL_NAME,
@@ -34,6 +35,12 @@ def read_runs(path: Path | None) -> list[dict]:
     raise MetricsError("Input must be a run list or an object containing runs")
 
 
+def active_runs(runs):
+    boundary = datetime.fromisoformat(CYCLE["reset_at"].replace("Z", "+00:00"))
+    return [r for r in runs if r["run_date"] >= CYCLE["daily_start_date"]
+            and datetime.fromisoformat(r["window_start"].replace("Z", "+00:00")) >= boundary]
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--input", type=Path, help="Validated ledger JSON from GitHub")
@@ -42,12 +49,11 @@ def main() -> None:
     parser.add_argument("--ledger-issue", type=int, default=DEFAULT_LEDGER_ISSUE)
     parser.add_argument("--as-of", help="Explicit timezone-aware projection time; never infer successful days")
     args = parser.parse_args()
-    payload = build_public_payload(
-        read_runs(args.input), args.ledger_issue, args.repository
-    )
+    runs = active_runs(read_runs(args.input))
+    payload = build_public_payload(runs, args.ledger_issue, args.repository)
     if args.as_of:
         payload["schemaVersion"] = 2
-        payload["calendar"] = calendar_projection(read_runs(args.input), args.as_of)
+        payload["calendar"] = calendar_projection(runs, args.as_of, date.fromisoformat(CYCLE["daily_start_date"]), CYCLE["review_id"])
     validate_public_payload(payload)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(

@@ -1,0 +1,2 @@
+version,release_date,protocol_version,schema_version,search_coverage_through,persistent_identifier,status,is_current,notes
+0.2.0,2026-08-30,1.1,2,2026-04-29,,prerelease,true,Governed archive foundation with explicit publication manifest and registry-only build.

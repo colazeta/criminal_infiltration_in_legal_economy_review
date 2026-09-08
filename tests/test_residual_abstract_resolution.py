@@ -7,8 +7,8 @@ from pathlib import Path
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
-COVERAGE = ROOT / "data" / "curation" / "abstract_coverage.csv"
-RESOLUTION = ROOT / "data" / "curation" / "residual_abstract_resolution.json"
+COVERAGE = ROOT / "data/legacy/pre-oa-reset-2026-09-08" / "curation" / "abstract_coverage.csv"
+RESOLUTION = ROOT / "data/legacy/pre-oa-reset-2026-09-08" / "curation" / "residual_abstract_resolution.json"
 
 
 class ResidualAbstractResolutionTests(unittest.TestCase):

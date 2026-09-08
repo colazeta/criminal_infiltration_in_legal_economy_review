@@ -18,7 +18,10 @@
   ],
   "properties": {
     "reviewId": {
-      "const": "legacy"
+      "enum": [
+        "legacy",
+        "oa-2026-09-08"
+      ]
     },
     "timezone": {
       "const": "Europe/Rome"
@@ -31,7 +34,10 @@
       "format": "date-time"
     },
     "coverageStart": {
-      "const": "2026-08-31"
+      "enum": [
+        "2026-08-31",
+        "2026-09-09"
+      ]
     },
     "lastLedgerDate": {
       "type": [

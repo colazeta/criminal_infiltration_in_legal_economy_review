@@ -331,6 +331,11 @@ def import_candidates(
         raise IntakeImportError("Import date must use YYYY-MM-DD") from exc
     if not re.fullmatch(r"\d+", issue_number):
         raise IntakeImportError("GitHub issue number is invalid")
+    cycle_path = root / "config/archive-cycle.json"
+    if cycle_path.exists():
+        cycle = json.loads(cycle_path.read_text())
+        if int(issue_number) <= cycle["legacy_issue_ceiling"]:
+            raise IntakeImportError("This intake belongs to the retired archive")
     manifest = parse_intake_issue(body, issue_title)
     batch_date = date.fromisoformat(str(manifest["batch_id"]).removeprefix("ACADEMIC-"))
     if date.fromisoformat(imported_at) < batch_date:

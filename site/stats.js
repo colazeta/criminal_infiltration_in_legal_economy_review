@@ -292,7 +292,7 @@ function renderStatus(payload) {
   if (payload.calendar) {
     const calendar = payload.calendar;
     statsElements.status.className = "status-banner";
-    statsElements.status.textContent = `Calendario Europe/Rome · avvio previsto 07:00. ${calendar.completedDays} / ${calendar.expectedDays} giorni attesi completi; ${calendar.missingDays} mancanti. Ultimo ledger: ${displayDate(calendar.lastLedgerDate)}. Proiezione: ${new Date(calendar.asOf).toLocaleString("it-IT", { timeZone: "Europe/Rome" })}. Tentativi e retry legacy: non misurati.`;
+    statsElements.status.textContent = `Calendario Europe/Rome · avvio previsto 07:00. ${calendar.completedDays} / ${calendar.expectedDays} giorni attesi completi; ${calendar.missingDays} mancanti. Ultimo ledger: ${displayDate(calendar.lastLedgerDate)}. Proiezione: ${new Date(calendar.asOf).toLocaleString("it-IT", { timeZone: "Europe/Rome" })}. Tentativi e retry: non misurati dal ledger esterno.`;
     return;
   }
   const last = payload.daily[payload.daily.length - 1];

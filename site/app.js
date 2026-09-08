@@ -149,7 +149,7 @@ function render() {
   if (records.length === 0 && corpusIsEmpty) {
     elements.emptyTitle.textContent = "No publications are currently public";
     elements.emptyCopy.textContent =
-      "The governed public export currently contains no records. This may reflect pending publication review, withholding, or withdrawal.";
+      "The archive has restarted from zero under the open-access policy. New works will appear after access verification and explicit scientific approval.";
   } else if (records.length === 0) {
     elements.emptyTitle.textContent = "No publications match these filters";
     elements.emptyCopy.textContent =
@@ -184,7 +184,7 @@ function populateMetrics(payload) {
   set("#included-count", payload.counts.included);
   set("#editorial-count", payload.counts.editorialQueue);
   set("#archive-version", `v${payload.archiveVersion}`);
-  set("#coverage-date", payload.searchCoverageThrough);
+  set("#coverage-date", payload.searchCoverageThrough || "Not yet searched");
   set("#metadata-fix-count", payload.counts.metadataFix);
   set("#manual-review-count", payload.counts.manualReview);
   set("#abstract-review-count", payload.counts.abstractReview);

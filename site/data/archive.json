@@ -1,25 +1,25 @@
 {
   "schemaVersion": 3,
-  "archiveVersion": "0.2.0",
-  "protocolVersion": "1.1",
-  "releaseDate": "2026-08-30",
-  "searchCoverageThrough": "2026-04-29",
-  "sourceSnapshot": "2026-08-30",
+  "archiveVersion": "0.3.0",
+  "protocolVersion": "CILE-4PT-OA-v3",
+  "releaseDate": "2026-09-08",
+  "searchCoverageThrough": "",
+  "sourceSnapshot": "2026-09-08",
   "methodology": {
     "includedDefinition": "Records pass the canonical, discovery, current eligibility and explicit publication-manifest gates, plus verified lawful open-access full text. Coverage is limited to open-access scholarship; access is separate from scientific eligibility.",
     "editorialDefinition": "Aggregate editorial counts are published separately; candidate metadata and reviewer notes are not included in the archive export.",
-    "rejectedRecordsOmitted": 19
+    "rejectedRecordsOmitted": 0
   },
   "counts": {
     "records": 0,
     "included": 0,
     "core": 0,
     "contextual": 0,
-    "editorialQueue": 36,
-    "metadataFix": 2,
-    "manualReview": 9,
-    "abstractReview": 25,
-    "rejectedOmitted": 19
+    "editorialQueue": 0,
+    "metadataFix": 0,
+    "manualReview": 0,
+    "abstractReview": 0,
+    "rejectedOmitted": 0
   },
   "records": []
 }

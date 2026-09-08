@@ -3,6 +3,13 @@
 All notable archive, protocol and schema changes are recorded here. Versions
 follow semantic versioning while the project is in prerelease.
 
+## [0.3.0] - 2026-09-08
+
+- Owner-authorised reset of the active archive and candidate queue to zero under OA-1.
+- Previous registries, decisions, coverage and reading aids preserved byte-for-byte in a retired snapshot and a dedicated Git branch.
+- Legacy issue and intake replay blocked; daily statistics begin with the first scheduled run on 2026-09-09.
+- No seed, eligibility decision or V2 database activation is included.
+
 ## Unreleased
 
 ### Added

@@ -60,7 +60,7 @@ function coordinatorEnvironment(overrides = {}) {
 function validDecision(overrides = {}) {
   return {
     candidateId: "E0-D002",
-    candidateIssueNumber: 33,
+    candidateIssueNumber: 233,
     screeningStage: "full_text",
     decision: "eligible_contextual",
     exclusionReasonCode: "",
@@ -79,9 +79,10 @@ function validDecision(overrides = {}) {
 
 function queueIssue(overrides = {}) {
   return {
-    number: 33,
+    number: 233,
+    created_at: "2026-09-09T05:10:00Z",
     state: "open",
-    html_url: "https://github.com/colazeta/example/issues/33",
+    html_url: "https://github.com/colazeta/example/issues/233",
     labels: [{ name: "curation:queue" }, { name: "stage:manual-review" }],
     body: `<!-- curator-candidate:E0-D002 -->
 
@@ -378,7 +379,7 @@ test("decision submission verifies the queue issue and creates an attributed ins
   globalThis.fetch = async (url, init = {}) => {
     calls.push({ url: String(url), init });
     if (String(url).includes("state=all")) return Response.json([]);
-    if (String(url).endsWith("/issues/33")) return Response.json(queueIssue());
+    if (String(url).endsWith("/issues/233")) return Response.json(queueIssue());
     if (String(url).endsWith("/issues") && init.method === "POST") {
       const payload = JSON.parse(init.body);
       assert.deepEqual(payload.labels, ["curation:decision"]);
@@ -424,7 +425,7 @@ test("concurrent retries reserve one submission atomically", async (context) => 
   let creations = 0;
   globalThis.fetch = async (url, init = {}) => {
     if (String(url).includes("state=all")) return Response.json([]);
-    if (String(url).endsWith("/issues/33")) return Response.json(queueIssue());
+    if (String(url).endsWith("/issues/233")) return Response.json(queueIssue());
     if (String(url).endsWith("/issues") && init.method === "POST") {
       creations += 1;
       await new Promise((resolve) => setTimeout(resolve, 15));
@@ -464,4 +465,38 @@ test("concurrent retries reserve one submission atomically", async (context) => 
     payloads.map((payload) => payload.replayed).sort(),
     [false, true],
   );
+});
+
+test("retired queue issues remain excluded even when reopened", async (context) => {
+  const originalFetch = globalThis.fetch;
+  context.after(() => { globalThis.fetch = originalFetch; });
+  globalThis.fetch = async () => Response.json([
+    queueIssue({ number: 33, created_at: "2026-08-31T22:21:10Z" }),
+    queueIssue({ number: 194, created_at: "2026-09-08T07:00:00Z" }),
+    queueIssue(),
+  ]);
+  const token = await sessionToken();
+  const response = await worker.fetch(new Request("https://curator.example.workers.dev/api/candidates", {
+    headers: { Origin: ORIGIN, Authorization: `Bearer ${token}` },
+  }), ENV);
+  assert.equal(response.status, 200);
+  assert.deepEqual((await response.json()).candidates.map(c => c.issueNumber), [233]);
+});
+
+test("a stale candidate deep link cannot create a new scientific instruction", async (context) => {
+  const originalFetch = globalThis.fetch;
+  context.after(() => { globalThis.fetch = originalFetch; });
+  let writes = 0;
+  globalThis.fetch = async (url, init = {}) => {
+    if (init.method === "POST") writes += 1;
+    return Response.json(queueIssue({ number: 33, created_at: "2026-08-31T22:21:10Z" }));
+  };
+  const token = await sessionToken();
+  const decision = validDecision({ candidateIssueNumber: 33 });
+  const response = await worker.fetch(new Request("https://curator.example.workers.dev/api/decisions", {
+    method: "POST", headers: { Origin: ORIGIN, Authorization: `Bearer ${token}`, "X-CSRF-Token": "csrf-test", "Idempotency-Key": decision.submissionId, "Content-Type": "application/json" },
+    body: JSON.stringify(decision),
+  }), coordinatorEnvironment());
+  assert.equal(response.status, 409);
+  assert.equal(writes, 0);
 });

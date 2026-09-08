@@ -390,7 +390,9 @@ def check_curator_queue() -> None:
     with (ROOT / "data/curation/review_queue.csv").open(
         newline="", encoding="utf-8-sig"
     ) as handle:
-        queue = list(csv.DictReader(handle))
+        reader = csv.DictReader(handle)
+        queue_headers = set(reader.fieldnames or [])
+        queue = list(reader)
     required = {
         "candidate_id",
         "title",
@@ -421,21 +423,29 @@ def check_curator_queue() -> None:
         "last_action_id",
         "provenance",
     }
-    headers = set(queue[0]) if queue else set()
+    headers = queue_headers
     if required - headers:
         fail(
             "review_queue.csv missing column(s): "
             + ", ".join(sorted(required - headers))
         )
     candidate_ids = {row["candidate_id"] for row in queue}
-    if len(queue) < 55 or "" in candidate_ids or len(candidate_ids) != len(queue):
-        fail("Curator queue must contain at least 55 unique materialised candidates")
+    if "" in candidate_ids or len(candidate_ids) != len(queue):
+        fail("Curator queue IDs must be nonblank and unique")
     legacy = [row for row in queue if row["origin"].startswith("legacy_")]
     daily = [row for row in queue if row["origin"] == "daily_surveillance"]
     if len(legacy) + len(daily) != len(queue):
         fail("Curator queue contains an unknown candidate origin")
-    if len(legacy) != 55:
-        fail("Curator queue must preserve exactly 55 audited legacy candidates")
+    cycle_path = ROOT / "config/archive-cycle.json"
+    reset = cycle_path.exists()
+    if len(legacy) != (0 if reset else 55):
+        fail("Active queue must respect the archive cycle boundary")
+    if reset:
+        cycle = json.loads(cycle_path.read_text())
+        for row in daily:
+            issue = re.search(r"github-issue:#(\d+)", row.get("provenance", ""))
+            if not issue or int(issue[1]) <= cycle["legacy_issue_ceiling"]:
+                fail("A retired intake returned to the active queue")
     expected = Counter(
         {
             "metadata_fix": 2,
@@ -444,7 +454,7 @@ def check_curator_queue() -> None:
             "legacy_rejection_review": 19,
         }
     )
-    if Counter(row["review_stage"] for row in legacy) != expected:
+    if not reset and Counter(row["review_stage"] for row in legacy) != expected:
         fail("Legacy curator stage counts differ from the audited materialisation")
     if {"E0-D001", "E0R1-C002"} & candidate_ids:
         fail("Already imported works returned to the candidate queue")

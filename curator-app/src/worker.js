@@ -9,6 +9,7 @@ import { handleProviderReadinessRequest } from "./provider-readiness.js";
 import { handleResolvedAbstractRequest } from "./resolved-abstract.js";
 import { superviseDays, consumeDays } from "./daily-runner.js";
 import { handleV2 } from "./review-v2.js";
+import { isActiveArchiveIssue } from "./archive-cycle.js";
 import worker, { SubmissionCoordinatorCore, authenticateCuratorRequest } from "./index.js";
 
 const CURATOR_COMPONENT_ASSETS = new Set([
@@ -239,6 +240,9 @@ async function authenticatedRetrieval(request, env) {
       status: 502,
       headers: { "Cache-Control": "no-store", "Content-Type": "application/json; charset=utf-8" },
     });
+  }
+  if (!isActiveArchiveIssue(issue)) {
+    return new Response(JSON.stringify({ error: { code: "retired_archive", message: "Questa scheda appartiene allo storico precedente al reset." } }), { status: 410, headers: { "Content-Type": "application/json", "Cache-Control": "no-store" } });
   }
   const retrieval = parseRetrievalCoverage(issue?.body, candidateId);
   if (!retrieval) {

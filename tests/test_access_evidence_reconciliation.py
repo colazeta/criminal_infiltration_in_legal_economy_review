@@ -98,9 +98,9 @@ class AccessEvidenceReconciliationTests(unittest.TestCase):
             reconcile_module.validate_evidence({"CAND-TEST-001"}, fields, rows)
 
     def test_repository_evidence_file_contains_only_open_positive_rows(self) -> None:
-        fields, rows = reconcile_module.read_csv(ROOT / "data/curation/access_evidence.csv")
+        fields, rows = reconcile_module.read_csv(ROOT / "data/legacy/pre-oa-reset-2026-09-08/curation/access_evidence.csv")
         validated = reconcile_module.validate_evidence(
-            {row["candidate_id"] for row in reconcile_module.read_csv(ROOT / "data/curation/review_queue.csv")[1]},
+            {row["candidate_id"] for row in reconcile_module.read_csv(ROOT / "data/legacy/pre-oa-reset-2026-09-08/curation/review_queue.csv")[1]},
             fields,
             rows,
         )

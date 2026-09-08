@@ -10,6 +10,7 @@ from __future__ import annotations
 import argparse
 import csv
 import io
+import json
 from collections import Counter
 from pathlib import Path
 
@@ -311,6 +312,16 @@ def main() -> None:
     args = parse_args()
     root = args.root.resolve()
     output = args.output or root / "data" / "curation" / "review_queue.csv"
+    cycle_path = root / "config/archive-cycle.json"
+    if cycle_path.exists():
+        cycle = json.loads(cycle_path.read_text())
+        committed = read_rows(output)
+        if any(row.get("origin", "").startswith("legacy_") for row in committed):
+            raise QueueBuildError("Retired candidates cannot enter the active OA queue")
+        if not args.check:
+            raise QueueBuildError("Legacy materialisation is retired; use fresh OA intake")
+        print(f"[OK] {cycle['review_id']}: no legacy candidates in the active queue.")
+        return
     expected_rows = materialise(root)
     rendered = render(expected_rows)
     if args.check:

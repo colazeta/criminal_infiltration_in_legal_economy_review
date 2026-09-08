@@ -1,0 +1,110 @@
+{
+  "commit": "f8d04e521fc2316acf82d339546a1b8e58f49db0",
+  "branch": "legacy/pre-oa-reset-2026-09-08",
+  "files": {
+    "curation/README.md": {
+      "sha256": "561be20359b00b28a1d23827b869a8c736838d55c2cec3d4281a9b3e54d06501",
+      "bytes": 2737
+    },
+    "curation/abstract_coverage.csv": {
+      "sha256": "68d7329d1cdbef9d590900c028dbe9f108329c33dd9df29b4794c09da73160e1",
+      "bytes": 31873
+    },
+    "curation/access_coverage.csv": {
+      "sha256": "fed1c10cfa7112bfb4fc8f3454c3ce30a6093d64f2b4c7f1f4678641d990110c",
+      "bytes": 25700
+    },
+    "curation/access_evidence.csv": {
+      "sha256": "9715e9b923f9651f545dc2e3ace81e753b18f10b555771fd168cb686a6793f87",
+      "bytes": 666
+    },
+    "curation/actions.csv": {
+      "sha256": "63c76f04b5b7edd19bfe4a90f90cd7c29334370adc7985357f7cc2f5310545ad",
+      "bytes": 268
+    },
+    "curation/reading_aid_overrides.json": {
+      "sha256": "addab2f7cea25c771f50f44ba548d0dbbb42a25920e54d57c970b3175636dda6",
+      "bytes": 7361
+    },
+    "curation/reading_aids.json": {
+      "sha256": "d39d10dcd51df580173eecbd93bd535bc8c0cfa1fe36deade42693c39e072af9",
+      "bytes": 19758
+    },
+    "curation/residual_abstract_resolution.json": {
+      "sha256": "6546ff9ff049796fc52d3c032ff6680dd8fc8e546b04ccc45882351719fba147",
+      "bytes": 15122
+    },
+    "curation/retrieval_coverage.csv": {
+      "sha256": "291b3df6b275c3300526f298c0c6f3f70c62f8787227041f0a814a49813ed5f3",
+      "bytes": 38318
+    },
+    "curation/review_queue.csv": {
+      "sha256": "1b8b582be6ffffa7d9e3795e44a32bbafe7b9e6dc58b330c84f1d0b0f2a91cae",
+      "bytes": 46973
+    },
+    "registry/README.md": {
+      "sha256": "588a437e1428b8e117c5bbf5bcd18d4bdcdb8b3235bb57851b12296e8234bc7f",
+      "bytes": 2564
+    },
+    "registry/archive_versions.csv": {
+      "sha256": "68f30732c7d34a3088ce85938d39c8c9e9a6f0e6671943b64b0474df678b538a",
+      "bytes": 262
+    },
+    "registry/discovery_events.csv": {
+      "sha256": "1a48ccfe861c17ddb802df47848aa649572d066b262da06f74a8bddfc9fcbb40",
+      "bytes": 868
+    },
+    "registry/editorial_summary.csv": {
+      "sha256": "cc20bc05755e07e3f9faab9894161d2dae7e9b960b08ff588dee3602cf3ca1f5",
+      "bytes": 335
+    },
+    "registry/exclusion_reasons.csv": {
+      "sha256": "adbb1bb391eb5b8d161a6f2423049d3a331e169461179c280d8bde63540fee60",
+      "bytes": 1329
+    },
+    "registry/execution_metrics.csv": {
+      "sha256": "f74981a015a541da25df7315fe5ae1de45f0d872736446098aca9e37b20ddeb6",
+      "bytes": 651
+    },
+    "registry/open_access_assessments.csv": {
+      "sha256": "e211734d6b9f34013c6367a53f7da25f4b808ab76a4e5770b5afb59ad5a915ac",
+      "bytes": 182
+    },
+    "registry/paper_codes.csv": {
+      "sha256": "0d42be0e03215c6d6d4aed52629315fa74112a150325137bcefb6dbd7434e378",
+      "bytes": 117
+    },
+    "registry/papers.csv": {
+      "sha256": "5f9632863ebce77459413eb328581787540fc6cc22361ad67765438e9832d52d",
+      "bytes": 805
+    },
+    "registry/publications.csv": {
+      "sha256": "91bcfe7abaef2ff7205d01940e71b2e04c624c92d45e2e87579737546e37690f",
+      "bytes": 2111
+    },
+    "registry/screening_decisions.csv": {
+      "sha256": "835aef83b35cfe55741b6b5733fbe4b0ccabf708202b95f6c6535880d71a8d9f",
+      "bytes": 1217
+    },
+    "registry/secondary_collections.csv": {
+      "sha256": "622bf58e994f4acfb9729aba0af70df75db47e3bd8f6dd886b3b683d035eca17",
+      "bytes": 345
+    },
+    "registry/secondary_publications.csv": {
+      "sha256": "2c123a468ca1e75c9d9ad5f733819e55cace446763f0bfb82185425689702f80",
+      "bytes": 262
+    },
+    "registry/taxonomy.csv": {
+      "sha256": "7ed0e670a15615799c20952ad5ca2ef90af829933579ae6e9dd0c0f19235f769",
+      "bytes": 365
+    },
+    "registry/work_identifiers.csv": {
+      "sha256": "c5a7116125fda52e71d753c1645087c1a40480d0da262ce62e38c8fb85f74954",
+      "bytes": 465
+    },
+    "registry/work_relations.csv": {
+      "sha256": "038011da3ee76d72cbf4cfb9f904272b05511395d6279b7ed5af7988909c7583",
+      "bytes": 88
+    }
+  }
+}
