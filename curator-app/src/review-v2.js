@@ -1,4 +1,5 @@
 import { fetchWithTimeout } from "./network.js";
+import { queryManifestProblem } from "./daily-source-policy.js";
 
 export const CRITERIA = Object.freeze(["criminal_actor", "legal_economy", "sustained_relation", "substantive_analysis"]);
 export const V2_PROTOCOL = "CILE-4PT-OA-v3";
@@ -84,9 +85,10 @@ export async function readiness(env) {
   if (!env.REVIEW_DB) blockers.push("private_database_not_bound");
   if (!env.REVIEW_EVIDENCE) blockers.push("private_evidence_store_not_bound");
   if (!env.REVIEW_JOBS) blockers.push("durable_queue_not_bound");
-  // The active daily protocol still requires Consensus + Exa. Do not substitute another source.
-  if (!env.CONSENSUS_SEARCH) blockers.push("consensus_runner_adapter_not_approved");
-  if (!env.REVIEW_DAILY_QUERY_MANIFEST) blockers.push("approved_daily_query_manifest_required");
+  // CILE-DAILY-v3 uses Exa. Access, budget and approved-query gates still apply.
+  let manifestReady = false;
+  try { manifestReady = !queryManifestProblem(JSON.parse(env.REVIEW_DAILY_QUERY_MANIFEST || "null")); } catch { /* Invalid manifests never establish readiness. */ }
+  if (!manifestReady) blockers.push("approved_daily_query_manifest_required");
   if (!env.EXA_API_KEY || env.EXA_FREE_ONLY !== "true" || env.EXA_DEDICATED_STARTER_ACCOUNT !== "true") blockers.push("exa_budget_readiness_required");
   let review = null;
   if (env.REVIEW_DB) {

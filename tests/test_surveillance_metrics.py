@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts/metrics"))
 
 from fetch_surveillance_ledger import (  # noqa: E402
-    MARKER,
+    MARKERS,
     extract_run,
     verify_intake_issue,
     verify_intake_issue_uniqueness,
@@ -56,6 +56,14 @@ def candidate_issue(run: dict, number: int = 31) -> dict:
         ["EXA-GAP-Q1"],
         ["CONSENSUS-W2-Q1", "EXA-GAP-Q2"],
     ]
+    if run["schema_version"] == 2:
+        search_manifest["schema_version"] = 2
+        search_manifest["sources"] = [{"source": "Exa", "queries": [
+            {"query_id": f"EXA-W{i}-Q1", "query_text": f"Exact synthetic W{i} query"}
+            for i in range(1, 8)
+        ]}]
+        candidate_sources = [["Exa"] for _ in range(3)]
+        candidate_queries = [[f"EXA-W{i}-Q1"] for i in range(1, 4)]
     candidate_assessments = ["plausible_core", "plausible_core", "plausible_contextual"]
     for ordinal in range(1, run["totals"]["intake_candidates"] + 1):
         candidates.append(
@@ -79,7 +87,7 @@ def candidate_issue(run: dict, number: int = 31) -> dict:
             }
         )
     manifest = {
-        "schema_version": 1,
+        "schema_version": run["schema_version"],
         "batch_id": batch_id,
         "candidates": candidates,
     }
@@ -161,6 +169,18 @@ def completed_run(day: str = "2026-08-31") -> dict:
         },
         "notes": ["Counts describe intake triage, not eligibility."],
     }
+
+
+def exa_run(day: str = "2026-09-09") -> dict:
+    """Synthetic v2 fixture; the original fixture above remains historical v1."""
+    run = completed_run(day)
+    run["schema_version"] = 2
+    run["expected_sources"] = ["Exa"]
+    source = run["sources"][1]
+    source.update(queries_planned=7, queries_completed=7, candidate_hits=3, exclusive_candidates=3)
+    run["sources"] = [source]
+    run["totals"].update(occurrences_returned=10, unique_results=7, known_matches=2, not_forwarded=1)
+    return run
 
 
 def zero_run(day: str = "2026-09-01") -> dict:
@@ -495,7 +515,7 @@ class SurveillanceRunTests(unittest.TestCase):
         run = completed_run()
         body = (
             f"Daily surveillance batch {run['batch_id']}: {run['status']}.\n\n"
-            f"{MARKER}\n```json\n{json.dumps(run)}\n```"
+            f"{MARKERS[run['schema_version']]}\n```json\n{json.dumps(run)}\n```"
         )
         self.assertEqual(extract_run(body)["batch_id"], run["batch_id"])
 
@@ -503,7 +523,7 @@ class SurveillanceRunTests(unittest.TestCase):
         run = completed_run()
         block = (
             f"Daily surveillance batch {run['batch_id']}: {run['status']}.\n\n"
-            f"{MARKER}\n```json\n{json.dumps(run)}\n```"
+            f"{MARKERS[run['schema_version']]}\n```json\n{json.dumps(run)}\n```"
         )
         with self.assertRaisesRegex(MetricsError, "canonical envelope"):
             extract_run(block + "\n" + block)

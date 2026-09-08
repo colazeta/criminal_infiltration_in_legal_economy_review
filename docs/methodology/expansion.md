@@ -81,9 +81,8 @@ Ogni strumento ha un compito diverso. Ripetere la stessa query ovunque non basta
 
 | Fonte | Compito principale nel progetto |
 |---|---|
-| Consensus | Cercare paper peer-reviewed e controllare i dettagli dei candidati |
+| Exa, ricerca quotidiana | Eseguire tutte le finestre W1–W7; verificare tipo di pubblicazione e accesso sulle fonti primarie |
 | OpenAlex | Eseguire ricerche strutturate e ripetibili; mappare autori, temi e citazioni |
-| Exa | Trovare lavori che descrivono lo stesso fenomeno con un linguaggio molto diverso |
 | Scite | Aggiungere ricerca scientifica e contesto delle citazioni quando l'accesso dell'account è disponibile |
 | Crossref | Verificare DOI e dati bibliografici |
 | Semantic Scholar | Controllare un secondo grafo di paper e citazioni |

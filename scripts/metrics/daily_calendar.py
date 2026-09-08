@@ -6,6 +6,7 @@ import json
 
 CYCLE = json.loads((Path(__file__).resolve().parents[2] / "config/archive-cycle.json").read_text())
 SCOPES = {"legacy": date(2026, 8, 31), CYCLE["review_id"]: date.fromisoformat(CYCLE["daily_start_date"])}
+SOURCE_COUNTS = {"legacy": 2, CYCLE["review_id"]: 1}
 
 ROME = ZoneInfo("Europe/Rome")
 START = date(2026, 8, 31)  # Effective date of the governed aggregate metrics ledger.
@@ -18,6 +19,10 @@ def calendar_projection(runs, as_of, start=START, review_id="legacy"):
         raise ValueError("calendar scope/start mismatch")
     if any(date.fromisoformat(r["run_date"]) < start for r in runs):
         raise ValueError("run predates this calendar")
+    expected_sources = SOURCE_COUNTS[review_id]
+    expected_version = 1 if review_id == "legacy" else 2
+    if any(r.get("schema_version") != expected_version or len(r["expected_sources"]) != expected_sources for r in runs):
+        raise ValueError("run source policy does not belong to this calendar")
     if isinstance(as_of, str):
         as_of = datetime.fromisoformat(as_of.replace("Z", "+00:00"))
     if as_of.tzinfo is None:
@@ -42,10 +47,10 @@ def calendar_projection(runs, as_of, start=START, review_id="legacy"):
             "finishedAt": run["window_end"] if run else None,
             # Legacy ledger does not measure retries: one comment is not one attempt.
             "attemptCount": None,
-            "queriesPlanned": sum(s["queries_planned"] for s in sources) if run else 14,
+            "queriesPlanned": sum(s["queries_planned"] for s in sources) if run else 7 * expected_sources,
             "queriesCompleted": sum(s["queries_completed"] for s in sources) if run else None,
             "completedSources": sum(s["status"] == "completed" for s in sources) if run else 0,
-            "expectedSources": 2, "failureCodes": failures,
+            "expectedSources": expected_sources, "failureCodes": failures,
         })
         day += timedelta(days=1)
     due_rows = [r for r in rows if r["status"] != "planned"]
@@ -57,7 +62,7 @@ def calendar_projection(runs, as_of, start=START, review_id="legacy"):
         "rows": rows, "expectedDays": len(due_rows), "completedDays": completed,
         "missingDays": sum(r["status"] == "missing" for r in rows),
         "completionRate": completed / len(due_rows) if due_rows else None,
-        "sourceCompletionRate30": sum(r["completedSources"] for r in recent) / (2 * len(recent)) if recent else None,
+        "sourceCompletionRate30": sum(r["completedSources"] for r in recent) / sum(r["expectedSources"] for r in recent) if recent else None,
     }
 
 
@@ -73,6 +78,7 @@ def validate_calendar(calendar, daily):
     start = date.fromisoformat(calendar["coverageStart"])
     if start != SCOPES[calendar["reviewId"]]:
         raise ValueError("unexpected calendar coverage start")
+    expected_sources = SOURCE_COUNTS[calendar["reviewId"]]
     expected_dates = [(start + timedelta(days=i)).isoformat() for i in range((end.astimezone(ROME).date() - start).days + 1)]
     if [r.get("date") for r in calendar["rows"]] != expected_dates:
         raise ValueError("calendar must represent every day exactly once")
@@ -87,12 +93,14 @@ def validate_calendar(calendar, daily):
         source = logged.get(row["date"])
         if type(row["ledgerPresent"]) is not bool or row["ledgerPresent"] != bool(source):
             raise ValueError("calendar ledger presence mismatch")
-        if source and (source["status"] != row["status"] or source["completedSourceCount"] != row["completedSources"]):
+        if source and (source["status"] != row["status"] or source["completedSourceCount"] != row["completedSources"] or source["expectedSourceCount"] != expected_sources):
             raise ValueError("calendar status mismatch")
         if not source and (row["attemptCount"] is not None or row["queriesCompleted"] is not None or row["startedAt"] is not None or row["finishedAt"] is not None or row["completedSources"] != 0):
             raise ValueError("missing day cannot have invented execution data")
-        if row["expectedSources"] != 2 or row["attemptCount"] is not None:
+        if row["expectedSources"] != expected_sources or row["attemptCount"] is not None:
             raise ValueError("legacy attempts cannot be inferred")
+        if not source and row["queriesPlanned"] != 7 * expected_sources:
+            raise ValueError("calendar planned query count disagrees with source policy")
         if not isinstance(row["failureCodes"], list) or any(c not in ERRORS | {"other_provider_failure"} for c in row["failureCodes"]):
             raise ValueError("private failure details are forbidden")
     due = [r for r in calendar["rows"] if r["status"] != "planned"]
@@ -100,7 +108,7 @@ def validate_calendar(calendar, daily):
     missing = sum(r["status"] == "missing" for r in due)
     recent = [r for r in due if date.fromisoformat(r["date"]) >= end.astimezone(ROME).date() - timedelta(days=29)]
     expected = [len(due), complete, missing, complete / len(due) if due else None,
-                sum(r["completedSources"] for r in recent) / (2 * len(recent)) if recent else None]
+                sum(r["completedSources"] for r in recent) / sum(r["expectedSources"] for r in recent) if recent else None]
     actual = [calendar[k] for k in ["expectedDays", "completedDays", "missingDays", "completionRate", "sourceCompletionRate30"]]
     if actual != expected:
         raise ValueError("calendar totals mismatch")

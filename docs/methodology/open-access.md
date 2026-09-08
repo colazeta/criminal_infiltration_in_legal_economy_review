@@ -61,8 +61,9 @@ For the repository intake lane, candidate hits and proposed seed admissions now
 require documented OA; record source/query limits and this scope change in the
 existing diagnostic fields. Do not change raw result totals into OA totals.
 
-The existing Consensus + Exa daily method, W1–W7, ledger idempotency, failed/partial
-day handling and 07:00 Europe/Rome schedule remain. The personal AML digest is
+Following the owner's source amendment of 2026-09-08, daily discovery uses only
+Exa for W1–W7. Ledger idempotency, failed/partial day visibility and the
+07:00 Europe/Rome schedule remain. The personal AML digest is
 separate from this archive scope. Access observations may be revisited if a
 legal repository copy appears; do not erase the failed or restricted observation.
 

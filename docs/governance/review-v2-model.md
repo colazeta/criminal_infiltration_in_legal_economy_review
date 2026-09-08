@@ -83,10 +83,11 @@ Outbox records delivery intent independently of external availability.
 
 The deployed supervisor is gated by `REVIEW_V2_RUNNER_ENABLED=false`; merely
 applying the empty SQL migration does not create a Review or start a search.
-The active methodology remains Consensus + Exa. There is no guessed Consensus
-HTTP endpoint or silent substitution of OpenAlex. An approved server adapter,
-fourteen source/window query definitions, credentials and preserved project
-budgets are prerequisites to activation.
+The owner-approved discovery policy is Exa-only (CILE-DAILY-v3). Seven approved
+source/window query definitions, Exa credentials and preserved project budgets
+are prerequisites to activation. The retired Consensus adapter is neither
+called nor required. Old two-source query manifests cannot activate this runner.
+This changes the operational source set, not CILE-4PT-OA-v3 scientific criteria.
 
 `scripts/review_v2/prepare_cloudflare.py` can prepare a dedicated private D1
 database, R2 bucket, queue and dead-letter queue using the existing deployment

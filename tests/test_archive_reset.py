@@ -15,7 +15,7 @@ from build_research_stats import active_runs
 from daily_calendar import calendar_projection, validate_calendar, CYCLE
 from fetch_surveillance_ledger import fetch_validated_runs
 from scripts.curation.import_intake_issue import import_candidates, IntakeImportError
-from test_surveillance_metrics import completed_run
+from test_surveillance_metrics import completed_run, exa_run
 
 class ArchiveResetTests(unittest.TestCase):
     def test_retired_files_are_byte_identical_and_scientific_vocabulary_is_retained(self):
@@ -45,7 +45,7 @@ class ArchiveResetTests(unittest.TestCase):
 
     def test_current_statistics_exclude_old_days_and_preserve_missing_days(self):
         old = completed_run('2026-09-08')
-        new = completed_run('2026-09-09')
+        new = exa_run('2026-09-09')
         self.assertEqual(active_runs([old, new]), [new])
         start = date.fromisoformat(CYCLE['daily_start_date'])
         calendar = calendar_projection([], '2026-09-10T12:00:00Z', start, CYCLE['review_id'])

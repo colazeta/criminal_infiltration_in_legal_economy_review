@@ -403,12 +403,35 @@ def check_private_v2_contract(profile: dict[str, Any]) -> None:
     connection.close()
 
 
+def check_surveillance_source_policy(profile: dict[str, Any]) -> None:
+    """Version source restrictions without changing any scientific concept."""
+    module = load_json(ROOT / "ontology/modules/daily-calendar.json")
+    contract = module["surveillance_contract"]
+    if module["profile_version"] != profile["version"] or contract["source_class"] not in profile["classes"] or contract["source_slot"] not in profile["slots"]:
+        fail("unmapped_surveillance_source_policy")
+    if contract["protocol_version"] != "CILE-DAILY-v3" or contract["schema_version"] != 2:
+        fail("invalid_surveillance_source_policy_version")
+    current = load_json(ROOT / contract["schema"])
+    legacy = load_json(ROOT / contract["legacy_schema"])
+    for schema, version, names in ((current, 2, ["Exa"]), (legacy, 1, ["Consensus", "Exa"])):
+        properties = schema["properties"]
+        if properties["schema_version"]["const"] != version or properties["expected_sources"]["items"]["enum"] != names:
+            fail("surveillance_schema_source_drift")
+        for key in ("expected_sources", "sources"):
+            if properties[key]["minItems"] != len(names) or properties[key]["maxItems"] != len(names):
+                fail("surveillance_schema_cardinality_drift")
+    cycle = load_json(ROOT / "config/archive-cycle.json")
+    if module["scopes"][cycle["review_id"]]["expected_sources"] != ["Exa"] or module["scopes"]["legacy"]["expected_sources"] != ["Consensus", "Exa"]:
+        fail("calendar_source_policy_drift")
+
+
 def validate_all(*, quiet: bool = False) -> dict[str, int | str]:
     profile = load_json(PROFILE_PATH)
     external = load_json(EXTERNAL_PATH)
     contracts = load_json(CONTRACT_PATH)
     check_profile(profile, external)
     check_private_v2_contract(profile)
+    check_surveillance_source_policy(profile)
     cycle_contract = load_json(ROOT / "ontology/modules/archive-cycle.json")
     cycle = load_json(ROOT / cycle_contract["artifact"])
     if cycle_contract["profile_version"] != profile["version"] or cycle_contract["class"] not in profile["classes"]:

@@ -12,6 +12,14 @@ follow semantic versioning while the project is in prerelease.
 
 ## Unreleased
 
+### Changed — 2026-09-08
+
+- Owner-requested removal of Consensus from discovery, daily intake and V2 runner readiness. Exa is the sole daily source for W1–W7.
+- Version 2 run/intake contracts and CILE-DAILY-v3; historical v1 telemetry retains original provenance and outcomes.
+- OA calendar expectations use one source and seven baseline queries, with partial query execution and missing days visible.
+- Bibliographic agreement UI uses “Concordanza bibliografica” to distinguish metadata reconciliation from the retired provider.
+- OA-1, CILE-4PT-OA-v3, ontology 0.3.0 and all scientific approval gates remain unchanged. No seeds or decisions are imported.
+
 ### Added
 
 - Italian quick guide and a plain-language curator portal;

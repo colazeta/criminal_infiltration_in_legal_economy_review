@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { readFileSync } from "node:fs";
 import { DatabaseSync } from "node:sqlite";
-import { canonicalJson, sha256, CRITERIA, validateProposal, verifyHumanApproval, handleV2 } from "../src/review-v2.js";
+import { canonicalJson, sha256, CRITERIA, validateProposal, verifyHumanApproval, handleV2, readiness } from "../src/review-v2.js";
 import { romeClock, romeTime, dayOutcome, runDay, superviseDays, validateQueryManifest } from "../src/daily-runner.js";
 
 function database() {
@@ -126,14 +126,35 @@ test("Rome daily scheduling preserves 07:00 across both DST changes", () => {
   assert.equal(romeTime("2026-10-25"), "2026-10-25T06:00:00.000Z");
   assert.equal(romeTime("2026-03-29"), "2026-03-29T05:00:00.000Z");
 });
-function manifest() { return { protocol_version: "CILE-DAILY-v2", queries: ["Consensus", "Exa"].flatMap((provider) => Array.from({ length: 7 }, (_, i) => ({ provider, window: `W${i + 1}`, query_id: `${provider}-W${i + 1}`, text: `Synthetic approved window ${i + 1}` }))) }; }
+function manifest() { return { protocol_version: "CILE-DAILY-v3", queries: ["Exa"].flatMap((provider) => Array.from({ length: 7 }, (_, i) => ({ provider, window: `W${i + 1}`, query_id: `${provider}-W${i + 1}`, text: `Synthetic approved window ${i + 1}` }))) }; }
+test("Exa-only readiness has no retired adapter dependency and rejects stale query manifests", async () => {
+  const { env } = setup();
+  Object.assign(env, { REVIEW_JOBS: {}, EXA_API_KEY: "synthetic-key", EXA_FREE_ONLY: "true", EXA_DEDICATED_STARTER_ACCOUNT: "true", REVIEW_DAILY_QUERY_MANIFEST: canonicalJson(manifest()) });
+  assert.equal((await readiness(env)).ready, true);
+  for (const bad of [null, {}, { ...manifest(), protocol_version: "CILE-DAILY-v2" }, { ...manifest(), queries: manifest().queries.map(q => ({ ...q, provider: "Consensus" })) }]) {
+    env.REVIEW_DAILY_QUERY_MANIFEST = canonicalJson(bad);
+    const state = await readiness(env);
+    assert.equal(state.ready, false);
+    assert.ok(state.blockers.includes("approved_daily_query_manifest_required"));
+    assert.throws(() => validateQueryManifest(bad));
+  }
+  env.REVIEW_DAILY_QUERY_MANIFEST = canonicalJson(manifest());
+  delete env.EXA_API_KEY;
+  assert.ok((await readiness(env)).blockers.includes("exa_budget_readiness_required"));
+});
+test("missing or duplicate Exa windows cannot start a daily run", () => {
+  const missing = manifest(); missing.queries.pop();
+  assert.throws(() => validateQueryManifest(missing));
+  const duplicate = manifest(); duplicate.queries[6] = { ...duplicate.queries[5] };
+  assert.throws(() => validateQueryManifest(duplicate));
+});
 test("checkpoints count once; failed queries are unknown, measured zeros remain zero", async () => {
   const { db, env } = setup(), m = validateQueryManifest(manifest());
   db.sqlite.prepare("INSERT INTO search_days VALUES (?,?,?,?,?,?,?,?)").run("TEST-REVIEW", "2026-09-08", "Europe/Rome", m.protocol_version, canonicalJson(m), "planned", "2026-09-08T05:20:00Z", "2026-09-08T00:00:00Z");
   let calls = 0;
   const now = Date.now();
-  const run = await runDay(env, "TEST-REVIEW", "2026-09-08", { now, search: async () => { calls++; return []; } });
-  assert.equal(run.status, "completed"); assert.equal(calls, 14);
+  const run = await runDay(env, "TEST-REVIEW", "2026-09-08", { now, search: async (_, query) => { assert.equal(query.provider, "Exa"); calls++; return []; } });
+  assert.equal(run.status, "completed"); assert.equal(calls, 7);
   const replay = await runDay(env, "TEST-REVIEW", "2026-09-08", { now, search: async () => { throw Error("must not rerun"); } });
   assert.equal(replay.status, "completed");
   assert.equal(db.sqlite.prepare("SELECT sum(occurrences_returned) n FROM query_executions").get().n, 0);
@@ -143,7 +164,7 @@ test("partial recovery only retries unfinished queries and preserves the failed 
   const { db, env } = setup(), m = manifest();
   db.sqlite.prepare("INSERT INTO search_days VALUES (?,?,?,?,?,?,?,?)").run("TEST-REVIEW", "2026-09-08", "Europe/Rome", m.protocol_version, canonicalJson(m), "planned", "2026-09-08T05:20:00Z", "2026-09-08T00:00:00Z");
   const now = Date.now(); let first = true, calls = 0;
-  const partial = await runDay(env, "TEST-REVIEW", "2026-09-08", { now, search: async (_, q) => { if (first && q.query_id === "Consensus-W1") { first = false; throw Error("outage"); } return []; } });
+  const partial = await runDay(env, "TEST-REVIEW", "2026-09-08", { now, search: async (_, q) => { if (first && q.query_id === "Exa-W1") { first = false; throw Error("outage"); } return []; } });
   assert.equal(partial.status, "partial");
   const recovered = await runDay(env, "TEST-REVIEW", "2026-09-08", { now: now + 21 * 60000, search: async () => { calls++; return []; } });
   assert.equal(recovered.status, "completed"); assert.equal(calls, 1);
@@ -156,7 +177,7 @@ test("an expired final lease remains visible as a failed day with immutable atte
   db.sqlite.prepare("INSERT INTO search_days VALUES (?,?,?,?,?,?,?,?)").run("TEST-REVIEW", "2026-09-08", "Europe/Rome", m.protocol_version, canonicalJson(m), "running", "2026-09-08T05:20:00Z", "2026-09-08T00:00:00Z");
   for (let n = 1; n <= 3; n++) db.sqlite.prepare("INSERT INTO run_attempts(attempt_id,review_id,scheduled_date,attempt_number,started_at,lease_until,status) VALUES (?,?,?,?,?,?,?)").run(`ATTEMPT-${n}`, "TEST-REVIEW", "2026-09-08", n, "2026-09-08T05:00:00Z", "2026-09-08T05:10:00Z", n === 3 ? "running" : "failed");
   let deliveries = 0;
-  Object.assign(env, { REVIEW_V2_RUNNER_ENABLED: "true", CONSENSUS_SEARCH: {}, REVIEW_DAILY_QUERY_MANIFEST: canonicalJson(m), REVIEW_JOBS: { async send() { deliveries++; } } });
+  Object.assign(env, { REVIEW_V2_RUNNER_ENABLED: "true", REVIEW_DAILY_QUERY_MANIFEST: canonicalJson(m), REVIEW_JOBS: { async send() { deliveries++; } } });
   await superviseDays(env, now);
   assert.equal(deliveries, 0);
   assert.equal(db.sqlite.prepare("SELECT status FROM search_days WHERE scheduled_date='2026-09-08'").get().status, "failed");

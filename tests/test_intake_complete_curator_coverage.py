@@ -24,16 +24,15 @@ class IntakeCompleteCuratorCoverageTests(unittest.TestCase):
         self.assertIn("scripts/access/classify_access.py --check", workflow)
         self.assertIn("scripts/access/reconcile_access_evidence.py --check", workflow)
 
-    def test_researched_overrides_cover_current_new_unresolved_records(self) -> None:
+    def test_retained_overrides_do_not_reintroduce_the_retired_provider(self) -> None:
         payload = json.loads(
             (ROOT / "config/curation/intake-reading-aid-overrides.json").read_text(encoding="utf-8")
         )
         records = {row["candidateId"]: row for row in payload["records"]}
         self.assertEqual(
             set(records),
-            {"CAND-ACADEMIC-2026-09-06-002", "CAND-ACADEMIC-2026-09-06-007"},
+            {"CAND-ACADEMIC-2026-09-06-007"},
         )
-        self.assertEqual(records["CAND-ACADEMIC-2026-09-06-002"]["kind"], "verified_abstract_source")
         self.assertEqual(records["CAND-ACADEMIC-2026-09-06-007"]["kind"], "publisher_summary")
         for record in records.values():
             self.assertTrue(record["sourceUrl"].startswith("https://"))

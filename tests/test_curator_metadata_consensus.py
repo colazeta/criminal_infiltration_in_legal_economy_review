@@ -16,7 +16,7 @@ class CuratorMetadataConsensusTests(unittest.TestCase):
     def test_consensus_exposes_field_support_and_manifestation_conflicts(self) -> None:
         source = (ROOT / "site/curator-consensus.js").read_text(encoding="utf-8")
         for marker in [
-            "Scholarly consensus",
+            "Concordanza bibliografica",
             "candidate-consensus-fields",
             "Supporto:",
             "Alternative:",

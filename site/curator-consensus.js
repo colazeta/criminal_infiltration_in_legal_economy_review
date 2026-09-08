@@ -37,11 +37,11 @@
 
   function stateLabel(state) {
     return {
-      verified: "Consensus verificato",
-      partial: "Consensus parziale",
+      verified: "Concordanza verificata",
+      partial: "Concordanza parziale",
       conflict: "Conflitto tra fonti",
       manifestation_ambiguity: "Manifestazioni multiple",
-    }[state] || "Consensus da verificare";
+    }[state] || "Concordanza da verificare";
   }
 
   function fieldStateLabel(state) {
@@ -122,7 +122,7 @@
     const heading = element("div", { className: "consensus-heading" });
     const titleGroup = element("div");
     titleGroup.append(
-      element("p", { className: "workspace-label", text: "Scholarly consensus" }),
+      element("p", { className: "workspace-label", text: "Concordanza bibliografica" }),
       element("h4", { id: "candidate-consensus-title", text: "Confronto tra fonti" }),
     );
     heading.append(titleGroup, element("span", { id: "candidate-consensus-state", className: "consensus-state", text: "—" }));
@@ -252,7 +252,7 @@
     facts.querySelector('[data-role="scholarly-consensus"]')?.remove();
     const fact = element("span", {
       className: "identity-fact",
-      text: isBlocking(resolution) ? "Consensus · conflitto" : `Consensus · ${clean(resolution.identityState)}`,
+      text: isBlocking(resolution) ? "Concordanza · conflitto" : `Concordanza · ${clean(resolution.identityState)}`,
     });
     fact.dataset.role = "scholarly-consensus";
     fact.dataset.state = isBlocking(resolution) ? "warning" : resolution.identityState === "verified" ? "positive" : "neutral";
@@ -277,7 +277,7 @@
     if (blocked) {
       const gate = byId("guided-decision-gate");
       if (gate) {
-        gate.textContent = "BLOCCATO DAL CONSENSUS";
+        gate.textContent = "CONFLITTO BIBLIOGRAFICO";
         gate.dataset.state = resolution.identityState;
       }
       const step = byId("decision-step-identity");
@@ -286,14 +286,14 @@
       if (copy) copy.textContent = "Le fonti bibliografiche non concordano ancora sull’identità o sulla manifestazione del lavoro. Risolvi questo conflitto prima dello screening scientifico.";
       if (submit && !/Invio|registrata/i.test(submit.textContent || "")) {
         submit.disabled = true;
-        submit.title = "Risolvi prima il conflitto bibliografico mostrato nel scholarly consensus.";
+        submit.title = "Risolvi prima il conflitto bibliografico mostrato nel concordanza bibliografica.";
       }
       for (const choice of document.querySelectorAll(".guided-decision-choice")) choice.disabled = true;
     } else if (!nativeBlocked) {
       if (composer) composer.dataset.blocked = "false";
       if (submit && !/Invio|registrata/i.test(submit.textContent || "")) {
         submit.disabled = false;
-        if (/scholarly consensus/i.test(submit.title || "")) submit.title = "";
+        if (/concordanza bibliografica/i.test(submit.title || "")) submit.title = "";
       }
       for (const choice of document.querySelectorAll(".guided-decision-choice")) choice.disabled = false;
     }
@@ -409,7 +409,7 @@
       event.stopImmediatePropagation();
       const message = byId("guided-decision-message");
       if (message) {
-        message.textContent = "Risolvi prima il conflitto bibliografico evidenziato nel scholarly consensus.";
+        message.textContent = "Risolvi prima il conflitto bibliografico evidenziato nel concordanza bibliografica.";
         message.dataset.state = "warning";
         message.hidden = false;
       }

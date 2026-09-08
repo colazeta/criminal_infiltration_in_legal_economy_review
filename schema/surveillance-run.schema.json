@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/schema/surveillance-run.schema.json",
-  "title": "Daily academic surveillance run",
+  "title": "Daily academic surveillance run — Exa-only v2",
   "description": "Aggregate, public-safe telemetry for one daily literature-surveillance batch. It contains no candidate metadata or scientific decisions.",
   "type": "object",
   "additionalProperties": false,
@@ -22,47 +22,87 @@
     "notes"
   ],
   "properties": {
-    "schema_version": {"const": 1},
+    "schema_version": {
+      "const": 2
+    },
     "batch_id": {
       "type": "string",
       "pattern": "^ACADEMIC-[0-9]{4}-[0-9]{2}-[0-9]{2}$"
     },
-    "run_date": {"type": "string", "format": "date"},
-    "window_start": {"type": "string", "format": "date-time"},
-    "window_end": {"type": "string", "format": "date-time"},
-    "timezone": {"const": "Europe/Rome"},
-    "status": {"enum": ["completed", "partial", "failed"]},
+    "run_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "window_start": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "window_end": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "timezone": {
+      "const": "Europe/Rome"
+    },
+    "status": {
+      "enum": [
+        "completed",
+        "partial",
+        "failed"
+      ]
+    },
     "repository_commit": {
       "type": "string",
       "pattern": "^[0-9a-f]{40}$"
     },
     "expected_sources": {
       "type": "array",
-      "minItems": 2,
-      "maxItems": 2,
+      "minItems": 1,
+      "maxItems": 1,
       "uniqueItems": true,
-      "items": {"enum": ["Consensus", "Exa"]}
+      "items": {
+        "enum": [
+          "Exa"
+        ]
+      }
     },
     "sources": {
       "type": "array",
-      "minItems": 2,
-      "maxItems": 2,
-      "items": {"$ref": "#/$defs/source"}
+      "minItems": 1,
+      "maxItems": 1,
+      "items": {
+        "$ref": "#/$defs/source"
+      }
     },
-    "totals": {"$ref": "#/$defs/totals"},
-    "assessments": {"$ref": "#/$defs/assessments"},
-    "intake_issue": {"$ref": "#/$defs/intakeIssue"},
+    "totals": {
+      "$ref": "#/$defs/totals"
+    },
+    "assessments": {
+      "$ref": "#/$defs/assessments"
+    },
+    "intake_issue": {
+      "$ref": "#/$defs/intakeIssue"
+    },
     "notes": {
       "type": "array",
       "maxItems": 10,
-      "items": {"type": "string", "minLength": 1, "maxLength": 280}
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 280
+      }
     }
   },
   "$defs": {
     "nullableCount": {
       "oneOf": [
-        {"type": "integer", "minimum": 0},
-        {"type": "null"}
+        {
+          "type": "integer",
+          "minimum": 0
+        },
+        {
+          "type": "null"
+        }
       ]
     },
     "source": {
@@ -81,24 +121,58 @@
         "limitations"
       ],
       "properties": {
-        "source": {"enum": ["Consensus", "Exa"]},
-        "status": {"enum": ["completed", "failed", "not_run"]},
-        "queries_planned": {"type": "integer", "minimum": 1},
-        "queries_completed": {"type": "integer", "minimum": 0},
-        "occurrences_returned": {"$ref": "#/$defs/nullableCount"},
-        "unique_results": {"$ref": "#/$defs/nullableCount"},
-        "candidate_hits": {"$ref": "#/$defs/nullableCount"},
-        "exclusive_candidates": {"$ref": "#/$defs/nullableCount"},
+        "source": {
+          "enum": [
+            "Exa"
+          ]
+        },
+        "status": {
+          "enum": [
+            "completed",
+            "failed",
+            "not_run"
+          ]
+        },
+        "queries_planned": {
+          "type": "integer",
+          "minimum": 7
+        },
+        "queries_completed": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "occurrences_returned": {
+          "$ref": "#/$defs/nullableCount"
+        },
+        "unique_results": {
+          "$ref": "#/$defs/nullableCount"
+        },
+        "candidate_hits": {
+          "$ref": "#/$defs/nullableCount"
+        },
+        "exclusive_candidates": {
+          "$ref": "#/$defs/nullableCount"
+        },
         "failure_code": {
           "oneOf": [
-            {"type": "string", "minLength": 1, "maxLength": 80},
-            {"type": "null"}
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            },
+            {
+              "type": "null"
+            }
           ]
         },
         "limitations": {
           "type": "array",
           "maxItems": 10,
-          "items": {"type": "string", "minLength": 1, "maxLength": 180}
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 180
+          }
         }
       }
     },
@@ -116,36 +190,76 @@
         "metadata_conflicts"
       ],
       "properties": {
-        "occurrences_returned": {"$ref": "#/$defs/nullableCount"},
-        "unique_results": {"$ref": "#/$defs/nullableCount"},
-        "known_matches": {"$ref": "#/$defs/nullableCount"},
-        "intake_candidates": {"$ref": "#/$defs/nullableCount"},
-        "not_forwarded": {"$ref": "#/$defs/nullableCount"},
-        "unresolved_identity": {"$ref": "#/$defs/nullableCount"},
-        "possible_duplicate_flags": {"$ref": "#/$defs/nullableCount"},
-        "metadata_conflicts": {"$ref": "#/$defs/nullableCount"}
+        "occurrences_returned": {
+          "$ref": "#/$defs/nullableCount"
+        },
+        "unique_results": {
+          "$ref": "#/$defs/nullableCount"
+        },
+        "known_matches": {
+          "$ref": "#/$defs/nullableCount"
+        },
+        "intake_candidates": {
+          "$ref": "#/$defs/nullableCount"
+        },
+        "not_forwarded": {
+          "$ref": "#/$defs/nullableCount"
+        },
+        "unresolved_identity": {
+          "$ref": "#/$defs/nullableCount"
+        },
+        "possible_duplicate_flags": {
+          "$ref": "#/$defs/nullableCount"
+        },
+        "metadata_conflicts": {
+          "$ref": "#/$defs/nullableCount"
+        }
       }
     },
     "assessments": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["plausible_core", "plausible_contextual", "uncertain"],
+      "required": [
+        "plausible_core",
+        "plausible_contextual",
+        "uncertain"
+      ],
       "properties": {
-        "plausible_core": {"type": "integer", "minimum": 0},
-        "plausible_contextual": {"type": "integer", "minimum": 0},
-        "uncertain": {"type": "integer", "minimum": 0}
+        "plausible_core": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "plausible_contextual": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "uncertain": {
+          "type": "integer",
+          "minimum": 0
+        }
       }
     },
     "intakeIssue": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["created", "number", "url"],
+      "required": [
+        "created",
+        "number",
+        "url"
+      ],
       "properties": {
-        "created": {"type": "boolean"},
+        "created": {
+          "type": "boolean"
+        },
         "number": {
           "oneOf": [
-            {"type": "integer", "minimum": 1},
-            {"type": "null"}
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "null"
+            }
           ]
         },
         "url": {
@@ -155,7 +269,9 @@
               "format": "uri",
               "pattern": "^https://github\\.com/colazeta/criminal_infiltration_in_legal_economy_review/issues/[1-9][0-9]*$"
             },
-            {"type": "null"}
+            {
+              "type": "null"
+            }
           ]
         }
       }
