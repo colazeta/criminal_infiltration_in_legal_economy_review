@@ -266,7 +266,9 @@ jobs:
               raise SystemExit(f"{label} failed after {attempts} attempts: {last_error}")
 
           retry_json(f"{origin}/health", {"status": "ok"}, "Curator production health")
-          retry_json(f"{origin}/version", {"commit": os.environ["GITHUB_SHA"], "ontology": "0.2.0"}, "Exact deployed commit")
+          with open("ontology/cile-review-profile.yaml", encoding="utf-8") as handle:
+              ontology_version = json.load(handle)["version"]
+          retry_json(f"{origin}/version", {"commit": os.environ["GITHUB_SHA"], "ontology": ontology_version}, "Exact deployed commit")
           retry_asset("curator-guided.js", ["CILE-GUIDED-v1", "criticalPoint(data)"], "Guided operating module")
           retry_asset("curator-config.js", ["curator-guided.js"], "Guided module loader")
           retry_asset(
