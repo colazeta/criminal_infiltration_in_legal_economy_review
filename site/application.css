@@ -227,6 +227,7 @@ body.model-page .workspace-heading span { font-size: 11px; color: var(--classic-
 body.curator-page #editorial-app { padding: 8px 12px; }
 body.curator-page .curator-titlebar { flex-basis: auto; min-height: 34px; padding: 5px 10px; }
 body.curator-page .curator-titlebar :is(h1, a, span) { color: white; font: 13px/1.4 var(--ui-font); }
+body.curator-page .curator-app-unavailable strong { font: bold 14px/1.4 var(--ui-font); }
 body.curator-page .curator-titlebar h1 { font-weight: normal; }
 body.curator-page .curator-brand { text-decoration: none; font-weight: bold; }
 body.curator-page .curator-brand span { margin-left: 12px; }
