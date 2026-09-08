@@ -57,9 +57,8 @@ these candidate receipts are copied to the public site.
 No real candidate is inserted by this fix. The active archive reset has already
 completed; private V2 activation has not. The external Work task remains the
 active search mechanism. The batch already recorded for the reset date must not
-be overwritten or reused for an extraordinary run. A full production trial
-requires an unused governed daily batch; use the next scheduled day unless a
-separate extraordinary-run identity policy is explicitly adopted.
+be overwritten or reused. The owner-approved [extraordinary-run policy](extraordinary-runs.md)
+now supplies a distinct identity for an additional post-reset execution today.
 
 Rollback must preserve every newly written receipt and candidate. Do not deploy
 the older permissive importer over the new intake: pause intake and apply a
@@ -68,22 +67,17 @@ remain unchanged.
 
 ## Second audit hardening — 2026-09-08
 
-The current automated intake evidence path accepts only the existing
-`zenodo.org` repository permission for record metadata/rights and file bytes.
-This deliberately does not upgrade metadata APIs, DOI redirects, discovery
-results, Jina text extraction or arbitrary publisher domains to file-acquisition
-permission. Both the original full-text locator and rights evidence must remain
-on that authorised origin (HTTPS, standard port, no credentials). Other source
-links may remain discovery locators, never authority to fetch them. Follow no
-redirect to an unapproved origin. Extending this boundary requires the reviewed
-source amendment specified in `sources.md`. This is a coverage limitation, not
-evidence that other publications are closed access. No new domain is authorised
-by this repair; no external scholarly retrieval was performed.
+The former Zenodo-only automated acquisition boundary was extended by the
+owner-approved [extraordinary-run and OA amendment](extraordinary-runs.md).
+Use the exact-host policy in `config/oa-acquisition.json` and the bounded
+`oa_acquisition.py` client. Unknown origins still require a reviewed amendment;
+identity, version, full content and lawful rights must still be verified.
 
 The production import now requires the authenticated issue creation timestamp
 and a completed, validated ledger run. Verification must precede issue creation,
 which must fall inside that run window and on its Rome batch date. Issue number,
-reset timestamp and daily start date all enforce the active cycle. The pure
+reset timestamp and scheduled start date enforce the active cycle. Extraordinary
+IDs may use the reset day only after the actual reset timestamp. The pure
 manifest parser checks syntax and evidence fields; it is not the production
 lifecycle gate. The CLI requires run context and the workflow obtains it from
 the authenticated ledger reader. Discovery must write its terminal ledger

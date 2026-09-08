@@ -6,8 +6,12 @@ from __future__ import annotations
 import argparse
 import json
 from pathlib import Path
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
 from daily_calendar import calendar_projection, CYCLE
+from scripts.surveillance_identity import is_extra
+from extra_runs import project_extra_runs
 from datetime import date, datetime
 
 from surveillance import (
@@ -38,7 +42,7 @@ def read_runs(path: Path | None) -> list[dict]:
 
 def active_runs(runs):
     boundary = datetime.fromisoformat(CYCLE["reset_at"].replace("Z", "+00:00"))
-    active = [r for r in runs if r["run_date"] >= CYCLE["daily_start_date"]
+    active = [r for r in runs if not is_extra(r["batch_id"]) and r["run_date"] >= CYCLE["daily_start_date"]
             and datetime.fromisoformat(r["window_start"].replace("Z", "+00:00")) >= boundary]
     if any(r.get("schema_version") != RUN_SCHEMA_VERSION for r in active):
         raise MetricsError("Active cycle requires the Exa-only v2 run contract")
@@ -53,11 +57,14 @@ def main() -> None:
     parser.add_argument("--ledger-issue", type=int, default=DEFAULT_LEDGER_ISSUE)
     parser.add_argument("--as-of", help="Explicit timezone-aware projection time; never infer successful days")
     args = parser.parse_args()
-    runs = active_runs(read_runs(args.input))
+    all_runs = read_runs(args.input)
+    runs = active_runs(all_runs)
     payload = build_public_payload(runs, args.ledger_issue, args.repository)
     if args.as_of:
         payload["schemaVersion"] = 2
         payload["calendar"] = calendar_projection(runs, args.as_of, date.fromisoformat(CYCLE["daily_start_date"]), CYCLE["review_id"])
+    payload["extraRuns"] = project_extra_runs(all_runs, CYCLE)
+    payload["schemaVersion"] = 3
     validate_public_payload(payload)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(

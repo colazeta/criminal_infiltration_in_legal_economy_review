@@ -137,7 +137,7 @@ def reconcile(repository: str, ledger_issue: int, token: str, day: date, *, dry_
     if day < start:
         return f"not_due:{batch_id}"
     runs = fetch_validated_runs(repository, ledger_issue, [repository.split("/")[0]], token, CYCLE)
-    represented = {run["run_date"] for run in runs}
+    represented = {run["run_date"] for run in runs if run["batch_id"] == batch_id_for(date.fromisoformat(run["run_date"]))}
     gaps = [(start + timedelta(days=i)).isoformat() for i in range((day - start).days + 1)
             if (start + timedelta(days=i)).isoformat() not in represented]
     present = not gaps

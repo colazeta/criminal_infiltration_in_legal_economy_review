@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/schema/surveillance-run.schema.json",
-  "title": "Daily academic surveillance run — Exa-only v2",
+  "title": "Daily academic surveillance run \u2014 Exa-only v2",
   "description": "Aggregate, public-safe telemetry for one daily literature-surveillance batch. It contains no candidate metadata or scientific decisions.",
   "type": "object",
   "additionalProperties": false,
@@ -27,7 +27,7 @@
     },
     "batch_id": {
       "type": "string",
-      "pattern": "^ACADEMIC-[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+      "pattern": "^ACADEMIC-[0-9]{4}-[0-9]{2}-[0-9]{2}(-EXTRA-[0-9a-f]{12})?$"
     },
     "run_date": {
       "type": "string",

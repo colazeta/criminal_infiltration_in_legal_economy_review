@@ -412,6 +412,14 @@ def check_surveillance_source_policy(profile: dict[str, Any]) -> None:
         fail("unmapped_surveillance_source_policy")
     if contract["protocol_version"] != "CILE-DAILY-v3" or contract["schema_version"] != 2:
         fail("invalid_surveillance_source_policy_version")
+    sys.path.insert(0, str(ROOT))
+    from scripts.metrics.extra_runs import FIELDS as EXTRA_FIELDS
+    extra = module["extraordinary_executions"]
+    if extra["class"] != "SearchActivity" or extra["identity_slot"] not in profile["classes"]["SearchActivity"]["slots"] or set(extra["public_fields"]) != EXTRA_FIELDS:
+        fail("unmapped_extra_execution_projection")
+    public = load_json(ROOT / "schema/research-stats.schema.json")
+    if set(public["properties"]["extraRuns"]["items"]["properties"]) != EXTRA_FIELDS:
+        fail("extra_execution_public_schema_drift")
     current = load_json(ROOT / contract["schema"])
     legacy = load_json(ROOT / contract["legacy_schema"])
     for schema, version, names in ((current, 2, ["Exa"]), (legacy, 1, ["Consensus", "Exa"])):

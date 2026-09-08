@@ -16,6 +16,7 @@ from urllib.request import Request, urlopen
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from scripts.intake_open_access import validate_intake_access, validate_cycle
+from scripts.surveillance_identity import BATCH_PATTERN, is_extra, validate_cycle_run, candidate_keys
 
 from surveillance import (
     REPOSITORY_FULL_NAME,
@@ -31,14 +32,14 @@ MARKER = "<!-- surveillance-run:v2 -->"
 MARKERS = {1: "<!-- surveillance-run:v1 -->", 2: MARKER}
 LEDGER_COMMENT = re.compile(
     r"\ADaily surveillance batch "
-    r"(?P<batch>ACADEMIC-[0-9]{4}-[0-9]{2}-[0-9]{2}): "
+    rf"(?P<batch>{BATCH_PATTERN}): "
     r"(?P<status>completed|partial|failed)\.\n\n"
     + r"<!-- surveillance-run:v(?P<version>[12]) -->"
     + r"\n```json\n(?P<payload>\{.*\})\n```\s*\Z",
     re.DOTALL,
 )
 LEDGER_SUMMARY_PREFIX = re.compile(
-    r"\ADaily surveillance batch ACADEMIC-[0-9]{4}-[0-9]{2}-[0-9]{2}:"
+    r"\ADaily surveillance batch ACADEMIC-"
 )
 INTAKE_TITLE_PREFIX = "[INTAKE][ACADEMIC]"
 INTAKE_BODY_FIELDS = (
@@ -516,6 +517,7 @@ def fetch_validated_runs(repository, ledger_issue, allowed_author, token, cycle=
     repository_issues: list[dict] | None = None
 
     runs = []
+    seen_candidate_keys = set()
     intake_cache: dict[int, dict] = {}
     commit_cache: dict[str, dict] = {}
     allowed_authors = set(allowed_author)
@@ -529,8 +531,13 @@ def fetch_validated_runs(repository, ledger_issue, allowed_author, token, cycle=
         run = extract_run(body)
         if run is None:
             continue
-        if cycle and run["run_date"] < cycle["daily_start_date"]:
-            raise MetricsError("New ledger comment replays a retired run date")
+        if cycle:
+            try:
+                validate_cycle_run(run, cycle)
+            except ValueError as exc:
+                raise MetricsError("New ledger comment replays a retired run date") from exc
+        if any(previous["batch_id"] == run["batch_id"] for previous in runs):
+            raise MetricsError("ledger contains a duplicate batch")
         if cycle and run["schema_version"] != RUN_SCHEMA_VERSION:
             raise MetricsError("Active cycle requires the Exa-only v2 run contract")
         verify_ledger_comment_time(run, comment)
@@ -572,10 +579,19 @@ def fetch_validated_runs(repository, ledger_issue, allowed_author, token, cycle=
             if cycle:
                 try:
                     validate_cycle(date.fromisoformat(run["run_date"]), number,
-                        parse_datetime(intake_cache[number].get("created_at"), "intake created_at"), cycle)
+                        parse_datetime(intake_cache[number].get("created_at"), "intake created_at"), cycle, batch_id=run["batch_id"])
                 except ValueError as exc:
                     raise MetricsError(str(exc)) from exc
             verify_intake_issue(run, intake_cache[number], allowed_authors, ledger_issue)
+            if cycle and run["schema_version"] == 2:
+                section = issue_form_value(intake_cache[number]["body"], "Candidate records")
+                candidates = json.loads(CANDIDATE_JSON_BLOCK.fullmatch(section).group(1))["candidates"]
+                for candidate in candidates:
+                    keys = candidate_keys(candidate)
+                    if keys & seen_candidate_keys:
+                        raise MetricsError("Candidate identity repeats across active intake records; reconciliation required")
+                    seen_candidate_keys.update(keys)
+
         runs.append(run)
 
     return runs

@@ -12,6 +12,8 @@ from urllib.parse import urlsplit
 from zoneinfo import ZoneInfo
 
 from scripts.open_access import validate_receipt
+from scripts.surveillance_identity import BATCH_PATTERN, batch_day, is_extra
+from scripts.oa_acquisition import authorised_host
 
 FIELDS = frozenset({"candidate_id", "full_text_url", "version_type", "host_type",
     "license_uri", "rights_basis", "rights_evidence_url", "access_status",
@@ -22,15 +24,11 @@ ROME = ZoneInfo("Europe/Rome")
 
 
 def validate_access_origin(url):
-    # sources.md authorises Zenodo record metadata AND files. Other listed
-    # metadata APIs, DOI redirects and text readers do not authorise full bytes.
-    parsed = urlsplit(url)
-    if parsed.scheme != "https" or parsed.hostname != "zenodo.org" or parsed.port not in (None, 443) or parsed.username or parsed.password:
-        raise ValueError("OA evidence origin is not authorised for full-text/rights acquisition")
+    return authorised_host(url)
 
 
-def validate_cycle(batch_date, issue_number, created_at, cycle):
-    if batch_date < datetime.fromisoformat(cycle["daily_start_date"]).date() or int(issue_number) <= cycle["legacy_issue_ceiling"]:
+def validate_cycle(batch_date, issue_number, created_at, cycle, *, batch_id=None):
+    if (batch_date < datetime.fromisoformat(cycle["daily_start_date"]).date() and not (batch_id and is_extra(batch_id) and batch_day(batch_id) == batch_date)) or int(issue_number) <= cycle["legacy_issue_ceiling"]:
         raise ValueError("intake belongs to the retired archive cycle")
     if created_at is None or created_at.tzinfo is None:
         raise ValueError("authenticated issue creation timestamp required")
@@ -51,10 +49,10 @@ def validate_intake_access(receipt, candidate, batch_date, *, observed_by=None):
     if receipt["access_status"] != "verified_open":
         raise ValueError("open_access requires verified_open before intake")
     validate_receipt(receipt)
-    validate_access_origin(receipt["full_text_url"])
+    host_type = validate_access_origin(receipt["full_text_url"])
     validate_access_origin(receipt["rights_evidence_url"])
-    if receipt["host_type"] != "repository":
-        raise ValueError("authorised OA evidence host must be a repository")
+    if receipt["host_type"] != host_type:
+        raise ValueError("OA host type disagrees with authorised origin")
     if receipt["full_text_url"] not in candidate["source_links"]:
         raise ValueError("open_access full text must occur in candidate source_links")
     observed = datetime.fromisoformat(receipt["verified_at"].replace("Z", "+00:00"))
@@ -78,9 +76,9 @@ def validate_snapshots(root: Path, queue=None):
         batch = snapshot["batch_id"]
         if type(snapshot["schema_version"]) is not int or snapshot["schema_version"] != 1:
             raise ValueError("invalid intake access snapshot version")
-        if not isinstance(batch, str) or not re.fullmatch(r"ACADEMIC-\d{4}-\d{2}-\d{2}", batch) or path.name != batch + ".json":
+        if not isinstance(batch, str) or not re.fullmatch(BATCH_PATTERN, batch) or path.name != batch + ".json":
             raise ValueError("invalid intake access snapshot batch")
-        batch_date = datetime.strptime(batch.removeprefix("ACADEMIC-"), "%Y-%m-%d").date()
+        batch_date = batch_day(batch)
         if type(snapshot["source_issue_number"]) is not int or snapshot["source_issue_number"] < 1:
             raise ValueError("invalid intake access source issue")
         if not isinstance(snapshot["source_body_sha256"], str) or not re.fullmatch(r"[a-f0-9]{64}", snapshot["source_body_sha256"]):

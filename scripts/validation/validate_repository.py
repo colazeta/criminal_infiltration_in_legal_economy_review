@@ -460,7 +460,7 @@ def check_curator_queue() -> None:
         fail("Already imported works returned to the candidate queue")
     for row in daily:
         if not re.fullmatch(
-            r"CAND-ACADEMIC-\d{4}-\d{2}-\d{2}-\d{3}", row["candidate_id"]
+            r"CAND-ACADEMIC-\d{4}-\d{2}-\d{2}(?:-EXTRA-[0-9a-f]{12})?-\d{3}", row["candidate_id"]
         ):
             fail(f"Daily curator candidate has invalid ID: {row['candidate_id']}")
         if row["review_stage"] not in {"metadata_fix", "abstract_full_text_review"}:
@@ -481,7 +481,7 @@ def check_curator_queue() -> None:
             if not row[field].strip():
                 fail(f"Daily candidate lacks {field}: {row['candidate_id']}")
         if not re.fullmatch(
-            r"github-issue:#\d+;batch:ACADEMIC-\d{4}-\d{2}-\d{2}",
+            r"github-issue:#\d+;batch:ACADEMIC-\d{4}-\d{2}-\d{2}(?:-EXTRA-[0-9a-f]{12})?",
             row["provenance"],
         ):
             fail(f"Daily candidate has invalid provenance: {row['candidate_id']}")
@@ -628,11 +628,13 @@ def check_actions_pinned() -> None:
     workflow = (ROOT / ".github/workflows/archive.yml").read_text(encoding="utf-8")
     safe_concurrency = (
         "concurrency:\n"
-        "  group: archive-${{ github.workflow }}-${{ github.ref }}\n"
+        "  group: archive-${{ github.workflow }}-${{ github.event_name == 'issue_comment' && github.run_id || github.ref }}\n"
         "  cancel-in-progress: true"
     )
     if safe_concurrency not in workflow:
         fail("Archive workflow must cancel superseded runs for the same ref")
+    if "group: archive-pages\n      cancel-in-progress: false" not in workflow:
+        fail("Ledger and push deployments must be serialised")
     for phrase in (
         'cron: "30 6 * * *"',
         "issues: read",

@@ -219,3 +219,13 @@ decisions are retained in `data/legacy/pre-oa-reset-2026-09-08/` and the preserv
 Git branch. Old issue/ledger data do not populate the active cycle. Private D1
 V2 activation remains separate. See `docs/operations/archive-reset.md` for the
 exact scope, first scheduled date and rollback procedure.
+
+
+## Same-day extraordinary execution amendment — 2026-09-08
+
+The owner-approved [extraordinary-run policy](../operations/extraordinary-runs.md) adds independently identified manual executions and
+explicit publisher/repository acquisition origins. It supersedes the former
+requirement to wait until the next calendar day and the Zenodo-only acquisition
+restriction. Daily IDs, schedules, historic records and scientific approval gates
+remain unchanged. Public statistics v3 shows extraordinary executions separately;
+they never fill scheduled-day gaps. Read that policy before a manual run.

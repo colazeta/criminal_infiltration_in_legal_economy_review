@@ -4,6 +4,10 @@
 from __future__ import annotations
 
 import re
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from scripts.surveillance_identity import BATCH_PATTERN, batch_day, is_extra
 from collections import defaultdict
 from datetime import date, datetime, timedelta
 from typing import Any, Iterable
@@ -197,11 +201,11 @@ def validate_run(run: dict[str, Any]) -> dict[str, Any]:
 
     batch_id = run["batch_id"]
     if not isinstance(batch_id, str) or not re.fullmatch(
-        r"ACADEMIC-\d{4}-\d{2}-\d{2}", batch_id
+        BATCH_PATTERN, batch_id
     ):
         raise MetricsError("run: invalid batch_id")
     run_date = parse_date(run["run_date"], "run.run_date")
-    if batch_id != f"ACADEMIC-{run_date.isoformat()}":
+    if batch_day(batch_id) != run_date or (version == 1 and is_extra(batch_id)):
         raise MetricsError("run: batch_id date differs from run_date")
     started = parse_datetime(run["window_start"], "run.window_start")
     ended = parse_datetime(run["window_end"], "run.window_end")
@@ -515,6 +519,8 @@ def build_public_payload(
     if repository != REPOSITORY_FULL_NAME:
         raise MetricsError("repository must match the governed repository")
     validated = [validate_run(run) for run in runs]
+    if any(is_extra(r["batch_id"]) for r in validated):
+        raise MetricsError("Extra executions require the separate extraRuns projection")
     if len({run["schema_version"] for run in validated}) > 1:
         raise MetricsError("Keep historical and current source policies in separate projections")
     validated.sort(key=lambda row: row["run_date"])
@@ -659,6 +665,19 @@ def validate_public_payload(payload: dict[str, Any]) -> dict[str, Any]:
 
     if not isinstance(payload, dict):
         raise MetricsError("public statistics: expected an object")
+    if payload.get("schemaVersion") == 3:
+        from scripts.metrics.extra_runs import validate_extra_rows
+        from scripts.metrics.daily_calendar import CYCLE
+        expected = PUBLIC_FIELDS | {"extraRuns"} | ({"calendar"} if "calendar" in payload else set())
+        require_exact_fields(payload, expected, "public statistics v3")
+        previous = {k: v for k, v in payload.items() if k != "extraRuns"}
+        previous["schemaVersion"] = 2 if "calendar" in previous else 1
+        validate_public_payload(previous)
+        try:
+            validate_extra_rows(payload["extraRuns"], CYCLE, as_of=payload.get("calendar", {}).get("asOf"))
+        except (ValueError, KeyError, TypeError) as error:
+            raise MetricsError(str(error)) from error
+        return payload
     if payload.get("schemaVersion") == 2:
         if __package__:
             from .daily_calendar import validate_calendar

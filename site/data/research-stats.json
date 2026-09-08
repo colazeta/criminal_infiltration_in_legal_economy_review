@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 3,
   "ledgerIssue": {
     "number": 30,
     "url": "https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/issues/30"
@@ -45,5 +45,6 @@
     "sourceCompletionRate": "Completed expected source runs divided by all expected source runs; failures are not treated as zero-result searches."
   },
   "daily": [],
-  "sources": []
+  "sources": [],
+  "extraRuns": []
 }

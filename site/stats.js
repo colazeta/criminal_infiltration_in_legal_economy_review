@@ -312,6 +312,22 @@ function renderStatus(payload) {
     freshness;
 }
 
+function renderExtraRuns(rows = []) {
+  const section = document.querySelector("#extra-runs");
+  const body = document.querySelector("#extra-runs-body");
+  if (!section || !body) return;
+  section.hidden = rows.length === 0;
+  body.replaceChildren();
+  for (const row of [...rows].reverse()) {
+    const tr = makeStatsElement("tr");
+    const values = [row.batchId, new Date(row.startedAt).toLocaleString("it-IT", {timeZone:"Europe/Rome"}),
+      statusLabel(row.status), `${row.queriesCompleted} / ${row.queriesPlanned}`,
+      displayNumber(row.uniqueResults), displayNumber(row.intakeCandidates)];
+    for (const value of values) tr.append(makeStatsElement("td", "", value));
+    body.append(tr);
+  }
+}
+
 fetch("./data/research-stats.json")
   .then((response) => {
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -319,6 +335,7 @@ fetch("./data/research-stats.json")
   })
   .then((payload) => {
     populateKpis(payload);
+    renderExtraRuns(payload.extraRuns);
     if (payload.calendar) renderStatus(payload);
     if (!payload.daily.length && !payload.calendar?.rows.length) {
       statsElements.empty.hidden = false;

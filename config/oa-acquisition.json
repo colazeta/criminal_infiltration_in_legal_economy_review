@@ -1,0 +1,18 @@
+{
+  "policy": "OA-1 acquisition amendment 2026-09-08",
+  "hosts": {
+    "zenodo.org": {"host_type": "repository", "operator": "CERN / Zenodo"},
+    "www.bancaditalia.it": {"host_type": "publisher", "operator": "Banca d'Italia"},
+    "uif.bancaditalia.it": {"host_type": "publisher", "operator": "UIF, Banca d'Italia"},
+    "riviste.unimi.it": {"host_type": "publisher", "operator": "Università degli Studi di Milano"},
+    "onlinelibrary.wiley.com": {"host_type": "publisher", "operator": "Wiley"},
+    "link.springer.com": {"host_type": "publisher", "operator": "Springer Nature"},
+    "link.springernature.com": {"host_type": "publisher", "operator": "Springer Nature"},
+    "www.aeaweb.org": {"host_type": "publisher", "operator": "American Economic Association"},
+    "iris.unicatt.it": {"host_type": "repository", "operator": "Università Cattolica del Sacro Cuore"},
+    "eprints.lse.ac.uk": {"host_type": "repository", "operator": "London School of Economics"},
+    "eprints.whiterose.ac.uk": {"host_type": "repository", "operator": "White Rose universities"},
+    "repository.essex.ac.uk": {"host_type": "repository", "operator": "University of Essex"},
+    "pureportal.coventry.ac.uk": {"host_type": "repository", "operator": "Coventry University"}
+  }
+}

@@ -121,5 +121,48 @@
     "source_slot": "source_name",
     "protocol_version": "CILE-DAILY-v3",
     "authority": "Owner instruction of 2026-09-08: remove Consensus from the process."
+  },
+  "extraordinary_executions": {
+    "class": "SearchActivity",
+    "identity_slot": "event_id",
+    "batch_pattern": "ACADEMIC-YYYY-MM-DD-EXTRA-<12 lowercase hexadecimal characters>",
+    "public_container": "extraRuns",
+    "public_fields": {
+      "batchId": {
+        "semantic_uri": "cile:eventId"
+      },
+      "date": {
+        "semantic_uri": "cile:date"
+      },
+      "startedAt": {
+        "semantic_uri": "cile:startedAt"
+      },
+      "finishedAt": {
+        "semantic_uri": "cile:finishedAt"
+      },
+      "status": {
+        "semantic_uri": "cile:status"
+      },
+      "queriesPlanned": {
+        "semantic_uri": "cile:queriesPlanned"
+      },
+      "queriesCompleted": {
+        "semantic_uri": "cile:queriesCompleted"
+      },
+      "occurrencesReturned": {
+        "semantic_uri": "cile:occurrencesReturned"
+      },
+      "uniqueResults": {
+        "semantic_uri": "cile:uniqueResults"
+      },
+      "intakeCandidates": {
+        "semantic_uri": "cile:intakeCandidates"
+      },
+      "failureCode": {
+        "semantic_uri": "cile:failureCodes"
+      }
+    },
+    "semantics": "Aggregate SearchActivity telemetry; distinct execution IDs on the same Rome day. Excluded from SearchDay scheduled completeness and scientific decisions. Existing operational quantities only.",
+    "authority": "Owner request to resolve same-day extraordinary-run and OA acquisition blockers, 2026-09-08."
   }
 }
