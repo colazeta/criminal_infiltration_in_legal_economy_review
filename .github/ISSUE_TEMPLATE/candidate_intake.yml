@@ -26,7 +26,7 @@ body:
     id: candidates
     attributes:
       label: Candidate records
-      description: One JSON manifest with schema_version 2, the exact batch_id and a candidates array. Each candidate needs a batch-scoped candidate_id, title, authors, year, venue, work_type, identifiers (doi and other), source_links, sources, query_ids, verification_status, possible_duplicate, metadata_conflict, intake_assessment, relevance_reason and required_human_action.
+      description: One JSON manifest with schema_version 2, the exact batch_id and a candidates array. Each candidate needs a batch-scoped candidate_id, title, authors, year, venue, work_type, identifiers (doi and other), source_links, sources, query_ids, verification_status, possible_duplicate, metadata_conflict, intake_assessment, relevance_reason, required_human_action and an open_access receipt conforming to schema/intake-open-access.schema.json. The receipt must bind this candidate to a verified lawful full-text copy, version, rights evidence, actual byte checksum and dated anonymous verification; see docs/operations/intake-open-access.md.
       placeholder: '{"schema_version":2,"batch_id":"ACADEMIC-YYYY-MM-DD","candidates":[]}'
       render: json
     validations:

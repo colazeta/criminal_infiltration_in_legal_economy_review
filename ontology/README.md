@@ -117,3 +117,12 @@ and historical/current restrictions are recorded in `modules/daily-calendar.json
 and checked by the ontology validator. Scientific classes, four-part criteria,
 controlled vocabularies and profile 0.3.0 do not change. Historical two-source
 telemetry is decoded under its original v1 contract and kept out of the OA cycle.
+
+## OA intake evidence
+
+`modules/intake-open-access.json` maps the mandatory candidate receipt and
+metadata-only snapshots to existing CandidateRecord, AccessAssessment and
+Evidence concepts. The ontology validator checks those mappings and requires
+one preserved receipt per active daily candidate. Scientific profile 0.3.0 and
+controlled vocabulary are unchanged; an intake attestation is not a curator
+publication receipt. See `../docs/operations/intake-open-access.md`.

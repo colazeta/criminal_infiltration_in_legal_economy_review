@@ -8,6 +8,7 @@ import unittest
 from collections import Counter
 from pathlib import Path
 from unittest.mock import patch
+from oa_fixtures import synthetic_oa
 
 from scripts.curation.apply_candidate_decision import (
     CandidateDecisionError,
@@ -78,6 +79,7 @@ def intake_body(
         "candidates": [
             {
                 "candidate_id": candidate_id,
+                "open_access": synthetic_oa(candidate_id, "https://example.org/record", batch_id.removeprefix("ACADEMIC-")),
                 "title": "A new candidate study",
                 "authors": ["Ada Researcher", "Bruno Scholar"],
                 "year": 2026,

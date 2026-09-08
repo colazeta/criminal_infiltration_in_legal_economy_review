@@ -11,6 +11,11 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import hashlib
+import io
+import os
+import sys
+import tempfile
 import re
 from datetime import date
 from pathlib import Path
@@ -18,7 +23,10 @@ from urllib.parse import urlsplit
 
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT))
+from scripts.intake_open_access import validate_intake_access
 CANDIDATE_FIELDS = {
+    "open_access",
     "candidate_id",
     "title",
     "authors",
@@ -272,6 +280,10 @@ def parse_manifest(body: str, query_sources: dict[str, str] | None = None) -> di
                 query_sources[query_id] for query_id in validated_query_ids
             } != set(validated_sources):
                 raise IntakeImportError(f"{label}.query_ids disagrees with sources")
+        try:
+            validate_intake_access(candidate["open_access"], candidate, date.fromisoformat(batch_id.removeprefix("ACADEMIC-")))
+        except ValueError as exc:
+            raise IntakeImportError(f"{label}: {exc}") from exc
         if candidate["verification_status"] not in VERIFICATION:
             raise IntakeImportError(f"{label}.verification_status is invalid")
         if candidate["intake_assessment"] not in ASSESSMENTS:
@@ -453,10 +465,34 @@ def import_candidates(
         queue.append(row)
         added.append(row["candidate_id"])
     queue.sort(key=lambda row: row["candidate_id"])
-    with path.open("w", newline="", encoding="utf-8") as handle:
-        writer = csv.DictWriter(handle, fieldnames=fields, lineterminator="\n")
-        writer.writeheader()
-        writer.writerows(queue)
+    # Prepare both projections before writing. The immutable receipt is created
+    # exclusively; a failed queue replacement removes only our new receipt.
+    snapshot = {
+        "schema_version": 1, "batch_id": manifest["batch_id"],
+        "source_issue_number": int(issue_number),
+        "source_body_sha256": hashlib.sha256(body.encode("utf-8")).hexdigest(),
+        "receipts": [candidate["open_access"] for candidate in candidates],
+    }
+    snapshot_path = root / "data/curation/intake_access" / f"{manifest['batch_id']}.json"
+    buffer = io.StringIO(newline="")
+    writer = csv.DictWriter(buffer, fieldnames=fields, lineterminator="\n")
+    writer.writeheader(); writer.writerows(queue)
+    snapshot_path.parent.mkdir(parents=True, exist_ok=True)
+    created = False
+    with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", dir=path.parent, delete=False) as handle:
+        temporary = Path(handle.name)
+        handle.write(buffer.getvalue())
+    try:
+        with snapshot_path.open("x", encoding="utf-8") as handle:
+            created = True
+            handle.write(json.dumps(snapshot, ensure_ascii=False, sort_keys=True, indent=2) + "\n")
+        os.replace(temporary, path)
+    except BaseException:
+        if created:
+            snapshot_path.unlink()
+        raise
+    finally:
+        temporary.unlink(missing_ok=True)
     return {
         "batch_id": manifest["batch_id"],
         "issue_number": issue_number,

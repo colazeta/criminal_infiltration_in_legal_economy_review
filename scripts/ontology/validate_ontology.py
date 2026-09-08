@@ -12,6 +12,7 @@ import argparse
 import csv
 import json
 import re
+import sys
 from collections import defaultdict
 from pathlib import Path
 from typing import Any
@@ -425,6 +426,24 @@ def check_surveillance_source_policy(profile: dict[str, Any]) -> None:
         fail("calendar_source_policy_drift")
 
 
+def check_intake_access_contract(profile: dict[str, Any]) -> None:
+    sys.path.insert(0, str(ROOT))
+    from scripts.intake_open_access import FIELDS, SNAPSHOT_FIELDS, validate_snapshots
+    module = load_json(ROOT / "ontology/modules/intake-open-access.json")
+    schema = load_json(ROOT / module["schema"])
+    if module["profile_version"] != profile["version"] or set(module["classes"]) - set(profile["classes"]):
+        fail("unmapped_intake_access_class")
+    if set(module["receipt_fields"]) != FIELDS or set(module["snapshot_fields"]) != SNAPSHOT_FIELDS:
+        fail("unmapped_intake_access_fields")
+    slots = set(module["receipt_fields"].values()) | set(module["snapshot_fields"].values())
+    if slots - set(profile["slots"]) or set(schema["required"]) != FIELDS or set(schema["properties"]) != FIELDS or schema["additionalProperties"] is not False:
+        fail("intake_access_schema_mapping_drift")
+    try:
+        validate_snapshots(ROOT)
+    except (ValueError, KeyError, TypeError) as exc:
+        fail(f"intake_access_provenance:{exc}")
+
+
 def validate_all(*, quiet: bool = False) -> dict[str, int | str]:
     profile = load_json(PROFILE_PATH)
     external = load_json(EXTERNAL_PATH)
@@ -432,6 +451,7 @@ def validate_all(*, quiet: bool = False) -> dict[str, int | str]:
     check_profile(profile, external)
     check_private_v2_contract(profile)
     check_surveillance_source_policy(profile)
+    check_intake_access_contract(profile)
     cycle_contract = load_json(ROOT / "ontology/modules/archive-cycle.json")
     cycle = load_json(ROOT / cycle_contract["artifact"])
     if cycle_contract["profile_version"] != profile["version"] or cycle_contract["class"] not in profile["classes"]:

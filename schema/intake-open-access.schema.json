@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/schema/intake-open-access.schema.json",
+  "title": "OA-1 candidate intake attestation",
+  "description": "Runtime validation additionally binds candidate identity, source_links and the run time. This is no scientific approval.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "access_status",
+    "candidate_id",
+    "full_text_sha256",
+    "full_text_url",
+    "host_type",
+    "license_uri",
+    "rights_basis",
+    "rights_evidence_url",
+    "verification_method",
+    "verified_at",
+    "version_type"
+  ],
+  "properties": {
+    "access_status": {
+      "type": "string",
+      "maxLength": 1000,
+      "minLength": 1,
+      "const": "verified_open"
+    },
+    "candidate_id": {
+      "type": "string",
+      "maxLength": 1000,
+      "minLength": 1
+    },
+    "full_text_sha256": {
+      "type": "string",
+      "maxLength": 1000,
+      "minLength": 1,
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "full_text_url": {
+      "type": "string",
+      "maxLength": 1000,
+      "minLength": 1,
+      "format": "uri",
+      "pattern": "^https://"
+    },
+    "host_type": {
+      "type": "string",
+      "maxLength": 1000,
+      "minLength": 1,
+      "enum": [
+        "publisher",
+        "repository"
+      ]
+    },
+    "license_uri": {
+      "type": "string",
+      "maxLength": 1000
+    },
+    "rights_basis": {
+      "type": "string",
+      "maxLength": 2000,
+      "minLength": 1
+    },
+    "rights_evidence_url": {
+      "type": "string",
+      "maxLength": 1000,
+      "minLength": 1,
+      "format": "uri",
+      "pattern": "^https://"
+    },
+    "verification_method": {
+      "type": "string",
+      "maxLength": 1000,
+      "minLength": 1,
+      "const": "anonymous_full_text_verified"
+    },
+    "verified_at": {
+      "type": "string",
+      "maxLength": 1000,
+      "minLength": 1,
+      "format": "date-time"
+    },
+    "version_type": {
+      "type": "string",
+      "maxLength": 1000,
+      "minLength": 1,
+      "enum": [
+        "accepted",
+        "version_of_record"
+      ]
+    }
+  }
+}

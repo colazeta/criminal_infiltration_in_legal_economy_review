@@ -12,6 +12,13 @@ follow semantic versioning while the project is in prerelease.
 
 ## Unreleased
 
+### Fixed — OA intake enforcement, 2026-09-08
+
+- Require a structured OA-1 attestation in both v2 intake import and ledger reconciliation; missing, restricted, cross-candidate or incomplete evidence fails closed.
+- Preserve original intake access receipts and the issue-body hash in metadata-only curation snapshots; validate coverage against the active daily queue.
+- Reuse existing ontology concepts and keep legacy v1 decoding unchanged. No seed, scientific decision or private V2 activation is included.
+- Clarify that the active archive reset completed in 0.3.0 while private V2 activation remains separate.
+
 ### Changed — 2026-09-08
 
 - Owner-requested removal of Consensus from discovery, daily intake and V2 runner readiness. Exa is the sole daily source for W1–W7.
