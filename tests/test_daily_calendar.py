@@ -1,5 +1,6 @@
 import copy
 import json
+import subprocess
 import sys
 import unittest
 from pathlib import Path
@@ -13,6 +14,14 @@ from surveillance import build_public_payload, validate_public_payload, MetricsE
 
 
 class DailyCalendarTests(unittest.TestCase):
+    def test_deployed_payload_validates_from_the_site_package_in_a_fresh_process(self):
+        runs = [completed_run("2026-09-08")]
+        payload = build_public_payload(runs, 30, "colazeta/criminal_infiltration_in_legal_economy_review")
+        payload.update(schemaVersion=2, calendar=calendar_projection(runs, "2026-09-08T06:30:00Z"))
+        code = "import sys,json; sys.path.insert(0,sys.argv[1]); from metrics.surveillance import validate_public_payload; validate_public_payload(json.load(sys.stdin))"
+        process = subprocess.run([sys.executable, "-I", "-c", code, str(ROOT / "scripts")], input=json.dumps(payload), text=True, capture_output=True)
+        self.assertEqual(process.returncode, 0, process.stderr)
+
     def test_all_days_exist_and_unknown_execution_is_never_zero(self):
         runs = [completed_run(day) for day in ["2026-08-31", "2026-09-01", "2026-09-07"]]
         payload = build_public_payload(runs, 30, "colazeta/criminal_infiltration_in_legal_economy_review")
