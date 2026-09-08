@@ -15,18 +15,20 @@ from urllib.request import Request, urlopen
 from surveillance import (
     REPOSITORY_FULL_NAME,
     ROME,
+    RUN_SCHEMA_VERSION,
     MetricsError,
     parse_datetime,
     validate_run,
 )
 
 
-MARKER = "<!-- surveillance-run:v1 -->"
+MARKER = "<!-- surveillance-run:v2 -->"
+MARKERS = {1: "<!-- surveillance-run:v1 -->", 2: MARKER}
 LEDGER_COMMENT = re.compile(
     r"\ADaily surveillance batch "
     r"(?P<batch>ACADEMIC-[0-9]{4}-[0-9]{2}-[0-9]{2}): "
     r"(?P<status>completed|partial|failed)\.\n\n"
-    + re.escape(MARKER)
+    + r"<!-- surveillance-run:v(?P<version>[12]) -->"
     + r"\n```json\n(?P<payload>\{.*\})\n```\s*\Z",
     re.DOTALL,
 )
@@ -111,11 +113,11 @@ def next_link(value: str | None) -> str | None:
 
 
 def extract_run(body: str) -> dict | None:
-    if MARKER not in body:
-        if LEDGER_SUMMARY_PREFIX.match(body.strip()):
+    if not any(marker in body for marker in MARKERS.values()):
+        if LEDGER_SUMMARY_PREFIX.match(body.strip()) or "<!-- surveillance-run:" in body:
             raise MetricsError("Marked ledger comment must use the canonical envelope")
         return None
-    if body.count(MARKER) != 1:
+    if body.count("<!-- surveillance-run:") != 1:
         raise MetricsError("Marked ledger comment must use the canonical envelope")
     match = LEDGER_COMMENT.fullmatch(body.strip())
     if not match:
@@ -125,6 +127,8 @@ def extract_run(body: str) -> dict | None:
     except json.JSONDecodeError as exc:
         raise MetricsError("Marked ledger comment contains invalid JSON") from exc
     run = validate_run(payload)
+    if int(match.group("version")) != run["schema_version"]:
+        raise MetricsError("Marked ledger comment version disagrees with payload")
     if match.group("batch") != run["batch_id"] or match.group("status") != run["status"]:
         raise MetricsError("Marked ledger comment summary disagrees with payload")
     return run
@@ -184,7 +188,7 @@ def verify_search_manifest(run: dict, section: str) -> dict[str, str]:
         raise MetricsError("run.intake_issue: Search log manifest fields are invalid")
     if (
         type(manifest["schema_version"]) is not int
-        or manifest["schema_version"] != 1
+        or manifest["schema_version"] != run["schema_version"]
         or manifest["batch_id"] != run["batch_id"]
         or manifest["repository_commit"] != run["repository_commit"]
     ):
@@ -208,7 +212,8 @@ def verify_search_manifest(run: dict, section: str) -> dict[str, str]:
         planned = run_sources[source_name]["queries_planned"]
         if not isinstance(queries, list) or len(queries) != planned:
             raise MetricsError(f"{label}.queries: count disagrees with planned queries")
-        prefix = "CONSENSUS" if source_name == "Consensus" else "EXA"
+        prefix = source_name.upper()
+        windows: set[str] = set()
         for query_index, query in enumerate(queries):
             query_label = f"{label}.queries[{query_index}]"
             if not isinstance(query, dict) or set(query) != SEARCH_QUERY_FIELDS:
@@ -220,6 +225,13 @@ def verify_search_manifest(run: dict, section: str) -> dict[str, str]:
                 raise MetricsError("run.intake_issue: search query IDs must be unique")
             required_text(query["query_text"], f"{query_label}.query_text", 2000)
             query_sources[query_id] = source_name
+            if run["schema_version"] == 2:
+                window = re.fullmatch(r"EXA-(W[1-7])-Q[1-9][0-9]*", query_id)
+                if not window:
+                    raise MetricsError(f"{query_label}: Exa query must identify a W1–W7 window")
+                windows.add(window.group(1))
+        if run["schema_version"] == 2 and windows != {f"W{i}" for i in range(1, 8)}:
+            raise MetricsError("run.intake_issue: Exa W1–W7 coverage is incomplete")
     if seen_sources != set(run_sources):
         raise MetricsError("run.intake_issue: Search log source set is incomplete")
     return query_sources
@@ -240,7 +252,7 @@ def verify_candidate_manifest(
         raise MetricsError("run.intake_issue: Candidate records manifest fields are invalid")
     if (
         type(manifest["schema_version"]) is not int
-        or manifest["schema_version"] != 1
+        or manifest["schema_version"] != run["schema_version"]
         or manifest["batch_id"] != run["batch_id"]
     ):
         raise MetricsError("run.intake_issue: Candidate records manifest batch is invalid")
@@ -251,8 +263,8 @@ def verify_candidate_manifest(
 
     candidate_ids: list[str] = []
     assessment_counts = {value: 0 for value in CANDIDATE_ASSESSMENTS}
-    source_hits = {value: 0 for value in ("Consensus", "Exa")}
-    source_exclusives = {value: 0 for value in ("Consensus", "Exa")}
+    source_hits = {value: 0 for value in run["expected_sources"]}
+    source_exclusives = {value: 0 for value in run["expected_sources"]}
     duplicate_notes = 0
     conflict_notes = 0
     expected_id = re.compile(rf"CAND-{re.escape(run['batch_id'])}-[0-9]{{3}}")
@@ -306,7 +318,7 @@ def verify_candidate_manifest(
         sources = text_list(
             candidate["sources"], f"{label}.sources", minimum=1, maximum=2, item_length=40
         )
-        if not set(sources).issubset({"Consensus", "Exa"}):
+        if not set(sources).issubset(run["expected_sources"]):
             raise MetricsError(f"{label}.sources: source is not governed")
         for source in sources:
             source_hits[source] += 1
@@ -508,6 +520,8 @@ def fetch_validated_runs(repository, ledger_issue, allowed_author, token, cycle=
             continue
         if cycle and run["run_date"] < cycle["daily_start_date"]:
             raise MetricsError("New ledger comment replays a retired run date")
+        if cycle and run["schema_version"] != RUN_SCHEMA_VERSION:
+            raise MetricsError("Active cycle requires the Exa-only v2 run contract")
         verify_ledger_comment_time(run, comment)
         if repository_issues is None:
             repository_issues = []

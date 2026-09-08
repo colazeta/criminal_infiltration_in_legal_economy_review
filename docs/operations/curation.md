@@ -57,7 +57,7 @@ workflow accetta soltanto una issue aperta dal proprietario del repository e
 convalida:
 
 - identità del batch coerente tra titolo, modulo e manifesti;
-- forma chiusa dei record e provenienza delle query Consensus/Exa;
+- forma chiusa dei record e provenienza delle query Exa W1–W7 (manifest v2);
 - metadati, URL, identificatori, possibili duplicati e conflitti dichiarati;
 - presenza dell'assessment di intake e dell'azione umana richiesta;
 - salvaguardie contro screening e pubblicazione automatici.

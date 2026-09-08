@@ -11,9 +11,11 @@ from urllib.parse import urlsplit
 from zoneinfo import ZoneInfo
 
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 1  # Public aggregate format; independent from the run contract.
+RUN_SCHEMA_VERSION = 2
 ROME = ZoneInfo("Europe/Rome")
-ACTIVE_SOURCES = frozenset({"Consensus", "Exa"})
+ACTIVE_SOURCES = frozenset({"Exa"})
+SOURCE_SETS = {1: frozenset({"Consensus", "Exa"}), 2: ACTIVE_SOURCES}
 REPOSITORY_FULL_NAME = "colazeta/criminal_infiltration_in_legal_economy_review"
 STATUS_VALUES = {"completed", "partial", "failed"}
 SOURCE_STATUS_VALUES = {"completed", "failed", "not_run"}
@@ -189,7 +191,8 @@ def validate_run(run: dict[str, Any]) -> dict[str, Any]:
     if not isinstance(run, dict):
         raise MetricsError("run: expected an object")
     require_exact_fields(run, RUN_FIELDS, "run")
-    if type(run["schema_version"]) is not int or run["schema_version"] != SCHEMA_VERSION:
+    version = run["schema_version"]
+    if type(version) is not int or version not in SOURCE_SETS:
         raise MetricsError("run: unsupported schema_version")
 
     batch_id = run["batch_id"]
@@ -236,7 +239,7 @@ def validate_run(run: dict[str, Any]) -> dict[str, Any]:
             r"[A-Za-z][A-Za-z0-9 ._-]{1,39}", source_name
         ):
             raise MetricsError("run: invalid expected source name")
-    if set(expected_sources) != ACTIVE_SOURCES:
+    if set(expected_sources) != SOURCE_SETS[version]:
         raise MetricsError(
             "run: expected_sources must match the governed active source set"
         )
@@ -263,6 +266,8 @@ def validate_run(run: dict[str, Any]) -> dict[str, Any]:
         completed = count(source["queries_completed"], f"{label}.queries_completed")
         if planned < 1:
             raise MetricsError(f"{label}: an expected source requires a planned query")
+        if version == 2 and planned < 7:
+            raise MetricsError(f"{label}: Exa must plan all seven W1–W7 windows")
         if completed > planned:
             raise MetricsError(f"{label}: completed queries exceed planned queries")
         if source_status == "not_run" and completed != 0:
@@ -320,6 +325,8 @@ def validate_run(run: dict[str, Any]) -> dict[str, Any]:
         if completed_sources == 0
         else "partial"
     )
+    if version == 2 and completed_sources == 0:
+        expected_status = "partial" if any(s["queries_completed"] for s in normalised_sources) else "failed"
     if status != expected_status:
         raise MetricsError("run: status disagrees with source completion")
 
@@ -406,13 +413,10 @@ def validate_run(run: dict[str, Any]) -> dict[str, Any]:
         if source_candidate_hits < intake_candidates or source_exclusive > intake_candidates:
             raise MetricsError("run.sources: candidate attribution does not reconcile")
         for row in normalised_sources:
-            other = next(
-                candidate
-                for candidate in normalised_sources
-                if candidate["source"] != row["source"]
-            )
+            other_hits = sum(candidate["candidate_hits"] for candidate in normalised_sources
+                             if candidate["source"] != row["source"])
             if row["exclusive_candidates"] != (
-                intake_candidates - other["candidate_hits"]
+                intake_candidates - other_hits
             ):
                 raise MetricsError(
                     "run.sources: exclusive candidate attribution does not reconcile"
@@ -429,7 +433,7 @@ def validate_run(run: dict[str, Any]) -> dict[str, Any]:
 
     notes = safe_text_list(run["notes"], "run.notes", 10, 280)
     return {
-        "schema_version": SCHEMA_VERSION,
+        "schema_version": version,
         "batch_id": batch_id,
         "run_date": run_date.isoformat(),
         "window_start": started.isoformat(),
@@ -511,6 +515,8 @@ def build_public_payload(
     if repository != REPOSITORY_FULL_NAME:
         raise MetricsError("repository must match the governed repository")
     validated = [validate_run(run) for run in runs]
+    if len({run["schema_version"] for run in validated}) > 1:
+        raise MetricsError("Keep historical and current source policies in separate projections")
     validated.sort(key=lambda row: row["run_date"])
     batch_ids = [row["batch_id"] for row in validated]
     dates = [row["run_date"] for row in validated]
@@ -834,6 +840,10 @@ def validate_public_payload(payload: dict[str, Any]) -> dict[str, Any]:
     else:
         source_window_rows = []
         has_completed_day = False
+    expected_counts = {row["expectedSourceCount"] for row in normalised_daily}
+    if len(expected_counts) > 1 or not expected_counts.issubset({1, 2}):
+        raise MetricsError("public statistics: incompatible source policies")
+    governed_sources = SOURCE_SETS[1] if expected_counts == {2} else ACTIVE_SOURCES
     source_names = []
     source_volume_rows = []
     source_completed_runs = 0
@@ -844,7 +854,7 @@ def validate_public_payload(payload: dict[str, Any]) -> dict[str, Any]:
         require_exact_fields(row, PUBLIC_SOURCE_FIELDS, label)
         if not isinstance(row["source"], str) or not row["source"].strip():
             raise MetricsError(f"{label}: invalid source")
-        if row["source"] not in ACTIVE_SOURCES:
+        if row["source"] not in governed_sources:
             raise MetricsError(f"{label}: source is not in the governed active set")
         source_names.append(row["source"])
         expected_runs = count(row["expectedRuns"], f"{label}.expectedRuns")
@@ -882,7 +892,7 @@ def validate_public_payload(payload: dict[str, Any]) -> dict[str, Any]:
                 raise MetricsError(f"{label}: exclusive candidates exceed candidate hits")
     if source_names != sorted(set(source_names)):
         raise MetricsError("public statistics: sources must be unique and sorted")
-    if normalised_daily and set(source_names) != ACTIVE_SOURCES:
+    if normalised_daily and set(source_names) != governed_sources:
         raise MetricsError("public statistics: source summary must contain the active set")
     if not normalised_daily and source_names:
         raise MetricsError("public statistics: an empty series cannot contain source summaries")
@@ -926,9 +936,9 @@ def validate_public_payload(payload: dict[str, Any]) -> dict[str, Any]:
             )
         source_by_name = dict(zip(source_names, source_volume_rows))
         for name, row in source_by_name.items():
-            other_name = next(source for source in ACTIVE_SOURCES if source != name)
+            other_hits = sum(other["candidateHits"] for other_name, other in source_by_name.items() if other_name != name)
             if row["exclusiveCandidates"] != (
-                global_candidates - source_by_name[other_name]["candidateHits"]
+                global_candidates - other_hits
             ):
                 raise MetricsError(
                     "public statistics: exclusive candidate totals disagree with daily rows"

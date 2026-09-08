@@ -34,7 +34,11 @@ flowchart TD
 Il [ledger GitHub #30](https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/issues/30)
 contiene un commento strutturato per ogni batch `ACADEMIC-YYYY-MM-DD`. La
 pubblicazione giornaliera accetta soltanto commenti dell'autore autorizzato e
-conformi a [`schema/surveillance-run.schema.json`](../../schema/surveillance-run.schema.json).
+conformi a [`schema/surveillance-run.schema.json`](../../schema/surveillance-run.schema.json),
+versione 2 per Exa. Il marker corrente è `<!-- surveillance-run:v2 -->`.
+Lo storico v1 conserva Consensus ed Exa e il proprio esito; non viene riscritto
+né proiettato nel ciclo OA. La versione dello schema del run è distinta dalla
+versione 2 dell’export pubblico con calendario.
 Ogni commento usa un involucro canonico composto da una sola riga tecnica,
 marker e oggetto JSON: testo aggiuntivo non viene accettato, così il ledger non
 diventa accidentalmente una seconda copia dei metadati dei candidati.
@@ -53,9 +57,14 @@ esplicito:
 
 Lo stato complessivo è:
 
-- `completed` se tutte le fonti attese sono complete;
-- `partial` se almeno una è completa e almeno una no;
-- `failed` se nessuna fonte è completa.
+- `completed` se Exa ha completato tutte le query pianificate;
+- `partial` se Exa ha completato almeno una query, ma non tutte;
+- `failed` se nessuna query è completa.
+
+La fonte Exa resta `failed` finché la sua esecuzione è incompleta, conservando
+il numero effettivo di query completate; `not_run` indica nessun avvio. Nel
+contratto storico v1 lo stato globale resta invece determinato dalla completezza
+delle due fonti, senza reinterpretazioni retroattive.
 
 Solo una giornata `completed` alimenta i conteggi di volume e novità. In una
 giornata parziale o fallita, i totali sono `null`: non vengono trasformati in
@@ -99,10 +108,9 @@ metadati. Sono indicatori di cautela, non paper aggiuntivi.
 
 ## Confronto tra le fonti
 
-Il contratto corrente accetta esattamente le due fonti attive dichiarate nella
-governance: Consensus ed Exa. Un nome diverso rende invalido il run; una futura
-fonte richiede prima una modifica revisionata di governance, schema e
-validazione. Per ciascuna fonte vengono registrati:
+Il contratto corrente accetta esclusivamente Exa. L’istruzione del proprietario
+dell’8 settembre 2026 ha rimosso Consensus dal processo. Una fonte aggiuntiva
+richiede prima una modifica revisionata di governance, schema e validazione. Per ciascuna fonte vengono registrati:
 
 - query pianificate e completate;
 - occorrenze restituite;
@@ -111,19 +119,20 @@ validazione. Per ciascuna fonte vengono registrati:
 - candidati trovati soltanto da quella fonte;
 - limiti, cap, errori e codice del fallimento.
 
-I candidati intercettati da più fonti possono comparire in più righe. Per questo
-la somma per fonte non coincide necessariamente con il totale dei candidati
-unici. I candidati esclusivi misurano invece il contributo marginale della
-singola fonte. Nella tabella pubblica, esecuzioni e query descrivono la salute
+Con Exa come unica fonte, candidati intercettati, candidati esclusivi e totale
+persistito devono coincidere. Questo non misura un contributo marginale rispetto
+a una seconda fonte. Nel solo storico a due fonti, i candidati condivisi possono
+comparire in entrambe le righe. Nella tabella pubblica, esecuzioni e query descrivono la salute
 tecnica della fonte anche nelle giornate parziali; occorrenze, risultati e
 candidati vengono invece sommati soltanto per giornate interamente complete.
-Poiché le fonti attive sono esattamente due, il numero esclusivo di una fonte è
-anche verificato come: candidati totali meno candidati intercettati dall'altra
-fonte.
+La riconciliazione storica a due fonti viene mantenuta soltanto per i run v1.
+Il denominatore di completezza del ciclo OA è una fonte attesa per giornata;
+nel calendario storico rimane due. Un giorno OA mancante pesa una giornata
+attesa, non scompare dal denominatore.
 
 ## Finestre temporali
 
-La proiezione v2 del calendario copre ogni giorno dal 31 agosto 2026 alla data esplicita di build (`--as-of`), in Europe/Rome. Il ledger originale resta distinto. La completezza include i giorni attesi mancanti; l’assenza non diventa zero. L’ultima data del ledger e quella della proiezione sono mostrate separatamente. I volumi legacy restano definiti dal loro contratto v1; i tentativi legacy non sono misurati.
+La proiezione v2 del calendario OA copre ogni giorno dal 9 settembre 2026 alla data esplicita di build (`--as-of`), in Europe/Rome. Il calendario storico separato parte dal 31 agosto 2026. Il ledger originale resta distinto. La completezza include i giorni attesi mancanti; l’assenza non diventa zero. L’ultima data del ledger e quella della proiezione sono mostrate separatamente. I volumi legacy restano definiti dal loro contratto v1; i tentativi legacy non sono misurati.
 
 Il grafico compare soltanto dopo almeno otto giornate complete. Prima di quella
 soglia vengono mostrate schede e tabella: pochi punti non vengono presentati

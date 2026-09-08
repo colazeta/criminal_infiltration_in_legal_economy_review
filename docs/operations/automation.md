@@ -2,11 +2,10 @@
 
 ## Purpose
 
-ChatGPT Work runs a conservative surveillance intake using Consensus and Exa,
+ChatGPT Work runs a conservative surveillance intake using Exa only,
 then uses GitHub only to create a structured issue for new candidates. It does
-not edit repository content. Scite remains authorised as an additional source,
-but the connected account did not have MCP access on 2026-08-30; no run may
-claim to have searched it until access succeeds.
+not edit repository content. The owner removed Consensus on 2026-09-08. Scite
+remains authorised for separate formal-cycle research, not for this daily lane.
 
 This surveillance feed supports, but never replaces, the formal E1–E3 process
 in the [literature expansion strategy](../methodology/expansion.md).
@@ -39,6 +38,16 @@ canonical registry and cannot merge its own pull request.
 
 ## Batch contract
 
+New runs and both intake manifests use `schema_version: 2`. The canonical
+ledger envelope is one summary line, a blank line, `<!-- surveillance-run:v2 -->`,
+and one fenced JSON object. The summary remains
+`Daily surveillance batch ACADEMIC-YYYY-MM-DD: completed.` (or `partial`/`failed`).
+The active source set is `["Exa"]`; the historical v1 contract is retained in
+`schema/surveillance-run-v1.schema.json` only for reading pre-reset history.
+Version, marker and source set must agree; no new v1 batch enters the active cycle.
+The source amendment is operational protocol `CILE-DAILY-v3`, independent of
+scientific protocol `CILE-4PT-OA-v3` and ontology profile 0.3.0.
+
 - Calculate exact date/window in `Europe/Rome`.
 - Batch ID: `ACADEMIC-YYYY-MM-DD`; no-op if that title/ID already exists.
 - Record the exact 40-character commit read from `main`. Deployment verifies
@@ -48,26 +57,32 @@ canonical registry and cannot merge its own pull request.
   `[INTAKE][ACADEMIC] ACADEMIC-YYYY-MM-DD` and preserve the candidate form's
   `Batch ID`, `Search and provenance log`, `Candidate records` and `Safeguards`
   sections. The batch ID in the title and form must equal the ledger batch.
-- Write `Candidate records` as one fenced JSON object with `schema_version: 1`,
+- Write `Candidate records` as one fenced JSON object with `schema_version: 2`,
   the exact `batch_id` and a `candidates` array. Use a unique ID of the form
   `CAND-ACADEMIC-YYYY-MM-DD-NNN` for every record and the governed fields shown
   in the issue template. The array length must equal `intake_candidates`.
 - Write `Search and provenance log` as one fenced JSON object with
   `schema_version`, `batch_id`, `repository_commit` and exactly one source
-  object for Consensus and Exa. Each source contains its complete planned query
-  list as `{query_id, query_text}` objects. Query IDs are globally unique,
-  start with `CONSENSUS-` or `EXA-`, and every candidate `query_id` must resolve
-  to a query from each source named on that candidate.
-- Search Consensus as the active peer-reviewed index and Exa as an independent
-  semantic coverage-gap channel. Fetch promising Consensus records before using
-  them in an intake issue.
+  object for Exa. It contains every planned query as `{query_id, query_text}`.
+  Query IDs use `EXA-Wn-Qm`, where n is 1–7 and m is a positive integer; every
+  window W1–W7 must occur. Every candidate query ID must resolve to this log.
+- Use Exa for all seven workstreams. Verify publication identity, review status
+  and lawful full text using publisher/repository evidence before intake;
+  search summaries do not establish these facts. No Consensus call is made.
 - Compare normalised DOI, stable identifiers and title/year against the current
   registry and existing intake issues.
 - Use only `plausible_core`, `plausible_contextual` or `uncertain`.
 - Create no issue when there are no new candidates.
 - Add a schema-valid ledger comment even after a successful zero-candidate run.
-- If one source fails, log `partial`; if all required sources fail, log `failed`.
-  Aggregate totals are `null`, never zero, for both states.
+- Log `completed` only when Exa completes every planned query. If some queries
+  finish and others fail or are not run, log `partial`; if none finish, log
+  `failed`. An incomplete Exa source uses `failed` (or `not_run` if never started),
+  keeps its actual `queries_completed`, has null volume counts and a failure code.
+  Aggregate totals are `null`, never zero, for both incomplete states; assessments
+  stay zero and no intake issue is created. No synthetic Consensus row is required.
+- With one source, `candidate_hits` and `exclusive_candidates` both equal the
+  actual number of persisted intake candidates. The latter is an attribution
+  identity, not evidence of independent marginal coverage.
 - Include queries, requested/returned counts, candidates before/after dedupe,
   metadata conflicts, access limits and the repository commit checked.
 - Do not paste abstracts or full-text excerpts; write a short paraphrased reason.
@@ -83,7 +98,7 @@ minimal shape for one record (repeat the object in `candidates` as needed):
 
 ```json
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "batch_id": "ACADEMIC-YYYY-MM-DD",
   "candidates": [
     {
@@ -95,8 +110,8 @@ minimal shape for one record (repeat the object in `candidates` as needed):
       "work_type": "working_paper",
       "identifiers": {"doi": null, "other": []},
       "source_links": ["https://example.org/record"],
-      "sources": ["Consensus", "Exa"],
-      "query_ids": ["CONSENSUS-W1-Q1", "EXA-GAP-Q1"],
+      "sources": ["Exa"],
+      "query_ids": ["EXA-W1-Q1"],
       "verification_status": "metadata_partial",
       "possible_duplicate": null,
       "metadata_conflict": null,
@@ -121,27 +136,28 @@ The `Search and provenance log` field is also machine-readable:
 
 ```json
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "batch_id": "ACADEMIC-YYYY-MM-DD",
   "repository_commit": "FULL_40_CHARACTER_MAIN_SHA",
   "sources": [
     {
-      "source": "Consensus",
-      "queries": [
-        {"query_id": "CONSENSUS-W1-Q1", "query_text": "Exact query text"}
-      ]
-    },
-    {
       "source": "Exa",
       "queries": [
-        {"query_id": "EXA-GAP-Q1", "query_text": "Exact semantic query"}
+        {"query_id": "EXA-W1-Q1", "query_text": "Exact planned W1 query"},
+        {"query_id": "EXA-W2-Q1", "query_text": "Exact planned W2 query"},
+        {"query_id": "EXA-W3-Q1", "query_text": "Exact planned W3 query"},
+        {"query_id": "EXA-W4-Q1", "query_text": "Exact planned W4 query"},
+        {"query_id": "EXA-W5-Q1", "query_text": "Exact planned W5 query"},
+        {"query_id": "EXA-W6-Q1", "query_text": "Exact planned W6 query"},
+        {"query_id": "EXA-W7-Q1", "query_text": "Exact planned W7 query"}
       ]
     }
   ]
 }
 ```
 
-The arrays contain every planned query, including a completed zero-result query.
+Replace the example query text with the exact planned searches. The arrays
+contain every planned query, including a completed zero-result query.
 The aggregate returned counts remain in the ledger run object; candidate records
 refer back to this manifest through `query_ids`.
 

@@ -19,7 +19,7 @@ ROME = ZoneInfo("Europe/Rome")
 API_ROOT = "https://api.github.com"
 INCIDENT_TITLE = "[OPS] Daily surveillance heartbeat missing"
 INCIDENT_MARKER = "<!-- surveillance-heartbeat-incident:v1 -->"
-SURVEILLANCE_MARKER = "<!-- surveillance-run:v1 -->"
+SURVEILLANCE_MARKER = "<!-- surveillance-run:v2 -->"
 
 
 def batch_id_for(day: date) -> str:
@@ -111,7 +111,8 @@ def paginated(repository: str, resource: str, token: str, **params: str) -> list
 
 def ledger_has_batch(repository: str, ledger_issue: int, token: str, batch_id: str) -> bool:
     from fetch_surveillance_ledger import fetch_validated_runs
-    runs = fetch_validated_runs(repository, ledger_issue, [repository.split("/")[0]], token)
+    from daily_calendar import CYCLE
+    runs = fetch_validated_runs(repository, ledger_issue, [repository.split("/")[0]], token, CYCLE)
     return any(run["batch_id"] == batch_id for run in runs)
 
 
@@ -131,11 +132,14 @@ def find_open_incident(repository: str, token: str) -> dict[str, Any] | None:
 def reconcile(repository: str, ledger_issue: int, token: str, day: date, *, dry_run: bool = False) -> str:
     batch_id = batch_id_for(day)
     from fetch_surveillance_ledger import fetch_validated_runs
-    from daily_calendar import START
-    runs = fetch_validated_runs(repository, ledger_issue, [repository.split("/")[0]], token)
+    from daily_calendar import CYCLE
+    start = date.fromisoformat(CYCLE["daily_start_date"])
+    if day < start:
+        return f"not_due:{batch_id}"
+    runs = fetch_validated_runs(repository, ledger_issue, [repository.split("/")[0]], token, CYCLE)
     represented = {run["run_date"] for run in runs}
-    gaps = [(START + timedelta(days=i)).isoformat() for i in range((day - START).days + 1)
-            if (START + timedelta(days=i)).isoformat() not in represented]
+    gaps = [(start + timedelta(days=i)).isoformat() for i in range((day - start).days + 1)
+            if (start + timedelta(days=i)).isoformat() not in represented]
     present = not gaps
     incident = find_open_incident(repository, token)
 

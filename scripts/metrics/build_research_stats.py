@@ -13,6 +13,7 @@ from datetime import date, datetime
 from surveillance import (
     REPOSITORY_FULL_NAME,
     MetricsError,
+    RUN_SCHEMA_VERSION,
     build_public_payload,
     validate_public_payload,
 )
@@ -37,8 +38,11 @@ def read_runs(path: Path | None) -> list[dict]:
 
 def active_runs(runs):
     boundary = datetime.fromisoformat(CYCLE["reset_at"].replace("Z", "+00:00"))
-    return [r for r in runs if r["run_date"] >= CYCLE["daily_start_date"]
+    active = [r for r in runs if r["run_date"] >= CYCLE["daily_start_date"]
             and datetime.fromisoformat(r["window_start"].replace("Z", "+00:00")) >= boundary]
+    if any(r.get("schema_version") != RUN_SCHEMA_VERSION for r in active):
+        raise MetricsError("Active cycle requires the Exa-only v2 run contract")
+    return active
 
 
 def main() -> None:

@@ -1,8 +1,8 @@
 import { canonicalJson, sha256, V2Error } from "./review-v2.js";
 import { fetchWithTimeout } from "./network.js";
 import { reserveProjectProviderBudget, budgetFor } from "./provider-budget.js";
+import { queryManifestProblem } from "./daily-source-policy.js";
 
-const SOURCES = ["Consensus", "Exa"];
 const iso = (value) => new Date(value).toISOString();
 const statement = (db, sql, ...values) => db.prepare(sql).bind(...values);
 const results = async (db, sql, ...values) => (await statement(db, sql, ...values).all()).results;
@@ -22,14 +22,8 @@ export function romeTime(day, hour = 7, minute = 0) {
   return iso(moment);
 }
 export function validateQueryManifest(manifest) {
-  if (!manifest || manifest.protocol_version !== "CILE-DAILY-v2" || !Array.isArray(manifest.queries) || manifest.queries.length !== 14) throw new V2Error("approved_query_manifest_required");
-  const keys = new Set();
-  for (const q of manifest.queries) {
-    if (!SOURCES.includes(q.provider) || !/^W[1-7]$/.test(q.window) || typeof q.text !== "string" || !q.text.trim() || q.text.length > 2000
-      || !/^[A-Za-z0-9-]{3,60}$/.test(q.query_id)) throw new V2Error("invalid_query_manifest");
-    keys.add(`${q.provider}:${q.window}`);
-  }
-  if (keys.size !== 14 || new Set(manifest.queries.map((q) => `${q.provider}:${q.query_id}`)).size !== 14) throw new V2Error("duplicate_or_missing_query");
+  const problem = queryManifestProblem(manifest);
+  if (problem) throw new V2Error(problem);
   return manifest;
 }
 export function dayOutcome(expected, checkpoints) {
@@ -41,17 +35,11 @@ function failure(error) {
   return ["budget_exhausted", "provider_not_configured", "rate_limited", "authentication_failed", "invalid_provider_response"].includes(error?.code) ? error.code : "provider_unavailable";
 }
 async function providerSearch(env, query, context) {
-  let response;
-  if (query.provider === "Consensus") {
-    if (!env.CONSENSUS_SEARCH?.fetch) throw new V2Error("provider_not_configured");
-    // Private service binding to an explicitly approved adapter, never a guessed public API.
-    response = await env.CONSENSUS_SEARCH.fetch(new Request("https://consensus-adapter.internal/search", { method: "POST", signal: AbortSignal.timeout(15000), headers: { "Content-Type": "application/json" }, body: canonicalJson({ query: query.text, limit: 10, scheduled_date: context.scheduled_date }) }));
-  } else {
-    if (!env.EXA_API_KEY || env.EXA_FREE_ONLY !== "true" || env.EXA_DEDICATED_STARTER_ACCOUNT !== "true") throw new V2Error("provider_not_configured");
-    const budget = await reserveProjectProviderBudget(env, "exa", `${context.review_id}/${context.scheduled_date}/${query.query_id}`);
-    if (!budget.allowed) throw new V2Error("budget_exhausted");
-    response = await fetchWithTimeout("https://api.exa.ai/search", { method: "POST", headers: { "Content-Type": "application/json", "x-api-key": env.EXA_API_KEY }, body: JSON.stringify({ query: query.text, type: "fast", category: "research paper", numResults: 5 }) });
-  }
+  if (query.provider !== "Exa") throw new V2Error("invalid_query_manifest");
+  if (!env.EXA_API_KEY || env.EXA_FREE_ONLY !== "true" || env.EXA_DEDICATED_STARTER_ACCOUNT !== "true") throw new V2Error("provider_not_configured");
+  const budget = await reserveProjectProviderBudget(env, "exa", `${context.review_id}/${context.scheduled_date}/${query.query_id}`);
+  if (!budget.allowed) throw new V2Error("budget_exhausted");
+  const response = await fetchWithTimeout("https://api.exa.ai/search", { method: "POST", headers: { "Content-Type": "application/json", "x-api-key": env.EXA_API_KEY }, body: JSON.stringify({ query: query.text, type: "fast", category: "research paper", numResults: 5 }) });
   if (response.status === 429) {
     const error = new V2Error("rate_limited");
     const retry = response.headers.get("Retry-After"), seconds = Number(retry);
@@ -148,7 +136,7 @@ export async function runDay(env, reviewId, day, { now = Date.now(), search = pr
 
 export async function superviseDays(env, now = Date.now()) {
   if (env.REVIEW_V2_RUNNER_ENABLED !== "true") return { status: "disabled" };
-  if (!env.REVIEW_DB || !env.REVIEW_JOBS || !env.REVIEW_EVIDENCE || !env.CONSENSUS_SEARCH) throw new V2Error("daily_readiness_incomplete");
+  if (!env.REVIEW_DB || !env.REVIEW_JOBS || !env.REVIEW_EVIDENCE) throw new V2Error("daily_readiness_incomplete");
   const manifest = validateQueryManifest(JSON.parse(env.REVIEW_DAILY_QUERY_MANIFEST || "null"));
   const db = env.REVIEW_DB, review = await db.prepare("SELECT * FROM reviews WHERE phase='active'").first();
   if (!review) return { status: "not_activated" };

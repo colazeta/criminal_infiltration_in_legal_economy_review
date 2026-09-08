@@ -98,12 +98,28 @@
   },
   "scopes": {
     "legacy": {
-      "coverage_start": "2026-08-31"
+      "coverage_start": "2026-08-31",
+      "expected_sources": [
+        "Consensus",
+        "Exa"
+      ]
     },
     "oa-2026-09-08": {
       "coverage_start": "2026-09-09",
       "policy": "OA-1",
-      "reset_at": "2026-09-08T08:29:28Z"
+      "reset_at": "2026-09-08T08:29:28Z",
+      "expected_sources": [
+        "Exa"
+      ]
     }
+  },
+  "surveillance_contract": {
+    "schema": "schema/surveillance-run.schema.json",
+    "schema_version": 2,
+    "legacy_schema": "schema/surveillance-run-v1.schema.json",
+    "source_class": "SearchActivity",
+    "source_slot": "source_name",
+    "protocol_version": "CILE-DAILY-v3",
+    "authority": "Owner instruction of 2026-09-08: remove Consensus from the process."
   }
 }

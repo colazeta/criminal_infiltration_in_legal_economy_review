@@ -61,29 +61,19 @@ def intake_body(
     sources: list[str] | None = None,
     query_ids: list[str] | None = None,
 ) -> str:
-    sources = sources or ["Consensus", "Exa"]
-    query_ids = query_ids or ["CONSENSUS-W1-Q1", "EXA-GAP-Q1"]
+    sources = sources if sources is not None else ["Exa"]
+    query_ids = query_ids if query_ids is not None else ["EXA-W1-Q1"]
     search = {
-        "schema_version": 1,
+        "schema_version": 2,
         "batch_id": batch_id,
         "repository_commit": "a" * 40,
-        "sources": [
-            {
-                "source": "Consensus",
-                "queries": [
-                    {"query_id": "CONSENSUS-W1-Q1", "query_text": "mafia firms"}
-                ],
-            },
-            {
-                "source": "Exa",
-                "queries": [
-                    {"query_id": "EXA-GAP-Q1", "query_text": "criminal infiltration"}
-                ],
-            },
-        ],
+        "sources": [{"source": "Exa", "queries": [
+            {"query_id": f"EXA-W{i}-Q1", "query_text": f"Synthetic query for W{i}"}
+            for i in range(1, 8)
+        ]}],
     }
     candidates = {
-        "schema_version": 1,
+        "schema_version": 2,
         "batch_id": batch_id,
         "candidates": [
             {
@@ -460,7 +450,7 @@ class DailyIntakeQueueTests(unittest.TestCase):
             )
 
     def test_candidate_queries_must_match_named_sources(self) -> None:
-        with self.assertRaisesRegex(IntakeImportError, "disagrees with sources"):
+        with self.assertRaisesRegex(IntakeImportError, "sources is invalid"):
             import_candidates(
                 self.root,
                 intake_body(sources=["Consensus"]),

@@ -49,8 +49,8 @@ search time is 07:00 Rome; failed attempts become eligible for retry after
 messages cannot create another successful source/query checkpoint. Availability
 is not absolutely guaranteed; missed work is made visible and recoverable.
 
-V2 activation remains blocked until its private infrastructure, Consensus server
-adapter, approved query manifest, complete external freeze and restore checks
+V2 activation remains blocked until its private infrastructure, Exa readiness,
+approved query manifest, complete external freeze and restore checks
 pass. `GET /api/v2/status` shows the actual blockers after authentication. There
 is no source substitution, empty success ledger, approval default or automatic
 scientific import from legacy.
@@ -62,7 +62,7 @@ over an active database or reset global provider-budget counters.
 
 ## OA-1 amendment — 2026-09-08
 
-The owner requested OA-only mapping and authorised restart if feasible. Profile 0.3.0 adds a 33rd private table for attributed, append-only access verification; migration 0001 remains byte-identical. Legacy public builders now require a current OA receipt. The public scope and private curator access form are implemented. No database reset or V2 activation is implied: the D1 permission failure, source adapter and complete preservation/restore gates remain unresolved. Full candidate seed/evidence material is delivered separately, outside the technical repository changes.
+The owner requested OA-only mapping and authorised restart if feasible. Profile 0.3.0 adds a 33rd private table for attributed, append-only access verification; migration 0001 remains byte-identical. Legacy public builders now require a current OA receipt. The public scope and private curator access form are implemented. No private database reset or V2 activation is implied: D1 permissions, Exa readiness and complete preservation/restore gates remain required. Full candidate seed/evidence material is delivered separately, outside the technical repository changes.
 
 ## Active archive reset — 2026-09-08
 

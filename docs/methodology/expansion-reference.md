@@ -66,7 +66,6 @@ coverage gaps. Only providers authorised in
 
 | Source | Primary role | It must not be used to do |
 |---|---|---|
-| Consensus | Active peer-reviewed discovery and candidate-detail verification | Decide eligibility from a result summary |
 | Scite | Additional scholarly discovery, citation context and access/retraction signals when account access is available | Decide eligibility from a result or citation label |
 | OpenAlex | Reproducible structured/full-text search, author/topic expansion and citation metadata | Supply final metadata without verification |
 | Exa Search | Natural-language semantic search for terminology and disciplinary blind spots | Replace a logged database search or silently fetch returned domains |
@@ -112,16 +111,16 @@ it. If a provider imposes a cap, record it and examine overlap and the tail of t
 ranking before claiming that the query was exhausted. Never describe “top 20” as
 complete retrieval.
 
-### Recommended first-pass division
+### Current first-pass division
 
-- **Consensus:** run all seven workstreams as the active peer-reviewed search.
 - **Scite:** when account access is enabled, add scholarly and citation-context
-  searches and record its overlap with Consensus.
+  searches in a declared formal cycle and record its overlap with the other executed sources.
 - **OpenAlex:** run reproducible concept-family searches and structured filters;
   keep the OpenAlex work ID alongside any DOI.
-- **Exa:** run distinct natural-language descriptions for W2, W4, W5 and W6,
-  using the research-paper/publication category. Its purpose is semantic
-  difference, not synonym repetition.
+- **Exa:** run distinct natural-language descriptions for every window W1–W7.
+  Use the research-paper/publication category when exposed by the interface;
+  otherwise document that it is unavailable. Verify publication type through
+  publisher/repository evidence; a search result is not a peer-review attestation.
 - **Crossref:** verify identifiers and manifestations after candidate discovery.
 
 ## Phase C: reconcile identity without losing provenance
@@ -208,9 +207,9 @@ scope, sources or query design.
 The active recurring Work automation runs a repository intake lane alongside
 the personal research digest:
 
-- Consensus is the active peer-reviewed channel;
-- Exa is an independent semantic gap channel;
-- Scite is added only after its account access succeeds;
+- Exa is the sole active discovery source and covers all seven windows;
+- the owner retired Consensus on 2026-09-08; no search, fetch or fallback calls are made;
+- Scite and other approved formal-cycle sources do not alter daily telemetry;
 - GitHub receives at most one idempotent, deduplicated intake issue;
 - GitHub issue #30 receives one aggregate, schema-valid telemetry comment per
   batch, including successful zero-candidate runs and technical failures;
@@ -235,7 +234,7 @@ and documents any stop decision. Living surveillance continues afterward.
 
 - [ ] Positive and near-neighbour benchmark sets are frozen and documented.
 - [ ] W1–W7 have an explicit source/query plan or a stated non-applicability.
-- [ ] Consensus, OpenAlex and Exa E1 searches are completed and reconciled;
+- [ ] OpenAlex and Exa E1 searches are completed and reconciled;
       Scite is included when its account access is available.
 - [ ] DOI/identifier metadata are verified through approved sources.
 - [ ] Backward and forward citation searches cover the declared frontier.

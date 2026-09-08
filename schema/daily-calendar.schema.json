@@ -111,7 +111,10 @@
             "minimum": 0
           },
           "expectedSources": {
-            "const": 2
+            "enum": [
+              1,
+              2
+            ]
           },
           "failureCodes": {
             "type": "array",
@@ -159,5 +162,51 @@
       "minimum": 0,
       "maximum": 1
     }
-  }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "reviewId": {
+            "const": "legacy"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "rows": {
+            "items": {
+              "properties": {
+                "expectedSources": {
+                  "const": 2
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "reviewId": {
+            "const": "oa-2026-09-08"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "rows": {
+            "items": {
+              "properties": {
+                "expectedSources": {
+                  "const": 1
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
 }

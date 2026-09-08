@@ -107,3 +107,13 @@ The [publication and review model](../docs/governance/review-v2-model.md) separa
 ## Open-access mapping
 
 The owner-approved OA-1 access scope is specified in [open-access.md](../docs/methodology/open-access.md). Both public collections require a current verified lawful full-text assessment. V2 records access history separately from scientific screening.
+
+## Discovery source amendment — 2026-09-08
+
+The owner retired Consensus. Exa-only run/intake schema v2 and operational
+protocol CILE-DAILY-v3 reuse `SearchActivity.source_name`, the existing
+`SearchDay` source-count projection and V2 provider/protocol slots. The mapping
+and historical/current restrictions are recorded in `modules/daily-calendar.json`
+and checked by the ontology validator. Scientific classes, four-part criteria,
+controlled vocabularies and profile 0.3.0 do not change. Historical two-source
+telemetry is decoded under its original v1 contract and kept out of the OA cycle.

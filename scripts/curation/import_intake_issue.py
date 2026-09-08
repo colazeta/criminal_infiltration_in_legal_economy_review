@@ -118,15 +118,15 @@ def parse_search_manifest(body: str, batch_id: str) -> dict[str, str]:
     commit = manifest["repository_commit"]
     if (
         type(manifest["schema_version"]) is not int
-        or manifest["schema_version"] != 1
+        or manifest["schema_version"] != 2
         or manifest["batch_id"] != batch_id
         or not isinstance(commit, str)
         or not re.fullmatch(r"[0-9a-f]{40}", commit)
     ):
         raise IntakeImportError("Search and provenance log identity is invalid")
     sources = manifest["sources"]
-    if not isinstance(sources, list) or len(sources) != 2:
-        raise IntakeImportError("Search and provenance log must contain two sources")
+    if not isinstance(sources, list) or len(sources) != 1:
+        raise IntakeImportError("Search and provenance log must contain only Exa")
     query_sources: dict[str, str] = {}
     seen_sources: set[str] = set()
     for source_index, source in enumerate(sources):
@@ -134,26 +134,29 @@ def parse_search_manifest(body: str, batch_id: str) -> dict[str, str]:
         if not isinstance(source, dict) or set(source) != SEARCH_SOURCE_FIELDS:
             raise IntakeImportError(f"{label}: fields are invalid")
         source_name = source["source"]
-        if source_name not in {"Consensus", "Exa"} or source_name in seen_sources:
+        if source_name != "Exa" or source_name in seen_sources:
             raise IntakeImportError(f"{label}.source is invalid or duplicated")
         seen_sources.add(source_name)
         queries = source["queries"]
-        if not isinstance(queries, list) or not 1 <= len(queries) <= 100:
+        if not isinstance(queries, list) or not 7 <= len(queries) <= 100:
             raise IntakeImportError(f"{label}.queries is invalid")
-        prefix = "CONSENSUS" if source_name == "Consensus" else "EXA"
+        windows: set[str] = set()
         for query_index, query in enumerate(queries):
             query_label = f"{label}.queries[{query_index}]"
             if not isinstance(query, dict) or set(query) != SEARCH_QUERY_FIELDS:
                 raise IntakeImportError(f"{query_label}: fields are invalid")
             query_id = required(query["query_id"], f"{query_label}.query_id", 80)
             if (
-                not re.fullmatch(rf"{prefix}-[A-Z0-9][A-Z0-9._-]*", query_id)
+                not re.fullmatch(r"EXA-W[1-7]-Q[1-9][0-9]*", query_id)
                 or query_id in query_sources
             ):
                 raise IntakeImportError(f"{query_label}.query_id is invalid or duplicated")
             required(query["query_text"], f"{query_label}.query_text", 2000)
             query_sources[query_id] = source_name
-    if seen_sources != {"Consensus", "Exa"}:
+            windows.add(query_id.split("-")[1])
+        if windows != {f"W{i}" for i in range(1, 8)}:
+            raise IntakeImportError("Search and provenance log must cover Exa W1–W7")
+    if seen_sources != {"Exa"}:
         raise IntakeImportError("Search and provenance log source set is incomplete")
     return query_sources
 
@@ -169,7 +172,7 @@ def parse_manifest(body: str, query_sources: dict[str, str] | None = None) -> di
     batch_id = manifest["batch_id"]
     if (
         type(manifest["schema_version"]) is not int
-        or manifest["schema_version"] != 1
+        or manifest["schema_version"] != 2
         or not isinstance(batch_id, str)
     ):
         raise IntakeImportError("Candidate manifest version or batch is invalid")
@@ -238,14 +241,14 @@ def parse_manifest(body: str, query_sources: dict[str, str] | None = None) -> di
         if (
             not isinstance(sources, list)
             or not sources
-            or len(sources) > 2
+            or len(sources) != 1
         ):
             raise IntakeImportError(f"{label}.sources is invalid")
         validated_sources = [
             required(source, f"{label}.sources[]", 40) for source in sources
         ]
         if (
-            not set(validated_sources).issubset({"Consensus", "Exa"})
+            set(validated_sources) != {"Exa"}
             or len(validated_sources) != len(set(validated_sources))
         ):
             raise IntakeImportError(f"{label}.sources is invalid")

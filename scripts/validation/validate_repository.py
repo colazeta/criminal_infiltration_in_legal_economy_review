@@ -802,7 +802,7 @@ def check_governance_copy() -> None:
         "Tasso di nuovi candidati",
         "Completezza delle fonti",
         "non vengono trasformati in zero",
-        "Consensus ed Exa",
+        "esclusivamente Exa",
         "relativi totali sono `null`",
         "non entra nella regola di arresto",
         "ledger GitHub #30",
@@ -837,13 +837,13 @@ def check_governance_copy() -> None:
         (ROOT / "schema/surveillance-run.schema.json").read_text(encoding="utf-8")
     )
     source_enum = run_schema["properties"]["expected_sources"]["items"].get("enum")
-    if set(source_enum or []) != {"Consensus", "Exa"}:
+    if set(source_enum or []) != {"Exa"}:
         fail("Daily telemetry schema must enforce the governed active source set")
     metrics_builder = (ROOT / "scripts/metrics/surveillance.py").read_text(
         encoding="utf-8"
     )
     for phrase in (
-        'ACTIVE_SOURCES = frozenset({"Consensus", "Exa"})',
+        'ACTIVE_SOURCES = frozenset({"Exa"})',
         "summed(runs_subset",
     ):
         if phrase not in metrics_builder:

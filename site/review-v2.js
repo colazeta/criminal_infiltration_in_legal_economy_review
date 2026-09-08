@@ -17,7 +17,7 @@
       return payload;
     } finally { clearTimeout(timer); }
   }
-  const blockerLabels = { open_access_schema_not_applied: "Schema delle verifiche OA da applicare", review_protocol_mismatch: "Protocollo della review da allineare al perimetro OA", private_database_not_bound: "Database privato da collegare", private_evidence_store_not_bound: "Archivio privato delle evidenze da collegare", durable_queue_not_bound: "Coda durevole da collegare", consensus_runner_adapter_not_approved: "Adapter server Consensus da configurare e verificare", exa_budget_readiness_required: "Disponibilità e budget Exa da verificare", approved_daily_query_manifest_required: "Manifesto delle query giornaliere da confermare", review_not_activated: "Avvio V2 subordinato a snapshot, ripristino e collaudo delle fonti", schema_not_applied: "Schema del database da applicare" };
+  const blockerLabels = { open_access_schema_not_applied: "Schema delle verifiche OA da applicare", review_protocol_mismatch: "Protocollo della review da allineare al perimetro OA", private_database_not_bound: "Database privato da collegare", private_evidence_store_not_bound: "Archivio privato delle evidenze da collegare", durable_queue_not_bound: "Coda durevole da collegare", exa_budget_readiness_required: "Disponibilità e budget Exa da verificare", approved_daily_query_manifest_required: "Manifesto delle query giornaliere da confermare", review_not_activated: "Avvio V2 subordinato a snapshot, ripristino e collaudo delle fonti", schema_not_applied: "Schema del database da applicare" };
   function list() {
     const query = $("v2-filter").value.toLowerCase();
     $("v2-candidates").replaceChildren(...candidates.filter((c) => c.title.toLowerCase().includes(query)).map((c) => {
