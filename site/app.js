@@ -147,9 +147,9 @@ function render() {
   elements.count.textContent = `${records.length} publication${records.length === 1 ? "" : "s"} shown`;
   elements.empty.hidden = records.length !== 0;
   if (records.length === 0 && corpusIsEmpty) {
-    elements.emptyTitle.textContent = "No publications are currently public";
+    elements.emptyTitle.textContent = "Il corpus valutato è ancora vuoto";
     elements.emptyCopy.textContent =
-      "The archive has restarted from zero under the open-access policy. New works will appear after access verification and explicit scientific approval.";
+      "I lavori acquisiti sono visibili nel registro qui sopra. Entreranno in questa raccolta dopo la tua analisi e la verifica dell’accesso aperto.";
   } else if (records.length === 0) {
     elements.emptyTitle.textContent = "No publications match these filters";
     elements.emptyCopy.textContent =

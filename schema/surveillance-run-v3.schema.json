@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/schema/surveillance-run.schema.json",
+  "$id": "https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/schema/surveillance-run-v3.schema.json",
   "title": "Surveillance with automatic provisional registration",
   "description": "Aggregate, public-safe telemetry for one daily literature-surveillance batch. It contains no candidate metadata or scientific decisions.",
   "type": "object",

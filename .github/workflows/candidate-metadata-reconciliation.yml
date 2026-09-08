@@ -83,7 +83,7 @@ jobs:
         run: |
           if git diff --quiet -- \
             data/curation/review_queue.csv \
-            site/data/curator-stats.json \
+            site/data/curator-stats.json site/data/paper-register.json \
             site/data/curator-options.json; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
           else
@@ -101,7 +101,7 @@ jobs:
           git checkout -b "$branch"
           git add \
             data/curation/review_queue.csv \
-            site/data/curator-stats.json \
+            site/data/curator-stats.json site/data/paper-register.json \
             site/data/curator-options.json
           git commit -m "Verify candidate identifiers from dual-source retrieval"
           git push origin "$branch"

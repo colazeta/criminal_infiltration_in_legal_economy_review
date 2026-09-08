@@ -217,3 +217,7 @@ requirement to wait until the next calendar day and the Zenodo-only acquisition
 restriction. Daily IDs, schedules, historic records and scientific approval gates
 remain unchanged. Public statistics v3 shows extraordinary executions separately;
 they never fill scheduled-day gaps. Read that policy before a manual run.
+
+## Superseding operational registration instruction — 2026-09-08
+
+The owner requires papers to enter the visible operational register before individual analysis and labelling. New intake uses run/manifest v3 and may record access as unknown. The mandatory verified-OA rule above applies to historical v2 intake and to admission into the assessed OA corpus, not to provisional registration. See [paper-register.md](paper-register.md). No scientific approval is implied.

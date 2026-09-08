@@ -126,3 +126,7 @@ The ledger gate also rereads the authenticated live issue and requires its body,
 title and creation timestamp to equal the queued event before producing import
 context. Distinct candidate manifests cannot substitute for one another merely
 because aggregate counts agree. Both live and event content must validate.
+
+## Superseding operational registration instruction — 2026-09-08
+
+The owner requires papers to enter the visible operational register before individual analysis and labelling. New intake uses run/manifest v3 and may record access as unknown. The mandatory verified-OA rule above applies to historical v2 intake and to admission into the assessed OA corpus, not to provisional registration. See [paper-register.md](paper-register.md). No scientific approval is implied.

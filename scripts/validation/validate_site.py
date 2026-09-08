@@ -349,8 +349,8 @@ def validate_assets() -> None:
     if "replaceChildren" not in javascript or "textContent" not in javascript:
         fail("Site must render untrusted metadata through DOM text nodes")
     for required in (
-        "No publications are currently public",
-        "restarted from zero under the open-access policy",
+        "Il corpus valutato è ancora vuoto",
+        "I lavori acquisiti sono visibili nel registro qui sopra",
         "No publications match these filters",
     ):
         if required not in javascript:
@@ -478,7 +478,7 @@ def validate_assets() -> None:
     if re.search(r"\.innerHTML\s*=|insertAdjacentHTML", stats_javascript):
         fail("stats.js must not inject ledger data as HTML")
     for required in (
-        'fetch("./data/research-stats.json")',
+        'fetch("./data/research-stats.json", { cache: "no-store" })',
         "replaceChildren",
         "textContent",
         "completed.length < 8",
@@ -496,6 +496,10 @@ def main() -> None:
     metric_days = validate_statistics()
     curator_stats = validate_curator_statistics()
     curator_options = validate_curator_options()
+    from scripts.curation.build_paper_register import build_payload as build_register
+    actual_register = json.loads((SITE / "data/paper-register.json").read_text())
+    if actual_register != build_register(ROOT):
+        fail("Public paper register is stale or exposes unexpected fields")
     validate_assets()
     print(
         "[OK] Static site validation passed: "

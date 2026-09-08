@@ -410,7 +410,7 @@ def check_surveillance_source_policy(profile: dict[str, Any]) -> None:
     contract = module["surveillance_contract"]
     if module["profile_version"] != profile["version"] or contract["source_class"] not in profile["classes"] or contract["source_slot"] not in profile["slots"]:
         fail("unmapped_surveillance_source_policy")
-    if contract["protocol_version"] != "CILE-DAILY-v3" or contract["schema_version"] != 2:
+    if contract["protocol_version"] != "CILE-DAILY-v4" or contract["schema_version"] != 3:
         fail("invalid_surveillance_source_policy_version")
     sys.path.insert(0, str(ROOT))
     from scripts.metrics.extra_runs import FIELDS as EXTRA_FIELDS
@@ -422,7 +422,8 @@ def check_surveillance_source_policy(profile: dict[str, Any]) -> None:
         fail("extra_execution_public_schema_drift")
     current = load_json(ROOT / contract["schema"])
     legacy = load_json(ROOT / contract["legacy_schema"])
-    for schema, version, names in ((current, 2, ["Exa"]), (legacy, 1, ["Consensus", "Exa"])):
+    retained_v2 = load_json(ROOT / contract["retained_v2_schema"])
+    for schema, version, names in ((current, 3, ["Exa"]), (retained_v2, 2, ["Exa"]), (legacy, 1, ["Consensus", "Exa"])):
         properties = schema["properties"]
         if properties["schema_version"]["const"] != version or properties["expected_sources"]["items"]["enum"] != names:
             fail("surveillance_schema_source_drift")
@@ -462,6 +463,17 @@ def validate_all(*, quiet: bool = False) -> dict[str, int | str]:
     check_private_v2_contract(profile)
     check_surveillance_source_policy(profile)
     check_intake_access_contract(profile)
+    registration = load_json(ROOT / "ontology/modules/paper-register.json")
+    from scripts.curation.build_paper_register import FIELDS as REGISTER_FIELDS
+    if (registration["profile_version"] != profile["version"] or registration["class"] != "CandidateRecord"
+            or set(registration["public_fields"]) != REGISTER_FIELDS
+            or set(registration["public_fields"].values()) - set(profile["slots"])
+            or registration["pending_access_value"] not in profile["enums"]["OpenAccessVerificationEnum"]["permissible_values"]):
+        fail("unmapped_paper_register")
+    registration_schema = load_json(ROOT / registration["run_schema"])
+    if registration_schema["properties"]["schema_version"]["const"] != 3 or registration_schema["properties"]["expected_sources"]["items"]["enum"] != ["Exa"]:
+        fail("invalid_registration_surveillance_schema")
+
     cycle_contract = load_json(ROOT / "ontology/modules/archive-cycle.json")
     cycle = load_json(ROOT / cycle_contract["artifact"])
     if cycle_contract["profile_version"] != profile["version"] or cycle_contract["class"] not in profile["classes"]:

@@ -328,7 +328,7 @@ function renderExtraRuns(rows = []) {
   }
 }
 
-fetch("./data/research-stats.json")
+fetch("./data/research-stats.json", { cache: "no-store" })
   .then((response) => {
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     return response.json();

@@ -44,7 +44,7 @@ def active_runs(runs):
     boundary = datetime.fromisoformat(CYCLE["reset_at"].replace("Z", "+00:00"))
     active = [r for r in runs if not is_extra(r["batch_id"]) and r["run_date"] >= CYCLE["daily_start_date"]
             and datetime.fromisoformat(r["window_start"].replace("Z", "+00:00")) >= boundary]
-    if any(r.get("schema_version") != RUN_SCHEMA_VERSION for r in active):
+    if any(r.get("schema_version") not in (2, 3) for r in active):
         raise MetricsError("Active cycle requires the Exa-only v2 run contract")
     return active
 
@@ -70,6 +70,9 @@ def main() -> None:
     args.output.write_text(
         json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
+    if args.as_of and args.output.resolve() == DEFAULT_OUTPUT.resolve():
+        from render_statistics_html import render_statistics_page
+        render_statistics_page(ROOT / "site/stats.html", payload)
     measured_candidates = payload["summary"]["allTime"]["newCandidates"]
     candidate_message = (
         f"{measured_candidates} intake candidate(s)."
