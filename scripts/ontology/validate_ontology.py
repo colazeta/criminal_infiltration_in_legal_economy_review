@@ -103,7 +103,7 @@ def enum_values(profile: dict[str, Any], enum_name: str) -> set[str]:
 
 
 def check_profile(profile: dict[str, Any], external: dict[str, Any]) -> None:
-    if profile.get("version") != "0.2.0":
+    if profile.get("version") != "0.3.0":
         fail(f"unexpected_profile_version:{profile.get('version')}")
     prefixes = profile.get("prefixes")
     classes = profile.get("classes")
@@ -267,7 +267,7 @@ def check_serialisations(profile: dict[str, Any]) -> None:
     if source != PUBLIC_TTL_PATH.read_text(encoding="utf-8"):
         fail("public_ontology_turtle_drift")
     for marker in (
-        'owl:versionInfo "0.2.0"', "cile:ScholarlyWork a owl:Class",
+        'owl:versionInfo "0.3.0"', "cile:ScholarlyWork a owl:Class",
         "cile:Manifestation a owl:Class", "cile:ScreeningDecision a owl:Class",
         "cile:AccessAssessment a owl:Class", "skos:relatedMatch fabio:Work",
         "skos:relatedMatch ripe:Answer",
@@ -378,7 +378,8 @@ def check_private_v2_contract(profile: dict[str, Any]) -> None:
     if module["profile_version"] != profile["version"]:
         fail("v2_profile_version_mismatch")
     connection = sqlite3.connect(":memory:")
-    connection.executescript((ROOT / module["migration"]).read_text())
+    for migration in module["migrations"]:
+        connection.executescript((ROOT / migration).read_text())
     tables = {row[0] for row in connection.execute("SELECT name FROM sqlite_master WHERE type='table'")}
     if tables != set(module["tables"]):
         fail("unmapped_private_v2_table")

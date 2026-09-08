@@ -1,5 +1,5 @@
 {
-  "version": "0.2.0",
+  "version": "0.3.0",
   "entities": [
     {
       "table": "reviews",
@@ -2426,6 +2426,128 @@
       "appendOnly": true,
       "constraints": [
         "Vincoli di dominio e integrità definiti dallo schema SQL versionato."
+      ]
+    },
+    {
+      "table": "access_assessments_v2",
+      "label": "Verifiche open access",
+      "class": "AccessAssessment",
+      "description": "Append-only, attributed lawful full-text access verification. OA admission is independent of four-part screening and publication approval.",
+      "group": "review",
+      "fields": [
+        {
+          "name": "assessment_id",
+          "description": "Identificatore immutabile della verifica di accesso, distinto dal giudizio scientifico.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:assessmentId"
+        },
+        {
+          "name": "review_id",
+          "description": "Namespace della review; impedisce di ereditare decisioni da un altro corpus.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:reviewId"
+        },
+        {
+          "name": "candidate_id",
+          "description": "Record candidato in questa review, senza eleggibilità implicita.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:candidateId"
+        },
+        {
+          "name": "evidence_id",
+          "description": "Private acquired source with identity, kind, rights and content hash. Field: evidence id.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "cile:evidenceId"
+        },
+        {
+          "name": "full_text_url",
+          "description": "Indirizzo della copia integrale verificata senza autenticazione.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "cile:fullTextUrl"
+        },
+        {
+          "name": "version_type",
+          "description": "Stato editoriale della versione; non determina l’eleggibilità scientifica.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "cile:versionType"
+        },
+        {
+          "name": "host_type",
+          "description": "Editore o repository responsabile della copia aperta.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "cile:hostType"
+        },
+        {
+          "name": "license_uri",
+          "description": "Licenza dichiarata per questa copia, senza dedurla dalla sola accessibilità.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "dcterms:license"
+        },
+        {
+          "name": "rights_basis",
+          "description": "Base documentata per conservare e usare il materiale.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "dcterms:rights"
+        },
+        {
+          "name": "rights_evidence_url",
+          "description": "Fonte editoriale o istituzionale che documenta licenza o deposito autorizzato.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "cile:rightsEvidenceUrl"
+        },
+        {
+          "name": "access_status",
+          "description": "Accesso aperto verificato, limitato o ignoto.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:accessStatus"
+        },
+        {
+          "name": "verification_method",
+          "description": "Verifica attestata dell’accesso anonimo al testo integrale, oppure osservazione senza ammissione.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:verificationMethod"
+        },
+        {
+          "name": "verified_at",
+          "description": "Data e ora della verifica: accessibilità osservata, non garanzia perpetua.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:verifiedAt"
+        },
+        {
+          "name": "attributed_to",
+          "description": "Agente responsabile dell’asserzione o dell’attività.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "prov:wasAttributedTo"
+        },
+        {
+          "name": "supersedes_id",
+          "description": "Registrazione precedente sostituita da questa, conservata nello storico.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "prov:wasRevisionOf"
+        }
+      ],
+      "appendOnly": true,
+      "constraints": [
+        "review_id → evidence_sources.review_id",
+        "evidence_id → evidence_sources.evidence_id",
+        "review_id → review_candidates.review_id",
+        "candidate_id → review_candidates.candidate_id",
+        "supersedes_id → access_assessments_v2.assessment_id"
       ]
     }
   ]

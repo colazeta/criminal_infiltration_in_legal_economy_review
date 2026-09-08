@@ -189,3 +189,7 @@ Once a curator has made an explicit decision, the
 registry edits, run the full checks and prepare a pull request. This is a
 separate automation from literature discovery: it does not search, infer a
 decision or merge its own registry change.
+
+## Open-access mapping
+
+The owner-approved OA-1 access scope is specified in [open-access.md](../methodology/open-access.md). Both public collections require a current verified lawful full-text assessment. V2 records access history separately from scientific screening.

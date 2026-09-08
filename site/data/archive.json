@@ -1,12 +1,12 @@
 {
-  "schemaVersion": 2,
+  "schemaVersion": 3,
   "archiveVersion": "0.2.0",
   "protocolVersion": "1.1",
   "releaseDate": "2026-08-30",
   "searchCoverageThrough": "2026-04-29",
   "sourceSnapshot": "2026-08-30",
   "methodology": {
-    "includedDefinition": "Records pass the canonical, discovery, current eligibility and explicit publication-manifest gates.",
+    "includedDefinition": "Records pass the canonical, discovery, current eligibility and explicit publication-manifest gates, plus verified lawful open-access full text. Coverage is limited to open-access scholarship; access is separate from scientific eligibility.",
     "editorialDefinition": "Aggregate editorial counts are published separately; candidate metadata and reviewer notes are not included in the archive export.",
     "rejectedRecordsOmitted": 19
   },

@@ -1,7 +1,6 @@
 {
-  "profile_version": "0.2.0",
+  "profile_version": "0.3.0",
   "storage": "private D1; bodies in private R2",
-  "migration": "curator-app/migrations/0001_review_v2.sql",
   "tables": {
     "reviews": {
       "class": "SystematicReview",
@@ -1604,6 +1603,87 @@
           "sql_type": "TEXT"
         }
       }
+    },
+    "access_assessments_v2": {
+      "class": "AccessAssessment",
+      "description": "Append-only, attributed lawful full-text access verification. OA admission is independent of four-part screening and publication approval.",
+      "fields": {
+        "assessment_id": {
+          "slot": "oa_assessment_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "review_id": {
+          "slot": "v2_review_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "candidate_id": {
+          "slot": "v2_candidate_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "evidence_id": {
+          "slot": "v2_evidence_id",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "full_text_url": {
+          "slot": "oa_full_text_url",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "version_type": {
+          "slot": "v2_version_type",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "host_type": {
+          "slot": "oa_host_type",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "license_uri": {
+          "slot": "v2_license_uri",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "rights_basis": {
+          "slot": "v2_rights_basis",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "rights_evidence_url": {
+          "slot": "oa_rights_evidence_url",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "access_status": {
+          "slot": "oa_access_status",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "verification_method": {
+          "slot": "oa_verification_method",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "verified_at": {
+          "slot": "oa_verified_at",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "attributed_to": {
+          "slot": "v2_attributed_to",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "supersedes_id": {
+          "slot": "v2_supersedes_id",
+          "nullable": true,
+          "sql_type": "TEXT"
+        }
+      }
     }
   },
   "states": {
@@ -1801,7 +1881,10 @@
     "Topics and infiltration relations are multi-label; infiltration relations are not ordinal.",
     "Unknown search counts are null; completed zero-result queries are measured zeros.",
     "Run attempts are immutable after leaving running; an expired third attempt resolves its day to completed, partial or failed from preserved checkpoints, never an indefinite running state.",
-    "Activation requires an existing immutable snapshot receipt with complete external state and a verified restore."
+    "Activation requires an existing immutable snapshot receipt with complete external state and a verified restore.",
+    "Open access requires a lawful anonymous full-text observation, a verified source identity, an accepted or record version, rights provenance and a retained private text hash.",
+    "An access observation never supplies scientific eligibility. Revocation supersedes access evidence without rewriting screening history.",
+    "Eligible proposals and approval imports bind the exact current OA assessment; publication insertion also requires current OA."
   ],
   "append_only_tables": [
     "metadata_assertions",
@@ -1821,7 +1904,8 @@
     "query_executions",
     "discovery_occurrences",
     "operational_events",
-    "legacy_snapshots"
+    "legacy_snapshots",
+    "access_assessments_v2"
   ],
   "infrastructure_tables": {
     "cile_schema_versions": {
@@ -1831,6 +1915,17 @@
         "sha256": "cile:contentSha256"
       },
       "purpose": "Technical receipt for a verified applied SQL migration; not a review instance."
+    }
+  },
+  "migrations": [
+    "curator-app/migrations/0001_review_v2.sql",
+    "curator-app/migrations/0002_open_access.sql"
+  ],
+  "views": {
+    "v2_open_access_candidates": {
+      "class": "AccessAssessment",
+      "source_table": "access_assessments_v2",
+      "purpose": "Current unsuperseded verified OA assessments joined to the same candidate’s verified full-text evidence; no scientific eligibility inference."
     }
   }
 }

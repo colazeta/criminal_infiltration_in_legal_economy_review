@@ -384,7 +384,7 @@ export default {
   async queue(batch, env) { return consumeDays(batch, env); },
   async fetch(request, env) {
     const url = new URL(request.url);
-    if (url.pathname === "/version" && request.method === "GET") return Response.json({ commit: env.DEPLOY_COMMIT || null, ontology: "0.2.0" }, { headers: { "Cache-Control": "no-store" } });
+    if (url.pathname === "/version" && request.method === "GET") return Response.json({ commit: env.DEPLOY_COMMIT || null, ontology: "0.3.0" }, { headers: { "Cache-Control": "no-store" } });
     if (url.pathname.startsWith("/api/v2/")) {
       try { return await handleV2(request, env, await authenticateCuratorRequest(request, env)); }
       catch (error) { return Response.json({ error: { code: error.code || "authentication_required" } }, { status: error.status || 401, headers: { "Cache-Control": "no-store" } }); }

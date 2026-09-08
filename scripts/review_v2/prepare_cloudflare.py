@@ -85,6 +85,19 @@ def prepare(output):
         # D1 executes multi-statement requests as a batch. No scientific data INSERT is present.
         migration = sql.replace("PRAGMA foreign_keys = ON;", "") + "\nCREATE TABLE cile_schema_versions(version TEXT PRIMARY KEY,sha256 TEXT NOT NULL);\nINSERT INTO cile_schema_versions VALUES ('0001','" + digest + "');"
         api(query, method="POST", payload={"sql": migration})
+    for path in sorted((ROOT / "curator-app/migrations").glob("*.sql")):
+        version = path.name.split("_", 1)[0]
+        if version == "0001":
+            continue
+        sql = path.read_text()
+        digest = hashlib.sha256(sql.encode()).hexdigest()
+        recorded = api(query, method="POST", payload={"sql": "SELECT sha256 FROM cile_schema_versions WHERE version=?", "params": [version]})[0]["results"]
+        if recorded:
+            if recorded != [{"sha256": digest}]:
+                raise RuntimeError("Applied additive migration differs; manual inspection required")
+        else:
+            migration = sql + "\nINSERT INTO cile_schema_versions VALUES ('" + version + "','" + digest + "');"
+            api(query, method="POST", payload={"sql": migration})
     buckets = api("r2/buckets")
     if not any(b["name"] == NAME for b in buckets.get("buckets", [])):
         api("r2/buckets", method="POST", payload={"name": NAME})

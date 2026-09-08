@@ -6,7 +6,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 LABELS = {
-    "reviews": "Review e protocollo", "scholarly_works": "Opera scientifica", "agents": "Autori e organizzazioni",
+    "access_assessments_v2": "Verifiche open access", "reviews": "Review e protocollo", "scholarly_works": "Opera scientifica", "agents": "Autori e organizzazioni",
     "publication_venues": "Rivista, volume e collana", "expressions": "Versione della pubblicazione", "contributions": "Autori, ruoli e affiliazioni",
     "document_sections": "Sezioni del paper", "publication_declarations": "Dichiarazioni della pubblicazione", "manifestations": "Copie digitali e accesso",
     "bibliographic_identifiers": "DOI e altri identificatori", "metadata_assertions": "Metadati e fonti discordanti", "citation_relations": "Citazioni bibliografiche",
@@ -87,7 +87,7 @@ DESCRIPTIONS = {
 def build():
     profile = json.loads((ROOT / "ontology/cile-review-profile.yaml").read_text())
     module = json.loads((ROOT / "ontology/modules/review-v2.json").read_text())
-    sql = (ROOT / module["migration"]).read_text()
+    sql = "\n".join((ROOT / path).read_text() for path in module["migrations"])
     connection = sqlite3.connect(":memory:"); connection.executescript(sql)
     entities = []
     for table, contract in module["tables"].items():

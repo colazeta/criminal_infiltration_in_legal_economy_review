@@ -2,7 +2,7 @@
   "schema_version": 1,
   "profile": "CILE Web Capability Registry",
   "profile_version": "0.1.1",
-  "extends_ontology_profile": "0.2.0",
+  "extends_ontology_profile": "0.3.0",
   "verified_at": "2026-09-03",
   "policy": {
     "goal": "Resolve web-retrieval needs by the lowest-cost sufficient capability while making automatic monetary spend impossible by default.",

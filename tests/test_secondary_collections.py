@@ -90,6 +90,8 @@ class SecondaryCollectionGateTests(unittest.TestCase):
             }
         ]
 
+        self.access = [{"assessment_id": "OA-TEST", "paper_id": "P000100", "full_text_url": "https://example.org/full.pdf", "version_type": "accepted", "host_type": "repository", "license_uri": "", "rights_basis": "Synthetic authorised manuscript", "rights_evidence_url": "https://example.org/rights", "access_status": "verified_open", "verification_method": "anonymous_full_text_verified", "full_text_sha256": "a" * 64, "verified_at": "2026-09-08T00:00:00Z", "supersedes_id": ""}]
+
     def records(self):
         return build_records(
             copy.deepcopy(self.papers),
@@ -100,6 +102,7 @@ class SecondaryCollectionGateTests(unittest.TestCase):
             copy.deepcopy(self.collections),
             copy.deepcopy(self.secondary_publications),
             copy.deepcopy(self.reasons),
+            copy.deepcopy(self.access),
         )
 
     def test_published_secondary_record_preserves_negative_core_decision(self) -> None:
@@ -108,6 +111,11 @@ class SecondaryCollectionGateTests(unittest.TestCase):
         self.assertEqual("outside_core_review", records[0]["status"])
         self.assertEqual("not_eligible", records[0]["screeningDecision"])
         self.assertEqual("broader_aml", records[0]["collectionCode"])
+
+    def test_secondary_collection_also_requires_verified_open_full_text(self):
+        self.access = []
+        with self.assertRaisesRegex(SecondaryCollectionBuildError, "open-access full text required"):
+            self.records()
 
     def test_routing_without_secondary_publication_approval_stays_hidden(self) -> None:
         self.secondary_publications[0]["publication_status"] = "withheld"

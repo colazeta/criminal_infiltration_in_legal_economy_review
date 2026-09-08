@@ -13,7 +13,7 @@ def parse(body):
     payload = json.loads(match[2])
     if set(payload) != {"proposal_id", "payload_sha256", "protocol_version", "action"}:
         raise ValueError("public manifest must contain hashes and identifiers only")
-    if payload["proposal_id"] != match[1] or payload["action"] != "approve_screening" or payload["protocol_version"] != "CILE-4PT-v2":
+    if payload["proposal_id"] != match[1] or payload["action"] != "approve_screening" or payload["protocol_version"] != "CILE-4PT-OA-v3":
         raise ValueError("approval manifest mismatch")
     if not re.fullmatch(r"[a-f0-9]{64}", payload["payload_sha256"]):
         raise ValueError("invalid proposal hash")

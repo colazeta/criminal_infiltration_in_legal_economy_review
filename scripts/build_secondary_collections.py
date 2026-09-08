@@ -10,6 +10,11 @@ Candidate and curator-working files are never read.
 
 from __future__ import annotations
 
+try:
+    from .open_access import current_receipts, public_access
+except ImportError:
+    from open_access import current_receipts, public_access
+
 import argparse
 import csv
 import json
@@ -18,7 +23,10 @@ from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Any, Iterable
 
-from build_archive import clean_doi, normalise_title, source_snapshot, year_value
+try:
+    from .build_archive import clean_doi, normalise_title, source_snapshot, year_value
+except ImportError:
+    from build_archive import clean_doi, normalise_title, source_snapshot, year_value
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -44,6 +52,7 @@ SECONDARY_RECORD_FIELDS = (
     "language",
     "doi",
     "links",
+    "openAccess",
     "exclusionReasonCode",
     "exclusionReasonLabel",
     "reason",
@@ -215,7 +224,12 @@ def build_records(
     collections: list[dict[str, str]],
     secondary_publications: list[dict[str, str]],
     exclusion_reasons: list[dict[str, str]],
+    access_assessments: list[dict[str, str]] | None = None,
 ) -> list[dict[str, Any]]:
+    try:
+        access_by_work = current_receipts(access_assessments)
+    except ValueError as exc:
+        raise SecondaryCollectionBuildError(str(exc)) from exc
     papers_by_id = {(row.get("paper_id") or "").strip(): row for row in papers}
     if len(papers_by_id) != len(papers):
         raise SecondaryCollectionBuildError("Duplicate canonical paper_id")
@@ -289,6 +303,10 @@ def build_records(
         doi = primary_doi.get(paper_id, "")
         if paper and clean_doi(paper.get("doi", "")) != doi:
             problems.append("papers.csv DOI and verified primary DOI disagree")
+        try:
+            access = public_access(access_by_work.get(paper_id))
+        except ValueError as exc:
+            problems.append(str(exc))
         if problems:
             raise SecondaryCollectionBuildError(
                 f"{paper_id}/{collection_code}: " + "; ".join(problems)
@@ -319,6 +337,7 @@ def build_records(
             "language": (paper.get("language") or "").strip(),
             "doi": doi,
             "links": links,
+            "openAccess": access,
             "exclusionReasonCode": reason_code,
             "exclusionReasonLabel": reason_labels[reason_code],
             "reason": (publication.get("public_relevance_reason") or "").strip(),
@@ -378,6 +397,7 @@ def build_payload(root: Path = ROOT) -> dict[str, Any]:
         collections,
         secondary_publications,
         exclusion_reasons,
+        registry_rows(root, "open_access_assessments.csv"),
     )
     counts = Counter(record["collectionCode"] for record in records)
     counts_by_collection = {
@@ -395,7 +415,7 @@ def build_payload(root: Path = ROOT) -> dict[str, Any]:
         for row in sorted(collections, key=lambda item: item["collection_code"])
     ]
     return {
-        "schemaVersion": 1,
+        "schemaVersion": 2,
         "archiveVersion": version["version"],
         "releaseDate": version["release_date"],
         "searchCoverageThrough": version["search_coverage_through"],
@@ -443,6 +463,7 @@ def write_outputs(payload: dict[str, Any], output_dir: Path) -> None:
         writer.writeheader()
         for record in payload["records"]:
             safe = dict(record)
+            safe["openAccess"] = json.dumps(record["openAccess"], ensure_ascii=False, sort_keys=True)
             for field in csv_fields:
                 value = safe.get(field)
                 if isinstance(value, str) and value.startswith(("=", "+", "-", "@")):
