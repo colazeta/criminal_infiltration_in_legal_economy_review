@@ -41,7 +41,8 @@ New search/intake timestamps must reflect real new execution.
 ## Public and private fields
 
 Public register: candidate ID, observed title/authors/year/venue/DOI, source links,
-metadata status, review status, intake access status and registration date.
+metadata status, review status, intake access status, registration date and any
+topic code subsequently assigned by the curator.
 The public DOI is observed metadata, not automatically independently verified.
 No copied abstracts, reviewer names, internal notes, evidence quotations or
 inferred topical labels are exported. The existing curator reads the same queue.

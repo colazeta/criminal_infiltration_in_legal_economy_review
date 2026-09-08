@@ -15,7 +15,8 @@
     "metadataStatus": "v2_verification_status",
     "reviewStatus": "candidate_status",
     "accessStatus": "oa_access_status",
-    "registeredAt": "generated_at_time"
+    "registeredAt": "generated_at_time",
+    "topicCode": "topic_code"
   },
   "run_schema": "schema/surveillance-run-v3.schema.json",
   "run_version": 3,

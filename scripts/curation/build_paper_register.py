@@ -8,7 +8,7 @@ from pathlib import Path
 from urllib.parse import urlsplit
 
 FIELDS = {'id', 'title', 'authors', 'year', 'venue', 'doi', 'sourceLinks',
-          'metadataStatus', 'reviewStatus', 'accessStatus', 'registeredAt'}
+          'metadataStatus', 'reviewStatus', 'accessStatus', 'registeredAt', 'topicCode'}
 
 def build_payload(root):
     root=Path(root)
@@ -24,7 +24,7 @@ def build_payload(root):
         records.append(dict(id=row['candidate_id'],title=row['title'],authors=row['authors'],
             year=int(row['year']) if row['year'] else None,venue=row['venue'],doi=row['doi'],
             sourceLinks=links,metadataStatus=row['verification_status'],reviewStatus=row['current_status'],
-            accessStatus='unknown',registeredAt=row['materialised_at']))
+            accessStatus='unknown',registeredAt=row['materialised_at'],topicCode=row['topic_code']))
     # Access assertions retain their specific meaning: discovery alone never verifies OA.
     by_id={r['id']:r for r in records}
     for path in sorted((root/'data/curation/intake_access').glob('*.json')):
@@ -45,6 +45,7 @@ def render_page(path,payload):
     for r in payload['records']:
         citation=escape(r['title'])+'<p>'+escape(' · '.join(str(v) for v in (r['authors'],r['year'],r['venue']) if v))+'</p>'
         review='Da analizzare' if r['reviewStatus']=='pending' else r['reviewStatus']
+        if r.get('topicCode'): review += ' · '+r['topicCode']
         access='OA verificato all’acquisizione' if r['accessStatus']=='verified_open' else 'Accesso da verificare'
         links=' · '.join('<a rel="noreferrer" href="'+escape(url,quote=True)+'">Fonte '+str(i+1)+'</a>' for i,url in enumerate(r['sourceLinks']))
         rows.append('<tr><td>'+citation+'</td><td>'+escape(review)+'</td><td>'+escape(access)+'</td><td>'+links+' · <a href="./curate.html">Analizza nel curatore</a></td></tr>')

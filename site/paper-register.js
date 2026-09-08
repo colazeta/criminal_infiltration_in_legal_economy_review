@@ -14,6 +14,7 @@
       const tr=document.createElement('tr');
       const citation=document.createElement('td');citation.append(el('strong',r.title),el('p',[r.authors,r.year,r.venue].filter(Boolean).join(' · ')||'Metadati da completare'));
       const status=el('td',labels[r.reviewStatus]||'Da verificare');
+      if(r.topicCode) status.append(el('p',`Etichetta: ${r.topicCode}`));
       status.append(el('p',r.metadataStatus==='metadata_verified'?'Metadati verificati':'Metadati da verificare'));
       const access=el('td',r.accessStatus==='verified_open'?'OA verificato all’acquisizione':'Accesso da verificare');
       const links=document.createElement('td');
