@@ -1,7 +1,7 @@
 {
   "profile_version": "0.3.0",
   "schema": "schema/intake-open-access.schema.json",
-  "artifact_pattern": "data/curation/intake_access/ACADEMIC-YYYY-MM-DD.json",
+  "artifact_pattern": "data/curation/intake_access/<batch_id>.json (scheduled or extraordinary)",
   "classes": [
     "AccessAssessment",
     "CandidateRecord",
@@ -52,5 +52,6 @@
     }
   },
   "authority": "OA-1 intake requirement; technical enforcement after the owner-requested audit.",
-  "semantics": "Attributed discovery attestations, preserved with candidate provenance; never curator OA approval, canonical work creation or scientific eligibility. The JSON envelope is not an RDF entity property map: receipts is structural containment of individually mapped AccessAssessment records; each record derives from the single source issue URI. Integer schema version is rendered as a decimal string, and source issue number expands to the repository issue URI."
+  "semantics": "Attributed discovery attestations, preserved with candidate provenance; never curator OA approval, canonical work creation or scientific eligibility. The JSON envelope is not an RDF entity property map: receipts is structural containment of individually mapped AccessAssessment records; each record derives from the single source issue URI. Integer schema version is rendered as a decimal string, and source issue number expands to the repository issue URI.",
+  "acquisition_policy": "config/oa-acquisition.json"
 }

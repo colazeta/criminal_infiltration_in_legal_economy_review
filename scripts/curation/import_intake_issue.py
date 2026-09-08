@@ -24,6 +24,7 @@ from urllib.parse import urlsplit
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
+from scripts.surveillance_identity import BATCH_PATTERN, batch_day, candidate_keys
 from scripts.intake_open_access import validate_intake_access, validate_cycle
 CANDIDATE_FIELDS = {
     "open_access",
@@ -184,10 +185,10 @@ def parse_manifest(body: str, query_sources: dict[str, str] | None = None) -> di
         or not isinstance(batch_id, str)
     ):
         raise IntakeImportError("Candidate manifest version or batch is invalid")
-    if not re.fullmatch(r"ACADEMIC-\d{4}-\d{2}-\d{2}", batch_id):
+    if not re.fullmatch(BATCH_PATTERN, batch_id):
         raise IntakeImportError("Candidate manifest batch ID is invalid")
     try:
-        date.fromisoformat(batch_id.removeprefix("ACADEMIC-"))
+        batch_day(batch_id)
     except ValueError as exc:
         raise IntakeImportError("Candidate manifest batch date is invalid") from exc
     candidates = manifest["candidates"]
@@ -281,7 +282,7 @@ def parse_manifest(body: str, query_sources: dict[str, str] | None = None) -> di
             } != set(validated_sources):
                 raise IntakeImportError(f"{label}.query_ids disagrees with sources")
         try:
-            validate_intake_access(candidate["open_access"], candidate, date.fromisoformat(batch_id.removeprefix("ACADEMIC-")))
+            validate_intake_access(candidate["open_access"], candidate, batch_day(batch_id))
         except ValueError as exc:
             raise IntakeImportError(f"{label}: {exc}") from exc
         if candidate["verification_status"] not in VERIFICATION:
@@ -302,7 +303,7 @@ def parse_manifest(body: str, query_sources: dict[str, str] | None = None) -> di
 
 def parse_intake_issue(body: str, title: str) -> dict[str, object]:
     batch_id = issue_form_value(body, "Batch ID")
-    if not re.fullmatch(r"ACADEMIC-\d{4}-\d{2}-\d{2}", batch_id):
+    if not re.fullmatch(BATCH_PATTERN, batch_id):
         raise IntakeImportError("Batch ID section is invalid")
     if title.strip() != f"[INTAKE][ACADEMIC] {batch_id}":
         raise IntakeImportError("Issue title disagrees with the batch ID")
@@ -353,11 +354,11 @@ def import_candidates(
         if int(issue_number) <= cycle["legacy_issue_ceiling"]:
             raise IntakeImportError("This intake belongs to the retired archive")
     manifest = parse_intake_issue(body, issue_title)
-    batch_date = date.fromisoformat(str(manifest["batch_id"]).removeprefix("ACADEMIC-"))
+    batch_date = batch_day(manifest["batch_id"])
     try:
         created_at = datetime.fromisoformat(issue_created_at.replace("Z", "+00:00")) if issue_created_at else None
         if cycle_path.exists():
-            validate_cycle(batch_date, issue_number, created_at, cycle)
+            validate_cycle(batch_date, issue_number, created_at, cycle, batch_id=manifest["batch_id"])
             if run is None:
                 raise ValueError("validated completed ledger run required before queue import")
         if run is not None:
@@ -416,8 +417,35 @@ def import_candidates(
             "Candidate(s) already materialised: " + ", ".join(overlap)
         )
     batch_marker = f"batch:{manifest['batch_id']}"
-    if any(batch_marker in row.get("provenance", "") for row in queue):
+    if any(batch_marker in row.get("provenance", "").split(";") for row in queue):
         raise IntakeImportError(f"Intake batch {manifest['batch_id']} is already staged")
+    known_keys = set()
+    for row in queue:
+        known_keys.update(candidate_keys({**row, "identifiers": {"doi": row.get("doi"), "other": [x.strip() for x in row.get("other_identifiers", "").split(";") if x.strip()]}}))
+    known_dois = {normalise_doi(row.get("doi")) for row in queue if row.get("doi")}
+    for name in ("papers.csv", "work_identifiers.csv"):
+        registry = root / "data/registry" / name
+        if registry.exists():
+            with registry.open(newline="", encoding="utf-8-sig") as handle:
+                for row in csv.DictReader(handle):
+                    if name == "papers.csv":
+                        known_keys.update(candidate_keys(row))
+                        value = row.get("doi")
+                    else:
+                        scheme, identifier = row.get("scheme", "").strip(), row.get("value", "").strip()
+                        value = identifier if scheme == "doi" else ""
+                        if identifier:
+                            known_keys.update(candidate_keys({"identifiers": {"other": [identifier, f"{scheme}:{identifier}"]}}))
+                    if value:
+                        known_dois.add(normalise_doi(value))
+    incoming_dois = [normalise_doi(c["identifiers"]["doi"]) for c in candidates if c["identifiers"]["doi"]]
+    if known_dois.intersection(incoming_dois) or len(incoming_dois) != len(set(incoming_dois)):
+        raise IntakeImportError("Duplicate DOI requires reconciliation before intake; queue unchanged")
+    for candidate in candidates:
+        keys = candidate_keys(candidate)
+        if keys & known_keys:
+            raise IntakeImportError("Candidate identity already present; reconcile before intake")
+        known_keys.update(keys)
     added: list[str] = []
     for candidate in candidates:
         identifiers = candidate["identifiers"]

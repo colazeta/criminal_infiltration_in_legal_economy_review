@@ -102,3 +102,13 @@ it never overwrites an active database.
 The prepared research dossier is delivered privately and is not embedded in a
 technical PR or static candidate export. It remains seed and expansion preparation, not an activated private V2 corpus
 or a scientific decision.
+
+
+## Same-day extraordinary execution amendment — 2026-09-08
+
+The owner-approved [extraordinary-run policy](../operations/extraordinary-runs.md) adds independently identified manual executions and
+explicit publisher/repository acquisition origins. It supersedes the former
+requirement to wait until the next calendar day and the Zenodo-only acquisition
+restriction. Daily IDs, schedules, historic records and scientific approval gates
+remain unchanged. Public statistics v3 shows extraordinary executions separately;
+they never fill scheduled-day gaps. Read that policy before a manual run.

@@ -34,7 +34,9 @@ persisted a valid intake issue, the repository-owned
 `intake-to-curation.yml` workflow may mechanically prepare a branch and pull
 request containing the same candidates in the non-public curation layer. That
 downstream workflow performs no retrieval or screening, never edits the
-canonical registry and cannot merge its own pull request.
+canonical registry. Its existing technical persistence path may merge validated
+pending queue rows under owner maintenance authority; this is not scientific
+approval or public corpus publication.
 
 ## Batch contract
 
@@ -226,3 +228,13 @@ decision or merge its own registry change.
 ## Open-access mapping
 
 The owner-approved OA-1 access scope is specified in [open-access.md](../methodology/open-access.md). Both public collections require a current verified lawful full-text assessment. V2 records access history separately from scientific screening.
+
+
+## Same-day extraordinary execution amendment — 2026-09-08
+
+The owner-approved [extraordinary-run policy](extraordinary-runs.md) adds independently identified manual executions and
+explicit publisher/repository acquisition origins. It supersedes the former
+requirement to wait until the next calendar day and the Zenodo-only acquisition
+restriction. Daily IDs, schedules, historic records and scientific approval gates
+remain unchanged. Public statistics v3 shows extraordinary executions separately;
+they never fill scheduled-day gaps. Read that policy before a manual run.

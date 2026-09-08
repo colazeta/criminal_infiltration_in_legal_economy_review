@@ -207,3 +207,13 @@ iniziali. Il calendario non può dichiarare completata una data senza ledger né
 lasciarla pianificata dopo le 07:20 locali. I conteggi intake misurano issue
 create: il completamento della ricerca non certifica l'importazione nella coda,
 che resta verificabile nel workflow separato.
+
+
+## Same-day extraordinary execution amendment — 2026-09-08
+
+The owner-approved [extraordinary-run policy](extraordinary-runs.md) adds independently identified manual executions and
+explicit publisher/repository acquisition origins. It supersedes the former
+requirement to wait until the next calendar day and the Zenodo-only acquisition
+restriction. Daily IDs, schedules, historic records and scientific approval gates
+remain unchanged. Public statistics v3 shows extraordinary executions separately;
+they never fill scheduled-day gaps. Read that policy before a manual run.
