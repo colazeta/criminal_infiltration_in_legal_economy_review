@@ -101,6 +101,9 @@ class AuditHardeningTests(unittest.TestCase):
         self.assertEqual(projected['contained_assessments'][0]['was_derived_from'],projected['was_derived_from'])
         broken=copy.deepcopy(module);broken['snapshot_fields']['receipts']='was_derived_from'
         with self.assertRaises(ValueError):validate_snapshot_mapping(broken,profile)
+        incompatible=copy.deepcopy(profile)
+        incompatible['classes']['AccessAssessment']['slots'].remove('oa_full_text_url')
+        with self.assertRaises(ValueError):validate_snapshot_mapping(module,incompatible)
         profile['slots']['was_derived_from']['multivalued']=True
         with self.assertRaises(ValueError):validate_snapshot_mapping(module,profile)
 
@@ -120,7 +123,7 @@ class LedgerImportGateTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             root=Path(d); event=root/'event.json';event.write_text(json.dumps({'issue':issue}))
             env={'GITHUB_EVENT_PATH':str(event),'GITHUB_REPOSITORY_OWNER':'colazeta','GITHUB_REPOSITORY':'colazeta/criminal_infiltration_in_legal_economy_review','GH_TOKEN':'synthetic','RUNNER_TEMP':d}
-            with patch.dict('os.environ',env), patch.object(gate,'fetch_validated_runs',side_effect=[[],[run]]) as fetch, patch.object(gate.time,'sleep') as sleep:
+            with patch.dict('os.environ',env), patch.object(gate,'fetch_validated_runs',side_effect=[[],[run]]) as fetch, patch.object(gate.time,'sleep') as sleep, patch('fetch_surveillance_ledger.api_get',return_value=(issue,{})):
                 gate.main()
                 self.assertEqual(fetch.call_args.args[2],['colazeta'])
                 sleep.assert_called_once_with(15)
@@ -135,4 +138,16 @@ class LedgerImportGateTests(unittest.TestCase):
             with patch.dict('os.environ',env), patch.object(gate,'fetch_validated_runs',side_effect=MetricsError('synthetic invalid ledger')), patch.object(gate.time,'sleep') as sleep:
                 with self.assertRaises(MetricsError):gate.main()
                 sleep.assert_not_called()
+            self.assertFalse((root/'intake-run.json').exists())
+
+    def test_changed_live_issue_cannot_substitute_for_queued_event(self):
+        from unittest.mock import patch
+        from scripts.curation import fetch_intake_run as gate
+        run=exa_run();issue=candidate_issue(run);live=copy.deepcopy(issue)
+        live['body']=live['body'].replace('Candidate 1','Another candidate')
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d);event=root/'event.json';event.write_text(json.dumps({'issue':issue}))
+            env={'GITHUB_EVENT_PATH':str(event),'GITHUB_REPOSITORY_OWNER':'colazeta','GITHUB_REPOSITORY':'colazeta/criminal_infiltration_in_legal_economy_review','GH_TOKEN':'synthetic','RUNNER_TEMP':d}
+            with patch.dict('os.environ',env), patch.object(gate,'fetch_validated_runs',return_value=[run]), patch('fetch_surveillance_ledger.api_get',return_value=(live,{})):
+                with self.assertRaisesRegex(ValueError,'differs from authenticated event'):gate.main()
             self.assertFalse((root/'intake-run.json').exists())

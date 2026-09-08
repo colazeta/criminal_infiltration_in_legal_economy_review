@@ -1342,7 +1342,18 @@
         "access_status",
         "access_kind",
         "access_url",
-        "generated_at_time"
+        "generated_at_time",
+        "candidate_id",
+        "oa_full_text_url",
+        "v2_version_type",
+        "oa_host_type",
+        "v2_license_uri",
+        "v2_rights_basis",
+        "oa_rights_evidence_url",
+        "oa_access_status",
+        "oa_verification_method",
+        "oa_full_text_sha256",
+        "oa_verified_at"
       ]
     },
     "CodingAssertion": {

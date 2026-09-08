@@ -117,3 +117,18 @@ client-clock warning does not invent ledger rows for later days. Intake counts
 mean issues created, not successful queue import; queue import still has a
 separate workflow outcome. Neither scheduled execution nor successful external
 provider calls are guaranteed by these repairs.
+
+### Review corrections
+
+The PR review additionally identified that globally declared receipt slots were
+not attached to the normative AccessAssessment class. The compatible profile
+erratum attaches those existing slots to that existing operational class, and
+the validator now follows inherited class slots. This correction is versioned
+in Git with the repair; profile identifier 0.3.0, all scientific concepts,
+controlled states and screening criteria remain unchanged. No new ontology
+concept or data schema is introduced.
+
+The ledger gate also rereads the authenticated live issue and requires its body,
+title and creation timestamp to equal the queued event before producing import
+context. Distinct candidate manifests cannot substitute for one another merely
+because aggregate counts agree. Both live and event content must validate.

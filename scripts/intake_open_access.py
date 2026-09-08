@@ -122,7 +122,20 @@ def validate_snapshot_mapping(module, profile):
             raise ValueError("snapshot mapping range/cardinality mismatch: " + field)
     if module["snapshot_fields"]["receipts"] != {"containment": "AccessAssessment", "multivalued": True, "field_mapping": "receipt_fields"}:
         raise ValueError("receipt array must be structural AccessAssessment containment")
+    def inherited_slots(name, seen=None):
+        seen = set() if seen is None else seen
+        if name in seen or name not in profile["classes"]:
+            raise ValueError("invalid assessment class inheritance")
+        seen.add(name)
+        definition = profile["classes"][name]
+        result = set(definition.get("slots", []))
+        if definition.get("is_a"):
+            result |= inherited_slots(definition["is_a"], seen)
+        return result
+    assessment_slots = inherited_slots("AccessAssessment")
     for field, slot in module["receipt_fields"].items():
+        if slot not in assessment_slots:
+            raise ValueError("receipt slot does not belong to AccessAssessment: " + field)
         semantic = profile["slots"][slot]
         range_name = semantic.get("range", profile.get("default_range", "string"))
         if semantic.get("multivalued", False) or range_name not in {"string", "OpenAccessVerificationEnum"}:
