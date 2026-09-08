@@ -349,8 +349,8 @@ def validate_assets() -> None:
     if "replaceChildren" not in javascript or "textContent" not in javascript:
         fail("Site must render untrusted metadata through DOM text nodes")
     for required in (
-        "No publications are currently public",
-        "restarted from zero under the open-access policy",
+        "Il corpus valutato è ancora vuoto",
+        "I lavori acquisiti sono visibili nel registro qui sopra",
         "No publications match these filters",
     ):
         if required not in javascript:
