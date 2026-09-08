@@ -13,10 +13,10 @@ labels, duplicate reconciliation and the assessed corpus remain governed.
 
 ## Intake contract
 
-New discovery uses run and both intake manifests version 3, Exa only, with the
+New discovery uses operational protocol CILE-DAILY-v4, run and both intake manifests version 3, Exa only, with the
 existing W1–W7, immutable ledger, active-cycle and idempotency rules. The marker
 is `<!-- surveillance-run:v3 -->`; envelope and aggregate fields are unchanged.
-The v3 run schema is `schema/surveillance-run-v3.schema.json`.
+The normative current schema is `schema/surveillance-run.schema.json`; the explicit v3 copy is `schema/surveillance-run-v3.schema.json`. The previous Exa contract is retained in `schema/surveillance-run-v2.schema.json`.
 
 The candidate's `open_access` object is either the unchanged fully verified OA-1
 receipt, or exactly `{"candidate_id":"the candidate ID","access_status":"unknown"}`.

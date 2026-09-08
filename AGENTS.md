@@ -17,7 +17,7 @@ boundary between discovery, editorial judgement and publication.
    `docs/governance/sources.md` before retrieval.
 5. Never overwrite decision history. Add a new decision and retire the former
    current row in the same reviewed change.
-6. Never auto-merge a registry or publication change.
+6. Never auto-merge a canonical-work registry or scientific publication change. The owner explicitly authorises automatic mechanical persistence and visibility of the provisional CandidateRecord register, without per-paper acceptance.
 7. When the owner has granted continuing maintenance authority, complete
    documentation, software, test, CI and site work through validation and merge
    without waiting for an extra ad-hoc approval. This authority never supplies a
@@ -52,8 +52,8 @@ autonomously when the owner has already granted that authority.
 4. A curator adds or updates the canonical work, identifiers, discovery event and
    approved public annotation together.
 5. CI rebuilds the site and applies the full publication gate.
-6. CI validates the visible change. Registry/publication changes remain
-   unmerged until an authorised curator or reviewer accepts them; validated
+6. CI validates the visible change. Canonical/scientific publication changes remain
+   unmerged until an authorised curator or reviewer accepts them; provisional candidate registration is already authorised by the owner; validated
    maintenance changes may be merged under continuing owner authority.
 
 Intake assessments use `plausible_core`, `plausible_contextual` or `uncertain`.

@@ -16,7 +16,7 @@ from zoneinfo import ZoneInfo
 
 
 SCHEMA_VERSION = 1  # Public aggregate format; independent from the run contract.
-RUN_SCHEMA_VERSION = 2
+RUN_SCHEMA_VERSION = 3
 ROME = ZoneInfo("Europe/Rome")
 ACTIVE_SOURCES = frozenset({"Exa"})
 SOURCE_SETS = {1: frozenset({"Consensus", "Exa"}), 2: ACTIVE_SOURCES, 3: ACTIVE_SOURCES}

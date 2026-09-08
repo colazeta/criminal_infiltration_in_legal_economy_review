@@ -115,12 +115,13 @@
   },
   "surveillance_contract": {
     "schema": "schema/surveillance-run.schema.json",
-    "schema_version": 2,
+    "schema_version": 3,
     "legacy_schema": "schema/surveillance-run-v1.schema.json",
     "source_class": "SearchActivity",
     "source_slot": "source_name",
-    "protocol_version": "CILE-DAILY-v3",
-    "authority": "Owner instruction of 2026-09-08: remove Consensus from the process."
+    "protocol_version": "CILE-DAILY-v4",
+    "authority": "Owner instruction 2026-09-08: Exa-only automatic provisional registration before individual analysis; retain v1/v2 history.",
+    "retained_v2_schema": "schema/surveillance-run-v2.schema.json"
   },
   "extraordinary_executions": {
     "class": "SearchActivity",

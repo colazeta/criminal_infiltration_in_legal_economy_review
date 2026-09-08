@@ -410,7 +410,7 @@ def check_surveillance_source_policy(profile: dict[str, Any]) -> None:
     contract = module["surveillance_contract"]
     if module["profile_version"] != profile["version"] or contract["source_class"] not in profile["classes"] or contract["source_slot"] not in profile["slots"]:
         fail("unmapped_surveillance_source_policy")
-    if contract["protocol_version"] != "CILE-DAILY-v3" or contract["schema_version"] != 2:
+    if contract["protocol_version"] != "CILE-DAILY-v4" or contract["schema_version"] != 3:
         fail("invalid_surveillance_source_policy_version")
     sys.path.insert(0, str(ROOT))
     from scripts.metrics.extra_runs import FIELDS as EXTRA_FIELDS
@@ -422,7 +422,8 @@ def check_surveillance_source_policy(profile: dict[str, Any]) -> None:
         fail("extra_execution_public_schema_drift")
     current = load_json(ROOT / contract["schema"])
     legacy = load_json(ROOT / contract["legacy_schema"])
-    for schema, version, names in ((current, 2, ["Exa"]), (legacy, 1, ["Consensus", "Exa"])):
+    retained_v2 = load_json(ROOT / contract["retained_v2_schema"])
+    for schema, version, names in ((current, 3, ["Exa"]), (retained_v2, 2, ["Exa"]), (legacy, 1, ["Consensus", "Exa"])):
         properties = schema["properties"]
         if properties["schema_version"]["const"] != version or properties["expected_sources"]["items"]["enum"] != names:
             fail("surveillance_schema_source_drift")
