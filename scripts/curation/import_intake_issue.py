@@ -433,7 +433,7 @@ def import_candidates(
         if registry.exists():
             with registry.open(newline="", encoding="utf-8-sig") as handle:
                 for row in csv.DictReader(handle):
-                    value = row.get("doi") or (row.get("identifier_value") if row.get("identifier_scheme") == "doi" else "")
+                    value = row.get("doi") or (row.get("value") if row.get("scheme") == "doi" else "")
                     if value: known_dois.add(normalise_doi(value))
     incoming_dois = [normalise_doi(c["identifiers"]["doi"]) for c in candidates if c["identifiers"]["doi"]]
     if known_dois.intersection(incoming_dois) or len(incoming_dois) != len(set(incoming_dois)):

@@ -125,6 +125,21 @@ class ExtraordinaryRunTests(unittest.TestCase):
             self.assertEqual(queue.read_bytes(),before)
             self.assertEqual(len(list((root/'data/curation/intake_access').glob('*.json'))),1)
 
+    def test_alternative_canonical_doi_blocks_intake_without_writes(self):
+        run=extra('2026-09-09');issue=extra_issue(run)
+        issue['body']=issue['body'].replace('"doi": null', '"doi": "10.1234/alternative"', 1)
+        candidate=parse_intake_issue(issue['body'],issue['title'])['candidates'][0]
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder);queue=root/'data/curation/review_queue.csv';queue.parent.mkdir(parents=True)
+            queue.write_text((ROOT/'data/curation/review_queue.csv').read_text().splitlines()[0]+'\n')
+            registry=root/'data/registry';registry.mkdir()
+            (registry/'work_identifiers.csv').write_text('work_id,scheme,value\nwork-existing,doi,'+candidate['identifiers']['doi']+'\n')
+            before=queue.read_bytes()
+            with self.assertRaisesRegex(IntakeImportError,'Duplicate DOI'):
+                import_candidates(root,issue['body'],issue['title'],'201','2026-09-09')
+            self.assertEqual(queue.read_bytes(),before)
+            self.assertFalse(list((root/'data/curation/intake_access').glob('*.json')))
+
     def test_partial_extra_never_displays_zero_candidates(self):
         run=extra();run['status']='partial'
         source=run['sources'][0];source.update(status='failed',queries_completed=3,failure_code='connector_unavailable')
