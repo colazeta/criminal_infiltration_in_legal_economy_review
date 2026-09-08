@@ -14,6 +14,7 @@ const CURATOR_ASSETS = new Set([
   "/review-v2.html",
   "/review-v2.js",
   "/model.css",
+  "/application.css",
   "/curator-shell.css",
   "/curator-guided.css",
   "/curate",

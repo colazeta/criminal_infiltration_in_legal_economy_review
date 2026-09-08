@@ -32,8 +32,8 @@ body.curator-page {
   overflow: hidden;
   background: var(--classic-bg);
   color: var(--classic-text);
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 12px;
+  font-family: Tahoma, Arial, Helvetica, sans-serif;
+  font-size: 13px;
 }
 
 .curator-page [hidden] {
@@ -103,7 +103,7 @@ body.curator-page {
 .curator-titlebar span {
   margin: 0;
   color: inherit;
-  font: bold 11px Arial, Helvetica, sans-serif;
+  font: bold 13px Tahoma, Arial, Helvetica, sans-serif;
   letter-spacing: 0;
 }
 
@@ -125,7 +125,7 @@ body.curator-page {
   background: var(--classic-header);
   color: #000;
   box-shadow: none;
-  font: 10px Arial, Helvetica, sans-serif;
+  font: 13px Tahoma, Arial, Helvetica, sans-serif;
 }
 
 .curator-page .curator-login-panel,
@@ -158,7 +158,7 @@ body.curator-page {
   padding: 1px 7px;
   background: #e6e6e6;
   color: var(--classic-blue);
-  font: 10px Arial, Helvetica, sans-serif;
+  font: 13px Tahoma, Arial, Helvetica, sans-serif;
   text-decoration: none;
   box-shadow: none;
   cursor: pointer;
@@ -194,7 +194,7 @@ body.curator-page {
 .curator-page .candidate-empty-state h2 {
   margin: 0;
   color: #555;
-  font: bold 11px Arial, Helvetica, sans-serif;
+  font: bold 13px Tahoma, Arial, Helvetica, sans-serif;
 }
 
 .curator-page .candidate-detail,
@@ -227,13 +227,13 @@ body.curator-page {
   display: block;
   margin: 0 0 1px;
   color: #444;
-  font: 9px "Courier New", Courier, monospace;
+  font: 12px "Courier New", Courier, monospace;
 }
 
 .curator-page #selected-candidate-title {
   margin: 0;
   color: #000;
-  font: bold 14px/1.15 Arial, Helvetica, sans-serif;
+  font: bold 14px/1.15 Tahoma, Arial, Helvetica, sans-serif;
 }
 
 .candidate-reading-byline {
@@ -287,14 +287,14 @@ body.curator-page {
 .curator-page .candidate-metadata dt {
   margin: 0 0 1px;
   color: #444;
-  font: bold 8px Arial, Helvetica, sans-serif;
+  font: bold 11px Tahoma, Arial, Helvetica, sans-serif;
 }
 
 .curator-page .candidate-metadata dd {
   margin: 0;
   overflow: hidden;
   color: #000;
-  font: 10px/1.2 Arial, Helvetica, sans-serif;
+  font: 13px/1.2 Tahoma, Arial, Helvetica, sans-serif;
   overflow-wrap: anywhere;
 }
 
@@ -333,14 +333,14 @@ body.curator-page {
 .candidate-abstract-heading h4 {
   margin: 0;
   color: #000;
-  font: bold 10px Arial, Helvetica, sans-serif;
+  font: bold 13px Tahoma, Arial, Helvetica, sans-serif;
 }
 
 .candidate-abstract-source {
   max-width: 65%;
   overflow: hidden;
   color: #444;
-  font: 8px Arial, Helvetica, sans-serif;
+  font: 11px Tahoma, Arial, Helvetica, sans-serif;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -354,7 +354,7 @@ body.curator-page {
   overflow: auto;
   padding: 8px 10px;
   color: #000;
-  font: 12px/1.45 Arial, Helvetica, sans-serif;
+  font: 13px/1.45 Tahoma, Arial, Helvetica, sans-serif;
   white-space: pre-wrap;
 }
 
@@ -366,7 +366,7 @@ body.curator-page {
   border-bottom: 1px solid var(--classic-border);
   background: #f4f4f4;
   color: #555;
-  font: 8px/1.2 Arial, Helvetica, sans-serif;
+  font: 11px/1.2 Tahoma, Arial, Helvetica, sans-serif;
 }
 
 /* Secondary diagnostics never occupy the operating surface. */
@@ -404,7 +404,7 @@ body.curator-page {
 
 .curator-page #candidate-identity-panel h4 {
   margin: 0 !important;
-  font: bold 9px Arial, Helvetica, sans-serif !important;
+  font: bold 12px Tahoma, Arial, Helvetica, sans-serif !important;
 }
 
 .curator-page .identity-state-chip,
@@ -416,7 +416,7 @@ body.curator-page {
   padding: 1px 4px !important;
   background: #eee !important;
   color: #000 !important;
-  font: 8px Arial, Helvetica, sans-serif !important;
+  font: 11px Tahoma, Arial, Helvetica, sans-serif !important;
   box-shadow: none !important;
 }
 
@@ -424,7 +424,7 @@ body.curator-page {
 .curator-page .identity-reason {
   margin: 2px 0 0 !important;
   color: #222 !important;
-  font: 8px/1.2 Arial, Helvetica, sans-serif !important;
+  font: 11px/1.2 Tahoma, Arial, Helvetica, sans-serif !important;
 }
 
 .curator-page #candidate-identity-panel .identity-boundary {
@@ -449,16 +449,16 @@ body.curator-page {
   padding: 3px 6px;
   border-bottom: 1px solid var(--classic-border);
   background: var(--classic-header);
-  font: 9px Arial, Helvetica, sans-serif;
+  font: 12px Tahoma, Arial, Helvetica, sans-serif;
 }
 
 .curator-page .decision-form-heading strong {
-  font: bold 9px Arial, Helvetica, sans-serif;
+  font: bold 12px Tahoma, Arial, Helvetica, sans-serif;
 }
 
 .curator-page .decision-form-heading code {
   color: #444;
-  font: 8px "Courier New", Courier, monospace;
+  font: 11px "Courier New", Courier, monospace;
 }
 
 /* Guided choices still drive the governed native select. */
@@ -513,7 +513,7 @@ body.curator-page {
 .curator-page .guided-decision-choice strong {
   display: block;
   color: inherit !important;
-  font: bold 9px Arial, Helvetica, sans-serif !important;
+  font: bold 12px Tahoma, Arial, Helvetica, sans-serif !important;
 }
 
 .curator-page .guided-decision-choice span {
@@ -529,7 +529,7 @@ body.curator-page {
 
 .curator-page .guided-exception-decisions summary {
   color: var(--classic-blue) !important;
-  font: 8px Arial, Helvetica, sans-serif !important;
+  font: 11px Tahoma, Arial, Helvetica, sans-serif !important;
   cursor: pointer;
 }
 
@@ -539,7 +539,7 @@ body.curator-page {
   padding: 2px 4px !important;
   background: #ffffdf !important;
   color: #222 !important;
-  font: 8px/1.2 Arial, Helvetica, sans-serif !important;
+  font: 11px/1.2 Tahoma, Arial, Helvetica, sans-serif !important;
 }
 
 .curator-page .decision-fields {
@@ -567,7 +567,7 @@ body.curator-page {
 
 .curator-page .decision-fields label > span {
   color: #222;
-  font: bold 8px Arial, Helvetica, sans-serif;
+  font: bold 11px Tahoma, Arial, Helvetica, sans-serif;
 }
 
 .curator-page .decision-fields input,
@@ -580,7 +580,7 @@ body.curator-page {
   padding: 2px 4px;
   background: #fff;
   color: #000;
-  font: 10px Arial, Helvetica, sans-serif;
+  font: 13px Tahoma, Arial, Helvetica, sans-serif;
   box-shadow: none;
 }
 
@@ -617,7 +617,7 @@ body.curator-page {
   padding: 0;
   border: 0;
   background: transparent;
-  font: 9px Arial, Helvetica, sans-serif;
+  font: 12px Tahoma, Arial, Helvetica, sans-serif;
 }
 
 .curator-page .classic-confirmation input[type="checkbox"] {
@@ -654,7 +654,7 @@ body.curator-page {
   padding: 4px 5px;
   background: #fff;
   box-shadow: none;
-  font: 9px Arial, Helvetica, sans-serif;
+  font: 12px Tahoma, Arial, Helvetica, sans-serif;
 }
 
 .curator-page .decision-result p,
@@ -714,7 +714,7 @@ body.curator-page {
     min-height: 72px;
     max-height: 24vh;
     padding: 7px;
-    font-size: 11px;
+    font-size: 13px;
   }
 
   .curator-page .guided-decision-grid,

@@ -48,7 +48,7 @@ class ClassicSiteUiTests(unittest.TestCase):
     def test_curator_uses_same_classic_navigation_language_without_global_skin(self) -> None:
         source = (SITE / "curate.html").read_text(encoding="utf-8") + (SITE / "curator-shell.css").read_text()
         self.assertIn('class="curator-menubar"', source)
-        self.assertIn('aria-current="page">CURATOR</a>', source)
+        self.assertIn('aria-current="page">Curatore</a>', source)
         self.assertIn("background: #000080", source)
         self.assertNotIn('href="./classic-site.css"', source)
         self.assertIn("CURATOR_FULLSCREEN_SHELL_V1", source)

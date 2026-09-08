@@ -27,7 +27,7 @@ body.classic-site {
   margin: 0;
   background: var(--classic-bg);
   color: var(--classic-text);
-  font: 12px/1.3 Arial, Helvetica, sans-serif;
+  font: 13px/1.3 Tahoma, Arial, Helvetica, sans-serif;
 }
 
 body.classic-site [hidden] {
@@ -115,7 +115,7 @@ body.classic-site .brand-mark {
   border: 1px solid #fff;
   border-radius: 0;
   color: #fff;
-  font: bold 8px Arial, Helvetica, sans-serif;
+  font: bold 11px Tahoma, Arial, Helvetica, sans-serif;
 }
 
 body.classic-site .brand strong,
@@ -123,7 +123,7 @@ body.classic-site .brand small {
   display: inline;
   margin: 0;
   color: #fff;
-  font: bold 10px Arial, Helvetica, sans-serif;
+  font: bold 13px Tahoma, Arial, Helvetica, sans-serif;
 }
 
 body.classic-site .brand small {
@@ -139,7 +139,7 @@ body.classic-site nav {
   border: 1px solid var(--classic-border);
   border-top: 0;
   background: var(--classic-header);
-  font: 10px Arial, Helvetica, sans-serif;
+  font: 13px Tahoma, Arial, Helvetica, sans-serif;
 }
 
 body.classic-site nav a {
@@ -176,7 +176,7 @@ body.classic-site h1,
 body.classic-site h2,
 body.classic-site h3,
 body.classic-site .paper-card h3 {
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: Tahoma, Arial, Helvetica, sans-serif;
   font-weight: bold;
 }
 
@@ -212,7 +212,7 @@ body.classic-site .eyebrow,
 body.classic-site .workspace-label {
   margin: 0 0 2px;
   color: var(--classic-muted);
-  font: bold 8px Arial, Helvetica, sans-serif;
+  font: bold 11px Tahoma, Arial, Helvetica, sans-serif;
   letter-spacing: 0;
   text-transform: uppercase;
 }
@@ -220,7 +220,7 @@ body.classic-site .workspace-label {
 body.classic-site h1 {
   max-width: none;
   margin: 0 0 5px;
-  font: bold 18px/1.15 Arial, Helvetica, sans-serif;
+  font: bold 18px/1.15 Tahoma, Arial, Helvetica, sans-serif;
   letter-spacing: 0;
 }
 
@@ -229,13 +229,13 @@ body.classic-site .scope-note p {
   max-width: none;
   margin: 0;
   color: #111;
-  font: 10px/1.35 Arial, Helvetica, sans-serif;
+  font: 13px/1.35 Tahoma, Arial, Helvetica, sans-serif;
 }
 
 body.classic-site .scope-note strong {
   display: block;
   margin-bottom: 3px;
-  font: bold 9px Arial, Helvetica, sans-serif;
+  font: bold 12px Tahoma, Arial, Helvetica, sans-serif;
 }
 
 /* Metrics become database summary cells */
@@ -278,7 +278,7 @@ body.classic-site .metrics span {
 body.classic-site .metrics p {
   margin: 0;
   color: #333;
-  font: 8px/1.2 Arial, Helvetica, sans-serif;
+  font: 11px/1.2 Tahoma, Arial, Helvetica, sans-serif;
 }
 
 /* Sections */
@@ -322,7 +322,7 @@ body.classic-site .compact-heading h3,
 body.classic-site .chart-heading h3 {
   margin: 0;
   color: #000;
-  font: bold 10px Arial, Helvetica, sans-serif;
+  font: bold 13px Tahoma, Arial, Helvetica, sans-serif;
   letter-spacing: 0;
 }
 
@@ -332,7 +332,7 @@ body.classic-site .chart-heading p {
   max-width: 680px;
   margin: 0;
   color: #333;
-  font: 8px/1.25 Arial, Helvetica, sans-serif;
+  font: 11px/1.25 Tahoma, Arial, Helvetica, sans-serif;
   text-align: right;
 }
 
@@ -365,7 +365,7 @@ body.classic-site .decision-fields label {
 
 body.classic-site .controls label span {
   color: #333;
-  font: bold 8px Arial, Helvetica, sans-serif;
+  font: bold 11px Tahoma, Arial, Helvetica, sans-serif;
   letter-spacing: 0;
   text-transform: uppercase;
 }
@@ -383,7 +383,7 @@ body.classic-site .toolbar-action {
   padding: 2px 5px;
   background: #fff;
   color: #000;
-  font: 10px Arial, Helvetica, sans-serif;
+  font: 13px Tahoma, Arial, Helvetica, sans-serif;
   box-shadow: none;
   transition: none;
 }
@@ -419,7 +419,7 @@ body.classic-site .chart-note {
   padding: 2px 5px;
   background: #f7f7f7;
   color: #333;
-  font: 8px Arial, Helvetica, sans-serif;
+  font: 11px Tahoma, Arial, Helvetica, sans-serif;
 }
 
 body.classic-site .results-meta p,
@@ -493,7 +493,7 @@ body.classic-site .operation-key {
   padding: 1px 4px;
   background: #fff;
   color: #111;
-  font: 8px Arial, Helvetica, sans-serif;
+  font: 11px Tahoma, Arial, Helvetica, sans-serif;
 }
 
 body.classic-site .badge-included,
@@ -511,7 +511,7 @@ body.classic-site .record-id {
   padding: 4px 5px;
   border-left: 1px solid #aaa;
   color: #333;
-  font: 8px "Courier New", Courier, monospace;
+  font: 11px "Courier New", Courier, monospace;
   text-align: right;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -522,7 +522,7 @@ body.classic-site .paper-card h3 {
   margin: 0;
   padding: 5px 7px 2px;
   color: #000;
-  font: bold 11px/1.25 Arial, Helvetica, sans-serif;
+  font: bold 13px/1.25 Tahoma, Arial, Helvetica, sans-serif;
   letter-spacing: 0;
 }
 
@@ -540,7 +540,7 @@ body.classic-site .citation {
   margin: 0;
   padding: 0 7px 5px;
   color: #333;
-  font: 9px/1.3 Arial, Helvetica, sans-serif;
+  font: 12px/1.3 Tahoma, Arial, Helvetica, sans-serif;
 }
 
 body.classic-site .record-details {
@@ -555,7 +555,7 @@ body.classic-site .record-details summary {
   padding: 3px 6px;
   background: var(--classic-header);
   color: var(--classic-blue);
-  font: 9px Arial, Helvetica, sans-serif;
+  font: 12px Tahoma, Arial, Helvetica, sans-serif;
   cursor: pointer;
 }
 
@@ -580,7 +580,7 @@ body.classic-site .details-grid h4,
 body.classic-site .details-grid dt {
   margin: 0 0 2px;
   color: #444;
-  font: bold 8px Arial, Helvetica, sans-serif;
+  font: bold 11px Tahoma, Arial, Helvetica, sans-serif;
   text-transform: uppercase;
 }
 
@@ -588,7 +588,7 @@ body.classic-site .details-grid p,
 body.classic-site .details-grid dd {
   margin: 0 0 3px;
   color: #111;
-  font: 9px/1.3 Arial, Helvetica, sans-serif;
+  font: 12px/1.3 Tahoma, Arial, Helvetica, sans-serif;
 }
 
 body.classic-site .paper-footer {
@@ -601,7 +601,7 @@ body.classic-site .paper-footer {
   padding: 3px 6px;
   background: #f7f7f7;
   color: #444;
-  font: 8px Arial, Helvetica, sans-serif;
+  font: 11px Tahoma, Arial, Helvetica, sans-serif;
 }
 
 body.classic-site .empty-state,
@@ -618,12 +618,12 @@ body.classic-site .error-state {
 
 body.classic-site .empty-state h3 {
   margin: 0 0 3px;
-  font: bold 10px Arial, Helvetica, sans-serif;
+  font: bold 13px Tahoma, Arial, Helvetica, sans-serif;
 }
 
 body.classic-site .empty-state p {
   margin: 0;
-  font: 9px Arial, Helvetica, sans-serif;
+  font: 12px Tahoma, Arial, Helvetica, sans-serif;
 }
 
 /* Method / definitions are plain reference tables */
@@ -657,20 +657,20 @@ body.classic-site .step {
   padding: 1px 4px;
   background: var(--classic-header);
   color: #000;
-  font: bold 8px "Courier New", Courier, monospace;
+  font: bold 11px "Courier New", Courier, monospace;
 }
 
 body.classic-site .method-grid h3,
 body.classic-site .definitions-grid h3 {
   margin: 0 0 3px;
-  font: bold 9px Arial, Helvetica, sans-serif;
+  font: bold 12px Tahoma, Arial, Helvetica, sans-serif;
 }
 
 body.classic-site .method-grid p,
 body.classic-site .definitions-grid p {
   margin: 0;
   color: #222;
-  font: 8px/1.3 Arial, Helvetica, sans-serif;
+  font: 11px/1.3 Tahoma, Arial, Helvetica, sans-serif;
 }
 
 body.classic-site .pipeline-panel,
@@ -703,7 +703,7 @@ body.classic-site .metrics-boundary > div:first-child {
 body.classic-site .pipeline-panel h3,
 body.classic-site .metrics-boundary h3 {
   margin: 0;
-  font: bold 9px Arial, Helvetica, sans-serif;
+  font: bold 12px Tahoma, Arial, Helvetica, sans-serif;
 }
 
 body.classic-site .pipeline-panel dl {
@@ -724,14 +724,14 @@ body.classic-site .pipeline-panel dl div:last-child {
 
 body.classic-site .pipeline-panel dt {
   color: var(--classic-blue);
-  font: bold 11px "Courier New", Courier, monospace;
+  font: bold 13px "Courier New", Courier, monospace;
 }
 
 body.classic-site .pipeline-panel dd,
 body.classic-site .metrics-boundary > p {
   margin: 0;
   color: #333;
-  font: 8px/1.3 Arial, Helvetica, sans-serif;
+  font: 11px/1.3 Tahoma, Arial, Helvetica, sans-serif;
 }
 
 /* Statistics */
@@ -753,7 +753,7 @@ body.classic-site .chart-legend {
   flex-wrap: wrap;
   gap: 8px;
   color: #333;
-  font: 8px Arial, Helvetica, sans-serif;
+  font: 11px Tahoma, Arial, Helvetica, sans-serif;
 }
 
 body.classic-site .legend-swatch,
@@ -790,7 +790,7 @@ body.classic-site td {
   padding: 3px 5px;
   border: 1px solid #aaa;
   color: #000;
-  font: 9px/1.25 Arial, Helvetica, sans-serif;
+  font: 12px/1.25 Tahoma, Arial, Helvetica, sans-serif;
   text-align: left;
   vertical-align: top;
 }
@@ -822,7 +822,7 @@ body.classic-site footer {
   padding: 3px 5px;
   background: var(--classic-header);
   color: #333;
-  font: 8px Arial, Helvetica, sans-serif;
+  font: 11px Tahoma, Arial, Helvetica, sans-serif;
 }
 
 body.classic-site footer p {
@@ -850,7 +850,7 @@ body.classic-site.classic-404 .error-titlebar {
   padding: 3px 5px;
   background: var(--classic-blue);
   color: #fff;
-  font: bold 10px Arial, Helvetica, sans-serif;
+  font: bold 13px Tahoma, Arial, Helvetica, sans-serif;
 }
 
 body.classic-site.classic-404 .error-body {
