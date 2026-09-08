@@ -29,6 +29,14 @@ def pending_issue():
     return run,issue
 
 class AutomaticRegisterTests(unittest.TestCase):
+    def test_successful_persistence_refreshes_pages_independently_of_bot_push(self):
+        workflow=(ROOT/'.github/workflows/archive.yml').read_text()
+        self.assertIn('workflow_run:',workflow)
+        self.assertIn('workflows: ["Stage daily intake in curator queue"]',workflow)
+        self.assertIn('types: [completed]',workflow)
+        self.assertIn("github.event.workflow_run.conclusion == 'success'",workflow)
+        self.assertIn('github.event.workflow_run.head_repository.full_name == github.repository',workflow)
+
     def test_v3_pending_access_enters_same_queue_without_scientific_decision(self):
         run,issue=pending_issue()
         validate_run(run);verify_intake_issue(run,issue,{'colazeta'},30)
