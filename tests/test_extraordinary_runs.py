@@ -140,6 +140,30 @@ class ExtraordinaryRunTests(unittest.TestCase):
             self.assertEqual(queue.read_bytes(),before)
             self.assertFalse(list((root/'data/curation/intake_access').glob('*.json')))
 
+    def test_canonical_stable_ids_and_citations_block_without_writes(self):
+        for scheme, value, incoming in [('arxiv','2401.12345','2401.12345'),
+                ('arxiv','2401.12345','arxiv:2401.12345'), ('isbn','9780123456789','9780123456789'),
+                ('citation','','')]:
+            with self.subTest(scheme=scheme,incoming=incoming), tempfile.TemporaryDirectory() as folder:
+                run=extra('2026-09-09');issue=extra_issue(run)
+                if incoming: issue['body']=issue['body'].replace('EX-1',incoming)
+                candidate=parse_intake_issue(issue['body'],issue['title'])['candidates'][0]
+                root=Path(folder);queue=root/'data/curation/review_queue.csv';queue.parent.mkdir(parents=True)
+                queue.write_text((ROOT/'data/curation/review_queue.csv').read_text().splitlines()[0]+'\n')
+                registry=root/'data/registry';registry.mkdir()
+                if scheme == 'citation':
+                    import csv
+                    with (registry/'papers.csv').open('w',newline='') as handle:
+                        writer=csv.DictWriter(handle,fieldnames=['title','year','authors']);writer.writeheader()
+                        writer.writerow({'title':candidate['title'],'year':candidate['year'],'authors':'; '.join(candidate['authors'])})
+                else:
+                    (registry/'work_identifiers.csv').write_text('paper_id,scheme,value\nexisting,'+scheme+','+value+'\n')
+                before=queue.read_bytes()
+                with self.assertRaisesRegex(IntakeImportError,'identity already present'):
+                    import_candidates(root,issue['body'],issue['title'],'201','2026-09-09')
+                self.assertEqual(queue.read_bytes(),before)
+                self.assertFalse(list((root/'data/curation/intake_access').glob('*.json')))
+
     def test_partial_extra_never_displays_zero_candidates(self):
         run=extra();run['status']='partial'
         source=run['sources'][0];source.update(status='failed',queries_completed=3,failure_code='connector_unavailable')

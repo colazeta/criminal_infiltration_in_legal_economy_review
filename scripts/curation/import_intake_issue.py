@@ -422,22 +422,30 @@ def import_candidates(
     known_keys = set()
     for row in queue:
         known_keys.update(candidate_keys({**row, "identifiers": {"doi": row.get("doi"), "other": [x.strip() for x in row.get("other_identifiers", "").split(";") if x.strip()]}}))
-    for candidate in candidates:
-        keys = candidate_keys(candidate)
-        if keys & known_keys:
-            raise IntakeImportError("Candidate identity already present; reconcile before intake")
-        known_keys.update(keys)
     known_dois = {normalise_doi(row.get("doi")) for row in queue if row.get("doi")}
     for name in ("papers.csv", "work_identifiers.csv"):
         registry = root / "data/registry" / name
         if registry.exists():
             with registry.open(newline="", encoding="utf-8-sig") as handle:
                 for row in csv.DictReader(handle):
-                    value = row.get("doi") or (row.get("value") if row.get("scheme") == "doi" else "")
-                    if value: known_dois.add(normalise_doi(value))
+                    if name == "papers.csv":
+                        known_keys.update(candidate_keys(row))
+                        value = row.get("doi")
+                    else:
+                        scheme, identifier = row.get("scheme", "").strip(), row.get("value", "").strip()
+                        value = identifier if scheme == "doi" else ""
+                        if identifier:
+                            known_keys.update(candidate_keys({"identifiers": {"other": [identifier, f"{scheme}:{identifier}"]}}))
+                    if value:
+                        known_dois.add(normalise_doi(value))
     incoming_dois = [normalise_doi(c["identifiers"]["doi"]) for c in candidates if c["identifiers"]["doi"]]
     if known_dois.intersection(incoming_dois) or len(incoming_dois) != len(set(incoming_dois)):
         raise IntakeImportError("Duplicate DOI requires reconciliation before intake; queue unchanged")
+    for candidate in candidates:
+        keys = candidate_keys(candidate)
+        if keys & known_keys:
+            raise IntakeImportError("Candidate identity already present; reconcile before intake")
+        known_keys.update(keys)
     added: list[str] = []
     for candidate in candidates:
         identifiers = candidate["identifiers"]
