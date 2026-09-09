@@ -102,6 +102,7 @@ def validate_pages() -> None:
         "404.html": "en",
         "curate.html": "it",
         "stats.html": "it",
+        "method.html": "it",
         "model.html": "it",
         "review-v2.html": "it",
     }
@@ -116,7 +117,6 @@ def validate_pages() -> None:
         "search-input",
         "paper-list",
         "result-count",
-        "methodology",
         "archive-version",
         "coverage-date",
     }
@@ -124,6 +124,30 @@ def validate_pages() -> None:
     missing = sorted(required_ids - index_ids)
     if missing:
         fail(f"index.html missing interface ID(s): {', '.join(missing)}")
+    archive_method_ids = sorted(
+        value for value in index_ids if value == "methodology" or value.startswith("method-")
+    )
+    if archive_method_ids:
+        fail(
+            "index.html must remain archive-only; methodology belongs on method.html: "
+            + ", ".join(archive_method_ids)
+        )
+    method_ids = set(parsed[SITE / "method.html"].ids)
+    missing = sorted(
+        {
+            "method-overview",
+            "method-scope",
+            "method-search",
+            "method-identity",
+            "method-screening",
+            "method-access",
+            "method-quality",
+            "method-limits",
+        }
+        - method_ids
+    )
+    if missing:
+        fail(f"method.html missing methodology ID(s): {', '.join(missing)}")
     curator_ids = set(parsed[SITE / "curate.html"].ids)
     missing = sorted(
         {
