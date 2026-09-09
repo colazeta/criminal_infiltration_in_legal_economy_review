@@ -17,7 +17,7 @@ body:
     id: search_log
     attributes:
       label: Search and provenance log
-      description: One JSON manifest with schema_version 3, the exact batch_id and repository_commit, and one source object for Exa. Exa has a queries array covering W1–W7 with unique EXA-Wn-Qm query_id and exact query_text values; its length equals queries_planned in the ledger.
+      description: One JSON manifest with schema_version 3, the exact batch_id and repository_commit, and exactly one final discovery source. Normal runs use Exa with EXA-Wn-Qm; an authorised Exa-limit fallback uses Parallel Search with PARALLEL-Wn-Qm. The selected provider must cover W1–W7 and its query-array length equals queries_planned in the ledger.
       placeholder: '{"schema_version":3,"batch_id":"ACADEMIC-YYYY-MM-DD","repository_commit":"FULL_MAIN_SHA","sources":[]}'
       render: json
     validations:

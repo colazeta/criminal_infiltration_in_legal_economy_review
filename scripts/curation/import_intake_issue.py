@@ -135,7 +135,7 @@ def parse_search_manifest(body: str, batch_id: str) -> dict[str, str]:
         raise IntakeImportError("Search and provenance log identity is invalid")
     sources = manifest["sources"]
     if not isinstance(sources, list) or len(sources) != 1:
-        raise IntakeImportError("Search and provenance log must contain only Exa")
+        raise IntakeImportError("Search and provenance log must contain exactly one final discovery provider")
     query_sources: dict[str, str] = {}
     seen_sources: set[str] = set()
     for source_index, source in enumerate(sources):
@@ -143,8 +143,10 @@ def parse_search_manifest(body: str, batch_id: str) -> dict[str, str]:
         if not isinstance(source, dict) or set(source) != SEARCH_SOURCE_FIELDS:
             raise IntakeImportError(f"{label}: fields are invalid")
         source_name = source["source"]
-        if source_name != "Exa" or source_name in seen_sources:
+        allowed_sources = {"Exa"} if manifest["schema_version"] == 2 else {"Exa", "Parallel Search"}
+        if source_name not in allowed_sources or source_name in seen_sources:
             raise IntakeImportError(f"{label}.source is invalid or duplicated")
+        prefix = {"Exa": "EXA", "Parallel Search": "PARALLEL"}[source_name]
         seen_sources.add(source_name)
         queries = source["queries"]
         if not isinstance(queries, list) or not 7 <= len(queries) <= 100:
@@ -156,7 +158,7 @@ def parse_search_manifest(body: str, batch_id: str) -> dict[str, str]:
                 raise IntakeImportError(f"{query_label}: fields are invalid")
             query_id = required(query["query_id"], f"{query_label}.query_id", 80)
             if (
-                not re.fullmatch(r"EXA-W[1-7]-Q[1-9][0-9]*", query_id)
+                not re.fullmatch(rf"{prefix}-W[1-7]-Q[1-9][0-9]*", query_id)
                 or query_id in query_sources
             ):
                 raise IntakeImportError(f"{query_label}.query_id is invalid or duplicated")
@@ -164,8 +166,8 @@ def parse_search_manifest(body: str, batch_id: str) -> dict[str, str]:
             query_sources[query_id] = source_name
             windows.add(query_id.split("-")[1])
         if windows != {f"W{i}" for i in range(1, 8)}:
-            raise IntakeImportError("Search and provenance log must cover Exa W1–W7")
-    if seen_sources != {"Exa"}:
+            raise IntakeImportError("Search and provenance log must cover final-provider W1–W7")
+    if len(seen_sources) != 1:
         raise IntakeImportError("Search and provenance log source set is incomplete")
     return query_sources
 
@@ -256,8 +258,9 @@ def parse_manifest(body: str, query_sources: dict[str, str] | None = None) -> di
         validated_sources = [
             required(source, f"{label}.sources[]", 40) for source in sources
         ]
+        allowed_candidate_sources = {"Exa"} if manifest["schema_version"] == 2 else {"Exa", "Parallel Search"}
         if (
-            set(validated_sources) != {"Exa"}
+            not set(validated_sources).issubset(allowed_candidate_sources)
             or len(validated_sources) != len(set(validated_sources))
         ):
             raise IntakeImportError(f"{label}.sources is invalid")

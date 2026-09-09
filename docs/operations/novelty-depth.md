@@ -8,8 +8,8 @@ head of a ranking, examining only the first 10 or 20 returned results can produc
 an artificial zero-yield run even though relevant unseen literature remains below
 the cutoff or is reachable through a materially different query formulation.
 
-This document governs the operational stopping rule for the Exa-only surveillance
-lane. It does not change scientific eligibility, canonical identity, the formal
+This document governs the operational stopping rule for the Exa-primary surveillance
+lane with a governed Parallel Search fallback. It does not change scientific eligibility, canonical identity, the formal
 E1-E3 expansion protocol, or the human saturation decision.
 
 ## Core rule
@@ -76,7 +76,7 @@ work toward novelty is not an eligibility decision.
 
 For every W1-W7 workstream:
 
-1. Run the planned Exa query and preserve every returned occurrence.
+1. Run the planned Exa query and preserve every returned occurrence while Exa remains available under the governed provider limits.
 2. Reconcile identity against the active register, queue and post-reset intake
    issues.
 3. Count unseen plausible scholarly works.
@@ -85,7 +85,8 @@ For every W1-W7 workstream:
 5. Continue by one or both of these authorised mechanisms:
    - examine a deeper rank tail when the provider/interface permits it;
    - execute an additional materially different query within the same workstream
-     using the next `EXA-Wn-Qm` identifier.
+     using the next provider-scoped identifier (`EXA-Wn-Qm` for Exa;
+     `PARALLEL-Wn-Qm` after governed fallback).
 6. Stop that workstream only when one of the stopping conditions below is met.
 
 A workstream is therefore a coverage objective and may contain multiple queries.
@@ -121,6 +122,33 @@ no additional unseen plausible scholarly works after deduplication. Record the
 query variants and marginal yield. This supports a statement of low marginal
 yield for that workstream/query family only; it does not establish literature
 saturation.
+
+## Governed Exa-limit fallback
+
+Parallel Search is **not** a co-equal daily source. It is activated only when Exa
+cannot continue because of a documented provider limit: credit/quota exhaustion,
+rate limiting that remains after the bounded retry, or an exposed provider/interface
+cap that prevents the required novelty-depth continuation. Generic metadata ambiguity,
+GitHub failure, governance failure, authentication uncertainty or disappointing yield
+do not authorise fallback.
+
+When fallback activates:
+
+1. stop issuing Exa searches for that batch;
+2. record the Exa failure code, requested/effective cap where known, number of primary
+   queries completed and any aggregate raw-occurrence telemetry in the run notes;
+3. restart the coverage objective from W1 with Parallel Search and run W1-W7 under the
+   same novelty target, identity rules, query rotation and stopping conditions;
+4. use `PARALLEL-Wn-Qm` query identifiers in the fallback search manifest;
+5. if the fallback completes, final batch counts and CandidateRecord intake are derived
+   only from the complete Parallel Search rerun. The incomplete Exa attempt is diagnostic
+   provenance and is not mixed into yield denominators;
+6. if Parallel Search also fails before W1-W7 complete, the batch remains `partial` or
+   `failed` under the terminal gate, with no intake.
+
+This clean restart avoids provider-mix artefacts in candidate-yield statistics. A switch
+to Parallel Search is therefore continuity handling, not evidence of literature
+saturation and not permission to weaken `NOVELTY_TARGET`.
 
 ## Query rotation
 

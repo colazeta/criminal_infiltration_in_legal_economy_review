@@ -218,7 +218,9 @@ def verify_search_manifest(run: dict, section: str) -> dict[str, str]:
         planned = run_sources[source_name]["queries_planned"]
         if not isinstance(queries, list) or len(queries) != planned:
             raise MetricsError(f"{label}.queries: count disagrees with planned queries")
-        prefix = source_name.upper()
+        prefix = {"Exa": "EXA", "Parallel Search": "PARALLEL"}.get(source_name)
+        if prefix is None:
+            raise MetricsError(f"{label}.source: source is not governed")
         windows: set[str] = set()
         for query_index, query in enumerate(queries):
             query_label = f"{label}.queries[{query_index}]"
@@ -232,12 +234,12 @@ def verify_search_manifest(run: dict, section: str) -> dict[str, str]:
             required_text(query["query_text"], f"{query_label}.query_text", 2000)
             query_sources[query_id] = source_name
             if run["schema_version"] >= 2:
-                window = re.fullmatch(r"EXA-(W[1-7])-Q[1-9][0-9]*", query_id)
+                window = re.fullmatch(rf"{prefix}-(W[1-7])-Q[1-9][0-9]*", query_id)
                 if not window:
-                    raise MetricsError(f"{query_label}: Exa query must identify a W1–W7 window")
+                    raise MetricsError(f"{query_label}: query must identify a provider-scoped W1–W7 window")
                 windows.add(window.group(1))
         if run["schema_version"] >= 2 and windows != {f"W{i}" for i in range(1, 8)}:
-            raise MetricsError("run.intake_issue: Exa W1–W7 coverage is incomplete")
+            raise MetricsError("run.intake_issue: final provider W1–W7 coverage is incomplete")
     if seen_sources != set(run_sources):
         raise MetricsError("run.intake_issue: Search log source set is incomplete")
     return query_sources
