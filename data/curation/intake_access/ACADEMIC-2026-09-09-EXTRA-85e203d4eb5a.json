@@ -1,0 +1,60 @@
+{
+  "batch_id": "ACADEMIC-2026-09-09-EXTRA-85e203d4eb5a",
+  "receipts": [
+    {
+      "access_status": "unknown",
+      "candidate_id": "CAND-ACADEMIC-2026-09-09-EXTRA-85e203d4eb5a-001"
+    },
+    {
+      "access_status": "unknown",
+      "candidate_id": "CAND-ACADEMIC-2026-09-09-EXTRA-85e203d4eb5a-002"
+    },
+    {
+      "access_status": "unknown",
+      "candidate_id": "CAND-ACADEMIC-2026-09-09-EXTRA-85e203d4eb5a-003"
+    },
+    {
+      "access_status": "unknown",
+      "candidate_id": "CAND-ACADEMIC-2026-09-09-EXTRA-85e203d4eb5a-004"
+    },
+    {
+      "access_status": "unknown",
+      "candidate_id": "CAND-ACADEMIC-2026-09-09-EXTRA-85e203d4eb5a-005"
+    },
+    {
+      "access_status": "unknown",
+      "candidate_id": "CAND-ACADEMIC-2026-09-09-EXTRA-85e203d4eb5a-006"
+    },
+    {
+      "access_status": "unknown",
+      "candidate_id": "CAND-ACADEMIC-2026-09-09-EXTRA-85e203d4eb5a-007"
+    },
+    {
+      "access_status": "unknown",
+      "candidate_id": "CAND-ACADEMIC-2026-09-09-EXTRA-85e203d4eb5a-008"
+    },
+    {
+      "access_status": "unknown",
+      "candidate_id": "CAND-ACADEMIC-2026-09-09-EXTRA-85e203d4eb5a-009"
+    },
+    {
+      "access_status": "unknown",
+      "candidate_id": "CAND-ACADEMIC-2026-09-09-EXTRA-85e203d4eb5a-010"
+    },
+    {
+      "access_status": "unknown",
+      "candidate_id": "CAND-ACADEMIC-2026-09-09-EXTRA-85e203d4eb5a-011"
+    },
+    {
+      "access_status": "unknown",
+      "candidate_id": "CAND-ACADEMIC-2026-09-09-EXTRA-85e203d4eb5a-012"
+    },
+    {
+      "access_status": "unknown",
+      "candidate_id": "CAND-ACADEMIC-2026-09-09-EXTRA-85e203d4eb5a-013"
+    }
+  ],
+  "schema_version": 2,
+  "source_body_sha256": "7c6ede0e5c8090ecfb869549e3de66145d249c211be4e5ecf49c60ff05b6c18a",
+  "source_issue_number": 218
+}
