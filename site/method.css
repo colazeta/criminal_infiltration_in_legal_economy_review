@@ -1,0 +1,94 @@
+/* PLAIN_90S_METHOD_V1
+   The method page is intentionally a linear, document-like 1990s reference page.
+   No cards, grids, hero split, shadows or decorative containers. */
+
+body.classic-method main {
+  background: #ffffff;
+  border-left: 1px solid #707070;
+  border-right: 1px solid #707070;
+  padding: 6px 8px 10px;
+}
+
+body.classic-method .page-tools {
+  margin: -3px -6px 8px;
+}
+
+body.classic-method main > section {
+  max-width: 1100px;
+  margin: 0;
+  padding: 0;
+  scroll-margin-top: 54px;
+}
+
+body.classic-method main > section:first-of-type {
+  padding-top: 2px;
+}
+
+body.classic-method main h1 {
+  margin: 0 0 6px;
+  font: bold 18px/1.2 Tahoma, Arial, Helvetica, sans-serif;
+}
+
+body.classic-method main h2 {
+  margin: 0 0 5px;
+  color: #000000;
+  font: bold 14px/1.25 Tahoma, Arial, Helvetica, sans-serif;
+}
+
+body.classic-method main p,
+body.classic-method main li {
+  max-width: 1050px;
+  color: #000000;
+  font: 13px/1.35 Tahoma, Arial, Helvetica, sans-serif;
+}
+
+body.classic-method main p {
+  margin: 0 0 7px;
+}
+
+body.classic-method main ol,
+body.classic-method main ul {
+  margin: 4px 0 8px 28px;
+  padding: 0;
+}
+
+body.classic-method main li {
+  margin: 0 0 3px;
+  padding: 0;
+}
+
+body.classic-method main > hr {
+  max-width: 1100px;
+  height: 0;
+  margin: 9px 0;
+  border: 0;
+  border-top: 1px solid #808080;
+}
+
+body.classic-method main code {
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  background: transparent;
+  color: #000000;
+  font: 12px "Courier New", Courier, monospace;
+}
+
+body.classic-method main a {
+  color: #0000ee;
+  text-decoration: underline;
+}
+
+body.classic-method footer {
+  margin-top: 0;
+}
+
+@media (max-width: 700px) {
+  body.classic-method main {
+    padding: 6px;
+  }
+
+  body.classic-method .page-tools {
+    margin: -3px -4px 8px;
+  }
+}
