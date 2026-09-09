@@ -5,17 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="Statistiche giornaliere, aggregate e verificabili della ricerca sulla criminal infiltration nell'economia legale."
+      content="Statistiche bibliometriche del corpus e metriche operative verificabili della living review sulla criminal infiltration nell'economia legale."
     />
     <title>Statistiche della ricerca · Criminal Infiltration Archive</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>◫</text></svg>" />
     <link rel="stylesheet" href="./styles.css" />
     <link rel="stylesheet" href="./classic-site.css" />
     <link rel="stylesheet" href="./application.css" />
+    <link rel="stylesheet" href="./bibliometrics.css" />
     <script src="./stats.js?v=oa-030" defer></script>
+    <script src="./bibliometrics.js?v=001" defer></script>
   </head>
   <body class="classic-site classic-stats">
-    <a class="skip-link" href="#research-statistics">Vai alle statistiche</a>
+    <a class="skip-link" href="#literature-statistics">Vai alle statistiche</a>
 
     <header class="site-header"><div class="header-inner">
         <a class="brand" href="./index.html" aria-label="Criminal Infiltration — archivio">
@@ -26,18 +28,18 @@
       </div></header>
 
     <main id="main-content">
-      <div class="page-tools" lang="it"><a href="#definitions-title">Come leggere i dati</a><a href="https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/blob/main/docs/operations/daily-metrics.md" rel="noreferrer">Documentazione</a></div>
-      <p class="archive-reset-note" role="status">Archivio azzerato il 8 settembre 2026 · nuovo perimetro solo open access. Nessun seed approvato. Prima ricerca giornaliera prevista: 9 settembre, ore 07:00 Europe/Rome.</p>
+      <div class="page-tools" lang="it"><a href="#literature-statistics">Letteratura</a><a href="#research-statistics">Audit review</a><a href="#definitions-title">Come leggere i dati</a></div>
+      <p class="archive-reset-note" role="status">Archivio azzerato il 8 settembre 2026 · nuovo perimetro solo open access. Il corpus valutato e il registro operativo restano statisticamente distinguibili.</p>
 
-      <p id="latest-execution" class="status-banner">I risultati delle esecuzioni vengono pubblicati qui dopo la registrazione.</p>
       <section class="intro" aria-labelledby="stats-page-title">
         <div>
-          <p class="eyebrow">Sorveglianza quotidiana</p>
-          <h1 id="stats-page-title">Che cosa trova ogni giorno la ricerca</h1>
+          <p class="eyebrow">Bibliometria + audit della living review</p>
+          <h1 id="stats-page-title">Come evolve la letteratura e come cresce l’archivio</h1>
           <p class="intro-copy">
-            La ricerca quotidiana usa Exa nelle sette finestre W1–W7. Questa pagina misura i risultati restituiti, le ripetizioni, i lavori
-            già conosciuti e i nuovi candidati inviati alla revisione umana. Conserva
-            anche i fallimenti: una ricerca non riuscita non vale zero.
+            Le statistiche bibliometriche descrivono pubblicazioni, journal e autori.
+            Per impostazione predefinita usano soltanto il corpus valutato; un toggle
+            separato permette di osservare anche i record ancora da analizzare senza
+            trasformarli in inclusioni scientifiche.
           </p>
         </div>
         <aside class="scope-note" aria-label="Avviso interpretativo">
@@ -45,64 +47,119 @@
           <div>
             <strong>Nuovo non significa eleggibile</strong>
             <p>
-              Un candidato entra soltanto nella coda editoriale. Inclusione,
-              etichette e pubblicazione richiedono decisioni umane separate.
+              Il corpus valutato sostiene inferenze sulla letteratura inclusa. Il registro
+              pending è una vista esplorativa: i suoi metadata possono essere incompleti o
+              non ancora verificati e non vengono normalizzati silenziosamente.
             </p>
           </div>
         </aside>
       </section>
 
-      <section class="metrics stats-metrics" aria-label="Indicatori recenti">
-        <article>
-          <span id="new-candidates-7">—</span>
-          <p>nuovi candidati negli ultimi 7 giorni osservati</p>
-        </article>
-        <article>
-          <span id="all-time-candidates">—</span>
-          <p>candidati complessivi dalla prima giornata registrata</p>
-        </article>
-        <article>
-          <span id="unique-results-7">—</span>
-          <p>risultati unici negli ultimi 7 giorni osservati</p>
-        </article>
-        <article>
-          <span id="source-completion-30">—</span>
-          <p>completezza delle fonti negli ultimi 30 giorni di calendario</p>
-        </article>
-        <article>
-          <span id="data-through">—</span>
-          <p>dati aggiornati fino al</p>
-        </article>
-      </section>
-
-      <section
-        class="statistics-section"
-        id="research-statistics"
-        aria-labelledby="research-statistics-title"
-      >
+      <section class="statistics-section" id="literature-statistics" aria-labelledby="literature-statistics-title">
         <div class="section-heading">
           <div>
-            <p class="eyebrow">Risultati e novità</p>
-            <h2 id="research-statistics-title">Andamento giornaliero</h2>
+            <p class="eyebrow">Struttura del campo</p>
+            <h2 id="literature-statistics-title">Statistiche della letteratura</h2>
+          </div>
+          <p>Top 10 journal e autori sono determinati sull’intera vista selezionata e poi seguiti anno per anno: la composizione del top 10 non cambia ad ogni anno.</p>
+        </div>
+
+        <div class="bibliometric-controls" role="group" aria-label="Perimetro delle statistiche bibliometriche">
+          <label><input id="include-pending-toggle" type="checkbox" /> Includi record ancora da analizzare</label>
+          <span id="bibliometric-scope-note" aria-live="polite">Caricamento del perimetro…</span>
+        </div>
+
+        <section class="metrics stats-metrics" aria-label="Indicatori bibliometrici">
+          <article><span id="bibliometric-total">—</span><p>record nella vista</p></article>
+          <article><span id="bibliometric-authors">—</span><p>autori distinti nei metadata correnti</p></article>
+          <article><span id="bibliometric-venues">—</span><p>journal / sedi distinti</p></article>
+          <article><span id="bibliometric-years">—</span><p>intervallo degli anni osservati</p></article>
+        </section>
+
+        <div id="bibliometric-empty" class="empty-state" hidden>
+          <h3>Il corpus valutato è ancora vuoto</h3>
+          <p>Attiva “Includi record ancora da analizzare” per una vista esplorativa del registro operativo. Questa vista non equivale ad inclusione scientifica.</p>
+        </div>
+        <div id="bibliometric-error" class="empty-state error-state" hidden>
+          <h3>Le statistiche bibliometriche non possono essere caricate</h3>
+          <p>Il corpus e il registro restano separati; nessun valore viene stimato quando i dati non sono disponibili.</p>
+        </div>
+
+        <div id="bibliometric-content" hidden>
+          <p id="bibliometric-quality-note" class="bibliometric-note"></p>
+
+          <div class="bibliometric-grid">
+            <article class="bibliometric-panel" aria-labelledby="publications-year-title">
+              <h3 id="publications-year-title">Pubblicazioni per anno</h3>
+              <p>Conteggio annuale e crescita cumulativa. Gli anni intermedi senza pubblicazioni restano visibili come zero.</p>
+              <div class="table-scroll"><table><thead><tr><th>Anno</th><th>Paper</th><th>Cumulativo</th><th>Volume relativo</th></tr></thead><tbody id="publications-by-year-body"></tbody></table></div>
+            </article>
+
+            <article class="bibliometric-panel" aria-labelledby="top-journals-title">
+              <h3 id="top-journals-title">Journal / sedi più presenti</h3>
+              <p>Top 10 per numero di lavori nella vista corrente. Le sedi mancanti non vengono imputate.</p>
+              <div class="table-scroll"><table><thead><tr><th>#</th><th>Journal / sede</th><th>Paper</th><th>Quota</th></tr></thead><tbody id="top-journals-body"></tbody></table></div>
+            </article>
+          </div>
+
+          <article class="bibliometric-panel" aria-labelledby="journal-evolution-title">
+            <h3 id="journal-evolution-title">Evoluzione annuale dei top 10 journal / sedi</h3>
+            <p>La matrice usa un top 10 fisso sull’intera vista selezionata. L’intensità della cella rappresenta il conteggio annuale; il numero resta sempre visibile.</p>
+            <div id="journal-evolution"></div>
+          </article>
+
+          <div class="bibliometric-grid">
+            <article class="bibliometric-panel" aria-labelledby="top-authors-title">
+              <h3 id="top-authors-title">Autori più presenti</h3>
+              <p>Il conteggio grezzo è affiancato dal fractional count: ogni paper attribuisce 1/n a ciascuno dei suoi n autori.</p>
+              <div class="table-scroll"><table><thead><tr><th>#</th><th>Autore</th><th>Paper</th><th>Fractional</th></tr></thead><tbody id="top-authors-body"></tbody></table></div>
+            </article>
+
+            <article class="bibliometric-panel" aria-labelledby="author-method-title">
+              <h3 id="author-method-title">Regola di conteggio degli autori</h3>
+              <p>Il top 10 è ordinato per numero grezzo di paper nell’intera vista. Il fractional count è diagnostico e non modifica l’ordinamento. Varianti nominali restano separate finché non sono riconciliate dal processo curatoriale.</p>
+              <p>Questa scelta evita che la pagina assegni automaticamente un’identità d’autore quando i metadata non sono ancora stati verificati.</p>
+            </article>
+          </div>
+
+          <article class="bibliometric-panel" aria-labelledby="author-evolution-title">
+            <h3 id="author-evolution-title">Evoluzione annuale dei top 10 autori</h3>
+            <p>Conteggi grezzi per anno per i dieci autori più presenti nell’intera vista selezionata.</p>
+            <div id="author-evolution"></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="statistics-section" id="research-statistics" aria-labelledby="research-statistics-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Audit della living review</p>
+            <h2 id="research-statistics-title">Che cosa trova ogni giorno la ricerca</h2>
           </div>
           <p>
-            I conteggi principali usano soltanto giornate completate. Le giornate
-            parziali o fallite restano nella tabella e riducono la misura di
-            completezza.
+            Questa sezione non descrive la letteratura inclusa: misura il processo di scoperta.
+            La ricerca quotidiana usa Exa nelle sette finestre W1–W7 e conserva anche
+            giornate parziali o fallite. Una ricerca non riuscita non vale zero.
           </p>
         </div>
 
+        <p id="latest-execution" class="status-banner">I risultati delle esecuzioni vengono pubblicati qui dopo la registrazione.</p>
+
+        <section class="metrics stats-metrics" aria-label="Indicatori recenti">
+          <article><span id="new-candidates-7">—</span><p>nuovi candidati negli ultimi 7 giorni osservati</p></article>
+          <article><span id="all-time-candidates">—</span><p>candidati complessivi dalla prima giornata registrata</p></article>
+          <article><span id="unique-results-7">—</span><p>risultati unici negli ultimi 7 giorni osservati</p></article>
+          <article><span id="source-completion-30">—</span><p>completezza delle fonti negli ultimi 30 giorni di calendario</p></article>
+          <article><span id="data-through">—</span><p>dati aggiornati fino al</p></article>
+        </section>
+
         <div id="metrics-empty" class="empty-state" hidden>
           <h3>La serie giornaliera non è ancora iniziata</h3>
-          <p>
-            Il registro è pronto. La prima esecuzione valida aggiungerà qui i suoi
-            conteggi senza pubblicare titoli o metadati dei candidati.
-          </p>
+          <p>Il registro è pronto. La prima esecuzione valida aggiungerà qui i suoi conteggi senza attribuire automaticamente eleggibilità ai candidati.</p>
         </div>
 
         <p id="run-status" class="status-banner" aria-live="polite"></p>
         <div id="metrics-content" hidden>
-
           <article class="chart-card" aria-labelledby="daily-chart-title">
             <div class="chart-heading">
               <div>
@@ -121,64 +178,18 @@
 
           <section class="source-section" aria-labelledby="source-title">
             <div class="compact-heading">
-              <div>
-                <p class="eyebrow">Controllo delle fonti</p>
-                <h3 id="source-title">Contributo nelle giornate registrate</h3>
-              </div>
-              <p>
-                Periodo di 30 giorni fino all’ultima data del ledger. Il denominatore
-                di questa tabella comprende le giornate registrate; l’indicatore
-                di completezza sopra comprende tutte le giornate attese.
-                I volumi e i candidati sommano soltanto giornate interamente complete;
-                i candidati esclusivi mostrano il contributo marginale.
-              </p>
+              <div><p class="eyebrow">Controllo delle fonti</p><h3 id="source-title">Contributo nelle giornate registrate</h3></div>
+              <p>Periodo di 30 giorni fino all’ultima data del ledger. I volumi e i candidati sommano soltanto giornate interamente complete; i candidati esclusivi mostrano il contributo marginale.</p>
             </div>
-            <div class="table-scroll">
-              <table>
-                <thead>
-                  <tr>
-                    <th scope="col">Fonte</th>
-                    <th scope="col">Esecuzioni complete</th>
-                    <th scope="col">Query complete</th>
-                    <th scope="col">Occorrenze</th>
-                    <th scope="col">Risultati unici nella fonte</th>
-                    <th scope="col">Candidati intercettati</th>
-                    <th scope="col">Candidati esclusivi</th>
-                  </tr>
-                </thead>
-                <tbody id="source-table-body"></tbody>
-              </table>
-            </div>
+            <div class="table-scroll"><table><thead><tr><th scope="col">Fonte</th><th scope="col">Esecuzioni complete</th><th scope="col">Query complete</th><th scope="col">Occorrenze</th><th scope="col">Risultati unici nella fonte</th><th scope="col">Candidati intercettati</th><th scope="col">Candidati esclusivi</th></tr></thead><tbody id="source-table-body"></tbody></table></div>
           </section>
 
           <section class="daily-table-section" aria-labelledby="daily-table-title">
             <div class="compact-heading">
-              <div>
-                <p class="eyebrow">Dati esatti</p>
-                <h3 id="daily-table-title">Calendario degli ultimi 30 giorni</h3>
-              </div>
-              <p>
-                Il trattino indica un dato non misurabile. Non viene mai sostituito
-                con zero.
-              </p>
+              <div><p class="eyebrow">Dati esatti</p><h3 id="daily-table-title">Calendario degli ultimi 30 giorni</h3></div>
+              <p>Il trattino indica un dato non misurabile. Non viene mai sostituito con zero.</p>
             </div>
-            <div class="table-scroll">
-              <table>
-                <thead>
-                  <tr>
-                    <th scope="col">Data</th>
-                    <th scope="col">Stato</th>
-                    <th scope="col">Occorrenze</th>
-                    <th scope="col">Unici</th>
-                    <th scope="col">Già noti</th>
-                    <th scope="col">Candidati</th>
-                    <th scope="col">Tasso di nuovi candidati</th>
-                    <th scope="col">Issue di intake</th>
-                  </tr>
-                </thead>
-                <tbody id="daily-table-body"></tbody>
-              </table>
-            </div>
+            <div class="table-scroll"><table><thead><tr><th scope="col">Data</th><th scope="col">Stato</th><th scope="col">Occorrenze</th><th scope="col">Unici</th><th scope="col">Già noti</th><th scope="col">Candidati</th><th scope="col">Tasso di nuovi candidati</th><th scope="col">Issue di intake</th></tr></thead><tbody id="daily-table-body"></tbody></table></div>
           </section>
         </div>
 
@@ -189,65 +200,29 @@
         </section>
 
         <div id="metrics-error" class="empty-state error-state" hidden>
-          <h3>Le statistiche non possono essere caricate</h3>
+          <h3>Le statistiche operative non possono essere caricate</h3>
           <p>Il sito conserva il precedente rilascio valido; controlla il workflow GitHub.</p>
         </div>
       </section>
 
       <section class="definitions-section" aria-labelledby="definitions-title">
-        <div class="section-heading">
-          <div>
-            <p class="eyebrow">Come leggere i numeri</p>
-            <h2 id="definitions-title">Quattro passaggi diversi</h2>
-          </div>
-        </div>
+        <div class="section-heading"><div><p class="eyebrow">Come leggere i numeri</p><h2 id="definitions-title">Bibliometria e discovery non sono la stessa misura</h2></div></div>
         <div class="method-grid definitions-grid">
-          <article>
-            <span class="step">01</span>
-            <h3>Occorrenze</h3>
-            <p>Ogni risultato restituito da ogni query, comprese le ripetizioni.</p>
-          </article>
-          <article>
-            <span class="step">02</span>
-            <h3>Risultati unici</h3>
-            <p>Record rimasti dopo il confronto di DOI, identificatori e titolo/anno.</p>
-          </article>
-          <article>
-            <span class="step">03</span>
-            <h3>Già noti</h3>
-            <p>Risultati unici già presenti nel registro o in una precedente issue di intake.</p>
-          </article>
-          <article>
-            <span class="step">04</span>
-            <h3>Nuovi candidati</h3>
-            <p>Lavori non già noti, plausibili o incerti, inviati alla valutazione umana.</p>
-          </article>
+          <article><span class="step">01</span><h3>Corpus valutato</h3><p>Default delle bibliometrie: lavori che hanno superato i gate della raccolta pubblica.</p></article>
+          <article><span class="step">02</span><h3>Pending</h3><p>Record operativi ancora da analizzare. Possono essere aggiunti soltanto mediante il toggle e restano dichiarati provvisori.</p></article>
+          <article><span class="step">03</span><h3>Risultati unici</h3><p>Record della sorveglianza rimasti dopo il confronto previsto dal protocollo di discovery.</p></article>
+          <article><span class="step">04</span><h3>Nuovi candidati</h3><p>Lavori non già noti inviati alla valutazione umana; non sono automaticamente eleggibili.</p></article>
         </div>
         <div class="pipeline-panel metrics-boundary">
-          <div>
-            <p class="eyebrow">Confine metodologico</p>
-            <h3>La sorveglianza non misura la saturazione</h3>
-          </div>
-          <p>
-            Le statistiche quotidiane misurano la scoperta. La resa della valutazione
-            umana, l'aumento dei paper eleggibili e l'eventuale regola di arresto si calcolano
-            soltanto sui cicli formali E1–E3 completi.
-          </p>
+          <div><p class="eyebrow">Confine metodologico</p><h3>La sorveglianza non misura la saturazione</h3></div>
+          <p>Le statistiche quotidiane misurano la scoperta. La resa della valutazione umana, l’aumento dei paper eleggibili e l’eventuale regola di arresto si calcolano soltanto sui cicli formali E1–E3 completi.</p>
         </div>
       </section>
     </main>
 
     <footer>
-      <p>
-        Il sito pubblica soltanto aggregati verificati. Titoli dei candidati, note
-        editoriali, prove e decisioni restano fuori da questo dataset.
-      </p>
-      <p>
-        <a href="./">Archivio</a> ·
-        <a href="./data/research-stats.json">JSON statistiche</a> ·
-        <a href="https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/issues/30">Registro GitHub</a> ·
-        <a href="./curate.html">Pannello del curatore</a>
-      </p>
+      <p>Le statistiche bibliometriche mantengono distinto il corpus valutato dai record pending; le statistiche operative descrivono invece il processo di discovery. Nessun full text viene redistribuito.</p>
+      <p><a href="./">Archivio</a> · <a href="./data/research-stats.json">JSON statistiche operative</a> · <a href="https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/issues/30">Registro GitHub</a> · <a href="./curate.html">Pannello del curatore</a></p>
     </footer>
   </body>
 </html>

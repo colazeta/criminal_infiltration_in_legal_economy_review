@@ -3,6 +3,8 @@ const state = {
   query: "",
   topic: "all",
   year: "all",
+  venue: "all",
+  author: "all",
   sort: "newest",
 };
 
@@ -16,6 +18,8 @@ const elements = {
   search: document.querySelector("#search-input"),
   topic: document.querySelector("#topic-filter"),
   year: document.querySelector("#year-filter"),
+  venue: document.querySelector("#venue-filter"),
+  author: document.querySelector("#author-filter"),
   sort: document.querySelector("#sort-order"),
   controls: document.querySelector("#archive-controls"),
 };
@@ -24,6 +28,13 @@ function formatCode(value) {
   return (value || "")
     .replaceAll("_", " ")
     .replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
+function splitAuthors(value) {
+  return String(value || "")
+    .split(";")
+    .map((author) => author.trim())
+    .filter(Boolean);
 }
 
 function makeElement(tag, className, text) {
@@ -128,7 +139,9 @@ function filteredRecords() {
     return (
       (!query || haystack.includes(query)) &&
       (state.topic === "all" || record.topicCode === state.topic) &&
-      (state.year === "all" || String(record.year) === state.year)
+      (state.year === "all" || String(record.year) === state.year) &&
+      (state.venue === "all" || String(record.venue || "").trim() === state.venue) &&
+      (state.author === "all" || splitAuthors(record.authors).includes(state.author))
     );
   });
 
@@ -175,6 +188,22 @@ function populateFilters(records) {
     option.value = String(year);
     elements.year.append(option);
   });
+
+  const venues = [...new Set(records.map((record) => String(record.venue || "").trim()).filter(Boolean))]
+    .sort((a, b) => a.localeCompare(b));
+  venues.forEach((venue) => {
+    const option = makeElement("option", null, venue);
+    option.value = venue;
+    elements.venue.append(option);
+  });
+
+  const authors = [...new Set(records.flatMap((record) => splitAuthors(record.authors)))]
+    .sort((a, b) => a.localeCompare(b));
+  authors.forEach((author) => {
+    const option = makeElement("option", null, author);
+    option.value = author;
+    elements.author.append(option);
+  });
 }
 
 function populateMetrics(payload) {
@@ -203,6 +232,14 @@ elements.year.addEventListener("change", (event) => {
   state.year = event.target.value;
   render();
 });
+elements.venue.addEventListener("change", (event) => {
+  state.venue = event.target.value;
+  render();
+});
+elements.author.addEventListener("change", (event) => {
+  state.author = event.target.value;
+  render();
+});
 elements.sort.addEventListener("change", (event) => {
   state.sort = event.target.value;
   render();
@@ -212,6 +249,8 @@ elements.controls.addEventListener("reset", () => {
     state.query = "";
     state.topic = "all";
     state.year = "all";
+    state.venue = "all";
+    state.author = "all";
     state.sort = "newest";
     render();
   });

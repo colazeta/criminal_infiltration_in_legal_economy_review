@@ -84,6 +84,7 @@ jobs:
           node --check site/app.js
           node --check site/aml.js
           node --check site/stats.js
+          node --check site/bibliometrics.js
           node --check site/curator.js
           node --check site/curator-config.js
           node --check site/curator-consensus.js
@@ -164,6 +165,7 @@ jobs:
           node --check site/app.js
           node --check site/aml.js
           node --check site/stats.js
+          node --check site/bibliometrics.js
           node --check site/curator.js
           node --check site/curator-config.js
           node --check site/curator-consensus.js

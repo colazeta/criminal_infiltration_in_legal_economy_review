@@ -1,0 +1,58 @@
+body.classic-site .bibliometric-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 10px;
+  border: 1px solid #777;
+  background: #eee;
+  margin: 8px 0 12px;
+}
+body.classic-site .bibliometric-controls label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+}
+body.classic-site .bibliometric-controls input { margin: 0; }
+body.classic-site .bibliometric-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+body.classic-site .bibliometric-panel {
+  border: 1px solid #777;
+  background: #fff;
+  padding: 8px;
+}
+body.classic-site .bibliometric-panel h3 { margin-top: 0; }
+body.classic-site .bibliometric-bar-track {
+  display: block;
+  width: 100%;
+  min-width: 120px;
+  height: 12px;
+  border: 1px solid #999;
+  background: #fff;
+}
+body.classic-site .bibliometric-bar-fill {
+  display: block;
+  height: 100%;
+  background: #627995;
+}
+body.classic-site .bibliometric-matrix { width: max-content; min-width: 100%; }
+body.classic-site .bibliometric-matrix th:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  background: #eee;
+  min-width: 220px;
+}
+body.classic-site .matrix-count { text-align: center; font-family: "Courier New", monospace; }
+body.classic-site .matrix-count[data-level="1"] { background: #e3e8ef; }
+body.classic-site .matrix-count[data-level="2"] { background: #c0cad8; }
+body.classic-site .matrix-count[data-level="3"] { background: #91a2b9; }
+body.classic-site .matrix-count[data-level="4"] { background: #627995; color: #fff; }
+body.classic-site .bibliometric-note { font-size: 12px; margin: 8px 0; }
+@media (max-width: 900px) {
+  body.classic-site .bibliometric-grid { grid-template-columns: 1fr; }
+  body.classic-site .bibliometric-controls { align-items: flex-start; flex-direction: column; }
+}
