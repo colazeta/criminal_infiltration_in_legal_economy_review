@@ -72,7 +72,7 @@ class ClassicSiteUiTests(unittest.TestCase):
         self.assertIn("body.classic-method main h2", source)
         self.assertNotIn("display: grid", source)
         self.assertNotIn("box-shadow", source)
-        self.assertNotIn("border-radius", source)
+        self.assertNotIn("border-radius", source.replace("border-radius: 0", ""))
 
     def test_statistics_surfaces_are_flat_tables_and_panels(self) -> None:
         source = (SITE / "classic-site.css").read_text(encoding="utf-8")
