@@ -214,10 +214,6 @@ function populateMetrics(payload) {
   set("#editorial-count", payload.counts.editorialQueue);
   set("#archive-version", `v${payload.archiveVersion}`);
   set("#coverage-date", payload.searchCoverageThrough || "Not yet searched");
-  set("#metadata-fix-count", payload.counts.metadataFix);
-  set("#manual-review-count", payload.counts.manualReview);
-  set("#abstract-review-count", payload.counts.abstractReview);
-  set("#rejected-count", payload.counts.rejectedOmitted);
 }
 
 elements.search.addEventListener("input", (event) => {
