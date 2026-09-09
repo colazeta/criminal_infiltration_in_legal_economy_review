@@ -51,6 +51,7 @@ class ClassicSiteUiTests(unittest.TestCase):
         self.assertGreaterEqual(source.count("<hr"), 7)
         self.assertIn("<ol>", source)
         self.assertIn("<ul>", source)
+        self.assertIn('href="./method.css"', source)
         for section_id in (
             "method-overview",
             "method-scope",
@@ -64,11 +65,14 @@ class ClassicSiteUiTests(unittest.TestCase):
             self.assertIn(f'id="{section_id}"', source)
 
     def test_method_page_has_specific_plain_document_styles(self) -> None:
-        source = (SITE / "classic-site.css").read_text(encoding="utf-8")
+        source = (SITE / "method.css").read_text(encoding="utf-8")
         self.assertIn("PLAIN_90S_METHOD_V1", source)
         self.assertIn("body.classic-method main > section", source)
         self.assertIn("body.classic-method main > hr", source)
         self.assertIn("body.classic-method main h2", source)
+        self.assertNotIn("display: grid", source)
+        self.assertNotIn("box-shadow", source)
+        self.assertNotIn("border-radius", source)
 
     def test_statistics_surfaces_are_flat_tables_and_panels(self) -> None:
         source = (SITE / "classic-site.css").read_text(encoding="utf-8")
