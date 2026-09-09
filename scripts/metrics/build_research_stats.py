@@ -41,12 +41,17 @@ def read_runs(path: Path | None) -> list[dict]:
 
 
 def active_runs(runs):
+    """Return only completed scheduled runs eligible for public statistics.
+
+    Partial and failed runs remain in the validated ledger for operational audit,
+    but they are deliberately absent from the public statistical projection.
+    """
     boundary = datetime.fromisoformat(CYCLE["reset_at"].replace("Z", "+00:00"))
     active = [r for r in runs if not is_extra(r["batch_id"]) and r["run_date"] >= CYCLE["daily_start_date"]
             and datetime.fromisoformat(r["window_start"].replace("Z", "+00:00")) >= boundary]
     if any(r.get("schema_version") not in (2, 3) for r in active):
         raise MetricsError("Active cycle requires the Exa-only v2 run contract")
-    return active
+    return [r for r in active if r.get("status") == "completed"]
 
 
 def main() -> None:
