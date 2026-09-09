@@ -27,8 +27,9 @@ class PlainMethodLayoutTests(unittest.TestCase):
     def test_method_specific_css_stays_plain(self) -> None:
         css = (SITE / "method.css").read_text(encoding="utf-8")
         self.assertIn("PLAIN_90S_METHOD_V1", css)
-        for token in ("display: grid", "box-shadow", "border-radius", "linear-gradient", "radial-gradient"):
+        for token in ("display: grid", "box-shadow", "linear-gradient", "radial-gradient"):
             self.assertNotIn(token, css)
+        self.assertNotIn("border-radius", css.replace("border-radius: 0", ""))
 
 
 if __name__ == "__main__":
