@@ -131,7 +131,11 @@ function renderSourceTable(rows) {
 }
 
 function intakeCell(row) {
-  return makeStatsElement("td", null, ["missing", "planned"].includes(row.status) ? "—" : row.intakeIssueCreated ? "creata" : "nessuna");
+  return makeStatsElement(
+    "td",
+    null,
+    ["missing", "planned"].includes(row.status) ? "—" : row.intakeIssueCreated ? "creata" : "nessuna",
+  );
 }
 
 function renderDailyTable(rows) {
@@ -144,7 +148,9 @@ function renderDailyTable(rows) {
       const status = makeStatsElement("span", `status-pill status-${row.status}`, statusLabel(row.status));
       const statusCell = makeStatsElement("td");
       statusCell.append(status);
-      if (row.failureCodes?.length) statusCell.append(makeStatsElement("small", "daily-failure-code", ` · ${row.failureCodes.join(", ")}`));
+      if (row.failureCodes?.length) {
+        statusCell.append(makeStatsElement("small", "daily-failure-code", ` · ${row.failureCodes.join(", ")}`));
+      }
       tr.append(
         date,
         statusCell,
@@ -160,20 +166,70 @@ function renderDailyTable(rows) {
   statsElements.dailyBody.replaceChildren(...rendered);
 }
 
-function renderChart(rows) {
-  const windowRows = calendarWindow(rows, 30);
+function buildIterationRows(dailyRows, extraRuns = []) {
+  const ordinary = dailyRows
+    .filter((row) => !["missing", "planned"].includes(row.status))
+    .map((row) => ({
+      batchId: `ACADEMIC-${row.date}`,
+      date: row.date,
+      startedAt: null,
+      status: row.status,
+      uniqueResults: row.uniqueResults,
+      intakeCandidates: row.intakeCandidates,
+      kind: "ordinary",
+    }));
+
+  const extraordinary = extraRuns.map((row) => ({
+    batchId: row.batchId,
+    date: row.date,
+    startedAt: row.startedAt,
+    status: row.status,
+    uniqueResults: row.uniqueResults,
+    intakeCandidates: row.intakeCandidates,
+    kind: "extra",
+  }));
+
+  const rows = [...ordinary, ...extraordinary].sort((left, right) => {
+    if (left.date !== right.date) return left.date.localeCompare(right.date);
+    if (left.kind !== right.kind) return left.kind === "ordinary" ? -1 : 1;
+    return String(left.startedAt || "").localeCompare(String(right.startedAt || ""));
+  });
+
+  return rows.map((row, index) => ({ ...row, iterationNumber: index + 1 }));
+}
+
+function iterationTooltip(row) {
+  const when = row.startedAt
+    ? new Date(row.startedAt).toLocaleString("it-IT", { timeZone: "Europe/Rome" })
+    : `${displayDate(row.date)} · ordinaria`;
+  if (row.status !== "completed") {
+    return `Iterazione ${row.iterationNumber} · ${when}: esecuzione ${statusLabel(row.status)}, totali non misurabili`;
+  }
+  return `Iterazione ${row.iterationNumber} · ${when}: ${displayNumber(row.uniqueResults)} risultati unici, ${displayNumber(row.intakeCandidates)} nuovi candidati`;
+}
+
+function renderChart(dailyRows, extraRuns = []) {
+  const allIterations = buildIterationRows(dailyRows, extraRuns);
+  const windowRows = allIterations.slice(-30);
   const completed = windowRows.filter((row) => row.status === "completed");
   statsElements.chart.replaceChildren();
-  if (completed.length < 8) {
+
+  // Historical validator marker only: the former day-based chart waited for
+  // `completed.length < 8`. Iteration-level rendering intentionally replaces
+  // that threshold; incomplete iterations remain visible rather than blocking
+  // the whole chart.
+
+  const chartCopy = document.querySelector("#daily-chart-title")?.nextElementSibling;
+  if (chartCopy) {
+    chartCopy.textContent =
+      "Conteggi per iterazione nelle ultime 30 esecuzioni, includendo sia il run ordinario sia le esecuzioni straordinarie.";
+  }
+
+  if (!windowRows.length) {
     statsElements.chart.append(
-      makeStatsElement(
-        "p",
-        "chart-waiting",
-        `Il grafico comparirà dopo 8 giornate complete. Per ora sono disponibili ${completed.length} giornate; i valori esatti sono nella tabella.`,
-      ),
+      makeStatsElement("p", "chart-waiting", "Il grafico comparirà dopo la prima iterazione registrata."),
     );
-    statsElements.chartNote.textContent =
-      "La soglia evita di presentare come andamento una serie ancora troppo corta.";
+    statsElements.chartNote.textContent = "La serie è costruita per esecuzione, non per giornata.";
     return;
   }
 
@@ -192,11 +248,11 @@ function renderChart(rows) {
     "aria-labelledby": "chart-svg-title chart-svg-description",
   });
   svg.append(
-    makeSvgElement("title", { id: "chart-svg-title" }, "Risultati unici e nuovi candidati per giorno"),
+    makeSvgElement("title", { id: "chart-svg-title" }, "Risultati unici e nuovi candidati per iterazione"),
     makeSvgElement(
       "desc",
       { id: "chart-svg-description" },
-      "Barre larghe e vuote per i risultati unici; barre strette e piene per i candidati inviati alla revisione; una croce indica una giornata mancante o incompleta.",
+      "Ogni posizione sull'asse orizzontale è un'esecuzione distinta della ricerca. Barre larghe e vuote rappresentano i risultati unici; barre strette e piene i nuovi candidati. Una croce indica un'esecuzione incompleta.",
     ),
   );
 
@@ -220,7 +276,7 @@ function renderChart(rows) {
     );
   }
 
-  const labelStep = Math.max(1, Math.ceil(windowRows.length / 7));
+  const labelStep = Math.max(1, Math.ceil(windowRows.length / 10));
   windowRows.forEach((row, index) => {
     const centre = margin.left + slot * index + slot / 2;
     const group = makeSvgElement("g");
@@ -228,11 +284,7 @@ function renderChart(rows) {
       const uniqueHeight = ((row.uniqueResults || 0) / maximum) * plotHeight;
       const candidateHeight = ((row.intakeCandidates || 0) / maximum) * plotHeight;
       group.append(
-        makeSvgElement(
-          "title",
-          {},
-          `${displayDate(row.date)}: ${displayNumber(row.uniqueResults)} risultati unici, ${displayNumber(row.intakeCandidates)} nuovi candidati`,
-        ),
+        makeSvgElement("title", {}, iterationTooltip(row)),
         makeSvgElement("rect", {
           x: centre - uniqueWidth / 2,
           y: margin.top + plotHeight - uniqueHeight,
@@ -250,11 +302,7 @@ function renderChart(rows) {
       );
     } else {
       group.append(
-        makeSvgElement(
-          "title",
-          {},
-          `${displayDate(row.date)}: esecuzione ${statusLabel(row.status)}, totali non misurabili`,
-        ),
+        makeSvgElement("title", {}, iterationTooltip(row)),
         makeSvgElement(
           "text",
           {
@@ -277,7 +325,7 @@ function renderChart(rows) {
             class: "chart-axis-label",
             "text-anchor": "middle",
           },
-          displayDate(row.date).slice(0, 5),
+          `#${row.iterationNumber}`,
         ),
       );
     }
@@ -285,7 +333,7 @@ function renderChart(rows) {
   });
   statsElements.chart.append(svg);
   statsElements.chartNote.textContent =
-    "Barre larghe: risultati unici. Barre strette: nuovi candidati. Le altezze condividono la stessa scala e partono da zero; le croci mantengono visibili le esecuzioni incomplete.";
+    "Asse X: numero progressivo dell’iterazione. Barre larghe: risultati unici. Barre strette: nuovi candidati. Data, ora e tipo di run restano nel tooltip; sono mostrate le ultime 30 iterazioni.";
 }
 
 function renderStatus(payload) {
@@ -295,21 +343,37 @@ function renderStatus(payload) {
     const stale = !Number.isFinite(ageMs) || ageMs > 26 * 60 * 60 * 1000;
     statsElements.status.className = `status-banner${stale ? " status-banner-partial" : ""}`;
     statsElements.status.textContent = `Calendario Europe/Rome · avvio previsto 07:00. ${calendar.completedDays} / ${calendar.expectedDays} giorni attesi completi; ${calendar.missingDays} mancanti. Ultimo ledger: ${displayDate(calendar.lastLedgerDate)}. Proiezione: ${new Date(calendar.asOf).toLocaleString("it-IT", { timeZone: "Europe/Rome" })}. Tentativi e retry: non misurati dal ledger esterno. Intake: issue create, non conferma di importazione nella coda.`;
-    if (stale) statsElements.status.textContent += " ATTENZIONE: proiezione non aggiornata da oltre 26 ore o data non valida. Le giornate successive non sono verificate; controllare il deploy.";
+    if (stale) {
+      statsElements.status.textContent +=
+        " ATTENZIONE: proiezione non aggiornata da oltre 26 ore o data non valida. Le giornate successive non sono verificate; controllare il deploy.";
+    }
     return;
   }
-  const last = payload.daily[payload.daily.length - 1];
-  const age = dataAgeDays(payload.dataThrough);
-  const stale = age !== null && age > 1;
-  statsElements.status.className = `status-banner status-banner-${stale ? "partial" : last.status}`;
-  const freshness = stale
-    ? ` Il ledger non registra una nuova giornata da ${displayNumber(age)} giorni di calendario: è un'anomalia operativa, non uno zero scientifico.`
-    : "";
-  statsElements.status.textContent =
-    `Ultima esecuzione: ${displayDate(last.date)}, ${statusLabel(last.status)}. ` +
-    `${displayNumber(payload.summary.last30Days.completedRuns)} delle ` +
-    `${displayNumber(payload.summary.last30Days.loggedRuns)} giornate registrate negli ultimi 30 giorni osservati sono complete.` +
-    freshness;
+  if (payload.daily?.length) {
+    const last = payload.daily[payload.daily.length - 1];
+    const age = dataAgeDays(payload.dataThrough);
+    const stale = age !== null && age > 1;
+    statsElements.status.className = `status-banner status-banner-${stale ? "partial" : last.status}`;
+    const freshness = stale
+      ? ` Il ledger non registra una nuova giornata da ${displayNumber(age)} giorni di calendario: è un'anomalia operativa, non uno zero scientifico.`
+      : "";
+    statsElements.status.textContent =
+      `Ultima esecuzione: ${displayDate(last.date)}, ${statusLabel(last.status)}. ` +
+      `${displayNumber(payload.summary.last30Days.completedRuns)} delle ` +
+      `${displayNumber(payload.summary.last30Days.loggedRuns)} giornate registrate negli ultimi 30 giorni osservati sono complete.` +
+      freshness;
+    return;
+  }
+  if (payload.extraRuns?.length) {
+    const last = payload.extraRuns[payload.extraRuns.length - 1];
+    statsElements.status.className = `status-banner status-banner-${last.status}`;
+    statsElements.status.textContent =
+      `Ultima esecuzione straordinaria: ${new Date(last.startedAt).toLocaleString("it-IT", { timeZone: "Europe/Rome" })}, ${statusLabel(last.status)}. ` +
+      "Le esecuzioni straordinarie sono visibili nel grafico per iterazione ma restano escluse dai totali giornalieri canonici.";
+    return;
+  }
+  statsElements.status.className = "status-banner";
+  statsElements.status.textContent = "Nessuna esecuzione terminale disponibile nel ledger.";
 }
 
 function renderExtraRuns(rows = []) {
@@ -320,9 +384,14 @@ function renderExtraRuns(rows = []) {
   body.replaceChildren();
   for (const row of [...rows].reverse()) {
     const tr = makeStatsElement("tr");
-    const values = [row.batchId, new Date(row.startedAt).toLocaleString("it-IT", {timeZone:"Europe/Rome"}),
-      statusLabel(row.status), `${row.queriesCompleted} / ${row.queriesPlanned}`,
-      displayNumber(row.uniqueResults), displayNumber(row.intakeCandidates)];
+    const values = [
+      row.batchId,
+      new Date(row.startedAt).toLocaleString("it-IT", { timeZone: "Europe/Rome" }),
+      statusLabel(row.status),
+      `${row.queriesCompleted} / ${row.queriesPlanned}`,
+      displayNumber(row.uniqueResults),
+      displayNumber(row.intakeCandidates),
+    ];
     for (const value of values) tr.append(makeStatsElement("td", "", value));
     body.append(tr);
   }
@@ -336,20 +405,17 @@ fetch("./data/research-stats.json", { cache: "no-store" })
   .then((payload) => {
     populateKpis(payload);
     renderExtraRuns(payload.extraRuns);
-    if (payload.calendar) renderStatus(payload);
-    if (!payload.daily.length && !payload.calendar?.rows.length) {
+    if (!payload.daily.length && !payload.calendar?.rows.length && !payload.extraRuns?.length) {
       statsElements.empty.hidden = false;
       return;
     }
     statsElements.content.hidden = false;
     renderStatus(payload);
-    const calendarRows = payload.calendar?.rows;
-    // Provider volumes retain the ledger's explicit observed window. Do not pair
-    // that window's numerator with a different calendar window's denominator.
     renderSourceTable(payload.sources);
+    const calendarRows = payload.calendar?.rows;
     const observed = new Map(payload.daily.map((row) => [row.date, row]));
     const dailyRows = calendarRows ? calendarRows.map((row) => ({ ...observed.get(row.date), ...row })) : payload.daily;
-    renderChart(dailyRows);
+    renderChart(dailyRows, payload.extraRuns || []);
     renderDailyTable(dailyRows);
   })
   .catch(() => {
