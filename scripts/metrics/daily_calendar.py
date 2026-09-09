@@ -20,8 +20,8 @@ def calendar_projection(runs, as_of, start=START, review_id="legacy"):
     if any(date.fromisoformat(r["run_date"]) < start for r in runs):
         raise ValueError("run predates this calendar")
     expected_sources = SOURCE_COUNTS[review_id]
-    expected_version = 1 if review_id == "legacy" else 2
-    if any(r.get("schema_version") != expected_version or len(r["expected_sources"]) != expected_sources for r in runs):
+    expected_versions = {1} if review_id == "legacy" else {2, 3}
+    if any(r.get("schema_version") not in expected_versions or len(r["expected_sources"]) != expected_sources for r in runs):
         raise ValueError("run source policy does not belong to this calendar")
     if isinstance(as_of, str):
         as_of = datetime.fromisoformat(as_of.replace("Z", "+00:00"))
