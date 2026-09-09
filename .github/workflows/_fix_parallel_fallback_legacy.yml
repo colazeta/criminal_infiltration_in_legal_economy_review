@@ -27,9 +27,9 @@ jobs:
           rm .github/workflows/_fix_parallel_fallback_legacy.yml
       - name: Run targeted surveillance tests
         run: |
-          python3 -m unittest tests.test_parallel_search_fallback
-          python3 -m unittest tests.test_surveillance_metrics
-          python3 -m unittest tests.test_intake_open_access
+          python3 -m unittest discover -s tests -p 'test_parallel_search_fallback.py'
+          python3 -m unittest discover -s tests -p 'test_surveillance_metrics.py'
+          python3 -m unittest discover -s tests -p 'test_intake_open_access.py'
       - name: Commit compatibility fix
         run: |
           git config user.name "github-actions[bot]"
