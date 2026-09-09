@@ -13,7 +13,7 @@ The contract applies to:
 - `site/404.html` — not-found surface;
 - `site/curate.html` — authenticated curator workstation.
 
-The public static pages share `site/classic-site.css`. The curator keeps its dedicated fullscreen CSS because it has stronger application-layout requirements, but its title/menu chrome follows the same visual language.
+The public static pages share `site/classic-site.css`. The methodology page adds the narrowly scoped `site/method.css` after the shared styles only to enforce its deliberately plain document layout. The curator keeps its dedicated fullscreen CSS because it has stronger application-layout requirements, while its title/menu chrome follows the same visual language.
 
 ## Visual rules
 
@@ -24,7 +24,7 @@ Required characteristics:
 - full-width working area;
 - navy application title bars and grey menu bars;
 - Arial/Helvetica for UI text and Courier for identifiers/status values;
-- rectangular 1px borders;
+- rectangular 1px borders where interface chrome or data structure requires them;
 - white data panes on a grey application background;
 - dense filters and tables;
 - publication records presented as database rows with expandable details;
@@ -54,7 +54,7 @@ This is a presentational contract only. It does not alter:
 - curator authentication, retrieval or decision workflows;
 - ontology, registry or publication state.
 
-`styles.css` remains loaded first for existing structural compatibility. `classic-site.css` is loaded afterwards and is the authoritative public visual layer.
+`styles.css` remains loaded first for existing structural compatibility. `classic-site.css` provides the shared public visual layer; `method.css` is a presentation-only extension for the standalone method document.
 
 ## Curator consistency
 
@@ -70,6 +70,7 @@ The fullscreen contract and internal scrolling remain governed by the curator-sp
 - the classic stylesheet is full-width and flat;
 - publication cards are visually converted into database records;
 - `method.html` remains a plain linear document and does not regress to cards, grids or split hero panels;
+- `method.css` remains free of grid/card/shadow styling;
 - statistics retain flat table/panel patterns;
 - curator navigation follows the same application language without importing the public skin;
 - the 404 page is rendered as a classic application error window.
