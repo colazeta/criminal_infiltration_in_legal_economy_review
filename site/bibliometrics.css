@@ -25,13 +25,18 @@ body.classic-site .bibliometric-panel {
   padding: 8px;
 }
 body.classic-site .bibliometric-panel h3 { margin-top: 0; }
-body.classic-site .bibliometric-bar {
+body.classic-site .bibliometric-bar-track {
   display: block;
-  min-width: 2.5em;
-  padding: 2px 4px;
-  background: linear-gradient(to right, #9aa8bd var(--bar-share), transparent var(--bar-share));
-  border: 1px solid #aaa;
-  font-family: "Courier New", monospace;
+  width: 100%;
+  min-width: 120px;
+  height: 12px;
+  border: 1px solid #999;
+  background: #fff;
+}
+body.classic-site .bibliometric-bar-fill {
+  display: block;
+  height: 100%;
+  background: #627995;
 }
 body.classic-site .bibliometric-matrix { width: max-content; min-width: 100%; }
 body.classic-site .bibliometric-matrix th:first-child {
