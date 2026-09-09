@@ -1,4 +1,8 @@
-"""Public execution telemetry, deliberately outside the scheduled-day totals."""
+"""Public execution telemetry for completed extraordinary runs only.
+
+Partial and failed extraordinary runs remain available in the canonical ledger for
+operational audit, but they are intentionally excluded from the public statistics.
+"""
 from datetime import datetime
 from scripts.surveillance_identity import batch_day, is_extra, validate_cycle_run
 
@@ -18,6 +22,8 @@ def project_extra_runs(runs, cycle):
         if not is_extra(run['batch_id']):
             continue
         validate_cycle_run(run, cycle)
+        if run['status'] != 'completed':
+            continue
         source = run['sources'][0]
         rows.append(dict(batchId=run['batch_id'], date=run['run_date'],
                          startedAt=run['window_start'], finishedAt=run['window_end'],
@@ -34,7 +40,6 @@ def project_extra_runs(runs, cycle):
 
 def validate_extra_rows(rows, cycle, *, as_of=None):
     from zoneinfo import ZoneInfo
-    import re
     if not isinstance(rows, list):
         raise ValueError('extraRuns must be an array')
     seen = set()
@@ -53,14 +58,10 @@ def validate_extra_rows(rows, cycle, *, as_of=None):
             raise ValueError('invalid extra execution window')
         validate_cycle_run({'batch_id': batch, 'run_date': row['date'], 'window_start': row['startedAt']}, cycle)
         planned, completed = row['queriesPlanned'], row['queriesCompleted']
-        if type(planned) is not int or type(completed) is not int or not 7 <= planned <= 1000 or not 0 <= completed <= planned:
-            raise ValueError('invalid extra query counts')
-        status = 'completed' if completed == planned else ('partial' if completed else 'failed')
-        if row['status'] != status:
-            raise ValueError('extra status disagrees with query completion')
+        if type(planned) is not int or type(completed) is not int or not 7 <= planned <= 1000 or completed != planned:
+            raise ValueError('public extra execution must be complete')
+        if row['status'] != 'completed':
+            raise ValueError('public extra execution status must be completed')
         volumes = [row[k] for k in ('intakeCandidates', 'uniqueResults', 'occurrencesReturned')]
-        if status == 'completed':
-            if any(type(v) is not int or v < 0 for v in volumes) or volumes != sorted(volumes) or row['failureCode'] is not None:
-                raise ValueError('invalid completed extra volumes')
-        elif any(v is not None for v in volumes) or not isinstance(row['failureCode'], str) or not re.fullmatch(r'[a-z][a-z0-9_]{2,79}', row['failureCode']):
-            raise ValueError('failed/partial extra must retain null volumes and a technical failure')
+        if any(type(v) is not int or v < 0 for v in volumes) or volumes != sorted(volumes) or row['failureCode'] is not None:
+            raise ValueError('invalid completed extra volumes')

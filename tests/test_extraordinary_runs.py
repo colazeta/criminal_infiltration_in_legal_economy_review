@@ -164,7 +164,7 @@ class ExtraordinaryRunTests(unittest.TestCase):
                 self.assertEqual(queue.read_bytes(),before)
                 self.assertFalse(list((root/'data/curation/intake_access').glob('*.json')))
 
-    def test_partial_extra_never_displays_zero_candidates(self):
+    def test_partial_extra_is_not_projected_publicly(self):
         run=extra();run['status']='partial'
         source=run['sources'][0];source.update(status='failed',queries_completed=3,failure_code='connector_unavailable')
         for key in ('occurrences_returned','unique_results','candidate_hits','exclusive_candidates'):source[key]=None
@@ -172,8 +172,7 @@ class ExtraordinaryRunTests(unittest.TestCase):
         run['assessments']={key:0 for key in run['assessments']}
         run['intake_issue']={'created':False,'number':None,'url':None}
         rows=project_extra_runs([run],CYCLE)
-        self.assertEqual(rows[0]['queriesCompleted'],3)
-        self.assertIsNone(rows[0]['intakeCandidates'])
+        self.assertEqual(rows, [])
 
 
 class OAAcquisitionTests(unittest.TestCase):
