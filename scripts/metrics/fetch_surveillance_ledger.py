@@ -218,7 +218,7 @@ def verify_search_manifest(run: dict, section: str) -> dict[str, str]:
         planned = run_sources[source_name]["queries_planned"]
         if not isinstance(queries, list) or len(queries) != planned:
             raise MetricsError(f"{label}.queries: count disagrees with planned queries")
-        prefix = {"Exa": "EXA", "Parallel Search": "PARALLEL"}.get(source_name)
+        prefix = {"Consensus": "CONSENSUS", "Exa": "EXA", "Parallel Search": "PARALLEL"}.get(source_name)
         if prefix is None:
             raise MetricsError(f"{label}.source: source is not governed")
         windows: set[str] = set()

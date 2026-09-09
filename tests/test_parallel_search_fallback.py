@@ -58,7 +58,7 @@ class ParallelSearchFallbackTests(unittest.TestCase):
     def test_parallel_query_cannot_use_exa_prefix(self):
         run = validate_run(fallback_run())
         section = search_section(run).replace("PARALLEL-W4-Q1", "EXA-W4-Q1")
-        with self.assertRaisesRegex(MetricsError, "provider-scoped W1–W7"):
+        with self.assertRaisesRegex(MetricsError, "source-scoped ID"):
             verify_search_manifest(run, section)
 
     def test_public_stats_can_span_exa_and_parallel_completed_days(self):
