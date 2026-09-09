@@ -556,6 +556,71 @@
       "accessStatus": "unknown",
       "registeredAt": "2026-09-09",
       "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-09-EXTRA-24b7a783a9a3-001",
+      "title": "The financial profile of firms infiltrated by organised crime in Italy",
+      "authors": "Marco De Simoni",
+      "year": 2022,
+      "venue": "UIF, Quaderni dell'antiriciclaggio, n. 17",
+      "doi": "",
+      "sourceLinks": [
+        "https://uif.bancaditalia.it/pubblicazioni/quaderni/2022/quaderno-17-2022/QAR_17_march_2022.pdf"
+      ],
+      "metadataStatus": "metadata_partial",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-09",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-09-EXTRA-24b7a783a9a3-002",
+      "title": "IDENTIFYING PATTERNS OF MAFIA MOBILITY: THE PRESENCE OF THE ITALIAN MAFIAS IN EUROPE",
+      "authors": "Federica Sarno",
+      "year": 2015,
+      "venue": "",
+      "doi": "",
+      "sourceLinks": [
+        "https://publicatt.unicatt.it/handle/10280/6118"
+      ],
+      "metadataStatus": "metadata_partial",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-09",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-09-EXTRA-24b7a783a9a3-003",
+      "title": "The Italian mafias in the world: A systematic assessment of the mobility of criminal groups",
+      "authors": "Francesco Calderoni; Giulia Berlusconi; Lorella Garofalo; Luca Giommoni; Federica Sarno",
+      "year": null,
+      "venue": "European Journal of Criminology",
+      "doi": "10.1177/1477370815623570",
+      "sourceLinks": [
+        "https://doi.org/10.1177/1477370815623570"
+      ],
+      "metadataStatus": "metadata_partial",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-09",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-09-EXTRA-24b7a783a9a3-004",
+      "title": "Understanding criminal mobility: The case of the Neapolitan Camorra",
+      "authors": "Felia Allum",
+      "year": 2014,
+      "venue": "Journal of Modern Italian Studies",
+      "doi": "10.1080/1354571x.2014.962257",
+      "sourceLinks": [
+        "https://purehost.bath.ac.uk/ws/portalfiles/portal/122463450/Functionalmobility.pdf",
+        "https://doi.org/10.1080/1354571X.2014.962257"
+      ],
+      "metadataStatus": "metadata_partial",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-09",
+      "topicCode": ""
     }
   ]
 }
