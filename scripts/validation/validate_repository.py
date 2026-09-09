@@ -838,14 +838,25 @@ def check_governance_copy() -> None:
     run_schema = json.loads(
         (ROOT / "schema/surveillance-run.schema.json").read_text(encoding="utf-8")
     )
-    source_enum = run_schema["properties"]["expected_sources"]["items"].get("enum")
-    if set(source_enum or []) != {"Exa"}:
-        fail("Daily telemetry schema must enforce the governed active source set")
+    expected_sources_schema = run_schema["properties"]["expected_sources"]
+    source_enum = expected_sources_schema["items"].get("enum")
+    record_source_enum = run_schema["$defs"]["source"]["properties"]["source"].get("enum")
+    governed_daily_sources = {"Exa", "Parallel Search"}
+    if (
+        set(source_enum or []) != governed_daily_sources
+        or set(record_source_enum or []) != governed_daily_sources
+        or expected_sources_schema.get("minItems") != 1
+        or expected_sources_schema.get("maxItems") != 1
+    ):
+        fail("Daily telemetry schema must enforce the governed single-provider source set")
     metrics_builder = (ROOT / "scripts/metrics/surveillance.py").read_text(
         encoding="utf-8"
     )
     for phrase in (
-        'ACTIVE_SOURCES = frozenset({"Exa"})',
+        'PRIMARY_SOURCE = "Exa"',
+        'FALLBACK_SOURCE = "Parallel Search"',
+        'ACTIVE_SOURCES = frozenset({PRIMARY_SOURCE, FALLBACK_SOURCE})',
+        'SOURCE_SETS = {1: frozenset({"Consensus", "Exa"}), 2: frozenset({PRIMARY_SOURCE})}',
         "summed(runs_subset",
     ):
         if phrase not in metrics_builder:

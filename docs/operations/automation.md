@@ -2,18 +2,20 @@
 
 ## Purpose
 
-ChatGPT Work runs a conservative surveillance intake using Exa only,
-then uses GitHub only to create a structured issue for new candidates. It does
-not edit repository content. The owner removed Consensus on 2026-09-08. Scite
-remains authorised for separate formal-cycle research, not for this daily lane.
+The dedicated living-review automation runs a conservative surveillance intake using Exa
+as the primary provider. If Exa hits a documented credit/quota/rate/provider limit that
+prevents completion, Parallel Search performs a governed full W1-W7 fallback rerun. GitHub
+is used only for the structured intake issue and terminal ledger comment. The automation
+does not edit repository content. Consensus remains excluded; Scite remains authorised for
+separate formal-cycle research, not for this daily lane.
 
 This surveillance feed supports, but never replaces, the formal E1–E3 process
 in the [literature expansion strategy](../methodology/expansion.md).
 
-The active Work task is **Daily AML & CI Research**. Its personal digest is
-separate from the repository lane described here. The repository lane creates
-no issue unless it finds genuinely new, in-scope candidates and completes every
-required check.
+The active repository writer is the dedicated **Living review infiltrazione** automation.
+Personal research digests are read-only with respect to this repository. The repository
+lane creates no issue unless it finds genuinely new, in-scope candidates and completes
+every required check.
 
 ## Write boundary
 
@@ -44,13 +46,16 @@ New runs and both intake manifests use `schema_version: 3`. The canonical
 ledger envelope is one summary line, a blank line, `<!-- surveillance-run:v3 -->`,
 and one fenced JSON object. The summary remains
 `Daily surveillance batch ACADEMIC-YYYY-MM-DD: completed.` (or `partial`/`failed`).
-The active source set is `["Exa"]`; the historical v1 contract is retained in
+A completed v3 batch has exactly one final discovery source: `["Exa"]` when the primary
+run completes, or `["Parallel Search"]` when the governed fallback rerun completes.
+Parallel Search may be selected only when the notes record an `Exa fallback:` diagnostic
+with a documented provider-limit reason. The historical v1 contract is retained in
 `schema/surveillance-run-v1.schema.json` only for reading pre-reset history.
 Version, marker and source set must agree; no new v1 batch enters the active cycle.
 V2 is retained only for immutable ledger comments created before the v3 release
 merged at 2026-09-08T20:05:10Z (PR #204). New comments require v3; the gate uses
 GitHub creation time, so backdating payload timestamps cannot bypass it.
-The current operational registration protocol is `CILE-DAILY-v4`, independent of
+The current operational registration protocol is `CILE-DAILY-v5`, independent of
 scientific protocol `CILE-4PT-OA-v3` and ontology profile 0.3.0.
 
 - Calculate exact date/window in `Europe/Rome`.
@@ -67,11 +72,15 @@ scientific protocol `CILE-4PT-OA-v3` and ontology profile 0.3.0.
   `CAND-ACADEMIC-YYYY-MM-DD-NNN` for every record and the governed fields shown
   in the issue template. The array length must equal `intake_candidates`.
 - Write `Search and provenance log` as one fenced JSON object with
-  `schema_version`, `batch_id`, `repository_commit` and exactly one source
-  object for Exa. It contains every planned query as `{query_id, query_text}`.
-  Query IDs use `EXA-Wn-Qm`, where n is 1–7 and m is a positive integer; every
-  window W1–W7 must occur. Every candidate query ID must resolve to this log.
-- Use Exa for all seven workstreams. Verify publication identity, review status
+  `schema_version`, `batch_id`, `repository_commit` and exactly one final source
+  object. Normal runs use `Exa` with `EXA-Wn-Qm`; governed fallback runs use
+  `Parallel Search` with `PARALLEL-Wn-Qm`. The selected final source must cover
+  every W1-W7 window and its query-array length equals `queries_planned`. Every
+  candidate query ID must resolve to this log.
+- Start with Exa for all seven workstreams. If a documented Exa provider limit
+  prevents completion, record the primary diagnostic in notes and restart W1-W7
+  from W1 using Parallel Search. Do not mix incomplete Exa hits into the fallback
+  batch totals or CandidateRecord intake. Verify publication identity, review status
   and lawful full text using publisher/repository evidence when available;
   search summaries do not establish these facts. Pending access uses the exact
   unknown object from paper-register.md and does not block provisional intake.
@@ -81,13 +90,14 @@ scientific protocol `CILE-4PT-OA-v3` and ontology profile 0.3.0.
 - Use only `plausible_core`, `plausible_contextual` or `uncertain`.
 - Create no issue when there are no new candidates.
 - Add a schema-valid ledger comment even after a successful zero-candidate run.
-- Log `completed` only when Exa completes every planned query. If some queries
-  finish and others fail or are not run, log `partial`; if none finish, log
-  `failed`. An incomplete Exa source uses `failed` (or `not_run` if never started),
-  keeps its actual `queries_completed`, has null volume counts and a failure code.
-  Aggregate totals are `null`, never zero, for both incomplete states; assessments
-  stay zero and no intake issue is created. No synthetic Consensus row is required.
-- With one source, `candidate_hits` and `exclusive_candidates` both equal the
+- Log `completed` only when the **final selected provider** completes every planned
+  query covering W1-W7. An Exa provider-limit event may trigger a clean Parallel
+  Search restart before the terminal is written. If the selected provider completes
+  only some queries, log `partial`; if none finish, log `failed`. Incomplete selected
+  sources keep actual `queries_completed`, null volume counts and a failure code.
+  Aggregate totals are `null`, never zero, for incomplete states; assessments stay
+  zero and no intake issue is created. No Consensus row is permitted.
+- With one final source, `candidate_hits` and `exclusive_candidates` both equal the
   actual number of persisted intake candidates. The latter is an attribution
   identity, not evidence of independent marginal coverage.
 - Include queries, requested/returned counts, candidates before/after dedupe,
@@ -180,16 +190,21 @@ The `Search and provenance log` field is also machine-readable:
 }
 ```
 
-Replace the example query text with the exact planned searches. The arrays
-contain every planned query, including a completed zero-result query.
-The aggregate returned counts remain in the ledger run object; candidate records
-refer back to this manifest through `query_ids`.
+Replace the example query text with the exact planned searches. The arrays contain every
+planned query for the final selected provider, including a completed zero-result query.
+For a fallback batch, replace `Exa` with `Parallel Search` and use
+`PARALLEL-W1-Q1` through the adaptive `PARALLEL-Wn-Qm` sequence. The ledger notes must
+also state the Exa limit that caused fallback; the incomplete primary query set is not
+mixed into final fallback counts. Candidate records refer back to the final manifest
+through `query_ids`.
 
 ## Failure behaviour
 
-Stop without a candidate issue if a connector is unavailable or results remain
-partial after retry. When governance and GitHub remain available, record the
-failed or partial run in the metrics ledger. Stop without any write if governance
+If Exa hits an authorised provider limit, do not stop immediately: execute the governed
+Parallel Search full rerun first. Stop without a candidate issue only if the selected
+final provider is unavailable or remains incomplete after its bounded retry. When
+governance and GitHub remain available, record that failed or partial terminal in the
+metrics ledger. Stop without any write if governance
 files cannot be read, the provider is not authorised, the batch is already logged
 or GitHub cannot be written. A paywall without a separately verified lawful OA
 copy blocks admission to the assessed OA corpus. Provisional v3 registration may

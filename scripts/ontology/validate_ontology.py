@@ -423,12 +423,17 @@ def check_surveillance_source_policy(profile: dict[str, Any]) -> None:
     current = load_json(ROOT / contract["schema"])
     legacy = load_json(ROOT / contract["legacy_schema"])
     retained_v2 = load_json(ROOT / contract["retained_v2_schema"])
-    for schema, version, names in ((current, 3, ["Exa"]), (retained_v2, 2, ["Exa"]), (legacy, 1, ["Consensus", "Exa"])):
+    source_contracts = (
+        (current, 3, ["Exa", "Parallel Search"], 1),
+        (retained_v2, 2, ["Exa"], 1),
+        (legacy, 1, ["Consensus", "Exa"], 2),
+    )
+    for schema, version, names, cardinality in source_contracts:
         properties = schema["properties"]
         if properties["schema_version"]["const"] != version or properties["expected_sources"]["items"]["enum"] != names:
             fail("surveillance_schema_source_drift")
         for key in ("expected_sources", "sources"):
-            if properties[key]["minItems"] != len(names) or properties[key]["maxItems"] != len(names):
+            if properties[key]["minItems"] != cardinality or properties[key]["maxItems"] != cardinality:
                 fail("surveillance_schema_cardinality_drift")
     cycle = load_json(ROOT / "config/archive-cycle.json")
     if module["scopes"][cycle["review_id"]]["expected_sources"] != ["Exa"] or module["scopes"]["legacy"]["expected_sources"] != ["Consensus", "Exa"]:
@@ -471,7 +476,13 @@ def validate_all(*, quiet: bool = False) -> dict[str, int | str]:
             or registration["pending_access_value"] not in profile["enums"]["OpenAccessVerificationEnum"]["permissible_values"]):
         fail("unmapped_paper_register")
     registration_schema = load_json(ROOT / registration["run_schema"])
-    if registration_schema["properties"]["schema_version"]["const"] != 3 or registration_schema["properties"]["expected_sources"]["items"]["enum"] != ["Exa"]:
+    registration_sources = registration_schema["properties"]["expected_sources"]
+    if (
+        registration_schema["properties"]["schema_version"]["const"] != 3
+        or registration_sources["items"]["enum"] != ["Exa", "Parallel Search"]
+        or registration_sources["minItems"] != 1
+        or registration_sources["maxItems"] != 1
+    ):
         fail("invalid_registration_surveillance_schema")
 
     cycle_contract = load_json(ROOT / "ontology/modules/archive-cycle.json")

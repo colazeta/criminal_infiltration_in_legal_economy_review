@@ -62,7 +62,8 @@
       "uniqueItems": true,
       "items": {
         "enum": [
-          "Exa"
+          "Exa",
+          "Parallel Search"
         ]
       }
     },
@@ -123,7 +124,8 @@
       "properties": {
         "source": {
           "enum": [
-            "Exa"
+            "Exa",
+            "Parallel Search"
           ]
         },
         "status": {

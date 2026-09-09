@@ -12,6 +12,12 @@ follow semantic versioning while the project is in prerelease.
 
 ## Unreleased
 
+### Changed — Exa-limit continuity fallback, 2026-09-09
+
+- Protocol 1.2 / CILE-DAILY-v5 keeps Exa as the primary living-surveillance provider and authorises Parallel Search only after a documented Exa credit, quota, rate or provider-cap limit.
+- Fallback is a clean W1–W7 restart. Final batch counts and intake use one provider only, preventing mixed-provider yield statistics; the incomplete Exa attempt remains diagnostic provenance and is never a zero-result search.
+- Consensus remains retired; eligibility, canonical identity, publication gates, formal E1–E3 expansion and saturation rules are unchanged. Existing records require no reassessment.
+
 ### Fixed — OA intake enforcement, 2026-09-08
 
 - Require a structured OA-1 attestation in both v2 intake import and ledger reconciliation; missing, restricted, cross-candidate or incomplete evidence fails closed.

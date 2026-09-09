@@ -18,8 +18,10 @@ from zoneinfo import ZoneInfo
 SCHEMA_VERSION = 1  # Public aggregate format; independent from the run contract.
 RUN_SCHEMA_VERSION = 3
 ROME = ZoneInfo("Europe/Rome")
-ACTIVE_SOURCES = frozenset({"Exa"})
-SOURCE_SETS = {1: frozenset({"Consensus", "Exa"}), 2: ACTIVE_SOURCES, 3: ACTIVE_SOURCES}
+PRIMARY_SOURCE = "Exa"
+FALLBACK_SOURCE = "Parallel Search"
+ACTIVE_SOURCES = frozenset({PRIMARY_SOURCE, FALLBACK_SOURCE})
+SOURCE_SETS = {1: frozenset({"Consensus", "Exa"}), 2: frozenset({PRIMARY_SOURCE})}
 REPOSITORY_FULL_NAME = "colazeta/criminal_infiltration_in_legal_economy_review"
 STATUS_VALUES = {"completed", "partial", "failed"}
 SOURCE_STATUS_VALUES = {"completed", "failed", "not_run"}
@@ -196,7 +198,7 @@ def validate_run(run: dict[str, Any]) -> dict[str, Any]:
         raise MetricsError("run: expected an object")
     require_exact_fields(run, RUN_FIELDS, "run")
     version = run["schema_version"]
-    if type(version) is not int or version not in SOURCE_SETS:
+    if type(version) is not int or version not in {1, 2, 3}:
         raise MetricsError("run: unsupported schema_version")
 
     batch_id = run["batch_id"]
@@ -243,7 +245,12 @@ def validate_run(run: dict[str, Any]) -> dict[str, Any]:
             r"[A-Za-z][A-Za-z0-9 ._-]{1,39}", source_name
         ):
             raise MetricsError("run: invalid expected source name")
-    if set(expected_sources) != SOURCE_SETS[version]:
+    if version == 3:
+        if len(expected_sources) != 1 or expected_sources[0] not in ACTIVE_SOURCES:
+            raise MetricsError(
+                "run: v3 expected_sources must select Exa or governed Parallel Search fallback"
+            )
+    elif set(expected_sources) != SOURCE_SETS[version]:
         raise MetricsError(
             "run: expected_sources must match the governed active source set"
         )
@@ -271,7 +278,7 @@ def validate_run(run: dict[str, Any]) -> dict[str, Any]:
         if planned < 1:
             raise MetricsError(f"{label}: an expected source requires a planned query")
         if version >= 2 and planned < 7:
-            raise MetricsError(f"{label}: Exa must plan all seven W1–W7 windows")
+            raise MetricsError(f"{label}: daily discovery must plan all seven W1–W7 windows")
         if completed > planned:
             raise MetricsError(f"{label}: completed queries exceed planned queries")
         if source_status == "not_run" and completed != 0:
@@ -436,6 +443,13 @@ def validate_run(run: dict[str, Any]) -> dict[str, Any]:
             raise MetricsError("run.intake_issue: incomplete run cannot create intake")
 
     notes = safe_text_list(run["notes"], "run.notes", 10, 280)
+    if version == 3 and expected_sources == [FALLBACK_SOURCE]:
+        fallback_notes = [note.lower() for note in notes if note.lower().startswith("exa fallback:")]
+        limit_terms = ("credit", "quota", "rate", "limit", "budget", "capacity", "provider cap")
+        if not fallback_notes or not any(any(term in note for term in limit_terms) for note in fallback_notes):
+            raise MetricsError(
+                "run.notes: Parallel Search requires a documented Exa provider-limit fallback"
+            )
     return {
         "schema_version": version,
         "batch_id": batch_id,
@@ -865,6 +879,7 @@ def validate_public_payload(payload: dict[str, Any]) -> dict[str, Any]:
     governed_sources = SOURCE_SETS[1] if expected_counts == {2} else ACTIVE_SOURCES
     source_names = []
     source_volume_rows = []
+    source_expected_runs = 0
     source_completed_runs = 0
     for index, row in enumerate(sources):
         label = f"public statistics.sources[{index}]"
@@ -878,8 +893,9 @@ def validate_public_payload(payload: dict[str, Any]) -> dict[str, Any]:
         source_names.append(row["source"])
         expected_runs = count(row["expectedRuns"], f"{label}.expectedRuns")
         completed_runs = count(row["completedRuns"], f"{label}.completedRuns")
-        if expected_runs != len(source_window_rows):
-            raise MetricsError(f"{label}: expected runs disagree with daily rows")
+        source_expected_runs += expected_runs
+        if expected_runs > len(source_window_rows):
+            raise MetricsError(f"{label}: expected runs exceed daily rows")
         if completed_runs > expected_runs:
             raise MetricsError(f"{label}: completed runs exceed expected runs")
         source_completed_runs += completed_runs
@@ -911,10 +927,18 @@ def validate_public_payload(payload: dict[str, Any]) -> dict[str, Any]:
                 raise MetricsError(f"{label}: exclusive candidates exceed candidate hits")
     if source_names != sorted(set(source_names)):
         raise MetricsError("public statistics: sources must be unique and sorted")
-    if normalised_daily and set(source_names) != governed_sources:
-        raise MetricsError("public statistics: source summary must contain the active set")
+    if normalised_daily:
+        if expected_counts == {2} and set(source_names) != governed_sources:
+            raise MetricsError("public statistics: historical source summary must contain the active set")
+        if expected_counts == {1} and (not source_names or not set(source_names).issubset(ACTIVE_SOURCES)):
+            raise MetricsError("public statistics: source summary contains an ungoverned daily provider")
     if not normalised_daily and source_names:
         raise MetricsError("public statistics: an empty series cannot contain source summaries")
+    expected_source_runs = sum(row["expectedSourceCount"] for row in source_window_rows)
+    if source_expected_runs != expected_source_runs:
+        raise MetricsError(
+            "public statistics: source expectation totals disagree with daily rows"
+        )
     expected_completed_sources = sum(
         row["completedSourceCount"] for row in source_window_rows
     )

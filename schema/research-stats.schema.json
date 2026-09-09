@@ -473,7 +473,8 @@
         "source": {
           "enum": [
             "Consensus",
-            "Exa"
+            "Exa",
+            "Parallel Search"
           ]
         },
         "expectedRuns": {

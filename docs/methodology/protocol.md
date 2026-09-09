@@ -1,6 +1,6 @@
 # Living literature review protocol
 
-**Protocol version:** 1.1  
+**Protocol version:** 1.2  
 **Status:** active  
 **Product:** living curated evidence map and publication archive
 
@@ -33,6 +33,15 @@ participation, influence, control or embeddedness in the legal economy.
 5. New unique works are screened and coded; complete E1–E3 cycles are repeated.
 6. Living surveillance continues even after an initial saturation judgement.
 
+Daily living surveillance uses **Exa as the primary discovery provider**. If Exa cannot
+complete the governed W1-W7 search because of a documented provider limit (for example
+credit/quota exhaustion, rate limiting after the bounded retry, or an exposed provider
+result-cap limit), the run may switch to **Parallel Search as the sole automatic fallback**.
+Fallback is a clean restart: Parallel Search reruns W1-W7 from W1 and the completed batch
+uses only the fallback rerun for its final counts, deduplication and CandidateRecord intake.
+The incomplete Exa attempt remains diagnostic provenance in the run notes and is never
+reinterpreted as a zero-result search. Consensus remains excluded.
+
 Retrieval preserves the exact strategy, source/platform, date, result occurrence
 and failure status. Screening never overwrites decision history. A current
 decision may be changed only by adding a superseding decision in a reviewed PR.
@@ -64,6 +73,14 @@ recorded before the consensus decision. Any automation used for retrieval,
 deduplication or prioritisation is declared in the execution record.
 
 ## Amendments
+
+### 2026-09-09 — Exa-limit fallback
+
+Protocol 1.2 authorises Parallel Search only as a failover for a documented Exa provider
+limit in living surveillance. The scientific scope, four-part eligibility construct,
+canonical-identity rules, E1-E3 formal expansion and saturation criteria are unchanged.
+Earlier runs require no reassessment because the amendment changes discovery continuity,
+not screening or coding. New operational runs follow CILE-DAILY-v5.
 
 Material changes to scope, eligibility, sources, selection, coding or stop rules
 increment the protocol version, update `CHANGELOG.md`, and state whether earlier
