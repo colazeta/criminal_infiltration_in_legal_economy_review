@@ -46,6 +46,24 @@
       "synopsis": "The repository record describes a comparative firm-level analysis of judicial administration/control measures applied under organised-crime infiltration and is potentially relevant to soft preventive enforcement.",
       "checkedAt": "2026-09-09",
       "note": "Source-grounded intake synopsis used because the mechanical cascade did not expose a standalone abstract. Verify the linked scholarly source before screening; this is not an author abstract and cannot determine eligibility."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-09-EXTRA-8e1caef4c376-003",
+      "kind": "review_synopsis",
+      "sourceLabel": "Exa intake evidence",
+      "sourceUrl": "https://doi.org/10.1007/s11187-020-00439-4",
+      "synopsis": "Firm-level analysis of performance after judicial administration removes criminal governance ties.",
+      "checkedAt": "2026-09-09",
+      "note": "Source-grounded intake synopsis used because the mechanical cascade did not expose a standalone abstract. Verify the linked scholarly source before screening; this is not an author abstract and cannot determine eligibility."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-09-EXTRA-8e1caef4c376-007",
+      "kind": "review_synopsis",
+      "sourceLabel": "Exa intake evidence",
+      "sourceUrl": "https://www.iris.unict.it/handle/20.500.11769/665869",
+      "synopsis": "Recent chapter on corporate and government prevention strategies against organised crime.",
+      "checkedAt": "2026-09-09",
+      "note": "Source-grounded intake synopsis used because the mechanical cascade did not expose a standalone abstract. Verify the linked scholarly source before screening; this is not an author abstract and cannot determine eligibility."
     }
   ]
 }

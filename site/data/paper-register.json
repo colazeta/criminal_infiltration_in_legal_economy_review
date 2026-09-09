@@ -621,6 +621,118 @@
       "accessStatus": "unknown",
       "registeredAt": "2026-09-09",
       "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-09-EXTRA-8e1caef4c376-001",
+      "title": "Organised crime infiltration in the legitimate private economy - An empirical network analysis approach",
+      "authors": "Stefano Gurciullo",
+      "year": 2014,
+      "venue": "arXiv",
+      "doi": "10.48550/arxiv.1403.5071",
+      "sourceLinks": [
+        "https://arxiv.org/abs/1403.5071"
+      ],
+      "metadataStatus": "metadata_partial",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-09",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-09-EXTRA-8e1caef4c376-002",
+      "title": "Identification and Economic Analysis of Governance Mechanisms in Legally Registered Mafia Firms",
+      "authors": "Valérie Duplat; Philippe Véry; Bertrand Monnet",
+      "year": 2012,
+      "venue": "M@n@gement",
+      "doi": "",
+      "sourceLinks": [
+        "https://management-aims.com/index.php/mgmt/article/view/3955"
+      ],
+      "metadataStatus": "metadata_partial",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-09",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-09-EXTRA-8e1caef4c376-003",
+      "title": "What happens in criminal firms after godfather management removal? Judicial administration and firms’ performance",
+      "authors": "Francesca M. Calamunci",
+      "year": 2021,
+      "venue": "Small Business Economics",
+      "doi": "10.1007/s11187-020-00439-4",
+      "sourceLinks": [
+        "https://doi.org/10.1007/s11187-020-00439-4"
+      ],
+      "metadataStatus": "metadata_partial",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-09",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-09-EXTRA-8e1caef4c376-004",
+      "title": "Organised crime infiltration in the Netherlands: transportation companies hiding transit crimes",
+      "authors": "Joras Ferwerda; Brigitte Unger",
+      "year": 2016,
+      "venue": "Organised Crime in European Businesses",
+      "doi": "10.4324/9781315640617-12",
+      "sourceLinks": [
+        "https://doi.org/10.4324/9781315640617-12"
+      ],
+      "metadataStatus": "metadata_partial",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-09",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-09-EXTRA-8e1caef4c376-005",
+      "title": "Measuring organised crime infiltration in legal businesses",
+      "authors": "Michele Riccardi; Giulia Berlusconi",
+      "year": 2017,
+      "venue": "Organised Crime in European Businesses",
+      "doi": "",
+      "sourceLinks": [
+        "https://openresearch.surrey.ac.uk/esploro/outputs/bookChapter/Measuring-organised-crime-infiltration-in-legal/99511554502346"
+      ],
+      "metadataStatus": "metadata_partial",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-09",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-09-EXTRA-8e1caef4c376-006",
+      "title": "Exploring infiltration behaviour by organised crime groups",
+      "authors": "Mariska Fourie; Philip Steenkamp; Jacqui-Lyn McIntyre-Louw; Clinton Oellermann",
+      "year": 2023,
+      "venue": "Journal of Money Laundering Control",
+      "doi": "10.1108/jmlc-10-2021-0117",
+      "sourceLinks": [
+        "https://ideas.repec.org/a/eme/jmlcpp/jmlc-10-2021-0117.html"
+      ],
+      "metadataStatus": "metadata_partial",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-09",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-09-EXTRA-8e1caef4c376-007",
+      "title": "Corporate Governance, Stakeholder Involvement, and Government Interventions as Corporate Prevention Strategies Against Organized Crime",
+      "authors": "Salvatore Cincimino; Fabio La Rosa; Sergio Paternostro",
+      "year": 2025,
+      "venue": "",
+      "doi": "",
+      "sourceLinks": [
+        "https://www.iris.unict.it/handle/20.500.11769/665869"
+      ],
+      "metadataStatus": "metadata_partial",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-09",
+      "topicCode": ""
     }
   ]
 }
