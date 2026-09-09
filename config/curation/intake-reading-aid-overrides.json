@@ -8,14 +8,6 @@
       "sourceUrl": "https://sk.sagepub.com/book/mono/organized-crime/chpt/organized-crime-legitimate-business",
       "synopsis": "This dedicated chapter examines the relationship between organised crime and legitimate business, including criminal actors operating as businesspeople, racketeering and protection, criminal control over legal sectors, and the vulnerability of legitimate firms to criminal influence.",
       "note": "The exact SAGE chapter page provides a substantive chapter description, but no separately labelled author abstract was located. Treat this as publisher-level reading support, not an author abstract."
-    },
-    {
-      "candidateId": "CAND-ACADEMIC-2026-09-09-EXTRA-5e31cc756b0e-011",
-      "kind": "review_synopsis",
-      "sourceLabel": "CEPR Discussion Paper",
-      "sourceUrl": "https://cepr.org/publications/dp19322",
-      "synopsis": "The CEPR discussion paper uses machine learning to predict mafia infiltration in Italian local governments, including municipalities classified as high-risk before formal state detection, and evaluates the resulting infiltration measure.",
-      "note": "Source-grounded CEPR synopsis supplied because the bulk abstract cascade did not expose a standalone abstract through an HTTPS locator. This is reading support only and cannot determine eligibility."
     }
   ]
 }
