@@ -48,6 +48,69 @@
       "note": "Source-grounded intake synopsis used because the mechanical cascade did not expose a standalone abstract. Verify the linked scholarly source before screening; this is not an author abstract and cannot determine eligibility."
     },
     {
+      "candidateId": "CAND-ACADEMIC-2026-09-09-EXTRA-5e31cc756b0e-001",
+      "kind": "review_synopsis",
+      "sourceLabel": "Exa intake evidence",
+      "sourceUrl": "https://ojp.gov/ncjrs/virtual-library/abstracts/penetration-legitimate-business-organized-crime-analysis",
+      "synopsis": "Historical empirical study explicitly measuring organized-crime penetration of legitimate private businesses.",
+      "checkedAt": "2026-09-09",
+      "note": "Source-grounded intake synopsis used because the mechanical cascade did not expose a standalone abstract. Verify the linked scholarly source before screening; this is not an author abstract and cannot determine eligibility."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-09-EXTRA-5e31cc756b0e-002",
+      "kind": "review_synopsis",
+      "sourceLabel": "Exa intake evidence",
+      "sourceUrl": "https://www.jstor.org/stable/3311463",
+      "synopsis": "Direct legal analysis of civil remedies against organized-crime infiltration of legitimate business.",
+      "checkedAt": "2026-09-09",
+      "note": "Source-grounded intake synopsis used because the mechanical cascade did not expose a standalone abstract. Verify the linked scholarly source before screening; this is not an author abstract and cannot determine eligibility."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-09-EXTRA-5e31cc756b0e-007",
+      "kind": "review_synopsis",
+      "sourceLabel": "Exa intake evidence",
+      "sourceUrl": "https://bra.se/english/publications/archive/2015-11-26-organized-crime-infiltration-of-legitimate-businesses-in-europe",
+      "synopsis": "Cross-national comparative research explicitly mapping organized-crime infiltration of legal businesses and risk factors across five EU countries.",
+      "checkedAt": "2026-09-09",
+      "note": "Source-grounded intake synopsis used because the mechanical cascade did not expose a standalone abstract. Verify the linked scholarly source before screening; this is not an author abstract and cannot determine eligibility."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-09-EXTRA-5e31cc756b0e-009",
+      "kind": "review_synopsis",
+      "sourceLabel": "Exa intake evidence",
+      "sourceUrl": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5203951",
+      "synopsis": "Uses accounting, budgeting and procurement data around municipalities dissolved for mafia infiltration, relevant to diagnostic infrastructure and administrative detection.",
+      "checkedAt": "2026-09-09",
+      "note": "Source-grounded intake synopsis used because the mechanical cascade did not expose a standalone abstract. Verify the linked scholarly source before screening; this is not an author abstract and cannot determine eligibility."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-09-EXTRA-5e31cc756b0e-010",
+      "kind": "review_synopsis",
+      "sourceLabel": "Exa intake evidence",
+      "sourceUrl": "https://www.rand.org/pubs/external_publications/EP68577.html",
+      "synopsis": "EU-wide research mapping sectoral and geographic risk of serious and organized crime infiltrating legitimate businesses.",
+      "checkedAt": "2026-09-09",
+      "note": "Source-grounded intake synopsis used because the mechanical cascade did not expose a standalone abstract. Verify the linked scholarly source before screening; this is not an author abstract and cannot determine eligibility."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-09-EXTRA-5e31cc756b0e-011",
+      "kind": "review_synopsis",
+      "sourceLabel": "Exa intake evidence",
+      "sourceUrl": "https://cepr.org/publications/dp19322",
+      "synopsis": "Uses machine learning to predict mafia infiltration of local governments before formal detection, directly relevant to preventive detection methods.",
+      "checkedAt": "2026-09-09",
+      "note": "Source-grounded intake synopsis used because the mechanical cascade did not expose a standalone abstract. Verify the linked scholarly source before screening; this is not an author abstract and cannot determine eligibility."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-09-EXTRA-5e31cc756b0e-013",
+      "kind": "review_synopsis",
+      "sourceLabel": "Exa intake evidence",
+      "sourceUrl": "https://www.routledge.com/Organised-Crime-in-European-Businesses/Savona-Riccardi-Berlusconi/p/book/9781138499478",
+      "synopsis": "Conceptual chapter explicitly focused on organized criminals' relationships with the legal economy and mechanisms of business infiltration.",
+      "checkedAt": "2026-09-09",
+      "note": "Source-grounded intake synopsis used because the mechanical cascade did not expose a standalone abstract. Verify the linked scholarly source before screening; this is not an author abstract and cannot determine eligibility."
+    },
+    {
       "candidateId": "CAND-ACADEMIC-2026-09-09-EXTRA-85e203d4eb5a-002",
       "kind": "review_synopsis",
       "sourceLabel": "Exa intake evidence",
