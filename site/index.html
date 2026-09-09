@@ -22,11 +22,11 @@
           <span class="brand-mark" aria-hidden="true">CI</span>
           <span><strong>Criminal Infiltration</strong><small>Literature review</small></span>
         </a>
-        <nav class="app-nav" aria-label="Navigazione principale" lang="it"><a href="./index.html" aria-current="page">Archivio</a><a href="./aml.html">Raccolta AML</a><a href="./stats.html">Statistiche</a><a href="./method.html">Metodo</a><a href="./model.html">Modello</a><a href="./curate.html">Curatore</a></nav>
+        <nav class="app-nav" aria-label="Navigazione principale" lang="it"><a href="./index.html" aria-current="page">Archivio</a><a href="./aml.html">Raccolta AML</a><a href="./stats.html">Statistiche</a><a href="./model.html">Modello</a><a href="./curate.html">Curatore</a></nav>
       </div></header>
 
     <main id="main-content">
-      <div class="page-tools" lang="it"><a href="./method.html">Metodo</a><a href="./data/archive.csv" download>Scarica CSV</a></div>
+      <div class="page-tools" lang="it"><a href="#methodology">Metodo</a><a href="#method-scope">Perimetro</a><a href="#method-search">Ricerca</a><a href="#method-screening">Screening</a><a href="#method-quality">Qualità</a><a href="./data/archive.csv" download>Scarica CSV</a></div>
       <p class="archive-reset-note" role="status">Archivio azzerato il 8 settembre 2026 · nuovo perimetro solo open access. Registro operativo aperto. Analisi ed etichette vengono attribuite dal curatore.</p>
 
       <section class="intro" aria-labelledby="page-title">
@@ -190,46 +190,88 @@
       <section class="methodology" id="methodology" aria-labelledby="methodology-title">
         <div class="section-heading">
           <div>
-            <p class="eyebrow">Traceable by design</p>
-            <h2 id="methodology-title">What the archive does — and does not — claim</h2>
+            <p class="eyebrow">Metodo pubblico · traceable by design</p>
+            <h2 id="methodology-title">Come viene costruita e mantenuta la living review</h2>
           </div>
+          <p>
+            Il metodo separa discovery, identità bibliografica, accesso, screening scientifico e pubblicazione.
+            Un record può essere visibile nel registro prima della valutazione, ma nessuna decisione scientifica viene attribuita automaticamente.
+          </p>
         </div>
-        <p>Questa è la sintesi operativa. <a href="./method.html">Leggi il metodo completo</a> per perimetro concettuale, strategia di ricerca, deduplica, screening, open access, governance e limiti.</p>
 
-        <div class="method-grid">
-          <article>
-            <span class="step">01</span>
-            <h3>One record per work</h3>
-            <p>
-              Repeated search results and alternate DOI records are joined before a
-              paper appears here.
-            </p>
-          </article>
-          <article>
-            <span class="step">02</span>
-            <h3>A recorded decision</h3>
-            <p>
-              Identity, source, relevance, topic and the public explanation must all
-              be checked and recorded.
-            </p>
-          </article>
-          <article>
-            <span class="step">03</span>
-            <h3>No automatic judgement</h3>
-            <p>
-              Search tools can find candidates and prepare data. They cannot silently
-              decide that a paper belongs in the review.
-            </p>
-          </article>
-          <article>
-            <span class="step">04</span>
-            <h3>The search stays open</h3>
-            <p>
-              Repeated database, reference and citation searches show when new work
-              becomes rare; they never prove that nothing else exists.
-            </p>
-          </article>
-        </div>
+        <section id="method-scope" aria-labelledby="method-scope-title">
+          <div class="compact-heading"><div><p class="eyebrow">Perimetro concettuale</p><h3 id="method-scope-title">Che cosa conta come criminal infiltration</h3></div></div>
+          <p>Un lavoro può essere classificato come <code>eligible_core</code> soltanto quando tutti e quattro i criteri seguenti sono sostenuti dalle prove esaminate.</p>
+          <div class="method-grid">
+            <article><span class="step">01</span><h3>Interesse criminale</h3><p>È analiticamente identificabile un attore, gruppo o interesse criminale.</p></article>
+            <article><span class="step">02</span><h3>Economia legale</h3><p>La relazione riguarda un'impresa, professione, asset, appalto, mercato, settore o struttura di governance lecita.</p></article>
+            <article><span class="step">03</span><h3>Relazione durevole</h3><p>Il paper analizza accesso, partecipazione, influenza, controllo o embeddedness organizzativa, non un contatto isolato.</p></article>
+            <article><span class="step">04</span><h3>Analisi sostanziale</h3><p>La relazione è una parte significativa dell'analisi e non una semplice menzione incidentale.</p></article>
+          </div>
+          <p><strong>Fenomeni adiacenti.</strong> Riciclaggio occasionale, corruzione isolata, investimento passivo, facilitazione professionale generica, shell companies o corporate crime non equivalgono da soli a infiltrazione. Possono essere contestuali solo quando forniscono un contributo specifico e documentato alla comprensione della relazione tra interesse criminale ed economia legale.</p>
+        </section>
+
+        <section id="method-search" aria-labelledby="method-search-title">
+          <div class="compact-heading"><div><p class="eyebrow">Discovery</p><h3 id="method-search-title">Come viene cercata la letteratura</h3></div></div>
+          <div class="method-grid">
+            <article><span class="step">E1</span><h3>Ricerca nelle fonti</h3><p>Query documentate esplorano fonti scientifiche con filtri, limiti, errori e numero di risultati registrati.</p></article>
+            <article><span class="step">E2</span><h3>Backward search</h3><p>Le bibliografie dei lavori rilevanti vengono seguite per recuperare contributi precedenti che le query lessicali possono perdere.</p></article>
+            <article><span class="step">E3</span><h3>Forward search</h3><p>Le citazioni successive permettono di seguire l'evoluzione del campo e intercettare nuovi termini, metodi e applicazioni.</p></article>
+            <article><span class="step">W1–W7</span><h3>Finestre tematiche</h3><p>La sorveglianza copre linguaggio dell'infiltrazione, proprietà e controllo, mercati e appalti, espansione territoriale, metodi e indicatori, paesi/lingue trascurati e letteratura recente.</p></article>
+          </div>
+          <p>La sorveglianza quotidiana corrente usa Exa nelle sette finestre W1–W7. I cicli metodologici completi possono integrare fonti strutturate e strumenti di verifica bibliografica o citazionale secondo il protocollo versionato. Una ricerca fallita resta un fallimento visibile: non viene convertita in uno zero.</p>
+        </section>
+
+        <section id="method-identity" aria-labelledby="method-identity-title">
+          <div class="compact-heading"><div><p class="eyebrow">Identità e deduplica</p><h3 id="method-identity-title">Un lavoro, non una pila di record</h3></div></div>
+          <div class="method-grid">
+            <article><span class="step">01</span><h3>Occorrenze conservate</h3><p>Ogni luogo in cui un lavoro viene trovato resta parte della provenance della ricerca.</p></article>
+            <article><span class="step">02</span><h3>Identificatori verificati</h3><p>DOI e altri identificatori stabili aiutano a stabilire l'identità, ma non verificano da soli l'intera citazione.</p></article>
+            <article><span class="step">03</span><h3>Manifestazioni collegate</h3><p>Preprint, working paper, accepted manuscript e versione editoriale vengono distinti e collegati solo quando la relazione è verificata.</p></article>
+            <article><span class="step">04</span><h3>Nessun merge silenzioso</h3><p>Somiglianza di titolo o autore può segnalare un possibile duplicato, ma non autorizza da sola a fondere due lavori.</p></article>
+          </div>
+        </section>
+
+        <section id="method-screening" aria-labelledby="method-screening-title">
+          <div class="compact-heading"><div><p class="eyebrow">Human-in-the-loop</p><h3 id="method-screening-title">Dalla scoperta alla decisione scientifica</h3></div></div>
+          <div class="method-grid">
+            <article><span class="step">01</span><h3>Registro operativo</h3><p>I nuovi lavori entrano nel registro prima della classificazione individuale. Controlli ancora necessari sono dichiarati, non nascosti.</p></article>
+            <article><span class="step">02</span><h3>Metadati e accesso</h3><p>Identità bibliografica, abstract/full text e stato di accesso sono controllati separatamente dalla rilevanza scientifica.</p></article>
+            <article><span class="step">03</span><h3>Screening umano</h3><p>Il curatore assegna <code>eligible_core</code>, <code>eligible_contextual</code>, <code>maybe_full_text_needed</code>, <code>not_eligible</code> o gli altri esiti controllati sulla base del materiale esaminato.</p></article>
+            <article><span class="step">04</span><h3>Pubblicazione separata</h3><p>La presenza nella coda o una valutazione positiva non rendono automaticamente pubblico il record nel corpus valutato.</p></article>
+          </div>
+        </section>
+
+        <section id="method-access" aria-labelledby="method-access-title">
+          <div class="compact-heading"><div><p class="eyebrow">Open-access evidence map</p><h3 id="method-access-title">Accesso aperto come criterio indipendente</h3></div></div>
+          <p>Il corpus valutato pubblico richiede una copia completa, lecita e anonimamente accessibile presso un publisher o repository autorizzato. Un abstract gratuito, una pagina metadata o un PDF non verificato non bastano.</p>
+          <div class="method-grid">
+            <article><span class="step">A</span><h3>Accesso osservato</h3><p>L'accesso è verificato in un momento specifico e può cambiare; link o diritti possono essere revocati.</p></article>
+            <article><span class="step">B</span><h3>Versione dichiarata</h3><p>Version of record, accepted manuscript, working paper e preprint vengono distinti invece di essere trattati come equivalenti.</p></article>
+            <article><span class="step">C</span><h3>Diritti non inferiti</h3><p>Una copia leggibile non implica automaticamente una licenza di riuso. Lawful access e licenza restano dimensioni separate.</p></article>
+            <article><span class="step">D</span><h3>OA ≠ eleggibilità</h3><p><code>verified_open</code> rende possibile la lettura ma non decide se il lavoro appartiene scientificamente alla review.</p></article>
+          </div>
+        </section>
+
+        <section id="method-quality" aria-labelledby="method-quality-title">
+          <div class="compact-heading"><div><p class="eyebrow">Governance e verificabilità</p><h3 id="method-quality-title">Come viene controllato il processo</h3></div></div>
+          <div class="method-grid">
+            <article><span class="step">01</span><h3>Provenance</h3><p>Query, fonti, date, limiti, occorrenze, identificatori e problemi di recupero restano tracciabili.</p></article>
+            <article><span class="step">02</span><h3>Storia versionata</h3><p>Decisioni, correzioni e manifestazioni vengono conservate; una decisione precedente non viene sovrascritta in silenzio.</p></article>
+            <article><span class="step">03</span><h3>Validation layer</h3><p>Test automatici controllano struttura del repository, coda, accesso, reading aids, ontologia, export pubblico e invarianti di governance.</p></article>
+            <article><span class="step">04</span><h3>Fail closed</h3><p>Quando una regola strutturale fallisce, il processo si ferma prima della pubblicazione invece di produrre un output parziale non dichiarato.</p></article>
+          </div>
+        </section>
+
+        <section id="method-limits" aria-labelledby="method-limits-title">
+          <div class="compact-heading"><div><p class="eyebrow">Limiti e saturazione</p><h3 id="method-limits-title">Che cosa la review non pretende di dimostrare</h3></div></div>
+          <div class="method-grid">
+            <article><span class="step">01</span><h3>Non esaustività</h3><p>La copertura può aumentare progressivamente, ma nessun ciclo dimostra che non esistano altri lavori.</p></article>
+            <article><span class="step">02</span><h3>Selection bias OA</h3><p>Il perimetro open access può sottorappresentare libri, letteratura più vecchia, discipline e paesi con minore disponibilità di depositi aperti.</p></article>
+            <article><span class="step">03</span><h3>Metadata imperfetti</h3><p>Autori, sedi, date e identificatori non verificati restano esplicitamente incompleti; il sito non li imputa automaticamente.</p></article>
+            <article><span class="step">04</span><h3>Saturazione prudente</h3><p>La ricerca può rallentare soltanto dopo tre cicli completi consecutivi con crescita e yield inferiori al 2%, nessuna nuova etichetta controllata e nessun importante errore di recupero ancora aperto. La sorveglianza periodica continua comunque.</p></article>
+          </div>
+        </section>
 
         <div class="pipeline-panel">
           <div>
@@ -255,7 +297,10 @@
             </div>
           </dl>
         </div>
+
+        <p><strong>Documentazione tecnica.</strong> Questa sezione è la sintesi pubblica. Le regole operative restano versionate nel repository: <a href="https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/blob/main/docs/methodology/expansion.md">strategia di espansione</a>, <a href="https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/blob/main/docs/methodology/eligibility.md">eligibility codebook</a>, <a href="https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/blob/main/docs/methodology/open-access.md">open-access policy</a> e <a href="https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/blob/main/INDEX.md">project guide</a>.</p>
       </section>
+
       <section class="scope-note" aria-label="Open-access methodology"><p><strong>Open-access scope.</strong> The assessed corpus covers scholarship with lawfully accessible full text. The operational register also displays records awaiting access verification. A free abstract is insufficient. Access is checked separately from scientific relevance and publication approval. Coverage may underrepresent older work and disciplines with fewer open deposits.</p></section>
     </main>
 
@@ -269,7 +314,7 @@
         <a href="./data/archive.csv">CSV</a> ·
         <a href="./aml.html">Broader AML</a> ·
         <a href="./stats.html">Statistiche</a> ·
-        <a href="./method.html">Metodo</a> ·
+        <a href="#methodology">Metodo</a> ·
         <a href="./curate.html">Curator desk</a> ·
         <a href="https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/blob/main/INDEX.md">Project guide</a>
       </p>
