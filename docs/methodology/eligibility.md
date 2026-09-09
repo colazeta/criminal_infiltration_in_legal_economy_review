@@ -45,6 +45,16 @@ for backward compatibility and audit. They are not an active destination, do not
 create a publication route and must not be used to expand the current review
 beyond criminal infiltration in the legal economy.
 
+### Retired secondary-collection rule retained for audit
+
+Before the 2026-09-09 scope change, `broader_aml` was the governed code for a
+separate adjacent collection. That historical routing **does not change the
+`not_eligible` decision**, **does not count toward the core or contextual corpus**,
+and historically required a **versioned secondary-publication approval** before
+anything could become public. These statements are retained only so legacy
+records remain interpretable. They do not authorise new routing or an active AML
+collection.
+
 ## Exclusion reason codes
 
 The machine-readable controlled list is
