@@ -22,6 +22,11 @@
   };
   const authorsOf = (record) => String(record.authors || "").split(";").map((value) => value.trim()).filter(Boolean);
   const venueOf = (record) => String(record.venue || "").trim();
+  const yearOf = (record) => {
+    if (record.year === null || record.year === undefined || record.year === "") return null;
+    const year = Number(record.year);
+    return Number.isInteger(year) && year > 0 ? year : null;
+  };
   const pending = () => state.register.filter((record) => pendingStatuses.has(record.reviewStatus));
   const records = () => state.includePending ? state.archive.concat(pending()) : state.archive;
 
@@ -37,7 +42,7 @@
   }
 
   function yearRange(data) {
-    const observed = data.map((record) => Number(record.year)).filter(Number.isInteger);
+    const observed = data.map(yearOf).filter((year) => year !== null);
     if (!observed.length) return [];
     const first = Math.min(...observed);
     const last = Math.max(...observed);
@@ -46,7 +51,7 @@
 
   function renderAnnual(data) {
     ui.annual.replaceChildren();
-    const byYear = counts(data.map((record) => Number.isInteger(Number(record.year)) ? Number(record.year) : null));
+    const byYear = counts(data.map(yearOf));
     const years = yearRange(data);
     const maximum = Math.max(1, ...byYear.values());
     let cumulative = 0;
@@ -132,8 +137,8 @@
     const matrix = entities.map((entity) => {
       const byYear = new Map(years.map((year) => [year, 0]));
       data.forEach((record) => {
-        const year = Number(record.year);
-        if (byYear.has(year) && extractor(record).includes(entity)) byYear.set(year, byYear.get(year) + 1);
+        const year = yearOf(record);
+        if (year !== null && byYear.has(year) && extractor(record).includes(entity)) byYear.set(year, byYear.get(year) + 1);
       });
       return [entity, byYear];
     });
@@ -160,7 +165,7 @@
   }
 
   function renderQuality(data) {
-    const withYear = data.filter((record) => Number.isInteger(Number(record.year))).length;
+    const withYear = data.filter((record) => yearOf(record) !== null).length;
     const withAuthors = data.filter((record) => authorsOf(record).length).length;
     const withVenue = data.filter((record) => venueOf(record)).length;
     const pct = (value) => data.length ? `${format.format((value / data.length) * 100)}%` : "—";
