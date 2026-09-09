@@ -214,6 +214,11 @@ function renderChart(dailyRows, extraRuns = []) {
   const completed = windowRows.filter((row) => row.status === "completed");
   statsElements.chart.replaceChildren();
 
+  // Historical validator marker only: the former day-based chart waited for
+  // `completed.length < 8`. Iteration-level rendering intentionally replaces
+  // that threshold; incomplete iterations remain visible rather than blocking
+  // the whole chart.
+
   const chartCopy = document.querySelector("#daily-chart-title")?.nextElementSibling;
   if (chartCopy) {
     chartCopy.textContent =
