@@ -9,7 +9,7 @@ SITE = ROOT / "site"
 
 class ClassicSiteUiTests(unittest.TestCase):
     def test_public_pages_load_classic_styles_after_base_styles(self) -> None:
-        for filename in ("index.html", "aml.html", "stats.html", "404.html"):
+        for filename in ("index.html", "aml.html", "stats.html", "method.html", "404.html"):
             source = (SITE / filename).read_text(encoding="utf-8")
             with self.subTest(filename=filename):
                 self.assertIn('class="classic-site', source)
@@ -37,10 +37,45 @@ class ClassicSiteUiTests(unittest.TestCase):
         self.assertIn("border-radius: 0", source)
         self.assertIn("body.classic-site .record-details summary", source)
 
-    def test_method_and_statistics_surfaces_are_flat_reference_panels(self) -> None:
+    def test_method_page_is_plain_linear_1990s_document(self) -> None:
+        source = (SITE / "method.html").read_text(encoding="utf-8")
+        for forbidden in (
+            'class="method-grid"',
+            'class="intro"',
+            'class="scope-note"',
+            'class="section-heading"',
+            'class="pipeline-panel"',
+        ):
+            with self.subTest(forbidden=forbidden):
+                self.assertNotIn(forbidden, source)
+        self.assertGreaterEqual(source.count("<hr"), 7)
+        self.assertIn("<ol>", source)
+        self.assertIn("<ul>", source)
+        self.assertIn('href="./method.css"', source)
+        for section_id in (
+            "method-overview",
+            "method-scope",
+            "method-search",
+            "method-identity",
+            "method-screening",
+            "method-access",
+            "method-quality",
+            "method-limits",
+        ):
+            self.assertIn(f'id="{section_id}"', source)
+
+    def test_method_page_has_specific_plain_document_styles(self) -> None:
+        source = (SITE / "method.css").read_text(encoding="utf-8")
+        self.assertIn("PLAIN_90S_METHOD_V1", source)
+        self.assertIn("body.classic-method main > section", source)
+        self.assertIn("body.classic-method main > hr", source)
+        self.assertIn("body.classic-method main h2", source)
+        self.assertNotIn("display: grid", source)
+        self.assertNotIn("box-shadow", source)
+        self.assertNotIn("border-radius", source.replace("border-radius: 0", ""))
+
+    def test_statistics_surfaces_are_flat_tables_and_panels(self) -> None:
         source = (SITE / "classic-site.css").read_text(encoding="utf-8")
-        self.assertIn("body.classic-site .method-grid", source)
-        self.assertIn("body.classic-site .pipeline-panel", source)
         self.assertIn("body.classic-site .chart-card", source)
         self.assertIn("body.classic-site .table-scroll", source)
         self.assertIn("border-collapse: collapse", source)
