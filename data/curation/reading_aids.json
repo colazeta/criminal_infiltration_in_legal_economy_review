@@ -21,21 +21,30 @@
       "note": "Source-grounded intake synopsis used because the mechanical cascade did not expose a standalone abstract. Verify the linked scholarly source before screening; this is not an author abstract and cannot determine eligibility."
     },
     {
-      "candidateId": "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-014",
-      "kind": "review_synopsis",
-      "sourceLabel": "Exa intake evidence",
-      "sourceUrl": "https://hdl.handle.net/11577/3478856",
-      "synopsis": "Il risultato descrive una ricerca potenzialmente pertinente alle relazioni tra criminalità organizzata, imprese o mercati legali; la pertinenza va valutata dal revisore.",
-      "checkedAt": "2026-09-08",
-      "note": "Source-grounded intake synopsis used because the mechanical cascade did not expose a standalone abstract. Verify the linked scholarly source before screening; this is not an author abstract and cannot determine eligibility."
-    },
-    {
       "candidateId": "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-018",
       "kind": "review_synopsis",
       "sourceLabel": "Exa intake evidence",
       "sourceUrl": "https://publicatt.unicatt.it/retrieve/handle/10807/117902/191792/Milani%20et%20al%202018%20L%27impatto%20di%20corruzione%20e%20mafia%20sugli%20appalti%20pubblici.pdf",
       "synopsis": "Il risultato descrive una ricerca potenzialmente pertinente alle relazioni tra criminalità organizzata, imprese o mercati legali; la pertinenza va valutata dal revisore.",
       "checkedAt": "2026-09-08",
+      "note": "Source-grounded intake synopsis used because the mechanical cascade did not expose a standalone abstract. Verify the linked scholarly source before screening; this is not an author abstract and cannot determine eligibility."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-09-011",
+      "kind": "review_synopsis",
+      "sourceLabel": "Exa intake evidence",
+      "sourceUrl": "https://igier.unibocconi.eu/sites/default/files/media/attach/Appalti-Corruzione.pdf",
+      "synopsis": "The article quantitatively examines criminal penetration of Italian public works procurement using crime reports linked to firms and contracting officials.",
+      "checkedAt": "2026-09-09",
+      "note": "Source-grounded intake synopsis used because the mechanical cascade did not expose a standalone abstract. Verify the linked scholarly source before screening; this is not an author abstract and cannot determine eligibility."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-09-013",
+      "kind": "review_synopsis",
+      "sourceLabel": "Exa intake evidence",
+      "sourceUrl": "https://iris.unipa.it/handle/10447/710250",
+      "synopsis": "The repository record describes a comparative firm-level analysis of judicial administration/control measures applied under organised-crime infiltration and is potentially relevant to soft preventive enforcement.",
+      "checkedAt": "2026-09-09",
       "note": "Source-grounded intake synopsis used because the mechanical cascade did not expose a standalone abstract. Verify the linked scholarly source before screening; this is not an author abstract and cannot determine eligibility."
     }
   ]

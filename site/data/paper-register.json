@@ -322,6 +322,240 @@
       "accessStatus": "unknown",
       "registeredAt": "2026-09-08",
       "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-09-001",
+      "title": "Mafia infiltrations in times of crisis: Evidence from the Covid-19 shock",
+      "authors": "Marco Castelluccio; Lucia Rizzica",
+      "year": 2023,
+      "venue": "IFS Working Papers",
+      "doi": "",
+      "sourceLinks": [
+        "https://ideas.repec.org/p/ifs/ifsewp/23-28.html",
+        "https://www.bancaditalia.it/pubblicazioni/temi-discussione/2025/2025-1502/index.html?com.dotmarketing.htmlpage.language=1"
+      ],
+      "metadataStatus": "metadata_partial",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-09",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-09-002",
+      "title": "Money laundering through the strategic management of accounting transactions",
+      "authors": "Diego Ravenda; Maika M. Valencia-Silva; Josep M. Argiles-Bosch; Josep García-Blandón",
+      "year": 2019,
+      "venue": "Critical Perspectives on Accounting",
+      "doi": "10.1016/j.cpa.2018.08.003",
+      "sourceLinks": [
+        "https://www.sciencedirect.com/science/article/pii/S1045235418302612",
+        "https://portalrecerca.csuc.cat/article/doi/10.1016/j.cpa.2018.08.003"
+      ],
+      "metadataStatus": "metadata_partial",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-09",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-09-003",
+      "title": "Financial crime risk assessment: machine learning insights into ownership structures in secrecy firms",
+      "authors": "Maria Jofre; Antonio Bosisio; Michele Riccardi",
+      "year": 2024,
+      "venue": "Global Crime",
+      "doi": "10.1080/17440572.2024.2402848",
+      "sourceLinks": [
+        "https://doi.org/10.1080/17440572.2024.2402848"
+      ],
+      "metadataStatus": "metadata_partial",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-09",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-09-004",
+      "title": "Organized Crime and Firms' Financial Statements: Evidence from Criminal Investigations in Italy",
+      "authors": "Pietro A. Bianchi; Antonio Marra; Donato Masciandaro; Nicola Pecchiari",
+      "year": 2021,
+      "venue": "The Accounting Review",
+      "doi": "10.2308/tar-2019-0079",
+      "sourceLinks": [
+        "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=3031747",
+        "https://doi.org/10.2308/tar-2019-0079"
+      ],
+      "metadataStatus": "metadata_partial",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-09",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-09-005",
+      "title": "Organized Crime and Firms: Evidence from Antimafia Enforcement Actions",
+      "authors": "Pablo Slutzky; Stefan Zeume",
+      "year": 2024,
+      "venue": "Management Science",
+      "doi": "10.1287/mnsc.2021.00859",
+      "sourceLinks": [
+        "https://ideas.repec.org/a/inm/ormnsc/v70y2024i10p6569-6596.html",
+        "https://doi.org/10.1287/mnsc.2021.00859"
+      ],
+      "metadataStatus": "metadata_partial",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-09",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-09-006",
+      "title": "The effects of mafia infiltration on public procurement performance",
+      "authors": "Diego Ravenda; Michele G. Giuranno; Maika M. Valencia-Silva; Josep María Argilés-Bosch; Josep García-Blandón",
+      "year": 2020,
+      "venue": "European Journal of Political Economy",
+      "doi": "10.1016/j.ejpoleco.2020.101923",
+      "sourceLinks": [
+        "https://doi.org/10.1016/j.ejpoleco.2020.101923"
+      ],
+      "metadataStatus": "metadata_partial",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-09",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-09-007",
+      "title": "Organized crime behavior of shell-company networks in procurement: prevention insights for policy and reform",
+      "authors": "J. R. Nicolás-Carlock; Issa Luna-Pla",
+      "year": 2023,
+      "venue": "Trends in Organized Crime",
+      "doi": "10.1007/s12117-023-09499-w",
+      "sourceLinks": [
+        "https://doi.org/10.1007/s12117-023-09499-w",
+        "https://arxiv.org/abs/2307.10028"
+      ],
+      "metadataStatus": "metadata_partial",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-09",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-09-008",
+      "title": "How Mafias Migrate: The Case of the 'Ndrangheta in Northern Italy",
+      "authors": "Federico Varese",
+      "year": 2006,
+      "venue": "Law & Society Review",
+      "doi": "",
+      "sourceLinks": [
+        "https://www.cambridge.org/core/journals/law-and-society-review/article/how-mafias-migrate-the-case-of-the-ndrangheta-in-northern-italy/83AFB5D62F69AB4E5CDD1027022E2735",
+        "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=900566"
+      ],
+      "metadataStatus": "metadata_partial",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-09",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-09-009",
+      "title": "Migrating mafias",
+      "authors": "Paolo Buonanno; Matteo Pazzona",
+      "year": null,
+      "venue": "Regional Science and Urban Economics",
+      "doi": "10.1016/j.regsciurbeco.2013.11.005",
+      "sourceLinks": [
+        "https://www.sciencedirect.com/science/article/abs/pii/S0166046213001099",
+        "https://doi.org/10.1016/j.regsciurbeco.2013.11.005"
+      ],
+      "metadataStatus": "metadata_partial",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-09",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-09-010",
+      "title": "Characteristics of Italian firms in the judicial administration: Can financial ratios be red flags of criminal infiltrations?",
+      "authors": "Angela M. Greco; Mariastella Messina",
+      "year": 2024,
+      "venue": "",
+      "doi": "10.22495/cocv21i3siart10",
+      "sourceLinks": [
+        "https://doi.org/10.22495/cocv21i3siart10"
+      ],
+      "metadataStatus": "metadata_partial",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-09",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-09-011",
+      "title": "Appalti e corruzione: alcune evidenze sulla penetrazione criminale negli appalti di lavori",
+      "authors": "Francesco Decarolis; Paolo Pinotti",
+      "year": 2021,
+      "venue": "Il diritto dell'economia",
+      "doi": "",
+      "sourceLinks": [
+        "https://igier.unibocconi.eu/sites/default/files/media/attach/Appalti-Corruzione.pdf",
+        "https://iris.unibocconi.it/handle/11565/4042583"
+      ],
+      "metadataStatus": "metadata_partial",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-09",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-09-012",
+      "title": "APPALTI PUBBLICI E CRIMINALITÀ ORGANIZZATA",
+      "authors": "S. Spartà",
+      "year": 2016,
+      "venue": "Cross",
+      "doi": "10.13130/cross-7791",
+      "sourceLinks": [
+        "https://riviste.unimi.it/index.php/cross/article/download/7791/7463",
+        "https://doi.org/10.13130/cross-7791"
+      ],
+      "metadataStatus": "metadata_partial",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-09",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-09-013",
+      "title": "Exploring the Impact of Soft Preventive Judicial Measures on Business Resilience and Performance under Organised Crime Infiltration: Evidence from a Multi Case Analysis",
+      "authors": "Giovanni Scire'; E. Bivona",
+      "year": 2026,
+      "venue": "",
+      "doi": "",
+      "sourceLinks": [
+        "https://iris.unipa.it/handle/10447/710250"
+      ],
+      "metadataStatus": "metadata_partial",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-09",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-09-014",
+      "title": "A Loan You Can’t Refuse: Credit Rationing and Organized Crime Infiltration of Distressed Firms",
+      "authors": "Gianmarco Daniele; Marco De Simoni; Domenico J. Marchetti; Giovanna Marcolongo; Paolo Pinotti",
+      "year": 2025,
+      "venue": "UIF, Quaderni dell'antiriciclaggio, n. 32",
+      "doi": "",
+      "sourceLinks": [
+        "https://uif.bancaditalia.it/pubblicazioni/quaderni/2025/quaderno-32-2025/index.html?com.dotmarketing.htmlpage.language=1",
+        "https://ideas.repec.org/p/ces/ceswps/_12219.html"
+      ],
+      "metadataStatus": "metadata_partial",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-09",
+      "topicCode": ""
     }
   ]
 }
