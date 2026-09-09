@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="./styles.css" />
     <link rel="stylesheet" href="./classic-site.css" />
     <link rel="stylesheet" href="./application.css" />
-    <script src="./app.js?v=oa-030" defer></script>
+    <script src="./app.js?v=oa-031" defer></script>
   </head>
   <body class="classic-site classic-home">
     <a class="skip-link" href="#archive">Skip to the archive</a>
@@ -73,8 +73,42 @@
 
       <section class="archive" id="register" aria-labelledby="register-title">
         <div class="section-heading"><h2 id="register-title">Registro dei paper</h2></div>
-        <p>I lavori trovati entrano nel registro prima dell’analisi individuale. Etichette, inclusione ed esclusione vengono attribuite dal curatore. L’accesso ancora da verificare è indicato esplicitamente.</p>
-        <label class="search-field">Cerca titolo, autore o DOI <input id="register-search" type="search" autocomplete="off"></label>
+        <p>I lavori trovati entrano nel registro prima dell’analisi individuale. Etichette, inclusione ed esclusione vengono attribuite dal curatore. L’accesso ancora da verificare è indicato esplicitamente. I filtri usano i metadata correnti e non fondono automaticamente varianti di nomi o sedi editoriali.</p>
+        <form class="controls" id="register-controls" role="search">
+          <label class="search-field">
+            <span>Cerca titolo, autore, journal/sede o DOI</span>
+            <input id="register-search" type="search" autocomplete="off" placeholder="e.g. procurement, Varese, 10.1111…">
+          </label>
+          <label>
+            <span>Anno</span>
+            <select id="register-year-filter"><option value="all">Tutti gli anni</option></select>
+          </label>
+          <label>
+            <span>Autore</span>
+            <select id="register-author-filter"><option value="all">Tutti gli autori</option></select>
+          </label>
+          <label>
+            <span>Journal / sede</span>
+            <select id="register-venue-filter"><option value="all">Tutte le sedi</option></select>
+          </label>
+          <label>
+            <span>Stato review</span>
+            <select id="register-review-filter"><option value="all">Tutti gli stati</option></select>
+          </label>
+          <label>
+            <span>Accesso</span>
+            <select id="register-access-filter"><option value="all">Tutti gli stati</option></select>
+          </label>
+          <label>
+            <span>Ordina</span>
+            <select id="register-sort-order">
+              <option value="newest">Più recenti</option>
+              <option value="oldest">Meno recenti</option>
+              <option value="title">Titolo A–Z</option>
+            </select>
+          </label>
+          <button type="reset">Azzera filtri</button>
+        </form>
         <p id="register-count" aria-live="polite">Caricamento del registro…</p>
         <div class="table-scroll"><table class="daily-table"><thead><tr><th>Pubblicazione</th><th>Revisione</th><th>Accesso</th><th>Consultazione</th></tr></thead><tbody id="registered-papers"></tbody></table></div>
       </section>
@@ -111,6 +145,18 @@
             <span>Year</span>
             <select id="year-filter">
               <option value="all">All years</option>
+            </select>
+          </label>
+          <label>
+            <span>Author</span>
+            <select id="author-filter">
+              <option value="all">All authors</option>
+            </select>
+          </label>
+          <label>
+            <span>Journal / venue</span>
+            <select id="venue-filter">
+              <option value="all">All venues</option>
             </select>
           </label>
           <label>
@@ -221,11 +267,11 @@
         <a href="./data/archive.json">JSON</a> ·
         <a href="./data/archive.csv">CSV</a> ·
         <a href="./aml.html">Broader AML</a> ·
-        <a href="./stats.html">Daily statistics</a> ·
+        <a href="./stats.html">Statistiche</a> ·
         <a href="./curate.html">Curator desk</a> ·
         <a href="https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/blob/main/INDEX.md">Project guide</a>
       </p>
     </footer>
-    <script src="./paper-register.js" defer></script>
+    <script src="./paper-register.js?v=filters-001" defer></script>
 </body>
 </html>
