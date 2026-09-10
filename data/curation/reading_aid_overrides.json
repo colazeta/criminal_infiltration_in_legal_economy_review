@@ -1,5 +1,24 @@
 {
   "schemaVersion": 1,
   "purpose": "Higher-confidence replacements for preparatory reading aids after targeted assisted retrieval. These records override matching candidate IDs in reading_aids.json without changing any eligibility decision.",
-  "records": []
+  "records": [
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-005",
+      "kind": "verified_abstract_source",
+      "sourceLabel": "Scite exact DOI record",
+      "sourceUrl": "https://doi.org/10.2139/ssrn.4912709",
+      "synopsis": "The paper develops a machine-learning approach for identifying firms connected to organised crime from financial-statement information, focusing on accounting patterns created by the tension between mandatory disclosure and illicit objectives.",
+      "checkedAt": "2026-09-10",
+      "note": "Exact DOI 10.2139/ssrn.4912709 and title/authors matched the queue candidate and Scite exposed an abstract. SciSpace and Scholar Gateway did not return the exact work; Sider Scholar could not resolve the DOI; Elicit API access is unavailable on the connected plan; Consensus monthly search quota is exhausted. No abstract text is persisted here."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-011",
+      "kind": "verified_abstract_source",
+      "sourceLabel": "SciSpace exact DOI record",
+      "sourceUrl": "https://link.springer.com/article/10.1007/s11187-019-00250-w",
+      "synopsis": "The article links mafia presence to concentration in Sicily's construction market and evaluates two anti-mafia interventions, finding that firm seizure and reassignment can weaken criminal organisations' dominant economic positions and increase local competition.",
+      "checkedAt": "2026-09-10",
+      "note": "Exact title and DOI 10.1007/s11187-019-00250-w matched the queue candidate and SciSpace exposed an abstract. Scite independently confirmed the exact bibliographic record but did not expose an abstract in its result. No abstract text is persisted here."
+    }
+  ]
 }
