@@ -183,6 +183,51 @@
       "note": "Source-grounded intake synopsis used because the mechanical cascade did not expose a standalone abstract. Verify the linked scholarly source before screening; this is not an author abstract and cannot determine eligibility."
     },
     {
+      "candidateId": "CAND-ACADEMIC-2026-09-10-EXTRA-8af43493861b-001",
+      "kind": "review_synopsis",
+      "sourceLabel": "Parallel Search intake evidence",
+      "sourceUrl": "https://www.ojp.gov/ncjrs/virtual-library/abstracts/business-organized-crime",
+      "synopsis": "Case-study research detailing an organised-crime family's legitimate business interests and the role of criminal capabilities in legal enterprise.",
+      "checkedAt": "2026-09-10",
+      "note": "Source-grounded intake synopsis used because the mechanical cascade did not expose a standalone abstract. Verify the linked scholarly source before screening; this is not an author abstract and cannot determine eligibility."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-10-EXTRA-8af43493861b-007",
+      "kind": "review_synopsis",
+      "sourceLabel": "Parallel Search intake evidence",
+      "sourceUrl": "https://ojp.gov/library/publications/threat-russian-organized-crime",
+      "synopsis": "Research report on Russian organised crime that discusses penetration of legitimate economic sectors and influence through legitimate businesses.",
+      "checkedAt": "2026-09-10",
+      "note": "Source-grounded intake synopsis used because the mechanical cascade did not expose a standalone abstract. Verify the linked scholarly source before screening; this is not an author abstract and cannot determine eligibility."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-10-EXTRA-8af43493861b-009",
+      "kind": "review_synopsis",
+      "sourceLabel": "Parallel Search intake evidence",
+      "sourceUrl": "https://academic.oup.com/edited-volume/38662/chapter/335787074",
+      "synopsis": "Scholarly chapter on the Russian mafia's rise and transformation that may contribute evidence on criminal governance and legal-market relationships.",
+      "checkedAt": "2026-09-10",
+      "note": "Source-grounded intake synopsis used because the mechanical cascade did not expose a standalone abstract. Verify the linked scholarly source before screening; this is not an author abstract and cannot determine eligibility."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-10-EXTRA-8af43493861b-012",
+      "kind": "review_synopsis",
+      "sourceLabel": "Parallel Search intake evidence",
+      "sourceUrl": "https://link.springer.com/article/10.1007/s10611-005-5655-2",
+      "synopsis": "Peer-reviewed study of solicitors' facilitation opportunities for organised crime, potentially relevant to professional mediation at the boundary of criminal and legitimate activity.",
+      "checkedAt": "2026-09-10",
+      "note": "Source-grounded intake synopsis used because the mechanical cascade did not expose a standalone abstract. Verify the linked scholarly source before screening; this is not an author abstract and cannot determine eligibility."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-10-EXTRA-8af43493861b-013",
+      "kind": "review_synopsis",
+      "sourceLabel": "Parallel Search intake evidence",
+      "sourceUrl": "https://ecpr.eu/Events/Event/PaperDetails/66185",
+      "synopsis": "Academic conference paper on the structured presence of the 'Ndrangheta in Canada, potentially relevant to territorial expansion and legal-economy embeddedness.",
+      "checkedAt": "2026-09-10",
+      "note": "Source-grounded intake synopsis used because the mechanical cascade did not expose a standalone abstract. Verify the linked scholarly source before screening; this is not an author abstract and cannot determine eligibility."
+    },
+    {
       "candidateId": "CAND-ACADEMIC-2026-09-10-EXTRA-dbc5cb0d9888-004",
       "kind": "review_synopsis",
       "sourceLabel": "Parallel Search intake evidence",

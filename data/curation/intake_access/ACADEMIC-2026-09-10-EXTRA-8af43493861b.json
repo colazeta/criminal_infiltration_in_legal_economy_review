@@ -1,0 +1,68 @@
+{
+  "batch_id": "ACADEMIC-2026-09-10-EXTRA-8af43493861b",
+  "receipts": [
+    {
+      "access_status": "unknown",
+      "candidate_id": "CAND-ACADEMIC-2026-09-10-EXTRA-8af43493861b-001"
+    },
+    {
+      "access_status": "unknown",
+      "candidate_id": "CAND-ACADEMIC-2026-09-10-EXTRA-8af43493861b-002"
+    },
+    {
+      "access_status": "unknown",
+      "candidate_id": "CAND-ACADEMIC-2026-09-10-EXTRA-8af43493861b-003"
+    },
+    {
+      "access_status": "unknown",
+      "candidate_id": "CAND-ACADEMIC-2026-09-10-EXTRA-8af43493861b-004"
+    },
+    {
+      "access_status": "unknown",
+      "candidate_id": "CAND-ACADEMIC-2026-09-10-EXTRA-8af43493861b-005"
+    },
+    {
+      "access_status": "unknown",
+      "candidate_id": "CAND-ACADEMIC-2026-09-10-EXTRA-8af43493861b-006"
+    },
+    {
+      "access_status": "unknown",
+      "candidate_id": "CAND-ACADEMIC-2026-09-10-EXTRA-8af43493861b-007"
+    },
+    {
+      "access_status": "unknown",
+      "candidate_id": "CAND-ACADEMIC-2026-09-10-EXTRA-8af43493861b-008"
+    },
+    {
+      "access_status": "unknown",
+      "candidate_id": "CAND-ACADEMIC-2026-09-10-EXTRA-8af43493861b-009"
+    },
+    {
+      "access_status": "unknown",
+      "candidate_id": "CAND-ACADEMIC-2026-09-10-EXTRA-8af43493861b-010"
+    },
+    {
+      "access_status": "unknown",
+      "candidate_id": "CAND-ACADEMIC-2026-09-10-EXTRA-8af43493861b-011"
+    },
+    {
+      "access_status": "unknown",
+      "candidate_id": "CAND-ACADEMIC-2026-09-10-EXTRA-8af43493861b-012"
+    },
+    {
+      "access_status": "unknown",
+      "candidate_id": "CAND-ACADEMIC-2026-09-10-EXTRA-8af43493861b-013"
+    },
+    {
+      "access_status": "unknown",
+      "candidate_id": "CAND-ACADEMIC-2026-09-10-EXTRA-8af43493861b-014"
+    },
+    {
+      "access_status": "unknown",
+      "candidate_id": "CAND-ACADEMIC-2026-09-10-EXTRA-8af43493861b-015"
+    }
+  ],
+  "schema_version": 2,
+  "source_body_sha256": "f8f74c3d28496c76124bdf6fce4bb7e2d6f87f2886326169e0b486ff304ad8bc",
+  "source_issue_number": 229
+}
