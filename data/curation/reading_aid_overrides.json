@@ -19,6 +19,24 @@
       "synopsis": "The article links mafia presence to concentration in Sicily's construction market and evaluates two anti-mafia interventions, finding that firm seizure and reassignment can weaken criminal organisations' dominant economic positions and increase local competition.",
       "checkedAt": "2026-09-10",
       "note": "Exact title and DOI 10.1007/s11187-019-00250-w matched the queue candidate and SciSpace exposed an abstract. Scite independently confirmed the exact bibliographic record but did not expose an abstract in its result. No abstract text is persisted here."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-09-EXTRA-85e203d4eb5a-008",
+      "kind": "verified_abstract_source",
+      "sourceLabel": "SciSpace exact DOI record",
+      "sourceUrl": "https://link.springer.com/article/10.1007/s10611-013-9473-7",
+      "synopsis": "The article develops a framework for mafia territorial expansion and applies it to Germany, finding a particularly strong 'Ndrangheta presence and an expansion pattern centred more on economic infiltration and illegal markets than on reproducing home-territory embeddedness.",
+      "checkedAt": "2026-09-10",
+      "note": "Exact title and DOI 10.1007/s10611-013-9473-7 matched the queue candidate. SciSpace exposed the published abstract and Scite independently exposed an abstract-bearing exact DOI record. No abstract text is persisted here."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-09-EXTRA-8e1caef4c376-003",
+      "kind": "verified_abstract_source",
+      "sourceLabel": "SciSpace exact DOI record",
+      "sourceUrl": "https://link.springer.com/article/10.1007/s11187-020-00439-4",
+      "synopsis": "The article estimates the effects of judicial administration on Italian criminal firms over 2004–2016 and reports deterioration in profitability and efficiency together with higher leverage after criminal management is removed, highlighting the difficulty of re-establishing viable market-based governance.",
+      "checkedAt": "2026-09-10",
+      "note": "Exact title and DOI 10.1007/s11187-020-00439-4 matched the queue candidate and SciSpace exposed the published abstract. Scite confirmed the bibliographic identity but its abstract field was contaminated by repository licensing text and was therefore not used as abstract evidence. No abstract text is persisted here."
     }
   ]
 }
