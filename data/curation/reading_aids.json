@@ -174,12 +174,39 @@
       "note": "Source-grounded intake synopsis used because the mechanical cascade did not expose a standalone abstract. Verify the linked scholarly source before screening; this is not an author abstract and cannot determine eligibility."
     },
     {
-      "candidateId": "CAND-ACADEMIC-2026-09-09-EXTRA-8e1caef4c376-007",
+      "candidateId": "CAND-ACADEMIC-2026-09-10-001",
       "kind": "review_synopsis",
-      "sourceLabel": "Exa intake evidence",
-      "sourceUrl": "https://www.iris.unict.it/handle/20.500.11769/665869",
-      "synopsis": "Recent chapter on corporate and government prevention strategies against organised crime.",
-      "checkedAt": "2026-09-09",
+      "sourceLabel": "Parallel Search intake evidence",
+      "sourceUrl": "https://www.oig.dol.gov/public/reports/laborracpaper.pdf",
+      "synopsis": "Institutional research on the evolution of organised-crime labour racketeering, including infiltration, exploitation or control of unions, benefit plans and employer-related structures.",
+      "checkedAt": "2026-09-10",
+      "note": "Source-grounded intake synopsis used because the mechanical cascade did not expose a standalone abstract. Verify the linked scholarly source before screening; this is not an author abstract and cannot determine eligibility."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-10-003",
+      "kind": "review_synopsis",
+      "sourceLabel": "Parallel Search intake evidence",
+      "sourceUrl": "https://www.publicsafety.gc.ca/cnt/rsrcs/pblctns/rgnzd-crm-brf-27/index-en.aspx",
+      "synopsis": "Research brief on organised-crime vulnerability in commercial construction, including counter-evidence on whether identified sector vulnerabilities translate into demonstrated criminal exploitation.",
+      "checkedAt": "2026-09-10",
+      "note": "Source-grounded intake synopsis used because the mechanical cascade did not expose a standalone abstract. Verify the linked scholarly source before screening; this is not an author abstract and cannot determine eligibility."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-10-006",
+      "kind": "review_synopsis",
+      "sourceLabel": "Parallel Search intake evidence",
+      "sourceUrl": "https://www.iris.unicz.it/handle/20.500.12317/104840",
+      "synopsis": "Scholarly legal contribution on judicial control and suspension of anti-mafia interdiction effects, directly relevant to the preventive apparatus applied to firms exposed to infiltration risk.",
+      "checkedAt": "2026-09-10",
+      "note": "Source-grounded intake synopsis used because the mechanical cascade did not expose a standalone abstract. Verify the linked scholarly source before screening; this is not an author abstract and cannot determine eligibility."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-10-007",
+      "kind": "review_synopsis",
+      "sourceLabel": "Parallel Search intake evidence",
+      "sourceUrl": "https://www.ojp.gov/ncjrs/virtual-library/abstracts/crime-crime-control-and-yakuza-contemporary-japan",
+      "synopsis": "Research article on the Yakuza that explicitly describes front companies, legitimate business operations and criminal influence in the corporate world in Japan.",
+      "checkedAt": "2026-09-10",
       "note": "Source-grounded intake synopsis used because the mechanical cascade did not expose a standalone abstract. Verify the linked scholarly source before screening; this is not an author abstract and cannot determine eligibility."
     },
     {
