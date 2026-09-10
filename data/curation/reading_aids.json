@@ -415,6 +415,24 @@
       "synopsis": "Recent book chapter on the German case of ’Ndrangheta expansion; potentially relevant to legitimate-business embeddedness but its identity relationship with the author's earlier DPhil remains unresolved.",
       "checkedAt": "2026-09-10",
       "note": "Source-grounded intake synopsis used because the mechanical cascade did not expose a standalone abstract. Verify the linked scholarly source before screening; this is not an author abstract and cannot determine eligibility."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-10-EXTRA-f276bc827f57-001",
+      "kind": "review_synopsis",
+      "sourceLabel": "Parallel Search intake evidence",
+      "sourceUrl": "https://markmoore.scholars.harvard.edu/publications/organized-crime-business-enterprise",
+      "synopsis": "Scholarly chapter framing organized crime as a business enterprise; potentially relevant to the review’s conceptual boundary between criminal enterprise and influence over legitimate economic activity.",
+      "checkedAt": "2026-09-10",
+      "note": "Source-grounded intake synopsis used because the mechanical cascade did not expose a standalone abstract. Verify the linked scholarly source before screening; this is not an author abstract and cannot determine eligibility."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-10-EXTRA-f276bc827f57-004",
+      "kind": "review_synopsis",
+      "sourceLabel": "Parallel Search intake evidence",
+      "sourceUrl": "https://ojp.gov/ncjrs/virtual-library/abstracts/major-issues-relating-organized-crime-within-context-economic",
+      "synopsis": "Research paper on the economic relationships required by organized crime and the interweaving of legitimate business and illicit activity, potentially relevant to the legal-economy boundary.",
+      "checkedAt": "2026-09-10",
+      "note": "Source-grounded intake synopsis used because the mechanical cascade did not expose a standalone abstract. Verify the linked scholarly source before screening; this is not an author abstract and cannot determine eligibility."
     }
   ]
 }

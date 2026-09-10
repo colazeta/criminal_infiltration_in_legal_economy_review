@@ -2117,6 +2117,150 @@
       "accessStatus": "unknown",
       "registeredAt": "2026-09-10",
       "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-10-EXTRA-f276bc827f57-001",
+      "title": "Organized Crime as a Business Enterprise",
+      "authors": "Mark H. Moore",
+      "year": 1987,
+      "venue": "Major Issues in Organized Crime Control",
+      "doi": "",
+      "sourceLinks": [
+        "https://markmoore.scholars.harvard.edu/publications/organized-crime-business-enterprise"
+      ],
+      "metadataStatus": "metadata_verified",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-10",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-10-EXTRA-f276bc827f57-002",
+      "title": "From Man of Honour to Entrepreneur: The Evolution of the Mafia",
+      "authors": "Pino Arlacchi",
+      "year": 1979,
+      "venue": "New Left Review",
+      "doi": "10.64590/ilh",
+      "sourceLinks": [
+        "https://newleftreview.org/issues/i118/articles/pino-arlacchi-from-man-of-honour-to-entrepreneur-the-evolution-of-the-mafia.pdf"
+      ],
+      "metadataStatus": "metadata_verified",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-10",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-10-EXTRA-f276bc827f57-003",
+      "title": "When corruption creates its Mafia. The “middle-world” case in Rome",
+      "authors": "Alberto Vannucci",
+      "year": 2024,
+      "venue": "Trends in Organized Crime",
+      "doi": "10.1007/s12117-023-09521-1",
+      "sourceLinks": [
+        "https://arpi.unipi.it/retrieve/ff5ef731-e732-4e41-98b1-2bb1bcee8999/Vannucci-2024-Trends_in_Organized_Crime.pdf"
+      ],
+      "metadataStatus": "metadata_verified",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-10",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-10-EXTRA-f276bc827f57-004",
+      "title": "Major Issues Relating to Organized Crime Within the Context of Economic Relationships",
+      "authors": "Margaret E. Beare; R. T. Naylor",
+      "year": 1999,
+      "venue": "",
+      "doi": "",
+      "sourceLinks": [
+        "https://ojp.gov/ncjrs/virtual-library/abstracts/major-issues-relating-organized-crime-within-context-economic"
+      ],
+      "metadataStatus": "metadata_verified",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-10",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-10-EXTRA-f276bc827f57-005",
+      "title": "The Sicilian Mafia: The Business of Private Protection",
+      "authors": "Diego Gambetta",
+      "year": null,
+      "venue": "Harvard University Press",
+      "doi": "",
+      "sourceLinks": [
+        "https://searchworks.stanford.edu/view/9505401"
+      ],
+      "metadataStatus": "metadata_partial",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-10",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-10-EXTRA-f276bc827f57-006",
+      "title": "Italian Organized Crime since 1950",
+      "authors": "Maurizio Catino",
+      "year": 2020,
+      "venue": "Crime and Justice",
+      "doi": "10.1086/707319",
+      "sourceLinks": [
+        "https://www.journals.uchicago.edu/doi/10.1086/707319"
+      ],
+      "metadataStatus": "metadata_verified",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-10",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-10-EXTRA-f276bc827f57-007",
+      "title": "Mafia e potere: processi di legittimazione e costruzione del consenso",
+      "authors": "Rocco Sciarrone",
+      "year": 2006,
+      "venue": "Stato e mercato",
+      "doi": "10.1425/23230",
+      "sourceLinks": [
+        "https://www.rivisteweb.it/doi/10.1425/23230"
+      ],
+      "metadataStatus": "metadata_verified",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-10",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-10-EXTRA-f276bc827f57-008",
+      "title": "The rising mafioso capitalists, opportunities, and the case of Turkey",
+      "authors": "Fatma Ülkü Selçuk",
+      "year": 2011,
+      "venue": "",
+      "doi": "10.1177/0309816811407298",
+      "sourceLinks": [
+        "https://journals.sagepub.com/doi/10.1177/0309816811407298"
+      ],
+      "metadataStatus": "metadata_partial",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-10",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-10-EXTRA-f276bc827f57-009",
+      "title": "La prevenzione mite: amministrazione giudiziaria e controllo giudiziario ex artt. 34 e 34 bis del codice antimafia",
+      "authors": "Marcella Vulcano",
+      "year": 2022,
+      "venue": "Cross",
+      "doi": "",
+      "sourceLinks": [
+        "https://riviste.unimi.it/index.php/cross/article/download/17445/15355/52114"
+      ],
+      "metadataStatus": "metadata_verified",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-10",
+      "topicCode": ""
     }
   ]
 }
