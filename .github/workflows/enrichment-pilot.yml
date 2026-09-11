@@ -1,9 +1,10 @@
 name: Private paper extraction pilot
 on:
   workflow_dispatch:
-  push:
+  workflow_run:
+    workflows: [Deploy curator Worker]
+    types: [completed]
     branches: [main]
-    paths: [scripts/enrichment/pilot.py, .github/workflows/enrichment-pilot.yml]
 permissions:
   contents: read
 concurrency:
@@ -11,14 +12,21 @@ concurrency:
   cancel-in-progress: false
 jobs:
   pilot:
-    if: github.repository == 'colazeta/criminal_infiltration_in_legal_economy_review' && github.ref == 'refs/heads/main'
+    if: >-
+      github.repository == 'colazeta/criminal_infiltration_in_legal_economy_review' &&
+      github.ref == 'refs/heads/main' &&
+      (github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_branch == 'main' &&
+      github.event.workflow_run.head_repository.full_name == github.repository))
     runs-on: ubuntu-24.04
     environment: curator-production
     timeout-minutes: 20
     steps:
-      - name: Checkout reviewed public code
+      - name: Checkout reviewed deployed code
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
           persist-credentials: false
       - name: Set up Node for the native schema validator
         uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
@@ -28,16 +36,26 @@ jobs:
         uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:
           python-version: '3.12'
-      - name: Verify ontology and synthetic conversion tests before private access
+      - name: Verify contracts before private access
         run: |
           python3 scripts/validation/validate_repository.py
           python3 scripts/ontology/validate_ontology.py
-          python3 -m unittest tests.test_enrichment_pilot tests.test_enrichment_service
-      - name: Run at most one abstract through the isolated local model
+          python3 -m unittest tests.test_enrichment_pilot tests.test_enrichment_service tests.test_enrichment_schedule_contract
+      - name: Refuse a stale deployment before model work
+        env:
+          EXPECTED_DEPLOYMENT_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+        run: |
+          python3 - <<'PY'
+          import os
+          from scripts.enrichment.service_client import current_commit
+          if current_commit() != os.environ['EXPECTED_DEPLOYMENT_SHA']:
+              raise SystemExit('pilot_deployment_changed')
+          PY
+      - name: Run at most one unvalidated abstract pilot
         env:
           CURATOR_SESSION_SECRET: ${{ secrets.CURATOR_SESSION_SECRET }}
         run: python3 -m scripts.enrichment.pilot --submit
-      - name: Record aggregate state without private source or proposal contents
+      - name: Record aggregate state without private contents
         if: always()
         env:
           CURATOR_SESSION_SECRET: ${{ secrets.CURATOR_SESSION_SECRET }}
@@ -46,5 +64,5 @@ jobs:
           from scripts.enrichment.service_client import call,current_commit
           import json
           status=call('status',expected_commit=current_commit())
-          print(json.dumps({'enabled':status.get('enabled'),'counts':status.get('counts'),'scientific_extraction':status.get('scientific_extraction')}))
+          print(json.dumps({'enabled':status.get('enabled'),'counts':status.get('counts'),'scientific_extraction':status.get('scientific_extraction'),'scheduling':status.get('scheduling')}))
           PY
