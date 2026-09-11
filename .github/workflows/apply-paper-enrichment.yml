@@ -1,0 +1,78 @@
+name: Apply isolated paper enrichment implementation
+on:
+  push:
+    branches: [implementation/paper-enrichment-20260911]
+    paths: [.github/workflows/apply-paper-enrichment.yml]
+permissions:
+  contents: write
+jobs:
+  apply:
+    if: github.ref == 'refs/heads/implementation/paper-enrichment-20260911'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout isolated implementation branch
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 0
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.11'
+      - name: Set up Node
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
+        with:
+          node-version: '22'
+      - name: Verify exact reviewed patch and apply source changes
+        run: |
+          python3 - <<'PY'
+          import base64, hashlib, lzma, os, subprocess
+          from pathlib import Path
+          pieces = [Path(f'.implementation-transfer/enrichment-{i}.b64').read_text().strip() for i in range(4)]
+          for i, piece in enumerate(pieces):
+              print('Transfer segment', i, 'characters', len(piece), 'sha256', hashlib.sha256(piece.encode()).hexdigest())
+          patch = lzma.decompress(base64.b64decode(''.join(pieces), validate=True))
+          if hashlib.sha256(patch).hexdigest() != 'af9f928f5734a1fc2126f8d709a7e9d8deb833b74312d6826a2e9cc7ed823fa0':
+              raise SystemExit('Implementation patch hash mismatch')
+          if b'diff --git a/.github/' in patch:
+              raise SystemExit('Workflow writes are not allowed in this source-only transfer')
+          target = Path(os.environ['RUNNER_TEMP']) / 'enrichment.patch'
+          target.write_bytes(patch)
+          subprocess.run(['git', 'apply', '--check', str(target)], check=True)
+          subprocess.run(['git', 'apply', str(target)], check=True)
+          PY
+          git rm .implementation-transfer/enrichment-*.b64
+          git add -A
+      - name: Validate complete implementation and regression suite
+        run: |
+          python3 scripts/validation/validate_repository.py
+          python3 scripts/ontology/validate_ontology.py
+          python3 scripts/ontology/build_model_browser.py
+          git diff --exit-code -- site/vocab/review-v2-model.json
+          python3 -m unittest discover -s tests -p 'test_*.py'
+          node --test curator-app/test/*.test.js
+          node --check site/enrichment.js
+          python3 scripts/build_archive.py
+          python3 scripts/build_secondary_collections.py
+          python3 scripts/curation/build_curator_stats.py
+          python3 scripts/curation/build_curator_options.py
+          python3 scripts/validation/validate_archive.py
+          python3 scripts/validation/validate_site.py
+          python3 scripts/report_saturation.py
+          git diff --exit-code
+      - name: Verify bounded public-provider connectivity without retaining abstracts
+        run: python3 scripts/enrichment/provider_smoke.py
+      - name: Commit only validated source changes to isolated branch
+        run: |
+          python3 - <<'PY'
+          import subprocess
+          paths = subprocess.check_output(['git', 'diff', '--cached', '--name-only'], text=True).splitlines()
+          if any(path.startswith('.github/') for path in paths):
+              raise SystemExit('Refusing workflow changes through runtime token')
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Implement private paper enrichment ontology, queue, proposals and citation coverage'
+          git push origin HEAD:implementation/paper-enrichment-20260911
+          git log -1 --format='%H %s'
+          echo 'Source implementation validated and committed. Production enrichment remains disabled; D1 readiness and scientific calibration are separate gates.' >> "$GITHUB_STEP_SUMMARY"
