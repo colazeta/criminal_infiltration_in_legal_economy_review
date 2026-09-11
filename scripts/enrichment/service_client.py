@@ -85,6 +85,8 @@ def main():
         print(json.dumps({'operation':args.operation,'private_output_written':True,'status':result.get('status')}))
     else:
         print(json.dumps(result,indent=2))
+    if args.operation == 'run' and result.get('status') not in {'completed','partial','empty','slot_already_observed','leased'}:
+        raise RuntimeError('enrichment_job_not_successful')
 
 if __name__=='__main__':
     try: main()
