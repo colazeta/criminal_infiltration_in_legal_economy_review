@@ -1,24 +1,53 @@
 name: Check paper enrichment readiness
 on:
   workflow_dispatch:
+  schedule:
+    - cron: '45 * * * *'
+  workflow_run:
+    workflows: [Deploy curator Worker]
+    types: [completed]
+    branches: [main]
 permissions:
   contents: read
+concurrency:
+  group: enrichment-readiness-observer
+  cancel-in-progress: false
 jobs:
   private-storage:
+    if: >-
+      github.repository == 'colazeta/criminal_infiltration_in_legal_economy_review' &&
+      github.ref == 'refs/heads/main' &&
+      (github.event_name != 'workflow_run' ||
+      (github.event.workflow_run.head_branch == 'main' &&
+      github.event.workflow_run.head_repository.full_name == github.repository))
     runs-on: ubuntu-latest
     environment: curator-production
     timeout-minutes: 5
     steps:
-      - name: Checkout
+      - name: Checkout public observer without retained credentials
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
-      - name: Verify exact deployed private storage
+        with:
+          persist-credentials: false
+      - name: Inspect deployed private storage and real scheduling receipts
         env:
           CURATOR_SESSION_SECRET: ${{ secrets.CURATOR_SESSION_SECRET }}
         run: |
-          python3 scripts/enrichment/service_client.py verify
-          python3 scripts/enrichment/service_client.py status
-      - name: Check bounded public-provider access without retaining source text
+          python3 - <<'PY'
+          import json, time
+          from scripts.enrichment.service_client import current_commit
+          from scripts.enrichment.deployment_check import check
+          state = check(current_commit(), activate=False)
+          print(json.dumps(state, indent=2))
+          if not state.get('enabled'):
+              raise SystemExit('enrichment_runtime_inactive')
+          schedule = state['scheduling'].get('schedule')
+          if not isinstance(schedule, dict):
+              raise SystemExit('enrichment_schedule_missing')
+          now = int(time.time() * 1000)
+          if schedule['next_slot'] < now - 300000:
+              raise SystemExit('enrichment_schedule_watermark_stalled')
+          print('Observer only: no paper job, model inference, activation or scientific approval performed.')
+          PY
+      - name: Check public-provider access only when manually requested
+        if: github.event_name == 'workflow_dispatch'
         run: python3 scripts/enrichment/provider_smoke.py
-      - name: Record activation boundary
-        run: |
-          echo "Readiness check only: it does not approve scientific labels or activate a model. Provider outcomes, persisted work and scientific calibration remain distinct." >> "$GITHUB_STEP_SUMMARY"
