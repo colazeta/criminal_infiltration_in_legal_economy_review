@@ -1,0 +1,28 @@
+# Private extraction pilot: computational scope
+
+Owner-directed implementation test, 11 September 2026. This amendment covers computational dependencies only; it does not change scholarly discovery providers, canonical identity, screening or publication.
+
+## Authorised execution
+
+Run one existing, privately retained author abstract through a local open-weight model on a standard Ubuntu GitHub Actions runner in this public repository. No paid/larger runner, model API, account upgrade or new credential is permitted. The model process listens on localhost and receives no service, repository or cloud credentials. The only authenticated remote operations are the existing narrow private enrichment service's packet and proposal operations.
+
+The initial execution occurs on merge of the reviewed pilot implementation. Subsequent runs require explicit workflow dispatch or a reviewed change to its source/workflow. There is no model schedule in this release. Each invocation processes at most one abstract, capped at 14,000 characters without truncation, at most 2,500 output tokens, four findings, six variable descriptions and one proposed primary framework category. Multi-study inference is not supported by this pilot. Scientific batch extraction remains blocked pending calibration.
+
+## Pinned computational dependencies
+
+- Official `ggml-org/llama.cpp` release `b10333`, Ubuntu x64 CPU asset `llama-b10333-bin-ubuntu-x64.tar.gz`; SHA-256 `936ce04d98abe2a977e9dd2ff92659bb96947e136acee8f2bc3e21d8eaebbf23`.
+- `unsloth/Qwen3-4B-Instruct-2507-GGUF`, `Qwen3-4B-Instruct-2507-Q4_K_M.gguf`; SHA-256 `3605803b982cb64aead44f6c1b2ae36e3acdb41d8e46c8a94c6533bc4c67e597`.
+
+The fixed public GitHub release and Hugging Face file locators may redirect to their ordinary public download CDNs. These software downloads carry no private text or credentials. The code verifies the complete hashes before extraction/execution and rejects an unexpected file, size or time overrun. No executable or weights are cached in the repository or published as an Actions artefact.
+
+## Evidence and privacy gates
+
+The source is read from the existing private store with hash-verified bytes. Generated quotes must be unique literal source spans. Offsets use UTF-16, consistent with the native validator. A generated statement is still an unvalidated interpretation: literal matching does not prove entailment or scientific correctness. Missing facts remain not_verifiable; they do not become negative claims. Framework assignments are analytical proposals, never author facts or approved labels.
+
+The complete converted proposal must pass the existing closed schema and scope validator before private import. The importer verifies source bytes and writes immutable proposal history. Logs contain stage names, record counts and opaque proposal IDs only, never source text, prompts containing source text, model output, signatures or secrets. Model subprocess output is discarded; temporary private files have restricted permissions and are removed at exit. No source/proposal artefact is uploaded or committed.
+
+A successful pilot establishes that private source → local model → grounded envelope → private proposal persistence can run. It is not the planned 12–18-paper scientific calibration, not a full-text extraction, not full variable coverage and not evidence that any paper belongs in the review.
+
+## Observed mechanical activation preceding the pilot
+
+Deployment run `34603354658`, job `103275779830`, on 11 September 2026 at 13:16 UTC verified exact commit `c2a6e524e60b810930c8d0a978ae8ec979979323`, private SQLite/KV readback and activation. The first successful mechanical run `592099ddeaa1ce348539f93bcead7667606f98e68cb59b5d710bb253d19b58cb` completed at 13:16:48 UTC. Readback showed 174 targets, one completed metadata job, two private sources, zero citation observations and zero proposals. Earlier failed registry attempts remain in the audit history. The deployed supervisor trigger is `7,22,37,52 * * * *`, with at most one scheduled mechanical job per UTC hour.
