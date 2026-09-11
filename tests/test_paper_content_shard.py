@@ -1,7 +1,6 @@
 """Synthetic benchmark partition tests, without network, model or production calls."""
 import copy
 import json
-import os
 import stat
 import tempfile
 import unittest
@@ -63,5 +62,5 @@ class ContentShardTests(unittest.TestCase):
         self.assertIn('cancel-in-progress: false',text)
         self.assertIn('fail-fast: false',text)
         self.assertIn('persist-credentials: false',text)
-        self.assertLess(text.index('Retain source-only ciphertext'),text.index('Run the unchanged source-bound extractor'))
+        self.assertLess(text.index('Retain source-only ciphertext'),text.index('paper_content_shard infer'))
         self.assertNotIn('path: ${{ runner.temp }}/benchmark-input.json',text)

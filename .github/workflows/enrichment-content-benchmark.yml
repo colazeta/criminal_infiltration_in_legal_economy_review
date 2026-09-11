@@ -6,6 +6,7 @@ on:
     paths:
       - scripts/calibration/paper_content_benchmark.py
       - scripts/calibration/paper_content_shard.py
+      - scripts/enrichment/focused.py
       - .github/workflows/enrichment-content-benchmark.yml
 permissions:
   contents: read
@@ -39,7 +40,7 @@ jobs:
         run: |
           python3 scripts/validation/validate_repository.py
           python3 scripts/ontology/validate_ontology.py
-          python3 -m unittest tests.test_paper_content_benchmark tests.test_enrichment_generation_contract tests.test_paper_content_shard
+          python3 -m unittest tests.test_paper_content_benchmark tests.test_enrichment_generation_contract tests.test_paper_content_shard tests.test_focused_extraction
           node --test curator-app/test/sealed-audit.test.js
       - name: Collect at most six existing matched abstracts for source-first assessment
         run: |
@@ -55,7 +56,7 @@ jobs:
           path: ${{ runner.temp }}/benchmark-sources.sealed.json
           if-no-files-found: ignore
           retention-days: 1
-      - name: Run the unchanged source-bound extractor on the collected partition
+      - name: Development re-test of focused extraction without production writes
         run: |
           python3 -m scripts.calibration.paper_content_shard infer \
             --partition '${{ matrix.partition }}' \
