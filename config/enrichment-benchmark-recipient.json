@@ -1,0 +1,7 @@
+{
+  "protocol": "CILE-SEALED-AUDIT-1",
+  "public_key_spki": "MCowBQYDK2VuAyEAIPiAIIbRp9KzRns3oxf/AFvC0MX/0+UIOfeTC2j1JGI=",
+  "public_key_sha256": "e16f2b613ed228c6dd312c9bc16b8d5019c039a6d055e1ba20e1f3d0a07b89a5",
+  "expires_at": "2026-09-12T00:00:00Z",
+  "purpose": "Owner-requested bounded content benchmark; public metadata/abstracts only, no production authentication or private database access."
+}

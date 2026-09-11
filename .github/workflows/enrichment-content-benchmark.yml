@@ -1,0 +1,52 @@
+name: Abstract content benchmark
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - scripts/calibration/paper_content_benchmark.py
+      - .github/workflows/enrichment-content-benchmark.yml
+permissions:
+  contents: read
+concurrency:
+  group: abstract-content-benchmark
+  cancel-in-progress: false
+jobs:
+  benchmark:
+    if: github.repository == 'colazeta/criminal_infiltration_in_legal_economy_review' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Checkout reviewed public code without retained credentials
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Set up Node for native validation and existing encryption
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
+        with:
+          node-version: '22'
+      - name: Set up Python for the isolated CPU benchmark
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12'
+      - name: Validate contracts before anonymous provider access
+        run: |
+          python3 scripts/validation/validate_repository.py
+          python3 scripts/ontology/validate_ontology.py
+          python3 -m unittest tests.test_paper_content_benchmark tests.test_enrichment_generation_contract
+          node --test curator-app/test/sealed-audit.test.js
+      - name: Analyse at most eighteen matched original abstracts without production access
+        run: |
+          python3 -m scripts.calibration.paper_content_benchmark \
+            --sources-output "$RUNNER_TEMP/benchmark-sources.sealed.json" \
+            --results-output "$RUNNER_TEMP/benchmark-results.sealed.json"
+      - name: Retain only the two recipient-encrypted audit files
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: recipient-encrypted-content-benchmark
+          path: |
+            ${{ runner.temp }}/benchmark-sources.sealed.json
+            ${{ runner.temp }}/benchmark-results.sealed.json
+          if-no-files-found: ignore
+          retention-days: 1
