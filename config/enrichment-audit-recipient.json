@@ -1,0 +1,7 @@
+{
+  "protocol": "CILE-SEALED-AUDIT-1",
+  "public_key_spki": "MCowBQYDK2VuAyEAqIp+ZqKRjtLOVqsZ9Zt5dqLFc1SJrB35PzkjDsKGeAk=",
+  "public_key_sha256": "9807e15962874bbc170fbfd6fcf4919dd551ed0a6e5f0a355ca45463a74b1ead",
+  "expires_at": "2026-09-12T00:00:00Z",
+  "purpose": "Owner-mandated independent content verification in this working session; no authentication credentials."
+}
