@@ -333,7 +333,4 @@ jobs:
         env:
           CURATOR_SESSION_SECRET: ${{ secrets.CURATOR_SESSION_SECRET }}
         run: |
-          python3 scripts/enrichment/service_client.py verify
-          python3 scripts/enrichment/service_client.py activate
-          python3 scripts/enrichment/service_client.py run
-          python3 scripts/enrichment/service_client.py status
+          python3 -m scripts.enrichment.deployment_check --activate
