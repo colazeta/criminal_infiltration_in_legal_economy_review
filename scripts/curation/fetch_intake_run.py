@@ -12,7 +12,7 @@ import time
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / 'scripts/metrics'))
-from fetch_surveillance_ledger import fetch_validated_runs
+from fetch_surveillance_ledger_quarantine import fetch_validated_runs
 
 
 def main():
@@ -28,7 +28,7 @@ def main():
         if len(matches) == 1 and matches[0]['status'] == 'completed':
             # Fetcher validates live body. Require the exact authenticated event
             # body too: an edited issue must not substitute an unvalidated body.
-            from fetch_surveillance_ledger import verify_intake_issue, api_get
+            from fetch_surveillance_ledger_quarantine import verify_intake_issue, api_get
             live, _ = api_get(f"https://api.github.com/repos/{os.environ['GITHUB_REPOSITORY']}/issues/{issue['number']}", os.environ['GH_TOKEN'])
             if any(live.get(key) != issue.get(key) for key in ("body", "title", "created_at")):
                 raise ValueError('live intake differs from authenticated event; reopen the current issue')
