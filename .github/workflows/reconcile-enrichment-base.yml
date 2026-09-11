@@ -1,0 +1,47 @@
+name: Reconcile enrichment implementation base
+on:
+  push:
+    branches: [implementation/paper-enrichment-20260911]
+    paths: [.github/workflows/reconcile-enrichment-base.yml]
+permissions:
+  contents: write
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout isolated branch
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 0
+      - name: Set up Node
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
+        with:
+          node-version: '22'
+      - name: Reconcile only byte-identical previously inspected base files
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          python3 - <<'PY'
+          import subprocess
+          inspected='3d52a7c09116dd7a85882d2c6886144dde7e53fa'
+          base='eec2ab098e1ddc15c0139f8324ca0735a6cd7adb'
+          if subprocess.check_output(['git','rev-parse','origin/main'],text=True).strip()!=base: raise SystemExit('Main moved: inspect before reconciling')
+          subprocess.run(['git','merge','--no-commit','--no-ff',base],check=False)
+          conflicts=subprocess.check_output(['git','diff','--name-only','--diff-filter=U'],text=True).splitlines()
+          for path in conflicts:
+              before=subprocess.check_output(['git','show',inspected+':'+path])
+              released=subprocess.check_output(['git','show',base+':'+path])
+              if before!=released: raise SystemExit('Concurrent change requires inspection: '+path)
+              subprocess.run(['git','checkout','--ours','--',path],check=True)
+              subprocess.run(['git','add','--',path],check=True)
+          staged=subprocess.check_output(['git','diff','--cached','--name-only'],text=True).splitlines()
+          if staged: raise SystemExit('Unexpected new main changes: '+', '.join(staged))
+          print('All merge conflicts matched the inspected previous release byte for byte; no file contents changed.')
+          PY
+          python3 scripts/validation/validate_repository.py
+          python3 scripts/ontology/validate_ontology.py
+          python3 -m unittest discover -s tests -p 'test_*.py'
+          node --test curator-app/test/*.test.js
+          git commit -m 'Reconcile the unchanged released base with the private runtime implementation'
+          git push origin HEAD:implementation/paper-enrichment-20260911
