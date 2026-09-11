@@ -1,0 +1,58 @@
+name: Integrate retained reference stage
+on:
+  push:
+    branches: [maintenance/retained-crossref-citations]
+    paths: [.github/workflows/integrate-retained-references.yml]
+permissions:
+  contents: write
+jobs:
+  integrate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout isolated source branch
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Set up Node for existing native tests
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
+        with:
+          node-version: '22'
+      - name: Apply three explicit source replacements with exact integrity checks
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import hashlib
+          path=Path('curator-app/src/paper-enrichment.js')
+          source=path.read_text()
+          if hashlib.sha256(source.encode()).hexdigest()!='ed54a86b045589b8aa5a566e97a01c8874b7e07e82662e3093be96cb7aadbf0b':
+              raise SystemExit('Source changed: inspect before applying')
+          replacements=[
+            ("import { fetchWithTimeout } from './network.js';", "import { fetchWithTimeout } from './network.js';\nimport { retainedCrossrefReferences } from './crossref-references.js';"),
+            ("  let cp={...checkpoint};\n  if(!cp.snapshot_id)", "  let cp={...checkpoint};\n  if (!cp.crossref_done) {\n    const derived = await retainedCrossrefReferences(env,target,cp.crossref,now);\n    cp.crossref_done = derived === null || derived.done;\n    if (derived !== null) return {complete:false,due:now+HOUR,checkpoint:{...cp,crossref:derived}};\n  }\n  if(!cp.snapshot_id)"),
+            ("cp={snapshot_id:iso(now), work_id:", "cp={...cp,snapshot_id:iso(now), work_id:")]
+          for before,after in replacements:
+              if source.count(before)!=1: raise SystemExit('Ambiguous source replacement')
+              source=source.replace(before,after)
+          if hashlib.sha256(source.encode()).hexdigest()!='a08fd89de6ffe6272520d607d24c3a88defd185e5477ea70f69ec268834af60c':
+              raise SystemExit('Unexpected replacement result')
+          path.write_text(source)
+          PY
+      - name: Validate the full repository before committing source
+        run: |
+          python3 scripts/validation/validate_repository.py
+          python3 scripts/ontology/validate_ontology.py
+          python3 scripts/ontology/build_model_browser.py
+          python3 -m unittest discover -s tests -p 'test_*.py'
+          node --test curator-app/test/*.test.js
+          python3 scripts/build_archive.py
+          python3 scripts/build_secondary_collections.py
+          python3 scripts/curation/build_curator_stats.py
+          python3 scripts/curation/build_curator_options.py
+          python3 scripts/validation/validate_archive.py
+          python3 scripts/validation/validate_site.py
+      - name: Commit only the inspected source integration to the isolated branch
+        run: |
+          git add curator-app/src/paper-enrichment.js
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Index retained Crossref references before independent OpenAlex stages'
+          git push origin HEAD:maintenance/retained-crossref-citations
