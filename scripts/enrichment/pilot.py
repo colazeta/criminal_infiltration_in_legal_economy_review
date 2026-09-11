@@ -140,8 +140,32 @@ def download(url,destination,digest,limit):
     if h.hexdigest()!=digest: raise RuntimeError('pilot_download_integrity')
 
 
+def write_sealed_audit(work, output, audit):
+    """Send only the selected research packet, never credentials, to the pinned audit recipient."""
+    if output is None:
+        return
+    recipient=json.loads((ROOT/'config/enrichment-audit-recipient.json').read_text())
+    from datetime import datetime, timezone
+    if datetime.now(timezone.utc)>=datetime.fromisoformat(recipient['expires_at'].replace('Z','+00:00')):
+        print(json.dumps({'audit':'recipient_expired_no_transfer'}),flush=True)
+        return
+    plain=work/'audit-input.json'
+    fd=os.open(plain,os.O_CREAT|os.O_EXCL|os.O_WRONLY,0o600)
+    with os.fdopen(fd,'w') as handle: json.dump(audit,handle,ensure_ascii=False)
+    try:
+        result=subprocess.run(['node','scripts/enrichment/seal-audit.mjs',str(plain),str(output)],cwd=ROOT,
+            stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,timeout=20,
+            env={'PATH':os.environ.get('PATH','/usr/bin:/bin')})
+        print(json.dumps({'audit':'recipient_encrypted' if result.returncode==0 else 'sealing_failed_no_transfer'}),flush=True)
+    finally:
+        plain.unlink(missing_ok=True)
+
+
 def main():
-    parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--submit',action='store_true');args=parser.parse_args()
+    parser=argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--submit',action='store_true')
+    parser.add_argument('--audit-output',type=Path)
+    args=parser.parse_args()
     commit=current_commit();status=call('status',expected_commit=commit)
     if not status.get('enabled'): raise RuntimeError('pilot_runtime_inactive')
     packet=call('packet',expected_commit=commit)
@@ -159,6 +183,7 @@ def main():
         binary=next((work/'bin').rglob('llama-server'));os.chmod(binary,0o700)
         env={'PATH':os.environ.get('PATH','/usr/bin:/bin'),'HOME':str(work),'LD_LIBRARY_PATH':str(binary.parent)}
         process=subprocess.Popen([str(binary),'-m',str(weights),'-c','16384','-t','4','-ngl','0','--host','127.0.0.1','--port','8181'],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,env=env)
+        audit={'target':packet['target'],'sources':[source],'scientific_validation':False}
         try:
             for _ in range(90):
                 if process.poll() is not None: raise RuntimeError('pilot_engine_failed')
@@ -177,8 +202,10 @@ def main():
             print(json.dumps({'pilot_stage':'model_response_received'}),flush=True)
             if answer['choices'][0].get('finish_reason')!='stop': raise RuntimeError('pilot_output_incomplete')
             extracted=json.loads(answer['choices'][0]['message']['content'])
+            audit['model_output']=extracted
             print(json.dumps({'pilot_stage':'model_json_parsed'}),flush=True)
             proposal=prepare_proposal(packet,extracted)
+            audit['proposal']=proposal
             print(json.dumps({'pilot_stage':'source_references_verified'}),flush=True)
             validation=work/'validation.json';validation.write_text(json.dumps({'proposal':proposal,'target':packet['target'],'sources':packet['sources']}));os.chmod(validation,0o600)
             js="import{readFileSync}from'node:fs';import{validateExtraction}from'./curator-app/src/paper-enrichment.js';const p=JSON.parse(readFileSync(process.argv[1],'utf8'));validateExtraction(p.proposal,p.target,p.sources);"
@@ -186,11 +213,13 @@ def main():
             if checked.returncode: raise RuntimeError('pilot_closed_schema_validation_failed')
             print(json.dumps({'pilot_stage':'native_schema_verified'}),flush=True)
             receipt=call('proposal',expected_commit=commit,target_id=packet['target']['target_id'],proposal=proposal) if args.submit else None
+            audit['receipt']=receipt
             print(json.dumps({'pilot':'private_proposal_saved' if receipt else 'validated_not_submitted','proposal_id':receipt.get('proposal_id') if receipt else None,'source_coverage':'abstract_only','findings':len(proposal['findings']),'variables':len(proposal['variable_uses']),'framework_proposed':proposal['framework']['primary'] is not None,'source_blocks_verified':len(proposal['spans']),'scientific_validation':False}))
         finally:
             process.terminate()
             try: process.wait(timeout=10)
             except subprocess.TimeoutExpired:process.kill();process.wait(timeout=10)
+            write_sealed_audit(work,args.audit_output,audit)
 
 if __name__=='__main__':
     try:main()
