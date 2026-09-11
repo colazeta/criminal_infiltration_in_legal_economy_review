@@ -142,7 +142,7 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
           LEDGER_AUTHOR: ${{ github.repository_owner }}
         run: |
-          python scripts/metrics/fetch_surveillance_ledger.py \
+          python scripts/metrics/fetch_surveillance_ledger_quarantine.py \
             --repository "$GITHUB_REPOSITORY" \
             --issue 30 \
             --allowed-author "$LEDGER_AUTHOR" \
