@@ -1,0 +1,24 @@
+name: Benchmark source snapshot
+on:
+  push:
+    branches: [implementation/enrichment-content-benchmark]
+    paths: [.github/workflows/benchmark-source-snapshot.yml]
+permissions:
+  contents: read
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout current public source
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Archive public tracked source only
+        run: git archive HEAD -o "$RUNNER_TEMP/benchmark-source.tar"
+      - name: Retain public source snapshot
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: benchmark-public-source
+          path: ${{ runner.temp }}/benchmark-source.tar
+          retention-days: 1
