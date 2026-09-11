@@ -51,3 +51,14 @@ test('source language is validated and generated summaries cannot be source kind
 test('stale target proposal insertion is atomic',async()=>{const{env,db,target,input}=await sourceSetup();await syncTargets(env,registry({...record,title:'Changed identity input'}),now+1);await assert.rejects(storeExtraction(env,target,input,now+2));assert.equal(db.sqlite.prepare('SELECT COUNT(*) n FROM enrichment_proposals').get().n,0);assert.equal(db.sqlite.prepare('SELECT COUNT(*) n FROM enrichment_framework_proposals').get().n,0)});
 test('offsets use UTF-16 units rather than Unicode code points',async()=>{const{target,source,input}=await sourceSetup();source.text='\u{1F600}ab';input.spans[0].start_offset=2;input.spans[0].end_offset=4;assert.equal(validateExtraction(input,target,[source]).spans[0].end_offset,4);input.spans[0].end_offset=5;assert.throws(()=>validateExtraction(input,target,[source]),/invalid_source_span/)});
 test('payload fields cannot invoke tools or write scientific acceptance',async()=>{const{env,target,input}=await sourceSetup();await assert.rejects(storeExtraction(env,target,{...input,tool_calls:[{name:'publish'}]},now),/schema_extra/)});
+
+// Native edge runtimes do not consistently support redirect:error. Refuse 3xx explicitly.
+test('provider requests use explicit identity and never follow redirects', async () => {
+  const {env,db}=setup(); let requested=0;
+  const result=await runEnrichment(env,{now,registry:registry(),fetcher:async(url,options)=>{
+    requested++;assert.equal(options.redirect,'manual');assert.equal(options.headers['User-Agent'],'cile-enrichment-service/1.0');
+    return new Response('',{status:302,headers:{Location:'https://unapproved.example/target'}});
+  }});
+  assert.equal(requested,1);assert.equal(result.status,'failed');assert.equal(result.error_code,'provider_redirect_refused');
+  assert.equal(db.sqlite.prepare('SELECT COUNT(*) n FROM enrichment_sources').get().n,0);
+});
