@@ -1,7 +1,7 @@
 {
   "id": "https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/vocab/cile-review.ttl",
   "name": "cile-review-profile",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "title": "CILE Review Ontology Profile",
   "description": "Application ontology for the Criminal Infiltration in the Legal Economy living systematic review. It profiles SLR Ontology, PROV-O, FaBiO/BIBO, Web Annotation, SKOS and RIPE-O while defining only the domain and governance concepts that are specific to this review.",
   "prefixes": {
@@ -985,11 +985,11 @@
     },
     "oa_verification_method": {
       "slot_uri": "cile:verificationMethod",
-      "description": "Verifica attestata dell\u2019accesso anonimo al testo integrale, oppure osservazione senza ammissione."
+      "description": "Verifica attestata dell’accesso anonimo al testo integrale, oppure osservazione senza ammissione."
     },
     "oa_verified_at": {
       "slot_uri": "cile:verifiedAt",
-      "description": "Data e ora della verifica: accessibilit\u00e0 osservata, non garanzia perpetua."
+      "description": "Data e ora della verifica: accessibilità osservata, non garanzia perpetua."
     },
     "oa_full_text_sha256": {
       "slot_uri": "cile:contentSha256",
@@ -1693,6 +1693,76 @@
       "slot_uri": "cile:extractionAlternative",
       "range": "string",
       "description": "Private scientific extraction field alternative; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "schedule_schedule_id": {
+      "range": "string",
+      "slot_uri": "cile:scheduleScheduleId",
+      "description": "Stable identity of the recurring hour-40 schedule."
+    },
+    "schedule_first_slot": {
+      "range": "integer",
+      "slot_uri": "cile:scheduleFirstSlot",
+      "description": "First planned UTC slot (epoch milliseconds), fixed at activation; not a claim of execution."
+    },
+    "schedule_next_slot": {
+      "range": "integer",
+      "slot_uri": "cile:scheduleNextSlot",
+      "description": "First UTC slot not yet materialised (epoch milliseconds); advances atomically with ticket insertion."
+    },
+    "schedule_scheduled_at": {
+      "range": "integer",
+      "slot_uri": "cile:scheduleScheduledAt",
+      "description": "Planned hour-40 UTC instant (epoch milliseconds), distinct from arrival or execution."
+    },
+    "schedule_materialised_at": {
+      "range": "integer",
+      "slot_uri": "cile:scheduleMaterialisedAt",
+      "description": "Actual ticket insertion time (epoch milliseconds); may be later after recovery."
+    },
+    "schedule_status": {
+      "range": "string",
+      "slot_uri": "cile:scheduleStatus",
+      "description": "Operational ticket lifecycle, never scientific approval: pending, running, completed or failed."
+    },
+    "schedule_attempts": {
+      "range": "integer",
+      "slot_uri": "cile:scheduleAttempts",
+      "description": "Number of actual claimed attempts for this ticket, including interrupted and deferred attempts."
+    },
+    "schedule_attempt": {
+      "range": "integer",
+      "slot_uri": "cile:scheduleAttempt",
+      "description": "Monotonic attempt number within this scheduled ticket."
+    },
+    "schedule_lease_until": {
+      "range": "integer",
+      "slot_uri": "cile:scheduleLeaseUntil",
+      "description": "Operational lease deadline (epoch milliseconds); fencing token prevents stale acknowledgement."
+    },
+    "schedule_retry_at": {
+      "range": "integer",
+      "slot_uri": "cile:scheduleRetryAt",
+      "description": "Earliest eligible retry instant (epoch milliseconds), not a fictitious successful run."
+    },
+    "schedule_started_at": {
+      "range": "integer",
+      "slot_uri": "cile:scheduleStartedAt",
+      "description": "Actual start of work (epoch milliseconds), never backdated to the planned slot."
+    },
+    "schedule_finished_at": {
+      "range": "integer",
+      "slot_uri": "cile:scheduleFinishedAt",
+      "description": "Actual terminalisation time (epoch milliseconds); null while work is not terminal."
+    },
+    "schedule_created_at": {
+      "range": "integer",
+      "slot_uri": "cile:scheduleCreatedAt",
+      "description": "Actual schedule registration time (epoch milliseconds)."
+    },
+    "schedule_outcome": {
+      "range": "string",
+      "slot_uri": "cile:scheduleOutcome",
+      "description": "Attempt lifecycle: running, completed, failed, interrupted or deferred. Terminal attempts are immutable."
     }
   },
   "enums": {
@@ -2510,6 +2580,50 @@
         "extraction_value",
         "extraction_variable_use_ids",
         "extraction_variable_uses"
+      ]
+    },
+    "EnrichmentSchedule": {
+      "class_uri": "cile:EnrichmentSchedule",
+      "description": "Persistent recurring plan with an explicit start epoch and non-truncating catch-up cursor.",
+      "slots": [
+        "schedule_schedule_id",
+        "enrichment_protocol_version",
+        "schedule_first_slot",
+        "schedule_next_slot",
+        "schedule_created_at"
+      ]
+    },
+    "EnrichmentIteration": {
+      "class_uri": "cile:EnrichmentIteration",
+      "description": "Durable work ticket for one planned hour-40 slot; not itself an observed invocation or a scientific result.",
+      "slots": [
+        "schedule_schedule_id",
+        "schedule_scheduled_at",
+        "schedule_materialised_at",
+        "schedule_status",
+        "schedule_attempts",
+        "enrichment_lease_token",
+        "schedule_lease_until",
+        "schedule_retry_at",
+        "schedule_started_at",
+        "schedule_finished_at",
+        "enrichment_run_id",
+        "enrichment_error_code"
+      ]
+    },
+    "EnrichmentIterationAttempt": {
+      "class_uri": "cile:EnrichmentIterationAttempt",
+      "description": "Actual processing attempt associated with a ticket and, when started, an existing enrichment run receipt.",
+      "slots": [
+        "schedule_schedule_id",
+        "schedule_scheduled_at",
+        "schedule_attempt",
+        "enrichment_lease_token",
+        "schedule_started_at",
+        "schedule_finished_at",
+        "schedule_outcome",
+        "enrichment_run_id",
+        "enrichment_error_code"
       ]
     }
   },

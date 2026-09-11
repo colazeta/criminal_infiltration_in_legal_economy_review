@@ -1,5 +1,5 @@
 {
-  "version": "0.4.0",
+  "version": "0.4.1",
   "entities": [
     {
       "table": "reviews",
@@ -3525,6 +3525,228 @@
       "appendOnly": true,
       "constraints": [
         "proposal_id → enrichment_proposals.proposal_id"
+      ]
+    },
+    {
+      "table": "enrichment_schedules",
+      "label": "Pianificazione oraria",
+      "class": "EnrichmentSchedule",
+      "description": "Persistent recurring plan with an explicit start epoch and non-truncating catch-up cursor.",
+      "group": "review",
+      "fields": [
+        {
+          "name": "schedule_id",
+          "description": "Stable identity of the recurring hour-40 schedule.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:scheduleScheduleId"
+        },
+        {
+          "name": "protocol_version",
+          "description": "Enrichment protocol version; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:protocolVersion"
+        },
+        {
+          "name": "first_slot",
+          "description": "First planned UTC slot (epoch milliseconds), fixed at activation; not a claim of execution.",
+          "type": "INTEGER",
+          "nullable": false,
+          "semantic": "cile:scheduleFirstSlot"
+        },
+        {
+          "name": "next_slot",
+          "description": "First UTC slot not yet materialised (epoch milliseconds); advances atomically with ticket insertion.",
+          "type": "INTEGER",
+          "nullable": false,
+          "semantic": "cile:scheduleNextSlot"
+        },
+        {
+          "name": "created_at",
+          "description": "Data e ora della registrazione, distinta dalla data di pubblicazione.",
+          "type": "INTEGER",
+          "nullable": false,
+          "semantic": "cile:scheduleCreatedAt"
+        }
+      ],
+      "appendOnly": false,
+      "constraints": [
+        "Vincoli di dominio e integrità definiti dallo schema SQL versionato."
+      ]
+    },
+    {
+      "table": "enrichment_iterations",
+      "label": "Iterazioni previste",
+      "class": "EnrichmentIteration",
+      "description": "Durable work ticket for one planned hour-40 slot; not itself an observed invocation or a scientific result.",
+      "group": "review",
+      "fields": [
+        {
+          "name": "schedule_id",
+          "description": "Stable identity of the recurring hour-40 schedule.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:scheduleScheduleId"
+        },
+        {
+          "name": "scheduled_at",
+          "description": "Planned hour-40 UTC instant (epoch milliseconds), distinct from arrival or execution.",
+          "type": "INTEGER",
+          "nullable": false,
+          "semantic": "cile:scheduleScheduledAt"
+        },
+        {
+          "name": "materialised_at",
+          "description": "Actual ticket insertion time (epoch milliseconds); may be later after recovery.",
+          "type": "INTEGER",
+          "nullable": false,
+          "semantic": "cile:scheduleMaterialisedAt"
+        },
+        {
+          "name": "status",
+          "description": "Operational ticket lifecycle, never scientific approval: pending, running, completed or failed.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:scheduleStatus"
+        },
+        {
+          "name": "attempts",
+          "description": "Number of actual claimed attempts for this ticket, including interrupted and deferred attempts.",
+          "type": "INTEGER",
+          "nullable": false,
+          "semantic": "cile:scheduleAttempts"
+        },
+        {
+          "name": "lease_token",
+          "description": "Enrichment lease token; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "cile:leaseToken"
+        },
+        {
+          "name": "lease_until",
+          "description": "Operational lease deadline (epoch milliseconds); fencing token prevents stale acknowledgement.",
+          "type": "INTEGER",
+          "nullable": true,
+          "semantic": "cile:scheduleLeaseUntil"
+        },
+        {
+          "name": "retry_at",
+          "description": "Earliest eligible retry instant (epoch milliseconds), not a fictitious successful run.",
+          "type": "INTEGER",
+          "nullable": false,
+          "semantic": "cile:scheduleRetryAt"
+        },
+        {
+          "name": "started_at",
+          "description": "Actual start of work (epoch milliseconds), never backdated to the planned slot.",
+          "type": "INTEGER",
+          "nullable": true,
+          "semantic": "cile:scheduleStartedAt"
+        },
+        {
+          "name": "finished_at",
+          "description": "Actual terminalisation time (epoch milliseconds); null while work is not terminal.",
+          "type": "INTEGER",
+          "nullable": true,
+          "semantic": "cile:scheduleFinishedAt"
+        },
+        {
+          "name": "run_id",
+          "description": "Enrichment run id; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "cile:runId"
+        },
+        {
+          "name": "error_code",
+          "description": "Enrichment error code; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "cile:errorCode"
+        }
+      ],
+      "appendOnly": false,
+      "constraints": [
+        "schedule_id → enrichment_schedules.schedule_id"
+      ]
+    },
+    {
+      "table": "enrichment_iteration_attempts",
+      "label": "Tentativi delle iterazioni",
+      "class": "EnrichmentIterationAttempt",
+      "description": "Actual processing attempt associated with a ticket and, when started, an existing enrichment run receipt.",
+      "group": "review",
+      "fields": [
+        {
+          "name": "schedule_id",
+          "description": "Stable identity of the recurring hour-40 schedule.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:scheduleScheduleId"
+        },
+        {
+          "name": "scheduled_at",
+          "description": "Planned hour-40 UTC instant (epoch milliseconds), distinct from arrival or execution.",
+          "type": "INTEGER",
+          "nullable": false,
+          "semantic": "cile:scheduleScheduledAt"
+        },
+        {
+          "name": "attempt",
+          "description": "Monotonic attempt number within this scheduled ticket.",
+          "type": "INTEGER",
+          "nullable": false,
+          "semantic": "cile:scheduleAttempt"
+        },
+        {
+          "name": "lease_token",
+          "description": "Enrichment lease token; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:leaseToken"
+        },
+        {
+          "name": "started_at",
+          "description": "Actual start of work (epoch milliseconds), never backdated to the planned slot.",
+          "type": "INTEGER",
+          "nullable": false,
+          "semantic": "cile:scheduleStartedAt"
+        },
+        {
+          "name": "finished_at",
+          "description": "Actual terminalisation time (epoch milliseconds); null while work is not terminal.",
+          "type": "INTEGER",
+          "nullable": true,
+          "semantic": "cile:scheduleFinishedAt"
+        },
+        {
+          "name": "outcome",
+          "description": "YES, NO oppure UNCERTAIN: la mancanza di testo non equivale a NO.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:scheduleOutcome"
+        },
+        {
+          "name": "run_id",
+          "description": "Enrichment run id; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "cile:runId"
+        },
+        {
+          "name": "error_code",
+          "description": "Enrichment error code; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "cile:errorCode"
+        }
+      ],
+      "appendOnly": false,
+      "constraints": [
+        "schedule_id → enrichment_iterations.schedule_id",
+        "scheduled_at → enrichment_iterations.scheduled_at"
       ]
     }
   ]

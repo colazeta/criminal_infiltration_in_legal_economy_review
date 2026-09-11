@@ -1,5 +1,5 @@
 {
-  "profile_version": "0.4.0",
+  "profile_version": "0.4.1",
   "storage": "private D1; bodies in private R2",
   "tables": {
     "reviews": {
@@ -2329,6 +2329,102 @@
           "sql_type": "TEXT"
         }
       }
+    },
+    "enrichment_schedules": {
+      "class": "EnrichmentSchedule",
+      "description": "Persistent recurring plan with an explicit start epoch and non-truncating catch-up cursor.",
+      "fields": {
+        "schedule_id": {
+          "slot": "schedule_schedule_id"
+        },
+        "protocol_version": {
+          "slot": "enrichment_protocol_version"
+        },
+        "first_slot": {
+          "slot": "schedule_first_slot"
+        },
+        "next_slot": {
+          "slot": "schedule_next_slot"
+        },
+        "created_at": {
+          "slot": "schedule_created_at"
+        }
+      }
+    },
+    "enrichment_iterations": {
+      "class": "EnrichmentIteration",
+      "description": "Durable work ticket for one planned hour-40 slot; not itself an observed invocation or a scientific result.",
+      "fields": {
+        "schedule_id": {
+          "slot": "schedule_schedule_id"
+        },
+        "scheduled_at": {
+          "slot": "schedule_scheduled_at"
+        },
+        "materialised_at": {
+          "slot": "schedule_materialised_at"
+        },
+        "status": {
+          "slot": "schedule_status"
+        },
+        "attempts": {
+          "slot": "schedule_attempts"
+        },
+        "lease_token": {
+          "slot": "enrichment_lease_token"
+        },
+        "lease_until": {
+          "slot": "schedule_lease_until"
+        },
+        "retry_at": {
+          "slot": "schedule_retry_at"
+        },
+        "started_at": {
+          "slot": "schedule_started_at"
+        },
+        "finished_at": {
+          "slot": "schedule_finished_at"
+        },
+        "run_id": {
+          "slot": "enrichment_run_id"
+        },
+        "error_code": {
+          "slot": "enrichment_error_code"
+        }
+      }
+    },
+    "enrichment_iteration_attempts": {
+      "class": "EnrichmentIterationAttempt",
+      "description": "Actual processing attempt associated with a ticket and, when started, an existing enrichment run receipt.",
+      "fields": {
+        "schedule_id": {
+          "slot": "schedule_schedule_id"
+        },
+        "scheduled_at": {
+          "slot": "schedule_scheduled_at"
+        },
+        "attempt": {
+          "slot": "schedule_attempt"
+        },
+        "lease_token": {
+          "slot": "enrichment_lease_token"
+        },
+        "started_at": {
+          "slot": "schedule_started_at"
+        },
+        "finished_at": {
+          "slot": "schedule_finished_at"
+        },
+        "outcome": {
+          "slot": "schedule_outcome"
+        },
+        "run_id": {
+          "slot": "enrichment_run_id"
+        },
+        "error_code": {
+          "slot": "enrichment_error_code"
+        }
+      }
     }
   },
   "states": {
@@ -2577,7 +2673,8 @@
   "migrations": [
     "curator-app/migrations/0001_review_v2.sql",
     "curator-app/migrations/0002_open_access.sql",
-    "curator-app/migrations/0003_paper_enrichment.sql"
+    "curator-app/migrations/0003_paper_enrichment.sql",
+    "curator-app/migrations/0004_enrichment_schedule.sql"
   ],
   "views": {
     "v2_open_access_candidates": {

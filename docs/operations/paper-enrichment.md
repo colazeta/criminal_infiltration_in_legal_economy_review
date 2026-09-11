@@ -1,8 +1,15 @@
 # Paper enrichment: operational contract
 
-Protocol **CILE-ENRICH-1** · ontology **0.4.0** · clinical codebook **1.0.0**.
+Protocol **CILE-ENRICH-1** · ontology **0.4.1** · clinical codebook **1.0.0**.
 Owner implementation mandate: 11 September 2026. This authorises engineering and
 mechanical enrichment, not scientific inclusion or the approval of machine labels.
+
+## Hour-40 delivery amendment
+
+The persistent :40 schedule supersedes the former one-observed-slot-per-hour gate.
+See [hour40-enrichment.md](hour40-enrichment.md) for tickets, queued overlap,
+non-truncating catch-up, alarms and separate planned/actual timestamps. The original
+15 evidence/proposal tables are preserved; migration 0004 adds three operational tables.
 
 ## Active storage implementation
 

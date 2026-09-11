@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/vocab/cile-review-record.schema.json",
   "title": "CILE Review semantic record",
-  "description": "Closed interchange schema for core entities in CILE Review Ontology Profile 0.4.0.",
+  "description": "Closed interchange schema for core entities in CILE Review Ontology Profile 0.4.1.",
   "oneOf": [
     {"$ref": "#/$defs/ScholarlyWork"},
     {"$ref": "#/$defs/CandidateRecord"},

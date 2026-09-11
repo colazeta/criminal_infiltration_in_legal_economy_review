@@ -1,5 +1,5 @@
 {
-  "profile_version": "0.4.0",
+  "profile_version": "0.4.1",
   "schema": "schema/intake-open-access.schema.json",
   "artifact_pattern": "data/curation/intake_access/<batch_id>.json (scheduled or extraordinary)",
   "classes": [

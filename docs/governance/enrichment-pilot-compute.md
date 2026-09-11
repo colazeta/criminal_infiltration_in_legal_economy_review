@@ -32,3 +32,7 @@ Deployment run `34603354658`, job `103275779830`, on 11 September 2026 at 13:16 
 ## First pilot result — preserved failure
 
 Run `34604516684`, job `103279585169`, verified the private source at 13:28:45 UTC, both dependency hashes at 13:30:35 and a running local model at 13:30:38. It failed at 13:31:42 with a generic privacy-safe error and saved zero proposals. The original logs do not establish the exact failure cause. Deterministic source blocks address a fragile quotation interface, but are not retrospectively claimed to be the proven cause. The revised code adds non-sensitive stage and error categories to distinguish generation, conversion, native validation and private persistence. The last aggregate readback at 13:31:43 still showed the active mechanical runtime, 174 targets and two sources.
+
+## Grounded-category correction — 11 September 2026
+
+Pilot run 34606679010 failed with `pilot_framework_ungrounded` after parsing the model response. The generation schema now expresses two branches: a non-null category requires a non-null source-backed analytical rationale; abstention may leave the rationale unknown. The existing converter and source validator remain unchanged. This addresses a generator/validator mismatch, not a scientific calibration result.

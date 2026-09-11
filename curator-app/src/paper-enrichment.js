@@ -3,6 +3,7 @@ import cycle from '../../config/archive-cycle.json' with { type: 'json' };
 import schema from '../../schema/paper-enrichment.schema.json' with { type: 'json' };
 import { canonicalJson, sha256 } from './review-v2.js';
 import { fetchWithTimeout } from './network.js';
+import { iterationKey, dueSlot } from './enrichment-schedule.js';
 
 export const ENRICHMENT_PROTOCOL = 'CILE-ENRICH-1';
 const HOUR = 3600000, WEEK = 7 * 24 * HOUR;
@@ -227,16 +228,17 @@ async function citations(env,target,checkpoint,now,fetcher,job,token) {
   return{complete:next===null,due:now+(next===null?WEEK:HOUR),checkpoint:next===null?{}:{...cp,cursor:next}};
 }
 
-export async function runEnrichment(env, {now=Date.now(),fetcher=fetchWithTimeout,registry=null,runKey=null}={}) {
+export async function runEnrichment(env, {now=Date.now(),fetcher=fetchWithTimeout,registry=null,runKey=null,iterationSlot=null,iterationAttempt=1}={}) {
   if(env.PAPER_ENRICHMENT_ENABLED!=='true')return{status:'disabled'};
   if(!env.REVIEW_DB||!env.REVIEW_EVIDENCE)return{status:'blocked',error_code:'private_storage_required'};
   const wallStarted=Date.now(), clock=()=>now+Date.now()-wallStarted;
   if(runKey!==null && !/^manual:[0-9a-f-]{36}$/.test(runKey))err('invalid_run_key');
-  const db=env.REVIEW_DB,slot=iso(now).slice(0,13)+(runKey?':'+runKey:''),runId=await sha256(cycle.review_id+slot),stamp=iso(now);
+  if(iterationSlot!==null && (!Number.isSafeInteger(iterationSlot)||dueSlot(iterationSlot)!==iterationSlot||iterationSlot>now||runKey!==null||!Number.isSafeInteger(iterationAttempt)||iterationAttempt<1))err('invalid_iteration_slot');
+  const db=env.REVIEW_DB,slot=iterationSlot===null?iso(now).slice(0,13)+(runKey?':'+runKey:''):iterationKey(iterationSlot,iterationAttempt),runId=await sha256(cycle.review_id+slot),stamp=iso(now);
   await S(db,"UPDATE enrichment_runs SET status='failed',finished_at=?,error_code='lease_expired' WHERE status='running' AND lease_until<=?",stamp,stamp).run();
   if(await S(db,"SELECT run_id FROM enrichment_runs WHERE status='running' AND lease_until>?",stamp).first())return{status:'leased'};
   const inserted=await S(db,"INSERT OR IGNORE INTO enrichment_runs(run_id,cycle_id,scheduled_slot,started_at,lease_until,status) VALUES (?,?,?,?,?,'running')",runId,cycle.review_id,slot,stamp,iso(now+10*60000)).run();
-  if(!inserted.meta?.changes)return{status:'slot_already_observed'};
+  if(!inserted.meta?.changes)return iterationSlot===null?{status:'slot_already_observed'}:await S(db,'SELECT run_id,status,selected_job_id,error_code FROM enrichment_runs WHERE run_id=?',runId).first();
   let syncError=null,job=null,target=null,outcome='empty',code=null,token=null;
   try {
     await S(db,"UPDATE enrichment_jobs SET failure_streak=MIN(failure_streak+1,3),status=CASE WHEN failure_streak>=2 THEN 'exhausted' ELSE 'pending' END,due_at=?,lease_until=NULL,lease_token=NULL,error_code='lease_expired',updated_at=? WHERE status='running' AND lease_until<=?",stamp,stamp,stamp).run();

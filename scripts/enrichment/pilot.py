@@ -25,7 +25,10 @@ IR = {'type':'object','additionalProperties':False,'properties':{
     **{k:FACT_IR for k in FACT_FIELDS},
     'findings':{'type':'array','maxItems':4,'items':FACT_IR},
     'variables':{'type':'array','maxItems':6,'items':{'type':'object','additionalProperties':False,'required':['name','operationalisation','role'], 'properties':{'name':{**FACT_IR,'type':'object'},'operationalisation':FACT_IR,'role':FACT_IR}}},
-    'framework':{'type':'object','additionalProperties':False,'required':['category','rationale'],'properties':{'category':{'enum':CATEGORIES+[None]},'rationale':FACT_IR}}
+    'framework':{'oneOf':[
+      {'type':'object','additionalProperties':False,'required':['category','rationale'],'properties':{'category':{'enum':CATEGORIES},'rationale':{**FACT_IR,'type':'object'}}},
+      {'type':'object','additionalProperties':False,'required':['category','rationale'],'properties':{'category':{'type':'null'},'rationale':FACT_IR}}
+    ]}
 },'required':FACT_FIELDS+['findings','variables','framework']}
 
 

@@ -1,5 +1,5 @@
 {
-  "profile_version": "0.4.0",
+  "profile_version": "0.4.1",
   "artifact": "config/archive-cycle.json",
   "class": "ReviewEvent",
   "fields": {

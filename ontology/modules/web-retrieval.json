@@ -2,7 +2,7 @@
   "id": "https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/vocab/cile-web-retrieval.json",
   "name": "cile-web-retrieval-module",
   "version": "0.1.1",
-  "extends_profile": "0.4.0",
+  "extends_profile": "0.4.1",
   "title": "CILE Web Retrieval Ontology Module",
   "description": "Normative extension for capability-aware, zero-spend web retrieval and browsing provenance.",
   "classes": {
