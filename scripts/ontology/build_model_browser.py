@@ -6,6 +6,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 LABELS = {
+    "enrichment_schedules": "Pianificazione oraria", "enrichment_iterations": "Iterazioni previste", "enrichment_iteration_attempts": "Tentativi delle iterazioni",
     "access_assessments_v2": "Verifiche open access", "reviews": "Review e protocollo", "scholarly_works": "Opera scientifica", "agents": "Autori e organizzazioni",
     "publication_venues": "Rivista, volume e collana", "expressions": "Versione della pubblicazione", "contributions": "Autori, ruoli e affiliazioni",
     "document_sections": "Sezioni del paper", "publication_declarations": "Dichiarazioni della pubblicazione", "manifestations": "Copie digitali e accesso",

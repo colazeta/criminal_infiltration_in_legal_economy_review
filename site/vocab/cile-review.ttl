@@ -17,7 +17,7 @@
     a owl:Ontology ;
     dcterms:title "CILE Review Ontology Profile" ;
     dcterms:description "Application ontology for the Criminal Infiltration in the Legal Economy living systematic review." ;
-    owl:versionInfo "0.4.0" ;
+    owl:versionInfo "0.4.1" ;
     dcterms:source <https://github.com/sensein/synthscholar> ,
                    <https://github.com/RIPE-Observatory/RIPE-O> .
 
@@ -301,3 +301,8 @@ cile:prognosis a skos:Concept ; skos:prefLabel "prognosis"@en .
 cile:prevention a skos:Concept ; skos:prefLabel "prevention"@en .
 
 cile:ScientificExtractionEnvelope a owl:Class ; rdfs:label "Private scientific extraction proposal" .
+
+# Operational hour-40 scheduling extension; no scientific eligibility change.
+cile:EnrichmentSchedule a owl:Class ; rdfs:label "EnrichmentSchedule" . 
+cile:EnrichmentIteration a owl:Class ; rdfs:label "EnrichmentIteration" . 
+cile:EnrichmentIterationAttempt a owl:Class ; rdfs:label "EnrichmentIterationAttempt" . 

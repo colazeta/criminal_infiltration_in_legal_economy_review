@@ -84,3 +84,12 @@ class PilotTests(unittest.TestCase):
         self.assertEqual(p['framework']['status'],'proposed')
         self.assertEqual(p['framework']['rationale']['origin'],'analyst')
         self.assertEqual(p['framework']['rationale']['evidence_span_ids'],['b1'])
+
+    def test_generation_schema_requires_rationale_for_nonnull_category(self):
+        branches=bound_schema(TEXT)['properties']['framework']['oneOf']
+        proposed,abstain=branches
+        self.assertNotIn(None,proposed['properties']['category']['enum'])
+        self.assertEqual(proposed['properties']['rationale']['type'],'object')
+        self.assertEqual(proposed['properties']['rationale']['properties']['evidence_ids']['minItems'],1)
+        self.assertEqual(abstain['properties']['category']['type'],'null')
+        self.assertEqual(proposed['properties']['rationale']['properties']['evidence_ids']['items']['enum'],['b1'])

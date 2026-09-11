@@ -1,6 +1,8 @@
 /* SQLite/KV adapter for an isolated private Durable Object, not a D1 permission bypass.
    Both backends implement the same versioned enrichment contract; canonical tables are absent. */
 import migration from './enrichment-migration.json' with { type: 'json' };
+import scheduleMigration from './enrichment-schedule-migration.json' with { type: 'json' };
+import {Hour40Schedule, iterationKey} from './enrichment-schedule.js';
 import { sha256 } from './review-v2.js';
 import { runEnrichment, handlePaperEnrichment, storeExtraction } from './paper-enrichment.js';
 
@@ -67,7 +69,16 @@ export class EnrichmentStoreCore {
       const applied=await ctx.storage.get('schema:enrichment');
       if(applied && applied!==digest)throw Error('additive_migration_required');
       if(!applied)await ctx.storage.transaction(async tx=>{ctx.storage.sql.exec(migration.sql);await tx.put('schema:enrichment',digest)});
+      const scheduleHash=await sha256(scheduleMigration.sql);
+      if(scheduleHash!==scheduleMigration.sha256)throw Error('schedule_migration_integrity');
+      const scheduleApplied=await ctx.storage.get('schema:enrichment-schedule');
+      if(scheduleApplied && scheduleApplied!==scheduleHash)throw Error('additive_schedule_migration_required');
+      if(!scheduleApplied)await ctx.storage.transaction(async tx=>{ctx.storage.sql.exec(scheduleMigration.sql);await tx.put('schema:enrichment-schedule',scheduleHash)});
       this.db=sqliteAdapter(ctx.storage); this.evidence=privateTextStore(ctx.storage);
+      this.schedule=new Hour40Schedule(ctx.storage,
+        async(at,attempt)=>runEnrichment(await this.environment(),{iterationSlot:at,iterationAttempt:attempt}),
+        async(at,attempt)=>this.db.prepare('SELECT run_id,status,selected_job_id,error_code FROM enrichment_runs WHERE scheduled_slot=?').bind(iterationKey(at,attempt)).first(),
+        async()=> (await this.environment()).PAPER_ENRICHMENT_ENABLED==='true');
     });
   }
   async environment() {
@@ -80,7 +91,7 @@ export class EnrichmentStoreCore {
     const env=await this.environment(),counts={};
     for(const table of ['targets','sources','citation_observations','proposals'])counts[table]=Number((await this.db.prepare(`SELECT COUNT(*) n FROM enrichment_${table}`).first()).n);
     const response=await handlePaperEnrichment(new Request('https://enrichment.internal/api/paper-enrichment/status'),env,{login:env.CURATOR_LOGIN});
-    return {...await response.json(),storage_backend:'durable_object_sqlite',counts,commit:this.env.DEPLOY_COMMIT};
+    return {...await response.json(),storage_backend:'durable_object_sqlite',counts,scheduling:this.schedule.status(),commit:this.env.DEPLOY_COMMIT};
   }
   async verify() {
     await this.ready;
@@ -129,11 +140,12 @@ export class EnrichmentStoreCore {
       if(!['verify','activate','deactivate','status','run','packet','proposal'].includes(data.operation))return json({error_code:'unknown_service_operation'},422);
       if(data.expected_commit!==this.env.DEPLOY_COMMIT)return json({error_code:'stale_deployment'},409);
       if(data.operation==='verify')return json(await this.verify());
-      if(data.operation==='activate'){await this.verify();await this.ctx.storage.put('activation:enrichment',{commit:this.env.DEPLOY_COMMIT,at:new Date(now).toISOString()});return json(await this.aggregate())}
+      if(data.operation==='activate'){await this.verify();await this.ctx.storage.put('activation:enrichment',{commit:this.env.DEPLOY_COMMIT,at:new Date(now).toISOString()});await this.schedule.start();return json(await this.aggregate())}
       if(data.operation==='deactivate'){await this.ctx.storage.delete('activation:enrichment');return json(await this.aggregate())}
       if(data.operation==='status')return json(await this.aggregate());
       const env=await this.environment();if(env.PAPER_ENRICHMENT_ENABLED!=='true')return json({error_code:'enrichment_inactive'},409);
       if(data.operation==='run'){
+        if(this.schedule.busy)return json({status:'leased'});
         if(!/^manual:[0-9a-f-]{36}$/.test(data.run_key||''))return json({error_code:'manual_run_key_required'},422);
         const today=new Date(now).toISOString().slice(0,10), count=await this.db.prepare("SELECT COUNT(*) n FROM enrichment_runs WHERE scheduled_slot LIKE ?").bind(today+'%manual:%').first();
         if(Number(count.n)>=12)return json({error_code:'manual_daily_budget_exhausted'},429);
@@ -147,12 +159,14 @@ export class EnrichmentStoreCore {
       return json({error_code:'unknown_service_operation'},422);
     }catch(error){return json({error_code:error.code||'service_operation_failed'},error.status||500)}
   }
+  async alarm() { await this.ready; return this.schedule.tick(); }
   async fetch(request) {
     await this.ready;
     const url=new URL(request.url);
     if(url.pathname==='/machine')return this.machine(request);
     const env=await this.environment();
-    if(url.pathname==='/tick')return json(await runEnrichment(env));
+    if(url.pathname==='/tick')return json(await this.schedule.tick());
+    if(url.pathname==='/api/paper-enrichment/status'&&request.method==='GET')return json(await this.aggregate());
     return handlePaperEnrichment(request,env,{login:env.CURATOR_LOGIN});
   }
 }

@@ -1,0 +1,66 @@
+{
+  "version": "1.0.0",
+  "profile_version": "0.4.1",
+  "protocol": "CILE-HOUR40-1",
+  "migration": "curator-app/migrations/0004_enrichment_schedule.sql",
+  "classes": [
+    "EnrichmentSchedule",
+    "EnrichmentIteration",
+    "EnrichmentIterationAttempt"
+  ],
+  "cron": "40 * * * *",
+  "timezone": "UTC",
+  "storage": "Existing private PaperEnrichmentStore SQL; no public research data",
+  "tables": {
+    "enrichment_schedules": {
+      "schedule_id": "schedule_schedule_id",
+      "protocol_version": "enrichment_protocol_version",
+      "first_slot": "schedule_first_slot",
+      "next_slot": "schedule_next_slot",
+      "created_at": "schedule_created_at"
+    },
+    "enrichment_iterations": {
+      "schedule_id": "schedule_schedule_id",
+      "scheduled_at": "schedule_scheduled_at",
+      "materialised_at": "schedule_materialised_at",
+      "status": "schedule_status",
+      "attempts": "schedule_attempts",
+      "lease_token": "enrichment_lease_token",
+      "lease_until": "schedule_lease_until",
+      "retry_at": "schedule_retry_at",
+      "started_at": "schedule_started_at",
+      "finished_at": "schedule_finished_at",
+      "run_id": "enrichment_run_id",
+      "error_code": "enrichment_error_code"
+    },
+    "enrichment_iteration_attempts": {
+      "schedule_id": "schedule_schedule_id",
+      "scheduled_at": "schedule_scheduled_at",
+      "attempt": "schedule_attempt",
+      "lease_token": "enrichment_lease_token",
+      "started_at": "schedule_started_at",
+      "finished_at": "schedule_finished_at",
+      "outcome": "schedule_outcome",
+      "run_id": "enrichment_run_id",
+      "error_code": "enrichment_error_code"
+    }
+  },
+  "terminal_ticket_states": [
+    "completed",
+    "failed"
+  ],
+  "terminal_attempt_states": [
+    "completed",
+    "failed",
+    "interrupted",
+    "deferred"
+  ],
+  "semantics": [
+    "At least once scheduling with idempotent effects, not exactly-once remote execution.",
+    "A missed callback is reconstructed as a planned slot with the actual later materialisation timestamp.",
+    "The first slot is fixed at first verified activation, not invented from historical failed runs.",
+    "Completed ticket means its bounded operation returned a checked receipt; partial citation pages and missing scientific calibration remain separate.",
+    "A failed paper operation is a failed ticket, never silently converted into a completed scientific result.",
+    "No provider scheduler promises exact wall-clock start while a preceding iteration is running."
+  ]
+}

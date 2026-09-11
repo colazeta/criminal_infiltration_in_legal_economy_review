@@ -119,3 +119,10 @@ follow semantic versioning while the project is in prerelease.
 
 [0.2.0]: https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/releases/tag/v0.2.0
 [0.1.0]: https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/tree/9d3210652cc943c514969f245cce754f22e2c3a4
+
+## Hour-40 operational delivery — 2026-09-11
+
+- Additive semantic profile 0.4.1 and three private scheduling tables; existing scientific records and clinical codebook unchanged.
+- Persist :40 tickets, recover missed/overlapping slots, reconcile completed effects after crashes, and wake pending work after release.
+- Tighten pilot generation so a proposed category always requires a source-backed rationale; do not weaken scientific validation.
+- Software tests and later production receipts remain distinct from content calibration.

@@ -388,6 +388,7 @@ export class SubmissionCoordinator extends DurableObject {
 export class PaperEnrichmentStore extends DurableObject {
   constructor(ctx, env) { super(ctx, env); this.core = new EnrichmentStoreCore(ctx, env); }
   fetch(request) { return this.core.fetch(request); }
+  alarm() { return this.core.alarm(); }
 }
 
 export default {
@@ -403,7 +404,7 @@ export default {
   async queue(batch, env) { return consumeDays(batch, env); },
   async fetch(request, env) {
     const url = new URL(request.url);
-    if (url.pathname === "/version" && request.method === "GET") return Response.json({ commit: env.DEPLOY_COMMIT || null, ontology: "0.4.0" }, { headers: { "Cache-Control": "no-store" } });
+    if (url.pathname === "/version" && request.method === "GET") return Response.json({ commit: env.DEPLOY_COMMIT || null, ontology: "0.4.1" }, { headers: { "Cache-Control": "no-store" } });
     if (url.pathname === "/api/paper-enrichment-machine") {
       const store=enrichmentStore(env);
       if (!store) return Response.json({error_code:"private_storage_required"},{status:503,headers:{"Cache-Control":"no-store"}});
