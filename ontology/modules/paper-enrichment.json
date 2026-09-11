@@ -5,7 +5,7 @@
   "schema": "schema/paper-enrichment.schema.json",
   "codebook": "ontology/vocabularies/clinical-contribution.json",
   "migration": "curator-app/migrations/0003_paper_enrichment.sql",
-  "storage": "existing private D1 and R2; no copied text in GitHub or Pages",
+  "storage": "Private D1/R2 or isolated Workers Durable Object SQLite/KV; explicit backend, identical schema and private source keys; no public evidence",
   "tables": [
     "enrichment_targets",
     "enrichment_inputs",
@@ -119,5 +119,9 @@
     "/$defs/framework/properties/secondary/items/properties/rationale": "extraction_rationale",
     "/$defs/framework/properties/alternative": "extraction_alternative"
   },
-  "schema_class": "ScientificExtractionEnvelope"
+  "schema_class": "ScientificExtractionEnvelope",
+  "physical_backends": {
+    "d1_r2": "Original optional REVIEW_DB and REVIEW_EVIDENCE bindings",
+    "durable_object_sqlite": "ENRICHMENT_STORE isolated class; identical 0003 SQL and private chunked KV implements storage_key/content_sha256. Infrastructure-only activation/schema/nonce keys never represent scientific judgements."
+  }
 }

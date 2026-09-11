@@ -226,11 +226,12 @@ async function citations(env,target,checkpoint,now,fetcher,job,token) {
   return{complete:next===null,due:now+(next===null?WEEK:HOUR),checkpoint:next===null?{}:{...cp,cursor:next}};
 }
 
-export async function runEnrichment(env, {now=Date.now(),fetcher=fetchWithTimeout,registry=null}={}) {
+export async function runEnrichment(env, {now=Date.now(),fetcher=fetchWithTimeout,registry=null,runKey=null}={}) {
   if(env.PAPER_ENRICHMENT_ENABLED!=='true')return{status:'disabled'};
   if(!env.REVIEW_DB||!env.REVIEW_EVIDENCE)return{status:'blocked',error_code:'private_storage_required'};
   const wallStarted=Date.now(), clock=()=>now+Date.now()-wallStarted;
-  const db=env.REVIEW_DB,slot=iso(now).slice(0,13),runId=await sha256(cycle.review_id+slot),stamp=iso(now);
+  if(runKey!==null && !/^manual:[0-9a-f-]{36}$/.test(runKey))err('invalid_run_key');
+  const db=env.REVIEW_DB,slot=iso(now).slice(0,13)+(runKey?':'+runKey:''),runId=await sha256(cycle.review_id+slot),stamp=iso(now);
   await S(db,"UPDATE enrichment_runs SET status='failed',finished_at=?,error_code='lease_expired' WHERE status='running' AND lease_until<=?",stamp,stamp).run();
   if(await S(db,"SELECT run_id FROM enrichment_runs WHERE status='running' AND lease_until>?",stamp).first())return{status:'leased'};
   const inserted=await S(db,"INSERT OR IGNORE INTO enrichment_runs(run_id,cycle_id,scheduled_slot,started_at,lease_until,status) VALUES (?,?,?,?,?,'running')",runId,cycle.review_id,slot,stamp,iso(now+10*60000)).run();
