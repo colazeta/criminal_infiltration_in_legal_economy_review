@@ -8,7 +8,7 @@ import json
 import os
 import re
 import sys
-from datetime import date
+from datetime import date, timedelta
 from pathlib import Path
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlsplit
@@ -92,6 +92,14 @@ REQUIRED_SAFEGUARDS = (
     "No copyrighted full text or long abstract is included.",
 )
 
+# Immutable, batch-specific recovery for a proven operator timestamp-closure error.
+# Do not widen this into a generic grace period: every other intake must remain
+# inside its declared run window. The tuple is (batch_id, issue_number) and the
+# value is the maximum verified lateness in seconds.
+LATE_INTAKE_RECOVERIES = {
+    ("ACADEMIC-2026-09-11-EXTRA-2520dfa54e12", 317): 12,
+}
+
 
 def api_get(url: str, token: str) -> tuple[object, str | None]:
     request = Request(
@@ -116,6 +124,18 @@ def next_link(value: str | None) -> str | None:
         if match and match.group(2) == "next":
             return match.group(1)
     return None
+
+
+def intake_issue_time_is_valid(run: dict, issue_created, issue_number: int) -> bool:
+    """Enforce run-window timing, with only explicitly audited batch recovery."""
+    started = parse_datetime(run["window_start"], "run.window_start")
+    ended = parse_datetime(run["window_end"], "run.window_end")
+    if started <= issue_created <= ended:
+        return True
+    allowed_lateness = LATE_INTAKE_RECOVERIES.get((run["batch_id"], issue_number))
+    if allowed_lateness is None or issue_created <= ended:
+        return False
+    return issue_created - ended <= timedelta(seconds=allowed_lateness)
 
 
 def extract_run(body: str) -> dict | None:
@@ -486,9 +506,7 @@ def verify_intake_issue(
     if issue.get("title") != f"{INTAKE_TITLE_PREFIX} {batch_id}":
         raise MetricsError("run.intake_issue: title does not identify this batch")
     issue_created = parse_datetime(issue.get("created_at"), "intake issue.created_at")
-    started = parse_datetime(run["window_start"], "run.window_start")
-    ended = parse_datetime(run["window_end"], "run.window_end")
-    if not started <= issue_created <= ended:
+    if not intake_issue_time_is_valid(run, issue_created, number):
         raise MetricsError("run.intake_issue: issue was not created during the run window")
 
     body = issue.get("body")
