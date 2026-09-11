@@ -243,7 +243,7 @@ export async function runEnrichment(env, {now=Date.now(),fetcher=fetchWithTimeou
   try {
     await S(db,"UPDATE enrichment_jobs SET failure_streak=MIN(failure_streak+1,3),status=CASE WHEN failure_streak>=2 THEN 'exhausted' ELSE 'pending' END,due_at=?,lease_until=NULL,lease_token=NULL,error_code='lease_expired',updated_at=? WHERE status='running' AND lease_until<=?",stamp,stamp,stamp).run();
     try{await syncTargets(env,registry||await fetchJSON(REGISTRY,fetcher,now),now);}catch(e){syncError=e.code||'registry_unavailable';}
-    job=await S(db,"SELECT j.* FROM enrichment_jobs j JOIN enrichment_targets t USING(target_id) WHERE t.active=1 AND t.cycle_id=? AND t.input_sha256=j.input_sha256 AND j.status IN ('pending','completed') AND j.due_at<=? ORDER BY j.due_at,j.target_id,CASE j.kind WHEN 'metadata' THEN 0 ELSE 1 END LIMIT 1",cycle.review_id,stamp).first();
+    job=await S(db,"SELECT j.* FROM enrichment_jobs j JOIN enrichment_targets t USING(target_id) WHERE t.active=1 AND t.cycle_id=? AND t.input_sha256=j.input_sha256 AND j.status IN ('pending','completed') AND j.due_at<=? ORDER BY CASE WHEN json_extract(t.record_json,'$.doi')<>'' THEN 0 ELSE 1 END,j.due_at,j.target_id,CASE j.kind WHEN 'metadata' THEN 0 ELSE 1 END LIMIT 1",cycle.review_id,stamp).first();
     if(job){
       token=crypto.randomUUID();
       const claim=await S(db,"UPDATE enrichment_jobs SET status='running',lease_until=?,lease_token=?,attempts_total=attempts_total+1,updated_at=? WHERE job_id=? AND status IN ('pending','completed')",iso(now+10*60000),token,stamp,job.job_id).run();
