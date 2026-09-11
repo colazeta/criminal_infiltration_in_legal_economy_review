@@ -20,4 +20,5 @@ jobs:
       - name: Check bounded public-provider access without retaining source text
         run: python3 scripts/enrichment/provider_smoke.py
       - name: Record activation boundary
-        run: echo "Readiness check only: it does not approve scientific labels or activate a model. Provider outcomes, persisted work and scientific calibration remain distinct." >> "$GITHUB_STEP_SUMMARY"
+        run: |
+          echo "Readiness check only: it does not approve scientific labels or activate a model. Provider outcomes, persisted work and scientific calibration remain distinct." >> "$GITHUB_STEP_SUMMARY"
