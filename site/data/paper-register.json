@@ -838,6 +838,486 @@
       "topicCode": ""
     },
     {
+      "id": "CAND-ACADEMIC-2026-09-09-EXTRA-6b5b5e038ac4-001",
+      "title": "Revealing “Mafia Inc.”? Financial Crisis, Organized Crime, and the Birth of New Enterprises",
+      "authors": "Marco Le Moglie; Giuseppe Sorrenti",
+      "year": 2022,
+      "venue": "The Review of Economics and Statistics",
+      "doi": "10.1162/rest_a_00942",
+      "sourceLinks": [
+        "https://direct.mit.edu/rest/article-abstract/104/1/142/97638"
+      ],
+      "metadataStatus": "metadata_verified",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-11",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-09-EXTRA-6b5b5e038ac4-002",
+      "title": "Mapping the Risk of Serious and Organised Crime Infiltrating Legitimate Businesses: Technical Annexes",
+      "authors": "Shann Corbett; Emma Disley; Emma Louise Blondes",
+      "year": 2021,
+      "venue": "Publications Office of the European Union / RAND Europe",
+      "doi": "10.2837/442937",
+      "sourceLinks": [
+        "https://www.rand.org/pubs/external_publications/EP68578.html"
+      ],
+      "metadataStatus": "metadata_verified",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-11",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-09-EXTRA-6b5b5e038ac4-003",
+      "title": "The Illusion of Success: A Case Study in the Infiltration of Legitimate Business",
+      "authors": "Frederick T. Martens",
+      "year": 1984,
+      "venue": "Federal Probation 48(1):40–45",
+      "doi": "",
+      "sourceLinks": [
+        "https://www.ojp.gov/ncjrs/virtual-library/abstracts/illusion-success-case-study-infiltration-legitimate-business"
+      ],
+      "metadataStatus": "metadata_verified",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-11",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-09-EXTRA-6b5b5e038ac4-004",
+      "title": "Racketeering in Legitimate Industries: A Study in The Economics of Intimidation",
+      "authors": "Peter Reuter",
+      "year": 1987,
+      "venue": "RAND",
+      "doi": "",
+      "sourceLinks": [
+        "https://www.rand.org/pubs/reports/R3525.html"
+      ],
+      "metadataStatus": "metadata_verified",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-11",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-09-EXTRA-6b5b5e038ac4-005",
+      "title": "Racketeering in Legitimate Industries - Two Case Studies - Executive Summary",
+      "authors": "",
+      "year": 1982,
+      "venue": "RAND / Office of Justice Programs",
+      "doi": "",
+      "sourceLinks": [
+        "https://www.ojp.gov/library/publications/racketeering-legitimate-industries-two-case-studies-executive-summary"
+      ],
+      "metadataStatus": "metadata_partial",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-11",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-09-EXTRA-6b5b5e038ac4-006",
+      "title": "The Cartage Industry in New York",
+      "authors": "Peter Reuter",
+      "year": 1993,
+      "venue": "Crime and Justice, Volume 18",
+      "doi": "10.1086/449224",
+      "sourceLinks": [
+        "https://www.journals.uchicago.edu/doi/10.1086/449224"
+      ],
+      "metadataStatus": "metadata_verified",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-11",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-09-EXTRA-6b5b5e038ac4-007",
+      "title": "Corruption and Racketeering in the New York City Construction Industry",
+      "authors": "",
+      "year": null,
+      "venue": "NYU Press / New York State Organized Crime Task Force",
+      "doi": "",
+      "sourceLinks": [
+        "https://nyupress.org/9780814730348/corruption-and-racketeering-in-the-new-york-city-construction-industry"
+      ],
+      "metadataStatus": "metadata_partial",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-11",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-09-EXTRA-6b5b5e038ac4-008",
+      "title": "The Persistence of Organized Crime in New York City Construction: An Economic Perspective",
+      "authors": "Casey Ichniowski; Anne Preston",
+      "year": 1989,
+      "venue": "",
+      "doi": "",
+      "sourceLinks": [
+        "https://scholarship.haverford.edu/cgi/viewcontent.cgi?article=1147&context=economics_facpubs"
+      ],
+      "metadataStatus": "metadata_partial",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-11",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-09-EXTRA-6b5b5e038ac4-009",
+      "title": "Study of Organized Crime Business-Type Activities and Their Implications For Law Enforcement",
+      "authors": "",
+      "year": 1990,
+      "venue": "Office of Justice Programs",
+      "doi": "",
+      "sourceLinks": [
+        "https://uat.ojp.gov/library/publications/study-organized-crime-business-type-activities-and-their-implications-law"
+      ],
+      "metadataStatus": "metadata_partial",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-11",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-09-EXTRA-6b5b5e038ac4-010",
+      "title": "The Private Sector and Organized Crime: Criminal Entrepreneurship, Illicit Profits, and Private Sector Security Governance",
+      "authors": "",
+      "year": 2024,
+      "venue": "Routledge",
+      "doi": "",
+      "sourceLinks": [
+        "https://www.routledge.com/The-Private-Sector-and-Organized-Crime-Criminal-Entrepreneurship-Illicit-Profits-and-Private-Sector-Security-Governance/Zabyelina-Thachuk/p/book/9781032056654"
+      ],
+      "metadataStatus": "metadata_partial",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-11",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-09-EXTRA-6b5b5e038ac4-011",
+      "title": "Entrepreneurship and Organised Crime: A Systematic Review and Research Agenda Based on Three Decades of Scholarship",
+      "authors": "Salvatore Cincimino; Fabio La Rosa; Sergio Paternostro",
+      "year": 2024,
+      "venue": "Journal of Small Business and Enterprise Development",
+      "doi": "",
+      "sourceLinks": [
+        "https://www.iris.unict.it/handle/20.500.11769/599089"
+      ],
+      "metadataStatus": "metadata_verified",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-11",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-09-EXTRA-6b5b5e038ac4-012",
+      "title": "Labor Tax Avoidance and Its Determinants: The Case of Mafia Firms in Italy",
+      "authors": "Diego Ravenda; Josep M. Argilés-Bosch; Maika M. Valencia-Silva",
+      "year": 2015,
+      "venue": "Journal of Business Ethics 132(1):41–62",
+      "doi": "10.1007/s10551-014-2304-7",
+      "sourceLinks": [
+        "https://ideas.repec.org/a/kap/jbuset/v132y2015i1p41-62.html"
+      ],
+      "metadataStatus": "metadata_verified",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-11",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-09-EXTRA-6b5b5e038ac4-013",
+      "title": "Tough on criminal wealth? Exploring the link between organized crime’s asset confiscation and regional entrepreneurship",
+      "authors": "Elisa Operti",
+      "year": 2018,
+      "venue": "Small Business Economics 51(2):321–335",
+      "doi": "10.1007/s11187-018-0003-y",
+      "sourceLinks": [
+        "https://ideas.repec.org/a/kap/sbusec/v51y2018i2d10.1007_s11187-018-0003-y.html"
+      ],
+      "metadataStatus": "metadata_verified",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-11",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-09-EXTRA-6b5b5e038ac4-014",
+      "title": "Closed for mafia: Evidence from the removal of mafia firms on commercial property values",
+      "authors": "Francesca M. Calamunci; Livio Ferrante; Rossana Scebba",
+      "year": 2022,
+      "venue": "Journal of Regional Science 62(5):1487–1511",
+      "doi": "10.1111/jors.12612",
+      "sourceLinks": [
+        "https://onlinelibrary.wiley.com/doi/full/10.1111/jors.12612"
+      ],
+      "metadataStatus": "metadata_verified",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-11",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-09-EXTRA-6b5b5e038ac4-015",
+      "title": "The Spatial Impact of Judicial Administration on Firms’ Performance",
+      "authors": "Vincenzo Sessa",
+      "year": 2026,
+      "venue": "LABOUR",
+      "doi": "10.1111/labr.70019",
+      "sourceLinks": [
+        "https://onlinelibrary.wiley.com/doi/full/10.1111/labr.70019"
+      ],
+      "metadataStatus": "metadata_verified",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-11",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-09-EXTRA-6b5b5e038ac4-016",
+      "title": "Institutional trust and the confiscation of real estate assets from organised crime",
+      "authors": "Michele Mosca; Luca Pennacchio",
+      "year": 2026,
+      "venue": "Journal of Institutional Economics 22:e8",
+      "doi": "10.1017/s1744137426100459",
+      "sourceLinks": [
+        "https://www.cambridge.org/core/journals/journal-of-institutional-economics/article/institutional-trust-and-the-confiscation-of-real-estate-assets-from-organised-crime/22CD16570A1AEF8DF68CA940E6C1BC76"
+      ],
+      "metadataStatus": "metadata_verified",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-11",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-09-EXTRA-6b5b5e038ac4-017",
+      "title": "Transition management strategies of confiscated mafia-type firms: the role of public administrations and nonprofit organizations",
+      "authors": "",
+      "year": 2023,
+      "venue": "Journal of Public Budgeting, Accounting & Financial Management 35(6):121–139",
+      "doi": "10.1108/jpbafm-03-2023-0041",
+      "sourceLinks": [
+        "https://www.emerald.com/jpbafm/article/35/6/121/234108/Transition-management-strategies-of-confiscated"
+      ],
+      "metadataStatus": "metadata_partial",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-11",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-09-EXTRA-6b5b5e038ac4-018",
+      "title": "Localized effects of confiscated and re-allocated real estate mafia assets",
+      "authors": "Filippo Boeri; Marco Di Cataldo; Elisabetta Pietrostefani",
+      "year": 2024,
+      "venue": "Journal of Economic Geography 24(2):219–240",
+      "doi": "10.1093/jeg/lbad035",
+      "sourceLinks": [
+        "https://academic.oup.com/joeg/article/24/2/219/7499713"
+      ],
+      "metadataStatus": "metadata_verified",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-11",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-09-EXTRA-6b5b5e038ac4-019",
+      "title": "Detection Model of Legally Registered Mafia Firms in Italy",
+      "authors": "Diego Ravenda; Josep M. Argilés-Bosch; Maika M. Valencia-Silva",
+      "year": 2015,
+      "venue": "European Management Review 12(1):23–39",
+      "doi": "10.1111/emre.12039",
+      "sourceLinks": [
+        "https://onlinelibrary.wiley.com/doi/10.1111/emre.12039"
+      ],
+      "metadataStatus": "metadata_verified",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-11",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-09-EXTRA-6b5b5e038ac4-020",
+      "title": "Accrual management as an indication of money laundering through legally registered Mafia firms in Italy",
+      "authors": "Diego Ravenda; Maika M. Valencia-Silva; Josep Maria Argiles-Bosch; Josep Garcia-Blandon",
+      "year": 2018,
+      "venue": "Accounting, Auditing & Accountability Journal 31(1)",
+      "doi": "10.1108/aaaj-12-2015-2329",
+      "sourceLinks": [
+        "https://www.emerald.com/insight/content/doi/10.1108/AAAJ-12-2015-2329/full/html"
+      ],
+      "metadataStatus": "metadata_verified",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-11",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-09-EXTRA-6b5b5e038ac4-021",
+      "title": "Mapping Organized Crime as a Stakeholder: A Risk-Based and Responsive Governance Perspective",
+      "authors": "",
+      "year": null,
+      "venue": "Regulation & Governance",
+      "doi": "10.1111/rego.70194",
+      "sourceLinks": [
+        "https://onlinelibrary.wiley.com/doi/full/10.1111/rego.70194"
+      ],
+      "metadataStatus": "metadata_partial",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-11",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-09-EXTRA-6b5b5e038ac4-022",
+      "title": "The sex market, bars and nightclubs: criminal infiltration in Slovenia",
+      "authors": "Boštjan Slak; Maja Modic; Katja Eman; Branko Ažman",
+      "year": 2016,
+      "venue": "Organised Crime in European Businesses",
+      "doi": "",
+      "sourceLinks": [
+        "https://www.routledge.com/Organised-Crime-in-European-Businesses/Savona-Riccardi-Berlusconi/p/book/9781138499478"
+      ],
+      "metadataStatus": "metadata_partial",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-11",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-09-EXTRA-6b5b5e038ac4-023",
+      "title": "From drug trafficking to wholesale trade business: organised crime infiltration in Spain",
+      "authors": "Jesús Palomo; Jerónimo Márquez; Pilar Laguna",
+      "year": 2016,
+      "venue": "Organised Crime in European Businesses",
+      "doi": "",
+      "sourceLinks": [
+        "https://www.routledge.com/Organised-Crime-in-European-Businesses/Savona-Riccardi-Berlusconi/p/book/9781138499478"
+      ],
+      "metadataStatus": "metadata_partial",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-11",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-09-EXTRA-6b5b5e038ac4-024",
+      "title": "Social welfare fraud and criminal infiltration in Sweden",
+      "authors": "Johanna Skinnari; Lars Korsell; Helena Rönnblom",
+      "year": 2016,
+      "venue": "Organised Crime in European Businesses",
+      "doi": "",
+      "sourceLinks": [
+        "https://www.routledge.com/Organised-Crime-in-European-Businesses/Savona-Riccardi-Berlusconi/p/book/9781138499478"
+      ],
+      "metadataStatus": "metadata_partial",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-11",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-09-EXTRA-6b5b5e038ac4-025",
+      "title": "Crash-for-cash and VAT carousels: organised crime infiltration in the United Kingdom",
+      "authors": "David Wall; Yulia Chistyakova; Stefano Bonino",
+      "year": 2016,
+      "venue": "Organised Crime in European Businesses",
+      "doi": "",
+      "sourceLinks": [
+        "https://www.routledge.com/Organised-Crime-in-European-Businesses/Savona-Riccardi-Berlusconi/p/book/9781138499478"
+      ],
+      "metadataStatus": "metadata_partial",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-11",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-09-EXTRA-6b5b5e038ac4-026",
+      "title": "Grand banditisme traditionnel and foreign groups: organised crime infiltration in France",
+      "authors": "Michele Riccardi; Diana Camerini",
+      "year": 2016,
+      "venue": "Organised Crime in European Businesses",
+      "doi": "",
+      "sourceLinks": [
+        "https://www.routledge.com/Organised-Crime-in-European-Businesses/Savona-Riccardi-Berlusconi/p/book/9781138499478"
+      ],
+      "metadataStatus": "metadata_partial",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-11",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-09-EXTRA-6b5b5e038ac4-027",
+      "title": "From bikers to entrepreneurs: motorcycle gangs infiltration in Finland",
+      "authors": "Sarianna Petrell; Jarmo Houtsonen",
+      "year": 2016,
+      "venue": "Organised Crime in European Businesses",
+      "doi": "",
+      "sourceLinks": [
+        "https://www.routledge.com/Organised-Crime-in-European-Businesses/Savona-Riccardi-Berlusconi/p/book/9781138499478"
+      ],
+      "metadataStatus": "metadata_partial",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-11",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-09-EXTRA-6b5b5e038ac4-028",
+      "title": "The impact of organised crime infiltration on the European legitimate economy",
+      "authors": "John Walker",
+      "year": 2016,
+      "venue": "Organised Crime in European Businesses",
+      "doi": "",
+      "sourceLinks": [
+        "https://www.routledge.com/Organised-Crime-in-European-Businesses/Savona-Riccardi-Berlusconi/p/book/9781138499478"
+      ],
+      "metadataStatus": "metadata_partial",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-11",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-09-EXTRA-6b5b5e038ac4-029",
+      "title": "From the analysis of criminal infiltration to the assessment of its risk",
+      "authors": "Lorella Garofalo",
+      "year": 2016,
+      "venue": "Organised Crime in European Businesses",
+      "doi": "",
+      "sourceLinks": [
+        "https://www.routledge.com/Organised-Crime-in-European-Businesses/Savona-Riccardi-Berlusconi/p/book/9781138499478"
+      ],
+      "metadataStatus": "metadata_partial",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-11",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-09-EXTRA-6b5b5e038ac4-030",
+      "title": "Mafia infiltrations in times of crisis: evidence from the Covid-19 shock",
+      "authors": "Marco Castelluccio; Lucia Rizzica",
+      "year": 2025,
+      "venue": "Bank of Italy, Temi di discussione (Economic working papers) 1502",
+      "doi": "",
+      "sourceLinks": [
+        "https://ideas.repec.org/p/bdi/wptemi/td_1502_25.html"
+      ],
+      "metadataStatus": "metadata_verified",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-11",
+      "topicCode": ""
+    },
+    {
       "id": "CAND-ACADEMIC-2026-09-09-EXTRA-85e203d4eb5a-001",
       "title": "Testing the reliability of OSINT network data for investigating organised crime infiltration of legal-market businesses",
       "authors": "Niles Breuer",

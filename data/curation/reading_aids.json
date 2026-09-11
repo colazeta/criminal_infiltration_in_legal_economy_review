@@ -3,24 +3,6 @@
   "purpose": "Non-decisional curator reading aids for candidates whose mechanical abstract cascade did not expose a standalone abstract. These records store only short paraphrased synopses and source locators; they do not replace the source, screening, or a human decision.",
   "records": [
     {
-      "candidateId": "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-005",
-      "kind": "review_synopsis",
-      "sourceLabel": "Exa intake evidence",
-      "sourceUrl": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4912709",
-      "synopsis": "Il risultato descrive una ricerca potenzialmente pertinente alle relazioni tra criminalità organizzata, imprese o mercati legali; la pertinenza va valutata dal revisore.",
-      "checkedAt": "2026-09-08",
-      "note": "Source-grounded intake synopsis used because the mechanical cascade did not expose a standalone abstract. Verify the linked scholarly source before screening; this is not an author abstract and cannot determine eligibility."
-    },
-    {
-      "candidateId": "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-011",
-      "kind": "review_synopsis",
-      "sourceLabel": "Exa intake evidence",
-      "sourceUrl": "https://link.springer.com/article/10.1007/s11187-019-00250-w",
-      "synopsis": "Il risultato descrive una ricerca potenzialmente pertinente alle relazioni tra criminalità organizzata, imprese o mercati legali; la pertinenza va valutata dal revisore.",
-      "checkedAt": "2026-09-08",
-      "note": "Source-grounded intake synopsis used because the mechanical cascade did not expose a standalone abstract. Verify the linked scholarly source before screening; this is not an author abstract and cannot determine eligibility."
-    },
-    {
       "candidateId": "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-018",
       "kind": "review_synopsis",
       "sourceLabel": "Exa intake evidence",
@@ -111,6 +93,150 @@
       "note": "Source-grounded intake synopsis used because the mechanical cascade did not expose a standalone abstract. Verify the linked scholarly source before screening; this is not an author abstract and cannot determine eligibility."
     },
     {
+      "candidateId": "CAND-ACADEMIC-2026-09-09-EXTRA-6b5b5e038ac4-002",
+      "kind": "review_synopsis",
+      "sourceLabel": "Parallel Search intake evidence",
+      "sourceUrl": "https://www.rand.org/pubs/external_publications/EP68578.html",
+      "synopsis": "Technical annexes to a structured risk-mapping study of organised-crime infiltration of legitimate businesses; distinct from the final report already in the queue.",
+      "checkedAt": "2026-09-11",
+      "note": "Source-grounded intake synopsis used because the mechanical cascade did not expose a standalone abstract. Verify the linked scholarly source before screening; this is not an author abstract and cannot determine eligibility."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-09-EXTRA-6b5b5e038ac4-003",
+      "kind": "review_synopsis",
+      "sourceLabel": "Parallel Search intake evidence",
+      "sourceUrl": "https://www.ojp.gov/ncjrs/virtual-library/abstracts/illusion-success-case-study-infiltration-legitimate-business",
+      "synopsis": "Case study of organised-crime penetration and exploitation of a legitimate business through credit dependence, professional facilitators and criminal use of the firm.",
+      "checkedAt": "2026-09-11",
+      "note": "Source-grounded intake synopsis used because the mechanical cascade did not expose a standalone abstract. Verify the linked scholarly source before screening; this is not an author abstract and cannot determine eligibility."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-09-EXTRA-6b5b5e038ac4-004",
+      "kind": "review_synopsis",
+      "sourceLabel": "Parallel Search intake evidence",
+      "sourceUrl": "https://www.rand.org/pubs/reports/R3525.html",
+      "synopsis": "Foundational empirical and economic study of organised-crime control and racketeering in legitimate industries.",
+      "checkedAt": "2026-09-11",
+      "note": "Source-grounded intake synopsis used because the mechanical cascade did not expose a standalone abstract. Verify the linked scholarly source before screening; this is not an author abstract and cannot determine eligibility."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-09-EXTRA-6b5b5e038ac4-005",
+      "kind": "review_synopsis",
+      "sourceLabel": "Parallel Search intake evidence",
+      "sourceUrl": "https://www.ojp.gov/library/publications/racketeering-legitimate-industries-two-case-studies-executive-summary",
+      "synopsis": "Early case-study evidence on organised-crime racketeering and control in legitimate industries, recovered as a distinct research output.",
+      "checkedAt": "2026-09-11",
+      "note": "Source-grounded intake synopsis used because the mechanical cascade did not expose a standalone abstract. Verify the linked scholarly source before screening; this is not an author abstract and cannot determine eligibility."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-09-EXTRA-6b5b5e038ac4-007",
+      "kind": "review_synopsis",
+      "sourceLabel": "Parallel Search intake evidence",
+      "sourceUrl": "https://nyupress.org/9780814730348/corruption-and-racketeering-in-the-new-york-city-construction-industry",
+      "synopsis": "Major research report on corruption, racketeering and organised-crime influence in the legitimate New York construction industry.",
+      "checkedAt": "2026-09-11",
+      "note": "Source-grounded intake synopsis used because the mechanical cascade did not expose a standalone abstract. Verify the linked scholarly source before screening; this is not an author abstract and cannot determine eligibility."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-09-EXTRA-6b5b5e038ac4-009",
+      "kind": "review_synopsis",
+      "sourceLabel": "Parallel Search intake evidence",
+      "sourceUrl": "https://uat.ojp.gov/library/publications/study-organized-crime-business-type-activities-and-their-implications-law",
+      "synopsis": "Research study explicitly addressing organised-crime business-type activity and criminal infiltration of legitimate business.",
+      "checkedAt": "2026-09-11",
+      "note": "Source-grounded intake synopsis used because the mechanical cascade did not expose a standalone abstract. Verify the linked scholarly source before screening; this is not an author abstract and cannot determine eligibility."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-09-EXTRA-6b5b5e038ac4-010",
+      "kind": "review_synopsis",
+      "sourceLabel": "Parallel Search intake evidence",
+      "sourceUrl": "https://www.routledge.com/The-Private-Sector-and-Organized-Crime-Criminal-Entrepreneurship-Illicit-Profits-and-Private-Sector-Security-Governance/Zabyelina-Thachuk/p/book/9781032056654",
+      "synopsis": "Academic edited volume on organised-crime attacks, infiltration and capture of legitimate businesses and private-sector responses.",
+      "checkedAt": "2026-09-11",
+      "note": "Source-grounded intake synopsis used because the mechanical cascade did not expose a standalone abstract. Verify the linked scholarly source before screening; this is not an author abstract and cannot determine eligibility."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-09-EXTRA-6b5b5e038ac4-012",
+      "kind": "review_synopsis",
+      "sourceLabel": "Parallel Search intake evidence",
+      "sourceUrl": "https://ideas.repec.org/a/kap/jbuset/v132y2015i1p41-62.html",
+      "synopsis": "Firm-level study of legally registered Mafia firms and management practices, directly informative on behaviour under criminal control.",
+      "checkedAt": "2026-09-11",
+      "note": "Source-grounded intake synopsis used because the mechanical cascade did not expose a standalone abstract. Verify the linked scholarly source before screening; this is not an author abstract and cannot determine eligibility."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-09-EXTRA-6b5b5e038ac4-022",
+      "kind": "review_synopsis",
+      "sourceLabel": "Parallel Search intake evidence",
+      "sourceUrl": "https://www.routledge.com/Organised-Crime-in-European-Businesses/Savona-Riccardi-Berlusconi/p/book/9781138499478",
+      "synopsis": "Country-level chapter explicitly examining criminal infiltration of legitimate businesses in Slovenia.",
+      "checkedAt": "2026-09-11",
+      "note": "Source-grounded intake synopsis used because the mechanical cascade did not expose a standalone abstract. Verify the linked scholarly source before screening; this is not an author abstract and cannot determine eligibility."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-09-EXTRA-6b5b5e038ac4-023",
+      "kind": "review_synopsis",
+      "sourceLabel": "Parallel Search intake evidence",
+      "sourceUrl": "https://www.routledge.com/Organised-Crime-in-European-Businesses/Savona-Riccardi-Berlusconi/p/book/9781138499478",
+      "synopsis": "Country-level chapter explicitly examining organised-crime infiltration of legitimate wholesale business in Spain.",
+      "checkedAt": "2026-09-11",
+      "note": "Source-grounded intake synopsis used because the mechanical cascade did not expose a standalone abstract. Verify the linked scholarly source before screening; this is not an author abstract and cannot determine eligibility."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-09-EXTRA-6b5b5e038ac4-024",
+      "kind": "review_synopsis",
+      "sourceLabel": "Parallel Search intake evidence",
+      "sourceUrl": "https://www.routledge.com/Organised-Crime-in-European-Businesses/Savona-Riccardi-Berlusconi/p/book/9781138499478",
+      "synopsis": "Country-level chapter on criminal infiltration and welfare-related legitimate structures in Sweden.",
+      "checkedAt": "2026-09-11",
+      "note": "Source-grounded intake synopsis used because the mechanical cascade did not expose a standalone abstract. Verify the linked scholarly source before screening; this is not an author abstract and cannot determine eligibility."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-09-EXTRA-6b5b5e038ac4-025",
+      "kind": "review_synopsis",
+      "sourceLabel": "Parallel Search intake evidence",
+      "sourceUrl": "https://www.routledge.com/Organised-Crime-in-European-Businesses/Savona-Riccardi-Berlusconi/p/book/9781138499478",
+      "synopsis": "Country-level chapter explicitly analysing organised-crime infiltration of legitimate business activity in the United Kingdom.",
+      "checkedAt": "2026-09-11",
+      "note": "Source-grounded intake synopsis used because the mechanical cascade did not expose a standalone abstract. Verify the linked scholarly source before screening; this is not an author abstract and cannot determine eligibility."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-09-EXTRA-6b5b5e038ac4-026",
+      "kind": "review_synopsis",
+      "sourceLabel": "Parallel Search intake evidence",
+      "sourceUrl": "https://www.routledge.com/Organised-Crime-in-European-Businesses/Savona-Riccardi-Berlusconi/p/book/9781138499478",
+      "synopsis": "Country-level chapter explicitly examining organised-crime infiltration of legitimate businesses in France.",
+      "checkedAt": "2026-09-11",
+      "note": "Source-grounded intake synopsis used because the mechanical cascade did not expose a standalone abstract. Verify the linked scholarly source before screening; this is not an author abstract and cannot determine eligibility."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-09-EXTRA-6b5b5e038ac4-027",
+      "kind": "review_synopsis",
+      "sourceLabel": "Parallel Search intake evidence",
+      "sourceUrl": "https://www.routledge.com/Organised-Crime-in-European-Businesses/Savona-Riccardi-Berlusconi/p/book/9781138499478",
+      "synopsis": "Country-level chapter on motorcycle-gang penetration of legitimate entrepreneurship and business activity in Finland.",
+      "checkedAt": "2026-09-11",
+      "note": "Source-grounded intake synopsis used because the mechanical cascade did not expose a standalone abstract. Verify the linked scholarly source before screening; this is not an author abstract and cannot determine eligibility."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-09-EXTRA-6b5b5e038ac4-028",
+      "kind": "review_synopsis",
+      "sourceLabel": "Parallel Search intake evidence",
+      "sourceUrl": "https://www.routledge.com/Organised-Crime-in-European-Businesses/Savona-Riccardi-Berlusconi/p/book/9781138499478",
+      "synopsis": "Cross-European chapter focused on the economic impact of organised-crime infiltration in the legitimate economy.",
+      "checkedAt": "2026-09-11",
+      "note": "Source-grounded intake synopsis used because the mechanical cascade did not expose a standalone abstract. Verify the linked scholarly source before screening; this is not an author abstract and cannot determine eligibility."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-09-EXTRA-6b5b5e038ac4-029",
+      "kind": "review_synopsis",
+      "sourceLabel": "Parallel Search intake evidence",
+      "sourceUrl": "https://www.routledge.com/Organised-Crime-in-European-Businesses/Savona-Riccardi-Berlusconi/p/book/9781138499478",
+      "synopsis": "Chapter translating analysis of criminal infiltration into structured risk assessment, relevant to measurement and prevention.",
+      "checkedAt": "2026-09-11",
+      "note": "Source-grounded intake synopsis used because the mechanical cascade did not expose a standalone abstract. Verify the linked scholarly source before screening; this is not an author abstract and cannot determine eligibility."
+    },
+    {
       "candidateId": "CAND-ACADEMIC-2026-09-09-EXTRA-85e203d4eb5a-002",
       "kind": "review_synopsis",
       "sourceLabel": "Exa intake evidence",
@@ -147,29 +273,11 @@
       "note": "Source-grounded intake synopsis used because the mechanical cascade did not expose a standalone abstract. Verify the linked scholarly source before screening; this is not an author abstract and cannot determine eligibility."
     },
     {
-      "candidateId": "CAND-ACADEMIC-2026-09-09-EXTRA-85e203d4eb5a-008",
-      "kind": "review_synopsis",
-      "sourceLabel": "Exa intake evidence",
-      "sourceUrl": "https://doi.org/10.1007/s10611-013-9473-7",
-      "synopsis": "Case-study analysis of mafia territorial expansion in Germany and mechanisms linking expansion to legitimate economic activities.",
-      "checkedAt": "2026-09-09",
-      "note": "Source-grounded intake synopsis used because the mechanical cascade did not expose a standalone abstract. Verify the linked scholarly source before screening; this is not an author abstract and cannot determine eligibility."
-    },
-    {
       "candidateId": "CAND-ACADEMIC-2026-09-09-EXTRA-85e203d4eb5a-009",
       "kind": "review_synopsis",
       "sourceLabel": "Exa intake evidence",
       "sourceUrl": "https://publicatt.unicatt.it/handle/10807/223872",
       "synopsis": "Direct chapter-level analysis of mafia infiltration in Italian legitimate firms, including sectors and infiltration modes.",
-      "checkedAt": "2026-09-09",
-      "note": "Source-grounded intake synopsis used because the mechanical cascade did not expose a standalone abstract. Verify the linked scholarly source before screening; this is not an author abstract and cannot determine eligibility."
-    },
-    {
-      "candidateId": "CAND-ACADEMIC-2026-09-09-EXTRA-8e1caef4c376-003",
-      "kind": "review_synopsis",
-      "sourceLabel": "Exa intake evidence",
-      "sourceUrl": "https://doi.org/10.1007/s11187-020-00439-4",
-      "synopsis": "Firm-level analysis of performance after judicial administration removes criminal governance ties.",
       "checkedAt": "2026-09-09",
       "note": "Source-grounded intake synopsis used because the mechanical cascade did not expose a standalone abstract. Verify the linked scholarly source before screening; this is not an author abstract and cannot determine eligibility."
     },
