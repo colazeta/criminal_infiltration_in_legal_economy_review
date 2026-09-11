@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - scripts/calibration/paper_content_benchmark.py
+      - scripts/calibration/paper_content_shard.py
       - .github/workflows/enrichment-content-benchmark.yml
 permissions:
   contents: read
@@ -15,7 +16,12 @@ jobs:
   benchmark:
     if: github.repository == 'colazeta/criminal_infiltration_in_legal_economy_review' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
-    timeout-minutes: 45
+    timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        partition: [0, 1, 2]
     steps:
       - name: Checkout reviewed public code without retained credentials
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
@@ -33,20 +39,41 @@ jobs:
         run: |
           python3 scripts/validation/validate_repository.py
           python3 scripts/ontology/validate_ontology.py
-          python3 -m unittest tests.test_paper_content_benchmark tests.test_enrichment_generation_contract
+          python3 -m unittest tests.test_paper_content_benchmark tests.test_enrichment_generation_contract tests.test_paper_content_shard
           node --test curator-app/test/sealed-audit.test.js
-      - name: Analyse at most eighteen matched original abstracts without production access
+      - name: Collect at most six existing matched abstracts for source-first assessment
         run: |
-          python3 -m scripts.calibration.paper_content_benchmark \
-            --sources-output "$RUNNER_TEMP/benchmark-sources.sealed.json" \
-            --results-output "$RUNNER_TEMP/benchmark-results.sealed.json"
-      - name: Retain only the two recipient-encrypted audit files
+          python3 -m scripts.calibration.paper_content_shard collect \
+            --partition '${{ matrix.partition }}' \
+            --private-input "$RUNNER_TEMP/benchmark-input.json" \
+            --sealed-output "$RUNNER_TEMP/benchmark-sources.sealed.json"
+      - name: Retain source-only ciphertext before model output is available
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: recipient-encrypted-content-benchmark
-          path: |
-            ${{ runner.temp }}/benchmark-sources.sealed.json
-            ${{ runner.temp }}/benchmark-results.sealed.json
+          name: benchmark-sources-part-${{ matrix.partition }}
+          path: ${{ runner.temp }}/benchmark-sources.sealed.json
           if-no-files-found: ignore
           retention-days: 1
+      - name: Run the unchanged source-bound extractor on the collected partition
+        run: |
+          python3 -m scripts.calibration.paper_content_shard infer \
+            --partition '${{ matrix.partition }}' \
+            --private-input "$RUNNER_TEMP/benchmark-input.json" \
+            --sealed-output "$RUNNER_TEMP/benchmark-results.sealed.json"
+      - name: Retain only recipient-encrypted result checkpoints
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: benchmark-results-part-${{ matrix.partition }}
+          path: ${{ runner.temp }}/benchmark-results.sealed.json
+          if-no-files-found: ignore
+          retention-days: 1
+      - name: Remove the temporary local source input even after failure
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          (Path(os.environ['RUNNER_TEMP']) / 'benchmark-input.json').unlink(missing_ok=True)
+          PY
