@@ -1,0 +1,37 @@
+name: Patch safe pilot diagnostics
+on:
+  push:
+    branches: [fix/pilot-output-validation]
+    paths: [.github/workflows/patch-pilot-diagnostics.yml]
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with: {fetch-depth: 0}
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with: {python-version: '3.12'}
+      - name: Add non-content diagnostic stages
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('scripts/enrichment/pilot.py')
+          s=p.read_text()
+          s=s.replace("            if answer['choices'][0].get('finish_reason')!='stop': raise RuntimeError('pilot_output_incomplete')\n            extracted=json.loads(answer['choices'][0]['message']['content']);proposal=prepare_proposal(packet,extracted)\n", "            if answer['choices'][0].get('finish_reason')!='stop': raise RuntimeError('pilot_output_incomplete')\n            print(json.dumps({'pilot_stage':'model_response_complete'}),flush=True)\n            try: extracted=json.loads(answer['choices'][0]['message']['content'])\n            except (json.JSONDecodeError,TypeError,KeyError): raise RuntimeError('pilot_model_json_invalid') from None\n            print(json.dumps({'pilot_stage':'model_json_parsed'}),flush=True)\n            proposal=prepare_proposal(packet,extracted)\n            print(json.dumps({'pilot_stage':'proposal_converted'}),flush=True)\n")
+          s=s.replace("    except Exception as error:\n        known={'pilot_no_source_ready','pilot_runtime_inactive','pilot_requires_bounded_complete_abstract','pilot_download_limit','pilot_download_integrity','pilot_engine_failed','pilot_engine_timeout','pilot_output_incomplete','pilot_closed_schema_validation_failed'}\n        raise SystemExit(str(error) if str(error) in known else 'pilot_failed_no_private_content_disclosed') from None\n", "    except Exception as error:\n        message=str(error)\n        safe=message if message.startswith('pilot_') and len(message)<100 else 'pilot_failed_no_private_content_disclosed'\n        raise SystemExit(safe) from None\n")
+          p.write_text(s)
+          PY
+      - name: Validate
+        run: |
+          python3 scripts/validation/validate_repository.py
+          python3 scripts/ontology/validate_ontology.py
+          python3 -m unittest tests.test_enrichment_pilot tests.test_enrichment_service
+      - name: Commit source only
+        run: |
+          git add scripts/enrichment/pilot.py
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Expose safe post-inference pilot stages without private content'
+          git push origin HEAD:fix/pilot-output-validation
