@@ -1,3 +1,14 @@
+## 2026-09-11 — private paper enrichment foundation
+
+* Add ontology profile 0.4.0, 15 empty additive private tables and closed scientific
+  extraction schema with field-by-field semantic mapping.
+* Add independently gated hourly mechanical enrichment, leases, retries, private
+  source readback and resumable provider-specific citation coverage.
+* Add authenticated source/proposal import and inspection; preserve all scientific
+  approvals, registry records and original migration hashes.
+* Add clinical contribution codebook 1.0.0, prompt, calibration requirements and
+  explicit machine-extraction block. No model or calibration is manufactured.
+
 # Changelog
 
 All notable archive, protocol and schema changes are recorded here. Versions

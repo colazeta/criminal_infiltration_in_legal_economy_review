@@ -9,6 +9,7 @@ import { handleProviderReadinessRequest } from "./provider-readiness.js";
 import { handleResolvedAbstractRequest } from "./resolved-abstract.js";
 import { superviseDays, consumeDays } from "./daily-runner.js";
 import { handleV2 } from "./review-v2.js";
+import { runEnrichment, handlePaperEnrichment } from "./paper-enrichment.js";
 import { isActiveArchiveIssue } from "./archive-cycle.js";
 import worker, { SubmissionCoordinatorCore, authenticateCuratorRequest } from "./index.js";
 
@@ -384,11 +385,23 @@ export class SubmissionCoordinator extends DurableObject {
 }
 
 export default {
-  async scheduled(controller, env) { return superviseDays(env, controller.scheduledTime); },
+  async scheduled(controller, env) {
+    // Independent outcomes: a disabled/failed discovery runner cannot suppress enrichment.
+    const outcomes = await Promise.allSettled([
+      superviseDays(env, controller.scheduledTime),
+      runEnrichment(env, { now: controller.scheduledTime }),
+    ]);
+    if (outcomes.some(o => o.status === "rejected")) throw new Error("scheduled_component_failed");
+    return outcomes.map(o => o.value);
+  },
   async queue(batch, env) { return consumeDays(batch, env); },
   async fetch(request, env) {
     const url = new URL(request.url);
-    if (url.pathname === "/version" && request.method === "GET") return Response.json({ commit: env.DEPLOY_COMMIT || null, ontology: "0.3.0" }, { headers: { "Cache-Control": "no-store" } });
+    if (url.pathname === "/version" && request.method === "GET") return Response.json({ commit: env.DEPLOY_COMMIT || null, ontology: "0.4.0" }, { headers: { "Cache-Control": "no-store" } });
+    if (url.pathname.startsWith("/api/paper-enrichment/")) {
+      try { return await handlePaperEnrichment(request, env, await authenticateCuratorRequest(request, env)); }
+      catch (error) { return Response.json({ error: { code: error.code || "authentication_required" } }, { status: error.status || 401, headers: { "Cache-Control": "no-store" } }); }
+    }
     if (url.pathname.startsWith("/api/v2/")) {
       try { return await handleV2(request, env, await authenticateCuratorRequest(request, env)); }
       catch (error) { return Response.json({ error: { code: error.code || "authentication_required" } }, { status: error.status || 401, headers: { "Cache-Control": "no-store" } }); }

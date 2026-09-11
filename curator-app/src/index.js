@@ -13,6 +13,8 @@ const CURATOR_ASSETS = new Set([
   "/curate.html",
   "/review-v2.html",
   "/review-v2.js",
+  "/enrichment.html",
+  "/enrichment.js",
   "/model.css",
   "/application.css",
   "/curator-shell.css",
@@ -212,7 +214,7 @@ function curatorAssetHeaders(headers, path) {
   result.set("Permissions-Policy", "camera=(), geolocation=(), microphone=()");
   result.set("Referrer-Policy", "no-referrer");
   result.set("X-Content-Type-Options", "nosniff");
-  if (path === "/curate.html" || path === "/review-v2.html") {
+  if (path === "/curate.html" || path === "/review-v2.html" || path === "/enrichment.html") {
     result.set("Cache-Control", "no-store");
     result.set(
       "Content-Security-Policy",

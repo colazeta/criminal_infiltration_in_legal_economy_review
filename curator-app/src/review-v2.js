@@ -3,7 +3,9 @@ import { queryManifestProblem } from "./daily-source-policy.js";
 
 export const CRITERIA = Object.freeze(["criminal_actor", "legal_economy", "sustained_relation", "substantive_analysis"]);
 export const V2_PROTOCOL = "CILE-4PT-OA-v3";
-export const V2_ONTOLOGY = "0.3.0";
+export const V2_ONTOLOGY = "0.4.0";
+// 0.4.0 adds private enrichment; existing 0.3.0 scientific records remain valid.
+const COMPATIBLE_V2_ONTOLOGIES = new Set(["0.3.0", "0.4.0"]);
 const DECISIONS = new Set(["eligible_core", "eligible_contextual", "needs_full_text", "not_eligible", "duplicate", "not_academic", "not_retrievable"]);
 const SCIENTIFIC_KINDS = new Set(["abstract", "full_text", "full_text_excerpt", "publisher_summary"]);
 const EXCLUSION_REASONS = new Set(["TOPIC_OFF_SCOPE", "NO_CRIMINAL_ACTOR_OR_INTEREST", "NO_LEGAL_ECONOMY_LINK", "NO_INFILTRATION_RELATION", "MENTION_ONLY_NOT_ANALYTICAL", "ADJACENT_PHENOMENON_ONLY", "CRIME_DOMAIN_MISMATCH", "DOCUMENT_TYPE_EXCLUDED", "LANGUAGE_EXCLUDED", "DUPLICATE_RECORD", "NOT_ACADEMIC_SOURCE", "FULL_TEXT_UNAVAILABLE"]);
@@ -96,7 +98,7 @@ export async function readiness(env) {
       review = await env.REVIEW_DB.prepare("SELECT review_id,phase,start_date,protocol_version,ontology_version FROM reviews WHERE phase = 'active'").first();
       const accessSchema = await env.REVIEW_DB.prepare("SELECT name FROM sqlite_master WHERE type='view' AND name='v2_open_access_candidates'").first();
       if (!accessSchema) blockers.push("open_access_schema_not_applied");
-      if (review && (review.protocol_version !== V2_PROTOCOL || review.ontology_version !== V2_ONTOLOGY)) blockers.push("review_protocol_mismatch");
+      if (review && (review.protocol_version !== V2_PROTOCOL || !COMPATIBLE_V2_ONTOLOGIES.has(review.ontology_version))) blockers.push("review_protocol_mismatch");
     }
     catch { blockers.push("schema_not_applied"); }
   }
@@ -109,7 +111,7 @@ async function activeReview(env) {
   if (!env.REVIEW_DB) throw new V2Error("private_database_not_bound", 503);
   const review = await env.REVIEW_DB.prepare("SELECT * FROM reviews WHERE phase = 'active'").first();
   if (!review) throw new V2Error("review_not_activated", 409);
-  if (review.protocol_version !== V2_PROTOCOL || review.ontology_version !== V2_ONTOLOGY) throw new V2Error("review_protocol_mismatch", 409);
+  if (review.protocol_version !== V2_PROTOCOL || !COMPATIBLE_V2_ONTOLOGIES.has(review.ontology_version)) throw new V2Error("review_protocol_mismatch", 409);
   return review;
 }
 async function candidateContext(db, review, candidateId) {

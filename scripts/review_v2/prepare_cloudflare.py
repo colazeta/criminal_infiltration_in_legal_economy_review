@@ -57,7 +57,7 @@ def api(resource, *, method="GET", payload=None):
     return request_api(f"accounts/{resolve_account()}/{resource}", method=method, payload=payload, family=resource.split("/")[0])
 
 
-def prepare(output):
+def prepare(output, *, storage_only=False):
     matches = []
     for page in range(1, 101):
         databases = api(f"d1/database?per_page=100&page={page}")
@@ -108,6 +108,15 @@ def prepare(output):
     custom = api(f"r2/buckets/{NAME}/domains/custom")
     if custom.get("domains"):
         raise RuntimeError("Evidence bucket has public custom domains; refusing to bind it")
+    if storage_only:
+        config = {
+            "d1_databases": [{"binding": "REVIEW_DB", "database_name": NAME, "database_id": database_id}],
+            "r2_buckets": [{"binding": "REVIEW_EVIDENCE", "bucket_name": NAME}],
+            "triggers": {"crons": ["*/15 * * * *"]},
+        }
+        Path(output).write_text(json.dumps(config, indent=2) + "\n")
+        print("Private storage prepared without discovery queues. Enrichment remains explicitly gated.")
+        return
     queues = []
     for page in range(1, 101):
         part = api(f"queues?per_page=100&page={page}")
@@ -133,8 +142,9 @@ def prepare(output):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", required=True, type=Path)
+    parser.add_argument("--storage-only", action="store_true", help="Do not require discovery queues")
     args = parser.parse_args()
     try:
-        prepare(args.output)
+        prepare(args.output, storage_only=args.storage_only)
     except (RuntimeError, KeyError, TypeError, ValueError) as error:
         raise SystemExit(f"V2 preparation blocked: {error}") from None

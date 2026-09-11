@@ -99,3 +99,16 @@ The first approved executions begin only after this amendment is merged.
 | Coventry University | pureportal.coventry.ac.uk | Institutional deposit records, rights and PDFs |
 
 Execution limits and rollback are in [extraordinary-runs.md](../operations/extraordinary-runs.md).
+
+### Candidate-bound scheduled enrichment — 11 September 2026
+
+The owner authorises bounded retrieval of existing registered candidates through
+Crossref (exact DOI/title-matched metadata and supplied abstract) and OpenAlex
+(exact matched record and paginated citation identifiers). Calls use the existing
+public endpoints with no paid upgrade or credential creation. Returned text is
+private research evidence only in D1/R2; no copied abstracts enter repository or
+Pages exports. Missing DOI, identity conflict, authentication refusal or exhausted
+retries blocks the job explicitly. No retrieved citation creates a new candidate
+or canonical work. The first production execution requires the storage/provider
+readiness check in `docs/operations/paper-enrichment.md`. This amendment does not
+change daily discovery providers or scientific acceptance.

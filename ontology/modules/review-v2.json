@@ -1,5 +1,5 @@
 {
-  "profile_version": "0.3.0",
+  "profile_version": "0.4.0",
   "storage": "private D1; bodies in private R2",
   "tables": {
     "reviews": {
@@ -1684,6 +1684,651 @@
           "sql_type": "TEXT"
         }
       }
+    },
+    "enrichment_targets": {
+      "class": "EnrichmentTarget",
+      "description": "Provisional registered-record target; not canonical bibliographic identity.",
+      "fields": {
+        "target_id": {
+          "slot": "enrichment_target_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "cycle_id": {
+          "slot": "enrichment_cycle_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "record_namespace": {
+          "slot": "enrichment_record_namespace",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "record_id": {
+          "slot": "enrichment_record_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "input_sha256": {
+          "slot": "enrichment_input_sha256",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "record_json": {
+          "slot": "enrichment_record_json",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "active": {
+          "slot": "enrichment_active",
+          "nullable": false,
+          "sql_type": "INTEGER"
+        },
+        "first_seen_at": {
+          "slot": "enrichment_first_seen_at",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "updated_at": {
+          "slot": "enrichment_updated_at",
+          "nullable": false,
+          "sql_type": "TEXT"
+        }
+      }
+    },
+    "enrichment_inputs": {
+      "class": "EnrichmentInputSnapshot",
+      "description": "Immutable bibliographic input snapshot from an existing registry.",
+      "fields": {
+        "input_id": {
+          "slot": "enrichment_input_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "target_id": {
+          "slot": "enrichment_target_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "input_sha256": {
+          "slot": "enrichment_input_sha256",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "record_json": {
+          "slot": "enrichment_record_json",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "observed_at": {
+          "slot": "enrichment_observed_at",
+          "nullable": false,
+          "sql_type": "TEXT"
+        }
+      }
+    },
+    "enrichment_jobs": {
+      "class": "EnrichmentJob",
+      "description": "Recoverable, leased work item independent of daily discovery.",
+      "fields": {
+        "job_id": {
+          "slot": "enrichment_job_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "target_id": {
+          "slot": "enrichment_target_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "input_sha256": {
+          "slot": "enrichment_input_sha256",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "kind": {
+          "slot": "enrichment_kind",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "protocol_version": {
+          "slot": "enrichment_protocol_version",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "status": {
+          "slot": "enrichment_status",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "failure_streak": {
+          "slot": "enrichment_failure_streak",
+          "nullable": false,
+          "sql_type": "INTEGER"
+        },
+        "attempts_total": {
+          "slot": "enrichment_attempts_total",
+          "nullable": false,
+          "sql_type": "INTEGER"
+        },
+        "due_at": {
+          "slot": "enrichment_due_at",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "lease_until": {
+          "slot": "enrichment_lease_until",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "lease_token": {
+          "slot": "enrichment_lease_token",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "checkpoint_json": {
+          "slot": "enrichment_checkpoint_json",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "error_code": {
+          "slot": "enrichment_error_code",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "updated_at": {
+          "slot": "enrichment_updated_at",
+          "nullable": false,
+          "sql_type": "TEXT"
+        }
+      }
+    },
+    "enrichment_runs": {
+      "class": "EnrichmentRun",
+      "description": "Observed scheduler invocation; no scientific completeness claim.",
+      "fields": {
+        "run_id": {
+          "slot": "enrichment_run_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "cycle_id": {
+          "slot": "enrichment_cycle_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "scheduled_slot": {
+          "slot": "enrichment_scheduled_slot",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "started_at": {
+          "slot": "enrichment_started_at",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "finished_at": {
+          "slot": "enrichment_finished_at",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "lease_until": {
+          "slot": "enrichment_lease_until",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "status": {
+          "slot": "enrichment_status",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "selected_job_id": {
+          "slot": "enrichment_selected_job_id",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "error_code": {
+          "slot": "enrichment_error_code",
+          "nullable": true,
+          "sql_type": "TEXT"
+        }
+      }
+    },
+    "enrichment_attempts": {
+      "class": "EnrichmentAttempt",
+      "description": "Immutable outcome of an actual enrichment attempt.",
+      "fields": {
+        "attempt_id": {
+          "slot": "enrichment_attempt_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "job_id": {
+          "slot": "enrichment_job_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "run_id": {
+          "slot": "enrichment_run_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "started_at": {
+          "slot": "enrichment_started_at",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "finished_at": {
+          "slot": "enrichment_finished_at",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "outcome": {
+          "slot": "enrichment_outcome",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "error_code": {
+          "slot": "enrichment_error_code",
+          "nullable": true,
+          "sql_type": "TEXT"
+        }
+      }
+    },
+    "enrichment_sources": {
+      "class": "EnrichmentSource",
+      "description": "Private source snapshot for an existing record, with content hash and retention basis.",
+      "fields": {
+        "source_id": {
+          "slot": "enrichment_source_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "target_id": {
+          "slot": "enrichment_target_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "input_sha256": {
+          "slot": "enrichment_input_sha256",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "provider": {
+          "slot": "enrichment_provider",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "source_url": {
+          "slot": "enrichment_source_url",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "evidence_kind": {
+          "slot": "enrichment_evidence_kind",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "content_sha256": {
+          "slot": "enrichment_content_sha256",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "storage_key": {
+          "slot": "enrichment_storage_key",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "version_label": {
+          "slot": "enrichment_version_label",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "language": {
+          "slot": "enrichment_language",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "retention_basis": {
+          "slot": "enrichment_retention_basis",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "licence_status": {
+          "slot": "enrichment_licence_status",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "observed_at": {
+          "slot": "enrichment_observed_at",
+          "nullable": false,
+          "sql_type": "TEXT"
+        }
+      }
+    },
+    "enrichment_citation_observations": {
+      "class": "CitationObservation",
+      "description": "Provider-attested directed citation between external identifiers, not canonical Work identity.",
+      "fields": {
+        "observation_id": {
+          "slot": "enrichment_observation_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "target_id": {
+          "slot": "enrichment_target_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "input_sha256": {
+          "slot": "enrichment_input_sha256",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "provider": {
+          "slot": "enrichment_provider",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "direction": {
+          "slot": "enrichment_direction",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "citing_identifier": {
+          "slot": "enrichment_citing_identifier",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "cited_identifier": {
+          "slot": "enrichment_cited_identifier",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "snapshot_id": {
+          "slot": "enrichment_snapshot_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "source_url": {
+          "slot": "enrichment_source_url",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "observed_at": {
+          "slot": "enrichment_observed_at",
+          "nullable": false,
+          "sql_type": "TEXT"
+        }
+      }
+    },
+    "enrichment_citation_coverage": {
+      "class": "CitationCoverage",
+      "description": "Provider-specific page/checkpoint coverage; not global completeness.",
+      "fields": {
+        "coverage_id": {
+          "slot": "enrichment_coverage_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "target_id": {
+          "slot": "enrichment_target_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "input_sha256": {
+          "slot": "enrichment_input_sha256",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "provider": {
+          "slot": "enrichment_provider",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "direction": {
+          "slot": "enrichment_direction",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "snapshot_id": {
+          "slot": "enrichment_snapshot_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "source_url": {
+          "slot": "enrichment_source_url",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "returned_count": {
+          "slot": "enrichment_returned_count",
+          "nullable": false,
+          "sql_type": "INTEGER"
+        },
+        "provider_count": {
+          "slot": "enrichment_provider_count",
+          "nullable": true,
+          "sql_type": "INTEGER"
+        },
+        "next_cursor": {
+          "slot": "enrichment_next_cursor",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "status": {
+          "slot": "enrichment_status",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "observed_at": {
+          "slot": "enrichment_observed_at",
+          "nullable": false,
+          "sql_type": "TEXT"
+        }
+      }
+    },
+    "enrichment_proposals": {
+      "class": "ScientificExtractionProposal",
+      "description": "Private evidence-grounded extraction; never an approved scientific decision.",
+      "fields": {
+        "proposal_id": {
+          "slot": "enrichment_proposal_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "target_id": {
+          "slot": "enrichment_target_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "input_sha256": {
+          "slot": "enrichment_input_sha256",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "protocol_version": {
+          "slot": "enrichment_protocol_version",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "codebook_version": {
+          "slot": "enrichment_codebook_version",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "payload_sha256": {
+          "slot": "enrichment_payload_sha256",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "payload_json": {
+          "slot": "enrichment_payload_json",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "generated_by": {
+          "slot": "enrichment_generated_by",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "created_at": {
+          "slot": "enrichment_created_at",
+          "nullable": false,
+          "sql_type": "TEXT"
+        }
+      }
+    },
+    "enrichment_studies": {
+      "class": "ReportedStudy",
+      "description": "Study reported inside a publication; not the bibliographic Work.",
+      "fields": {
+        "proposal_id": {
+          "slot": "enrichment_proposal_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "study_id": {
+          "slot": "enrichment_study_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "payload_json": {
+          "slot": "enrichment_payload_json",
+          "nullable": false,
+          "sql_type": "TEXT"
+        }
+      }
+    },
+    "enrichment_datasets": {
+      "class": "StudyDatasetUse",
+      "description": "Dataset and selection used by a reported study.",
+      "fields": {
+        "proposal_id": {
+          "slot": "enrichment_proposal_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "study_id": {
+          "slot": "enrichment_study_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "dataset_id": {
+          "slot": "enrichment_dataset_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "payload_json": {
+          "slot": "enrichment_payload_json",
+          "nullable": false,
+          "sql_type": "TEXT"
+        }
+      }
+    },
+    "enrichment_analyses": {
+      "class": "ReportedAnalysis",
+      "description": "Analysis within a reported study.",
+      "fields": {
+        "proposal_id": {
+          "slot": "enrichment_proposal_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "study_id": {
+          "slot": "enrichment_study_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "analysis_id": {
+          "slot": "enrichment_analysis_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "payload_json": {
+          "slot": "enrichment_payload_json",
+          "nullable": false,
+          "sql_type": "TEXT"
+        }
+      }
+    },
+    "enrichment_variable_uses": {
+      "class": "AnalysisVariableUse",
+      "description": "Operationalised variable and role in one particular analysis.",
+      "fields": {
+        "proposal_id": {
+          "slot": "enrichment_proposal_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "analysis_id": {
+          "slot": "enrichment_analysis_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "variable_use_id": {
+          "slot": "enrichment_variable_use_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "payload_json": {
+          "slot": "enrichment_payload_json",
+          "nullable": false,
+          "sql_type": "TEXT"
+        }
+      }
+    },
+    "enrichment_findings": {
+      "class": "ReportedFinding",
+      "description": "Individual result grounded in an analysis and source evidence.",
+      "fields": {
+        "proposal_id": {
+          "slot": "enrichment_proposal_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "analysis_id": {
+          "slot": "enrichment_analysis_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "finding_id": {
+          "slot": "enrichment_finding_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "payload_json": {
+          "slot": "enrichment_payload_json",
+          "nullable": false,
+          "sql_type": "TEXT"
+        }
+      }
+    },
+    "enrichment_framework_proposals": {
+      "class": "ClinicalContributionProposal",
+      "description": "Proposed role in the six-category medical framework, separate from review screening.",
+      "fields": {
+        "proposal_id": {
+          "slot": "enrichment_proposal_id",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "primary_category": {
+          "slot": "enrichment_primary_category",
+          "nullable": true,
+          "sql_type": "TEXT"
+        },
+        "classification_status": {
+          "slot": "enrichment_classification_status",
+          "nullable": false,
+          "sql_type": "TEXT"
+        },
+        "payload_json": {
+          "slot": "enrichment_payload_json",
+          "nullable": false,
+          "sql_type": "TEXT"
+        }
+      }
     }
   },
   "states": {
@@ -1905,7 +2550,19 @@
     "discovery_occurrences",
     "operational_events",
     "legacy_snapshots",
-    "access_assessments_v2"
+    "access_assessments_v2",
+    "enrichment_inputs",
+    "enrichment_attempts",
+    "enrichment_sources",
+    "enrichment_citation_observations",
+    "enrichment_citation_coverage",
+    "enrichment_proposals",
+    "enrichment_studies",
+    "enrichment_datasets",
+    "enrichment_analyses",
+    "enrichment_variable_uses",
+    "enrichment_findings",
+    "enrichment_framework_proposals"
   ],
   "infrastructure_tables": {
     "cile_schema_versions": {
@@ -1919,7 +2576,8 @@
   },
   "migrations": [
     "curator-app/migrations/0001_review_v2.sql",
-    "curator-app/migrations/0002_open_access.sql"
+    "curator-app/migrations/0002_open_access.sql",
+    "curator-app/migrations/0003_paper_enrichment.sql"
   ],
   "views": {
     "v2_open_access_candidates": {
