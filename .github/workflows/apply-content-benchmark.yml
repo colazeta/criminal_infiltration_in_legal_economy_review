@@ -1,0 +1,68 @@
+name: Apply bounded content benchmark
+on:
+  push:
+    branches: [implementation/enrichment-content-benchmark]
+    paths: [.github/workflows/apply-content-benchmark.yml]
+permissions:
+  contents: write
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout isolated source branch
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 0
+      - name: Set up Node
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
+        with:
+          node-version: '22'
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12'
+      - name: Apply exact source-only patch
+        run: |
+          python3 - <<'PY'
+          import base64,hashlib,lzma,os,subprocess
+          from pathlib import Path
+          encoded=Path('.implementation-transfer/content-benchmark.b64').read_text().strip()
+          patch=lzma.decompress(base64.b64decode(encoded,validate=True))
+          if len(patch)!=44256 or hashlib.sha256(patch).hexdigest()!='0fc3b9e2bcd140c216be24458bc297231ca5a571885631587745894744c96760':
+              raise SystemExit('Source integrity failure')
+          if b'diff --git a/.github/' in patch: raise SystemExit('Workflow transfer prohibited')
+          path=Path(os.environ['RUNNER_TEMP'])/'content-benchmark.patch';path.write_bytes(patch)
+          subprocess.run(['git','apply','--check',str(path)],check=True)
+          subprocess.run(['git','apply',str(path)],check=True)
+          PY
+          git rm .implementation-transfer/content-benchmark.b64
+          git add -A
+      - name: Validate full source and semantic contracts
+        run: |
+          python3 scripts/validation/validate_repository.py
+          python3 scripts/ontology/validate_ontology.py
+          python3 scripts/ontology/build_model_browser.py
+          git diff --exit-code -- site/vocab/review-v2-model.json
+          python3 -m unittest discover -s tests -p 'test_*.py'
+          node --test curator-app/test/*.test.js
+          python3 scripts/build_archive.py
+          python3 scripts/build_secondary_collections.py
+          python3 scripts/curation/build_curator_stats.py
+          python3 scripts/curation/build_curator_options.py
+          python3 scripts/validation/validate_archive.py
+          python3 scripts/validation/validate_site.py
+          for file in site/app.js site/aml.js site/stats.js site/curator.js site/curator-config.js site/curator-guided.js site/model.js site/review-v2.js site/enrichment.js curator-app/src/index.js curator-app/src/worker.js; do node --check "$file"; done
+          python3 scripts/report_saturation.py
+          git diff --exit-code
+      - name: Commit validated source only
+        run: |
+          python3 - <<'PY'
+          import subprocess
+          paths=subprocess.check_output(['git','diff','--cached','--name-only'],text=True).splitlines()
+          if any(p.startswith('.github/') for p in paths): raise SystemExit('Unexpected workflow write')
+          PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Prepare bounded real-paper benchmark with private readback and explicit missingness'
+          git push origin HEAD:implementation/enrichment-content-benchmark
