@@ -1,0 +1,24 @@
+name: Content audit source snapshot
+on:
+  push:
+    branches: [validation/content-assessment-20260911]
+    paths: [.github/workflows/content-audit-source.yml]
+permissions:
+  contents: read
+jobs:
+  source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout public source without retained credentials
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Archive tracked public source only
+        run: git archive HEAD -o "$RUNNER_TEMP/source.tar"
+      - name: Retain the public source for local regression tests
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: content-audit-public-source
+          path: ${{ runner.temp }}/source.tar
+          retention-days: 1
