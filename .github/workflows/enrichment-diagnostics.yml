@@ -1,0 +1,70 @@
+name: Diagnose paper enrichment dependencies
+on:
+  push:
+    branches: [implementation/paper-enrichment-20260911]
+    paths: [.github/workflows/enrichment-diagnostics.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    environment: curator-production
+    timeout-minutes: 5
+    steps:
+      - name: Checkout public source
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Read-only dependency checks with redacted output
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          python3 - <<'PY'
+          import json, os, re
+          from urllib.request import Request, urlopen
+          from urllib.error import HTTPError, URLError
+          token=os.environ.get('CLOUDFLARE_API_TOKEN','')
+          report={'mode':'read_only','cloudflare_credential_present':bool(token),'model_credential_present':bool(os.environ.get('OPENAI_API_KEY')), 'checks':[]}
+          def check(path,label):
+              if not token:
+                  report['checks'].append({'service':label,'status':'credential_absent'}); return None
+              try:
+                  with urlopen(Request('https://api.cloudflare.com/client/v4/'+path,headers={'Authorization':'Bearer '+token,'Accept':'application/json'}),timeout=15) as r:
+                      data=json.load(r)
+                  report['checks'].append({'service':label,'status':'ok' if data.get('success') else 'api_error','codes':[x.get('code') for x in data.get('errors',[]) if isinstance(x.get('code'),int)]})
+                  return data.get('result') if data.get('success') else None
+              except HTTPError as e:
+                  codes=[]
+                  try:
+                      obj=json.loads(e.read(16000)); codes=[x.get('code') for x in obj.get('errors',[]) if isinstance(x.get('code'),int)]
+                  except (ValueError,TypeError): pass
+                  report['checks'].append({'service':label,'status':'http_error','http_status':e.code,'codes':codes})
+              except (URLError,TimeoutError,ValueError):
+                  report['checks'].append({'service':label,'status':'transport_or_decode_error'})
+              return None
+          check('user/tokens/verify','token_validity')
+          account=os.environ.get('CLOUDFLARE_ACCOUNT_ID','').strip()
+          if not account:
+              accounts=check('accounts?per_page=50&page=1','account_discovery')
+              if isinstance(accounts,list) and len(accounts)==1: account=accounts[0].get('id','')
+          if re.fullmatch(r'[a-f0-9]{32}',account):
+              prefix='accounts/'+account+'/'
+              check(prefix+'d1/database?per_page=100&page=1','d1_inventory')
+              check(prefix+'r2/buckets','r2_inventory')
+              settings=check(prefix+'workers/scripts/criminal-infiltration-curator/settings','existing_worker_settings')
+              if isinstance(settings,dict):
+                  report['worker_binding_types']=sorted(set(b.get('type','unknown') for b in settings.get('bindings',[])))
+              check(prefix+'workers/scripts/criminal-infiltration-curator/schedules','existing_worker_schedules')
+              check(prefix+'ai/models/search?per_page=1','workers_ai_catalogue_read')
+          else: report['checks'].append({'service':'account_scope','status':'unresolved'})
+          print(json.dumps(report,indent=2))
+          with open(os.environ['GITHUB_STEP_SUMMARY'],'a') as f: f.write('Read-only dependency report; no migration, model request, credential change or activation.\n\n```json\n'+json.dumps(report,indent=2)+'\n```\n')
+          PY
+      - name: Package tracked public source only
+        run: git archive HEAD -o "$RUNNER_TEMP/enrichment-source.tar"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: enrichment-diagnostic-source
+          path: ${{ runner.temp }}/enrichment-source.tar
+          retention-days: 1
