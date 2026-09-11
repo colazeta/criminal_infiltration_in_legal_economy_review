@@ -1,5 +1,5 @@
 {
-  "profile_version": "0.3.0",
+  "profile_version": "0.4.0",
   "governed_roots": ["data/registry", "data/curation"],
   "header_policy": "Every CSV header must be an explicit semantic field or match an approved field family. New files or genuinely new field concepts require an ontology change first.",
   "field_families": [

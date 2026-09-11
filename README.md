@@ -156,3 +156,13 @@ decisions are retained in `data/legacy/pre-oa-reset-2026-09-08/` and the preserv
 Git branch. Old issue/ledger data do not populate the active cycle. Private D1
 V2 activation remains separate. See `docs/operations/archive-reset.md` for the
 exact scope, first scheduled date and rollback procedure.
+
+## Candidate-bound paper enrichment
+
+[Operational contract](docs/operations/paper-enrichment.md) ·
+[Scientific extraction guide](docs/methodology/paper-extraction.md) ·
+[Closed proposal schema](schema/paper-enrichment.schema.json).
+The private enrichment module is independent of daily discovery. It stores
+abstract/source provenance, citation coverage and source-grounded extraction
+proposals. Scientific automation remains blocked pending real-paper calibration.
+A deployed schema is not proof that the scheduler or a model is active.

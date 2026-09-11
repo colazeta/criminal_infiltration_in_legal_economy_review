@@ -1,0 +1,47 @@
+{
+  "version": "1.0.0",
+  "protocol_version": "CILE-ENRICH-1",
+  "status": "owner-authorised operational codebook; calibration pending",
+  "categories": [
+    {
+      "code": "aetiology",
+      "label": "Eziologia",
+      "question": "Why and through which conditions or mechanisms does criminal participation in the legal economy develop?"
+    },
+    {
+      "code": "diagnosis",
+      "label": "Diagnosi",
+      "question": "Which observed characteristics describe or recognise criminal presence or influence?"
+    },
+    {
+      "code": "screening",
+      "label": "Screening",
+      "question": "How can a procedure identify potential cases not yet recognised?"
+    },
+    {
+      "code": "therapy",
+      "label": "Terapia",
+      "question": "How can criminal relationships be disrupted and affected economic activities recovered?"
+    },
+    {
+      "code": "prognosis",
+      "label": "Prognosi",
+      "question": "What subsequent development, recoverability or recurrence can be expected after identification?"
+    },
+    {
+      "code": "prevention",
+      "label": "Prevenzione",
+      "question": "How can vulnerability to criminal entry be reduced?"
+    }
+  ],
+  "rules": [
+    "Code the main substantive contribution, not isolated vocabulary or generic policy implications.",
+    "One primary category; secondary categories require separate substantive evidence.",
+    "Prediction alone does not establish prognosis.",
+    "Review selection screening is different from screening as a scientific contribution.",
+    "Use insufficient_evidence when available sources do not support classification; outside_framework is different.",
+    "All machine outputs remain proposals; no eligibility, inclusion, publication or curator coding is overwritten.",
+    "Do not infer numerical confidence without empirical calibration."
+  ],
+  "source_basis": "Owner discussion of 11 September 2026; operational adaptation of the Cincimino framework, not a verbatim reproduction."
+}

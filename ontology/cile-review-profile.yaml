@@ -1,7 +1,7 @@
 {
   "id": "https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/vocab/cile-review.ttl",
   "name": "cile-review-profile",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "title": "CILE Review Ontology Profile",
   "description": "Application ontology for the Criminal Infiltration in the Legal Economy living systematic review. It profiles SLR Ontology, PROV-O, FaBiO/BIBO, Web Annotation, SKOS and RIPE-O while defining only the domain and governance concepts that are specific to this review.",
   "prefixes": {
@@ -985,11 +985,11 @@
     },
     "oa_verification_method": {
       "slot_uri": "cile:verificationMethod",
-      "description": "Verifica attestata dell’accesso anonimo al testo integrale, oppure osservazione senza ammissione."
+      "description": "Verifica attestata dell\u2019accesso anonimo al testo integrale, oppure osservazione senza ammissione."
     },
     "oa_verified_at": {
       "slot_uri": "cile:verifiedAt",
-      "description": "Data e ora della verifica: accessibilità osservata, non garanzia perpetua."
+      "description": "Data e ora della verifica: accessibilit\u00e0 osservata, non garanzia perpetua."
     },
     "oa_full_text_sha256": {
       "slot_uri": "cile:contentSha256",
@@ -998,6 +998,701 @@
     "oa_access_assessment_id": {
       "slot_uri": "cile:accessAssessmentId",
       "description": "Verifica OA esatta vincolata alla proposta scientifica."
+    },
+    "enrichment_target_id": {
+      "range": "string",
+      "slot_uri": "cile:targetId",
+      "description": "Enrichment target id; governed by CILE-ENRICH-1."
+    },
+    "enrichment_cycle_id": {
+      "range": "string",
+      "slot_uri": "cile:cycleId",
+      "description": "Enrichment cycle id; governed by CILE-ENRICH-1."
+    },
+    "enrichment_record_namespace": {
+      "range": "string",
+      "slot_uri": "cile:recordNamespace",
+      "description": "Enrichment record namespace; governed by CILE-ENRICH-1."
+    },
+    "enrichment_record_id": {
+      "range": "string",
+      "slot_uri": "cile:recordId",
+      "description": "Enrichment record id; governed by CILE-ENRICH-1."
+    },
+    "enrichment_input_sha256": {
+      "range": "string",
+      "slot_uri": "cile:inputSha256",
+      "description": "Enrichment input sha256; governed by CILE-ENRICH-1."
+    },
+    "enrichment_record_json": {
+      "range": "string",
+      "slot_uri": "cile:recordJson",
+      "description": "Enrichment record json; governed by CILE-ENRICH-1."
+    },
+    "enrichment_active": {
+      "range": "integer",
+      "slot_uri": "cile:active",
+      "description": "Enrichment active; governed by CILE-ENRICH-1."
+    },
+    "enrichment_first_seen_at": {
+      "range": "string",
+      "slot_uri": "cile:firstSeenAt",
+      "description": "Enrichment first seen at; governed by CILE-ENRICH-1."
+    },
+    "enrichment_updated_at": {
+      "range": "string",
+      "slot_uri": "cile:updatedAt",
+      "description": "Enrichment updated at; governed by CILE-ENRICH-1."
+    },
+    "enrichment_input_id": {
+      "range": "string",
+      "slot_uri": "cile:inputId",
+      "description": "Enrichment input id; governed by CILE-ENRICH-1."
+    },
+    "enrichment_observed_at": {
+      "range": "string",
+      "slot_uri": "cile:observedAt",
+      "description": "Enrichment observed at; governed by CILE-ENRICH-1."
+    },
+    "enrichment_job_id": {
+      "range": "string",
+      "slot_uri": "cile:jobId",
+      "description": "Enrichment job id; governed by CILE-ENRICH-1."
+    },
+    "enrichment_kind": {
+      "range": "string",
+      "slot_uri": "cile:kind",
+      "description": "Enrichment kind; governed by CILE-ENRICH-1."
+    },
+    "enrichment_protocol_version": {
+      "range": "string",
+      "slot_uri": "cile:protocolVersion",
+      "description": "Enrichment protocol version; governed by CILE-ENRICH-1."
+    },
+    "enrichment_status": {
+      "range": "string",
+      "slot_uri": "cile:status",
+      "description": "Enrichment status; governed by CILE-ENRICH-1."
+    },
+    "enrichment_failure_streak": {
+      "range": "integer",
+      "slot_uri": "cile:failureStreak",
+      "description": "Enrichment failure streak; governed by CILE-ENRICH-1."
+    },
+    "enrichment_attempts_total": {
+      "range": "integer",
+      "slot_uri": "cile:attemptsTotal",
+      "description": "Enrichment attempts total; governed by CILE-ENRICH-1."
+    },
+    "enrichment_due_at": {
+      "range": "string",
+      "slot_uri": "cile:dueAt",
+      "description": "Enrichment due at; governed by CILE-ENRICH-1."
+    },
+    "enrichment_lease_until": {
+      "range": "string",
+      "slot_uri": "cile:leaseUntil",
+      "description": "Enrichment lease until; governed by CILE-ENRICH-1."
+    },
+    "enrichment_lease_token": {
+      "range": "string",
+      "slot_uri": "cile:leaseToken",
+      "description": "Enrichment lease token; governed by CILE-ENRICH-1."
+    },
+    "enrichment_checkpoint_json": {
+      "range": "string",
+      "slot_uri": "cile:checkpointJson",
+      "description": "Enrichment checkpoint json; governed by CILE-ENRICH-1."
+    },
+    "enrichment_error_code": {
+      "range": "string",
+      "slot_uri": "cile:errorCode",
+      "description": "Enrichment error code; governed by CILE-ENRICH-1."
+    },
+    "enrichment_run_id": {
+      "range": "string",
+      "slot_uri": "cile:runId",
+      "description": "Enrichment run id; governed by CILE-ENRICH-1."
+    },
+    "enrichment_scheduled_slot": {
+      "range": "string",
+      "slot_uri": "cile:scheduledSlot",
+      "description": "Enrichment scheduled slot; governed by CILE-ENRICH-1."
+    },
+    "enrichment_started_at": {
+      "range": "string",
+      "slot_uri": "cile:startedAt",
+      "description": "Enrichment started at; governed by CILE-ENRICH-1."
+    },
+    "enrichment_finished_at": {
+      "range": "string",
+      "slot_uri": "cile:finishedAt",
+      "description": "Enrichment finished at; governed by CILE-ENRICH-1."
+    },
+    "enrichment_selected_job_id": {
+      "range": "string",
+      "slot_uri": "cile:selectedJobId",
+      "description": "Enrichment selected job id; governed by CILE-ENRICH-1."
+    },
+    "enrichment_attempt_id": {
+      "range": "string",
+      "slot_uri": "cile:attemptId",
+      "description": "Enrichment attempt id; governed by CILE-ENRICH-1."
+    },
+    "enrichment_outcome": {
+      "range": "string",
+      "slot_uri": "cile:outcome",
+      "description": "Enrichment outcome; governed by CILE-ENRICH-1."
+    },
+    "enrichment_source_id": {
+      "range": "string",
+      "slot_uri": "cile:sourceId",
+      "description": "Enrichment source id; governed by CILE-ENRICH-1."
+    },
+    "enrichment_provider": {
+      "range": "string",
+      "slot_uri": "cile:provider",
+      "description": "Enrichment provider; governed by CILE-ENRICH-1."
+    },
+    "enrichment_source_url": {
+      "range": "string",
+      "slot_uri": "cile:sourceUrl",
+      "description": "Enrichment source url; governed by CILE-ENRICH-1."
+    },
+    "enrichment_evidence_kind": {
+      "range": "string",
+      "slot_uri": "cile:evidenceKind",
+      "description": "Enrichment evidence kind; governed by CILE-ENRICH-1."
+    },
+    "enrichment_content_sha256": {
+      "range": "string",
+      "slot_uri": "cile:contentSha256",
+      "description": "Enrichment content sha256; governed by CILE-ENRICH-1."
+    },
+    "enrichment_storage_key": {
+      "range": "string",
+      "slot_uri": "cile:storageKey",
+      "description": "Enrichment storage key; governed by CILE-ENRICH-1."
+    },
+    "enrichment_version_label": {
+      "range": "string",
+      "slot_uri": "cile:versionLabel",
+      "description": "Enrichment version label; governed by CILE-ENRICH-1."
+    },
+    "enrichment_language": {
+      "range": "string",
+      "slot_uri": "cile:language",
+      "description": "Enrichment language; governed by CILE-ENRICH-1."
+    },
+    "enrichment_retention_basis": {
+      "range": "string",
+      "slot_uri": "cile:retentionBasis",
+      "description": "Enrichment retention basis; governed by CILE-ENRICH-1."
+    },
+    "enrichment_licence_status": {
+      "range": "string",
+      "slot_uri": "cile:licenceStatus",
+      "description": "Enrichment licence status; governed by CILE-ENRICH-1."
+    },
+    "enrichment_observation_id": {
+      "range": "string",
+      "slot_uri": "cile:observationId",
+      "description": "Enrichment observation id; governed by CILE-ENRICH-1."
+    },
+    "enrichment_direction": {
+      "range": "string",
+      "slot_uri": "cile:direction",
+      "description": "Enrichment direction; governed by CILE-ENRICH-1."
+    },
+    "enrichment_citing_identifier": {
+      "range": "string",
+      "slot_uri": "cile:citingIdentifier",
+      "description": "Enrichment citing identifier; governed by CILE-ENRICH-1."
+    },
+    "enrichment_cited_identifier": {
+      "range": "string",
+      "slot_uri": "cile:citedIdentifier",
+      "description": "Enrichment cited identifier; governed by CILE-ENRICH-1."
+    },
+    "enrichment_snapshot_id": {
+      "range": "string",
+      "slot_uri": "cile:snapshotId",
+      "description": "Enrichment snapshot id; governed by CILE-ENRICH-1."
+    },
+    "enrichment_coverage_id": {
+      "range": "string",
+      "slot_uri": "cile:coverageId",
+      "description": "Enrichment coverage id; governed by CILE-ENRICH-1."
+    },
+    "enrichment_returned_count": {
+      "range": "integer",
+      "slot_uri": "cile:returnedCount",
+      "description": "Enrichment returned count; governed by CILE-ENRICH-1."
+    },
+    "enrichment_provider_count": {
+      "range": "integer",
+      "slot_uri": "cile:providerCount",
+      "description": "Enrichment provider count; governed by CILE-ENRICH-1."
+    },
+    "enrichment_next_cursor": {
+      "range": "string",
+      "slot_uri": "cile:nextCursor",
+      "description": "Enrichment next cursor; governed by CILE-ENRICH-1."
+    },
+    "enrichment_proposal_id": {
+      "range": "string",
+      "slot_uri": "cile:proposalId",
+      "description": "Enrichment proposal id; governed by CILE-ENRICH-1."
+    },
+    "enrichment_codebook_version": {
+      "range": "string",
+      "slot_uri": "cile:codebookVersion",
+      "description": "Enrichment codebook version; governed by CILE-ENRICH-1."
+    },
+    "enrichment_payload_sha256": {
+      "range": "string",
+      "slot_uri": "cile:payloadSha256",
+      "description": "Enrichment payload sha256; governed by CILE-ENRICH-1."
+    },
+    "enrichment_payload_json": {
+      "range": "string",
+      "slot_uri": "cile:payloadJson",
+      "description": "Enrichment payload json; governed by CILE-ENRICH-1."
+    },
+    "enrichment_generated_by": {
+      "range": "string",
+      "slot_uri": "cile:generatedBy",
+      "description": "Enrichment generated by; governed by CILE-ENRICH-1."
+    },
+    "enrichment_created_at": {
+      "range": "string",
+      "slot_uri": "cile:createdAt",
+      "description": "Enrichment created at; governed by CILE-ENRICH-1."
+    },
+    "enrichment_study_id": {
+      "range": "string",
+      "slot_uri": "cile:studyId",
+      "description": "Enrichment study id; governed by CILE-ENRICH-1."
+    },
+    "enrichment_dataset_id": {
+      "range": "string",
+      "slot_uri": "cile:datasetId",
+      "description": "Enrichment dataset id; governed by CILE-ENRICH-1."
+    },
+    "enrichment_analysis_id": {
+      "range": "string",
+      "slot_uri": "cile:analysisId",
+      "description": "Enrichment analysis id; governed by CILE-ENRICH-1."
+    },
+    "enrichment_variable_use_id": {
+      "range": "string",
+      "slot_uri": "cile:variableUseId",
+      "description": "Enrichment variable use id; governed by CILE-ENRICH-1."
+    },
+    "enrichment_finding_id": {
+      "range": "string",
+      "slot_uri": "cile:findingId",
+      "description": "Enrichment finding id; governed by CILE-ENRICH-1."
+    },
+    "enrichment_primary_category": {
+      "range": "string",
+      "slot_uri": "cile:primaryCategory",
+      "description": "Enrichment primary category; governed by CILE-ENRICH-1."
+    },
+    "enrichment_classification_status": {
+      "range": "string",
+      "slot_uri": "cile:classificationStatus",
+      "description": "Enrichment classification status; governed by CILE-ENRICH-1."
+    },
+    "extraction_schema_version": {
+      "slot_uri": "cile:extractionSchemaVersion",
+      "range": "string",
+      "description": "Private scientific extraction field schema_version; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_protocol_version": {
+      "slot_uri": "cile:extractionProtocolVersion",
+      "range": "string",
+      "description": "Private scientific extraction field protocol_version; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_codebook_version": {
+      "slot_uri": "cile:extractionCodebookVersion",
+      "range": "string",
+      "description": "Private scientific extraction field codebook_version; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_target_id": {
+      "slot_uri": "cile:extractionTargetId",
+      "range": "string",
+      "description": "Private scientific extraction field target_id; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_input_sha256": {
+      "slot_uri": "cile:extractionInputSha256",
+      "range": "string",
+      "description": "Private scientific extraction field input_sha256; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_generated_by": {
+      "slot_uri": "cile:extractionGeneratedBy",
+      "range": "string",
+      "description": "Private scientific extraction field generated_by; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_agent": {
+      "slot_uri": "cile:extractionAgent",
+      "range": "string",
+      "description": "Private scientific extraction field agent; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_model": {
+      "slot_uri": "cile:extractionModel",
+      "range": "string",
+      "description": "Private scientific extraction field model; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_prompt_sha256": {
+      "slot_uri": "cile:extractionPromptSha256",
+      "range": "string",
+      "description": "Private scientific extraction field prompt_sha256; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_source_ids": {
+      "slot_uri": "cile:extractionSourceIds",
+      "range": "string",
+      "description": "Private scientific extraction field source_ids; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_source_coverage": {
+      "slot_uri": "cile:extractionSourceCoverage",
+      "range": "string",
+      "description": "Private scientific extraction field source_coverage; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_spans": {
+      "slot_uri": "cile:extractionSpans",
+      "range": "string",
+      "description": "Private scientific extraction field spans; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_id": {
+      "slot_uri": "cile:extractionId",
+      "range": "string",
+      "description": "Private scientific extraction field id; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_source_id": {
+      "slot_uri": "cile:extractionSourceId",
+      "range": "string",
+      "description": "Private scientific extraction field source_id; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_start_offset": {
+      "slot_uri": "cile:extractionStartOffset",
+      "range": "string",
+      "description": "Private scientific extraction field start_offset; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_end_offset": {
+      "slot_uri": "cile:extractionEndOffset",
+      "range": "string",
+      "description": "Private scientific extraction field end_offset; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_locator": {
+      "slot_uri": "cile:extractionLocator",
+      "range": "string",
+      "description": "Private scientific extraction field locator; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_summary": {
+      "slot_uri": "cile:extractionSummary",
+      "range": "string",
+      "description": "Private scientific extraction field summary; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_contribution": {
+      "slot_uri": "cile:extractionContribution",
+      "range": "string",
+      "description": "Private scientific extraction field contribution; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_research_question": {
+      "slot_uri": "cile:extractionResearchQuestion",
+      "range": "string",
+      "description": "Private scientific extraction field research_question; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_infiltration_definition": {
+      "slot_uri": "cile:extractionInfiltrationDefinition",
+      "range": "string",
+      "description": "Private scientific extraction field infiltration_definition; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_infiltration_operationalisation": {
+      "slot_uri": "cile:extractionInfiltrationOperationalisation",
+      "range": "string",
+      "description": "Private scientific extraction field infiltration_operationalisation; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_authors_limitations": {
+      "slot_uri": "cile:extractionAuthorsLimitations",
+      "range": "string",
+      "description": "Private scientific extraction field authors_limitations; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_analyst_limitations": {
+      "slot_uri": "cile:extractionAnalystLimitations",
+      "range": "string",
+      "description": "Private scientific extraction field analyst_limitations; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_studies": {
+      "slot_uri": "cile:extractionStudies",
+      "range": "string",
+      "description": "Private scientific extraction field studies; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_datasets": {
+      "slot_uri": "cile:extractionDatasets",
+      "range": "string",
+      "description": "Private scientific extraction field datasets; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_analyses": {
+      "slot_uri": "cile:extractionAnalyses",
+      "range": "string",
+      "description": "Private scientific extraction field analyses; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_variable_uses": {
+      "slot_uri": "cile:extractionVariableUses",
+      "range": "string",
+      "description": "Private scientific extraction field variable_uses; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_findings": {
+      "slot_uri": "cile:extractionFindings",
+      "range": "string",
+      "description": "Private scientific extraction field findings; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_framework": {
+      "slot_uri": "cile:extractionFramework",
+      "range": "string",
+      "description": "Private scientific extraction field framework; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_status": {
+      "slot_uri": "cile:extractionStatus",
+      "range": "string",
+      "description": "Private scientific extraction field status; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_value": {
+      "slot_uri": "cile:extractionValue",
+      "range": "string",
+      "description": "Private scientific extraction field value; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_evidence_span_ids": {
+      "slot_uri": "cile:extractionEvidenceSpanIds",
+      "range": "string",
+      "description": "Private scientific extraction field evidence_span_ids; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_origin": {
+      "slot_uri": "cile:extractionOrigin",
+      "range": "string",
+      "description": "Private scientific extraction field origin; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_study_type": {
+      "slot_uri": "cile:extractionStudyType",
+      "range": "string",
+      "description": "Private scientific extraction field study_type; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_population": {
+      "slot_uri": "cile:extractionPopulation",
+      "range": "string",
+      "description": "Private scientific extraction field population; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_sampling": {
+      "slot_uri": "cile:extractionSampling",
+      "range": "string",
+      "description": "Private scientific extraction field sampling; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_sample_size": {
+      "slot_uri": "cile:extractionSampleSize",
+      "range": "string",
+      "description": "Private scientific extraction field sample_size; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_observation_unit": {
+      "slot_uri": "cile:extractionObservationUnit",
+      "range": "string",
+      "description": "Private scientific extraction field observation_unit; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_analysis_unit": {
+      "slot_uri": "cile:extractionAnalysisUnit",
+      "range": "string",
+      "description": "Private scientific extraction field analysis_unit; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_geography": {
+      "slot_uri": "cile:extractionGeography",
+      "range": "string",
+      "description": "Private scientific extraction field geography; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_period": {
+      "slot_uri": "cile:extractionPeriod",
+      "range": "string",
+      "description": "Private scientific extraction field period; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_study_id": {
+      "slot_uri": "cile:extractionStudyId",
+      "range": "string",
+      "description": "Private scientific extraction field study_id; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_name": {
+      "slot_uri": "cile:extractionName",
+      "range": "string",
+      "description": "Private scientific extraction field name; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_provider": {
+      "slot_uri": "cile:extractionProvider",
+      "range": "string",
+      "description": "Private scientific extraction field provider; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_accessibility": {
+      "slot_uri": "cile:extractionAccessibility",
+      "range": "string",
+      "description": "Private scientific extraction field accessibility; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_selection": {
+      "slot_uri": "cile:extractionSelection",
+      "range": "string",
+      "description": "Private scientific extraction field selection; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_coverage": {
+      "slot_uri": "cile:extractionCoverage",
+      "range": "string",
+      "description": "Private scientific extraction field coverage; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_limitations": {
+      "slot_uri": "cile:extractionLimitations",
+      "range": "string",
+      "description": "Private scientific extraction field limitations; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_dataset_ids": {
+      "slot_uri": "cile:extractionDatasetIds",
+      "range": "string",
+      "description": "Private scientific extraction field dataset_ids; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_design": {
+      "slot_uri": "cile:extractionDesign",
+      "range": "string",
+      "description": "Private scientific extraction field design; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_method": {
+      "slot_uri": "cile:extractionMethod",
+      "range": "string",
+      "description": "Private scientific extraction field method; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_comparison": {
+      "slot_uri": "cile:extractionComparison",
+      "range": "string",
+      "description": "Private scientific extraction field comparison; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_identification": {
+      "slot_uri": "cile:extractionIdentification",
+      "range": "string",
+      "description": "Private scientific extraction field identification; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_validation": {
+      "slot_uri": "cile:extractionValidation",
+      "range": "string",
+      "description": "Private scientific extraction field validation; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_robustness": {
+      "slot_uri": "cile:extractionRobustness",
+      "range": "string",
+      "description": "Private scientific extraction field robustness; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_analysis_id": {
+      "slot_uri": "cile:extractionAnalysisId",
+      "range": "string",
+      "description": "Private scientific extraction field analysis_id; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_original_name": {
+      "slot_uri": "cile:extractionOriginalName",
+      "range": "string",
+      "description": "Private scientific extraction field original_name; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_concept": {
+      "slot_uri": "cile:extractionConcept",
+      "range": "string",
+      "description": "Private scientific extraction field concept; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_operationalisation": {
+      "slot_uri": "cile:extractionOperationalisation",
+      "range": "string",
+      "description": "Private scientific extraction field operationalisation; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_unit": {
+      "slot_uri": "cile:extractionUnit",
+      "range": "string",
+      "description": "Private scientific extraction field unit; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_transformation": {
+      "slot_uri": "cile:extractionTransformation",
+      "range": "string",
+      "description": "Private scientific extraction field transformation; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_role": {
+      "slot_uri": "cile:extractionRole",
+      "range": "string",
+      "description": "Private scientific extraction field role; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_variable_use_ids": {
+      "slot_uri": "cile:extractionVariableUseIds",
+      "range": "string",
+      "description": "Private scientific extraction field variable_use_ids; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_statement": {
+      "slot_uri": "cile:extractionStatement",
+      "range": "string",
+      "description": "Private scientific extraction field statement; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_finding_type": {
+      "slot_uri": "cile:extractionFindingType",
+      "range": "string",
+      "description": "Private scientific extraction field finding_type; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_direction": {
+      "slot_uri": "cile:extractionDirection",
+      "range": "string",
+      "description": "Private scientific extraction field direction; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_estimate": {
+      "slot_uri": "cile:extractionEstimate",
+      "range": "string",
+      "description": "Private scientific extraction field estimate; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_uncertainty": {
+      "slot_uri": "cile:extractionUncertainty",
+      "range": "string",
+      "description": "Private scientific extraction field uncertainty; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_reference_comparison": {
+      "slot_uri": "cile:extractionReferenceComparison",
+      "range": "string",
+      "description": "Private scientific extraction field reference_comparison; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_population_scope": {
+      "slot_uri": "cile:extractionPopulationScope",
+      "range": "string",
+      "description": "Private scientific extraction field population_scope; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_temporal_scope": {
+      "slot_uri": "cile:extractionTemporalScope",
+      "range": "string",
+      "description": "Private scientific extraction field temporal_scope; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_caveat": {
+      "slot_uri": "cile:extractionCaveat",
+      "range": "string",
+      "description": "Private scientific extraction field caveat; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_primary": {
+      "slot_uri": "cile:extractionPrimary",
+      "range": "string",
+      "description": "Private scientific extraction field primary; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_rationale": {
+      "slot_uri": "cile:extractionRationale",
+      "range": "string",
+      "description": "Private scientific extraction field rationale; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_secondary": {
+      "slot_uri": "cile:extractionSecondary",
+      "range": "string",
+      "description": "Private scientific extraction field secondary; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_category": {
+      "slot_uri": "cile:extractionCategory",
+      "range": "string",
+      "description": "Private scientific extraction field category; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
+    },
+    "extraction_alternative": {
+      "slot_uri": "cile:extractionAlternative",
+      "range": "string",
+      "description": "Private scientific extraction field alternative; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion."
     }
   },
   "enums": {
@@ -1146,6 +1841,28 @@
         "restricted": {},
         "unknown": {},
         "revoked": {}
+      }
+    },
+    "ClinicalContributionEnum": {
+      "permissible_values": {
+        "aetiology": {
+          "meaning": "cile:aetiology"
+        },
+        "diagnosis": {
+          "meaning": "cile:diagnosis"
+        },
+        "screening": {
+          "meaning": "cile:screening"
+        },
+        "therapy": {
+          "meaning": "cile:therapy"
+        },
+        "prognosis": {
+          "meaning": "cile:prognosis"
+        },
+        "prevention": {
+          "meaning": "cile:prevention"
+        }
       }
     }
   },
@@ -1508,6 +2225,292 @@
       "is_a": "Entity",
       "class_uri": "cile:LegacySnapshot",
       "description": "Byte-hashed preservation manifest, external-state completeness and restore receipt."
+    },
+    "EnrichmentTarget": {
+      "class_uri": "cile:EnrichmentTarget",
+      "description": "Provisional registered-record target; not canonical bibliographic identity.",
+      "slots": [
+        "enrichment_target_id",
+        "enrichment_cycle_id",
+        "enrichment_record_namespace",
+        "enrichment_record_id",
+        "enrichment_input_sha256",
+        "enrichment_record_json",
+        "enrichment_active",
+        "enrichment_first_seen_at",
+        "enrichment_updated_at"
+      ]
+    },
+    "EnrichmentInputSnapshot": {
+      "class_uri": "cile:EnrichmentInputSnapshot",
+      "description": "Immutable bibliographic input snapshot from an existing registry.",
+      "slots": [
+        "enrichment_input_id",
+        "enrichment_target_id",
+        "enrichment_input_sha256",
+        "enrichment_record_json",
+        "enrichment_observed_at"
+      ]
+    },
+    "EnrichmentJob": {
+      "class_uri": "cile:EnrichmentJob",
+      "description": "Recoverable, leased work item independent of daily discovery.",
+      "slots": [
+        "enrichment_job_id",
+        "enrichment_target_id",
+        "enrichment_input_sha256",
+        "enrichment_kind",
+        "enrichment_protocol_version",
+        "enrichment_status",
+        "enrichment_failure_streak",
+        "enrichment_attempts_total",
+        "enrichment_due_at",
+        "enrichment_lease_until",
+        "enrichment_lease_token",
+        "enrichment_checkpoint_json",
+        "enrichment_error_code",
+        "enrichment_updated_at"
+      ]
+    },
+    "EnrichmentRun": {
+      "class_uri": "cile:EnrichmentRun",
+      "description": "Observed scheduler invocation; no scientific completeness claim.",
+      "slots": [
+        "enrichment_run_id",
+        "enrichment_cycle_id",
+        "enrichment_scheduled_slot",
+        "enrichment_started_at",
+        "enrichment_finished_at",
+        "enrichment_lease_until",
+        "enrichment_status",
+        "enrichment_selected_job_id",
+        "enrichment_error_code"
+      ]
+    },
+    "EnrichmentAttempt": {
+      "class_uri": "cile:EnrichmentAttempt",
+      "description": "Immutable outcome of an actual enrichment attempt.",
+      "slots": [
+        "enrichment_attempt_id",
+        "enrichment_job_id",
+        "enrichment_run_id",
+        "enrichment_started_at",
+        "enrichment_finished_at",
+        "enrichment_outcome",
+        "enrichment_error_code"
+      ]
+    },
+    "EnrichmentSource": {
+      "class_uri": "cile:EnrichmentSource",
+      "description": "Private source snapshot for an existing record, with content hash and retention basis.",
+      "slots": [
+        "enrichment_source_id",
+        "enrichment_target_id",
+        "enrichment_input_sha256",
+        "enrichment_provider",
+        "enrichment_source_url",
+        "enrichment_evidence_kind",
+        "enrichment_content_sha256",
+        "enrichment_storage_key",
+        "enrichment_version_label",
+        "enrichment_language",
+        "enrichment_retention_basis",
+        "enrichment_licence_status",
+        "enrichment_observed_at"
+      ]
+    },
+    "CitationObservation": {
+      "class_uri": "cile:CitationObservation",
+      "description": "Provider-attested directed citation between external identifiers, not canonical Work identity.",
+      "slots": [
+        "enrichment_observation_id",
+        "enrichment_target_id",
+        "enrichment_input_sha256",
+        "enrichment_provider",
+        "enrichment_direction",
+        "enrichment_citing_identifier",
+        "enrichment_cited_identifier",
+        "enrichment_snapshot_id",
+        "enrichment_source_url",
+        "enrichment_observed_at"
+      ]
+    },
+    "CitationCoverage": {
+      "class_uri": "cile:CitationCoverage",
+      "description": "Provider-specific page/checkpoint coverage; not global completeness.",
+      "slots": [
+        "enrichment_coverage_id",
+        "enrichment_target_id",
+        "enrichment_input_sha256",
+        "enrichment_provider",
+        "enrichment_direction",
+        "enrichment_snapshot_id",
+        "enrichment_source_url",
+        "enrichment_returned_count",
+        "enrichment_provider_count",
+        "enrichment_next_cursor",
+        "enrichment_status",
+        "enrichment_observed_at"
+      ]
+    },
+    "ScientificExtractionProposal": {
+      "class_uri": "cile:ScientificExtractionProposal",
+      "description": "Private evidence-grounded extraction; never an approved scientific decision.",
+      "slots": [
+        "enrichment_proposal_id",
+        "enrichment_target_id",
+        "enrichment_input_sha256",
+        "enrichment_protocol_version",
+        "enrichment_codebook_version",
+        "enrichment_payload_sha256",
+        "enrichment_payload_json",
+        "enrichment_generated_by",
+        "enrichment_created_at"
+      ]
+    },
+    "ReportedStudy": {
+      "class_uri": "cile:ReportedStudy",
+      "description": "Study reported inside a publication; not the bibliographic Work.",
+      "slots": [
+        "enrichment_proposal_id",
+        "enrichment_study_id",
+        "enrichment_payload_json"
+      ]
+    },
+    "StudyDatasetUse": {
+      "class_uri": "cile:StudyDatasetUse",
+      "description": "Dataset and selection used by a reported study.",
+      "slots": [
+        "enrichment_proposal_id",
+        "enrichment_study_id",
+        "enrichment_dataset_id",
+        "enrichment_payload_json"
+      ]
+    },
+    "ReportedAnalysis": {
+      "class_uri": "cile:ReportedAnalysis",
+      "description": "Analysis within a reported study.",
+      "slots": [
+        "enrichment_proposal_id",
+        "enrichment_study_id",
+        "enrichment_analysis_id",
+        "enrichment_payload_json"
+      ]
+    },
+    "AnalysisVariableUse": {
+      "class_uri": "cile:AnalysisVariableUse",
+      "description": "Operationalised variable and role in one particular analysis.",
+      "slots": [
+        "enrichment_proposal_id",
+        "enrichment_analysis_id",
+        "enrichment_variable_use_id",
+        "enrichment_payload_json"
+      ]
+    },
+    "ReportedFinding": {
+      "class_uri": "cile:ReportedFinding",
+      "description": "Individual result grounded in an analysis and source evidence.",
+      "slots": [
+        "enrichment_proposal_id",
+        "enrichment_analysis_id",
+        "enrichment_finding_id",
+        "enrichment_payload_json"
+      ]
+    },
+    "ClinicalContributionProposal": {
+      "class_uri": "cile:ClinicalContributionProposal",
+      "description": "Proposed role in the six-category medical framework, separate from review screening.",
+      "slots": [
+        "enrichment_proposal_id",
+        "enrichment_primary_category",
+        "enrichment_classification_status",
+        "enrichment_payload_json"
+      ]
+    },
+    "ScientificExtractionEnvelope": {
+      "is_a": "Entity",
+      "class_uri": "cile:ScientificExtractionEnvelope",
+      "description": "Private, immutable proposed extraction, with schema-scoped analyses and source-backed observations. Never scientific approval.",
+      "slots": [
+        "extraction_accessibility",
+        "extraction_agent",
+        "extraction_alternative",
+        "extraction_analyses",
+        "extraction_analysis_id",
+        "extraction_analysis_unit",
+        "extraction_analyst_limitations",
+        "extraction_authors_limitations",
+        "extraction_category",
+        "extraction_caveat",
+        "extraction_codebook_version",
+        "extraction_comparison",
+        "extraction_concept",
+        "extraction_contribution",
+        "extraction_coverage",
+        "extraction_dataset_ids",
+        "extraction_datasets",
+        "extraction_design",
+        "extraction_direction",
+        "extraction_end_offset",
+        "extraction_estimate",
+        "extraction_evidence_span_ids",
+        "extraction_finding_type",
+        "extraction_findings",
+        "extraction_framework",
+        "extraction_generated_by",
+        "extraction_geography",
+        "extraction_id",
+        "extraction_identification",
+        "extraction_infiltration_definition",
+        "extraction_infiltration_operationalisation",
+        "extraction_input_sha256",
+        "extraction_limitations",
+        "extraction_locator",
+        "extraction_method",
+        "extraction_model",
+        "extraction_name",
+        "extraction_observation_unit",
+        "extraction_operationalisation",
+        "extraction_origin",
+        "extraction_original_name",
+        "extraction_period",
+        "extraction_population",
+        "extraction_population_scope",
+        "extraction_primary",
+        "extraction_prompt_sha256",
+        "extraction_protocol_version",
+        "extraction_provider",
+        "extraction_rationale",
+        "extraction_reference_comparison",
+        "extraction_research_question",
+        "extraction_robustness",
+        "extraction_role",
+        "extraction_sample_size",
+        "extraction_sampling",
+        "extraction_schema_version",
+        "extraction_secondary",
+        "extraction_selection",
+        "extraction_source_coverage",
+        "extraction_source_id",
+        "extraction_source_ids",
+        "extraction_spans",
+        "extraction_start_offset",
+        "extraction_statement",
+        "extraction_status",
+        "extraction_studies",
+        "extraction_study_id",
+        "extraction_study_type",
+        "extraction_summary",
+        "extraction_target_id",
+        "extraction_temporal_scope",
+        "extraction_transformation",
+        "extraction_uncertainty",
+        "extraction_unit",
+        "extraction_validation",
+        "extraction_value",
+        "extraction_variable_use_ids",
+        "extraction_variable_uses"
+      ]
     }
   },
   "see_also": [

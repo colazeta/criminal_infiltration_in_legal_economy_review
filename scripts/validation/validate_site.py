@@ -105,6 +105,7 @@ def validate_pages() -> None:
         "method.html": "it",
         "model.html": "it",
         "review-v2.html": "it",
+        "enrichment.html": "it",
     }
     if {path.name for path in pages} != set(expected_languages):
         fail("Unexpected HTML page outside the governed site route inventory")

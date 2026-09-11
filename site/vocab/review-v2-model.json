@@ -1,5 +1,5 @@
 {
-  "version": "0.3.0",
+  "version": "0.4.0",
   "entities": [
     {
       "table": "reviews",
@@ -2548,6 +2548,983 @@
         "review_id → review_candidates.review_id",
         "candidate_id → review_candidates.candidate_id",
         "supersedes_id → access_assessments_v2.assessment_id"
+      ]
+    },
+    {
+      "table": "enrichment_targets",
+      "label": "enrichment_targets",
+      "class": "EnrichmentTarget",
+      "description": "Provisional registered-record target; not canonical bibliographic identity.",
+      "group": "review",
+      "fields": [
+        {
+          "name": "target_id",
+          "description": "Enrichment target id; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:targetId"
+        },
+        {
+          "name": "cycle_id",
+          "description": "Enrichment cycle id; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:cycleId"
+        },
+        {
+          "name": "record_namespace",
+          "description": "Enrichment record namespace; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:recordNamespace"
+        },
+        {
+          "name": "record_id",
+          "description": "Enrichment record id; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:recordId"
+        },
+        {
+          "name": "input_sha256",
+          "description": "Enrichment input sha256; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:inputSha256"
+        },
+        {
+          "name": "record_json",
+          "description": "Enrichment record json; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:recordJson"
+        },
+        {
+          "name": "active",
+          "description": "Enrichment active; governed by CILE-ENRICH-1.",
+          "type": "INTEGER",
+          "nullable": false,
+          "semantic": "cile:active"
+        },
+        {
+          "name": "first_seen_at",
+          "description": "Enrichment first seen at; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:firstSeenAt"
+        },
+        {
+          "name": "updated_at",
+          "description": "Enrichment updated at; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:updatedAt"
+        }
+      ],
+      "appendOnly": false,
+      "constraints": [
+        "Vincoli di dominio e integrità definiti dallo schema SQL versionato."
+      ]
+    },
+    {
+      "table": "enrichment_inputs",
+      "label": "enrichment_inputs",
+      "class": "EnrichmentInputSnapshot",
+      "description": "Immutable bibliographic input snapshot from an existing registry.",
+      "group": "review",
+      "fields": [
+        {
+          "name": "input_id",
+          "description": "Enrichment input id; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:inputId"
+        },
+        {
+          "name": "target_id",
+          "description": "Enrichment target id; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:targetId"
+        },
+        {
+          "name": "input_sha256",
+          "description": "Enrichment input sha256; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:inputSha256"
+        },
+        {
+          "name": "record_json",
+          "description": "Enrichment record json; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:recordJson"
+        },
+        {
+          "name": "observed_at",
+          "description": "Momento in cui la fonte è stata osservata.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:observedAt"
+        }
+      ],
+      "appendOnly": true,
+      "constraints": [
+        "target_id → enrichment_targets.target_id"
+      ]
+    },
+    {
+      "table": "enrichment_jobs",
+      "label": "enrichment_jobs",
+      "class": "EnrichmentJob",
+      "description": "Recoverable, leased work item independent of daily discovery.",
+      "group": "review",
+      "fields": [
+        {
+          "name": "job_id",
+          "description": "Enrichment job id; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:jobId"
+        },
+        {
+          "name": "target_id",
+          "description": "Enrichment target id; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:targetId"
+        },
+        {
+          "name": "input_sha256",
+          "description": "Enrichment input sha256; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:inputSha256"
+        },
+        {
+          "name": "kind",
+          "description": "Enrichment kind; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:kind"
+        },
+        {
+          "name": "protocol_version",
+          "description": "Enrichment protocol version; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:protocolVersion"
+        },
+        {
+          "name": "status",
+          "description": "Enrichment status; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:status"
+        },
+        {
+          "name": "failure_streak",
+          "description": "Enrichment failure streak; governed by CILE-ENRICH-1.",
+          "type": "INTEGER",
+          "nullable": false,
+          "semantic": "cile:failureStreak"
+        },
+        {
+          "name": "attempts_total",
+          "description": "Enrichment attempts total; governed by CILE-ENRICH-1.",
+          "type": "INTEGER",
+          "nullable": false,
+          "semantic": "cile:attemptsTotal"
+        },
+        {
+          "name": "due_at",
+          "description": "Enrichment due at; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "cile:dueAt"
+        },
+        {
+          "name": "lease_until",
+          "description": "Enrichment lease until; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "cile:leaseUntil"
+        },
+        {
+          "name": "lease_token",
+          "description": "Enrichment lease token; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "cile:leaseToken"
+        },
+        {
+          "name": "checkpoint_json",
+          "description": "Enrichment checkpoint json; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:checkpointJson"
+        },
+        {
+          "name": "error_code",
+          "description": "Enrichment error code; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "cile:errorCode"
+        },
+        {
+          "name": "updated_at",
+          "description": "Enrichment updated at; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:updatedAt"
+        }
+      ],
+      "appendOnly": false,
+      "constraints": [
+        "target_id → enrichment_targets.target_id"
+      ]
+    },
+    {
+      "table": "enrichment_runs",
+      "label": "enrichment_runs",
+      "class": "EnrichmentRun",
+      "description": "Observed scheduler invocation; no scientific completeness claim.",
+      "group": "review",
+      "fields": [
+        {
+          "name": "run_id",
+          "description": "Enrichment run id; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:runId"
+        },
+        {
+          "name": "cycle_id",
+          "description": "Enrichment cycle id; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:cycleId"
+        },
+        {
+          "name": "scheduled_slot",
+          "description": "Enrichment scheduled slot; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:scheduledSlot"
+        },
+        {
+          "name": "started_at",
+          "description": "Enrichment started at; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:startedAt"
+        },
+        {
+          "name": "finished_at",
+          "description": "Enrichment finished at; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "cile:finishedAt"
+        },
+        {
+          "name": "lease_until",
+          "description": "Enrichment lease until; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:leaseUntil"
+        },
+        {
+          "name": "status",
+          "description": "Enrichment status; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:status"
+        },
+        {
+          "name": "selected_job_id",
+          "description": "Enrichment selected job id; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "cile:selectedJobId"
+        },
+        {
+          "name": "error_code",
+          "description": "Enrichment error code; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "cile:errorCode"
+        }
+      ],
+      "appendOnly": false,
+      "constraints": [
+        "Vincoli di dominio e integrità definiti dallo schema SQL versionato."
+      ]
+    },
+    {
+      "table": "enrichment_attempts",
+      "label": "enrichment_attempts",
+      "class": "EnrichmentAttempt",
+      "description": "Immutable outcome of an actual enrichment attempt.",
+      "group": "review",
+      "fields": [
+        {
+          "name": "attempt_id",
+          "description": "Enrichment attempt id; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:attemptId"
+        },
+        {
+          "name": "job_id",
+          "description": "Enrichment job id; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:jobId"
+        },
+        {
+          "name": "run_id",
+          "description": "Enrichment run id; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:runId"
+        },
+        {
+          "name": "started_at",
+          "description": "Enrichment started at; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:startedAt"
+        },
+        {
+          "name": "finished_at",
+          "description": "Enrichment finished at; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:finishedAt"
+        },
+        {
+          "name": "outcome",
+          "description": "YES, NO oppure UNCERTAIN: la mancanza di testo non equivale a NO.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:outcome"
+        },
+        {
+          "name": "error_code",
+          "description": "Enrichment error code; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "cile:errorCode"
+        }
+      ],
+      "appendOnly": true,
+      "constraints": [
+        "run_id → enrichment_runs.run_id",
+        "job_id → enrichment_jobs.job_id"
+      ]
+    },
+    {
+      "table": "enrichment_sources",
+      "label": "enrichment_sources",
+      "class": "EnrichmentSource",
+      "description": "Private source snapshot for an existing record, with content hash and retention basis.",
+      "group": "review",
+      "fields": [
+        {
+          "name": "source_id",
+          "description": "Enrichment source id; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:sourceId"
+        },
+        {
+          "name": "target_id",
+          "description": "Enrichment target id; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:targetId"
+        },
+        {
+          "name": "input_sha256",
+          "description": "Enrichment input sha256; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:inputSha256"
+        },
+        {
+          "name": "provider",
+          "description": "Enrichment provider; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:provider"
+        },
+        {
+          "name": "source_url",
+          "description": "Indirizzo della fonte da cui deriva l’informazione; non prova da solo l’acquisizione del testo.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:sourceUrl"
+        },
+        {
+          "name": "evidence_kind",
+          "description": "Enrichment evidence kind; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:evidenceKind"
+        },
+        {
+          "name": "content_sha256",
+          "description": "Impronta dei byte conservati per riconoscere cambiamenti e verificare il ripristino.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:contentSha256"
+        },
+        {
+          "name": "storage_key",
+          "description": "Riferimento interno al documento privato; non è un URL pubblico.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:storageKey"
+        },
+        {
+          "name": "version_label",
+          "description": "Denominazione della versione riportata dalla fonte.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:versionLabel"
+        },
+        {
+          "name": "language",
+          "description": "Lingua di questa specifica versione del testo.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "cile:language"
+        },
+        {
+          "name": "retention_basis",
+          "description": "Enrichment retention basis; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:retentionBasis"
+        },
+        {
+          "name": "licence_status",
+          "description": "Enrichment licence status; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:licenceStatus"
+        },
+        {
+          "name": "observed_at",
+          "description": "Momento in cui la fonte è stata osservata.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:observedAt"
+        }
+      ],
+      "appendOnly": true,
+      "constraints": [
+        "target_id → enrichment_targets.target_id"
+      ]
+    },
+    {
+      "table": "enrichment_citation_observations",
+      "label": "enrichment_citation_observations",
+      "class": "CitationObservation",
+      "description": "Provider-attested directed citation between external identifiers, not canonical Work identity.",
+      "group": "review",
+      "fields": [
+        {
+          "name": "observation_id",
+          "description": "Enrichment observation id; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:observationId"
+        },
+        {
+          "name": "target_id",
+          "description": "Enrichment target id; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:targetId"
+        },
+        {
+          "name": "input_sha256",
+          "description": "Enrichment input sha256; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:inputSha256"
+        },
+        {
+          "name": "provider",
+          "description": "Enrichment provider; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:provider"
+        },
+        {
+          "name": "direction",
+          "description": "Enrichment direction; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:direction"
+        },
+        {
+          "name": "citing_identifier",
+          "description": "Enrichment citing identifier; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:citingIdentifier"
+        },
+        {
+          "name": "cited_identifier",
+          "description": "Enrichment cited identifier; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:citedIdentifier"
+        },
+        {
+          "name": "snapshot_id",
+          "description": "Enrichment snapshot id; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:snapshotId"
+        },
+        {
+          "name": "source_url",
+          "description": "Indirizzo della fonte da cui deriva l’informazione; non prova da solo l’acquisizione del testo.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:sourceUrl"
+        },
+        {
+          "name": "observed_at",
+          "description": "Momento in cui la fonte è stata osservata.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:observedAt"
+        }
+      ],
+      "appendOnly": true,
+      "constraints": [
+        "target_id → enrichment_targets.target_id"
+      ]
+    },
+    {
+      "table": "enrichment_citation_coverage",
+      "label": "enrichment_citation_coverage",
+      "class": "CitationCoverage",
+      "description": "Provider-specific page/checkpoint coverage; not global completeness.",
+      "group": "review",
+      "fields": [
+        {
+          "name": "coverage_id",
+          "description": "Enrichment coverage id; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:coverageId"
+        },
+        {
+          "name": "target_id",
+          "description": "Enrichment target id; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:targetId"
+        },
+        {
+          "name": "input_sha256",
+          "description": "Enrichment input sha256; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:inputSha256"
+        },
+        {
+          "name": "provider",
+          "description": "Enrichment provider; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:provider"
+        },
+        {
+          "name": "direction",
+          "description": "Enrichment direction; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:direction"
+        },
+        {
+          "name": "snapshot_id",
+          "description": "Enrichment snapshot id; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:snapshotId"
+        },
+        {
+          "name": "source_url",
+          "description": "Indirizzo della fonte da cui deriva l’informazione; non prova da solo l’acquisizione del testo.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:sourceUrl"
+        },
+        {
+          "name": "returned_count",
+          "description": "Enrichment returned count; governed by CILE-ENRICH-1.",
+          "type": "INTEGER",
+          "nullable": false,
+          "semantic": "cile:returnedCount"
+        },
+        {
+          "name": "provider_count",
+          "description": "Enrichment provider count; governed by CILE-ENRICH-1.",
+          "type": "INTEGER",
+          "nullable": true,
+          "semantic": "cile:providerCount"
+        },
+        {
+          "name": "next_cursor",
+          "description": "Enrichment next cursor; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "cile:nextCursor"
+        },
+        {
+          "name": "status",
+          "description": "Enrichment status; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:status"
+        },
+        {
+          "name": "observed_at",
+          "description": "Momento in cui la fonte è stata osservata.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:observedAt"
+        }
+      ],
+      "appendOnly": true,
+      "constraints": [
+        "target_id → enrichment_targets.target_id"
+      ]
+    },
+    {
+      "table": "enrichment_proposals",
+      "label": "enrichment_proposals",
+      "class": "ScientificExtractionProposal",
+      "description": "Private evidence-grounded extraction; never an approved scientific decision.",
+      "group": "review",
+      "fields": [
+        {
+          "name": "proposal_id",
+          "description": "Enrichment proposal id; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:proposalId"
+        },
+        {
+          "name": "target_id",
+          "description": "Enrichment target id; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:targetId"
+        },
+        {
+          "name": "input_sha256",
+          "description": "Enrichment input sha256; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:inputSha256"
+        },
+        {
+          "name": "protocol_version",
+          "description": "Enrichment protocol version; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:protocolVersion"
+        },
+        {
+          "name": "codebook_version",
+          "description": "Enrichment codebook version; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:codebookVersion"
+        },
+        {
+          "name": "payload_sha256",
+          "description": "Enrichment payload sha256; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:payloadSha256"
+        },
+        {
+          "name": "payload_json",
+          "description": "Enrichment payload json; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:payloadJson"
+        },
+        {
+          "name": "generated_by",
+          "description": "Enrichment generated by; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:generatedBy"
+        },
+        {
+          "name": "created_at",
+          "description": "Data e ora della registrazione, distinta dalla data di pubblicazione.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:createdAt"
+        }
+      ],
+      "appendOnly": true,
+      "constraints": [
+        "target_id → enrichment_targets.target_id"
+      ]
+    },
+    {
+      "table": "enrichment_studies",
+      "label": "enrichment_studies",
+      "class": "ReportedStudy",
+      "description": "Study reported inside a publication; not the bibliographic Work.",
+      "group": "review",
+      "fields": [
+        {
+          "name": "proposal_id",
+          "description": "Enrichment proposal id; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:proposalId"
+        },
+        {
+          "name": "study_id",
+          "description": "Enrichment study id; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:studyId"
+        },
+        {
+          "name": "payload_json",
+          "description": "Enrichment payload json; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:payloadJson"
+        }
+      ],
+      "appendOnly": true,
+      "constraints": [
+        "proposal_id → enrichment_proposals.proposal_id"
+      ]
+    },
+    {
+      "table": "enrichment_datasets",
+      "label": "enrichment_datasets",
+      "class": "StudyDatasetUse",
+      "description": "Dataset and selection used by a reported study.",
+      "group": "review",
+      "fields": [
+        {
+          "name": "proposal_id",
+          "description": "Enrichment proposal id; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:proposalId"
+        },
+        {
+          "name": "study_id",
+          "description": "Enrichment study id; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:studyId"
+        },
+        {
+          "name": "dataset_id",
+          "description": "Enrichment dataset id; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:datasetId"
+        },
+        {
+          "name": "payload_json",
+          "description": "Enrichment payload json; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:payloadJson"
+        }
+      ],
+      "appendOnly": true,
+      "constraints": [
+        "proposal_id → enrichment_studies.proposal_id",
+        "study_id → enrichment_studies.study_id"
+      ]
+    },
+    {
+      "table": "enrichment_analyses",
+      "label": "enrichment_analyses",
+      "class": "ReportedAnalysis",
+      "description": "Analysis within a reported study.",
+      "group": "review",
+      "fields": [
+        {
+          "name": "proposal_id",
+          "description": "Enrichment proposal id; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:proposalId"
+        },
+        {
+          "name": "study_id",
+          "description": "Enrichment study id; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:studyId"
+        },
+        {
+          "name": "analysis_id",
+          "description": "Enrichment analysis id; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:analysisId"
+        },
+        {
+          "name": "payload_json",
+          "description": "Enrichment payload json; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:payloadJson"
+        }
+      ],
+      "appendOnly": true,
+      "constraints": [
+        "proposal_id → enrichment_studies.proposal_id",
+        "study_id → enrichment_studies.study_id"
+      ]
+    },
+    {
+      "table": "enrichment_variable_uses",
+      "label": "enrichment_variable_uses",
+      "class": "AnalysisVariableUse",
+      "description": "Operationalised variable and role in one particular analysis.",
+      "group": "review",
+      "fields": [
+        {
+          "name": "proposal_id",
+          "description": "Enrichment proposal id; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:proposalId"
+        },
+        {
+          "name": "analysis_id",
+          "description": "Enrichment analysis id; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:analysisId"
+        },
+        {
+          "name": "variable_use_id",
+          "description": "Enrichment variable use id; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:variableUseId"
+        },
+        {
+          "name": "payload_json",
+          "description": "Enrichment payload json; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:payloadJson"
+        }
+      ],
+      "appendOnly": true,
+      "constraints": [
+        "proposal_id → enrichment_analyses.proposal_id",
+        "analysis_id → enrichment_analyses.analysis_id"
+      ]
+    },
+    {
+      "table": "enrichment_findings",
+      "label": "enrichment_findings",
+      "class": "ReportedFinding",
+      "description": "Individual result grounded in an analysis and source evidence.",
+      "group": "review",
+      "fields": [
+        {
+          "name": "proposal_id",
+          "description": "Enrichment proposal id; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:proposalId"
+        },
+        {
+          "name": "analysis_id",
+          "description": "Enrichment analysis id; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:analysisId"
+        },
+        {
+          "name": "finding_id",
+          "description": "Enrichment finding id; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:findingId"
+        },
+        {
+          "name": "payload_json",
+          "description": "Enrichment payload json; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:payloadJson"
+        }
+      ],
+      "appendOnly": true,
+      "constraints": [
+        "proposal_id → enrichment_analyses.proposal_id",
+        "analysis_id → enrichment_analyses.analysis_id"
+      ]
+    },
+    {
+      "table": "enrichment_framework_proposals",
+      "label": "enrichment_framework_proposals",
+      "class": "ClinicalContributionProposal",
+      "description": "Proposed role in the six-category medical framework, separate from review screening.",
+      "group": "review",
+      "fields": [
+        {
+          "name": "proposal_id",
+          "description": "Enrichment proposal id; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:proposalId"
+        },
+        {
+          "name": "primary_category",
+          "description": "Enrichment primary category; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "cile:primaryCategory"
+        },
+        {
+          "name": "classification_status",
+          "description": "Enrichment classification status; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:classificationStatus"
+        },
+        {
+          "name": "payload_json",
+          "description": "Enrichment payload json; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:payloadJson"
+        }
+      ],
+      "appendOnly": true,
+      "constraints": [
+        "proposal_id → enrichment_proposals.proposal_id"
       ]
     }
   ]

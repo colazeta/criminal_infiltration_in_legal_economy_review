@@ -104,7 +104,7 @@ def enum_values(profile: dict[str, Any], enum_name: str) -> set[str]:
 
 
 def check_profile(profile: dict[str, Any], external: dict[str, Any]) -> None:
-    if profile.get("version") != "0.3.0":
+    if profile.get("version") != "0.4.0":
         fail(f"unexpected_profile_version:{profile.get('version')}")
     prefixes = profile.get("prefixes")
     classes = profile.get("classes")
@@ -268,7 +268,7 @@ def check_serialisations(profile: dict[str, Any]) -> None:
     if source != PUBLIC_TTL_PATH.read_text(encoding="utf-8"):
         fail("public_ontology_turtle_drift")
     for marker in (
-        'owl:versionInfo "0.3.0"', "cile:ScholarlyWork a owl:Class",
+        'owl:versionInfo "0.4.0"', "cile:ScholarlyWork a owl:Class",
         "cile:Manifestation a owl:Class", "cile:ScreeningDecision a owl:Class",
         "cile:AccessAssessment a owl:Class", "skos:relatedMatch fabio:Work",
         "skos:relatedMatch ripe:Answer",
@@ -460,12 +460,41 @@ def check_intake_access_contract(profile: dict[str, Any]) -> None:
         fail(f"intake_access_provenance:{exc}")
 
 
+def check_enrichment_contract(profile: dict[str, Any]) -> None:
+    module = load_json(ROOT / "ontology/modules/paper-enrichment.json")
+    schema = load_json(ROOT / module["schema"])
+    if module["profile_version"] != profile["version"] or module["schema_class"] not in profile["classes"]:
+        fail("enrichment_profile_mismatch")
+    fields: set[str] = set()
+    def visit(spec: dict[str, Any], pointer: str) -> None:
+        if "properties" in spec:
+            if spec.get("additionalProperties") is not False:
+                fail("enrichment_schema_must_be_closed:" + pointer)
+            for name, child in spec["properties"].items():
+                path = pointer + "/properties/" + name
+                fields.add(path)
+                visit(child, path)
+        if "items" in spec:
+            visit(spec["items"], pointer + "/items")
+    visit(schema, "")
+    for name, spec in schema.get("$defs", {}).items():
+        visit(spec, "/$defs/" + name)
+    if fields != set(module["schema_field_slots"]) or set(module["schema_field_slots"].values()) - set(profile["slots"]):
+        fail("unmapped_enrichment_schema_field")
+    codebook = load_json(ROOT / module["codebook"])
+    expected = set(profile["enums"]["ClinicalContributionEnum"]["permissible_values"])
+    codes = {item["code"] for item in codebook["categories"]}
+    if codes != expected or set(schema["$defs"]["framework"]["properties"]["primary"]["enum"]) - {None} != expected:
+        fail("enrichment_framework_vocabulary_drift")
+
+
 def validate_all(*, quiet: bool = False) -> dict[str, int | str]:
     profile = load_json(PROFILE_PATH)
     external = load_json(EXTERNAL_PATH)
     contracts = load_json(CONTRACT_PATH)
     check_profile(profile, external)
     check_private_v2_contract(profile)
+    check_enrichment_contract(profile)
     check_surveillance_source_policy(profile)
     check_intake_access_contract(profile)
     registration = load_json(ROOT / "ontology/modules/paper-register.json")

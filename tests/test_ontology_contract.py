@@ -17,7 +17,7 @@ SPEC.loader.exec_module(ontology)
 class OntologyContractTests(unittest.TestCase):
     def test_entire_governed_repository_conforms(self) -> None:
         result = ontology.validate_all(quiet=True)
-        self.assertEqual(result["profile_version"], "0.3.0")
+        self.assertEqual(result["profile_version"], "0.4.0")
         self.assertGreaterEqual(result["governed_artifacts"], 20)
         import csv
         with (ROOT / "data/curation/review_queue.csv").open() as source:
@@ -43,6 +43,13 @@ class OntologyContractTests(unittest.TestCase):
         contracts = json.loads((ROOT / "ontology/mappings/artifact-contracts.json").read_text(encoding="utf-8"))
         self.assertEqual(contracts["artifacts"]["data/registry/papers.csv"]["row_classes"], ["ScholarlyWork"])
         self.assertIn("Manifestation", contracts["artifacts"]["data/curation/retrieval_coverage.csv"]["row_classes"])
+
+    def test_enrichment_schema_has_complete_semantic_field_mapping(self) -> None:
+        profile = json.loads((ROOT / "ontology/cile-review-profile.yaml").read_text())
+        ontology.check_enrichment_contract(profile)
+        module = json.loads((ROOT / "ontology/modules/paper-enrichment.json").read_text())
+        self.assertGreater(len(module["schema_field_slots"]), 80)
+        self.assertEqual(len(module["tables"]), 15)
 
     def test_new_governed_csv_requires_an_ontology_contract(self) -> None:
         contracts = json.loads((ROOT / "ontology/mappings/artifact-contracts.json").read_text(encoding="utf-8"))

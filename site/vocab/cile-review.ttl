@@ -17,7 +17,7 @@
     a owl:Ontology ;
     dcterms:title "CILE Review Ontology Profile" ;
     dcterms:description "Application ontology for the Criminal Infiltration in the Legal Economy living systematic review." ;
-    owl:versionInfo "0.3.0" ;
+    owl:versionInfo "0.4.0" ;
     dcterms:source <https://github.com/sensein/synthscholar> ,
                    <https://github.com/RIPE-Observatory/RIPE-O> .
 
@@ -276,3 +276,28 @@ cile:gitCommit a rdf:Property ; rdfs:label "git_commit" .
 cile:manifestSha256 a rdf:Property ; rdfs:label "manifest_sha256" .
 cile:externalStateComplete a rdf:Property ; rdfs:label "external_state_complete" .
 cile:restoreVerifiedAt a rdf:Property ; rdfs:label "restore_verified_at" .
+
+# CILE-ENRICH-1 additions (private storage; proposals only).
+cile:EnrichmentTarget a owl:Class ; rdfs:comment "Provisional registered-record target; not canonical bibliographic identity." .
+cile:EnrichmentInputSnapshot a owl:Class ; rdfs:comment "Immutable bibliographic input snapshot from an existing registry." .
+cile:EnrichmentJob a owl:Class ; rdfs:comment "Recoverable, leased work item independent of daily discovery." .
+cile:EnrichmentRun a owl:Class ; rdfs:comment "Observed scheduler invocation; no scientific completeness claim." .
+cile:EnrichmentAttempt a owl:Class ; rdfs:comment "Immutable outcome of an actual enrichment attempt." .
+cile:EnrichmentSource a owl:Class ; rdfs:comment "Private source snapshot for an existing record, with content hash and retention basis." .
+cile:CitationObservation a owl:Class ; rdfs:comment "Provider-attested directed citation between external identifiers, not canonical Work identity." .
+cile:CitationCoverage a owl:Class ; rdfs:comment "Provider-specific page/checkpoint coverage; not global completeness." .
+cile:ScientificExtractionProposal a owl:Class ; rdfs:comment "Private evidence-grounded extraction; never an approved scientific decision." .
+cile:ReportedStudy a owl:Class ; rdfs:comment "Study reported inside a publication; not the bibliographic Work." .
+cile:StudyDatasetUse a owl:Class ; rdfs:comment "Dataset and selection used by a reported study." .
+cile:ReportedAnalysis a owl:Class ; rdfs:comment "Analysis within a reported study." .
+cile:AnalysisVariableUse a owl:Class ; rdfs:comment "Operationalised variable and role in one particular analysis." .
+cile:ReportedFinding a owl:Class ; rdfs:comment "Individual result grounded in an analysis and source evidence." .
+cile:ClinicalContributionProposal a owl:Class ; rdfs:comment "Proposed role in the six-category medical framework, separate from review screening." .
+cile:aetiology a skos:Concept ; skos:prefLabel "aetiology"@en .
+cile:diagnosis a skos:Concept ; skos:prefLabel "diagnosis"@en .
+cile:screening a skos:Concept ; skos:prefLabel "screening"@en .
+cile:therapy a skos:Concept ; skos:prefLabel "therapy"@en .
+cile:prognosis a skos:Concept ; skos:prefLabel "prognosis"@en .
+cile:prevention a skos:Concept ; skos:prefLabel "prevention"@en .
+
+cile:ScientificExtractionEnvelope a owl:Class ; rdfs:label "Private scientific extraction proposal" .

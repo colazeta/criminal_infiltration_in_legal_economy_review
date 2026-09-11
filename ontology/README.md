@@ -1,6 +1,6 @@
 # CILE Review Ontology Profile
 
-**Current profile:** `0.3.0`
+**Current profile:** `0.4.0`
 
 This directory is the semantic contract for the living systematic review on **Criminal Infiltration in the Legal Economy (CILE)**. The contract is normative: physical CSV/JSON structures may evolve, but every governed artifact must remain mapped to this ontology and must pass `scripts/ontology/validate_ontology.py`.
 
@@ -115,7 +115,7 @@ protocol CILE-DAILY-v3 reuse `SearchActivity.source_name`, the existing
 `SearchDay` source-count projection and V2 provider/protocol slots. The mapping
 and historical/current restrictions are recorded in `modules/daily-calendar.json`
 and checked by the ontology validator. Scientific classes, four-part criteria,
-controlled vocabularies and profile 0.3.0 do not change. Historical two-source
+controlled vocabularies and profile 0.4.0 do not change. Historical two-source
 telemetry is decoded under its original v1 contract and kept out of the OA cycle.
 
 ## OA intake evidence
@@ -123,10 +123,21 @@ telemetry is decoded under its original v1 contract and kept out of the OA cycle
 `modules/intake-open-access.json` maps the mandatory candidate receipt and
 metadata-only snapshots to existing CandidateRecord, AccessAssessment and
 Evidence concepts. The ontology validator checks those mappings and requires
-one preserved receipt per active daily candidate. Scientific profile 0.3.0 and
+one preserved receipt per active daily candidate. Scientific profile 0.4.0 and
 controlled vocabulary are unchanged; an intake attestation is not a curator
 publication receipt. See `../docs/operations/intake-open-access.md`.
 
 ## Operational register amendment
 
 The owner instruction of 2026-09-08 authorises a visible bibliographic projection of CandidateRecord before screening. See modules/paper-register.json and ../docs/operations/paper-register.md. This reuses existing candidate, unknown-access and provenance concepts; no scientific vocabulary is changed. The old mandatory verified-OA intake rule remains only for v2 history. New v3 intake allows explicit unknown access.
+
+## Scientific enrichment — profile 0.4.0
+
+`modules/paper-enrichment.json` maps every property of the closed private
+`schema/paper-enrichment.schema.json`, alongside the 15 additive tables in
+`0003_paper_enrichment.sql`. The six clinical contribution categories are
+proposed classifications, not eligibility decisions. See
+[the operational contract](../docs/operations/paper-enrichment.md) and
+[the extraction guide](../docs/methodology/paper-extraction.md).
+The previous 0.3.0 scientific application remains backward-compatible; no
+existing decisions or source snapshots are recoded.

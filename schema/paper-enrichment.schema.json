@@ -1,0 +1,574 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "protocol_version",
+    "codebook_version",
+    "target_id",
+    "input_sha256",
+    "generated_by",
+    "source_ids",
+    "source_coverage",
+    "spans",
+    "summary",
+    "contribution",
+    "research_question",
+    "infiltration_definition",
+    "infiltration_operationalisation",
+    "authors_limitations",
+    "analyst_limitations",
+    "studies",
+    "datasets",
+    "analyses",
+    "variable_uses",
+    "findings",
+    "framework"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "protocol_version": {
+      "const": "CILE-ENRICH-1"
+    },
+    "codebook_version": {
+      "const": "1.0.0"
+    },
+    "target_id": {
+      "type": "string",
+      "maxLength": 100
+    },
+    "input_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "generated_by": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "agent",
+        "model",
+        "prompt_sha256"
+      ],
+      "properties": {
+        "agent": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "model": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 200
+        },
+        "prompt_sha256": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      }
+    },
+    "source_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 100
+      },
+      "maxItems": 100
+    },
+    "source_coverage": {
+      "enum": [
+        "abstract_only",
+        "partial_text",
+        "full_text"
+      ]
+    },
+    "spans": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "source_id",
+          "start_offset",
+          "end_offset",
+          "locator"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "source_id": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "start_offset": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "end_offset": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "locator": {
+            "type": "string",
+            "maxLength": 500
+          }
+        }
+      },
+      "maxItems": 400
+    },
+    "summary": {
+      "$ref": "#/$defs/fact"
+    },
+    "contribution": {
+      "$ref": "#/$defs/fact"
+    },
+    "research_question": {
+      "$ref": "#/$defs/fact"
+    },
+    "infiltration_definition": {
+      "$ref": "#/$defs/fact"
+    },
+    "infiltration_operationalisation": {
+      "$ref": "#/$defs/fact"
+    },
+    "authors_limitations": {
+      "$ref": "#/$defs/fact"
+    },
+    "analyst_limitations": {
+      "$ref": "#/$defs/fact"
+    },
+    "studies": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/study"
+      },
+      "maxItems": 50
+    },
+    "datasets": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/dataset"
+      },
+      "maxItems": 100
+    },
+    "analyses": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/analysis"
+      },
+      "maxItems": 200
+    },
+    "variable_uses": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/variable_use"
+      },
+      "maxItems": 500
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/finding"
+      },
+      "maxItems": 300
+    },
+    "framework": {
+      "$ref": "#/$defs/framework"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/schema/paper-enrichment.schema.json",
+  "$defs": {
+    "fact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "value",
+        "evidence_span_ids",
+        "origin"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "reported",
+            "not_reported",
+            "not_verifiable",
+            "not_applicable",
+            "ambiguous"
+          ]
+        },
+        "value": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 6000
+        },
+        "evidence_span_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "maxItems": 100
+        },
+        "origin": {
+          "enum": [
+            "source",
+            "analyst"
+          ]
+        }
+      }
+    },
+    "study": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "study_type",
+        "research_question",
+        "population",
+        "sampling",
+        "sample_size",
+        "observation_unit",
+        "analysis_unit",
+        "geography",
+        "period"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "study_type": {
+          "$ref": "#/$defs/fact"
+        },
+        "research_question": {
+          "$ref": "#/$defs/fact"
+        },
+        "population": {
+          "$ref": "#/$defs/fact"
+        },
+        "sampling": {
+          "$ref": "#/$defs/fact"
+        },
+        "sample_size": {
+          "$ref": "#/$defs/fact"
+        },
+        "observation_unit": {
+          "$ref": "#/$defs/fact"
+        },
+        "analysis_unit": {
+          "$ref": "#/$defs/fact"
+        },
+        "geography": {
+          "$ref": "#/$defs/fact"
+        },
+        "period": {
+          "$ref": "#/$defs/fact"
+        }
+      }
+    },
+    "dataset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "study_id",
+        "name",
+        "provider",
+        "accessibility",
+        "selection",
+        "coverage",
+        "limitations"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "study_id": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "name": {
+          "$ref": "#/$defs/fact"
+        },
+        "provider": {
+          "$ref": "#/$defs/fact"
+        },
+        "accessibility": {
+          "$ref": "#/$defs/fact"
+        },
+        "selection": {
+          "$ref": "#/$defs/fact"
+        },
+        "coverage": {
+          "$ref": "#/$defs/fact"
+        },
+        "limitations": {
+          "$ref": "#/$defs/fact"
+        }
+      }
+    },
+    "analysis": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "study_id",
+        "dataset_ids",
+        "design",
+        "method",
+        "comparison",
+        "identification",
+        "validation",
+        "robustness"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "study_id": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "dataset_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "maxItems": 100
+        },
+        "design": {
+          "$ref": "#/$defs/fact"
+        },
+        "method": {
+          "$ref": "#/$defs/fact"
+        },
+        "comparison": {
+          "$ref": "#/$defs/fact"
+        },
+        "identification": {
+          "$ref": "#/$defs/fact"
+        },
+        "validation": {
+          "$ref": "#/$defs/fact"
+        },
+        "robustness": {
+          "$ref": "#/$defs/fact"
+        }
+      }
+    },
+    "variable_use": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "analysis_id",
+        "dataset_ids",
+        "original_name",
+        "concept",
+        "operationalisation",
+        "unit",
+        "period",
+        "transformation",
+        "role"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "analysis_id": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "dataset_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "maxItems": 100
+        },
+        "original_name": {
+          "$ref": "#/$defs/fact"
+        },
+        "concept": {
+          "$ref": "#/$defs/fact"
+        },
+        "operationalisation": {
+          "$ref": "#/$defs/fact"
+        },
+        "unit": {
+          "$ref": "#/$defs/fact"
+        },
+        "period": {
+          "$ref": "#/$defs/fact"
+        },
+        "transformation": {
+          "$ref": "#/$defs/fact"
+        },
+        "role": {
+          "$ref": "#/$defs/fact"
+        }
+      }
+    },
+    "finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "analysis_id",
+        "variable_use_ids",
+        "statement",
+        "finding_type",
+        "direction",
+        "estimate",
+        "unit",
+        "uncertainty",
+        "reference_comparison",
+        "population_scope",
+        "temporal_scope",
+        "caveat"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "analysis_id": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "variable_use_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "maxItems": 100
+        },
+        "statement": {
+          "$ref": "#/$defs/fact"
+        },
+        "finding_type": {
+          "$ref": "#/$defs/fact"
+        },
+        "direction": {
+          "$ref": "#/$defs/fact"
+        },
+        "estimate": {
+          "$ref": "#/$defs/fact"
+        },
+        "unit": {
+          "$ref": "#/$defs/fact"
+        },
+        "uncertainty": {
+          "$ref": "#/$defs/fact"
+        },
+        "reference_comparison": {
+          "$ref": "#/$defs/fact"
+        },
+        "population_scope": {
+          "$ref": "#/$defs/fact"
+        },
+        "temporal_scope": {
+          "$ref": "#/$defs/fact"
+        },
+        "caveat": {
+          "$ref": "#/$defs/fact"
+        }
+      }
+    },
+    "framework": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "primary",
+        "rationale",
+        "secondary",
+        "alternative"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "proposed",
+            "insufficient_evidence",
+            "outside_framework"
+          ]
+        },
+        "primary": {
+          "enum": [
+            "aetiology",
+            "diagnosis",
+            "screening",
+            "therapy",
+            "prognosis",
+            "prevention",
+            null
+          ]
+        },
+        "rationale": {
+          "$ref": "#/$defs/fact"
+        },
+        "secondary": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "category",
+              "rationale"
+            ],
+            "properties": {
+              "category": {
+                "enum": [
+                  "aetiology",
+                  "diagnosis",
+                  "screening",
+                  "therapy",
+                  "prognosis",
+                  "prevention"
+                ]
+              },
+              "rationale": {
+                "$ref": "#/$defs/fact"
+              }
+            }
+          },
+          "maxItems": 5
+        },
+        "alternative": {
+          "enum": [
+            "aetiology",
+            "diagnosis",
+            "screening",
+            "therapy",
+            "prognosis",
+            "prevention",
+            null
+          ]
+        }
+      }
+    }
+  }
+}
