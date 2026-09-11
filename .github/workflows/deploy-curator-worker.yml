@@ -75,6 +75,7 @@ jobs:
           node --check site/curator-guided.js
 
       - name: Prepare empty private Review V2 resources
+        if: vars.REVIEW_V2_STORAGE_ENABLED == 'true'
         id: v2_storage
         continue-on-error: true
         working-directory: .
@@ -98,7 +99,7 @@ jobs:
         run: echo "Discovery V2 infrastructure is blocked. Enrichment storage fallback is checked separately and its runner remains disabled. Legacy safety fixes may still deploy; this does not imply extraction is active." >> "$GITHUB_STEP_SUMMARY"
 
       - name: Report enrichment activation boundary
-        run: echo "Paper enrichment is disabled pending verified private-storage access, live provider smoke testing and separate scientific calibration. Deployment success is not activation." >> "$GITHUB_STEP_SUMMARY"
+        run: echo "Enrichment uses explicitly selected private Workers storage. Exact-commit activation follows live private readback. Scientific labels remain proposals." >> "$GITHUB_STEP_SUMMARY"
 
       - name: Prepare production configuration
         env:
@@ -326,3 +327,13 @@ jobs:
           free_web_query = urllib.parse.urlencode({"candidate": "CAND-SMOKE-001", "issue": "1", "title": "Authentication smoke test"})
           retry_unauthenticated_401(f"{origin}/api/free-web-search?{free_web_query}", "Curator free web-search endpoint")
           PY
+
+      - name: Verify and activate independent private mechanical enrichment
+        working-directory: .
+        env:
+          CURATOR_SESSION_SECRET: ${{ secrets.CURATOR_SESSION_SECRET }}
+        run: |
+          python3 scripts/enrichment/service_client.py verify
+          python3 scripts/enrichment/service_client.py activate
+          python3 scripts/enrichment/service_client.py run
+          python3 scripts/enrichment/service_client.py status
