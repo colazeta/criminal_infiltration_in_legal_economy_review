@@ -11,12 +11,13 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
-      - name: Prepare private storage independently of discovery
+      - name: Verify exact deployed private storage
         env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
-        run: python3 scripts/review_v2/prepare_cloudflare.py --storage-only --output "$RUNNER_TEMP/enrichment-bindings.json"
+          CURATOR_SESSION_SECRET: ${{ secrets.CURATOR_SESSION_SECRET }}
+        run: |
+          python3 scripts/enrichment/service_client.py verify
+          python3 scripts/enrichment/service_client.py status
       - name: Check bounded public-provider access without retaining source text
         run: python3 scripts/enrichment/provider_smoke.py
       - name: Record activation boundary
-        run: echo "Storage preparation passed. This check does not enable hourly work or scientific extraction. Inspect provider outcomes and the separate calibration gate." >> "$GITHUB_STEP_SUMMARY"
+        run: echo "Readiness check only: it does not approve scientific labels or activate a model. Provider outcomes, persisted work and scientific calibration remain distinct." >> "$GITHUB_STEP_SUMMARY"

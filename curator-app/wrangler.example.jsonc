@@ -15,6 +15,10 @@
       {
         "name": "SUBMISSIONS",
         "class_name": "SubmissionCoordinator"
+      },
+      {
+        "name": "ENRICHMENT_STORE",
+        "class_name": "PaperEnrichmentStore"
       }
     ]
   },
@@ -23,6 +27,12 @@
       "tag": "v1",
       "new_sqlite_classes": [
         "SubmissionCoordinator"
+      ]
+    },
+    {
+      "tag": "v2-private-enrichment",
+      "new_sqlite_classes": [
+        "PaperEnrichmentStore"
       ]
     }
   ],
@@ -39,6 +49,12 @@
     "EXA_FREE_ONLY": "true",
     "EXA_DEDICATED_STARTER_ACCOUNT": "REPLACE_EXA_DEDICATED_STARTER_ACCOUNT",
     "TAVILY_FREE_ONLY": "true",
-    "PAPER_ENRICHMENT_ENABLED": "false"
+    "PAPER_ENRICHMENT_ENABLED": "true",
+    "PAPER_ENRICHMENT_STORAGE": "durable_object_sqlite"
+  },
+  "triggers": {
+    "crons": [
+      "7,22,37,52 * * * *"
+    ]
   }
 }

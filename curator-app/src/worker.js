@@ -10,6 +10,7 @@ import { handleResolvedAbstractRequest } from "./resolved-abstract.js";
 import { superviseDays, consumeDays } from "./daily-runner.js";
 import { handleV2 } from "./review-v2.js";
 import { runEnrichment, handlePaperEnrichment } from "./paper-enrichment.js";
+import { EnrichmentStoreCore, enrichmentStore } from "./enrichment-store.js";
 import { isActiveArchiveIssue } from "./archive-cycle.js";
 import worker, { SubmissionCoordinatorCore, authenticateCuratorRequest } from "./index.js";
 
@@ -384,12 +385,17 @@ export class SubmissionCoordinator extends DurableObject {
   }
 }
 
+export class PaperEnrichmentStore extends DurableObject {
+  constructor(ctx, env) { super(ctx, env); this.core = new EnrichmentStoreCore(ctx, env); }
+  fetch(request) { return this.core.fetch(request); }
+}
+
 export default {
   async scheduled(controller, env) {
     // Independent outcomes: a disabled/failed discovery runner cannot suppress enrichment.
     const outcomes = await Promise.allSettled([
       superviseDays(env, controller.scheduledTime),
-      runEnrichment(env, { now: controller.scheduledTime }),
+      enrichmentStore(env) ? enrichmentStore(env).fetch(new Request("https://enrichment.internal/tick")) : runEnrichment(env, { now: controller.scheduledTime }),
     ]);
     if (outcomes.some(o => o.status === "rejected")) throw new Error("scheduled_component_failed");
     return outcomes.map(o => o.value);
@@ -398,8 +404,17 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     if (url.pathname === "/version" && request.method === "GET") return Response.json({ commit: env.DEPLOY_COMMIT || null, ontology: "0.4.0" }, { headers: { "Cache-Control": "no-store" } });
+    if (url.pathname === "/api/paper-enrichment-machine") {
+      const store=enrichmentStore(env);
+      if (!store) return Response.json({error_code:"private_storage_required"},{status:503,headers:{"Cache-Control":"no-store"}});
+      return store.fetch(new Request("https://enrichment.internal/machine",request));
+    }
     if (url.pathname.startsWith("/api/paper-enrichment/")) {
-      try { return await handlePaperEnrichment(request, env, await authenticateCuratorRequest(request, env)); }
+      try {
+        const session=await authenticateCuratorRequest(request,env),store=enrichmentStore(env);
+        if(store){if(session?.login!==env.CURATOR_LOGIN)return Response.json({error_code:"authentication_required"},{status:401});return store.fetch(request)}
+        return await handlePaperEnrichment(request,env,session);
+      }
       catch (error) { return Response.json({ error: { code: error.code || "authentication_required" } }, { status: error.status || 401, headers: { "Cache-Control": "no-store" } }); }
     }
     if (url.pathname.startsWith("/api/v2/")) {

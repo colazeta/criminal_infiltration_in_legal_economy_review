@@ -4,11 +4,15 @@ Protocol **CILE-ENRICH-1** · ontology **0.4.0** · clinical codebook **1.0.0**.
 Owner implementation mandate: 11 September 2026. This authorises engineering and
 mechanical enrichment, not scientific inclusion or the approval of machine labels.
 
+## Active storage implementation
+
+The 11 September follow-up uses an explicitly selected isolated Workers SQLite/KV backend with the same enrichment schema. D1/R2 remain supported, not required. See [the storage decision](enrichment-storage-decision.md). Earlier D1-readiness observations below remain historical evidence, not a description of this new backend. Production activation still requires an exact-commit, authenticated private readback.
+
 ## Implemented boundary
 
 The candidate register is the input, not a new search. The Worker reads the fixed
 published `data/paper-register.json` endpoint, validates the entire projection and
-synchronises stable candidate references into private D1. No canonical work ID is
+synchronises stable candidate references into the explicitly selected private SQL store. No canonical work ID is
 created. The original registry and daily-discovery runner are not written.
 
 Fifteen additive private tables store targets, immutable input snapshots, jobs,
@@ -25,8 +29,7 @@ GitHub issues, workflow artefacts or source control.
 
 ## What the initial runner does — and does not do
 
-When `PAPER_ENRICHMENT_ENABLED=true` and both private bindings exist, the existing
-15-minute Cloudflare supervisor checks a persistent hourly slot. At most **one
+When the explicitly selected private backend is ready and the exact deployed commit has a successful private readback and signed activation receipt, the 15-minute Cloudflare supervisor checks a persistent hourly slot. The master `PAPER_ENRICHMENT_ENABLED` flag must also be true. At most **one
 job** is attempted per hour. A failed or missed daily-discovery run cannot suppress
 it. This first capacity limit is intentionally conservative, not a throughput claim.
 
@@ -67,8 +70,8 @@ superseded jobs; scientific proposals remain immutable.
 
 A database-enforced single active run and ten-minute leases prevent overlap.
 The next supervisor call recovers an expired run and job. Normal attempts have terminal receipts; interrupted attempts are also identifiable
-from the expired run and job lease records. Source storage follows R2 write, hash-checked R2 readback,
-D1 receipt and D1 readback. A proposal and all its normalised objects are written
+from the expired run and job lease records. Source storage follows private object write, hash-checked private readback,
+SQL receipt and SQL readback. The isolated SQLite Durable Object provides both stores; the optional D1/R2 backend retains the same interface. A proposal and all its normalised objects are written
 in one transaction (maximum 90 statements), never partial scientific batches.
 
 A scheduled slot is an observation of actual work, not a promise of punctuality.
@@ -79,9 +82,7 @@ previously persisted valid jobs, but their run is labelled partial.
 
 ## Readiness and activation
 
-The default example configuration is **disabled**. Production may enable only
-mechanical jobs after the additive migration, private R2 access, an isolated live
-provider smoke test, authenticated reads and scheduler configuration are checked.
+The default configuration selects the isolated private Workers backend, but it remains **inactive without a deployment-bound activation receipt**. Production may enable only mechanical jobs after the exact additive migration, private object readback, an isolated live provider smoke test, authenticated reads and scheduler configuration are checked.
 The flag must not be set merely because unit tests pass. Production deployment
 must report each blocker, not conceal a failed migration behind a green build.
 
@@ -117,7 +118,7 @@ new source count, pending/blocked/exhausted work and citation coverage separatel
 The interface reports these private metrics; it does not equate an HTTP response
 with scientific completion. No monitoring notification service is configured.
 
-Pause with `PAPER_ENRICHMENT_ENABLED=false` and redeploy. Preserve D1/R2 and all
+Pause with `PAPER_ENRICHMENT_ENABLED=false` and redeploy. Preserve the selected SQL/private object store and all
 receipts. Revert software through a normal reviewed revert; never run destructive
 migration rollback. Profile 0.3.0 scientific records remain supported by the
 additive 0.4.0 application. Original migration hashes and old decisions are unchanged.
