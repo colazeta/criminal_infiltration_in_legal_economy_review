@@ -3,6 +3,7 @@ import cycle from '../../config/archive-cycle.json' with { type: 'json' };
 import schema from '../../schema/paper-enrichment.schema.json' with { type: 'json' };
 import { canonicalJson, sha256 } from './review-v2.js';
 import { fetchWithTimeout } from './network.js';
+import { retainedCrossrefReferences } from './crossref-references.js';
 import { iterationKey, dueSlot } from './enrichment-schedule.js';
 
 export const ENRICHMENT_PROTOCOL = 'CILE-ENRICH-1';
@@ -198,11 +199,16 @@ async function metadata(env, target, checkpoint, now, fetcher) {
 async function citations(env,target,checkpoint,now,fetcher,job,token) {
   const record=JSON.parse(target.record_json);if(!validDoi(record.doi))err('identifier_resolution_required',409);
   let cp={...checkpoint};
+  if (!cp.crossref_done) {
+    const derived = await retainedCrossrefReferences(env,target,cp.crossref,now);
+    cp.crossref_done = derived === null || derived.done;
+    if (derived !== null) return {complete:false,due:now+HOUR,checkpoint:{...cp,crossref:derived}};
+  }
   if(!cp.snapshot_id) {
     const url='https://api.openalex.org/works/https://doi.org/'+encodeURIComponent(record.doi)+'?select=id,doi,title,referenced_works,cited_by_count';
     const work=await fetchJSON(url,fetcher,now);matched(record,work.doi,work.title);
     if(!/^https:\/\/openalex\.org\/W\d+$/.test(work.id)||!Array.isArray(work.referenced_works)||work.referenced_works.length>20000||work.referenced_works.some(x=>!/^https:\/\/openalex\.org\/W\d+$/.test(x)))err('invalid_citation_payload');
-    cp={snapshot_id:iso(now), work_id:work.id, outgoing:work.referenced_works, outgoing_offset:0, cursor:'*', provider_count:Number.isInteger(work.cited_by_count)?work.cited_by_count:null};
+    cp={...cp,snapshot_id:iso(now), work_id:work.id, outgoing:work.referenced_works, outgoing_offset:0, cursor:'*', provider_count:Number.isInteger(work.cited_by_count)?work.cited_by_count:null};
     const saved=await S(env.REVIEW_DB,"UPDATE enrichment_jobs SET checkpoint_json=? WHERE job_id=? AND lease_token=? AND status='running'",canonicalJson(cp),job.job_id,token).run();
     if(!saved.meta?.changes)err('lease_lost',409);
   }
