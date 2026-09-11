@@ -1,8 +1,6 @@
-name: Enrichment storage readiness
+name: Check paper enrichment readiness
 on:
-  push:
-    branches: [implementation/paper-enrichment-20260911]
-    paths: [.github/workflows/enrichment-readiness.yml]
+  workflow_dispatch:
 permissions:
   contents: read
 jobs:
@@ -11,20 +9,14 @@ jobs:
     environment: curator-production
     timeout-minutes: 5
     steps:
-      - name: Checkout isolated implementation branch
+      - name: Checkout
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
-      - name: Check existing private resources
+      - name: Prepare private storage independently of discovery
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
-        run: |
-          python3 scripts/review_v2/prepare_cloudflare.py --output "$RUNNER_TEMP/enrichment-bindings.json"
-      - name: Record aggregate readiness only
-        run: |
-          python3 - <<'PY'
-          import json, os
-          from pathlib import Path
-          data=json.loads((Path(os.environ['RUNNER_TEMP'])/'enrichment-bindings.json').read_text())
-          with open(os.environ['GITHUB_STEP_SUMMARY'],'a') as out:
-              out.write('Existing private D1 and R2 preparation passed. No review, model, paper extraction or hourly enrichment was enabled.\n')
-          PY
+        run: python3 scripts/review_v2/prepare_cloudflare.py --storage-only --output "$RUNNER_TEMP/enrichment-bindings.json"
+      - name: Check bounded public-provider access without retaining source text
+        run: python3 scripts/enrichment/provider_smoke.py
+      - name: Record activation boundary
+        run: echo "Storage preparation passed. This check does not enable hourly work or scientific extraction. Inspect provider outcomes and the separate calibration gate." >> "$GITHUB_STEP_SUMMARY"
