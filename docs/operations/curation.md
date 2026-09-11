@@ -8,6 +8,10 @@ Il workspace separa due attività diverse:
 Nessuna delle due attività effettua auto-merge. Una decisione di screening non
 equivale a promozione canonica e non approva la pubblicazione.
 
+Il perimetro editoriale attivo è esclusivamente **criminal infiltration in the
+legal economy**. Il progetto non mantiene più una raccolta AML separata e non
+instrada gli esclusi verso collezioni tematiche secondarie.
+
 ## Perché il sito usa una GitHub App
 
 GitHub Pages resta un sito statico e pubblico: non può custodire credenziali o
@@ -16,8 +20,8 @@ scrivere nel repository. La pagina
 rimanda al pannello editoriale servito, insieme al backend, da un'origine Worker
 dedicata. Dopo l'accesso, la GitHub App legge le schede direttamente dalle issue
 e invia la decisione per conto dell'utente autenticato. GitHub Pages non riceve
-la sessione; la console non chiede
-password o personal access token e non incorpora il token GitHub.
+la sessione; la console non chiede password o personal access token e non
+incorpora il token GitHub.
 
 Il documento statico su GitHub Pages e `site/data/` continuano a mostrare soltanto conteggi
 aggregati e codici controllati. Titoli, identificatori, provenienza ed evidenza
@@ -28,19 +32,9 @@ export pubblico. La configurazione e il modello di sicurezza sono descritti in
 ## Coda dei candidati
 
 La coda corrente è in `data/curation/review_queue.csv`. Il suo nucleo legacy
-contiene 55 record distinti e resta verificabile separatamente anche quando la
-coda cresce:
-
-| Stage | Record | Significato |
-|---|---:|---|
-| `metadata_fix` | 2 | metadati bibliografici da riparare |
-| `manual_review` | 9 | decisione umana sullo scope o sul valore contestuale |
-| `abstract_full_text_review` | 25 | il titolo non basta; occorre abstract o full text |
-| `legacy_rejection_review` | 19 | rigetto del pilot da ricontrollare con la regola corrente |
-
-I due lavori già importati nel registro canonico non sono duplicati nella coda.
-Le raccomandazioni legacy restano dichiarazioni storiche: non sono trasformate
-in esclusioni, inclusioni o conferme di identità.
+resta verificabile separatamente anche quando la coda cresce. Le raccomandazioni
+legacy restano dichiarazioni storiche: non sono trasformate in esclusioni,
+inclusioni o conferme di identità.
 
 Il workflow `.github/workflows/materialize-curation.yml` crea una issue
 idempotente per ogni scheda mancante e applica etichette di stage. Dopo il merge
@@ -57,7 +51,7 @@ workflow accetta soltanto una issue aperta dal proprietario del repository e
 convalida:
 
 - identità del batch coerente tra titolo, modulo e manifesti;
-- forma chiusa dei record e provenienza delle query Exa W1–W7 (manifest v2);
+- forma chiusa dei record e provenienza delle query Exa W1–W7;
 - metadati, URL, identificatori, possibili duplicati e conflitti dichiarati;
 - presenza dell'assessment di intake e dell'azione umana richiesta;
 - salvaguardie contro screening e pubblicazione automatici.
@@ -77,15 +71,14 @@ triage, non una decisione di eleggibilità.
 3. Compilare stage, decisione, evidenza, motivazione e confidenza. Il pannello
    mostra soltanto i campi compatibili con la decisione scelta.
 4. Per un'esclusione usare un codice esatto da
-   `data/registry/exclusion_reasons.csv`.
-5. Se la decisione è `not_eligible` ma il lavoro è utile per antiriciclaggio o
-   criminalità economico-finanziaria, selezionare `broader_aml` e scrivere una
-   motivazione distinta della rilevanza più ampia.
-6. Per `eligible_core` o `eligible_contextual` usare un tema già presente nella
+   `data/registry/exclusion_reasons.csv`. Un lavoro utile soltanto per AML,
+   riciclaggio o criminalità economico-finanziaria resta `not_eligible` se non
+   soddisfa il test di infiltrazione; non viene instradato altrove.
+5. Per `eligible_core` o `eligible_contextual` usare un tema già presente nella
    tassonomia.
-7. Per `duplicate` indicare il candidato o paper che sopravvive e la prova di
+6. Per `duplicate` indicare il candidato o paper che sopravvive e la prova di
    identità.
-8. Confermare esplicitamente e inviare. La App scrive `APPLY` nella issue
+7. Confermare esplicitamente e inviare. La App scrive `APPLY` nella issue
    strutturata e ne mostra il collegamento.
 
 Il [modulo GitHub](https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/issues/new?template=candidate_decision.yml)
@@ -121,25 +114,13 @@ codice di esclusione coerente. `not_academic`, `not_retrievable` e `duplicate`
 usano rispettivamente `NOT_ACADEMIC_SOURCE`, `FULL_TEXT_UNAVAILABLE` e
 `DUPLICATE_RECORD`.
 
-### Conservare un escluso nella raccolta AML
+### Campi secondari legacy
 
-La destinazione `broader_aml` è disponibile soltanto con `not_eligible`. Il
-codice di esclusione continua a spiegare perché il lavoro non entra nella review
-sull'infiltrazione; la seconda motivazione spiega invece perché vale la pena
-conservarlo nella biblioteca più ampia. Le due affermazioni non si sostituiscono.
-
-Il merge della decisione aggiorna soltanto la coda. Per mostrare il lavoro nella
-pagina pubblica AML servono poi, in una modifica scientifica separata:
-
-1. verifica e promozione dei metadati nel record canonico;
-2. decisione corrente `not_eligible` e stato canonico `review_excluded`;
-3. manifesto core corrente `withheld`;
-4. approvazione versionata in `secondary_publications.csv` con una nota pubblica.
-
-La pagina AML resta quindi separata dal corpus core e può essere vuota anche
-quando la coda contiene lavori già indirizzati a quella raccolta. Le relative
-schede GitHub chiuse ricevono l'etichetta `collection:broader-aml`, così il
-curatore può ritrovarle dalla propria area.
+Le colonne e i campi relativi a una `secondary_collection` possono rimanere
+nello schema e nei dati storici per compatibilità e audit, ma non rappresentano
+una destinazione editoriale attiva. `data/registry/secondary_collections.csv`
+non definisce collezioni attive e la console non deve proporre un routing AML.
+Non valorizzare questi campi nelle nuove decisioni.
 
 ## Che cosa non fa una decisione sul candidato
 
@@ -150,7 +131,7 @@ Il workflow dei candidati non:
 - modifica screening o pubblicazioni già registrati;
 - dichiara verificato un DOI;
 - pubblica il candidato nel sito;
-- pubblica il candidato nella raccolta AML;
+- crea o alimenta una raccolta AML separata;
 - unisce la propria pull request.
 
 Verifica dei metadati, promozione canonica e approvazione della nota pubblica

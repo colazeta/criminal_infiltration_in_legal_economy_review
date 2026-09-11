@@ -4,13 +4,17 @@ A searchable, governed archive of scholarly work on **criminal infiltration in
 the legal economy**.
 
 - [Public archive](https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/)
-- [Broader AML collection](https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/aml.html)
 - [Daily research statistics](https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/stats.html)
 - [Curator desk](https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/curate.html)
 - [Start here: repository index](INDEX.md)
 - [Guida rapida in italiano](docs/GUIDA_RAPIDA_IT.md)
 - [Documentation index](docs/README.md)
 - [How to contribute](CONTRIBUTING.md)
+
+The repository's sole active subject scope is **criminal infiltration in the legal
+economy**. It does not maintain a separate AML or economic/financial-crime
+collection. Money laundering, corruption, facilitation and other adjacent
+phenomena are relevant only when they satisfy the governed infiltration boundary.
 
 The repository's primary product is the public publication index. The review
 protocol, screening history and controlled update process make that index
@@ -30,14 +34,10 @@ A work appears on the site only when all publication gates pass:
 6. the validators find no identity, schema or public-field conflict.
 
 Candidate intake, reviewer notes, rejected works and legacy retrieval files are
-not read by the site builder. Automated discovery can create an intake issue; it
-cannot publish a work.
-
-A work that is `not_eligible` for the infiltration review may still be retained
-in the separately governed broader AML and economic/financial-crime collection.
-It appears there only after canonical verification and an independent,
-versioned secondary-publication approval. It never changes core inclusion or
-saturation counts.
+not read by the public archive builder. Automated discovery can create an intake
+issue; it cannot publish a work. A work that is `not_eligible` under the
+criminal-infiltration test remains outside the active project rather than being
+routed to a separate AML collection.
 
 ## Repository map
 
@@ -46,7 +46,7 @@ saturation counts.
 | `INDEX.md` | Plain-language routes for readers, reviewers and maintainers |
 | `data/registry/` | Canonical works, identifiers, decisions and publication state |
 | `data/curation/` | Materialised review queue and append-only candidate decisions |
-| `data/legacy/` | Retired pilot evidence retained only for audit |
+| `data/legacy/` | Retired evidence retained only for audit |
 | `docs/methodology/` | Protocol, eligibility, discovery, saturation and reporting |
 | `docs/governance/` | Data contract and authorised sources/connectors |
 | `docs/operations/` | Automation and release runbooks |
@@ -54,53 +54,48 @@ saturation counts.
 | `tests/` | Negative publication-gate and cycle-grouping tests |
 | `site/` | Static public interface and deterministic data exports |
 
+Historical secondary-collection fields and files can remain where required for
+backward compatibility, reproducibility or audit. They are not an active
+editorial destination and are not exposed as a separate subject section.
+
 ## Expanding the literature
 
 The [plain-language operational guide in Italian](docs/methodology/expansion.md)
-describes a six-step loop: test the search, search several sources, join repeated
-results, follow references and citations, review each work, and use the gaps to
-plan the next round. The
+describes the search loop. The
 [technical reference in English](docs/methodology/expansion-reference.md) keeps
 the provider rules, metrics and audit fields needed for reproducibility.
+Discovery should broaden terminology and geography while preserving the same
+criminal-infiltration eligibility boundary.
 
 Automation may create one deduplicated intake issue and one aggregate metrics
 comment per daily batch. It cannot assign canonical IDs, decide eligibility,
 edit registries, declare saturation or publish papers. The
-[daily-metrics guide](docs/operations/daily-metrics.md) explains how successful
-zero-result days, partial runs and failures are kept distinct.
+[daily-metrics guide](docs/operations/daily-metrics.md) explains the public
+statistics contract.
 
-A validated positive intake batch now prepares a separate pull request that
-adds its candidates to `data/curation/review_queue.csv`. After human merge, each
-new row receives an individual GitHub review issue. Intake assessment,
-screening, canonical promotion and publication remain four distinct gates.
+A validated positive intake batch prepares a separate pull request that adds its
+candidates to `data/curation/review_queue.csv`. After human merge, each new row
+receives an individual review record. Intake assessment, screening, canonical
+promotion and publication remain distinct gates.
 
 ## Correcting the archive
 
 Repository owners can use the [curator workspace](https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/curate.html)
-to open an isolated console and authenticate with the repository GitHub App
-once its backend is configured. There they can open the individually materialised
-legacy and daily candidates, filter them by review stage and submit an
-evidence-backed decision without leaving the site. Candidate actions
-update only the editorial queue; canonical promotion and publication remain
-separate reviewed changes. A second authenticated workflow handles topic
-changes, exclusions and confirmed duplicate merges for existing canonical
-records. No repository token or candidate metadata is placed in the static
-website artifact or the shared `colazeta.github.io` origin; authenticated
-candidate fields are loaded at runtime from GitHub issues on the dedicated
-Worker origin. Until activation, the workspace fails closed and links to the
-existing authenticated GitHub issue form.
+to open an isolated console and authenticate with the repository GitHub App once
+its backend is configured. Candidate actions update only the editorial queue;
+canonical promotion and publication remain separate reviewed changes. The
+curator no longer offers an AML secondary-collection route.
 
 ## Publishing the website
 
-GitHub Pages is already configured to use the pinned workflow in
+GitHub Pages is configured to use the pinned workflow in
 `.github/workflows/archive.yml`. A reviewed merge to `main` runs quality checks,
 builds `site/` and deploys the public archive. See the
-[GitHub Pages guide](docs/operations/github-pages.md) for the exact first-release
-steps and troubleshooting.
+[GitHub Pages guide](docs/operations/github-pages.md) for troubleshooting.
 
 ## Build locally
 
-Requires Python 3.11+ and Node only for the JavaScript syntax check.
+Requires Python 3.11+ and Node for JavaScript syntax checks.
 
 ```bash
 python3 scripts/validation/validate_repository.py
@@ -122,9 +117,9 @@ node --test curator-app/test/*.test.js
 python3 -m http.server 8000 --directory site
 ```
 
-Open `http://localhost:8000`. No network request is required to build or browse
-the public archive and aggregate statistics. The authenticated candidate view
-requires a configured GitHub App backend.
+The retained `aml.js`/secondary-collection build paths are compatibility and
+validation surfaces only; the active site has no AML collection. The historical
+`/aml.html` URL redirects to the main archive.
 
 ## Scientific boundary
 
@@ -134,11 +129,8 @@ embeddedness, and substantive analysis of that relationship. Money laundering,
 corruption, facilitation, passive investment and corporate offending are not
 treated as infiltration without that relational evidence.
 
-Relevant scholarly work on those adjacent phenomena can be preserved in the
-separate broader AML collection while remaining explicitly outside the review
-corpus.
-
-The complete rule is in [the eligibility codebook](docs/methodology/eligibility.md).
+Adjacent scholarly work that does not meet this rule is outside the active
+review. The complete rule is in [the eligibility codebook](docs/methodology/eligibility.md).
 The repository does not redistribute full text; it publishes curated metadata,
 classifications, provenance and lawful external links.
 
@@ -146,13 +138,12 @@ classifications, provenance and lawful external links.
 
 The current archive release metadata are in
 `data/registry/archive_versions.csv`, `CITATION.cff` and `CHANGELOG.md`.
-Release `0.2.0` is a prerelease foundation. A persistent DOI and an open reuse
-licence remain explicit release decisions; no rights are silently granted.
+Historical releases and legacy snapshots remain available for audit and are not
+rewritten when the active editorial scope changes.
 
 ## Active archive reset — 2026-09-08
 
 Release 0.3.0 starts the active archive from zero under OA-1. Previous data and
 decisions are retained in `data/legacy/pre-oa-reset-2026-09-08/` and the preserved
-Git branch. Old issue/ledger data do not populate the active cycle. Private D1
-V2 activation remains separate. See `docs/operations/archive-reset.md` for the
-exact scope, first scheduled date and rollback procedure.
+Git branch. Old issue/ledger data do not populate the active cycle. See
+`docs/operations/archive-reset.md` for the exact scope and rollback procedure.
