@@ -110,7 +110,7 @@ def paginated(repository: str, resource: str, token: str, **params: str) -> list
 
 
 def ledger_has_batch(repository: str, ledger_issue: int, token: str, batch_id: str) -> bool:
-    from fetch_surveillance_ledger import fetch_validated_runs
+    from fetch_surveillance_ledger_quarantine import fetch_validated_runs
     from daily_calendar import CYCLE
     runs = fetch_validated_runs(repository, ledger_issue, [repository.split("/")[0]], token, CYCLE)
     return any(run["batch_id"] == batch_id for run in runs)
@@ -131,7 +131,7 @@ def find_open_incident(repository: str, token: str) -> dict[str, Any] | None:
 
 def reconcile(repository: str, ledger_issue: int, token: str, day: date, *, dry_run: bool = False) -> str:
     batch_id = batch_id_for(day)
-    from fetch_surveillance_ledger import fetch_validated_runs
+    from fetch_surveillance_ledger_quarantine import fetch_validated_runs
     from daily_calendar import CYCLE
     start = date.fromisoformat(CYCLE["daily_start_date"])
     if day < start:
