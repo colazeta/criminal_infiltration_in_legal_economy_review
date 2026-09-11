@@ -18,6 +18,7 @@ on:
       - "site/enrichment*"
       - "site/model*"
       - "scripts/review_v2/**"
+      - "scripts/enrichment/**"
       - "site/classic-site.css"
       - "site/curator-consensus.js"
       - "site/curator-reading.js"
