@@ -73,6 +73,7 @@ export class Hour40Schedule {
       if (active) {
         const previous = await this.resolve(active.scheduled_at, active.attempts);
         if (previous && terminal.has(previous.status)) this.finish(active, previous, 'completed');
+        else if (previous?.status === 'failed' && previous.selected_job_id) this.finish(active, previous, 'failed');
         else this.storage.transactionSync(() => {
           this.rows("UPDATE enrichment_iteration_attempts SET outcome='interrupted',finished_at=?,error_code='lease_expired' WHERE schedule_id=? AND scheduled_at=? AND attempt=? AND outcome='running'", now, SCHEDULE_ID, active.scheduled_at, active.attempts);
           this.rows("UPDATE enrichment_iterations SET status='pending',lease_token=NULL,lease_until=NULL,retry_at=?,error_code='lease_expired' WHERE schedule_id=? AND scheduled_at=? AND lease_token=?", now, SCHEDULE_ID, active.scheduled_at, active.lease_token);
