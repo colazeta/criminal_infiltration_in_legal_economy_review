@@ -1,0 +1,36 @@
+name: Hour-40 source audit
+on:
+  push:
+    branches: [implementation/enrichment-hour40-catchup]
+    paths: [.github/workflows/hour40-source-audit.yml]
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout public source
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Set up Node
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
+        with:
+          node-version: '22'
+      - name: Baseline checks
+        run: |
+          python3 scripts/validation/validate_repository.py
+          python3 scripts/ontology/validate_ontology.py
+          python3 -m unittest discover -s tests -p 'test_*.py'
+          node --test curator-app/test/*.test.js
+      - name: Archive tracked public files only
+        if: always()
+        run: git archive HEAD -o "$RUNNER_TEMP/hour40-source.tar"
+      - name: Save public source audit
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: hour40-public-source
+          path: ${{ runner.temp }}/hour40-source.tar
+          retention-days: 1
