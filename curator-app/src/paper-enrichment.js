@@ -124,7 +124,8 @@ async function fetchJSON(url, fetcher, now) {
 async function fetchJSONBody(url, fetcher, now, signal) {
   const u = new URL(url);
   if (!['api.crossref.org','api.openalex.org','colazeta.github.io'].includes(u.hostname) || u.protocol !== 'https:') err('provider_not_authorised');
-  const response = await fetcher(url, { redirect: 'error', signal, headers: { Accept: 'application/json' } }, 10000);
+  const response = await fetcher(url, { redirect: 'manual', signal, headers: { Accept: 'application/json', 'User-Agent': 'cile-enrichment-service/1.0' } }, 10000);
+  if (response.status >= 300 && response.status < 400) err('provider_redirect_refused', 503);
   if (response.status === 429) {
     const retry = response.headers.get('Retry-After');
     const time = /^\d+$/.test(retry || '') ? now + Number(retry) * 1000 : Date.parse(retry || '');
