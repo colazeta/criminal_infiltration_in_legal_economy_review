@@ -34,7 +34,8 @@ def call(operation, *, expected_commit, target_id=None, proposal=None, run_key=N
     derived = hmac.new(secret.encode(), DOMAIN.encode(), hashlib.sha256).digest()
     signature = hmac.new(derived, (DOMAIN + '\n' + timestamp + '\n' + nonce + '\n').encode() + body, hashlib.sha256).hexdigest()
     req = Request(ORIGIN + '/api/paper-enrichment-machine', data=body, headers={
-        'Content-Type': 'application/json', 'X-Enrichment-Timestamp': timestamp,
+        'Content-Type': 'application/json', 'Accept': 'application/json',
+        'User-Agent': 'cile-enrichment-service/1.0', 'X-Enrichment-Timestamp': timestamp,
         'X-Enrichment-Nonce': nonce, 'X-Enrichment-Signature': signature,
     }, method='POST')
     try:
@@ -44,13 +45,23 @@ def call(operation, *, expected_commit, target_id=None, proposal=None, run_key=N
         return json.loads(raw)
     except HTTPError as error:
         # No raw server body, input, signature, or authentication material enters logs.
-        raise RuntimeError('enrichment_service_http_' + str(error.code)) from None
+        suffix = ''
+        try:
+            raw = error.read(4096)
+            data = json.loads(raw)
+            code = data.get('error_code') or (data.get('error', {}).get('code') if isinstance(data.get('error'), dict) else None)
+            allowed = {'service_authentication_required', 'private_storage_required', 'stale_deployment',
+                       'service_operation_failed', 'enrichment_inactive', 'payload_too_large'}
+            if code in allowed: suffix = ':' + code
+        except (ValueError, TypeError, AttributeError):
+            suffix = ':non_json_response'
+        raise RuntimeError('enrichment_service_http_' + str(error.code) + suffix) from None
     except (URLError, TimeoutError, ValueError):
         raise RuntimeError('enrichment_service_transport_or_decode_failure') from None
 
 
 def current_commit():
-    with urlopen(Request(ORIGIN + '/version', headers={'Accept':'application/json'}), timeout=15) as response:
+    with urlopen(Request(ORIGIN + '/version', headers={'Accept':'application/json','User-Agent':'cile-enrichment-service/1.0'}), timeout=15) as response:
         data = json.load(response)
     commit = data.get('commit', '')
     if not isinstance(commit, str) or len(commit) != 40: raise RuntimeError('invalid_deployment_version')
