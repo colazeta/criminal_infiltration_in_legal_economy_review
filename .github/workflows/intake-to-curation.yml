@@ -9,8 +9,10 @@ on:
 permissions:
   contents: read
 
+# All intake jobs mutate the same queue and coverage artefacts. Serialise them
+# globally so a second issue cannot race a validated write to main.
 concurrency:
-  group: intake-to-curation-${{ github.event.issue.number }}
+  group: intake-to-curation-main
   cancel-in-progress: false
 
 jobs:
@@ -50,12 +52,13 @@ jobs:
         run: python3 scripts/curation/fetch_intake_run.py
 
       - name: Stage validated candidates without screening
+        id: stage
         env:
           ISSUE_CREATED_AT: ${{ github.event.issue.created_at }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
         run: |
           action_date="$(date -u +%F)"
-          python scripts/curation/import_intake_issue.py \
+          python scripts/curation/stage_intake.py \
             --issue-body-file "$RUNNER_TEMP/intake-body.md" \
             --issue-title-file "$RUNNER_TEMP/intake-title.txt" \
             --issue-number "$ISSUE_NUMBER" \
@@ -63,8 +66,29 @@ jobs:
             --run-file "$RUNNER_TEMP/intake-run.json" \
             --date "$action_date" \
             --output "$RUNNER_TEMP/intake-import.json"
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json, os
+          data=json.load(open(os.path.join(os.environ["RUNNER_TEMP"], "intake-import.json"), encoding="utf-8"))
+          print(f"added_count={len(data['added'])}")
+          print(f"skipped_count={len(data['skipped_existing'])}")
+          print(f"batch_id={data['batch_id']}")
+          print(f"queue_total={data['queue_total']}")
+          PY
+
+      - name: Close rediscovery-only intake
+        if: steps.stage.outputs.added_count == '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          BATCH_ID: ${{ steps.stage.outputs.batch_id }}
+          SKIPPED_COUNT: ${{ steps.stage.outputs.skipped_count }}
+        run: |
+          run_url="https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          gh issue comment "$ISSUE_NUMBER" --body "Validated intake \`${BATCH_ID}\` contained no new operational candidate identity after exact reconciliation. ${SKIPPED_COUNT} rediscovery occurrence(s) remain preserved in this intake issue; no scientific duplicate decision was inferred. Run: ${run_url}"
+          gh issue close "$ISSUE_NUMBER" --reason completed
 
       - name: Resolve paper access for the complete queue
+        if: steps.stage.outputs.added_count != '0'
         env:
           OPENALEX_API_KEY: ${{ secrets.OPENALEX_API_KEY }}
           UNPAYWALL_EMAIL: ${{ secrets.UNPAYWALL_EMAIL }}
@@ -77,6 +101,7 @@ jobs:
           python scripts/retrieval/resolve_queue.py --check
 
       - name: Backfill abstract coverage for the expanded queue
+        if: steps.stage.outputs.added_count != '0'
         env:
           SEMANTIC_SCHOLAR_API_KEY: ${{ secrets.SEMANTIC_SCHOLAR_API_KEY }}
           CORE_API_KEY: ${{ secrets.CORE_API_KEY }}
@@ -92,6 +117,7 @@ jobs:
           node scripts/abstracts/backfill_coverage.mjs --check
 
       - name: Reconcile reading aids for unresolved abstracts
+        if: steps.stage.outputs.added_count != '0'
         run: |
           action_date="$(date -u +%F)"
           python scripts/curation/reconcile_reading_aids.py --date "$action_date" \
@@ -99,6 +125,7 @@ jobs:
           python scripts/curation/reconcile_reading_aids.py --check
 
       - name: Classify access for the expanded queue
+        if: steps.stage.outputs.added_count != '0'
         env:
           UNPAYWALL_EMAIL: ${{ secrets.UNPAYWALL_EMAIL }}
         run: |
@@ -117,6 +144,7 @@ jobs:
           PY
 
       - name: Validate the complete archive
+        if: steps.stage.outputs.added_count != '0'
         run: |
           python scripts/curation/build_legacy_queue.py --check
           python scripts/validation/validate_repository.py
@@ -147,11 +175,13 @@ jobs:
           python scripts/report_saturation.py
 
       - name: Create a validated review branch
+        if: steps.stage.outputs.added_count != '0'
         id: branch
         run: |
-          batch_id="$(python3 -c 'import json, os; print(json.load(open(os.path.join(os.environ["RUNNER_TEMP"], "intake-import.json"), encoding="utf-8"))["batch_id"])')"
-          added_count="$(python3 -c 'import json, os; print(len(json.load(open(os.path.join(os.environ["RUNNER_TEMP"], "intake-import.json"), encoding="utf-8"))["added"]))')"
-          queue_total="$(python3 -c 'import json, os; print(json.load(open(os.path.join(os.environ["RUNNER_TEMP"], "intake-import.json"), encoding="utf-8"))["queue_total"])')"
+          batch_id="${{ steps.stage.outputs.batch_id }}"
+          added_count="${{ steps.stage.outputs.added_count }}"
+          skipped_count="${{ steps.stage.outputs.skipped_count }}"
+          queue_total="${{ steps.stage.outputs.queue_total }}"
           base_sha="$(git rev-parse HEAD)"
           branch="curation/intake-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
           git config user.name "github-actions[bot]"
@@ -163,16 +193,19 @@ jobs:
           echo "branch=$branch" >> "$GITHUB_OUTPUT"
           echo "batch_id=$batch_id" >> "$GITHUB_OUTPUT"
           echo "added_count=$added_count" >> "$GITHUB_OUTPUT"
+          echo "skipped_count=$skipped_count" >> "$GITHUB_OUTPUT"
           echo "queue_total=$queue_total" >> "$GITHUB_OUTPUT"
           echo "base_sha=$base_sha" >> "$GITHUB_OUTPUT"
 
       - name: Persist validated intake change
+        if: steps.stage.outputs.added_count != '0'
         env:
           GH_TOKEN: ${{ github.token }}
           BRANCH: ${{ steps.branch.outputs.branch }}
           BASE_SHA: ${{ steps.branch.outputs.base_sha }}
           BATCH_ID: ${{ steps.branch.outputs.batch_id }}
           ADDED_COUNT: ${{ steps.branch.outputs.added_count }}
+          SKIPPED_COUNT: ${{ steps.branch.outputs.skipped_count }}
           QUEUE_TOTAL: ${{ steps.branch.outputs.queue_total }}
           ISSUE_CREATED_AT: ${{ github.event.issue.created_at }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
@@ -197,6 +230,11 @@ jobs:
             echo
             echo "${candidates}"
             echo
+            echo "## Exact rediscovery reconciliation"
+            echo
+            echo "- Rediscovery occurrences not duplicated in the operational queue: ${SKIPPED_COUNT}"
+            echo "- This is mechanical identity reconciliation only, not a scientific duplicate decision."
+            echo
             echo "## Reviewability coverage"
             echo
             echo "- Retrieval: ${retrieval}."
@@ -213,6 +251,7 @@ jobs:
             echo "## Record counts after the change"
             echo
             echo "- Candidates added: ${ADDED_COUNT}"
+            echo "- Exact rediscovery occurrences reconciled: ${SKIPPED_COUNT}"
             echo "- Materialised queue rows: ${QUEUE_TOTAL}"
             echo "- Canonical or publication rows changed: 0"
             echo
@@ -237,6 +276,7 @@ jobs:
             set -e
             if [ "$merge_status" -eq 0 ]; then
               gh issue comment "$ISSUE_NUMBER" --body "Validated intake merged automatically: ${pr_url}"
+              gh issue close "$ISSUE_NUMBER" --reason completed || true
               {
                 echo "## Intake merged"
                 echo
@@ -262,6 +302,7 @@ jobs:
             set -e
             if [ "$push_status" -eq 0 ]; then
               gh issue comment "$ISSUE_NUMBER" --body "Validated intake fast-forwarded to main because repository policy blocked the preferred PR/automerge path. Audit branch: \`${BRANCH}\`. Run: ${run_url}"
+              gh issue close "$ISSUE_NUMBER" --reason completed || true
               {
                 echo "## Intake fast-forwarded to main"
                 echo
