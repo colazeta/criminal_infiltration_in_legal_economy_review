@@ -121,7 +121,7 @@ def issue_inventory(repository: str, token: str) -> dict[str, dict]:
         if "pull_request" in issue:
             continue
         body = str(issue.get("body") or "")
-        match = re.search(r"<!--\s*curator-candidate:([A-Z0-9-]+)\s*-->", body)
+        match = re.search(r"<!--\s*curator-candidate:([A-Za-z0-9-]+)\s*-->", body)
         if not match:
             continue
         candidate_id = match.group(1)
