@@ -70,7 +70,7 @@ class AuditHardeningTests(unittest.TestCase):
             issue=candidate_issue(exa_run(),number=201)
             import_candidates(root,issue['body'],issue['title'],'201','2026-09-09')
             receipt=root/'data/curation/intake_access/ACADEMIC-2026-09-09.json'; original=receipt.read_bytes()
-            queue.write_bytes(before)  # Reproduce kill after receipt publish, before queue replace.
+            queue.write_bytes(before)
             import_candidates(root,issue['body'],issue['title'],'201','2026-09-09')
             self.assertEqual(receipt.read_bytes(),original)
             queue.write_bytes(before);receipt.write_bytes(original+b' ')
@@ -115,6 +115,7 @@ class AuditHardeningTests(unittest.TestCase):
             broken.update(expectedDays=1 if state=='completed' else 0,completedDays=int(state=='completed'),missingDays=0,completionRate=1 if state=='completed' else None,sourceCompletionRate30=0 if state=='completed' else None)
             with self.assertRaises(ValueError): validate_calendar(broken,[])
 
+
 class LedgerImportGateTests(unittest.TestCase):
     def test_absent_ledger_retries_then_checks_event_before_producing_context(self):
         from unittest.mock import patch
@@ -123,7 +124,7 @@ class LedgerImportGateTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             root=Path(d); event=root/'event.json';event.write_text(json.dumps({'issue':issue}))
             env={'GITHUB_EVENT_PATH':str(event),'GITHUB_REPOSITORY_OWNER':'colazeta','GITHUB_REPOSITORY':'colazeta/criminal_infiltration_in_legal_economy_review','GH_TOKEN':'synthetic','RUNNER_TEMP':d}
-            with patch.dict('os.environ',env), patch.object(gate,'fetch_validated_runs',side_effect=[[],[run]]) as fetch, patch.object(gate.time,'sleep') as sleep, patch('fetch_surveillance_ledger.api_get',return_value=(issue,{})):
+            with patch.dict('os.environ',env), patch.object(gate,'fetch_validated_run_for_intake',side_effect=[None,run]) as fetch, patch.object(gate.time,'sleep') as sleep, patch.object(gate,'api_get',return_value=(issue,{})):
                 gate.main()
                 self.assertEqual(fetch.call_args.args[2],['colazeta'])
                 sleep.assert_called_once_with(15)
@@ -135,7 +136,7 @@ class LedgerImportGateTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             root=Path(d);event=root/'event.json';event.write_text(json.dumps({'issue':candidate_issue(exa_run())}))
             env={'GITHUB_EVENT_PATH':str(event),'GITHUB_REPOSITORY_OWNER':'colazeta','GITHUB_REPOSITORY':'colazeta/criminal_infiltration_in_legal_economy_review','GH_TOKEN':'synthetic','RUNNER_TEMP':d}
-            with patch.dict('os.environ',env), patch.object(gate,'fetch_validated_runs',side_effect=MetricsError('synthetic invalid ledger')), patch.object(gate.time,'sleep') as sleep:
+            with patch.dict('os.environ',env), patch.object(gate,'fetch_validated_run_for_intake',side_effect=MetricsError('synthetic invalid ledger')), patch.object(gate.time,'sleep') as sleep:
                 with self.assertRaises(MetricsError):gate.main()
                 sleep.assert_not_called()
             self.assertFalse((root/'intake-run.json').exists())
@@ -148,6 +149,6 @@ class LedgerImportGateTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             root=Path(d);event=root/'event.json';event.write_text(json.dumps({'issue':issue}))
             env={'GITHUB_EVENT_PATH':str(event),'GITHUB_REPOSITORY_OWNER':'colazeta','GITHUB_REPOSITORY':'colazeta/criminal_infiltration_in_legal_economy_review','GH_TOKEN':'synthetic','RUNNER_TEMP':d}
-            with patch.dict('os.environ',env), patch.object(gate,'fetch_validated_runs',return_value=[run]), patch('fetch_surveillance_ledger.api_get',return_value=(live,{})):
+            with patch.dict('os.environ',env), patch.object(gate,'fetch_validated_run_for_intake',return_value=run), patch.object(gate,'api_get',return_value=(live,{})):
                 with self.assertRaisesRegex(ValueError,'differs from authenticated event'):gate.main()
             self.assertFalse((root/'intake-run.json').exists())
