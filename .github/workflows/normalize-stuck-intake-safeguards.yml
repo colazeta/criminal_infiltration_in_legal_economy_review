@@ -1,0 +1,23 @@
+name: Normalize stuck intake safeguards
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - scripts/maintenance/normalize_stuck_intake_safeguards.py
+      - .github/workflows/normalize-stuck-intake-safeguards.yml
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  normalize:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # pinned
+      - name: Normalize allow-listed intake safeguards
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python scripts/maintenance/normalize_stuck_intake_safeguards.py
