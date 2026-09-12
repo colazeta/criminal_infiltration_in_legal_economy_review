@@ -1,0 +1,93 @@
+[
+  {
+    "source_comment_id": 5642209455,
+    "batch_id": "ACADEMIC-2026-09-12-EXTRA-7652f77d6fde",
+    "status": "completed",
+    "sha256": "dca6c3897489400ed1b99e4f6de39323c1b33246b61941edbe69ee00b98fbe18",
+    "path": "tmp/terminal-recovery-payloads/5642209455.md"
+  },
+  {
+    "source_comment_id": 5642881870,
+    "batch_id": "ACADEMIC-2026-09-12-EXTRA-8943d605c4aa",
+    "status": "completed",
+    "sha256": "132ce34e0f171850ef274080069a827ce268fc4674884944b8049bfd77fd13cb",
+    "path": "tmp/terminal-recovery-payloads/5642881870.md"
+  },
+  {
+    "source_comment_id": 5644857109,
+    "batch_id": "ACADEMIC-2026-09-12-EXTRA-486aaf42fb90",
+    "status": "completed",
+    "sha256": "80e9774d016ed34fac0b0bc7fc74bae520e2a68652b45be6bd483071f1ca256a",
+    "path": "tmp/terminal-recovery-payloads/5644857109.md"
+  },
+  {
+    "source_comment_id": 5645417536,
+    "batch_id": "ACADEMIC-2026-09-12-EXTRA-748af9c3f874",
+    "status": "completed",
+    "sha256": "eb5412225a0b5e1ca9355b227f4ec81d4c425ff0842021241dea857585bb0360",
+    "path": "tmp/terminal-recovery-payloads/5645417536.md"
+  },
+  {
+    "source_comment_id": 5645995942,
+    "batch_id": "ACADEMIC-2026-09-12-EXTRA-069e6c0a5fa8",
+    "status": "completed",
+    "sha256": "8e6d35623232044eac4831770127d1b8e302aaf49800f1eaa5640bcd2e99cc4a",
+    "path": "tmp/terminal-recovery-payloads/5645995942.md"
+  },
+  {
+    "source_comment_id": 5646951308,
+    "batch_id": "ACADEMIC-2026-09-12-EXTRA-6e00fc2aca6a",
+    "status": "completed",
+    "sha256": "08535432f5ab3badfb2e88ecd73a6bd8894f4e926ca5d30c30b17a46e85fe706",
+    "path": "tmp/terminal-recovery-payloads/5646951308.md"
+  },
+  {
+    "source_comment_id": 5647317502,
+    "batch_id": "ACADEMIC-2026-09-12-EXTRA-b54c1a6aa281",
+    "status": "completed",
+    "sha256": "2af3b9ed0b04e4f2d1f00d362be16497f4c9961f75f17f1aca0827daf8ac4098",
+    "path": "tmp/terminal-recovery-payloads/5647317502.md"
+  },
+  {
+    "source_comment_id": 5647606053,
+    "batch_id": "ACADEMIC-2026-09-12-EXTRA-2231aace38f9",
+    "status": "completed",
+    "sha256": "02dd542731d7e3094f37f4dd5306e9a854909c15a0ff952055d2dce611cd7bef",
+    "path": "tmp/terminal-recovery-payloads/5647606053.md"
+  },
+  {
+    "source_comment_id": 5647897601,
+    "batch_id": "ACADEMIC-2026-09-12-EXTRA-335f7df7ae34",
+    "status": "completed",
+    "sha256": "b140128b18cc0e6ff98d7604fa94b36c16da82e927a029ee1ad410d3ced64f10",
+    "path": "tmp/terminal-recovery-payloads/5647897601.md"
+  },
+  {
+    "source_comment_id": 5647898301,
+    "batch_id": "ACADEMIC-2026-09-12-EXTRA-570dae192194",
+    "status": "completed",
+    "sha256": "3f501c1410cdd9801ec0dc807149d7279e58c892609b505c342d51731dbcdebb",
+    "path": "tmp/terminal-recovery-payloads/5647898301.md"
+  },
+  {
+    "source_comment_id": 5647926004,
+    "batch_id": "ACADEMIC-2026-09-12-EXTRA-724679219793",
+    "status": "completed",
+    "sha256": "99649f5334fc0f09e5a0105f9b729979bdbcf2c55831b92aa5c7a1cd65e35048",
+    "path": "tmp/terminal-recovery-payloads/5647926004.md"
+  },
+  {
+    "source_comment_id": 5647932606,
+    "batch_id": "ACADEMIC-2026-09-12-EXTRA-4faa0ba491c4",
+    "status": "completed",
+    "sha256": "f7769e8d53966e1b0667fe1bce518c4e404a8bb85ef699c63e9e09dfa9c2fa8c",
+    "path": "tmp/terminal-recovery-payloads/5647932606.md"
+  },
+  {
+    "source_comment_id": 5647933485,
+    "batch_id": "ACADEMIC-2026-09-12-EXTRA-9bdb3c1e67c7",
+    "status": "completed",
+    "sha256": "add418f53e4b2a051bd388f3a30bdfd6423da352558331f4711e1630aae58b29",
+    "path": "tmp/terminal-recovery-payloads/5647933485.md"
+  }
+]
