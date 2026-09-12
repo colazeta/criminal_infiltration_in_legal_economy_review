@@ -109,6 +109,33 @@
       "synopsis": "The exact 2021 Technical Annexes companion to the EU/RAND risk-mapping report is verified by DOI 10.2837/442937 and authoritative EU/RAND records, and the Publications Office lists an English PDF. Substantive annex methods, variables and findings were not extracted in this pass.",
       "checkedAt": "2026-09-12",
       "note": "Parallel Search matched the exact title, authors and DOI on RAND Europe and the EU Publications Office. Evidence basis: partial_text limited to authoritative publication metadata and download availability; substantive annex content remains not_verifiable."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-09-EXTRA-5e31cc756b0e-009",
+      "kind": "verified_abstract_source",
+      "sourceLabel": "SSRN exact abstract record located with Parallel Search",
+      "sourceUrl": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=5203951",
+      "synopsis": "The paper conceptualises public financial-management systems as diagnostic infrastructures whose budgeting, accounting and procurement routines can reveal behavioural drift when institutional integrity erodes. It uses Italian municipalities dissolved for Mafia infiltration under Law 164/1991 as the empirical setting for examining that drift.",
+      "checkedAt": "2026-09-13",
+      "note": "Parallel Search fetched the exact SSRN title and four-author record for the 33-page paper, first posted 6 May 2025 and later revised. Evidence basis: abstract_only. The paper body was not used in this pass, so methods, variables and findings not explicit in the SSRN abstract remain not_verifiable; no scientific decision is persisted."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-09-EXTRA-85e203d4eb5a-002",
+      "kind": "full_text_intro",
+      "sourceLabel": "Bristol University Press OA chapter located with Parallel Search",
+      "sourceUrl": "https://bristoluniversitypressdigital.com/downloadpdf/edcollchap-oa/book/9781529247145/ch007.pdf",
+      "synopsis": "The chapter argues for studying criminal infiltration of the legal economy beyond a mafia-specific lens. It frames infiltration around the channelling of resources and the exertion of control by organised-crime actors within legal businesses and discusses why the research agenda should extend beyond traditional mafia-type organisations.",
+      "checkedAt": "2026-09-13",
+      "note": "Parallel Search fetched the authoritative Bristol University Press full-text chapter and publisher XML, matching Giovanni Nicolazzo, the exact title, publication date and pages 111–124. Evidence basis: full_text. The publisher record assigns DOI 10.51952/9781529247145.ch007, while the current review record carries 10.56687/9781529247145-010; this identifier conflict is preserved explicitly and requires separate metadata reconciliation. The OA locator is not treated as authority to overwrite the registered DOI or canonical identity, and no scientific decision is persisted."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-09-EXTRA-85e203d4eb5a-007",
+      "kind": "verified_abstract_source",
+      "sourceLabel": "Oxford University Research Archive thesis record located with Parallel Search",
+      "sourceUrl": "https://ora.ox.ac.uk/objects/uuid:1de693d7-e5f5-4876-b7e7-7e6c1e2094d6",
+      "synopsis": "The thesis asks why and how mafias expand to new territories, when they engage in governance rather than trading activities, and when expansion fails. It tests theory-derived hypotheses against three case studies of the 'Ndrangheta in Germany using hard-to-reach sources including judicial data, intelligence reports and archival material.",
+      "checkedAt": "2026-09-13",
+      "note": "Parallel Search fetched the exact Oxford repository record matching Zora Lea Hauser, 2022 and the PhD-thesis title. Evidence basis: abstract_only for this synopsis. ORA also lists a 3.2 MB dissemination-version PDF, but the connector did not expose a stable direct file URL in this pass, so the existing source-only retrieval locator is not promoted to full_text automatically; substantive claims beyond the ORA abstract remain not_verifiable."
     }
   ]
 }
