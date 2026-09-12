@@ -2,7 +2,9 @@ name: Apply Parallel Search OA retrieval lane
 on:
   push:
     branches: [maintenance/parallel-search-oa-retrieval]
-    paths: [.github/workflows/apply-parallel-oa-retrieval.yml]
+    paths:
+      - .github/workflows/apply-parallel-oa-retrieval.yml
+      - tests/test_parallel_search_selected_paper_lane.py
 permissions:
   contents: write
 jobs:
