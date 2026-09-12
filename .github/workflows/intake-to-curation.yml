@@ -129,6 +129,14 @@ jobs:
           python scripts/access/reconcile_access_evidence.py
           python scripts/access/classify_access.py --check
           python scripts/access/reconcile_access_evidence.py --check
+          python3 - <<'PY' > "$RUNNER_TEMP/access-coverage-summary.json"
+          import csv, json
+          from collections import Counter
+          with open("data/curation/access_coverage.csv", newline="", encoding="utf-8-sig") as handle:
+              rows = list(csv.DictReader(handle))
+          counts = Counter(row["access_status"] for row in rows)
+          print(json.dumps({"total": len(rows), "open": counts.get("open", 0), "restricted": counts.get("restricted", 0), "unknown": counts.get("unknown", 0)}, sort_keys=True))
+          PY
 
       - name: Validate the complete archive
         if: steps.stage.outputs.added_count != '0'
@@ -191,11 +199,20 @@ jobs:
         run: |
           run_url="https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
           body_file="$RUNNER_TEMP/intake-curation-pr.md"
+          abstract_coverage="$(cat "$RUNNER_TEMP/abstract-coverage-summary.json")"
+          reading_aids="$(cat "$RUNNER_TEMP/reading-aid-summary.json")"
+          access_coverage="$(cat "$RUNNER_TEMP/access-coverage-summary.json")"
           {
             echo "## Authorised intake source"
             echo "- Batch: \`${BATCH_ID}\`"
             echo "- Source issue: #${ISSUE_NUMBER}"
             echo "- Validated workflow run: ${run_url}"
+            echo
+            echo "## Reviewability coverage"
+            echo "- Abstract coverage: \`${abstract_coverage}\`."
+            echo "- Reading-aid reconciliation: \`${reading_aids}\`."
+            echo "- Access coverage: \`${access_coverage}\`."
+            echo "- Retrieval, abstract, reading-aid and access metadata are preparatory; the preceding steps only make each paper reviewable and auditable."
             echo
             echo "## Changed files"
             git diff --name-only main...HEAD | sed 's/^/- `/' | sed 's/$/`/'
