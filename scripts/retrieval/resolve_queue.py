@@ -41,6 +41,7 @@ COVERAGE_PATH = ROOT / "data" / "curation" / "retrieval_coverage.csv"
 OPENALEX_API = "https://api.openalex.org"
 CROSSREF_API = "https://api.crossref.org/v1"
 UNPAYWALL_API = "https://api.unpaywall.org/v2"
+SELECTED_PAPER_NOTE = "Parallel Search selected-paper OA lane:"
 
 FIELDS = [
     "candidate_id",
@@ -131,6 +132,32 @@ def split_urls(value: object) -> list[str]:
             result.append(url)
             seen.add(url)
     return result
+
+
+def split_labels(value: object) -> list[str]:
+    return [part.strip() for part in str(value or "").split("; ") if part.strip()]
+
+
+def join_unique_labels(*values: object) -> str:
+    result: list[str] = []
+    seen: set[str] = set()
+    for value in values:
+        for part in split_labels(value):
+            if part not in seen:
+                result.append(part)
+                seen.add(part)
+    return "; ".join(result)
+
+
+def join_unique_urls(*values: object) -> str:
+    result: list[str] = []
+    seen: set[str] = set()
+    for value in values:
+        for url in split_urls(value):
+            if url not in seen:
+                result.append(url)
+                seen.add(url)
+    return "; ".join(result)
 
 
 def looks_like_pdf(url: str) -> bool:
@@ -407,14 +434,67 @@ def valid_iso_date(value: str) -> bool:
         return False
 
 
+def same_identity(row: dict[str, str], existing: dict[str, str]) -> bool:
+    return (
+        clean(existing.get("title")) == clean(row.get("title"))
+        and normalise_doi(existing.get("doi")) == normalise_doi(row.get("doi"))
+    )
+
+
+def preserve_selected_paper_resolution(
+    row: dict[str, str],
+    previous: dict[str, str] | None,
+    resolved: dict[str, str],
+) -> dict[str, str]:
+    """Keep curator-verified selected-paper evidence across metadata refreshes.
+
+    The bulk resolver may discover a different exact manifestation, and that is
+    allowed. It must not, however, downgrade a previously verified selected-paper
+    full-text locator to a landing page solely because a metadata provider omitted
+    the PDF on a later call. Preservation is restricted to an unchanged queue
+    identity and to rows carrying the explicit selected-paper provenance marker.
+    """
+    if not previous or SELECTED_PAPER_NOTE not in str(previous.get("notes") or ""):
+        return resolved
+    if not same_identity(row, previous):
+        return resolved
+
+    result = dict(resolved)
+    previous_full_text = safe_url(previous.get("full_text_url"))
+    if (
+        result.get("resolution_status") != "full_text"
+        and previous.get("resolution_status") == "full_text"
+        and previous_full_text
+    ):
+        result["resolution_status"] = "full_text"
+        result["best_url"] = previous_full_text
+        result["best_url_kind"] = "full_text"
+        result["full_text_url"] = previous_full_text
+
+    result["source_urls"] = join_unique_urls(result.get("source_urls"), previous.get("source_urls"))
+    result["resolution_sources"] = join_unique_labels(
+        result.get("resolution_sources"), previous.get("resolution_sources")
+    )
+    result["match_method"] = join_unique_labels(result.get("match_method"), previous.get("match_method"))
+    previous_notes = str(previous.get("notes") or "").strip()
+    if previous_notes and previous_notes not in str(result.get("notes") or ""):
+        result["notes"] = "; ".join(part for part in (result.get("notes", ""), previous_notes) if part)
+    if previous_full_text:
+        result["match_confidence"] = "high"
+    return result
+
+
 def should_refresh(row: dict[str, str], existing: dict[str, str] | None, checked_at: str, max_age_days: int) -> bool:
     if not existing:
         return True
-    if clean(existing.get("title")) != clean(row.get("title")):
+    if not same_identity(row, existing):
         return True
-    if normalise_doi(existing.get("doi")) != normalise_doi(row.get("doi")):
-        return True
-    if clean(existing.get("source_urls")) != "; ".join(split_urls(row.get("source_links"))):
+    queue_sources = set(split_urls(row.get("source_links")))
+    existing_sources = set(split_urls(existing.get("source_urls")))
+    # Enrichment may legitimately add verified manifestations beyond discovery
+    # source_links. Extra URLs must not themselves force a perpetual refresh;
+    # refresh immediately only when a current queue source has not yet been seen.
+    if not queue_sources.issubset(existing_sources):
         return True
     if not valid_iso_date(existing.get("checked_at", "")):
         return True
@@ -476,7 +556,8 @@ def resolve_all(queue_path: Path, coverage_path: Path, checked_at: str, max_age_
         previous = old.get(candidate_id)
         if refresh_all or should_refresh(row, previous, checked_at, max_age_days):
             print(f"[{index}/{len(queue_rows)}] resolving {candidate_id}")
-            resolved.append(resolve_row(row, checked_at))
+            fresh = resolve_row(row, checked_at)
+            resolved.append(preserve_selected_paper_resolution(row, previous, fresh))
             refreshed += 1
             time.sleep(0.08)
         else:

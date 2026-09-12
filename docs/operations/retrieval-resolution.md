@@ -32,6 +32,12 @@ The bridge accepts only an existing candidate whose override is `full_text_intro
 
 This bridge exists to keep the curator action, access classification and persisted retrieval projection consistent with an already verified reading source. Other reading-aid kinds, including summaries and metadata warnings, do not change retrieval status.
 
+### Refresh preservation for selected-paper evidence
+
+A bulk metadata refresh may expose a different exact manifestation of the same work or may temporarily expose only a landing page. The resolver therefore treats previously recorded `Parallel Search selected-paper OA lane:` evidence as durable candidate-bound retrieval provenance while the queue title and DOI identity remain unchanged. A fresh exact full-text manifestation may become the primary URL, but earlier verified source URLs and their provenance remain visible. A metadata refresh is not allowed to downgrade a previously verified selected-paper full-text location to landing-only access merely because a provider omitted the PDF in a later response.
+
+Extra verified manifestations in `source_urls` also do not by themselves trigger a perpetual resolver refresh: all current queue `source_links` must be represented, while additional candidate-bound retrieval evidence is permitted. A title or DOI change disables this preservation path so that identity changes remain explicit rather than being silently carried forward.
+
 ## Persisted fields
 
 The retrieval ledger records:
