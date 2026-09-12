@@ -94,8 +94,8 @@ class ParallelSearchSelectedPaperLaneTests(unittest.TestCase):
 
         expected = {
             "CAND-ACADEMIC-2026-09-09-001": ("ifs.org.uk", "full_text_intro", "full_text"),
-            "CAND-ACADEMIC-2026-09-09-EXTRA-5e31cc756b0e-010": ("rand.org", "publisher_summary", "partial_text"),
-            "CAND-ACADEMIC-2026-09-09-EXTRA-6b5b5e038ac4-002": ("op.europa.eu", "metadata_warning", "partial_text"),
+            "CAND-ACADEMIC-2026-09-09-EXTRA-5e31cc756b0e-010": ("op.europa.eu", "full_text_intro", "full_text"),
+            "CAND-ACADEMIC-2026-09-09-EXTRA-6b5b5e038ac4-002": ("op.europa.eu", "full_text_intro", "full_text"),
         }
         for candidate, (host, kind, coverage) in expected.items():
             self.assertIn(candidate, queue_ids)
@@ -112,8 +112,29 @@ class ParallelSearchSelectedPaperLaneTests(unittest.TestCase):
         self.assertIn("2023", covid["sourceLabel"])
         self.assertIn("2025", covid["note"])
         self.assertIn("not silently substituted", covid["note"])
-        self.assertIn("not_verifiable", records["CAND-ACADEMIC-2026-09-09-EXTRA-5e31cc756b0e-010"]["note"])
-        self.assertIn("not_verifiable", records["CAND-ACADEMIC-2026-09-09-EXTRA-6b5b5e038ac4-002"]["note"])
+        final_report = records["CAND-ACADEMIC-2026-09-09-EXTRA-5e31cc756b0e-010"]
+        annexes = records["CAND-ACADEMIC-2026-09-09-EXTRA-6b5b5e038ac4-002"]
+        self.assertIn("10.2837/64101", final_report["note"])
+        self.assertIn("10.2837/442937", annexes["note"])
+        self.assertNotEqual(final_report["sourceUrl"], annexes["sourceUrl"])
+        self.assertIn("distinct", final_report["note"])
+        self.assertIn("distinct", annexes["note"])
+
+    def test_fourth_parallel_search_batch_promotes_only_verified_full_text(self):
+        payload = json.loads((ROOT / "data/curation/reading_aid_overrides.json").read_text(encoding="utf-8"))
+        records = {row["candidateId"]: row for row in payload["records"]}
+        with (ROOT / "data/curation/review_queue.csv").open(encoding="utf-8", newline="") as handle:
+            queue_ids = {row["candidate_id"] for row in csv.DictReader(handle)}
+
+        candidate = "CAND-ACADEMIC-2026-09-09-EXTRA-6b5b5e038ac4-003"
+        self.assertIn(candidate, queue_ids)
+        row = records[candidate]
+        self.assertEqual(row["kind"], "full_text_intro")
+        self.assertIn("www.ojp.gov/pdffiles1/Digitization/93999NCJRS.pdf", row["sourceUrl"])
+        self.assertIn("NCJ 93999", row["note"])
+        self.assertIn("Evidence basis: full_text", row["note"])
+        self.assertNotIn("parallel-search", row["sourceUrl"].lower())
+        self.assertLess(len(row["synopsis"]), 900)
 
 
 if __name__ == "__main__":
