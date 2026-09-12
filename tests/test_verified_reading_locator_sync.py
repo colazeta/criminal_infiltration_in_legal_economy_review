@@ -154,8 +154,9 @@ class VerifiedReadingLocatorSyncTests(unittest.TestCase):
         eligible = {row["candidate_id"] for row in MODULE.eligible_overrides(MODULE.OVERRIDES_PATH)}
         self.assertIn("CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-014", eligible)
         self.assertIn("CAND-ACADEMIC-2026-09-09-001", eligible)
-        self.assertNotIn("CAND-ACADEMIC-2026-09-09-EXTRA-5e31cc756b0e-010", eligible)
-        self.assertNotIn("CAND-ACADEMIC-2026-09-09-EXTRA-6b5b5e038ac4-002", eligible)
+        self.assertIn("CAND-ACADEMIC-2026-09-09-EXTRA-5e31cc756b0e-010", eligible)
+        self.assertIn("CAND-ACADEMIC-2026-09-09-EXTRA-6b5b5e038ac4-002", eligible)
+        self.assertIn("CAND-ACADEMIC-2026-09-09-EXTRA-6b5b5e038ac4-003", eligible)
 
     def test_workflow_runs_bridge_before_coverage_check(self):
         workflow = (ROOT / ".github/workflows/retrieval-resolution.yml").read_text(encoding="utf-8")
