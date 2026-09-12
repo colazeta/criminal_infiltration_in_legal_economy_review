@@ -1,14 +1,17 @@
 #!/usr/bin/env python3
-"""Read the governed surveillance ledger while quarantining one invalid batch.
+"""Read the governed surveillance ledger while quarantining audited invalid batches.
 
 The batch ACADEMIC-2026-09-11-EXTRA-2520dfa54e12 was later proven to repeat
-candidate identities already present in intake #226. Its immutable terminal
-comment must remain available for audit, but it must not enter the active
-validated run set, public statistics, heartbeat state, or downstream intake
-reconciliation.
+candidate identities already present in intake #226. The batch
+ACADEMIC-2026-09-11-EXTRA-f28583e91573 was later proven to repeat the work
+identified by DOI 10.1177/1477370818803050 already present in intake #225.
+Their immutable terminal comments must remain available for audit, but they must
+not enter the active validated run set, public statistics, heartbeat state, or
+downstream intake reconciliation.
 
-This module does not weaken validation for any other run. It filters exactly one
-immutable GitHub issue-comment ID before delegating to the canonical validator.
+This module does not weaken validation for any other run. It filters only the
+explicitly audited immutable GitHub issue-comment IDs below before delegating to
+the canonical validator.
 """
 
 from __future__ import annotations
@@ -21,6 +24,7 @@ import fetch_surveillance_ledger as _base
 
 QUARANTINED_LEDGER_COMMENTS = {
     5631393628: "ACADEMIC-2026-09-11-EXTRA-2520dfa54e12",
+    5639689529: "ACADEMIC-2026-09-11-EXTRA-f28583e91573",
 }
 _RAW_API_GET = _base.api_get
 
