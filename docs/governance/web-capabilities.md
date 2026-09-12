@@ -35,6 +35,12 @@ No Serper/Exa Contents, Deep Search, Agent, crawl, x402 or paid extraction capab
 
 Firecrawl and Cloudflare Browser Run remain registered but `automatic_allowed=false` pending a separate hard free-plan boundary.
 
+## Connector-side Parallel Search lane
+
+Parallel Search selected-paper retrieval is an authenticated ChatGPT connector workflow, **not a Cloudflare Worker runtime provider** and not a replacement for the automatic zero-spend resolver above. For already-registered candidates, the owner authorises it to locate and inspect OA publisher/repository manifestations, including substantive information in an accessible open paper. The final evidence identity is the publisher, repository or document URL; the connector itself is recorded only as retrieval provenance.
+
+The assisted lane writes only through the existing reviewed retrieval/reading-support artefacts and must pass repository validation. It never consumes or changes Serper/Exa/Tavily project budgets, never creates a new discovery candidate, and never opens the scientific extraction gate. Search snippets alone are insufficient when the underlying paper is available: prefer the final paper/abstract source and record the actual evidence coverage.
+
 ## Persistent project budgets
 
 A provider free tier is not enough by itself. Credit-priced automatic providers also require a **persistent project-side budget** stored in the existing Cloudflare Durable Object namespace.

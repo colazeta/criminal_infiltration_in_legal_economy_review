@@ -5,11 +5,11 @@
     {
       "candidateId": "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-005",
       "kind": "verified_abstract_source",
-      "sourceLabel": "Scite exact DOI record",
-      "sourceUrl": "https://doi.org/10.2139/ssrn.4912709",
-      "synopsis": "The paper develops a machine-learning approach for identifying firms connected to organised crime from financial-statement information, focusing on accounting patterns created by the tension between mandatory disclosure and illicit objectives.",
-      "checkedAt": "2026-09-10",
-      "note": "Exact DOI 10.2139/ssrn.4912709 and title/authors matched the queue candidate and Scite exposed an abstract. SciSpace and Scholar Gateway did not return the exact work; Sider Scholar could not resolve the DOI; Elicit API access is unavailable on the connected plan; Consensus monthly search quota is exhausted. No abstract text is persisted here."
+      "sourceLabel": "SSRN exact paper record located with Parallel Search",
+      "sourceUrl": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4912709",
+      "synopsis": "The paper constructs a labelled dataset of 2,082 Mafia-connected Italian firms from judicial evidence and applies gradient-boosted classification to financial-statement information. The abstract reports hold-out performance of 75.8% AUC and 90.4% precision, using accounting patterns to identify criminal connections.",
+      "checkedAt": "2026-09-12",
+      "note": "Parallel Search fetched the exact SSRN title/authors/DOI record and located the direct 50-page PDF. The synopsis is abstract_only; the full-text locator is stored separately in retrieval_coverage.csv. No verbatim abstract or model-derived scientific decision is persisted here."
     },
     {
       "candidateId": "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-011",
@@ -37,6 +37,24 @@
       "synopsis": "The article estimates the effects of judicial administration on Italian criminal firms over 2004–2016 and reports deterioration in profitability and efficiency together with higher leverage after criminal management is removed, highlighting the difficulty of re-establishing viable market-based governance.",
       "checkedAt": "2026-09-10",
       "note": "Exact title and DOI 10.1007/s11187-020-00439-4 matched the queue candidate and SciSpace exposed the published abstract. Scite confirmed the bibliographic identity but its abstract field was contaminated by repository licensing text and was therefore not used as abstract evidence. No abstract text is persisted here."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-001",
+      "kind": "verified_abstract_source",
+      "sourceLabel": "American Economic Association publisher record located with Parallel Search",
+      "sourceUrl": "https://www.aeaweb.org/articles?id=10.1257%2Faer.20201015",
+      "synopsis": "The article studies firm-level effects of Mafia infiltration by combining investigative records with panel data on governance and balance sheets. It reports that targeted firms tend to be young and less efficient and that infiltration is associated with higher revenues without proportional input growth, alongside worsening financial conditions and eventual market exit.",
+      "checkedAt": "2026-09-12",
+      "note": "Parallel Search located and fetched the exact AEA DOI/title/authors publisher record. The synopsis uses the verified publisher abstract only (abstract_only); the existing retrieval ledger already records the publisher full-text PDF. No abstract text is persisted here."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-003",
+      "kind": "verified_abstract_source",
+      "sourceLabel": "RePEc/CEPR abstract record located with Parallel Search",
+      "sourceUrl": "https://ideas.repec.org/p/cpr/ceprdp/18982.html",
+      "synopsis": "The paper develops a framework for distinguishing organised-crime groups’ motives for infiltrating legal firms and validates it with new Italian Financial Intelligence Unit data. The abstract estimates that about 2% of Italian firms have links with organised crime and distinguishes three principal infiltration motives.",
+      "checkedAt": "2026-09-12",
+      "note": "Parallel Search verified the 2024 title/authors on the RePEc CEPR record and located an exact full-text IZA manifestation at EconStor, recorded separately in retrieval_coverage.csv. This synopsis is abstract_only; no full text or verbatim abstract is committed and versions are not silently canonicalised."
     }
   ]
 }
