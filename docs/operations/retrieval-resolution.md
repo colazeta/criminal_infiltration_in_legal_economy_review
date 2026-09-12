@@ -24,6 +24,14 @@ The resolver attempts, in priority order:
 
 For records without a DOI, title/year matching is deliberately strict. A weak bibliographic match is rejected rather than used as a paper URL.
 
+### Curator-verified full-text locator bridge
+
+Targeted reading retrieval can establish a full-text manifestation that the bulk resolver did not discover. To prevent that verified locator from remaining only in the reading-support layer, `scripts/retrieval/apply_verified_reading_locators.py` synchronises a deliberately narrow subset of `reading_aid_overrides.json` into the retrieval ledger after the normal resolver pass.
+
+The bridge accepts only an existing candidate whose override is `full_text_intro`, whose final source is HTTPS and whose note explicitly records `Evidence basis: full_text`. It does not infer open-access rights from availability, does not create candidates, and does not decide eligibility or canonical identity. When retrieval coverage already has a full-text location, that existing primary location is preserved and the curator-verified locator is added as corroborating provenance rather than silently replacing it.
+
+This bridge exists to keep the curator action, access classification and persisted retrieval projection consistent with an already verified reading source. Other reading-aid kinds, including summaries and metadata warnings, do not change retrieval status.
+
 ## Persisted fields
 
 The retrieval ledger records:
@@ -47,11 +55,12 @@ No abstract or full text is persisted by this layer.
 `.github/workflows/retrieval-resolution.yml` runs:
 
 - whenever the curator queue changes;
-- whenever the resolver or its workflow changes;
+- whenever verified reading-aid locators change;
+- whenever the resolver, verified-locator bridge or workflow changes;
 - weekly, so older rows can be refreshed;
 - manually on demand.
 
-The workflow resolves the complete queue, validates one-row-per-candidate coverage, and runs the governed repository tests before attempting any write-back.
+The workflow resolves the complete queue, applies the verified full-text locator bridge, validates one-row-per-candidate coverage and the bridge invariants, and runs the governed repository tests before attempting any write-back.
 
 The preferred write-back is an auditable pull request. Some repository configurations disable pull-request creation by `GITHUB_TOKEN`; when that policy applies, the workflow may fast-forward the already validated mechanical commit directly to `main` **only if `main` has not moved since resolution began**. It never force-pushes. If both PR creation and the guarded fast-forward are blocked, the validated branch is retained and the workflow reports the persistence limitation without discarding the resolved data.
 
