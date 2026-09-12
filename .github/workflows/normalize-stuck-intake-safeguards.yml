@@ -15,7 +15,8 @@ jobs:
   normalize:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4/v5-compatible pinned checkout
+      - name: Check out repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # pinned
       - name: Normalize allow-listed intake safeguards
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
