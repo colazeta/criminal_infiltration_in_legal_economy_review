@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import copy
 import json
-import re
 import tempfile
 import unittest
 from pathlib import Path
@@ -65,10 +64,10 @@ class IntakeRediscoveryTests(unittest.TestCase):
             root = empty_root(folder)
             one = stage_candidates(root, first["body"], first["title"], "201", "2026-09-09")
             two = stage_candidates(root, second["body"], second["title"], "202", "2026-09-09")
-            self.assertEqual(len(one["added"]), 1)
+            self.assertEqual(len(one["added"]), 3)
             self.assertEqual(two["added"], [])
-            self.assertEqual(len(two["skipped_existing"]), 1)
-            self.assertEqual(validate_snapshots(root), 1)
+            self.assertEqual(len(two["skipped_existing"]), 3)
+            self.assertEqual(validate_snapshots(root), 3)
             snapshots = sorted((root / "data/curation/intake_access").glob("*.json"))
             self.assertEqual(len(snapshots), 1)
 
@@ -79,7 +78,7 @@ class IntakeRediscoveryTests(unittest.TestCase):
 
         def add_novel(candidates):
             novel = copy.deepcopy(candidates[0])
-            novel["candidate_id"] = f"CAND-{second_run['batch_id']}-002"
+            novel["candidate_id"] = f"CAND-{second_run['batch_id']}-004"
             novel["title"] = "A genuinely novel recovery candidate"
             novel["year"] = 2024
             novel["identifiers"] = {"doi": None, "other": ["RECOVERY-NOVEL-001"]}
@@ -91,15 +90,15 @@ class IntakeRediscoveryTests(unittest.TestCase):
             root = empty_root(folder)
             stage_candidates(root, first["body"], first["title"], "201", "2026-09-09")
             result = stage_candidates(root, second["body"], second["title"], "202", "2026-09-09")
-            self.assertEqual(result["added"], [f"CAND-{second_run['batch_id']}-002"])
-            self.assertEqual(len(result["skipped_existing"]), 1)
-            self.assertEqual(validate_snapshots(root), 2)
+            self.assertEqual(result["added"], [f"CAND-{second_run['batch_id']}-004"])
+            self.assertEqual(len(result["skipped_existing"]), 3)
+            self.assertEqual(validate_snapshots(root), 4)
             snapshot = json.loads(
                 (root / "data/curation/intake_access" / f"{second_run['batch_id']}.json").read_text()
             )
             self.assertEqual(
                 [receipt["candidate_id"] for receipt in snapshot["receipts"]],
-                [f"CAND-{second_run['batch_id']}-002"],
+                [f"CAND-{second_run['batch_id']}-004"],
             )
 
     def test_exact_identifier_with_incompatible_title_fails_closed(self) -> None:
