@@ -47,7 +47,9 @@ class ParallelSearchSelectedPaperLaneTests(unittest.TestCase):
             self.assertLess(len(row["synopsis"]), 900)
             self.assertIn("Parallel Search", row["note"])
         self.assertIn("aeaweb.org", records["CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-001"]["sourceUrl"])
-        self.assertIn("econstor.eu", records["CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-003"]["sourceUrl"])
+        # The reading aid is grounded in the RePEc abstract record; the separate
+        # retrieval ledger carries the EconStor full-text manifestation.
+        self.assertIn("ideas.repec.org", records["CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-003"]["sourceUrl"])
         self.assertIn("ssrn.com", records["CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-005"]["sourceUrl"])
 
 
