@@ -82,7 +82,7 @@ async function authenticatedEnrichment(request, env) {
 }
 
 function validCandidateId(value) {
-  return /^[A-Z0-9][A-Z0-9-]{2,59}$/.test(String(value || ""));
+  return /^[A-Za-z0-9][A-Za-z0-9-]{2,59}$/.test(String(value || ""));
 }
 
 function cleanRetrievalValue(value) {
