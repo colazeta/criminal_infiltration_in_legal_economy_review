@@ -94,21 +94,21 @@
     },
     {
       "candidateId": "CAND-ACADEMIC-2026-09-09-EXTRA-5e31cc756b0e-010",
-      "kind": "publisher_summary",
-      "sourceLabel": "RAND Europe exact report record located with Parallel Search",
-      "sourceUrl": "https://www.rand.org/pubs/external_publications/EP68577.html",
-      "synopsis": "The report examines serious and organised crime infiltration of legitimate European businesses and maps risk relevant to the interaction between criminal activity and the legal economy. It is an EU-level risk-mapping study rather than evidence from a single firm or locality.",
-      "checkedAt": "2026-09-12",
-      "note": "Parallel Search matched the exact title, authors and DOI 10.2837/64101 on RAND Europe and resolved the DOI to the official EU Publications Office record, which lists an English PDF. Evidence basis: partial_text from authoritative report summary and publication metadata; the report body was not fetched in this pass, so methods, variables and findings beyond that support remain not_verifiable."
+      "kind": "full_text_intro",
+      "sourceLabel": "EU Publications Office final-report PDF located with Parallel Search",
+      "sourceUrl": "https://op.europa.eu/o/opportal-service/download-handler?identifier=ab3534a2-87a0-11eb-ac4c-01aa75ed71a1&format=pdf&language=en&productionSystem=cellar&part=",
+      "synopsis": "The report maps serious and organised-crime infiltration of legitimate businesses across the EU to strengthen the evidence base on the phenomenon. Its cross-EU design includes surveys of Asset Recovery Offices, Asset Management Offices and Financial Intelligence Units in the 28 Member States, alongside secondary data including company-ownership and public-procurement datasets.",
+      "checkedAt": "2026-09-13",
+      "note": "Parallel Search fetched the official Publications Office PDF and matched DOI 10.2837/64101, the title and the 2021 final-report identity. Evidence basis: full_text. This upgrades the earlier partial-text reading aid only; the Technical Annexes remain a distinct CandidateRecord and no eligibility or canonicalisation decision is inferred."
     },
     {
       "candidateId": "CAND-ACADEMIC-2026-09-09-EXTRA-6b5b5e038ac4-002",
-      "kind": "metadata_warning",
-      "sourceLabel": "EU Publications Office exact Technical Annexes record located with Parallel Search",
-      "sourceUrl": "https://op.europa.eu/en/publication-detail/-/publication/bd3cb673-879d-11eb-ac4c-01aa75ed71a1/language-en",
-      "synopsis": "The exact 2021 Technical Annexes companion to the EU/RAND risk-mapping report is verified by DOI 10.2837/442937 and authoritative EU/RAND records, and the Publications Office lists an English PDF. Substantive annex methods, variables and findings were not extracted in this pass.",
-      "checkedAt": "2026-09-12",
-      "note": "Parallel Search matched the exact title, authors and DOI on RAND Europe and the EU Publications Office. Evidence basis: partial_text limited to authoritative publication metadata and download availability; substantive annex content remains not_verifiable."
+      "kind": "full_text_intro",
+      "sourceLabel": "EU Publications Office Technical Annexes PDF located with Parallel Search",
+      "sourceUrl": "https://op.europa.eu/o/opportal-service/download-handler?identifier=bd3cb673-879d-11eb-ac4c-01aa75ed71a1&format=pdf&language=en&productionSystem=cellar&part=",
+      "synopsis": "The Technical Annexes document the study’s methodological approach and cross-cutting data-collection activities. They describe reliance on existing literature and secondary data alongside primary stakeholder interviews and surveys of organisations, providing the methodological detail that supports the study’s research questions and outputs.",
+      "checkedAt": "2026-09-13",
+      "note": "Parallel Search fetched the official Publications Office PDF and matched DOI 10.2837/442937, the Technical Annexes title and the 2021 publication identity. Evidence basis: full_text. The annexes remain distinct from the Final Report and no scientific eligibility, canonical merge or framework classification is inferred."
     },
     {
       "candidateId": "CAND-ACADEMIC-2026-09-09-EXTRA-5e31cc756b0e-009",
@@ -136,6 +136,15 @@
       "synopsis": "The thesis asks why and how mafias expand to new territories, when they engage in governance rather than trading activities, and when expansion fails. It tests theory-derived hypotheses against three case studies of the 'Ndrangheta in Germany using hard-to-reach sources including judicial data, intelligence reports and archival material.",
       "checkedAt": "2026-09-13",
       "note": "Parallel Search fetched the exact Oxford repository record matching Zora Lea Hauser, 2022 and the PhD-thesis title. Evidence basis: abstract_only for this synopsis. ORA also lists a 3.2 MB dissemination-version PDF, but the connector did not expose a stable direct file URL in this pass, so the existing source-only retrieval locator is not promoted to full_text automatically; substantive claims beyond the ORA abstract remain not_verifiable."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-09-EXTRA-6b5b5e038ac4-003",
+      "kind": "full_text_intro",
+      "sourceLabel": "U.S. Office of Justice Programs digitised article located with Parallel Search",
+      "sourceUrl": "https://www.ojp.gov/pdffiles1/Digitization/93999NCJRS.pdf",
+      "synopsis": "The 1984 Federal Probation case study examines how a vending company, liquor wholesaler, professional facilitator and finance company use overextended credit to make a bar owner dependent and extract value from a legitimate business. It presents the arrangement as combining an appearance of business success with parasitic exploitation.",
+      "checkedAt": "2026-09-13",
+      "note": "Parallel Search fetched the OJP digitised article and matched NCJ 93999, Frederick T. Martens, Federal Probation 48(1):40–45 and the exact title. Evidence basis: full_text. The public synopsis is a concise paraphrase; no verbatim article text, eligibility decision or canonical-identity decision is persisted."
     }
   ]
 }
