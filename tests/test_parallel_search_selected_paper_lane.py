@@ -52,6 +52,30 @@ class ParallelSearchSelectedPaperLaneTests(unittest.TestCase):
         self.assertIn("ideas.repec.org", records["CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-003"]["sourceUrl"])
         self.assertIn("ssrn.com", records["CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-005"]["sourceUrl"])
 
+    def test_parallel_search_followup_batch_preserves_evidence_boundaries(self):
+        payload = json.loads((ROOT / "data/curation/reading_aid_overrides.json").read_text(encoding="utf-8"))
+        records = {row["candidateId"]: row for row in payload["records"]}
+        with (ROOT / "data/curation/review_queue.csv").open(encoding="utf-8", newline="") as handle:
+            queue_ids = {row["candidate_id"] for row in csv.DictReader(handle)}
+
+        expected = {
+            "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-014": ("core.ac.uk", "full_text_intro", "full_text"),
+            "CAND-ACADEMIC-2026-09-09-013": ("iris.unipa.it", "verified_abstract_source", "abstract_only"),
+            "CAND-ACADEMIC-2026-09-09-012": ("riviste.unimi.it", "verified_abstract_source", "full_text"),
+        }
+        for candidate, (host, kind, coverage) in expected.items():
+            self.assertIn(candidate, queue_ids)
+            row = records[candidate]
+            self.assertEqual(row["kind"], kind)
+            self.assertTrue(row["sourceUrl"].startswith("https://"))
+            self.assertIn(host, row["sourceUrl"])
+            self.assertNotIn("parallel-search", row["sourceUrl"].lower())
+            self.assertLess(len(row["synopsis"]), 900)
+            self.assertIn("Parallel Search", row["note"])
+            self.assertIn(coverage, row["note"])
+
+        self.assertIn("not_verifiable", records["CAND-ACADEMIC-2026-09-09-013"]["note"])
+
 
 if __name__ == "__main__":
     unittest.main()

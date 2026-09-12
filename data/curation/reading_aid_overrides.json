@@ -55,6 +55,33 @@
       "synopsis": "The paper develops a framework for distinguishing organised-crime groups’ motives for infiltrating legal firms and validates it with new Italian Financial Intelligence Unit data. The abstract estimates that about 2% of Italian firms have links with organised crime and distinguishes three principal infiltration motives.",
       "checkedAt": "2026-09-12",
       "note": "Parallel Search verified the 2024 title/authors on the RePEc CEPR record and located an exact full-text IZA manifestation at EconStor, recorded separately in retrieval_coverage.csv. This synopsis is abstract_only; no full text or verbatim abstract is committed and versions are not silently canonicalised."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-014",
+      "kind": "full_text_intro",
+      "sourceLabel": "CORE full-text dissertation located with Parallel Search",
+      "sourceUrl": "https://core.ac.uk/download/576931876.pdf",
+      "synopsis": "The dissertation develops an accounting-oriented study of criminal firms, defined as apparently legal businesses controlled by people connected to organised crime. Its structure includes research on organisational roles within criminal firms and a machine-learning approach to detecting them from firm information.",
+      "checkedAt": "2026-09-12",
+      "note": "Parallel Search verified the exact University of Padua repository record and fetched the CORE full-text manifestation; its title page identifies Francesco Ambrosini and the dissertation title, and its contents expose the organisational-role and detection studies. Evidence basis: full_text. No scientific eligibility or canonical-identity decision is inferred, and the connector read is not treated as governed private full-text ingestion."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-09-013",
+      "kind": "verified_abstract_source",
+      "sourceLabel": "University of Palermo institutional repository abstract located with Parallel Search",
+      "sourceUrl": "https://iris.unipa.it/handle/10447/710250",
+      "synopsis": "The chapter studies continuity-preserving Italian preventive measures—judicial administration under Article 34 and judicial control under Article 34-bis—through an organisational-resilience lens. It uses a comparative multi-case analysis of 11 firms to examine changes in operating and financial conditions around the interventions.",
+      "checkedAt": "2026-09-12",
+      "note": "Parallel Search fetched the exact institutional repository record, matching title, Giovanni Scire' and Enzo Bivona, year 2026, and an explicit Abstract section. Evidence basis: abstract_only. No open full-text manifestation was verified in this pass, so claims beyond the repository abstract remain not_verifiable."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-09-012",
+      "kind": "verified_abstract_source",
+      "sourceLabel": "University of Milan CROSS article and full-text manifestation located with Parallel Search",
+      "sourceUrl": "https://riviste.unimi.it/index.php/cross/article/download/7791/7463",
+      "synopsis": "The article examines why organised crime infiltrates public procurement, how infiltration techniques have evolved across the phases of contracting, and how the legal and regulatory response developed in parallel.",
+      "checkedAt": "2026-09-12",
+      "note": "Parallel Search fetched the exact University of Milan publisher article for DOI 10.13130/cross-7791 and the direct scholarly full-text manifestation, matching Sara Spartà and the 2016 CROSS issue. Evidence basis: full_text; the synopsis is a conservative paraphrase of the verified author abstract. No verbatim article text or scientific decision is persisted here."
     }
   ]
 }
