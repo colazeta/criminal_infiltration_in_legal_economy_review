@@ -145,6 +145,33 @@
       "synopsis": "The 1984 Federal Probation case study examines how a vending company, liquor wholesaler, professional facilitator and finance company use overextended credit to make a bar owner dependent and extract value from a legitimate business. It presents the arrangement as combining an appearance of business success with parasitic exploitation.",
       "checkedAt": "2026-09-13",
       "note": "Parallel Search fetched the OJP digitised article and matched NCJ 93999, Frederick T. Martens, Federal Probation 48(1):40–45 and the exact title. Evidence basis: full_text. The public synopsis is a concise paraphrase; no verbatim article text, eligibility decision or canonical-identity decision is persisted."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-09-EXTRA-85e203d4eb5a-004",
+      "kind": "publisher_summary",
+      "sourceLabel": "SAGE Academic Books chapter summary located with Parallel Search",
+      "sourceUrl": "https://sk.sagepub.com/book/mono/organized-crime/chpt/organized-crime-legitimate-business",
+      "synopsis": "The chapter distinguishes different forms of organised-criminal involvement in legitimate business and focuses on higher-level situations in which criminal actors gain influence over lawful firms and markets, rather than treating every connection between criminals and business as the same form of infiltration.",
+      "checkedAt": "2026-09-13",
+      "note": "Parallel Search fetched the exact SAGE chapter page and matched Klaus von Lampe, the 2016 book and DOI 10.4135/9781506305110.n10. Evidence basis: publisher_summary. The chapter page is access-controlled and no open full-text manifestation was verified in this pass, so claims beyond the publisher summary remain not_verifiable; no scientific or canonical-identity decision is persisted."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-09-EXTRA-5e31cc756b0e-001",
+      "kind": "full_text_intro",
+      "sourceLabel": "U.S. Office of Justice Programs digitised report located with Parallel Search",
+      "sourceUrl": "https://www.ojp.gov/pdffiles1/Digitization/2300NCJRS.pdf",
+      "synopsis": "The report studies a target population of 200 people identified as principals or associates of major New York organised-crime families in order to describe and assess the character and scale of their involvement in legitimate business and its prospective economic and social impact.",
+      "checkedAt": "2026-09-13",
+      "note": "Parallel Search fetched the exact OJP NCJRS record for NCJ 2300, M. K. Bers and 1970, and verified the linked official OJP digitised report. Evidence basis: full_text. The synopsis is a concise paraphrase of the verified report/official abstract; no verbatim report text, eligibility decision or private full-text ingestion is claimed."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-09-EXTRA-85e203d4eb5a-009",
+      "kind": "verified_abstract_source",
+      "sourceLabel": "Università Cattolica institutional repository abstract located with Parallel Search",
+      "sourceUrl": "https://publicatt.unicatt.it/handle/10807/223872",
+      "synopsis": "The chapter analyses organised-crime infiltration of Italian firms by examining the territories, sectors and modi operandi associated with Italian mafias and also discusses the much thinner evidence available on infiltration by foreign organised-crime groups.",
+      "checkedAt": "2026-09-13",
+      "note": "Parallel Search fetched the exact Università Cattolica record matching Michele Riccardi, Cristina Soriani, Valentina Giampietri, the 2016 chapter and pages 119–140, with an explicit institutional Abstract section. Evidence basis: abstract_only. An exact Taylor & Francis publisher manifestation was also located, but no open full text was verified and its chapter identifier is not silently added or reconciled here; claims beyond the institutional abstract remain not_verifiable."
     }
   ]
 }
