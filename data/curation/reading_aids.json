@@ -228,15 +228,6 @@
       "note": "Source-grounded intake synopsis used because the mechanical cascade did not expose a standalone abstract. Verify the linked scholarly source before screening; this is not an author abstract and cannot determine eligibility."
     },
     {
-      "candidateId": "CAND-ACADEMIC-2026-09-09-EXTRA-6b5b5e038ac4-029",
-      "kind": "review_synopsis",
-      "sourceLabel": "Parallel Search intake evidence",
-      "sourceUrl": "https://www.routledge.com/Organised-Crime-in-European-Businesses/Savona-Riccardi-Berlusconi/p/book/9781138499478",
-      "synopsis": "Chapter translating analysis of criminal infiltration into structured risk assessment, relevant to measurement and prevention.",
-      "checkedAt": "2026-09-11",
-      "note": "Source-grounded intake synopsis used because the mechanical cascade did not expose a standalone abstract. Verify the linked scholarly source before screening; this is not an author abstract and cannot determine eligibility."
-    },
-    {
       "candidateId": "CAND-ACADEMIC-2026-09-09-EXTRA-85e203d4eb5a-002",
       "kind": "review_synopsis",
       "sourceLabel": "Exa intake evidence",
@@ -558,6 +549,78 @@
       "sourceUrl": "https://ojp.gov/ncjrs/virtual-library/abstracts/major-issues-relating-organized-crime-within-context-economic",
       "synopsis": "Research paper on the economic relationships required by organized crime and the interweaving of legitimate business and illicit activity, potentially relevant to the legal-economy boundary.",
       "checkedAt": "2026-09-10",
+      "note": "Source-grounded intake synopsis used because the mechanical cascade did not expose a standalone abstract. Verify the linked scholarly source before screening; this is not an author abstract and cannot determine eligibility."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-11-EXTRA-61e4d03af5c4-009",
+      "kind": "review_synopsis",
+      "sourceLabel": "Parallel Search intake evidence",
+      "sourceUrl": "https://link.springer.com/article/10.1007/BF01915552",
+      "synopsis": "Scholarly study explicitly addressing organised crime and business crime-enterprises in the Netherlands.",
+      "checkedAt": "2026-09-12",
+      "note": "Source-grounded intake synopsis used because the mechanical cascade did not expose a standalone abstract. Verify the linked scholarly source before screening; this is not an author abstract and cannot determine eligibility."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-11-EXTRA-61e4d03af5c4-013",
+      "kind": "review_synopsis",
+      "sourceLabel": "Parallel Search intake evidence",
+      "sourceUrl": "https://library2.smu.ca/bitstream/handle/01/29018/Spencer_Tyler_MASTERS_2019.pdf?isAllowed=y&sequence=1",
+      "synopsis": "Thesis directly examining relationships between Montreal mafia actors and private construction companies in contract collusion.",
+      "checkedAt": "2026-09-12",
+      "note": "Source-grounded intake synopsis used because the mechanical cascade did not expose a standalone abstract. Verify the linked scholarly source before screening; this is not an author abstract and cannot determine eligibility."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-11-EXTRA-61e4d03af5c4-014",
+      "kind": "review_synopsis",
+      "sourceLabel": "Parallel Search intake evidence",
+      "sourceUrl": "https://www.publicsafety.gc.ca/cnt/rsrcs/pblctns/rgnzd-crm-brf-27/index-en.aspx",
+      "synopsis": "Institutional research brief based on literature review, interviews and descriptive economic analysis of organised-crime vulnerability in Canadian commercial construction.",
+      "checkedAt": "2026-09-12",
+      "note": "Source-grounded intake synopsis used because the mechanical cascade did not expose a standalone abstract. Verify the linked scholarly source before screening; this is not an author abstract and cannot determine eligibility."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-11-EXTRA-e4fad066a46c-001",
+      "kind": "review_synopsis",
+      "sourceLabel": "Parallel Search intake evidence",
+      "sourceUrl": "https://www.ojp.gov/ncjrs/virtual-library/abstracts/study-organized-crimes-infiltration-pizza-and-cheese-industry",
+      "synopsis": "Substantial two-year investigation documenting actual organised-crime control and ownership of cheese and pizza businesses across 54 Pennsylvania municipalities.",
+      "checkedAt": "2026-09-12",
+      "note": "Source-grounded intake synopsis used because the mechanical cascade did not expose a standalone abstract. Verify the linked scholarly source before screening; this is not an author abstract and cannot determine eligibility."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-12-EXTRA-bca84c56f316-002",
+      "kind": "review_synopsis",
+      "sourceLabel": "Parallel Search intake evidence",
+      "sourceUrl": "https://www.govinfo.gov/content/pkg/GOVPUB-PR-PURL-gpo215456/pdf/GOVPUB-PR-PURL-gpo215456.pdf",
+      "synopsis": "Commission research material explicitly reviews organised-crime infiltration of legal gambling and licensed casinos, including regulatory hardening against criminal penetration.",
+      "checkedAt": "2026-09-12",
+      "note": "Source-grounded intake synopsis used because the mechanical cascade did not expose a standalone abstract. Verify the linked scholarly source before screening; this is not an author abstract and cannot determine eligibility."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-12-EXTRA-cfe8ae9b3710-001",
+      "kind": "review_synopsis",
+      "sourceLabel": "Parallel Search intake evidence",
+      "sourceUrl": "https://www.rivisteweb.it/doi/10.7383/70771",
+      "synopsis": "Investigates the mafia grey area and relationships between criminal and legitimate actors, potentially relevant to relational mechanisms of criminal embeddedness in the legal economy.",
+      "checkedAt": "2026-09-12",
+      "note": "Source-grounded intake synopsis used because the mechanical cascade did not expose a standalone abstract. Verify the linked scholarly source before screening; this is not an author abstract and cannot determine eligibility."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-12-EXTRA-e43980672341-001",
+      "kind": "review_synopsis",
+      "sourceLabel": "Parallel Search intake evidence",
+      "sourceUrl": "https://heinonline.org/hol-cgi-bin/get_pdf.cgi?handle=hein.journals%2Ftrndorgc7&section=14",
+      "synopsis": "Investigative study of sustained organised-crime influence in the Teamsters Union, directly relevant to durable criminal influence within a legitimate labour-market institution.",
+      "checkedAt": "2026-09-12",
+      "note": "Source-grounded intake synopsis used because the mechanical cascade did not expose a standalone abstract. Verify the linked scholarly source before screening; this is not an author abstract and cannot determine eligibility."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-12-EXTRA-e43980672341-002",
+      "kind": "review_synopsis",
+      "sourceLabel": "Parallel Search intake evidence",
+      "sourceUrl": "https://www.oecd.org/en/publications/2026/03/anti-corruption-and-integrity-outlook-2026_d8f55b04/full-report/component-15.html",
+      "synopsis": "Institutional analytical chapter on organised crime and corruption that explicitly addresses criminal infiltration and use of legal business structures across corporate sectors.",
+      "checkedAt": "2026-09-12",
       "note": "Source-grounded intake synopsis used because the mechanical cascade did not expose a standalone abstract. Verify the linked scholarly source before screening; this is not an author abstract and cannot determine eligibility."
     }
   ]
