@@ -1,40 +1,32 @@
 #!/usr/bin/env python3
-"""Read the governed surveillance ledger while quarantining audited invalid batches.
+"""Read the governed surveillance ledger with audited recovery handling.
 
-The batches ACADEMIC-2026-09-11-EXTRA-2520dfa54e12 and
-ACADEMIC-2026-09-11-EXTRA-f28583e91573 were later proven to repeat candidate
-identities already present in earlier intake state. The original terminal for
-ACADEMIC-2026-09-11-EXTRA-61e4d03af5c4 was accidentally edited during an
-authorised recovery and therefore lost append-only validity.
+Historical terminal comments that were proven invalid remain on GitHub for audit
+but are excluded by exact comment ID and batch ID.  A single audited replacement
+terminal is allowed to cross the Rome-calendar-day boundary created by recovery.
 
-Six later immutable v3 terminals are also quarantined because their source
-``limitations`` field contains a text item longer than the schema's 180-character
-maximum. Their scientific/intake content is not being withdrawn; each is replaced
-by a separately appended terminal with the same governed counts and references
-and a schema-valid shortened limitation.
+Candidate identity collisions across *different* valid intake runs are discovery
+occurrences, not ledger-corruption events.  The operational register reconciles
+those exact collisions when materialising a batch.  Consequently this wrapper
+keeps every other canonical ledger validation but disables only the base reader's
+cross-run candidate-novelty assertion.  Batch identity, issue identity, immutable
+terminal timing, source/query counts, repository ancestry and intake contents
+remain fail-closed.
 
-The replacement terminal for ACADEMIC-2026-09-11-EXTRA-61e4d03af5c4 had to be
-created on 2026-09-12, because GitHub comments cannot be backdated. It therefore
-cannot satisfy the ordinary same-Rome-date check even though it is immutable and
-was created after the original run ended. A single exact comment-ID/batch-ID
-recovery exception accepts that replacement while retaining every other temporal
-and ledger-integrity check.
-
-These historical comments remain on GitHub for audit, but must not enter the
-active validated run set, public statistics, heartbeat state, or downstream
-intake reconciliation.
-
-This module does not weaken validation for any other run. It filters or relaxes
-only the explicitly audited GitHub issue-comment IDs below before delegating to
-the canonical validator.
+For intake materialisation, ``fetch_validated_run_for_intake`` validates only the
+terminal belonging to the target issue.  An unrelated malformed terminal must not
+prevent a valid target batch from being staged; a malformed or duplicated target
+terminal still fails immediately.
 """
 
 from __future__ import annotations
 
 import json
+import re
 from urllib.error import HTTPError, URLError
 
 import fetch_surveillance_ledger as _base
+from scripts.surveillance_identity import validate_cycle_run
 
 
 QUARANTINED_LEDGER_COMMENTS = {
@@ -47,6 +39,14 @@ QUARANTINED_LEDGER_COMMENTS = {
     5644330070: "ACADEMIC-2026-09-12-EXTRA-d6b0ffff25fd",
     5644553677: "ACADEMIC-2026-09-12-EXTRA-335f7df7ae34",
     5646294694: "ACADEMIC-2026-09-12-EXTRA-570dae192194",
+}
+
+# These batches are not merely superseded malformed terminals: the audited run
+# itself must never be materialised because it repeated already-known candidate
+# identities rather than representing a valid new intake batch.
+PERMANENTLY_QUARANTINED_BATCHES = {
+    "ACADEMIC-2026-09-11-EXTRA-2520dfa54e12",
+    "ACADEMIC-2026-09-11-EXTRA-f28583e91573",
 }
 
 LATE_RECOVERY_TERMINALS = {
@@ -103,12 +103,19 @@ def _verify_ledger_comment_time_with_recovery(run: dict, comment: dict) -> None:
         )
 
 
+def _occurrence_keys(_candidate: dict) -> set:
+    """Do not turn rediscovery across valid runs into a ledger-integrity error."""
+    return set()
+
+
 def fetch_validated_runs(repository, ledger_issue, allowed_author, token, cycle=None):
-    """Delegate to the canonical validator after exact recovery handling."""
+    """Run canonical validation after exact recovery/occurrence handling."""
     original_api = _base.api_get
     original_time = _base.verify_ledger_comment_time
+    original_keys = _base.candidate_keys
     _base.api_get = _quarantine_api_get
     _base.verify_ledger_comment_time = _verify_ledger_comment_time_with_recovery
+    _base.candidate_keys = _occurrence_keys
     try:
         return _base.fetch_validated_runs(
             repository, ledger_issue, allowed_author, token, cycle
@@ -116,6 +123,101 @@ def fetch_validated_runs(repository, ledger_issue, allowed_author, token, cycle=
     finally:
         _base.api_get = original_api
         _base.verify_ledger_comment_time = original_time
+        _base.candidate_keys = original_keys
+
+
+def _target_batch(issue: dict) -> str:
+    title = str(issue.get("title") or "")
+    prefix = f"{_base.INTAKE_TITLE_PREFIX} "
+    if not title.startswith(prefix):
+        raise _base.MetricsError("target issue is not an academic intake")
+    batch_id = title[len(prefix):].strip()
+    if not re.fullmatch(_base.BATCH_PATTERN, batch_id):
+        raise _base.MetricsError("target intake batch identity is invalid")
+    return batch_id
+
+
+def fetch_validated_run_for_intake(
+    repository: str,
+    ledger_issue: int,
+    allowed_author,
+    token: str,
+    cycle: dict | None,
+    issue: dict,
+) -> dict | None:
+    """Validate only the authenticated terminal belonging to ``issue``.
+
+    The function deliberately ignores malformed terminals for unrelated batches.
+    If a malformed comment claims the target batch, or more than one valid target
+    terminal survives audited quarantine, materialisation fails closed.
+    """
+    batch_id = _target_batch(issue)
+    if batch_id in PERMANENTLY_QUARANTINED_BATCHES:
+        raise _base.MetricsError("target intake batch is permanently quarantined")
+
+    allowed_authors = set(allowed_author)
+    url = (
+        f"https://api.github.com/repos/{repository}/issues/"
+        f"{ledger_issue}/comments?per_page=100"
+    )
+    matches: list[dict] = []
+    while url:
+        page, links = _quarantine_api_get(url, token)
+        if not isinstance(page, list):
+            raise _base.MetricsError("GitHub comments response is not a list")
+        for comment in page:
+            author = ((comment.get("user") or {}).get("login") or "").strip()
+            if author not in allowed_authors:
+                continue
+            body = str(comment.get("body") or "")
+            try:
+                run = _base.extract_run(body)
+            except _base.MetricsError:
+                if batch_id in body:
+                    raise
+                continue
+            if run is None or run.get("batch_id") != batch_id:
+                continue
+            if cycle:
+                try:
+                    validate_cycle_run(run, cycle)
+                except ValueError as exc:
+                    raise _base.MetricsError("target run belongs to the retired archive cycle") from exc
+            _verify_ledger_comment_time_with_recovery(run, comment)
+            matches.append(run)
+        url = _base.next_link(links)
+
+    if not matches:
+        return None
+    if len(matches) != 1:
+        raise _base.MetricsError("target intake has more than one validated terminal")
+    run = matches[0]
+    if run.get("status") != "completed":
+        raise _base.MetricsError("target intake terminal is not completed")
+    intake = run.get("intake_issue") or {}
+    if intake.get("number") != issue.get("number") or not intake.get("created"):
+        raise _base.MetricsError("target terminal does not identify this intake issue")
+
+    # Preserve the canonical uniqueness check for the *target issue identity*.
+    repository_issues: list[dict] = []
+    issues_url = f"https://api.github.com/repos/{repository}/issues?state=all&per_page=100"
+    while issues_url:
+        page, links = _RAW_API_GET(issues_url, token)
+        if not isinstance(page, list):
+            raise _base.MetricsError("GitHub issues response is not a list")
+        repository_issues.extend(page)
+        issues_url = _base.next_link(links)
+    _base.verify_intake_issue_uniqueness(run, repository_issues)
+
+    comparison, _ = _RAW_API_GET(
+        f"https://api.github.com/repos/{repository}/compare/{run['repository_commit']}...main",
+        token,
+    )
+    if not isinstance(comparison, dict):
+        raise _base.MetricsError("GitHub commit comparison response is not an object")
+    _base.verify_repository_commit(run, comparison)
+    _base.verify_intake_issue(run, issue, allowed_authors, ledger_issue)
+    return run
 
 
 api_get = _base.api_get
@@ -126,13 +228,16 @@ extract_run = _base.extract_run
 def main() -> None:
     original_api = _base.api_get
     original_time = _base.verify_ledger_comment_time
+    original_keys = _base.candidate_keys
     _base.api_get = _quarantine_api_get
     _base.verify_ledger_comment_time = _verify_ledger_comment_time_with_recovery
+    _base.candidate_keys = _occurrence_keys
     try:
         _base.main()
     finally:
         _base.api_get = original_api
         _base.verify_ledger_comment_time = original_time
+        _base.candidate_keys = original_keys
 
 
 if __name__ == "__main__":

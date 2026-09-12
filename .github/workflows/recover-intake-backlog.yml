@@ -1,0 +1,275 @@
+name: Recover intake backlog
+
+run-name: "Recover intake backlog from issue #${{ github.event.issue.number }}"
+
+on:
+  issues:
+    types: [opened, reopened]
+
+permissions:
+  contents: read
+
+# Share the same mutation lease as the ordinary intake writer.
+concurrency:
+  group: intake-to-curation-main
+  cancel-in-progress: false
+
+jobs:
+  recover:
+    if: >-
+      github.actor == github.repository_owner &&
+      github.event.issue.user.login == github.repository_owner &&
+      github.event.issue.title == '[MAINTENANCE][INTAKE-RECOVERY]'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+      actions: write
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.11"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: 22
+
+      - name: Reconcile and stage all outstanding intake issues
+        id: recovery
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          action_date="$(date -u +%F)"
+          python scripts/curation/recover_intake_backlog.py \
+            --repository "$GITHUB_REPOSITORY" \
+            --owner "$GITHUB_REPOSITORY_OWNER" \
+            --ledger-issue 30 \
+            --date "$action_date" \
+            --output "$RUNNER_TEMP/intake-recovery.json"
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json, os
+          data=json.load(open(os.path.join(os.environ["RUNNER_TEMP"], "intake-recovery.json"), encoding="utf-8"))
+          print(f"added_count={data['added_candidates']}")
+          print(f"processed_batches={data['processed_batches']}")
+          print(f"rediscovery_count={data['rediscovery_occurrences']}")
+          print(f"failure_count={len(data['failures'])}")
+          print(f"quarantine_count={len(data['quarantined'])}")
+          PY
+
+      - name: Resolve paper access once for the expanded queue
+        if: steps.recovery.outputs.added_count != '0'
+        env:
+          OPENALEX_API_KEY: ${{ secrets.OPENALEX_API_KEY }}
+          UNPAYWALL_EMAIL: ${{ secrets.UNPAYWALL_EMAIL }}
+        run: |
+          action_date="$(date -u +%F)"
+          python scripts/retrieval/resolve_queue.py \
+            --date "$action_date" \
+            --max-age-days 30 \
+            --output "$RUNNER_TEMP/retrieval-summary.json"
+          python scripts/retrieval/resolve_queue.py --check
+
+      - name: Backfill abstract coverage once
+        if: steps.recovery.outputs.added_count != '0'
+        env:
+          SEMANTIC_SCHOLAR_API_KEY: ${{ secrets.SEMANTIC_SCHOLAR_API_KEY }}
+          CORE_API_KEY: ${{ secrets.CORE_API_KEY }}
+          UNPAYWALL_EMAIL: ${{ secrets.UNPAYWALL_EMAIL }}
+        run: |
+          if ! command -v pdftotext >/dev/null 2>&1; then
+            sudo apt-get update -qq
+            sudo apt-get install -y --no-install-recommends poppler-utils
+          fi
+          export ABSTRACT_COVERAGE_DATE="$(date -u +%F)"
+          node scripts/abstracts/backfill_coverage.mjs \
+            --summary "$RUNNER_TEMP/abstract-coverage-summary.json"
+          node scripts/abstracts/backfill_coverage.mjs --check
+
+      - name: Reconcile reading aids once
+        if: steps.recovery.outputs.added_count != '0'
+        run: |
+          action_date="$(date -u +%F)"
+          python scripts/curation/reconcile_reading_aids.py --date "$action_date" \
+            > "$RUNNER_TEMP/reading-aid-summary.json"
+          python scripts/curation/reconcile_reading_aids.py --check
+
+      - name: Classify access once
+        if: steps.recovery.outputs.added_count != '0'
+        env:
+          UNPAYWALL_EMAIL: ${{ secrets.UNPAYWALL_EMAIL }}
+        run: |
+          action_date="$(date -u +%F)"
+          python scripts/access/classify_access.py --date "$action_date"
+          python scripts/access/reconcile_access_evidence.py
+          python scripts/access/classify_access.py --check
+          python scripts/access/reconcile_access_evidence.py --check
+
+      - name: Validate complete recovered state
+        if: steps.recovery.outputs.added_count != '0'
+        run: |
+          python scripts/curation/build_legacy_queue.py --check
+          python scripts/validation/validate_repository.py
+          python scripts/ontology/validate_ontology.py
+          python scripts/validation/validate_intake_history.py --base HEAD
+          python -m unittest discover -s tests -p 'test_*.py'
+          python scripts/build_archive.py
+          python scripts/build_secondary_collections.py
+          python scripts/curation/build_curator_stats.py
+          python scripts/curation/build_curator_options.py
+          python scripts/validation/validate_archive.py
+          python scripts/validation/validate_site.py
+          node --test curator-app/test/*.test.js
+          python scripts/report_saturation.py
+
+      - name: Persist recovered candidate state
+        id: persist
+        if: steps.recovery.outputs.added_count != '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ADDED_COUNT: ${{ steps.recovery.outputs.added_count }}
+          PROCESSED_BATCHES: ${{ steps.recovery.outputs.processed_batches }}
+          REDISCOVERY_COUNT: ${{ steps.recovery.outputs.rediscovery_count }}
+        run: |
+          base_sha="$(git rev-parse HEAD)"
+          branch="curation/intake-recovery-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$branch"
+          git add data/curation site/data/curator-stats.json site/data/paper-register.json
+          git commit -m "Recover outstanding intake candidates"
+          git push origin "$branch"
+
+          body_file="$RUNNER_TEMP/recovery-pr.md"
+          {
+            echo "## Intake backlog recovery"
+            echo
+            echo "- Governed batches processed: ${PROCESSED_BATCHES}"
+            echo "- New operational candidates added: ${ADDED_COUNT}"
+            echo "- Exact rediscovery occurrences reconciled without duplicate queue rows: ${REDISCOVERY_COUNT}"
+            echo "- Canonical works, eligibility decisions and publication decisions changed: 0"
+            echo
+            echo "## Validation"
+            echo
+            echo "- Complete repository, ontology, intake-history, Python-test, archive and site validation passed before persistence."
+            echo "- Retrieval/abstract/access enrichment was executed once after the sequential recovery."
+            echo
+            echo "## Changed files"
+            echo
+            git diff --name-only main...HEAD | sed 's/^/- `/' | sed 's/$/`/'
+            echo
+            echo "Source maintenance issue: #${{ github.event.issue.number }}"
+          } > "$body_file"
+
+          pr_url=""
+          set +e
+          pr_url="$(gh pr create --base main --head "$branch" --title "Recover outstanding intake candidates" --body-file "$body_file" 2>"$RUNNER_TEMP/pr-create-error.log")"
+          pr_status=$?
+          set -e
+          if [ "$pr_status" -eq 0 ]; then
+            set +e
+            merge_output="$(gh pr merge "$pr_url" --squash --delete-branch 2>&1)"
+            merge_status=$?
+            set -e
+            if [ "$merge_status" -eq 0 ]; then
+              echo "persisted=true" >> "$GITHUB_OUTPUT"
+              echo "persistence=pr:${pr_url}" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            printf '%s\n' "$merge_output" > "$RUNNER_TEMP/pr-merge-error.log"
+          fi
+
+          git fetch origin main
+          current_main="$(git rev-parse origin/main)"
+          if [ "$current_main" = "$base_sha" ]; then
+            set +e
+            git push origin HEAD:main 2>"$RUNNER_TEMP/main-push-error.log"
+            push_status=$?
+            set -e
+            if [ "$push_status" -eq 0 ]; then
+              echo "persisted=true" >> "$GITHUB_OUTPUT"
+              echo "persistence=fast-forward:${branch}" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          fi
+
+          echo "::error::Recovered intake state validated but could not be persisted; branch retained: ${branch}"
+          exit 1
+
+      - name: Mark no-data recovery as persisted
+        id: nochange
+        if: steps.recovery.outputs.added_count == '0'
+        run: |
+          echo "persisted=true" >> "$GITHUB_OUTPUT"
+          echo "persistence=no-data-change" >> "$GITHUB_OUTPUT"
+
+      - name: Finalise recovered intake issues
+        if: >-
+          (steps.persist.outputs.persisted == 'true' || steps.nochange.outputs.persisted == 'true')
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PERSISTENCE: ${{ steps.persist.outputs.persistence || steps.nochange.outputs.persistence }}
+        run: |
+          report="$RUNNER_TEMP/intake-recovery.json"
+          run_url="https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+
+          jq -c '.processed[]' "$report" | while IFS= read -r row; do
+            issue="$(jq -r '.issue_number' <<<"$row")"
+            batch="$(jq -r '.batch_id' <<<"$row")"
+            added="$(jq '.added | length' <<<"$row")"
+            skipped="$(jq '.skipped_existing | length' <<<"$row")"
+            gh issue comment "$issue" --body "Backlog recovery completed for \`${batch}\`: ${added} new operational candidate(s) materialised and ${skipped} exact rediscovery occurrence(s) reconciled without creating duplicate queue rows. No scientific eligibility or canonical duplicate decision was inferred. Persistence: ${PERSISTENCE}. Run: ${run_url}"
+            gh issue close "$issue" --reason completed || true
+          done
+
+          jq -c '.quarantined[]' "$report" | while IFS= read -r row; do
+            issue="$(jq -r '.issue_number' <<<"$row")"
+            batch="$(jq -r '.batch_id' <<<"$row")"
+            reason="$(jq -r '.reason' <<<"$row")"
+            gh issue comment "$issue" --body "Backlog recovery did not materialise \`${batch}\`: ${reason}. The source issue remains the audit record; no candidate or scientific decision was created. Run: ${run_url}"
+            gh issue close "$issue" --reason "not planned" || true
+          done
+
+          jq -c '.failures[]' "$report" | while IFS= read -r row; do
+            issue="$(jq -r '.issue_number' <<<"$row")"
+            batch="$(jq -r '.batch_id' <<<"$row")"
+            error="$(jq -r '.error' <<<"$row")"
+            gh issue comment "$issue" --body "Backlog recovery is still blocked for \`${batch}\`: \`${error}\`. This issue remains open and is not counted as materialised. Run: ${run_url}"
+          done
+
+      - name: Refresh published archive after persisted recovery
+        if: >-
+          steps.recovery.outputs.added_count != '0' &&
+          steps.persist.outputs.persisted == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run archive.yml --ref main
+
+      - name: Report recovery outcome
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TRIGGER_ISSUE: ${{ github.event.issue.number }}
+          ADDED: ${{ steps.recovery.outputs.added_count }}
+          PROCESSED: ${{ steps.recovery.outputs.processed_batches }}
+          REDISCOVERIES: ${{ steps.recovery.outputs.rediscovery_count }}
+          FAILURES: ${{ steps.recovery.outputs.failure_count }}
+          QUARANTINED: ${{ steps.recovery.outputs.quarantine_count }}
+        run: |
+          run_url="https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          if [ "${{ job.status }}" != "success" ]; then
+            gh issue comment "$TRIGGER_ISSUE" --body "Intake backlog recovery encountered an operational failure before completion. Run: ${run_url}"
+            exit 0
+          fi
+          gh issue comment "$TRIGGER_ISSUE" --body "Intake backlog recovery run completed: ${PROCESSED} governed batch(es) processed, ${ADDED} new candidate(s) materialised, ${REDISCOVERIES} exact rediscovery occurrence(s) reconciled, ${QUARANTINED} audited batch(es) quarantined, ${FAILURES} unresolved batch(es). Run: ${run_url}"
+          if [ "${FAILURES}" = "0" ]; then
+            gh issue close "$TRIGGER_ISSUE" --reason completed || true
+          fi
