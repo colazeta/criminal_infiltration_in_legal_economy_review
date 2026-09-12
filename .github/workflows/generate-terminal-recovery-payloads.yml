@@ -1,0 +1,155 @@
+name: Generate terminal recovery payloads
+
+on:
+  push:
+    branches:
+      - maintenance/normalize-all-invalid-terminals
+
+permissions:
+  contents: write
+  issues: read
+
+jobs:
+  generate:
+    if: ${{ !contains(github.event.head_commit.message, '[recovery payloads]') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out recovery branch
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: maintenance/normalize-all-invalid-terminals
+      - name: Generate fail-closed replacement bodies
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          python3 - <<'PY'
+          import copy, hashlib, json, os, pathlib, re, urllib.request
+
+          targets = {
+              5642209455: "ACADEMIC-2026-09-12-EXTRA-7652f77d6fde",
+              5642881870: "ACADEMIC-2026-09-12-EXTRA-8943d605c4aa",
+              5644857109: "ACADEMIC-2026-09-12-EXTRA-486aaf42fb90",
+              5645417536: "ACADEMIC-2026-09-12-EXTRA-748af9c3f874",
+              5645995942: "ACADEMIC-2026-09-12-EXTRA-069e6c0a5fa8",
+              5646951308: "ACADEMIC-2026-09-12-EXTRA-6e00fc2aca6a",
+              5647317502: "ACADEMIC-2026-09-12-EXTRA-b54c1a6aa281",
+              5647606053: "ACADEMIC-2026-09-12-EXTRA-2231aace38f9",
+              5647897601: "ACADEMIC-2026-09-12-EXTRA-335f7df7ae34",
+              5647898301: "ACADEMIC-2026-09-12-EXTRA-570dae192194",
+              5647926004: "ACADEMIC-2026-09-12-EXTRA-724679219793",
+              5647932606: "ACADEMIC-2026-09-12-EXTRA-4faa0ba491c4",
+              5647933485: "ACADEMIC-2026-09-12-EXTRA-9bdb3c1e67c7",
+          }
+          repo = os.environ["REPOSITORY"]
+          token = os.environ["GH_TOKEN"]
+          out = pathlib.Path("tmp/terminal-recovery-payloads")
+          out.mkdir(parents=True, exist_ok=True)
+
+          def get_comment(cid):
+              req = urllib.request.Request(
+                  f"https://api.github.com/repos/{repo}/issues/comments/{cid}",
+                  headers={
+                      "Authorization": f"Bearer {token}",
+                      "Accept": "application/vnd.github+json",
+                      "X-GitHub-Api-Version": "2022-11-28",
+                  },
+              )
+              with urllib.request.urlopen(req, timeout=30) as response:
+                  return json.load(response)
+
+          def extract_payload(body):
+              match = re.search(r"<!-- surveillance-run:v3 -->\s*```json\s*(\{.*\})\s*```\s*$", body, re.S)
+              if not match:
+                  raise RuntimeError("missing canonical v3 marker/fenced JSON")
+              return json.loads(match.group(1))
+
+          def bounded(value, limit, cid):
+              text = " ".join(str(value).split())
+              if len(text) <= limit:
+                  return text
+              suffix = f" [full telemetry: quarantined comment {cid}]"
+              keep = limit - len(suffix)
+              if keep < 16:
+                  raise RuntimeError("text bound too small for audit pointer")
+              return text[:keep].rstrip(" ,;:-") + suffix
+
+          def normalise_list(values, limit, cid, label, preserve_fallback=False):
+              if not isinstance(values, list):
+                  raise RuntimeError(f"{label} is not a list")
+              bounded_values = [bounded(value, limit, cid) for value in values]
+              if len(bounded_values) <= 10:
+                  return bounded_values
+              pointer = bounded(f"Additional original {label} retained in quarantined ledger comment {cid}.", limit, cid)
+              selected = []
+              if preserve_fallback:
+                  fallback = next((v for v in bounded_values if v.startswith("Exa fallback:")), None)
+                  if fallback:
+                      selected.append(fallback)
+              for value in bounded_values:
+                  if value in selected:
+                      continue
+                  if len(selected) >= 9:
+                      break
+                  selected.append(value)
+              selected.append(pointer)
+              return selected
+
+          def structural(payload):
+              value = copy.deepcopy(payload)
+              value.pop("notes", None)
+              for source in value.get("sources", []):
+                  source.pop("limitations", None)
+              return value
+
+          manifest = []
+          for cid, batch in targets.items():
+              comment = get_comment(cid)
+              if comment.get("user", {}).get("login") != "colazeta":
+                  raise RuntimeError(f"{cid}: unexpected author")
+              if comment.get("created_at") != comment.get("updated_at"):
+                  raise RuntimeError(f"{cid}: source comment is edited")
+              body = str(comment.get("body") or "")
+              if batch not in body:
+                  raise RuntimeError(f"{cid}: batch mismatch")
+              payload = extract_payload(body)
+              if payload.get("schema_version") != 3 or payload.get("batch_id") != batch:
+                  raise RuntimeError(f"{cid}: payload identity mismatch")
+              before = structural(payload)
+              for source in payload.get("sources", []):
+                  source["limitations"] = normalise_list(source.get("limitations", []), 180, cid, "limitations")
+              payload["notes"] = normalise_list(payload.get("notes", []), 280, cid, "notes", preserve_fallback=True)
+              if structural(payload) != before:
+                  raise RuntimeError(f"{cid}: non-telemetry structure changed")
+              status = payload.get("status")
+              if status not in {"completed", "partial", "failed"}:
+                  raise RuntimeError(f"{cid}: invalid status")
+              replacement = (
+                  f"Daily surveillance batch {batch}: {status}.\n\n"
+                  "<!-- surveillance-run:v3 -->\n```json\n"
+                  + json.dumps(payload, ensure_ascii=False, separators=(",", ":"))
+                  + "\n```"
+              )
+              path = out / f"{cid}.md"
+              path.write_text(replacement, encoding="utf-8")
+              manifest.append({
+                  "source_comment_id": cid,
+                  "batch_id": batch,
+                  "status": status,
+                  "sha256": hashlib.sha256(replacement.encode("utf-8")).hexdigest(),
+                  "path": str(path),
+              })
+          (out / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+          print(f"generated {len(manifest)} replacement payloads")
+          PY
+      - name: Persist generated payloads on recovery branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tmp/terminal-recovery-payloads
+          if git diff --cached --quiet; then
+            echo "payloads already current"
+            exit 0
+          fi
+          git commit -m "[recovery payloads] Generate bounded terminal replacements"
+          git push origin HEAD:maintenance/normalize-all-invalid-terminals
