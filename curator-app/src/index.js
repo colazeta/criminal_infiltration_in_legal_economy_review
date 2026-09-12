@@ -495,7 +495,7 @@ async function authenticatedSession(request, config, requireCsrf = false) {
 }
 
 function validCandidateId(value) {
-  return /^[A-Z0-9][A-Z0-9-]{2,59}$/.test(String(value || ""));
+  return /^[A-Za-z0-9][A-Za-z0-9-]{2,59}$/.test(String(value || ""));
 }
 
 function stripMarkdown(value) {
@@ -510,7 +510,7 @@ function stripMarkdown(value) {
 
 function parseCandidateIssue(issue) {
   const body = String(issue?.body || "");
-  const marker = body.match(/<!--\s*curator-candidate:([A-Z0-9-]+)\s*-->/);
+  const marker = body.match(/<!--\s*curator-candidate:([A-Za-z0-9-]+)\s*-->/);
   if (!marker || !validCandidateId(marker[1])) return null;
   const fields = {};
   for (const line of body.split("\n")) {
