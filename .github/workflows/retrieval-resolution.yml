@@ -5,7 +5,9 @@ on:
     branches: [main]
     paths:
       - data/curation/review_queue.csv
+      - data/curation/reading_aid_overrides.json
       - scripts/retrieval/resolve_queue.py
+      - scripts/retrieval/apply_verified_reading_locators.py
       - .github/workflows/retrieval-resolution.yml
   schedule:
     - cron: "20 5 * * 0"
@@ -42,7 +44,7 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Resolve every queue candidate
+      - name: Resolve every queue candidate and sync verified reading locators
         env:
           OPENALEX_API_KEY: ${{ secrets.OPENALEX_API_KEY }}
           UNPAYWALL_EMAIL: ${{ secrets.UNPAYWALL_EMAIL }}
@@ -52,7 +54,9 @@ jobs:
             --date "$action_date" \
             --max-age-days 30 \
             --output "$RUNNER_TEMP/retrieval-summary.json"
+          python scripts/retrieval/apply_verified_reading_locators.py
           python scripts/retrieval/resolve_queue.py --check
+          python scripts/retrieval/apply_verified_reading_locators.py --check
 
       - name: Validate governed repository
         run: |

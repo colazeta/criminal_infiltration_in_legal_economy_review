@@ -82,6 +82,33 @@
       "synopsis": "The article examines why organised crime infiltrates public procurement, how infiltration techniques have evolved across the phases of contracting, and how the legal and regulatory response developed in parallel.",
       "checkedAt": "2026-09-12",
       "note": "Parallel Search fetched the exact University of Milan publisher article for DOI 10.13130/cross-7791 and the direct scholarly full-text manifestation, matching Sara Spartà and the 2016 CROSS issue. Evidence basis: full_text; the synopsis is a conservative paraphrase of the verified author abstract. No verbatim article text or scientific decision is persisted here."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-09-001",
+      "kind": "full_text_intro",
+      "sourceLabel": "IFS 2023 working-paper PDF located with Parallel Search",
+      "sourceUrl": "https://ifs.org.uk/sites/default/files/2023-10/WP202328-Mafia-infiltrations-in-times-of-crisis-Evidence-from-the-Covid-19-shock-1_0.pdf",
+      "synopsis": "The working paper exploits variation in firms’ exposure to Covid-19 closure days as a shock to revenues and financial conditions to estimate whether distress raises Mafia infiltration risk. It reports that worsening financial conditions increased infiltration likelihood, while government support partly offset the effect; heterogeneity is consistent with a role for Mafia lending when firms face temporary debt-repayment difficulties.",
+      "checkedAt": "2026-09-12",
+      "note": "Parallel Search fetched the exact IFS 2023 working-paper manifestation, matching Marco Castelluccio, Lucia Rizzica and the candidate title/year. Evidence basis: full_text. A later Bank of Italy Temi di discussione no. 1502 (2025) manifestation was also located but is not silently substituted for or canonicalised with the 2023 candidate. No verbatim text or scientific decision is persisted here."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-09-EXTRA-5e31cc756b0e-010",
+      "kind": "publisher_summary",
+      "sourceLabel": "RAND Europe exact report record located with Parallel Search",
+      "sourceUrl": "https://www.rand.org/pubs/external_publications/EP68577.html",
+      "synopsis": "The report examines serious and organised crime infiltration of legitimate European businesses and maps risk relevant to the interaction between criminal activity and the legal economy. It is an EU-level risk-mapping study rather than evidence from a single firm or locality.",
+      "checkedAt": "2026-09-12",
+      "note": "Parallel Search matched the exact title, authors and DOI 10.2837/64101 on RAND Europe and resolved the DOI to the official EU Publications Office record, which lists an English PDF. Evidence basis: partial_text from authoritative report summary and publication metadata; the report body was not fetched in this pass, so methods, variables and findings beyond that support remain not_verifiable."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-09-EXTRA-6b5b5e038ac4-002",
+      "kind": "metadata_warning",
+      "sourceLabel": "EU Publications Office exact Technical Annexes record located with Parallel Search",
+      "sourceUrl": "https://op.europa.eu/en/publication-detail/-/publication/bd3cb673-879d-11eb-ac4c-01aa75ed71a1/language-en",
+      "synopsis": "The exact 2021 Technical Annexes companion to the EU/RAND risk-mapping report is verified by DOI 10.2837/442937 and authoritative EU/RAND records, and the Publications Office lists an English PDF. Substantive annex methods, variables and findings were not extracted in this pass.",
+      "checkedAt": "2026-09-12",
+      "note": "Parallel Search matched the exact title, authors and DOI on RAND Europe and the EU Publications Office. Evidence basis: partial_text limited to authoritative publication metadata and download availability; substantive annex content remains not_verifiable."
     }
   ]
 }

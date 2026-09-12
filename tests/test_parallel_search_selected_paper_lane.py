@@ -76,6 +76,35 @@ class ParallelSearchSelectedPaperLaneTests(unittest.TestCase):
 
         self.assertIn("not_verifiable", records["CAND-ACADEMIC-2026-09-09-013"]["note"])
 
+    def test_third_parallel_search_batch_is_version_aware_and_bounded(self):
+        payload = json.loads((ROOT / "data/curation/reading_aid_overrides.json").read_text(encoding="utf-8"))
+        records = {row["candidateId"]: row for row in payload["records"]}
+        with (ROOT / "data/curation/review_queue.csv").open(encoding="utf-8", newline="") as handle:
+            queue_ids = {row["candidate_id"] for row in csv.DictReader(handle)}
+
+        expected = {
+            "CAND-ACADEMIC-2026-09-09-001": ("ifs.org.uk", "full_text_intro", "full_text"),
+            "CAND-ACADEMIC-2026-09-09-EXTRA-5e31cc756b0e-010": ("rand.org", "publisher_summary", "partial_text"),
+            "CAND-ACADEMIC-2026-09-09-EXTRA-6b5b5e038ac4-002": ("op.europa.eu", "metadata_warning", "partial_text"),
+        }
+        for candidate, (host, kind, coverage) in expected.items():
+            self.assertIn(candidate, queue_ids)
+            row = records[candidate]
+            self.assertEqual(row["kind"], kind)
+            self.assertTrue(row["sourceUrl"].startswith("https://"))
+            self.assertIn(host, row["sourceUrl"])
+            self.assertNotIn("parallel-search", row["sourceUrl"].lower())
+            self.assertLess(len(row["synopsis"]), 900)
+            self.assertIn("Parallel Search", row["note"])
+            self.assertIn(coverage, row["note"])
+
+        covid = records["CAND-ACADEMIC-2026-09-09-001"]
+        self.assertIn("2023", covid["sourceLabel"])
+        self.assertIn("2025", covid["note"])
+        self.assertIn("not silently substituted", covid["note"])
+        self.assertIn("not_verifiable", records["CAND-ACADEMIC-2026-09-09-EXTRA-5e31cc756b0e-010"]["note"])
+        self.assertIn("not_verifiable", records["CAND-ACADEMIC-2026-09-09-EXTRA-6b5b5e038ac4-002"]["note"])
+
 
 if __name__ == "__main__":
     unittest.main()
