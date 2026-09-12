@@ -14,21 +14,14 @@ import fetch_surveillance_ledger_quarantine as quarantine  # noqa: E402
 
 class SurveillanceLedgerQuarantineTests(unittest.TestCase):
     def test_exact_invalid_terminals_are_filtered(self) -> None:
-        rows = [
-            {"id": 1, "body": "ordinary"},
-            {
-                "id": 5631393628,
-                "body": "Daily surveillance batch ACADEMIC-2026-09-11-EXTRA-2520dfa54e12: completed.",
-            },
-            {
-                "id": 5639689529,
-                "body": "Daily surveillance batch ACADEMIC-2026-09-11-EXTRA-f28583e91573: completed.",
-            },
-            {
-                "id": 5633517951,
-                "body": "Daily surveillance batch ACADEMIC-2026-09-11-EXTRA-61e4d03af5c4: completed.",
-            },
-        ]
+        rows = [{"id": 1, "body": "ordinary"}]
+        for comment_id, batch_id in quarantine.QUARANTINED_LEDGER_COMMENTS.items():
+            rows.append(
+                {
+                    "id": comment_id,
+                    "body": f"Daily surveillance batch {batch_id}: completed.",
+                }
+            )
         with patch.object(quarantine, "_RAW_API_GET", return_value=(rows, None)):
             payload, links = quarantine._quarantine_api_get(
                 "https://api.github.com/repos/x/y/issues/30/comments?per_page=100", "token"
@@ -37,7 +30,7 @@ class SurveillanceLedgerQuarantineTests(unittest.TestCase):
         self.assertIsNone(links)
 
     def test_same_comment_id_with_wrong_batch_fails_closed(self) -> None:
-        for comment_id in (5631393628, 5639689529, 5633517951):
+        for comment_id in quarantine.QUARANTINED_LEDGER_COMMENTS:
             rows = [{"id": comment_id, "body": "different batch"}]
             with patch.object(quarantine, "_RAW_API_GET", return_value=(rows, None)):
                 with self.assertRaises(Exception):
@@ -46,10 +39,10 @@ class SurveillanceLedgerQuarantineTests(unittest.TestCase):
                     )
 
     def test_non_ledger_calls_are_unchanged(self) -> None:
-        rows = [{"id": 5633517951, "body": "different batch"}]
+        rows = [{"id": 5644330070, "body": "different batch"}]
         with patch.object(quarantine, "_RAW_API_GET", return_value=(rows, None)):
             payload, _ = quarantine._quarantine_api_get(
-                "https://api.github.com/repos/x/y/issues/320", "token"
+                "https://api.github.com/repos/x/y/issues/345", "token"
             )
         self.assertEqual(payload, rows)
 
