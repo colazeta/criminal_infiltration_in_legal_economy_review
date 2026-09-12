@@ -1,19 +1,21 @@
 #!/usr/bin/env python3
 """Read the governed surveillance ledger while quarantining audited invalid batches.
 
-The batch ACADEMIC-2026-09-11-EXTRA-2520dfa54e12 was later proven to repeat
-candidate identities already present in intake #226. The batch
-ACADEMIC-2026-09-11-EXTRA-f28583e91573 was later proven to repeat the work
-identified by DOI 10.1177/1477370818803050 already present in intake #225.
-The original terminal comment for ACADEMIC-2026-09-11-EXTRA-61e4d03af5c4
-was accidentally edited during an owner-authorised recovery operation on
-2026-09-12. Because ledger terminals are append-only, that edited comment is
-quarantined by exact comment ID so that a separately appended replacement
-terminal can become the governed record for the batch.
+The batches ACADEMIC-2026-09-11-EXTRA-2520dfa54e12 and
+ACADEMIC-2026-09-11-EXTRA-f28583e91573 were later proven to repeat candidate
+identities already present in earlier intake state. The original terminal for
+ACADEMIC-2026-09-11-EXTRA-61e4d03af5c4 was accidentally edited during an
+authorised recovery and therefore lost append-only validity.
 
-These historical comments must remain available for audit, but they must not
-enter the active validated run set, public statistics, heartbeat state, or
-downstream intake reconciliation.
+Three later immutable v3 terminals are also quarantined because their source
+``limitations`` field contains a text item longer than the schema's 180-character
+maximum. Their scientific/intake content is not being withdrawn; each is replaced
+by a separately appended terminal with the same governed counts and references
+and a schema-valid shortened limitation.
+
+These historical comments remain on GitHub for audit, but must not enter the
+active validated run set, public statistics, heartbeat state, or downstream
+intake reconciliation.
 
 This module does not weaken validation for any other run. It filters only the
 explicitly audited GitHub issue-comment IDs below before delegating to the
@@ -32,6 +34,9 @@ QUARANTINED_LEDGER_COMMENTS = {
     5631393628: "ACADEMIC-2026-09-11-EXTRA-2520dfa54e12",
     5639689529: "ACADEMIC-2026-09-11-EXTRA-f28583e91573",
     5633517951: "ACADEMIC-2026-09-11-EXTRA-61e4d03af5c4",
+    5644330070: "ACADEMIC-2026-09-12-EXTRA-d6b0ffff25fd",
+    5644553677: "ACADEMIC-2026-09-12-EXTRA-335f7df7ae34",
+    5646294694: "ACADEMIC-2026-09-12-EXTRA-570dae192194",
 }
 _RAW_API_GET = _base.api_get
 
@@ -67,8 +72,6 @@ def fetch_validated_runs(repository, ledger_issue, allowed_author, token, cycle=
         _base.api_get = original
 
 
-# Callers that need to validate the live intake object still use the canonical
-# functions directly. Only ledger enumeration is quarantined.
 api_get = _base.api_get
 verify_intake_issue = _base.verify_intake_issue
 extract_run = _base.extract_run
