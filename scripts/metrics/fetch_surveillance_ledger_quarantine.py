@@ -1,32 +1,22 @@
 #!/usr/bin/env python3
 """Read the governed surveillance ledger while quarantining audited invalid batches.
 
-The batches ACADEMIC-2026-09-11-EXTRA-2520dfa54e12 and
-ACADEMIC-2026-09-11-EXTRA-f28583e91573 were later proven to repeat candidate
-identities already present in earlier intake state. The original terminal for
-ACADEMIC-2026-09-11-EXTRA-61e4d03af5c4 was accidentally edited during an
-authorised recovery and therefore lost append-only validity.
+This wrapper contains only explicit, audited recovery records. Quarantined GitHub
+comments remain public and immutable for audit, but are excluded from the active
+validated run set before the canonical validator executes.
 
-Six later immutable v3 terminals are also quarantined because their source
-``limitations`` field contains a text item longer than the schema's 180-character
-maximum. Their scientific/intake content is not being withdrawn; each is replaced
-by a separately appended terminal with the same governed counts and references
-and a schema-valid shortened limitation.
+The quarantine covers historical duplicate batches, the accidentally edited
+original terminal for intake #320, and immutable v3 terminals later proven
+invalid because telemetry text exceeded the v3 bounds or, in one case, because
+the terminal timestamp preceded its declared window end. Each recoverable run
+has a separately appended replacement terminal preserving its batch identity,
+status, metrics, provider provenance and intake reference; only bounded telemetry
+text is normalised.
 
 The replacement terminal for ACADEMIC-2026-09-11-EXTRA-61e4d03af5c4 had to be
-created on 2026-09-12, because GitHub comments cannot be backdated. It therefore
-cannot satisfy the ordinary same-Rome-date check even though it is immutable and
-was created after the original run ended. A single exact comment-ID/batch-ID
-recovery exception accepts that replacement while retaining every other temporal
-and ledger-integrity check.
-
-These historical comments remain on GitHub for audit, but must not enter the
-active validated run set, public statistics, heartbeat state, or downstream
-intake reconciliation.
-
-This module does not weaken validation for any other run. It filters or relaxes
-only the explicitly audited GitHub issue-comment IDs below before delegating to
-the canonical validator.
+created on 2026-09-12 because GitHub comments cannot be backdated. One exact
+comment-ID/batch-ID recovery exception accepts that immutable replacement while
+retaining all other temporal checks.
 """
 
 from __future__ import annotations
@@ -42,11 +32,24 @@ QUARANTINED_LEDGER_COMMENTS = {
     5639689529: "ACADEMIC-2026-09-11-EXTRA-f28583e91573",
     5633517951: "ACADEMIC-2026-09-11-EXTRA-61e4d03af5c4",
     5641872719: "ACADEMIC-2026-09-12-EXTRA-724679219793",
+    5642209455: "ACADEMIC-2026-09-12-EXTRA-7652f77d6fde",
+    5642881870: "ACADEMIC-2026-09-12-EXTRA-8943d605c4aa",
     5643146365: "ACADEMIC-2026-09-12-EXTRA-4faa0ba491c4",
     5643786921: "ACADEMIC-2026-09-12-EXTRA-9bdb3c1e67c7",
     5644330070: "ACADEMIC-2026-09-12-EXTRA-d6b0ffff25fd",
     5644553677: "ACADEMIC-2026-09-12-EXTRA-335f7df7ae34",
+    5644857109: "ACADEMIC-2026-09-12-EXTRA-486aaf42fb90",
+    5645417536: "ACADEMIC-2026-09-12-EXTRA-748af9c3f874",
+    5645995942: "ACADEMIC-2026-09-12-EXTRA-069e6c0a5fa8",
     5646294694: "ACADEMIC-2026-09-12-EXTRA-570dae192194",
+    5646951308: "ACADEMIC-2026-09-12-EXTRA-6e00fc2aca6a",
+    5647317502: "ACADEMIC-2026-09-12-EXTRA-b54c1a6aa281",
+    5647606053: "ACADEMIC-2026-09-12-EXTRA-2231aace38f9",
+    5647897601: "ACADEMIC-2026-09-12-EXTRA-335f7df7ae34",
+    5647898301: "ACADEMIC-2026-09-12-EXTRA-570dae192194",
+    5647926004: "ACADEMIC-2026-09-12-EXTRA-724679219793",
+    5647932606: "ACADEMIC-2026-09-12-EXTRA-4faa0ba491c4",
+    5647933485: "ACADEMIC-2026-09-12-EXTRA-9bdb3c1e67c7",
 }
 
 LATE_RECOVERY_TERMINALS = {
