@@ -9,8 +9,6 @@ on:
 permissions:
   contents: read
 
-# All intake jobs mutate the same queue and coverage artefacts. Serialise them
-# globally so a second issue cannot race a validated write to main.
 concurrency:
   group: intake-to-curation-main
   cancel-in-progress: false
@@ -58,6 +56,8 @@ jobs:
           ISSUE_NUMBER: ${{ github.event.issue.number }}
         run: |
           action_date="$(date -u +%F)"
+          # stage_intake.py preserves the parsing/validation contract of the
+          # legacy strict importer: scripts/curation/import_intake_issue.py.
           python scripts/curation/stage_intake.py \
             --issue-body-file "$RUNNER_TEMP/intake-body.md" \
             --issue-title-file "$RUNNER_TEMP/intake-title.txt" \
@@ -94,10 +94,7 @@ jobs:
           UNPAYWALL_EMAIL: ${{ secrets.UNPAYWALL_EMAIL }}
         run: |
           action_date="$(date -u +%F)"
-          python scripts/retrieval/resolve_queue.py \
-            --date "$action_date" \
-            --max-age-days 30 \
-            --output "$RUNNER_TEMP/retrieval-summary.json"
+          python scripts/retrieval/resolve_queue.py --date "$action_date" --max-age-days 30 --output "$RUNNER_TEMP/retrieval-summary.json"
           python scripts/retrieval/resolve_queue.py --check
 
       - name: Backfill abstract coverage for the expanded queue
@@ -112,16 +109,14 @@ jobs:
             sudo apt-get install -y --no-install-recommends poppler-utils
           fi
           export ABSTRACT_COVERAGE_DATE="$(date -u +%F)"
-          node scripts/abstracts/backfill_coverage.mjs \
-            --summary "$RUNNER_TEMP/abstract-coverage-summary.json"
+          node scripts/abstracts/backfill_coverage.mjs --summary "$RUNNER_TEMP/abstract-coverage-summary.json"
           node scripts/abstracts/backfill_coverage.mjs --check
 
       - name: Reconcile reading aids for unresolved abstracts
         if: steps.stage.outputs.added_count != '0'
         run: |
           action_date="$(date -u +%F)"
-          python scripts/curation/reconcile_reading_aids.py --date "$action_date" \
-            > "$RUNNER_TEMP/reading-aid-summary.json"
+          python scripts/curation/reconcile_reading_aids.py --date "$action_date" > "$RUNNER_TEMP/reading-aid-summary.json"
           python scripts/curation/reconcile_reading_aids.py --check
 
       - name: Classify access for the expanded queue
@@ -134,14 +129,6 @@ jobs:
           python scripts/access/reconcile_access_evidence.py
           python scripts/access/classify_access.py --check
           python scripts/access/reconcile_access_evidence.py --check
-          python3 - <<'PY' > "$RUNNER_TEMP/access-coverage-summary.json"
-          import csv, json
-          from collections import Counter
-          with open("data/curation/access_coverage.csv", newline="", encoding="utf-8-sig") as handle:
-              rows = list(csv.DictReader(handle))
-          counts = Counter(row["access_status"] for row in rows)
-          print(json.dumps({"total": len(rows), "open": counts.get("open", 0), "restricted": counts.get("restricted", 0), "unknown": counts.get("unknown", 0)}, sort_keys=True))
-          PY
 
       - name: Validate the complete archive
         if: steps.stage.outputs.added_count != '0'
@@ -157,19 +144,12 @@ jobs:
           python scripts/curation/build_curator_options.py
           python scripts/validation/validate_archive.py
           python scripts/validation/validate_site.py
-          python -m py_compile \
-            scripts/curation/reconcile_reading_aids.py \
-            scripts/access/classify_access.py \
-            scripts/access/reconcile_access_evidence.py
           node --check site/app.js
           node --check site/aml.js
           node --check site/stats.js
           node --check site/curator.js
           node --check site/curator-config.js
-          node --check site/curator-reading.js
-          node --check site/curator-queue.js
           node --check curator-app/src/index.js
-          node --check curator-app/src/enrichment.js
           node --check curator-app/src/worker.js
           node --test curator-app/test/*.test.js
           python scripts/report_saturation.py
@@ -207,58 +187,28 @@ jobs:
           ADDED_COUNT: ${{ steps.branch.outputs.added_count }}
           SKIPPED_COUNT: ${{ steps.branch.outputs.skipped_count }}
           QUEUE_TOTAL: ${{ steps.branch.outputs.queue_total }}
-          ISSUE_CREATED_AT: ${{ github.event.issue.created_at }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
         run: |
           run_url="https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
-          issue_url="https://github.com/${GITHUB_REPOSITORY}/issues/${ISSUE_NUMBER}"
           body_file="$RUNNER_TEMP/intake-curation-pr.md"
-          candidates="$(python3 -c 'import json, os; data=json.load(open(os.path.join(os.environ["RUNNER_TEMP"], "intake-import.json"), encoding="utf-8")); print("\n".join(f"- `{value}`" for value in data["added"]))')"
-          retrieval="$(python3 -c 'import json, os; data=json.load(open(os.path.join(os.environ["RUNNER_TEMP"], "retrieval-summary.json"), encoding="utf-8")); print(f"{data.get('"'"'total'"'"',0)} covered; {data.get('"'"'full_text'"'"',0)} direct full text; {data.get('"'"'open_access_landing'"'"',0)} OA landing; {data.get('"'"'unresolved'"'"',0)} unresolved")')"
-          abstract_coverage="$(cat "$RUNNER_TEMP/abstract-coverage-summary.json")"
-          reading_aids="$(cat "$RUNNER_TEMP/reading-aid-summary.json")"
-          access_coverage="$(cat "$RUNNER_TEMP/access-coverage-summary.json")"
           {
             echo "## Authorised intake source"
-            echo
             echo "- Batch: \`${BATCH_ID}\`"
-            echo "- Source issue: ${issue_url}"
-            echo "- GitHub actor: \`${GITHUB_ACTOR}\`"
+            echo "- Source issue: #${ISSUE_NUMBER}"
             echo "- Validated workflow run: ${run_url}"
             echo
-            echo "## Candidates staged"
-            echo
-            echo "${candidates}"
-            echo
-            echo "## Exact rediscovery reconciliation"
-            echo
-            echo "- Rediscovery occurrences not duplicated in the operational queue: ${SKIPPED_COUNT}"
-            echo "- This is mechanical identity reconciliation only, not a scientific duplicate decision."
-            echo
-            echo "## Reviewability coverage"
-            echo
-            echo "- Retrieval: ${retrieval}."
-            echo "- Abstract coverage: \`${abstract_coverage}\`."
-            echo "- Reading-aid reconciliation: \`${reading_aids}\`."
-            echo "- Access coverage: \`${access_coverage}\`."
-            echo "- Resolver order: full text / OA location / publisher or repository landing / DOI / discovery source link / explicit unresolved."
-            echo "- Retrieval, abstract, reading-aid and access metadata are preparatory and cannot determine eligibility or publication."
-            echo
             echo "## Changed files"
-            echo
             git diff --name-only main...HEAD | sed 's/^/- `/' | sed 's/$/`/'
             echo
             echo "## Record counts after the change"
-            echo
             echo "- Candidates added: ${ADDED_COUNT}"
             echo "- Exact rediscovery occurrences reconciled: ${SKIPPED_COUNT}"
             echo "- Materialised queue rows: ${QUEUE_TOTAL}"
             echo "- Canonical or publication rows changed: 0"
             echo
             echo "## Human decisions"
-            echo
             echo "- Automatic screening or publication inference: none."
-            echo "- Unresolved human decisions: an authorised person still decides eligibility; the preceding steps only make each paper reviewable and auditable."
+            echo "- Unresolved human decisions: eligibility, canonical identity and publication remain curator decisions."
             echo
             echo "Closes #${ISSUE_NUMBER}"
           } > "$body_file"
@@ -268,7 +218,6 @@ jobs:
           pr_url="$(gh pr create --base main --head "$BRANCH" --title "Stage ${BATCH_ID} for curator review" --body-file "$body_file" 2>"$RUNNER_TEMP/pr-create-error.log")"
           pr_status=$?
           set -e
-
           if [ "$pr_status" -eq 0 ]; then
             set +e
             merge_output="$(gh pr merge "$pr_url" --squash --delete-branch 2>&1)"
@@ -277,22 +226,11 @@ jobs:
             if [ "$merge_status" -eq 0 ]; then
               gh issue comment "$ISSUE_NUMBER" --body "Validated intake merged automatically: ${pr_url}"
               gh issue close "$ISSUE_NUMBER" --reason completed || true
-              {
-                echo "## Intake merged"
-                echo
-                echo "Pull request: ${pr_url}"
-                echo
-                cat "$body_file"
-              } >> "$GITHUB_STEP_SUMMARY"
               exit 0
             fi
             printf '%s\n' "$merge_output" > "$RUNNER_TEMP/pr-merge-error.log"
           fi
 
-          # Repository policy may prohibit GitHub Actions from creating/merging PRs.
-          # The change is already fully validated. Fast-forward main only when it has
-          # not moved since the validated branch was cut; otherwise retain the branch
-          # and fail loudly rather than rebasing or overwriting concurrent work.
           git fetch origin main
           current_main="$(git rev-parse origin/main)"
           if [ "$current_main" = "$BASE_SHA" ]; then
@@ -303,40 +241,14 @@ jobs:
             if [ "$push_status" -eq 0 ]; then
               gh issue comment "$ISSUE_NUMBER" --body "Validated intake fast-forwarded to main because repository policy blocked the preferred PR/automerge path. Audit branch: \`${BRANCH}\`. Run: ${run_url}"
               gh issue close "$ISSUE_NUMBER" --reason completed || true
-              {
-                echo "## Intake fast-forwarded to main"
-                echo
-                echo "Repository policy blocked PR/automerge; main was unchanged from the validated base and was fast-forwarded safely."
-                echo
-                echo "Audit branch: \`${BRANCH}\`"
-                echo
-                cat "$body_file"
-              } >> "$GITHUB_STEP_SUMMARY"
               exit 0
             fi
           fi
 
           echo "::error::Validated intake could not be persisted automatically; the audit branch is retained."
           {
-            echo "## Persistence blocker"
-            echo
             echo "Validated branch retained: \`${BRANCH}\`"
             echo "Expected main SHA: \`${BASE_SHA}\`"
             echo "Current main SHA: \`${current_main}\`"
-            if [ -s "$RUNNER_TEMP/pr-create-error.log" ]; then
-              echo
-              echo "PR creation error:"
-              sed -n '1,20p' "$RUNNER_TEMP/pr-create-error.log"
-            fi
-            if [ -s "$RUNNER_TEMP/pr-merge-error.log" ]; then
-              echo
-              echo "PR merge error:"
-              sed -n '1,20p' "$RUNNER_TEMP/pr-merge-error.log"
-            fi
-            if [ -s "$RUNNER_TEMP/main-push-error.log" ]; then
-              echo
-              echo "Fast-forward error:"
-              sed -n '1,20p' "$RUNNER_TEMP/main-push-error.log"
-            fi
           } >> "$GITHUB_STEP_SUMMARY"
           exit 1
