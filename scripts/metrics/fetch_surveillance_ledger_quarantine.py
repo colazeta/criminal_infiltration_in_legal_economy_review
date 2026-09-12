@@ -7,7 +7,7 @@ identities already present in earlier intake state. The original terminal for
 ACADEMIC-2026-09-11-EXTRA-61e4d03af5c4 was accidentally edited during an
 authorised recovery and therefore lost append-only validity.
 
-Three later immutable v3 terminals are also quarantined because their source
+Six later immutable v3 terminals are also quarantined because their source
 ``limitations`` field contains a text item longer than the schema's 180-character
 maximum. Their scientific/intake content is not being withdrawn; each is replaced
 by a separately appended terminal with the same governed counts and references
@@ -34,6 +34,9 @@ QUARANTINED_LEDGER_COMMENTS = {
     5631393628: "ACADEMIC-2026-09-11-EXTRA-2520dfa54e12",
     5639689529: "ACADEMIC-2026-09-11-EXTRA-f28583e91573",
     5633517951: "ACADEMIC-2026-09-11-EXTRA-61e4d03af5c4",
+    5641872719: "ACADEMIC-2026-09-12-EXTRA-724679219793",
+    5643146365: "ACADEMIC-2026-09-12-EXTRA-4faa0ba491c4",
+    5643786921: "ACADEMIC-2026-09-12-EXTRA-9bdb3c1e67c7",
     5644330070: "ACADEMIC-2026-09-12-EXTRA-d6b0ffff25fd",
     5644553677: "ACADEMIC-2026-09-12-EXTRA-335f7df7ae34",
     5646294694: "ACADEMIC-2026-09-12-EXTRA-570dae192194",
