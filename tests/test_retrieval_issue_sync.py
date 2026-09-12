@@ -52,6 +52,21 @@ action
         self.assertEqual(first, second)
         self.assertLess(first.index(syncer.SECTION_HEADING), first.index("## Curator action"))
 
+    def test_issue_inventory_accepts_lowercase_batch_hex_in_candidate_id(self) -> None:
+        candidate_id = "CAND-ACADEMIC-2026-09-09-EXTRA-85e203d4eb5a-002"
+        original = syncer.paginated
+        try:
+            syncer.paginated = lambda repository, token, path: [
+                {
+                    "number": 464,
+                    "body": f"<!-- curator-candidate:{candidate_id} -->\n",
+                }
+            ]
+            inventory = syncer.issue_inventory("owner/repo", "token")
+        finally:
+            syncer.paginated = original
+        self.assertEqual(inventory[candidate_id]["number"], 464)
+
 
 if __name__ == "__main__":
     unittest.main()
