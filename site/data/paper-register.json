@@ -23,11 +23,12 @@
       "authors": "Francesca Calamunci; Francesco Drago",
       "year": 2020,
       "venue": "IZA Discussion Papers",
-      "doi": "",
+      "doi": "10.1007/s40797-020-00128-x",
       "sourceLinks": [
-        "https://docs.iza.org/dp13028.pdf"
+        "https://docs.iza.org/dp13028.pdf",
+        "https://doi.org/10.1007/s40797-020-00128-x"
       ],
-      "metadataStatus": "metadata_partial",
+      "metadataStatus": "metadata_verified",
       "reviewStatus": "pending",
       "accessStatus": "unknown",
       "registeredAt": "2026-09-08",
@@ -955,11 +956,12 @@
       "authors": "Casey Ichniowski; Anne Preston",
       "year": 1989,
       "venue": "",
-      "doi": "",
+      "doi": "10.1177/001979398904200406",
       "sourceLinks": [
-        "https://scholarship.haverford.edu/cgi/viewcontent.cgi?article=1147&context=economics_facpubs"
+        "https://scholarship.haverford.edu/cgi/viewcontent.cgi?article=1147&context=economics_facpubs",
+        "https://doi.org/10.1177/001979398904200406"
       ],
-      "metadataStatus": "metadata_partial",
+      "metadataStatus": "metadata_verified",
       "reviewStatus": "pending",
       "accessStatus": "unknown",
       "registeredAt": "2026-09-11",
@@ -1628,11 +1630,12 @@
       "authors": "Salvatore Cincimino; Fabio La Rosa; Sergio Paternostro",
       "year": 2025,
       "venue": "",
-      "doi": "",
+      "doi": "10.1007/978-3-031-74523-2_19",
       "sourceLinks": [
-        "https://www.iris.unict.it/handle/20.500.11769/665869"
+        "https://www.iris.unict.it/handle/20.500.11769/665869",
+        "https://doi.org/10.1007/978-3-031-74523-2_19"
       ],
-      "metadataStatus": "metadata_partial",
+      "metadataStatus": "metadata_verified",
       "reviewStatus": "pending",
       "accessStatus": "unknown",
       "registeredAt": "2026-09-09",
@@ -1852,11 +1855,12 @@
       "authors": "",
       "year": null,
       "venue": "",
-      "doi": "",
+      "doi": "10.2307/1600326",
       "sourceLinks": [
-        "https://chicagounbound.uchicago.edu/cgi/viewcontent.cgi?article=5018&context=uclrev"
+        "https://chicagounbound.uchicago.edu/cgi/viewcontent.cgi?article=5018&context=uclrev",
+        "https://doi.org/10.2307/1600326"
       ],
-      "metadataStatus": "metadata_partial",
+      "metadataStatus": "metadata_verified",
       "reviewStatus": "pending",
       "accessStatus": "unknown",
       "registeredAt": "2026-09-10",
@@ -1980,11 +1984,12 @@
       "authors": "Niles Breuer; Federico Varese; Elena Racheva",
       "year": 2025,
       "venue": "",
-      "doi": "",
+      "doi": "10.1093/bjc/azaf041",
       "sourceLinks": [
-        "https://ora.ox.ac.uk/objects/uuid:abca2b8f-2c5e-4dd7-b66b-bd0da1b4849d/files/rsx61dp050"
+        "https://ora.ox.ac.uk/objects/uuid:abca2b8f-2c5e-4dd7-b66b-bd0da1b4849d/files/rsx61dp050",
+        "https://doi.org/10.1093/bjc/azaf041"
       ],
-      "metadataStatus": "metadata_partial",
+      "metadataStatus": "metadata_verified",
       "reviewStatus": "pending",
       "accessStatus": "unknown",
       "registeredAt": "2026-09-10",
