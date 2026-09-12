@@ -5,13 +5,19 @@ The batch ACADEMIC-2026-09-11-EXTRA-2520dfa54e12 was later proven to repeat
 candidate identities already present in intake #226. The batch
 ACADEMIC-2026-09-11-EXTRA-f28583e91573 was later proven to repeat the work
 identified by DOI 10.1177/1477370818803050 already present in intake #225.
-Their immutable terminal comments must remain available for audit, but they must
-not enter the active validated run set, public statistics, heartbeat state, or
+The original terminal comment for ACADEMIC-2026-09-11-EXTRA-61e4d03af5c4
+was accidentally edited during an owner-authorised recovery operation on
+2026-09-12. Because ledger terminals are append-only, that edited comment is
+quarantined by exact comment ID so that a separately appended replacement
+terminal can become the governed record for the batch.
+
+These historical comments must remain available for audit, but they must not
+enter the active validated run set, public statistics, heartbeat state, or
 downstream intake reconciliation.
 
 This module does not weaken validation for any other run. It filters only the
-explicitly audited immutable GitHub issue-comment IDs below before delegating to
-the canonical validator.
+explicitly audited GitHub issue-comment IDs below before delegating to the
+canonical validator.
 """
 
 from __future__ import annotations
@@ -25,6 +31,7 @@ import fetch_surveillance_ledger as _base
 QUARANTINED_LEDGER_COMMENTS = {
     5631393628: "ACADEMIC-2026-09-11-EXTRA-2520dfa54e12",
     5639689529: "ACADEMIC-2026-09-11-EXTRA-f28583e91573",
+    5633517951: "ACADEMIC-2026-09-11-EXTRA-61e4d03af5c4",
 }
 _RAW_API_GET = _base.api_get
 

@@ -24,6 +24,10 @@ class SurveillanceLedgerQuarantineTests(unittest.TestCase):
                 "id": 5639689529,
                 "body": "Daily surveillance batch ACADEMIC-2026-09-11-EXTRA-f28583e91573: completed.",
             },
+            {
+                "id": 5633517951,
+                "body": "Daily surveillance batch ACADEMIC-2026-09-11-EXTRA-61e4d03af5c4: completed.",
+            },
         ]
         with patch.object(quarantine, "_RAW_API_GET", return_value=(rows, None)):
             payload, links = quarantine._quarantine_api_get(
@@ -33,7 +37,7 @@ class SurveillanceLedgerQuarantineTests(unittest.TestCase):
         self.assertIsNone(links)
 
     def test_same_comment_id_with_wrong_batch_fails_closed(self) -> None:
-        for comment_id in (5631393628, 5639689529):
+        for comment_id in (5631393628, 5639689529, 5633517951):
             rows = [{"id": comment_id, "body": "different batch"}]
             with patch.object(quarantine, "_RAW_API_GET", return_value=(rows, None)):
                 with self.assertRaises(Exception):
@@ -42,10 +46,10 @@ class SurveillanceLedgerQuarantineTests(unittest.TestCase):
                     )
 
     def test_non_ledger_calls_are_unchanged(self) -> None:
-        rows = [{"id": 5639689529, "body": "different batch"}]
+        rows = [{"id": 5633517951, "body": "different batch"}]
         with patch.object(quarantine, "_RAW_API_GET", return_value=(rows, None)):
             payload, _ = quarantine._quarantine_api_get(
-                "https://api.github.com/repos/x/y/issues/337", "token"
+                "https://api.github.com/repos/x/y/issues/320", "token"
             )
         self.assertEqual(payload, rows)
 
