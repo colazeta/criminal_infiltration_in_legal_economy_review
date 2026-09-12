@@ -46,6 +46,61 @@ class SurveillanceLedgerQuarantineTests(unittest.TestCase):
             )
         self.assertEqual(payload, rows)
 
+    def test_exact_late_recovery_terminal_accepts_audited_next_day_creation(self) -> None:
+        run = {
+            "batch_id": "ACADEMIC-2026-09-11-EXTRA-61e4d03af5c4",
+            "run_date": "2026-09-11",
+            "window_end": "2026-09-11T13:06:48+02:00",
+        }
+        comment = {
+            "id": 5647832949,
+            "created_at": "2026-09-12T18:30:00Z",
+            "updated_at": "2026-09-12T18:30:00Z",
+        }
+        quarantine._verify_ledger_comment_time_with_recovery(run, comment)
+
+    def test_late_recovery_terminal_fails_if_edited(self) -> None:
+        run = {
+            "batch_id": "ACADEMIC-2026-09-11-EXTRA-61e4d03af5c4",
+            "run_date": "2026-09-11",
+            "window_end": "2026-09-11T13:06:48+02:00",
+        }
+        comment = {
+            "id": 5647832949,
+            "created_at": "2026-09-12T18:30:00Z",
+            "updated_at": "2026-09-12T18:31:00Z",
+        }
+        with self.assertRaises(Exception):
+            quarantine._verify_ledger_comment_time_with_recovery(run, comment)
+
+    def test_late_recovery_terminal_fails_for_wrong_batch(self) -> None:
+        run = {
+            "batch_id": "ACADEMIC-2026-09-11-EXTRA-wrong",
+            "run_date": "2026-09-11",
+            "window_end": "2026-09-11T13:06:48+02:00",
+        }
+        comment = {
+            "id": 5647832949,
+            "created_at": "2026-09-12T18:30:00Z",
+            "updated_at": "2026-09-12T18:30:00Z",
+        }
+        with self.assertRaises(Exception):
+            quarantine._verify_ledger_comment_time_with_recovery(run, comment)
+
+    def test_late_recovery_terminal_fails_for_unexpected_creation_day(self) -> None:
+        run = {
+            "batch_id": "ACADEMIC-2026-09-11-EXTRA-61e4d03af5c4",
+            "run_date": "2026-09-11",
+            "window_end": "2026-09-11T13:06:48+02:00",
+        }
+        comment = {
+            "id": 5647832949,
+            "created_at": "2026-09-13T18:30:00Z",
+            "updated_at": "2026-09-13T18:30:00Z",
+        }
+        with self.assertRaises(Exception):
+            quarantine._verify_ledger_comment_time_with_recovery(run, comment)
+
 
 if __name__ == "__main__":
     unittest.main()
