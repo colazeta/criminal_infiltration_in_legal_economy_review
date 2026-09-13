@@ -160,8 +160,13 @@
       const summaries = [...index.rows.values()].filter(s => s.summary).length;
       const ai = [...index.rows.values()].filter(s => matches(s, 'ai')).length;
       const supportErrors = [...index.rows.values()].filter(s => s.support === 'error').length;
+      const supportChecked = [...index.rows.values()].filter(s => s.support === 'checked').length;
+      const supportPending = [...index.rows.values()].filter(s => s.support === 'pending').length;
+      const summaryText = supportChecked === p.total ? `${summaries} sintesi disponibili` : supportChecked ? `${summaries} sintesi trovate nei record verificati` : 'Disponibilità delle sintesi da verificare';
+      const aiText = p.checked ? `${ai} analisi AI trovate nei record verificati` : 'Analisi AI da verificare';
       const lead = p.running ? 'Verifica in corso: risultati parziali. ' : p.scanned && p.checked < p.total ? 'Verifica incompleta: non interpretare gli stati mancanti come assenza di analisi. ' : '';
-      status.textContent = lead + `${summaries} sintesi disponibili · ${ai} analisi AI verificate nel caricamento · ${p.checked}/${p.total} stati analitici verificati.` +
+      status.textContent = lead + summaryText + ` · ${supportChecked}/${p.total} stati delle sintesi verificati · ` + aiText + ` · ${p.checked}/${p.total} stati analitici verificati.` +
+        (supportPending ? ' Verifica delle sintesi in corso.' : '') +
         (supportErrors ? ` ${supportErrors} sintesi non verificabili.` : '') +
         (p.errors ? ` ${p.errors} richieste analitiche non riuscite.` : '') +
         (!p.scanned && !p.running ? ' Seleziona un filtro di analisi o premi Aggiorna per verificare l’intero registro.' : '');
@@ -185,7 +190,7 @@
         if (mode.value === 'all' && category.value === 'all') return '';
         const incomplete = mode.value === 'summary' && category.value === 'all'
           ? [...index.rows.values()].some(row => row.support !== 'checked')
-          : index.progress.running || index.progress.checked < records.length;
+          : index.progress.running || index.progress.checked < records.length || (mode.value === 'content' && [...index.rows.values()].some(row => row.support !== 'checked'));
         return incomplete ? 'Nessuna corrispondenza verificata finora. La verifica dei contenuti non è completa: consulta lo stato sopra i risultati.' : '';
       },
     };
