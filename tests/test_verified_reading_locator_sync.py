@@ -5,6 +5,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from scripts.retrieval.selected_paper_delivery import PREPARE
 
 ROOT = Path(__file__).resolve().parents[1]
 MODULE_PATH = ROOT / "scripts/retrieval/apply_verified_reading_locators.py"
@@ -162,9 +163,10 @@ class VerifiedReadingLocatorSyncTests(unittest.TestCase):
         workflow = (ROOT / ".github/workflows/retrieval-resolution.yml").read_text(encoding="utf-8")
         self.assertIn("data/curation/reading_aid_overrides.json", workflow)
         self.assertIn("scripts/retrieval/apply_verified_reading_locators.py", workflow)
-        apply_at = workflow.index("python scripts/retrieval/apply_verified_reading_locators.py\n")
+        apply_at = workflow.index("selected_paper_delivery.py --prepare --validate")
         check_at = workflow.index("python scripts/retrieval/resolve_queue.py --check")
         self.assertLess(apply_at, check_at)
+        self.assertEqual(PREPARE[0], ["python3", "scripts/retrieval/apply_verified_reading_locators.py"])
         self.assertIn("python scripts/retrieval/apply_verified_reading_locators.py --check", workflow)
         self.assertIn("cancel-in-progress: false", workflow)
 
