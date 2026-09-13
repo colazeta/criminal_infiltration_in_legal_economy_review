@@ -109,8 +109,25 @@ jobs:
           node --check curator-app/src/worker.js
           node --test curator-app/test/*.test.js
 
-      - name: Audit actual public delivery without inferring scientific approval
-        run: python3 scripts/retrieval/selected_paper_delivery.py --check
+      - name: Audit selected-paper delivery state without inferring scientific approval
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            # PR validation proves the deterministic bridges can absorb already-verified
+            # support. It does not claim these generated projections are persisted on main.
+            python3 scripts/retrieval/selected_paper_delivery.py --prepare \
+              --summary "$RUNNER_TEMP/selected-support-pr-audit.json"
+            unexpected="$(git diff --name-only | grep -Ev '^(data/curation/(retrieval_coverage|abstract_coverage)\.csv|site/data/)' || true)"
+            if [ -n "$unexpected" ]; then
+              echo "::error::Selected-paper preparation changed unexpected paths"
+              printf '%s\n' "$unexpected"
+              exit 1
+            fi
+          else
+            # Main must already contain the materialised support. No false-green bridge here.
+            python3 scripts/retrieval/selected_paper_delivery.py --check
+          fi
 
   deploy:
     concurrency:
