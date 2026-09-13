@@ -21,9 +21,10 @@ class CandidateConservationWorkflowTests(unittest.TestCase):
 
     def test_newer_global_recovery_supersedes_stale_recovery(self) -> None:
         workflow = self._workflow()
+        compact = " ".join(line.lstrip("# ").strip() for line in workflow.splitlines())
         self.assertIn("cancel-in-progress: true", workflow)
-        self.assertIn("immutable intake source of truth", workflow)
-        self.assertIn("cancellation policy is recovery-only", workflow)
+        self.assertIn("immutable intake source of truth", compact)
+        self.assertIn("cancellation policy is recovery-only", compact)
 
     def test_automatic_recovery_never_comments_on_or_closes_the_ledger(self) -> None:
         workflow = self._workflow()
