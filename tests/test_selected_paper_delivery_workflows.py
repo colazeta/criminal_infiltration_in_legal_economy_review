@@ -6,14 +6,36 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class SelectedPaperDeliveryWorkflowTests(unittest.TestCase):
-    def test_both_support_writers_serialize_and_validate_before_persisting(self):
-        for name in ("retrieval-resolution.yml", "abstract-coverage.yml"):
-            text = (ROOT / ".github/workflows" / name).read_text()
+    def test_support_writers_serialize_main_persistence_without_blocking_pr_validation(self):
+        retrieval = (ROOT / ".github/workflows/retrieval-resolution.yml").read_text()
+        abstract = (ROOT / ".github/workflows/abstract-coverage.yml").read_text()
+        materialize = (ROOT / ".github/workflows/materialize-curation.yml").read_text()
+
+        # Main/scheduled persistence and all curator-issue mutation share one lane.
+        self.assertIn("'curator-support-persistence'", retrieval)
+        for name, text in (
+            ("abstract-coverage.yml", abstract),
+            ("materialize-curation.yml", materialize),
+        ):
             with self.subTest(workflow=name):
                 self.assertIn("group: curator-support-persistence", text)
                 self.assertIn("cancel-in-progress: false", text)
                 self.assertIn("queue: max", text)
                 self.assertNotIn("cancel-in-progress: true", text)
+
+        # Branch-local PR preparation must not wait behind an independent main backfill.
+        self.assertIn("github.event_name == 'pull_request'", retrieval)
+        self.assertIn("selected-support-pr-{0}", retrieval)
+        self.assertIn("github.event.pull_request.number", retrieval)
+        self.assertIn("cancel-in-progress: false", retrieval)
+        self.assertIn("queue: max", retrieval)
+        self.assertNotIn("cancel-in-progress: true", retrieval)
+
+        for name, text in (
+            ("retrieval-resolution.yml", retrieval),
+            ("abstract-coverage.yml", abstract),
+        ):
+            with self.subTest(workflow=name):
                 self.assertIn("fetch-depth: 0", text)
                 self.assertIn("actions: write", text)
                 self.assertIn("selected_paper_delivery.py --refresh-mode", text)
