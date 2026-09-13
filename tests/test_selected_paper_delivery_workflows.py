@@ -55,7 +55,12 @@ class SelectedPaperDeliveryWorkflowTests(unittest.TestCase):
         self.assertEqual(text.count("selected_paper_delivery.py --check"), 2)
         self.assertIn("selected_paper_delivery.py --prepare", text)
         self.assertIn('if [ "$EVENT_NAME" = "pull_request" ]', text)
-        self.assertIn("Main must already contain the materialised support", text)
+        self.assertIn('selected-support-pr-audit.json', text)
+        self.assertIn("Selected-paper preparation changed unexpected paths", text)
+        self.assertLess(
+            text.index("selected_paper_delivery.py --prepare"),
+            text.index("Selected-paper preparation changed unexpected paths"),
+        )
         for path in ("site/curator-guided.js", "site/model.js", "site/review-v2.js"):
             self.assertEqual(text.count("node --check " + path), 2)
 
