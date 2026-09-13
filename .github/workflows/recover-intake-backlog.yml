@@ -14,14 +14,8 @@ on:
 permissions:
   contents: read
 
-# Recovery is idempotent and rescans the immutable intake source of truth. A newer
-# global recovery may therefore supersede an older recovery that has not crossed
-# its CandidateRecord persistence barrier. This avoids optional enrichment in an
-# obsolete run blocking candidate preservation indefinitely. This cancellation
-# policy is recovery-only; it does not change surveillance-run semantics.
-concurrency:
-  group: intake-to-curation-main
-  cancel-in-progress: true
+# This is the sole automatic CandidateRecord writer. It is intentionally short:
+# preservation must complete before any optional retrieval or enrichment work.
 
 jobs:
   recover:
@@ -36,7 +30,12 @@ jobs:
        contains(github.event.comment.body, 'surveillance-run:v3')) ||
       github.event_name == 'schedule' ||
       github.event_name == 'workflow_dispatch'
+    concurrency:
+      group: candidate-conservation-main
+      cancel-in-progress: false
+      queue: max
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     permissions:
       contents: write
       issues: write
@@ -59,7 +58,7 @@ jobs:
         with:
           node-version: 22
 
-      - name: Reconcile and stage all outstanding intake issues
+      - name: Reconcile every outstanding governed intake
         id: recovery
         env:
           GH_TOKEN: ${{ github.token }}
@@ -81,19 +80,35 @@ jobs:
           print(f"quarantine_count={len(data['quarantined'])}")
           PY
 
-      # Candidate preservation is the commit barrier. Do not make it wait for
-      # abstracts, OA enrichment or other useful-but-optional downstream work.
-      - name: Validate candidate preservation state
-        if: steps.recovery.outputs.added_count != '0'
+      - name: Build and validate the complete preservation transaction
+        id: projection
         run: |
+          python scripts/build_archive.py
+          python scripts/build_secondary_collections.py
+          python scripts/metrics/build_research_stats.py
+          python scripts/curation/build_curator_stats.py
+          python scripts/curation/build_curator_options.py
           python scripts/curation/build_legacy_queue.py --check
           python scripts/validation/validate_intake_history.py --base HEAD
-          python -m unittest discover -s tests -p 'test_intake_backlog_recovery.py'
-          python -m unittest discover -s tests -p 'test_candidate_conservation.py'
+          python scripts/validation/validate_repository.py
+          python scripts/ontology/validate_ontology.py
+          python scripts/ontology/build_model_browser.py
+          git diff --exit-code -- site/vocab/review-v2-model.json
+          python -m unittest discover -s tests -p 'test_*.py'
+          python scripts/validation/validate_archive.py
+          python scripts/validation/validate_site.py
+          for script in site/*.js curator-app/src/*.js; do node --check "$script"; done
+          node --test curator-app/test/*.test.js
+          python scripts/report_saturation.py
+          if git diff --quiet HEAD -- data/curation site/data; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
 
-      - name: Persist recovered CandidateRecords first
-        id: core_persist
-        if: steps.recovery.outputs.added_count != '0'
+      - name: Persist recovered CandidateRecords
+        id: persist
+        if: steps.projection.outputs.changed == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           ADDED_COUNT: ${{ steps.recovery.outputs.added_count }}
@@ -105,25 +120,25 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout -b "$branch"
-          git add data/curation/review_queue.csv data/curation/intake_access
+          git add data/curation/review_queue.csv data/curation/intake_access \
+            data/curation/retrieval_coverage.csv data/curation/abstract_coverage.csv \
+            data/curation/access_coverage.csv site/data
           git commit -m "Preserve recovered intake candidates"
           git push origin "$branch"
 
-          body_file="$RUNNER_TEMP/core-recovery-pr.md"
+          body_file="$RUNNER_TEMP/candidate-preservation-pr.md"
           {
             echo "## Candidate-preservation barrier"
             echo
             echo "- Governed batches processed: ${PROCESSED_BATCHES}"
             echo "- New operational CandidateRecords added: ${ADDED_COUNT}"
-            echo "- Exact rediscovery occurrences reconciled without duplicate queue rows: ${REDISCOVERY_COUNT}"
+            echo "- Exact rediscovery occurrences reconciled: ${REDISCOVERY_COUNT}"
             echo "- Eligibility, canonical identity and scientific publication decisions changed: 0"
-            echo
-            echo "This commit intentionally persists CandidateRecords before optional abstract/access enrichment."
           } > "$body_file"
 
           pr_url=""
           set +e
-          pr_url="$(gh pr create --base main --head "$branch" --title "Preserve recovered intake candidates" --body-file "$body_file" 2>"$RUNNER_TEMP/core-pr-create-error.log")"
+          pr_url="$(gh pr create --base main --head "$branch" --title "Preserve recovered intake candidates" --body-file "$body_file" 2>"$RUNNER_TEMP/pr-create-error.log")"
           pr_status=$?
           set -e
           if [ "$pr_status" -eq 0 ]; then
@@ -134,45 +149,58 @@ jobs:
             if [ "$merge_status" -eq 0 ]; then
               echo "persisted=true" >> "$GITHUB_OUTPUT"
               echo "persistence=pr:${pr_url}" >> "$GITHUB_OUTPUT"
-              git fetch origin main
-              git checkout -B recovery-enrichment origin/main
               exit 0
             fi
-            printf '%s\n' "$merge_output" > "$RUNNER_TEMP/core-pr-merge-error.log"
+            printf '%s\n' "$merge_output" > "$RUNNER_TEMP/pr-merge-error.log"
           fi
 
           git fetch origin main
           current_main="$(git rev-parse origin/main)"
           if [ "$current_main" = "$base_sha" ]; then
-            set +e
-            git push origin HEAD:main 2>"$RUNNER_TEMP/core-main-push-error.log"
-            push_status=$?
-            set -e
-            if [ "$push_status" -eq 0 ]; then
-              echo "persisted=true" >> "$GITHUB_OUTPUT"
-              echo "persistence=fast-forward:${branch}" >> "$GITHUB_OUTPUT"
-              git fetch origin main
-              git checkout -B recovery-enrichment origin/main
-              exit 0
-            fi
+            git push origin HEAD:main
+            echo "persisted=true" >> "$GITHUB_OUTPUT"
+            echo "persistence=fast-forward:${branch}" >> "$GITHUB_OUTPUT"
+            exit 0
           fi
 
-          echo "::error::CandidateRecords were staged but the preservation barrier could not persist them; source intake issues remain open."
+          echo "::error::CandidateRecords were staged but could not cross the persistence barrier; source intake issues remain open."
           exit 1
 
       - name: Mark no-data recovery as preserved
         id: nochange
-        if: steps.recovery.outputs.added_count == '0'
+        if: steps.projection.outputs.changed == 'false'
         run: |
           echo "persisted=true" >> "$GITHUB_OUTPUT"
           echo "persistence=no-data-change" >> "$GITHUB_OUTPUT"
 
-      - name: Finalise intake issues after preservation barrier
+      - name: Read back persisted candidate identities from main
+        id: readback
+        if: steps.persist.outputs.persisted == 'true' || steps.nochange.outputs.persisted == 'true'
+        run: |
+          git fetch origin main
+          git show origin/main:data/curation/review_queue.csv > "$RUNNER_TEMP/persisted-queue.csv"
+          git show origin/main:site/data/paper-register.json > "$RUNNER_TEMP/persisted-register.json"
+          python3 - <<'PY_READBACK'
+          import csv, json, os
+          from pathlib import Path
+          root = Path(os.environ['RUNNER_TEMP'])
+          report = json.loads((root/'intake-recovery.json').read_text())
+          queue = {r['candidate_id'] for r in csv.DictReader((root/'persisted-queue.csv').open())}
+          public = {r['id'] for r in json.loads((root/'persisted-register.json').read_text())['records']}
+          added = {cid for row in report['processed'] for cid in row['added']}
+          if queue != public or not added <= queue:
+              raise SystemExit('Persisted queue/public projection mismatch; no intake may be finalised')
+          print(f'Persisted identity read-back: {len(queue)} candidates; {len(added)} additions verified')
+          PY_READBACK
+          echo "verified=true" >> "$GITHUB_OUTPUT"
+          echo "sha=$(git rev-parse origin/main)" >> "$GITHUB_OUTPUT"
+
+      - name: Finalise source intake issues after persistence
         if: >-
-          (steps.core_persist.outputs.persisted == 'true' || steps.nochange.outputs.persisted == 'true')
+          steps.readback.outputs.verified == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
-          PERSISTENCE: ${{ steps.core_persist.outputs.persistence || steps.nochange.outputs.persistence }}
+          PERSISTENCE: ${{ steps.persist.outputs.persistence || steps.nochange.outputs.persistence }}
         run: |
           report="$RUNNER_TEMP/intake-recovery.json"
           run_url="https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
@@ -182,7 +210,7 @@ jobs:
             batch="$(jq -r '.batch_id' <<<"$row")"
             added="$(jq '.added | length' <<<"$row")"
             skipped="$(jq '.skipped_existing | length' <<<"$row")"
-            gh issue comment "$issue" --body "Candidate-preservation barrier completed for \`${batch}\`: ${added} new operational candidate(s) materialised and ${skipped} exact rediscovery occurrence(s) reconciled. Optional enrichment may continue independently. No scientific eligibility or canonical duplicate decision was inferred. Persistence: ${PERSISTENCE}. Run: ${run_url}"
+            gh issue comment "$issue" --body "Candidate-preservation barrier completed for \`${batch}\`: ${added} new operational candidate(s) materialised and ${skipped} exact rediscovery occurrence(s) reconciled. Public deployment is tracked separately and is not yet claimed. No scientific eligibility or canonical duplicate decision was inferred. Persistence: ${PERSISTENCE}. Run: ${run_url}"
             gh issue close "$issue" --reason completed || true
           done
 
@@ -190,7 +218,7 @@ jobs:
             issue="$(jq -r '.issue_number' <<<"$row")"
             batch="$(jq -r '.batch_id' <<<"$row")"
             reason="$(jq -r '.reason' <<<"$row")"
-            gh issue comment "$issue" --body "Backlog recovery did not materialise \`${batch}\`: ${reason}. The source issue remains the audit record; no candidate or scientific decision was created. Run: ${run_url}"
+            gh issue comment "$issue" --body "Candidate recovery quarantined \`${batch}\`: ${reason}. No CandidateRecord or scientific decision was created. Run: ${run_url}"
             gh issue close "$issue" --reason "not planned" || true
           done
 
@@ -198,125 +226,14 @@ jobs:
             issue="$(jq -r '.issue_number' <<<"$row")"
             batch="$(jq -r '.batch_id' <<<"$row")"
             error="$(jq -r '.error' <<<"$row")"
-            gh issue comment "$issue" --body "Candidate preservation is still blocked for \`${batch}\`: \`${error}\`. This issue remains open and is not counted as materialised. Run: ${run_url}"
+            gh issue comment "$issue" --body "Candidate preservation remains blocked for \`${batch}\`: \`${error}\`. This intake remains open and is not counted as materialised. Run: ${run_url}"
           done
 
-      - name: Refresh operational archive after CandidateRecord persistence
-        if: >-
-          steps.recovery.outputs.added_count != '0' &&
-          steps.core_persist.outputs.persisted == 'true'
+      - name: Refresh operational archive
+        if: steps.readback.outputs.verified == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh workflow run archive.yml --ref main
-
-      # Everything below this point is enrichment. It must never be capable of
-      # undoing or withholding a CandidateRecord that crossed the barrier above.
-      - name: Resolve paper access for preserved candidates
-        id: resolve_access
-        if: steps.core_persist.outputs.persisted == 'true'
-        continue-on-error: true
-        timeout-minutes: 12
-        env:
-          OPENALEX_API_KEY: ${{ secrets.OPENALEX_API_KEY }}
-          UNPAYWALL_EMAIL: ${{ secrets.UNPAYWALL_EMAIL }}
-        run: |
-          action_date="$(date -u +%F)"
-          python scripts/retrieval/resolve_queue.py \
-            --date "$action_date" \
-            --max-age-days 30 \
-            --output "$RUNNER_TEMP/retrieval-summary.json"
-          python scripts/retrieval/resolve_queue.py --check
-
-      - name: Backfill abstract coverage for preserved candidates
-        id: abstract_enrichment
-        if: steps.core_persist.outputs.persisted == 'true'
-        continue-on-error: true
-        timeout-minutes: 15
-        env:
-          SEMANTIC_SCHOLAR_API_KEY: ${{ secrets.SEMANTIC_SCHOLAR_API_KEY }}
-          CORE_API_KEY: ${{ secrets.CORE_API_KEY }}
-          UNPAYWALL_EMAIL: ${{ secrets.UNPAYWALL_EMAIL }}
-        run: |
-          if ! command -v pdftotext >/dev/null 2>&1; then
-            sudo apt-get update -qq
-            sudo apt-get install -y --no-install-recommends poppler-utils
-          fi
-          export ABSTRACT_COVERAGE_DATE="$(date -u +%F)"
-          node scripts/abstracts/backfill_coverage.mjs \
-            --summary "$RUNNER_TEMP/abstract-coverage-summary.json"
-          node scripts/abstracts/backfill_coverage.mjs --check
-
-      - name: Reconcile reading aids for preserved candidates
-        id: reading_aids
-        if: steps.core_persist.outputs.persisted == 'true'
-        continue-on-error: true
-        timeout-minutes: 8
-        run: |
-          action_date="$(date -u +%F)"
-          python scripts/curation/reconcile_reading_aids.py --date "$action_date" \
-            > "$RUNNER_TEMP/reading-aid-summary.json"
-          python scripts/curation/reconcile_reading_aids.py --check
-
-      - name: Classify access for preserved candidates
-        id: classify_access
-        if: steps.core_persist.outputs.persisted == 'true'
-        continue-on-error: true
-        timeout-minutes: 10
-        env:
-          UNPAYWALL_EMAIL: ${{ secrets.UNPAYWALL_EMAIL }}
-        run: |
-          action_date="$(date -u +%F)"
-          python scripts/access/classify_access.py --date "$action_date"
-          python scripts/access/reconcile_access_evidence.py
-          python scripts/access/classify_access.py --check
-          python scripts/access/reconcile_access_evidence.py --check
-
-      - name: Validate enriched recovered state
-        id: validate_enriched
-        if: >-
-          steps.core_persist.outputs.persisted == 'true' &&
-          steps.resolve_access.outcome == 'success' &&
-          steps.abstract_enrichment.outcome == 'success' &&
-          steps.reading_aids.outcome == 'success' &&
-          steps.classify_access.outcome == 'success'
-        run: |
-          python scripts/curation/build_legacy_queue.py --check
-          python scripts/validation/validate_repository.py
-          python scripts/ontology/validate_ontology.py
-          python scripts/validation/validate_intake_history.py --base HEAD
-          python -m unittest discover -s tests -p 'test_*.py'
-          python scripts/build_archive.py
-          python scripts/build_secondary_collections.py
-          python scripts/curation/build_curator_stats.py
-          python scripts/curation/build_curator_options.py
-          python scripts/validation/validate_archive.py
-          python scripts/validation/validate_site.py
-          node --test curator-app/test/*.test.js
-          python scripts/report_saturation.py
-
-      - name: Persist successful enrichment
-        id: enrichment_persist
-        if: steps.validate_enriched.outcome == 'success'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          if git diff --quiet && git diff --cached --quiet; then
-            echo "persisted=true" >> "$GITHUB_OUTPUT"
-            echo "persistence=no-enrichment-change" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
-
-          branch="curation/intake-enrichment-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git checkout -b "$branch"
-          git add data/curation site/data/curator-stats.json site/data/paper-register.json
-          git commit -m "Enrich recovered intake candidates"
-          git push origin "$branch"
-          pr_url="$(gh pr create --base main --head "$branch" --title "Enrich recovered intake candidates" --body "Optional enrichment after the CandidateRecord preservation barrier. No scientific eligibility or canonical-identity decision is changed.")"
-          gh pr merge "$pr_url" --squash --delete-branch
-          echo "persisted=true" >> "$GITHUB_OUTPUT"
-          echo "persistence=pr:${pr_url}" >> "$GITHUB_OUTPUT"
 
       - name: Report recovery outcome
         if: always()
@@ -324,41 +241,32 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           EVENT_NAME: ${{ github.event_name }}
           TRIGGER_ISSUE: ${{ github.event.issue.number }}
+          VERIFIED: ${{ steps.readback.outputs.verified }}
           ADDED: ${{ steps.recovery.outputs.added_count }}
           PROCESSED: ${{ steps.recovery.outputs.processed_batches }}
           REDISCOVERIES: ${{ steps.recovery.outputs.rediscovery_count }}
           FAILURES: ${{ steps.recovery.outputs.failure_count }}
           QUARANTINED: ${{ steps.recovery.outputs.quarantine_count }}
-          CORE_PERSISTENCE: ${{ steps.core_persist.outputs.persistence || steps.nochange.outputs.persistence }}
-          RESOLVE_OUTCOME: ${{ steps.resolve_access.outcome }}
-          ABSTRACT_OUTCOME: ${{ steps.abstract_enrichment.outcome }}
-          READING_OUTCOME: ${{ steps.reading_aids.outcome }}
-          ACCESS_OUTCOME: ${{ steps.classify_access.outcome }}
+          PERSISTENCE: ${{ steps.persist.outputs.persistence || steps.nochange.outputs.persistence }}
         run: |
           run_url="https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
-          summary="Candidate conservation: ${PROCESSED:-0} governed batch(es) processed, ${ADDED:-0} CandidateRecord(s) materialised, ${REDISCOVERIES:-0} exact rediscovery occurrence(s) reconciled, ${QUARANTINED:-0} audited batch(es) quarantined, ${FAILURES:-0} unresolved batch(es). Core persistence: ${CORE_PERSISTENCE:-not-persisted}. Optional enrichment outcomes: retrieval=${RESOLVE_OUTCOME:-n/a}, abstracts=${ABSTRACT_OUTCOME:-n/a}, reading-aids=${READING_OUTCOME:-n/a}, access=${ACCESS_OUTCOME:-n/a}. Run: ${run_url}"
-
+          materialised=0
+          if [ "$VERIFIED" = "true" ]; then materialised="${ADDED:-0}"; fi
+          summary="Candidate conservation: ${PROCESSED:-0} governed batch(es) processed, ${ADDED:-0} candidate(s) staged, ${materialised} CandidateRecord(s) verified on main, ${REDISCOVERIES:-0} exact rediscovery occurrence(s) reconciled, ${QUARANTINED:-0} batch(es) quarantined, ${FAILURES:-0} unresolved batch(es). Persistence: ${PERSISTENCE:-not-persisted}. Run: ${run_url}"
           if [ "$EVENT_NAME" = "issues" ] && [ -n "$TRIGGER_ISSUE" ]; then
-            if [ "${FAILURES:-0}" != "0" ] || [ -z "${CORE_PERSISTENCE:-}" ]; then
-              gh issue comment "$TRIGGER_ISSUE" --body "Candidate-conservation recovery did not clear its preservation barrier. ${summary}"
-              exit 0
-            fi
             gh issue comment "$TRIGGER_ISSUE" --body "$summary"
-            gh issue close "$TRIGGER_ISSUE" --reason completed || true
+            if [ "${FAILURES:-0}" = "0" ] && [ "$VERIFIED" = "true" ]; then
+              gh issue close "$TRIGGER_ISSUE" --reason completed || true
+            fi
           else
-            {
-              echo "### Candidate-conservation recovery"
-              echo
-              echo "$summary"
-            } >> "$GITHUB_STEP_SUMMARY"
+            echo "$summary" >> "$GITHUB_STEP_SUMMARY"
           fi
 
       - name: Enforce candidate-conservation invariant
         if: >-
-          always() &&
-          steps.recovery.outcome == 'success' &&
+          always() && steps.recovery.outcome == 'success' &&
           ((steps.recovery.outputs.failure_count != '' && steps.recovery.outputs.failure_count != '0') ||
-           (steps.recovery.outputs.added_count != '0' && steps.core_persist.outputs.persisted != 'true'))
+           (steps.recovery.outputs.added_count != '0' && steps.readback.outputs.verified != 'true'))
         run: |
           echo "::error::Candidate conservation failed: one or more governed CandidateRecords did not cross the persistence barrier."
           exit 1

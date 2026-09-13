@@ -633,7 +633,7 @@ def check_actions_pinned() -> None:
         "  queue: max"
     )
     if safe_concurrency not in workflow:
-        fail("Archive workflow must retain active and queued publication runs")
+        fail("Archive publication must queue without cancelling running work")
     if "group: archive-pages\n      cancel-in-progress: false" not in workflow:
         fail("Ledger and push deployments must be serialised")
     for phrase in (
@@ -710,26 +710,28 @@ def check_actions_pinned() -> None:
         if phrase not in materialize:
             fail(f"Queue materialisation workflow missing safeguard: {phrase}")
 
-    intake = (
-        ROOT / ".github/workflows/intake-to-curation.yml"
-    ).read_text(encoding="utf-8")
-    for phrase in (
-        "github.actor == github.repository_owner",
-        "[INTAKE][ACADEMIC] ",
-        "import_intake_issue.py",
-        "build_curator_stats.py",
-        "site/data/curator-stats.json",
-        "--issue-title-file",
-        "data/curation",
-        "pull-requests: write",
-        "Automatic screening or publication inference: none",
-        "Unresolved human decisions",
-        "Canonical or publication rows changed: 0",
-        "build_secondary_collections.py",
-        "node --check site/aml.js",
-    ):
-        if phrase not in intake:
-            fail(f"Intake-to-curation workflow missing safeguard: {phrase}")
+    intake = (ROOT / ".github/workflows/intake-to-curation.yml").read_text(encoding="utf-8")
+    recovery = (ROOT / ".github/workflows/recover-intake-backlog.yml").read_text(encoding="utf-8")
+    # Comments must not satisfy execution safeguards.
+    intake = "\n".join(line for line in intake.splitlines() if not line.lstrip().startswith("#"))
+    recovery = "\n".join(line for line in recovery.splitlines() if not line.lstrip().startswith("#"))
+    for required in ("github.actor == github.repository_owner", "[INTAKE][ACADEMIC] ",
+                     "defer-to-terminal-recovery:", "persist-credentials: false"):
+        if required not in intake:
+            fail(f"Intake terminal-deferral safeguard missing: {required}")
+    for forbidden in ("stage_intake.py", "git push", "contents: write", "gh issue close"):
+        if forbidden in intake:
+            fail(f"Issue-open must not mutate candidates: {forbidden}")
+    for required in ("group: candidate-conservation-main", "cancel-in-progress: false",
+                     "queue: max", "recover_intake_backlog.py", "surveillance-run:v3",
+                     "github.event.issue.number == 30", "build_curator_stats.py",
+                     "data/curation/review_queue.csv", "site/data", "validate_repository.py",
+                     "Read back persisted candidate identities from main", "gh workflow run archive.yml"):
+        if required not in recovery:
+            fail(f"Candidate recovery safeguard missing: {required}")
+    for forbidden in ("resolve_queue.py", "backfill_coverage.mjs", "classify_access.py"):
+        if forbidden in recovery:
+            fail(f"Optional enrichment blocks candidate preservation: {forbidden}")
 
 
 def check_release_metadata() -> None:

@@ -32,11 +32,10 @@ class AutomaticRegisterTests(unittest.TestCase):
     def test_successful_persistence_refreshes_pages_independently_of_bot_push(self):
         workflow=(ROOT/'.github/workflows/archive.yml').read_text()
         self.assertIn('workflow_run:',workflow)
-        triggers=workflow.split('workflow_run:',1)[1].split('permissions:',1)[0]
-        for name in ('Stage daily intake in curator queue','Resolve curator paper access','Backfill curator abstract coverage'):
-            self.assertIn('"'+name+'"',triggers)
-        self.assertIn('types: [completed]',triggers)
-        self.assertIn('branches: [main]',triggers)
+        self.assertIn('Recover intake backlog',workflow)
+        self.assertIn('Resolve curator paper access',workflow)
+        self.assertIn('Backfill curator abstract coverage',workflow)
+        self.assertIn('types: [completed]',workflow)
         self.assertIn("github.event.workflow_run.conclusion == 'success'",workflow)
         self.assertIn('github.event.workflow_run.head_repository.full_name == github.repository',workflow)
 

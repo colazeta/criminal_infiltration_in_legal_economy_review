@@ -31,6 +31,19 @@ from scripts.surveillance_identity import validate_cycle_run
 
 
 QUARANTINED_LEDGER_COMMENTS = {
+    # An intermediate exact copy of #341 was also superseded by 5652046564.
+    # See candidate-publication-runtime-audit.md; no counts or evidence are changed.
+    5647980951: "ACADEMIC-2026-09-12-EXTRA-7652f77d6fde",
+    # Bounded-text audit 2026-09-13: originals remain immutable.
+    5642881870: "ACADEMIC-2026-09-12-EXTRA-8943d605c4aa",
+    5644857109: "ACADEMIC-2026-09-12-EXTRA-486aaf42fb90",
+    5645417536: "ACADEMIC-2026-09-12-EXTRA-748af9c3f874",
+    5645995942: "ACADEMIC-2026-09-12-EXTRA-069e6c0a5fa8",
+    5647932606: "ACADEMIC-2026-09-12-EXTRA-4faa0ba491c4",
+    5647933485: "ACADEMIC-2026-09-12-EXTRA-9bdb3c1e67c7",
+    5648912417: "ACADEMIC-2026-09-12-EXTRA-2d5ea81ff42e",
+    5651755147: "ACADEMIC-2026-09-13-EXTRA-e58052b5dd95",
+    5652293899: "ACADEMIC-2026-09-13-EXTRA-df65ea613c7f",
     5631393628: "ACADEMIC-2026-09-11-EXTRA-2520dfa54e12",
     5639689529: "ACADEMIC-2026-09-11-EXTRA-f28583e91573",
     5633517951: "ACADEMIC-2026-09-11-EXTRA-61e4d03af5c4",
@@ -65,6 +78,9 @@ PERMANENTLY_QUARANTINED_BATCHES = {
 }
 
 LATE_RECOVERY_TERMINALS = {
+    5652442044: {"batch_id": "ACADEMIC-2026-09-12-EXTRA-2d5ea81ff42e", "run_date": "2026-09-12", "created_rome_date": "2026-09-13"},
+    5652443544: {"batch_id": "ACADEMIC-2026-09-13-EXTRA-e58052b5dd95", "run_date": "2026-09-13", "created_rome_date": "2026-09-13"},
+    5652444573: {"batch_id": "ACADEMIC-2026-09-13-EXTRA-df65ea613c7f", "run_date": "2026-09-13", "created_rome_date": "2026-09-13"},
     5647832949: {
         "batch_id": "ACADEMIC-2026-09-11-EXTRA-61e4d03af5c4",
         "run_date": "2026-09-11",
