@@ -13,7 +13,7 @@ labels, duplicate reconciliation and the assessed corpus remain governed.
 
 ## Intake contract
 
-New discovery uses operational protocol CILE-DAILY-v4, run and both intake manifests version 3, Exa only, with the
+New discovery uses operational protocol CILE-DAILY-v5, run and both intake manifests version 3, Exa primary with the governed full Parallel Search fallback after an evidenced provider limit, and the
 existing W1–W7, immutable ledger, active-cycle and idempotency rules. The marker
 is `<!-- surveillance-run:v3 -->`; envelope and aggregate fields are unchanged.
 The normative current schema is `schema/surveillance-run.schema.json`; the explicit v3 copy is `schema/surveillance-run-v3.schema.json`. The previous Exa contract is retained in `schema/surveillance-run-v2.schema.json`.
@@ -54,7 +54,7 @@ The statistics HTML also contains a deployment-time aggregate summary so the las
 extra execution is readable before the separate JSON request succeeds.
 
 After successful mechanical intake persistence, the archive workflow is triggered
-by completion of `Stage daily intake in curator queue` on main. This is required
+by completion of `Recover intake backlog` on main or its explicit archive dispatch. This is required
 because writes using the repository's GITHUB_TOKEN do not trigger another push
 workflow. Only a successful same-repository run can trigger this refresh; the
 normal repository, ontology, deterministic-export and live-ledger gates still

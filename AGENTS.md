@@ -143,3 +143,12 @@ separately identified maintenance step, the task may reopen the existing exact-t
 repository-owned recovery. This limited exception does not permit discovery to
 edit repository files, registries or scientific decisions. Validate the actual
 terminal before writing; immutable evidence must not be edited to conceal failure.
+
+## Maintenance retrigger clarification — 2026-09-13
+
+The canonical recovery request is issue #362. When recovery is needed and no
+actual recovery job is queued or in progress, the owner may comment exactly
+`/recover-intake` on that issue to activate the existing sole writer. Do not treat
+an open maintenance issue as an active lease or create a duplicate request.
+See docs/operations/residual-intake-recovery.md. Evidence-pinned historical
+occurrence reconciliation cannot create candidates or fabricate a run terminal.
