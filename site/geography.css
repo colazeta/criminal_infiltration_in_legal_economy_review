@@ -1,0 +1,19 @@
+/* Reuse the archive's existing bar styling; keep bars visible on narrow screens. */
+body.classic-site #study-geography table { width: 100%; min-width: 0; table-layout: fixed; }
+body.classic-site #study-geography th,
+body.classic-site #study-geography td,
+body.classic-site #study-geography caption { white-space: normal; overflow-wrap: anywhere; }
+body.classic-site #study-geography th:first-child { width: 32%; }
+body.classic-site #study-geography th:nth-child(2) { width: 12%; }
+body.classic-site #study-geography th:nth-child(3) { width: 23%; }
+body.classic-site #study-geography th:nth-child(4) { width: 33%; }
+body.classic-site #study-geography .bibliometric-bar-track { min-width: 0; }
+body.classic-site #study-geography details ul { padding-left: 16px; font-weight: normal; }
+body.classic-site #study-geography details summary { cursor: pointer; }
+@media (max-width: 600px) {
+  body.classic-site #study-geography th:nth-child(3),
+  body.classic-site #study-geography td:nth-child(3) { display: none; }
+  body.classic-site #study-geography th:first-child { width: 38%; }
+  body.classic-site #study-geography th:nth-child(2) { width: 20%; }
+  body.classic-site #study-geography th:nth-child(4) { width: 42%; }
+}

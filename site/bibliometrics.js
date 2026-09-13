@@ -12,6 +12,11 @@
     empty: $("#bibliometric-empty"), content: $("#bibliometric-content"), error: $("#bibliometric-error"),
   };
   if (!ui.toggle) return;
+  import('./geography-statistics.js').catch(() => {
+    const note = document.createElement('p');
+    note.textContent = 'Il grafico geografico non è disponibile in questo momento; nessun paese viene stimato.';
+    ui.quality.after(note);
+  });
 
   const format = new Intl.NumberFormat("it-IT", { maximumFractionDigits: 2 });
   const cell = (tag, value, className = "") => {
@@ -189,6 +194,8 @@
 
     ui.empty.hidden = data.length !== 0;
     ui.content.hidden = data.length === 0;
+    globalThis.CILEBibliometricView = data;
+    globalThis.dispatchEvent(new Event('cile:bibliometric-view'));
     if (!data.length) return;
 
     renderAnnual(data);

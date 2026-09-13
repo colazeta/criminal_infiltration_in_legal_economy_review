@@ -37,6 +37,14 @@
     }
     parent.append(el('p',r.generation_kind==='automated'?'Estrazione automatica preliminare, non validata scientificamente. La classificazione resta una proposta.':'Estrazione preliminare non confermata. La modalità di produzione non è attestata come revisione umana.'));
     parent.append(el('p','Base documentale: '+COVERAGE[r.source_coverage]+' · Analisi aggiornata: '+r.updated_at));
+    const geography=section(parent,'Ambito geografico dell’analisi',true);
+    if(!r.studies.length)geography.append(el('p','Nessuno studio strutturato disponibile: il paese non viene dedotto dal titolo o dagli autori.'));
+    r.studies.forEach((study,i)=>fact(geography,'Studio '+(i+1)+' · Territorio effettivamente analizzato',study.geography));
+    if(globalThis.CILEPaperGeography){
+      const g=globalThis.CILEPaperGeography.fromResearch(data);
+      geography.append(el('p',g.countries.length?'Paesi / territori identificati nella geografia proposta: '+g.countries.map(globalThis.CILEPaperGeography.name).join(', '):'Nessun paese normalizzabile con sufficiente chiarezza dalla geografia estratta.'));
+    }
+    geography.append(el('small','La copertura può essere cittadina, regionale, nazionale o multipaese. Un paese presente non implica un campione nazionale. Affiliazioni, nazionalità degli autori e luoghi menzionati soltanto come contesto non definiscono l’area studiata.'));
     const cls=section(parent,'Collocazione nel framework delle sei classi',true);
     if(f.status==='proposed')cls.append(el('p','Classe principale proposta: '+CLASSES[f.primary]));
     else cls.append(el('p',f.status==='insufficient_evidence'?'Evidenza insufficiente per attribuire una classe.':'Contributo valutato come esterno al framework; proposta non confermata.'));
@@ -78,4 +86,94 @@
     finally{clearTimeout(timeout);if(isCurrent())parent.setAttribute('aria-busy','false')}
   }
   globalThis.CILEPaperResearch={render,load,selectRecord,safeUrl};
+})();
+
+/* Read-only geography derived from source-grounded study.geography facts.
+   Never scans titles, author affiliations, abstracts or publisher addresses. */
+(() => {
+  'use strict';
+  const CODES='AD AE AF AG AI AL AM AO AQ AR AS AT AU AW AX AZ BA BB BD BE BF BG BH BI BJ BL BM BN BO BQ BR BS BT BV BW BY BZ CA CC CD CF CG CH CI CK CL CM CN CO CR CU CV CW CX CY CZ DE DJ DK DM DO DZ EC EE EG EH ER ES ET FI FJ FK FM FO FR GA GB GD GE GF GG GH GI GL GM GN GP GQ GR GS GT GU GW GY HK HM HN HR HT HU ID IE IL IM IN IO IQ IR IS IT JE JM JO JP KE KG KH KI KM KN KP KR KW KY KZ LA LB LC LI LK LR LS LT LU LV LV LY MA MC MD ME MF MG MH MK ML MM MN MO MP MQ MR MS MT MU MV MW MX MY MZ NA NC NE NF NG NI NL NO NP NR NU NZ OM PA PE PF PG PH PK PL PM PN PR PS PT PW PY QA RE RO RS RU RW SA SB SC SD SE SG SH SI SJ SK SL SM SN SO SR SS ST SV SX SY SZ TC TD TF TG TH TJ TK TL TM TN TO TR TT TV TW TZ UA UG UM US UY UZ VA VC VE VG VI VN VU WF WS YE YT ZA ZM ZW'.split(' ');
+  const normal=s=>String(s||'').normalize('NFKC').toLowerCase().replace(/[’']/g,"'").replace(/\s+/g,' ').trim().replace(/[.]$/,'');
+  const aliases=new Map(), names=new Map();
+  const add=(name,code)=>{const key=normal(name);if(key)aliases.set(key,code)};
+  for(const locale of ['en','it']){
+    const display=new Intl.DisplayNames([locale],{type:'region'});
+    for(const code of CODES){const name=display.of(code);add(name,code);if(locale==='it')names.set(code,name)}
+  }
+  for(const[code,values]of Object.entries({BA:['Bosnia and Herzegovina'],TT:['Trinidad and Tobago'],AG:['Antigua and Barbuda'],KN:['Saint Kitts and Nevis'],VC:['Saint Vincent and the Grenadines'],ST:['Sao Tome and Principe','São Tomé and Príncipe'],GB:['UK','U.K.','United Kingdom','Great Britain','Regno Unito'],US:['USA','U.S.A.','U.S.','United States of America','United States','Stati Uniti'],RU:['Russian Federation'],CZ:['Czech Republic'],KR:['Republic of Korea','South Korea'],KP:["Democratic People's Republic of Korea",'North Korea'],CD:['Democratic Republic of the Congo','DR Congo'],CG:['Republic of the Congo'],CI:["Cote d'Ivoire","Côte d'Ivoire"],TR:['Turkey','Türkiye'],VA:['Vatican City','Holy See']}))values.forEach(value=>add(value,code));
+  // Bare ambiguous names never silently pick a country or a successor state.
+  ['congo','korea','georgia','georgie','georgien','georgia del sud'].forEach(value=>aliases.delete(value));
+  const uncertain=/\b(unknown|unspecified|uncertain|probably|possibly|perhaps|e\.g\.|such as|not reported|other countries|among others|excluding|except|versus|origin|affiliation)\b/i;
+  const broad=/^(?:europe|europa|european union|unione europea|eu|ue|africa|asia|latin america|america latina|north america|south america|oceania|oecd|ocse|americas|middle east)$/i;
+  const global=/^(?:global|globale|worldwide|world-wide|mondiale|world|mondo)$/i;
+  function parse(value){
+    if(typeof value!=='string'||!value.trim())return{countries:[],kind:'missing'};
+    const text=value.trim();
+    if(global.test(text))return{countries:[],kind:'global'};
+    if(broad.test(text))return{countries:[],kind:'supranational'};
+    // Optional explicit form preserves full scope, while keeping a bounded list.
+    const labelled=text.match(/^(?:countries|country|paesi|paese)\s*:\s*([^|]+)(?:\|\s*(?:scope|territorio|ambito)\s*:.+)?$/i);
+    const list=labelled?labelled[1].trim():text;
+    if(uncertain.test(list))return{countries:[],kind:'unresolved'};
+    const exact=aliases.get(normal(list));
+    if(exact)return{countries:[exact],kind:'country'};
+    if(labelled&&/^Georgia\s*$/i.test(list))return{countries:['GE'],kind:'country'};
+    // Protect names containing conjunctions/commas before tokenising a list.
+    const tokens=[];
+    let protectedList=list;
+    for(const[name,code]of [...aliases].sort((a,b)=>b[0].length-a[0].length)){
+      if(!/[,&;]|\band\b|\be\b/i.test(name))continue;
+      const escaped=name.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+      protectedList=protectedList.replace(new RegExp('(^|[\\s,;])('+escaped+')(?=$|[\\s,;)])','gi'),(_,lead)=>{const token='__country'+tokens.length+'__';tokens.push(code);return lead+token});
+    }
+    const parts=protectedList.split(/\s*(?:;|,|\band\b|\be\b|&)\s*/i).filter(Boolean);
+    const result=[];
+    for(const part of parts){
+      const marker=part.match(/^__country(\d+)__$/);
+      let code=marker?tokens[Number(marker[1])]:aliases.get(normal(part));
+      // Accept a country with a qualified territorial scope, not arbitrary prose.
+      if(!code){
+        const match=part.match(/^([^()]+)\s*\(([^()]+)\)$/);
+        if(match){
+          code=aliases.get(normal(match[1]));
+          if(!code&&/^[\p{L}\p{M} .'-]{1,80}$/u.test(match[1].trim())&&!/\b(mafia|firms?|companies|authors?|migrants?|diaspora|affiliations?)\b/i.test(match[1]))code=aliases.get(normal(match[2]));
+        }
+      }
+      if(!code)code=aliases.get(normal(part.replace(/^(?:north(?:ern)?|south(?:ern)?|east(?:ern)?|west(?:ern)?|central|northern and southern|nord|sud|centro)\s+/i,'')));
+      if(!code)return{countries:[],kind:'unresolved'};
+      if(!result.includes(code))result.push(code);
+    }
+    return{countries:result.sort(),kind:result.length?'country':'unresolved'};
+  }
+  function fromResearch(payload){
+    if(payload?.availability!=='available'||!payload.research)return{status:payload?.availability||'error',countries:[],studies:[]};
+    const r=payload.research;
+    if(r.assessment_state!=='unreviewed_proposal'||!Array.isArray(r.studies))throw Error('invalid_geography_projection');
+    const spans=new Set((r.spans||[]).map(s=>s.id));
+    const studies=r.studies.map((s,index)=>{
+      const f=s.geography;
+      const base={number:index+1,scope:typeof f?.value==='string'?f.value:null,countries:[],kind:f?.status||'missing'};
+      if(f?.status!=='reported'||!f.value)return base;
+      if(f.origin!=='source'||!Array.isArray(f.evidence_span_ids)||!f.evidence_span_ids.length||f.evidence_span_ids.some(id=>!spans.has(id)))return{...base,kind:'unverified'};
+      return{...base,...parse(f.value)};
+    });
+    const countries=[...new Set(studies.flatMap(s=>s.countries))].sort();
+    return{status:'available',countries,studies,partial:studies.some(s=>!s.countries.length),updatedAt:r.updated_at,coverage:r.source_coverage};
+  }
+  function aggregate(records,entries){
+    const seen=new Set(),rows=new Map(),states=new Map();let total=0,known=0,partial=0;
+    for(const record of records){
+      if(seen.has(record.id))continue;seen.add(record.id);total++;
+      const item=entries.get(record.id);
+      const state=!item?'pending':item.countries?.length?'country':item.status==='available'?(item.studies?.length?([...new Set(item.studies.map(s=>s.kind))].join(' / ')):'no_study'):item.status;
+      states.set(state,(states.get(state)||0)+1);
+      if(!item?.countries?.length)continue;known++;if(item.partial)partial++;
+      for(const code of new Set(item.countries)){
+        if(!rows.has(code))rows.set(code,{code,name:names.get(code)||code,count:0,papers:[]});
+        const row=rows.get(code);row.count++;row.papers.push({id:record.id,title:record.title,studies:item.studies.filter(s=>s.countries.includes(code)),updatedAt:item.updatedAt});
+      }
+    }
+    return{total,known,partial,states:[...states].map(([status,count])=>({status,count})),rows:[...rows.values()].sort((a,b)=>b.count-a.count||a.name.localeCompare(b.name,'it'))};
+  }
+  globalThis.CILEPaperGeography={parse,fromResearch,aggregate,name:code=>names.get(code)||code};
 })();
