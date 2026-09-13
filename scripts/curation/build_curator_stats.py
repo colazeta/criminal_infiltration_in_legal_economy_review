@@ -121,7 +121,13 @@ def main() -> None:
         encoding="utf-8",
     )
     from build_paper_register import build_payload as build_register
-    output.with_name("paper-register.json").write_text(json.dumps(build_register(root), ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    register = build_register(root)
+    output.with_name("paper-register.json").write_text(json.dumps(register, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    if args.output is None:
+        # Separate generated release artifact: no change to the worker register.
+        from build_paper_support import write_payload
+        support = write_payload(root, register)
+        print(f"[OK] Rebuilt public paper-sheet support: {len(support['records'])} candidates.")
     print(
         f"[OK] Wrote aggregate curator stats: {payload['open']} open, "
         f"{payload['completed']} completed."
