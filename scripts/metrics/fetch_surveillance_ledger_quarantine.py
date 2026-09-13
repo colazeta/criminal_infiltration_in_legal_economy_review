@@ -70,6 +70,40 @@ LATE_RECOVERY_TERMINALS = {
         "run_date": "2026-09-11",
         "created_rome_date": "2026-09-12",
     },
+    # Audited bounded-text replacements written later on 2026-09-12.
+    5647994836: {
+        "batch_id": "ACADEMIC-2026-09-12-EXTRA-724679219793",
+        "run_date": "2026-09-12",
+        "created_rome_date": "2026-09-12",
+    },
+    5647991867: {
+        "batch_id": "ACADEMIC-2026-09-12-EXTRA-335f7df7ae34",
+        "run_date": "2026-09-12",
+        "created_rome_date": "2026-09-12",
+    },
+    5647993089: {
+        "batch_id": "ACADEMIC-2026-09-12-EXTRA-570dae192194",
+        "run_date": "2026-09-12",
+        "created_rome_date": "2026-09-12",
+    },
+    5647987839: {
+        "batch_id": "ACADEMIC-2026-09-12-EXTRA-6e00fc2aca6a",
+        "run_date": "2026-09-12",
+        "created_rome_date": "2026-09-12",
+    },
+    5647989408: {
+        "batch_id": "ACADEMIC-2026-09-12-EXTRA-b54c1a6aa281",
+        "run_date": "2026-09-12",
+        "created_rome_date": "2026-09-12",
+    },
+    5647990614: {
+        "batch_id": "ACADEMIC-2026-09-12-EXTRA-2231aace38f9",
+        "run_date": "2026-09-12",
+        "created_rome_date": "2026-09-12",
+    },
+    # Immutable recovery terminals written on 2026-09-13 for four orphaned
+    # candidate-bearing batches. Their original terminal comments are quarantined
+    # above but remain available as audit evidence.
     5652046564: {
         "batch_id": "ACADEMIC-2026-09-12-EXTRA-7652f77d6fde",
         "run_date": "2026-09-12",
