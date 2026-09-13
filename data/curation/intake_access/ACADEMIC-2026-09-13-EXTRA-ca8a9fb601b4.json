@@ -1,0 +1,12 @@
+{
+  "batch_id": "ACADEMIC-2026-09-13-EXTRA-ca8a9fb601b4",
+  "receipts": [
+    {
+      "access_status": "unknown",
+      "candidate_id": "CAND-ACADEMIC-2026-09-13-EXTRA-ca8a9fb601b4-001"
+    }
+  ],
+  "schema_version": 2,
+  "source_body_sha256": "54aa20aadf2d17b80b04f3fe9ac2165160636578b5046079b3e6b179d09e0474",
+  "source_issue_number": 481
+}
