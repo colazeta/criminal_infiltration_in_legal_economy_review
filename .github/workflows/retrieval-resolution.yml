@@ -44,6 +44,7 @@ jobs:
          startsWith(github.head_ref, 'maintenance/parallel-search-'))))
     runs-on: ubuntu-latest
     permissions:
+      actions: write
       contents: write
       issues: write
       pull-requests: write
@@ -105,6 +106,8 @@ jobs:
 
       - name: Retain validated preparation on its owning PR branch
         if: github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           case "$GITHUB_HEAD_REF" in
@@ -130,16 +133,22 @@ jobs:
           git add -- "${paths[@]}"
           git commit -m "Prepare verified reading-support projections for review"
           git push origin "HEAD:refs/heads/$GITHUB_HEAD_REF"
+          prepared_head="$(git rev-parse HEAD)"
+          # GITHUB_TOKEN pushes do not recursively trigger pull_request workflows.
+          # workflow_dispatch is the supported exception and validates the exact new head.
+          gh workflow run archive.yml --ref "$GITHUB_HEAD_REF" || {
+            echo "::error::Prepared branch retained but final-head quality dispatch failed"
+            exit 1
+          }
           {
-            echo "## Preparation retained; final-head CI still required"
+            echo "## Preparation retained; dispatched final-head CI"
             echo "Branch: $GITHUB_HEAD_REF"
-            echo "Prepared head: $(git rev-parse HEAD)"
+            echo "Prepared head: $prepared_head"
             echo "Validated input: $base_sha"
-            echo "Next: inspect the generated diff and obtain ordinary CI on this new head before merge."
+            echo "Next: ordinary archive quality must finish green on the prepared head before merge."
             echo "No main write, publication, private ingestion or scientific approval occurred."
           } >> "$GITHUB_STEP_SUMMARY"
-          echo "::error::Prepared branch checkpoint retained; final_head_validation_pending"
-          exit 1
+          exit 0
 
       - name: Persist validated retrieval update
         if: github.event_name != 'pull_request'
