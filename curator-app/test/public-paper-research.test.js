@@ -57,6 +57,8 @@ test('source quotations, credentials and private source locators cannot be publi
  assert.equal((await projectResearch(x.target,{...row,payload_json,payload_sha256:await sha256(payload_json)},[{...x.source,text:quote,content_sha256:await sha256(quote)}])).availability,'withheld');
  const shortQuote='the text is preserved privately';input=structuredClone(x.input);input.summary.value='Context before '+shortQuote+' context after';payload_json=canonicalJson(input);
  assert.equal((await projectResearch(x.target,{...row,payload_json,payload_sha256:await sha256(payload_json)},[x.source])).availability,'withheld');
+ const decomposed='cafe\u0301 noir avec cinq mots';input=structuredClone(x.input);input.summary.value='café noir avec cinq mots';payload_json=canonicalJson(input);
+ assert.equal((await projectResearch(x.target,{...row,payload_json,payload_sha256:await sha256(payload_json)},[{...x.source,text:decomposed,content_sha256:await sha256(decomposed)}])).availability,'withheld');
  input=structuredClone(x.input);input.spans[0].locator='the text is preserved privately';payload_json=canonicalJson(input);const locatorOut=await projectResearch(x.target,{...row,payload_json,payload_sha256:await sha256(payload_json)},[x.source]);assert.equal(locatorOut.availability,'available');assert.equal(locatorOut.research.spans[0].locator,'evidence segment 1');assert.ok(!JSON.stringify(locatorOut).includes(input.spans[0].locator));
  for(const url of ['javascript:alert(1)','http://example.org','https://u:p@example.org','https://example.org?X-Amz-Signature=a','https://x.workers.dev/private','https://127.0.0.1/data'])assert.equal(safeResearchUrl(url),false,url);
 });
