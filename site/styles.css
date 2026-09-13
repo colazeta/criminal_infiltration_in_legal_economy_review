@@ -2217,3 +2217,17 @@ footer p {
     transition: none;
   }
 }
+
+/* Bibliographic record window, matching the archive's 1990s desktop style. */
+.paper-sheet { width: min(760px, calc(100vw - 24px)); max-height: calc(100dvh - 24px); padding: 3px; border: 3px outset #eee; border-radius: 0; background: #c0c0c0; color: #111; box-shadow: 5px 5px 0 #222; }
+.paper-sheet::backdrop { background: rgb(0 0 0 / 45%); }
+.paper-sheet-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; background: #000080; color: white; padding: 5px 8px; font: bold 14px Arial, sans-serif; }
+.paper-sheet-bar button { border: 2px outset #eee; border-radius: 0; background: #c0c0c0; color: #111; padding: 4px 10px; }
+.paper-sheet-body { padding: 16px; background: #fffff0; margin-top: 3px; overflow-wrap: anywhere; }
+.paper-sheet-body h2 { font-size: 1.35rem; }
+.paper-sheet-body dl { display: grid; grid-template-columns: minmax(100px, 160px) minmax(0, 1fr); gap: 6px 16px; }
+.paper-sheet-body dt { font-weight: bold; }
+.paper-sheet-body dd { margin: 0; white-space: pre-wrap; }
+.paper-sheet-body a { color: #000080; text-decoration: underline; }
+.paper-sheet button:focus-visible, #registered-papers button:focus-visible { outline: 2px dashed #000080; outline-offset: 3px; }
+@media (max-width: 480px) { .paper-sheet-body { padding: 10px; } .paper-sheet-body dl { grid-template-columns: 1fr; gap: 3px; } .paper-sheet-body dd { margin-bottom: 9px; } }

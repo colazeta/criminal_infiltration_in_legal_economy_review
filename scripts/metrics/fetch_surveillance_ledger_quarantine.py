@@ -2,19 +2,20 @@
 """Read the governed surveillance ledger with audited recovery handling.
 
 Historical terminal comments that were proven invalid remain on GitHub for audit
-but are excluded by exact comment ID and batch ID.  A single audited replacement
-terminal is allowed to cross the Rome-calendar-day boundary created by recovery.
+but are excluded by exact comment ID and batch ID. Audited immutable replacement
+terminals may cross their original run day only when their exact comment ID,
+batch identity and Rome creation date are recorded below.
 
 Candidate identity collisions across *different* valid intake runs are discovery
-occurrences, not ledger-corruption events.  The operational register reconciles
-those exact collisions when materialising a batch.  Consequently this wrapper
+occurrences, not ledger-corruption events. The operational register reconciles
+those exact collisions when materialising a batch. Consequently this wrapper
 keeps every other canonical ledger validation but disables only the base reader's
-cross-run candidate-novelty assertion.  Batch identity, issue identity, immutable
-terminal timing, source/query counts, repository ancestry and intake contents
-remain fail-closed.
+cross-run candidate-novelty assertion. Batch identity, issue identity, terminal
+timing, source/query counts, repository ancestry and intake contents remain
+fail-closed.
 
 For intake materialisation, ``fetch_validated_run_for_intake`` validates only the
-terminal belonging to the target issue.  An unrelated malformed terminal must not
+terminal belonging to the target issue. An unrelated malformed terminal must not
 prevent a valid target batch from being staged; a malformed or duplicated target
 terminal still fails immediately.
 """
@@ -39,6 +40,20 @@ QUARANTINED_LEDGER_COMMENTS = {
     5644330070: "ACADEMIC-2026-09-12-EXTRA-d6b0ffff25fd",
     5644553677: "ACADEMIC-2026-09-12-EXTRA-335f7df7ae34",
     5646294694: "ACADEMIC-2026-09-12-EXTRA-570dae192194",
+    # First-generation replacement terminals that still exceeded the bounded
+    # text contract; later ledger comments contain their audited truncations.
+    5647926004: "ACADEMIC-2026-09-12-EXTRA-724679219793",
+    5647897601: "ACADEMIC-2026-09-12-EXTRA-335f7df7ae34",
+    5647898301: "ACADEMIC-2026-09-12-EXTRA-570dae192194",
+    5646951308: "ACADEMIC-2026-09-12-EXTRA-6e00fc2aca6a",
+    5647317502: "ACADEMIC-2026-09-12-EXTRA-b54c1a6aa281",
+    5647606053: "ACADEMIC-2026-09-12-EXTRA-2231aace38f9",
+    # Exact historical terminals superseded during the candidate-conservation
+    # repair on 2026-09-13. The source comments remain immutable audit evidence.
+    5642209455: "ACADEMIC-2026-09-12-EXTRA-7652f77d6fde",
+    5648272072: "ACADEMIC-2026-09-12-EXTRA-38a999646d3f",
+    5648606308: "ACADEMIC-2026-09-12-EXTRA-426cdea055d3",
+    5651216526: "ACADEMIC-2026-09-13-EXTRA-76bb4c0cee3e",
 }
 
 # These batches are not merely superseded malformed terminals: the audited run
@@ -54,11 +69,68 @@ LATE_RECOVERY_TERMINALS = {
         "batch_id": "ACADEMIC-2026-09-11-EXTRA-61e4d03af5c4",
         "run_date": "2026-09-11",
         "created_rome_date": "2026-09-12",
-    }
+    },
+    # Audited bounded-text replacements written later on 2026-09-12.
+    5647994836: {
+        "batch_id": "ACADEMIC-2026-09-12-EXTRA-724679219793",
+        "run_date": "2026-09-12",
+        "created_rome_date": "2026-09-12",
+    },
+    5647991867: {
+        "batch_id": "ACADEMIC-2026-09-12-EXTRA-335f7df7ae34",
+        "run_date": "2026-09-12",
+        "created_rome_date": "2026-09-12",
+    },
+    5647993089: {
+        "batch_id": "ACADEMIC-2026-09-12-EXTRA-570dae192194",
+        "run_date": "2026-09-12",
+        "created_rome_date": "2026-09-12",
+    },
+    5647987839: {
+        "batch_id": "ACADEMIC-2026-09-12-EXTRA-6e00fc2aca6a",
+        "run_date": "2026-09-12",
+        "created_rome_date": "2026-09-12",
+    },
+    5647989408: {
+        "batch_id": "ACADEMIC-2026-09-12-EXTRA-b54c1a6aa281",
+        "run_date": "2026-09-12",
+        "created_rome_date": "2026-09-12",
+    },
+    5647990614: {
+        "batch_id": "ACADEMIC-2026-09-12-EXTRA-2231aace38f9",
+        "run_date": "2026-09-12",
+        "created_rome_date": "2026-09-12",
+    },
+    # Immutable recovery terminals written on 2026-09-13 for four orphaned
+    # candidate-bearing batches. Their original terminal comments are quarantined
+    # above but remain available as audit evidence.
+    5652046564: {
+        "batch_id": "ACADEMIC-2026-09-12-EXTRA-7652f77d6fde",
+        "run_date": "2026-09-12",
+        "created_rome_date": "2026-09-13",
+    },
+    5652047522: {
+        "batch_id": "ACADEMIC-2026-09-13-EXTRA-76bb4c0cee3e",
+        "run_date": "2026-09-13",
+        "created_rome_date": "2026-09-13",
+    },
+    5652048230: {
+        "batch_id": "ACADEMIC-2026-09-12-EXTRA-38a999646d3f",
+        "run_date": "2026-09-12",
+        "created_rome_date": "2026-09-13",
+    },
+    5652049188: {
+        "batch_id": "ACADEMIC-2026-09-12-EXTRA-426cdea055d3",
+        "run_date": "2026-09-12",
+        "created_rome_date": "2026-09-13",
+    },
 }
 
 _RAW_API_GET = _base.api_get
 _RAW_VERIFY_LEDGER_COMMENT_TIME = _base.verify_ledger_comment_time
+_LEDGER_BATCH_CLAIM = re.compile(
+    rf"\ADaily surveillance batch (?P<batch>{_base.BATCH_PATTERN}): "
+)
 
 
 def _quarantine_api_get(url: str, token: str):
@@ -137,6 +209,28 @@ def _target_batch(issue: dict) -> str:
     return batch_id
 
 
+def _comment_claims_batch(body: str, batch_id: str) -> bool:
+    """Return whether malformed ledger evidence claims exactly ``batch_id``.
+
+    Ordinary daily batch IDs are prefixes of same-day ``-EXTRA-`` batch IDs. A
+    substring test therefore turns a malformed EXTRA terminal into a false error
+    for the ordinary batch. Prefer the immutable ledger summary identity and use
+    an exact JSON ``batch_id`` field only as a fail-closed fallback when the
+    summary itself is malformed.
+    """
+    text = body.strip()
+    summary = _LEDGER_BATCH_CLAIM.match(text)
+    if summary is not None:
+        return summary.group("batch") == batch_id
+    return (
+        re.search(
+            rf'"batch_id"\s*:\s*"{re.escape(batch_id)}"',
+            text,
+        )
+        is not None
+    )
+
+
 def fetch_validated_run_for_intake(
     repository: str,
     ledger_issue: int,
@@ -173,7 +267,7 @@ def fetch_validated_run_for_intake(
             try:
                 run = _base.extract_run(body)
             except _base.MetricsError:
-                if batch_id in body:
+                if _comment_claims_batch(body, batch_id):
                     raise
                 continue
             if run is None or run.get("batch_id") != batch_id:
@@ -198,7 +292,6 @@ def fetch_validated_run_for_intake(
     if intake.get("number") != issue.get("number") or not intake.get("created"):
         raise _base.MetricsError("target terminal does not identify this intake issue")
 
-    # Preserve the canonical uniqueness check for the *target issue identity*.
     repository_issues: list[dict] = []
     issues_url = f"https://api.github.com/repos/{repository}/issues?state=all&per_page=100"
     while issues_url:
