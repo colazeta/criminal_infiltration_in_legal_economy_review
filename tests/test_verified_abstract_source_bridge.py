@@ -3,6 +3,8 @@ from __future__ import annotations
 from pathlib import Path
 import unittest
 
+from scripts.retrieval.selected_paper_delivery import PREPARE
+
 ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -22,11 +24,16 @@ class VerifiedAbstractSourceBridgeTests(unittest.TestCase):
         self.assertIn("data/curation/reading_aid_overrides.json", source)
         self.assertIn("merged.set(record.candidateId, record)", source)
 
-    def test_backfill_workflow_runs_bridge_after_bulk_check(self) -> None:
+    def test_backfill_workflow_runs_bridge_before_final_check_and_persistence(self) -> None:
         workflow = (ROOT / ".github/workflows/abstract-coverage.yml").read_text(encoding="utf-8")
+        prepare = workflow.index("selected_paper_delivery.py --prepare --validate")
         check = workflow.index("node scripts/abstracts/backfill_coverage.mjs --check")
-        promote = workflow.index("node scripts/abstracts/promote_verified_sources.mjs")
-        self.assertLess(check, promote)
+        persist = workflow.index("run: bash scripts/retrieval/persist_selected_support.sh")
+        self.assertLess(prepare, check)
+        self.assertLess(check, persist)
+        promote = PREPARE.index(["node", "scripts/abstracts/promote_verified_sources.mjs"])
+        build = PREPARE.index(["python3", "scripts/build_archive.py"])
+        self.assertLess(promote, build)
         self.assertIn("data/curation/reading_aids.json", workflow)
         self.assertIn("data/curation/reading_aid_overrides.json", workflow)
 
