@@ -19,6 +19,12 @@ class CandidateConservationWorkflowTests(unittest.TestCase):
         self.assertIn("workflow_dispatch:", workflow)
         self.assertIn("group: intake-to-curation-main", workflow)
 
+    def test_newer_global_recovery_supersedes_stale_recovery(self) -> None:
+        workflow = self._workflow()
+        self.assertIn("cancel-in-progress: true", workflow)
+        self.assertIn("immutable intake source of truth", workflow)
+        self.assertIn("cancellation policy is recovery-only", workflow)
+
     def test_automatic_recovery_never_comments_on_or_closes_the_ledger(self) -> None:
         workflow = self._workflow()
         self.assertIn('if [ "$EVENT_NAME" = "issues" ]', workflow)
