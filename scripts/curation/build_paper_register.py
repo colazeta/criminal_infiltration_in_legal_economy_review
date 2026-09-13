@@ -4,11 +4,43 @@ No copied abstracts, reviewer identities, internal reasons or eligibility infere
 """
 import csv
 import json
+import re
 from pathlib import Path
 from urllib.parse import urlsplit
 
 FIELDS = {'id', 'title', 'authors', 'year', 'venue', 'doi', 'sourceLinks',
           'metadataStatus', 'reviewStatus', 'accessStatus', 'registeredAt', 'topicCode'}
+CANDIDATE_ID = re.compile(r'^CAND-[A-Za-z0-9-]{1,100}$')
+
+
+def validate_enrichment_registry(payload):
+    """Mirror the deployed enrichment worker's public-registry boundary.
+
+    The worker consumes this same public projection. Reject incompatible records
+    before publication so an otherwise-green archive cannot strand hour-40
+    delivery with ``invalid_registry_record``.
+    """
+    if payload.get('schemaVersion') != 1 or not isinstance(payload.get('records'), list) or len(payload['records']) > 10000:
+        raise ValueError('Invalid enrichment registry envelope')
+    seen = set()
+    for record in payload['records']:
+        candidate_id = record.get('id', '')
+        title = record.get('title')
+        links = record.get('sourceLinks')
+        if (not CANDIDATE_ID.fullmatch(candidate_id) or candidate_id in seen
+                or not isinstance(title, str) or not title or len(title) > 3000
+                or not isinstance(record.get('doi'), str)
+                or not isinstance(links, list)):
+            raise ValueError(f'{candidate_id or "<missing>"}: invalid enrichment registry record')
+        seen.add(candidate_id)
+        for url in links:
+            if not isinstance(url, str) or len(url) > 2000:
+                raise ValueError(f'{candidate_id}: invalid enrichment registry source URL')
+            parsed = urlsplit(url)
+            if parsed.scheme != 'https' or not parsed.hostname or parsed.username or parsed.password:
+                raise ValueError(f'{candidate_id}: enrichment registry sources must be credential-free HTTPS')
+    return payload
+
 
 def build_payload(root):
     root=Path(root)
@@ -35,14 +67,16 @@ def build_payload(root):
     records.sort(key=lambda r:r['id'])
     if len(by_id)!=len(records) or any(set(r)!=FIELDS for r in records):
         raise ValueError('Invalid public register identity or fields')
-    return {'schemaVersion':1,'records':records}
+    return validate_enrichment_registry({'schemaVersion':1,'records':records})
 
 
 def render_source_link(url, number):
     """Keep original locators but make only credential-free HTTPS clickable.
 
     Do not silently rewrite HTTP to HTTPS: that would invent a verified locator.
-    Legacy HTTP provenance remains visible as escaped, non-interactive text.
+    Legacy HTTP provenance remains visible as escaped, non-interactive text when
+    rendering an explicitly supplied legacy locator. The governed registry build
+    itself rejects HTTP because the deployed enrichment worker consumes it.
     """
     from html import escape
     parsed = urlsplit(url)
