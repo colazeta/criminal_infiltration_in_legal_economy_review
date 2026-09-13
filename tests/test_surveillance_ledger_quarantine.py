@@ -46,6 +46,36 @@ class SurveillanceLedgerQuarantineTests(unittest.TestCase):
             )
         self.assertEqual(payload, rows)
 
+    def test_extra_batch_does_not_claim_same_day_ordinary_batch(self) -> None:
+        ordinary = "ACADEMIC-2026-09-13"
+        extra = "ACADEMIC-2026-09-13-EXTRA-123456789abc"
+        malformed_extra = (
+            f"Daily surveillance batch {extra}: completed.\n\n"
+            "<!-- surveillance-run:v3 -->\n"
+            "```json\n"
+            f'{{"schema_version":3,"batch_id":"{extra}","sources":[]}}\n'
+            "```"
+        )
+        self.assertFalse(quarantine._comment_claims_batch(malformed_extra, ordinary))
+        self.assertTrue(quarantine._comment_claims_batch(malformed_extra, extra))
+
+    def test_exact_target_batch_still_fails_closed_when_malformed(self) -> None:
+        target = "ACADEMIC-2026-09-13"
+        malformed_target = (
+            f"Daily surveillance batch {target}: completed.\n\n"
+            "<!-- surveillance-run:v3 -->\n```json\n{}\n```"
+        )
+        self.assertTrue(quarantine._comment_claims_batch(malformed_target, target))
+
+    def test_exact_json_batch_id_is_fail_closed_fallback(self) -> None:
+        target = "ACADEMIC-2026-09-13"
+        malformed_summary = (
+            "broken surveillance summary\n"
+            "<!-- surveillance-run:v3 -->\n"
+            f'```json\n{{"batch_id":"{target}"}}\n```'
+        )
+        self.assertTrue(quarantine._comment_claims_batch(malformed_summary, target))
+
     def test_exact_late_recovery_terminal_accepts_audited_next_day_creation(self) -> None:
         run = {
             "batch_id": "ACADEMIC-2026-09-11-EXTRA-61e4d03af5c4",
