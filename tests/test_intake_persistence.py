@@ -9,27 +9,27 @@ ROOT = Path(__file__).resolve().parents[1]
 
 class IntakePersistenceTests(unittest.TestCase):
     def test_validated_intake_prefers_pr_and_automerge(self) -> None:
-        workflow = (ROOT / ".github/workflows/intake-to-curation.yml").read_text(encoding="utf-8")
-        self.assertIn('gh pr create --base main --head "$BRANCH"', workflow)
+        workflow = (ROOT / ".github/workflows/recover-intake-backlog.yml").read_text(encoding="utf-8")
+        self.assertIn('gh pr create --base main --head "$branch"', workflow)
         self.assertIn('gh pr merge "$pr_url" --squash --delete-branch', workflow)
-        self.assertIn("Validated intake merged automatically", workflow)
+        self.assertIn("persisted=true", workflow)
 
     def test_direct_persistence_is_guarded_by_exact_validated_base(self) -> None:
-        workflow = (ROOT / ".github/workflows/intake-to-curation.yml").read_text(encoding="utf-8")
+        workflow = (ROOT / ".github/workflows/recover-intake-backlog.yml").read_text(encoding="utf-8")
         self.assertIn('base_sha="$(git rev-parse HEAD)"', workflow)
         self.assertIn('git fetch origin main', workflow)
         self.assertIn('current_main="$(git rev-parse origin/main)"', workflow)
-        self.assertIn('if [ "$current_main" = "$BASE_SHA" ]; then', workflow)
+        self.assertIn('if [ "$current_main" = "$base_sha" ]; then', workflow)
         self.assertIn('git push origin HEAD:main', workflow)
         self.assertNotIn('git push --force', workflow)
         self.assertNotIn('git push -f', workflow)
 
     def test_concurrent_main_change_fails_loudly_and_retains_audit_branch(self) -> None:
-        workflow = (ROOT / ".github/workflows/intake-to-curation.yml").read_text(encoding="utf-8")
-        self.assertIn("Validated intake could not be persisted automatically", workflow)
-        self.assertIn("Validated branch retained", workflow)
-        self.assertIn("Expected main SHA", workflow)
-        self.assertIn("Current main SHA", workflow)
+        workflow = (ROOT / ".github/workflows/recover-intake-backlog.yml").read_text(encoding="utf-8")
+        self.assertIn("CandidateRecords were staged but could not cross the persistence barrier", workflow)
+        self.assertIn('git push origin "$branch"', workflow)
+        self.assertIn('base_sha="$(git rev-parse HEAD)"', workflow)
+        self.assertIn('current_main="$(git rev-parse origin/main)"', workflow)
         self.assertIn("exit 1", workflow)
 
 

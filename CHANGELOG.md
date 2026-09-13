@@ -1,5 +1,14 @@
 ## 2026-09-11 — private paper enrichment foundation
 
+## 2026-09-13 — candidate publication completion
+
+- One non-cancelling terminal-driven writer; atomic coverage and public exports.
+- Verify main persistence before finalisation and served records after deployment.
+- Retry publication even with no additions; isolate invalid aggregate telemetry
+  without relaxing scientific/candidate gates or claiming complete health.
+- Reconcile exact immutable terminal replacements; update architecture tests.
+
+
 * Add ontology profile 0.4.0, 15 empty additive private tables and closed scientific
   extraction schema with field-by-field semantic mapping.
 * Add independently gated hourly mechanical enrichment, leases, retries, private

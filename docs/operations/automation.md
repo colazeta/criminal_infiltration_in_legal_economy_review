@@ -263,3 +263,13 @@ they never fill scheduled-day gaps. Read that policy before a manual run.
 ## Superseding operational registration instruction — 2026-09-08
 
 The owner requires papers to enter the visible operational register before individual analysis and labelling. New intake uses run/manifest v3 and may record access as unknown. The mandatory verified-OA rule above applies to historical v2 intake and to admission into the assessed OA corpus, not to provisional registration. See [paper-register.md](paper-register.md). No scientific approval is implied.
+
+## Completion and maintenance amendment — 2026-09-13
+
+Follow [the completion contract](candidate-pipeline-audit.md). The sole automatic
+CandidateRecord writer is terminal-driven recover-intake-backlog.yml; the issue-open
+workflow is read-only. Separate intake, main persistence, served provisional
+publication and scientific inclusion. Scaffolding and public projections persist
+atomically; network enrichment is optional downstream work. The archive verifies
+actual served records. Use the documented backlog-first maintenance exception and
+mandatory bounded-text terminal preflight. No scientific gate is relaxed.

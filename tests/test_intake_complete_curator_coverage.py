@@ -9,20 +9,17 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class IntakeCompleteCuratorCoverageTests(unittest.TestCase):
-    def test_intake_builds_all_reviewability_layers_before_validation(self) -> None:
-        workflow = (ROOT / ".github/workflows/intake-to-curation.yml").read_text(encoding="utf-8")
-        retrieval = workflow.index("Resolve paper access for the complete queue")
-        abstracts = workflow.index("Backfill abstract coverage for the expanded queue")
-        aids = workflow.index("Reconcile reading aids for unresolved abstracts")
-        access = workflow.index("Classify access for the expanded queue")
-        validation = workflow.index("Validate the complete archive")
-        self.assertLess(retrieval, abstracts)
-        self.assertLess(abstracts, aids)
-        self.assertLess(aids, access)
-        self.assertLess(access, validation)
-        self.assertIn("scripts/curation/reconcile_reading_aids.py --check", workflow)
-        self.assertIn("scripts/access/classify_access.py --check", workflow)
-        self.assertIn("scripts/access/reconcile_access_evidence.py --check", workflow)
+    def test_reviewability_enrichment_cannot_block_candidate_preservation(self) -> None:
+        workflow = (ROOT / ".github/workflows/recover-intake-backlog.yml").read_text()
+        for network_script in ("resolve_queue.py", "backfill_coverage.mjs", "reconcile_reading_aids.py", "classify_access.py"):
+            self.assertNotIn(network_script, workflow)
+        self.assertIn("python scripts/ontology/validate_ontology.py", workflow)
+        self.assertIn("python scripts/curation/build_curator_stats.py", workflow)
+        self.assertIn("site/data", workflow)
+        scaffold = (ROOT / "scripts/curation/scaffold_candidate_coverage.py").read_text()
+        for status in ('"unresolved"', '"needs_web_search"', '"unknown"'):
+            self.assertIn(status, scaffold)
+        self.assertIn("preserves every existing enriched row", scaffold)
 
     def test_retained_overrides_do_not_reintroduce_the_retired_provider(self) -> None:
         payload = json.loads(

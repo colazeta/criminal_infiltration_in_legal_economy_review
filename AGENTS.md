@@ -132,3 +132,14 @@ incomplete E1–E3 cycle is not an assessable saturation cycle.
 ## Automatic operational registration — owner instruction, 2026-09-08
 
 Read docs/operations/paper-register.md. New surveillance uses run/intake v3. Register newly discovered plausible scholarly records before individual review, even when OA verification is pending. Do not fabricate missing metadata or an OA receipt. Use existing CandidateRecord and pending status; canonical identity, controlled labels and scientific decisions remain separate. The owner authorises reviewed maintenance and mechanical persistence of this provisional register.
+
+## Publication accountability — owner maintenance instruction, 2026-09-13
+
+Apply docs/operations/candidate-pipeline-audit.md. Distinguish intake, verified
+main persistence, served provisional publication and scientific inclusion.
+Valid completed intake/publication debt has priority over new discovery. In a
+separately identified maintenance step, the task may reopen the existing exact-title
+[MAINTENANCE][INTAKE-RECOVERY] request, creating it only when absent, and verify the
+repository-owned recovery. This limited exception does not permit discovery to
+edit repository files, registries or scientific decisions. Validate the actual
+terminal before writing; immutable evidence must not be edited to conceal failure.
