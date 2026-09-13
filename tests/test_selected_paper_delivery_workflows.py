@@ -21,13 +21,18 @@ class SelectedPaperDeliveryWorkflowTests(unittest.TestCase):
                 self.assertNotIn("HEAD:main", text)
                 self.assertNotIn("gh pr merge", text)
 
-    def test_persistence_requires_quality_and_expected_head_without_main_fallback(self):
+    def test_persistence_requires_quality_expected_head_and_reuses_identical_checkpoint(self):
         text = (ROOT / "scripts/retrieval/persist_selected_support.sh").read_text()
         self.assertIn("persistence_pending", text)
         self.assertIn('echo "::error::', text)
         self.assertIn('pending "quality_not_successful"', text)
         self.assertIn('pending "main_moved_reconciliation_required"', text)
         self.assertIn('-f sha="$head_sha"', text)
+        self.assertIn('diff_digest="$( { printf', text)
+        self.assertIn('branch="automation/selected-support-${diff_digest}"', text)
+        self.assertIn('gh pr list --state open --base main --head "$branch"', text)
+        self.assertIn("Reusing retained selected-support checkpoint", text)
+        self.assertNotIn('selected-support-${GITHUB_RUN_ID}', text)
         self.assertNotIn("HEAD:main", text)
         self.assertNotIn("--force", text)
         self.assertLess(text.index('pending "quality_not_successful"'), text.index("--method PUT"))
@@ -39,6 +44,9 @@ class SelectedPaperDeliveryWorkflowTests(unittest.TestCase):
         self.assertIn('"Resolve curator paper access"', text)
         self.assertIn('"Backfill curator abstract coverage"', text)
         self.assertEqual(text.count("selected_paper_delivery.py --check"), 2)
+        self.assertIn("selected_paper_delivery.py --prepare", text)
+        self.assertIn('if [ "$EVENT_NAME" = "pull_request" ]', text)
+        self.assertIn("Main must already contain the materialised support", text)
         for path in ("site/curator-guided.js", "site/model.js", "site/review-v2.js"):
             self.assertEqual(text.count("node --check " + path), 2)
 
