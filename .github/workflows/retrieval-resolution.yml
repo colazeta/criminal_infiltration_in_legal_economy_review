@@ -6,6 +6,7 @@ on:
     paths:
       - data/curation/review_queue.csv
       - data/curation/reading_aid_overrides.json
+      - scripts/curation/materialize_queue_issues.py
       - scripts/retrieval/resolve_queue.py
       - scripts/retrieval/apply_verified_reading_locators.py
       - scripts/retrieval/selected_paper_delivery.py
@@ -15,6 +16,7 @@ on:
     branches: [main]
     paths:
       - data/curation/reading_aid_overrides.json
+      - scripts/curation/materialize_queue_issues.py
       - scripts/retrieval/selected_paper_delivery.py
       - scripts/retrieval/persist_selected_support.sh
       - .github/workflows/retrieval-resolution.yml
@@ -25,10 +27,11 @@ on:
 permissions:
   contents: read
 
-# Both coverage workflows can touch the same governed support projections.
-# This is not a replacement for the persistent Cloudflare minute-40 queue.
+# Main/scheduled/manual persistence and curator issue mutation share one repository-wide
+# lane. PR preparation is branch-local and must not be stalled by an independent main
+# backfill; give each reviewed PR its own bounded lane instead.
 concurrency:
-  group: curator-support-persistence
+  group: ${{ github.event_name == 'pull_request' && format('selected-support-pr-{0}', github.event.pull_request.number) || 'curator-support-persistence' }}
   cancel-in-progress: false
   queue: max
 
@@ -157,11 +160,25 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         run: bash scripts/retrieval/persist_selected_support.sh
 
+      - name: Refresh and validate current main before issue reconciliation
+        if: github.event_name != 'pull_request'
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin main
+          current_main="$(git rev-parse origin/main)"
+          git checkout --detach "$current_main"
+          python3 scripts/validation/validate_repository.py
+          python scripts/curation/build_legacy_queue.py --check
+          python scripts/retrieval/resolve_queue.py --check
+          python scripts/retrieval/apply_verified_reading_locators.py --check
+          echo "Issue reconciliation pinned to current main: $current_main" >> "$GITHUB_STEP_SUMMARY"
+
       - name: Reconcile issue support after confirmed persistence or unchanged coverage
         if: github.event_name != 'pull_request'
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
+          python scripts/curation/materialize_queue_issues.py --repository "$GITHUB_REPOSITORY"
           python scripts/retrieval/sync_issue_retrieval.py --repository "$GITHUB_REPOSITORY"
           python scripts/abstracts/sync_issue_coverage.py --repository "$GITHUB_REPOSITORY"
           cat "$RUNNER_TEMP/selected-support-summary.json" >> "$GITHUB_STEP_SUMMARY"
