@@ -1,48 +1,82 @@
-name: Build archive
+name: Validate and publish archive
 
 on:
-  push:
-    branches:
-      - main
   pull_request:
-    branches:
-      - main
+  push:
+    branches: [main]
+  schedule:
+    - cron: "30 6 * * *"
   workflow_dispatch:
-
-concurrency:
-  group: archive-${{ github.ref }}
-  cancel-in-progress: false
-  queue: max
+  issue_comment:
+    types: [created]
+  workflow_run:
+    workflows: ["Recover intake backlog", "Resolve curator paper access", "Backfill curator abstract coverage"]
+    types: [completed]
+    branches: [main]
 
 permissions:
   contents: read
 
-env:
-  PYTHONUNBUFFERED: "1"
+concurrency:
+  group: archive-${{ github.workflow }}-${{ github.event_name == 'issue_comment' && github.run_id || github.ref }}
+  cancel-in-progress: false
+  queue: max
 
 jobs:
   quality:
+    if: >-
+      (github.event_name != 'workflow_run' ||
+       (github.event.workflow_run.conclusion == 'success' &&
+        github.event.workflow_run.head_repository.full_name == github.repository)) &&
+      (github.event_name != 'issue_comment' ||
+      (github.event.issue.number == 30 &&
+       github.event.comment.user.login == github.repository_owner &&
+       startsWith(github.event.comment.body, 'Daily surveillance batch ACADEMIC-')))
     runs-on: ubuntu-latest
     steps:
-      - name: Check out repository
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
-        with:
-          fetch-depth: 0
-
-      - name: Set up Python
-        uses: actions/setup-python@e797f83bcb11b83ae66e0230d6156d7c80228e7c # v6
-        with:
-          python-version: "3.12"
-
       - name: Set up Node.js
         uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
         with:
           node-version: 22
 
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate immutable intake history
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PR_BASE: ${{ github.event.pull_request.base.sha }}
+          PUSH_BASE: ${{ github.event.before }}
+        run: |
+          base="HEAD"
+          if [ "$EVENT_NAME" = "pull_request" ]; then base="$PR_BASE"; fi
+          if [ "$EVENT_NAME" = "push" ]; then base="$PUSH_BASE"; fi
+          python3 scripts/validation/validate_intake_history.py --base "$base"
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.11"
+
       - name: Validate repository and tests
         run: |
-          python3 -m unittest discover -s tests -p 'test_*.py'
           python scripts/validation/validate_repository.py
+          python scripts/ontology/validate_ontology.py
+          python scripts/ontology/build_model_browser.py
+          git diff --exit-code -- site/vocab/review-v2-model.json
+          python -m unittest discover -s tests -p 'test_*.py'
+          python scripts/report_saturation.py
+
+      - name: Verify deterministic committed export
+        run: |
+          python scripts/build_archive.py --output-dir "$RUNNER_TEMP/archive"
+          python scripts/build_secondary_collections.py --output-dir "$RUNNER_TEMP/archive"
+          python scripts/metrics/build_research_stats.py --output "$RUNNER_TEMP/archive/research-stats.json"
+          python scripts/curation/build_curator_stats.py --output "$RUNNER_TEMP/archive/curator-stats.json"
+          python scripts/curation/build_curator_options.py --output "$RUNNER_TEMP/archive/curator-options.json"
+          diff -ru "$RUNNER_TEMP/archive" site/data
           python scripts/validation/validate_archive.py
           python scripts/validation/validate_site.py
           node --check scripts/abstracts/backfill_coverage.mjs
@@ -75,17 +109,6 @@ jobs:
           node --check curator-app/src/worker.js
           node --test curator-app/test/*.test.js
 
-      - name: Verify deterministic committed export
-        run: |
-          tmp_dir="$(mktemp -d)"
-          cp -R site/data "$tmp_dir/site-data-before"
-          python scripts/archive/build_archive.py
-          python scripts/archive/build_access_coverage.py
-          python scripts/archive/build_abstract_coverage.py
-          python scripts/archive/build_retrieval_coverage.py
-          diff -ru "$tmp_dir/site-data-before" site/data
-          git diff --exit-code -- data/curation/retrieval_coverage.csv data/curation/abstract_coverage.csv site/data
-
       - name: Audit selected-paper delivery state without inferring scientific approval
         env:
           EVENT_NAME: ${{ github.event_name }}
@@ -94,7 +117,7 @@ jobs:
             python3 scripts/retrieval/selected_paper_delivery.py --prepare \
               --summary "$RUNNER_TEMP/selected-support-pr-audit.json"
             prepared="$(git diff --name-only)"
-            unexpected="$(printf '%s\n' "$prepared" | grep -Ev '^(data/curation/(retrieval_coverage|abstract_coverage)\.csv|site/data/)$' || true)"
+            unexpected="$(printf '%s\n' "$prepared" | grep -Ev '^(data/curation/(retrieval_coverage|abstract_coverage)\.csv|site/data/)' || true)"
             if [ -n "$unexpected" ]; then
               echo "::error::Selected-paper preparation changed unexpected paths"
               printf '%s\n' "$unexpected"
@@ -131,14 +154,111 @@ jobs:
         uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
         with:
           node-version: 22
-      - name: Check out repository
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.11"
+
+      - name: Fetch validated daily research metrics
+        id: metrics
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          LEDGER_AUTHOR: ${{ github.repository_owner }}
+        run: |
+          # Canonical validation remains delegated to scripts/metrics/fetch_surveillance_ledger.py.
+          # The wrapper removes only the explicitly quarantined immutable terminal first.
+          python scripts/metrics/fetch_surveillance_ledger_quarantine.py \
+            --repository "$GITHUB_REPOSITORY" \
+            --issue 30 \
+            --allowed-author "$LEDGER_AUTHOR" \
+            --output "$RUNNER_TEMP/surveillance-ledger.json"
+
+      - name: Build release artifact
+        env:
+          METRICS_OUTCOME: ${{ steps.metrics.outcome }}
+        run: |
+          python scripts/build_archive.py
+          python scripts/build_secondary_collections.py
+          if [ "$METRICS_OUTCOME" = "success" ]; then
+            python scripts/metrics/build_research_stats.py \
+              --input "$RUNNER_TEMP/surveillance-ledger.json" \
+              --as-of "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          else
+            python scripts/metrics/build_research_stats.py
+            python scripts/metrics/mark_statistics_unavailable.py
+          fi
+          python scripts/curation/build_curator_stats.py
+          python scripts/curation/build_paper_register.py
+          python scripts/curation/build_curator_options.py
+          python scripts/validation/validate_archive.py
+          python scripts/validation/validate_site.py
+          node --check scripts/abstracts/backfill_coverage.mjs
+          node --check scripts/expansion/citation_frontier.mjs
+          node --check site/app.js
+          node --check site/aml.js
+          node --check site/stats.js
+          node --check site/bibliometrics.js
+          node --check site/curator.js
+          node --check site/curator-config.js
+          node --check site/curator-guided.js
+          node --check site/model.js
+          node --check site/review-v2.js
+          node --check site/curator-consensus.js
+          node --check site/curator-reading.js
+          node --check site/curator-assisted-resolution.js
+          node --check site/curator-queue.js
+          node --check site/curator-resolved-link.js
+          node --check curator-app/src/index.js
+          node --check curator-app/src/enrichment.js
+          node --check curator-app/src/scholarly-providers.js
+          node --check curator-app/src/open-scholarly-providers.js
+          node --check curator-app/src/metadata-reconciliation.js
+          node --check curator-app/src/citation-chasing.js
+          node --check curator-app/src/provider-budget.js
+          node --check curator-app/src/provider-readiness.js
+          node --check curator-app/src/web-capability-resolver.js
+          node --check curator-app/src/free-web-search.js
+          node --check curator-app/src/resolved-abstract.js
+          node --check curator-app/src/worker.js
+          node --test curator-app/test/*.test.js
+          python3 scripts/retrieval/selected_paper_delivery.py --check
+
       - name: Configure Pages
         uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5
+
       - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb75 # v4
+        uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3
         with:
           path: site
-      - name: Deploy to GitHub Pages
+
+      - name: Deploy Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4
+
+      - name: Verify candidate identities on the served public site
+        env:
+          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+        run: |
+          python scripts/curation/verify_published_register.py \
+            --url "${PAGE_URL%/}/data/paper-register.json" \
+            --expected site/data/paper-register.json \
+            --receipt "$RUNNER_TEMP/candidate-publication.json"
+          {
+            echo '### Verified provisional-register publication'
+            echo '```json'
+            cat "$RUNNER_TEMP/candidate-publication.json"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Keep failed statistics visible as operational debt
+        if: always() && steps.metrics.outcome != 'success'
+        run: |
+          echo "::error::Daily statistics failed validation and were not published. Check the separate public-register verification before claiming candidate publication."
+          exit 1
