@@ -60,9 +60,10 @@ class ParallelSearchBatch17Tests(unittest.TestCase):
         }
         for candidate_id, url in expected.items():
             row = self.abstract[candidate_id]
-            self.assertEqual(row["abstract_status"], "available")
-            self.assertEqual(row["abstract_kind"], "verified_abstract_source")
-            self.assertEqual(row["abstract_source_url"], url)
+            self.assertEqual(row["coverage_status"], "available")
+            self.assertEqual(row["match_type"], "verified_abstract_source")
+            self.assertEqual(row["article_url"], url)
+            self.assertEqual(row["providers_tried"], "curator verified abstract source")
 
     def test_abstract_only_records_are_not_promoted_to_full_text(self) -> None:
         for candidate_id, source_url in (
