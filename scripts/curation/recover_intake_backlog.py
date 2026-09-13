@@ -12,6 +12,11 @@ candidate. They are finalised only when every source candidate is already
 materialised or exactly reconciled to an existing operational/canonical identity;
 otherwise the residual candidate is reported as an explicit blocker.
 
+Stable DOI/identifier equality is the primary identity rule. A different observed
+title under the same stable identifier is retained as audited manifestation
+telemetry, not treated as a reason to duplicate or block an entire intake. Weak
+citation/title matches remain secondary and conservative.
+
 When new CandidateRecords are staged, their minimal retrieval/abstract/access
 coverage projections are scaffolded before the preservation commit. This keeps
 candidate conservation independent from network enrichment while preserving the
@@ -40,13 +45,15 @@ from scripts.curation.scaffold_candidate_coverage import (  # noqa: E402
     COVERAGE_PATHS,
     scaffold_all,
 )
+import scripts.curation.stage_intake as stage_intake_module  # noqa: E402
 from scripts.curation.stage_intake import (  # noqa: E402
     IntakeImportError,
+    _inventory,
     _normal,
+    _render_key,
     _validate_context,
-    reconcile_candidates,
-    stage_candidates,
 )
+from scripts.surveillance_identity import candidate_keys  # noqa: E402
 
 PREFIX = "[INTAKE][ACADEMIC] "
 
@@ -78,20 +85,102 @@ def represented_batches(root: Path) -> set[str]:
     return represented
 
 
+def reconcile_candidates_stable_first(
+    root: Path,
+    queue: list[dict[str, str]],
+    candidates: list[dict],
+):
+    """Reconcile exact stable IDs before title/citation observations.
+
+    This mirrors the review protocol's identity order: DOI/stable identifier
+    first, then conservative citation/title-year keys. A title mismatch on an
+    exact stable identifier is preserved in audit telemetry as a manifestation
+    variant; it is not a second scholarly identity.
+    """
+    key_targets, titles = _inventory(root, queue)
+    novel: list[dict] = []
+    skipped: list[dict] = []
+
+    for candidate in candidates:
+        keys = candidate_keys(candidate)
+        strong_keys = [key for key in keys if key and key[0] in {"doi", "id"}]
+        strong_matches: set[str] = set()
+        matched_strong: list[tuple] = []
+        for key in strong_keys:
+            targets = key_targets.get(key, set())
+            if targets:
+                strong_matches.update(targets)
+                matched_strong.append(key)
+
+        if strong_matches:
+            incoming_title = _normal(candidate.get("title") or "")
+            existing_titles = sorted(
+                {
+                    _normal(titles.get(target, ""))
+                    for target in strong_matches
+                    if _normal(titles.get(target, ""))
+                }
+            )
+            skipped.append(
+                {
+                    "candidate_id": candidate["candidate_id"],
+                    "existing_ids": sorted(strong_matches),
+                    "matched_keys": sorted(_render_key(key) for key in matched_strong),
+                    "title_variant": bool(
+                        incoming_title
+                        and existing_titles
+                        and incoming_title not in existing_titles
+                    ),
+                    "observed_title": str(candidate.get("title") or ""),
+                    "existing_titles": existing_titles,
+                }
+            )
+            continue
+
+        weak_matches: set[str] = set()
+        matched_weak: list[tuple] = []
+        for key in keys:
+            targets = key_targets.get(key, set())
+            if targets:
+                weak_matches.update(targets)
+                matched_weak.append(key)
+        if weak_matches:
+            skipped.append(
+                {
+                    "candidate_id": candidate["candidate_id"],
+                    "existing_ids": sorted(weak_matches),
+                    "matched_keys": sorted(_render_key(key) for key in matched_weak),
+                    "title_variant": False,
+                }
+            )
+            continue
+
+        novel.append(candidate)
+        target = f"candidate:{candidate['candidate_id']}"
+        titles[target] = str(candidate.get("title") or "")
+        for key in keys:
+            key_targets[key].add(target)
+
+    return novel, skipped
+
+
+def _stage_candidates_stable_first(*args, **kwargs):
+    """Use stable-first reconciliation inside the existing strict stage contract."""
+    original = stage_intake_module.reconcile_candidates
+    stage_intake_module.reconcile_candidates = reconcile_candidates_stable_first
+    try:
+        return stage_intake_module.stage_candidates(*args, **kwargs)
+    finally:
+        stage_intake_module.reconcile_candidates = original
+
+
 def reconcile_represented_issue(
     root: Path,
     issue: dict,
     run: dict,
     imported_at: str,
 ) -> dict[str, object]:
-    """Prove candidate conservation for an already-represented intake.
-
-    Exact candidate IDs from the immutable source issue are checked first. Any
-    source candidate not present under its original ID is then reconciled with the
-    same stable-identifier/citation logic used for normal intake staging. A batch
-    with even one unresolved residual candidate fails closed instead of being
-    silently skipped.
-    """
+    """Prove candidate conservation for an already-represented intake."""
     issue_number = str(issue["number"])
     issue_title = str(issue.get("title") or "")
     manifest, _ = _validate_context(
@@ -123,10 +212,11 @@ def reconcile_represented_issue(
                 "candidate_id": candidate_id,
                 "existing_ids": [f"candidate:{candidate_id}"],
                 "matched_keys": [f"candidate_id:{candidate_id}"],
+                "title_variant": False,
             }
         )
 
-    novel, exact_skipped = reconcile_candidates(root, queue, remaining)
+    novel, exact_skipped = reconcile_candidates_stable_first(root, queue, remaining)
     skipped.extend(exact_skipped)
     if novel:
         unresolved = ", ".join(str(candidate["candidate_id"]) for candidate in novel)
@@ -187,7 +277,7 @@ def recover(
             if batch_id in represented:
                 result = reconcile_represented_issue(root, issue, run, imported_at)
             else:
-                result = stage_candidates(
+                result = _stage_candidates_stable_first(
                     root,
                     issue.get("body") or "",
                     title,
@@ -197,9 +287,6 @@ def recover(
                     run=run,
                 )
             processed.append(result)
-            # A batch with additions has a snapshot/provenance marker. A
-            # rediscovery-only batch is intentionally represented only by its
-            # immutable source issue plus this recovery audit.
             if result["added"]:
                 represented.add(batch_id)
         except Exception as exc:  # keep unrelated batches recoverable
@@ -223,13 +310,7 @@ def recover(
 
 
 def _stage_coverage_for_preservation(root: Path) -> None:
-    """Keep deterministic coverage projections in the same Actions commit.
-
-    The existing workflow explicitly stages the queue and intake-access receipts.
-    Git preserves already-staged paths when that later ``git add`` runs, so the
-    three coverage projections cross the same persistence barrier without making
-    network enrichment part of candidate conservation.
-    """
+    """Keep deterministic coverage projections in the same Actions commit."""
     if os.environ.get("GITHUB_ACTIONS") != "true":
         return
     subprocess.run(
