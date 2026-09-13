@@ -38,6 +38,21 @@ def build_payload(root):
     return {'schemaVersion':1,'records':records}
 
 
+def render_source_link(url, number):
+    """Keep original locators but make only credential-free HTTPS clickable.
+
+    Do not silently rewrite HTTP to HTTPS: that would invent a verified locator.
+    Legacy HTTP provenance remains visible as escaped, non-interactive text.
+    """
+    from html import escape
+    parsed = urlsplit(url)
+    if parsed.scheme == 'https' and parsed.hostname and not parsed.username and not parsed.password:
+        return '<a rel="noreferrer" href="' + escape(url, quote=True) + '">Fonte ' + str(number) + '</a>'
+    if parsed.scheme == 'http' and parsed.hostname and not parsed.username and not parsed.password:
+        return '<span>Fonte ' + str(number) + ' (indirizzo originale HTTP): ' + escape(url) + '</span>'
+    raise ValueError('Unsafe public source locator')
+
+
 def render_page(path,payload):
     from html import escape
     import re
@@ -47,7 +62,7 @@ def render_page(path,payload):
         review='Da analizzare' if r['reviewStatus']=='pending' else r['reviewStatus']
         if r.get('topicCode'): review += ' · '+r['topicCode']
         access='OA verificato all’acquisizione' if r['accessStatus']=='verified_open' else 'Accesso da verificare'
-        links=' · '.join('<a rel="noreferrer" href="'+escape(url,quote=True)+'">Fonte '+str(i+1)+'</a>' for i,url in enumerate(r['sourceLinks']))
+        links=' · '.join(render_source_link(url,i+1) for i,url in enumerate(r['sourceLinks']))
         rows.append('<tr><td>'+citation+'</td><td>'+escape(review)+'</td><td>'+escape(access)+'</td><td>'+links+' · <a href="./curate.html">Analizza nel curatore</a></td></tr>')
     content=path.read_text()
     for pattern,replacement in [(r'(<tbody id="registered-papers">).*?(</tbody>)',''.join(rows)),
