@@ -1,0 +1,37 @@
+name: Temporary Parallel Search batch 12 materialiser
+
+on:
+  push:
+    branches: [maintenance/parallel-search-reading-batch12]
+    paths:
+      - scripts/tmp_apply_parallel_batch12.py
+      - .github/workflows/tmp-parallel-batch12.yml
+
+permissions:
+  contents: write
+
+jobs:
+  materialise:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: maintenance/parallel-search-reading-batch12
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: "3.11"
+      - name: Apply bounded reading-support batch
+        run: |
+          python scripts/tmp_apply_parallel_batch12.py
+          python -m json.tool data/curation/reading_aid_overrides.json >/dev/null
+      - name: Persist generated data on branch
+        run: |
+          if git diff --quiet -- data/curation/reading_aid_overrides.json; then
+            echo "No generated change"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/curation/reading_aid_overrides.json
+          git commit -m "Add twelfth Parallel Search reading-support batch"
+          git push origin HEAD:maintenance/parallel-search-reading-batch12
