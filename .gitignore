@@ -11,3 +11,5 @@ dist/
 curator-app/wrangler.jsonc
 curator-app/.dev.vars
 curator-app/.dev.vars.*
+# Rebuilt from allowlisted current ledgers during every release build.
+site/paper-support.json
