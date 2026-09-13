@@ -10,7 +10,7 @@ on:
   issue_comment:
     types: [created]
   workflow_run:
-    workflows: ["Stage daily intake in curator queue"]
+    workflows: ["Stage daily intake in curator queue", "Resolve curator paper access", "Backfill curator abstract coverage"]
     types: [completed]
     branches: [main]
 
@@ -19,7 +19,8 @@ permissions:
 
 concurrency:
   group: archive-${{ github.workflow }}-${{ github.event_name == 'issue_comment' && github.run_id || github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
+  queue: max
 
 jobs:
   quality:
@@ -42,7 +43,6 @@ jobs:
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           fetch-depth: 0
-
 
       - name: Validate immutable intake history
         env:
@@ -87,6 +87,9 @@ jobs:
           node --check site/bibliometrics.js
           node --check site/curator.js
           node --check site/curator-config.js
+          node --check site/curator-guided.js
+          node --check site/model.js
+          node --check site/review-v2.js
           node --check site/curator-consensus.js
           node --check site/curator-reading.js
           node --check site/curator-assisted-resolution.js
@@ -106,10 +109,14 @@ jobs:
           node --check curator-app/src/worker.js
           node --test curator-app/test/*.test.js
 
+      - name: Audit actual public delivery without inferring scientific approval
+        run: python3 scripts/retrieval/selected_paper_delivery.py --check
+
   deploy:
     concurrency:
       group: archive-pages
       cancel-in-progress: false
+      queue: max
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     needs: quality
     runs-on: ubuntu-latest
@@ -170,6 +177,9 @@ jobs:
           node --check site/bibliometrics.js
           node --check site/curator.js
           node --check site/curator-config.js
+          node --check site/curator-guided.js
+          node --check site/model.js
+          node --check site/review-v2.js
           node --check site/curator-consensus.js
           node --check site/curator-reading.js
           node --check site/curator-assisted-resolution.js
@@ -188,6 +198,7 @@ jobs:
           node --check curator-app/src/resolved-abstract.js
           node --check curator-app/src/worker.js
           node --test curator-app/test/*.test.js
+          python3 scripts/retrieval/selected_paper_delivery.py --check
 
       - name: Configure Pages
         uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5
