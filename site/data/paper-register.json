@@ -4288,6 +4288,70 @@
       "accessStatus": "unknown",
       "registeredAt": "2026-09-14",
       "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-14-EXTRA-8b3f2d6a91c4-001",
+      "title": "Blowing in the Wind: The Infiltration of Sicilian Mafia in the Wind Power Business",
+      "authors": "Valeria Virginia Checchi; Michele Polo",
+      "year": 2019,
+      "venue": "GREEN Working Paper Series, Bocconi University",
+      "doi": "",
+      "sourceLinks": [
+        "https://green.unibocconi.eu/sites/default/files/media/attach/GREEN_wp04.pdf"
+      ],
+      "metadataStatus": "metadata_verified",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-14",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-14-EXTRA-8b3f2d6a91c4-002",
+      "title": "Waste and organized crime in regional environments: How waste tariffs and the mafia affect waste management and disposal",
+      "authors": "",
+      "year": null,
+      "venue": "",
+      "doi": "",
+      "sourceLinks": [
+        "https://www.sciencedirect.com/science/article/abs/pii/S0928765515000299"
+      ],
+      "metadataStatus": "metadata_partial",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-14",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-14-EXTRA-8b3f2d6a91c4-003",
+      "title": "Future involvement of organised crime in energy supply: Scenarios to 2020",
+      "authors": "",
+      "year": null,
+      "venue": "Europol",
+      "doi": "",
+      "sourceLinks": [
+        "https://www.europol.europa.eu/sites/default/files/documents/organised-crime-in-energy-supply.pdf"
+      ],
+      "metadataStatus": "metadata_partial",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-14",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-14-EXTRA-8b3f2d6a91c4-004",
+      "title": "The use of regulatory regimes to prevent the infiltration of organised crime groups into lawful occupations and industries",
+      "authors": "",
+      "year": 2023,
+      "venue": "Victorian Law Reform Commission",
+      "doi": "",
+      "sourceLinks": [
+        "https://www.lawreform.vic.gov.au/publication/regulatory-regimes-and-organised-crime-consultation-paper/4-the-use-of-regulatory-regimes-to-prevent-the-infiltration-of-organised-crime-groups-into-lawful-occupations-and-industries"
+      ],
+      "metadataStatus": "metadata_partial",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-14",
+      "topicCode": ""
     }
   ]
 }
