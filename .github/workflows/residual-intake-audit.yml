@@ -5,6 +5,7 @@ on:
     paths: [.github/workflows/residual-intake-audit.yml]
 permissions:
   contents: read
+  issues: read
 jobs:
   snapshot:
     runs-on: ubuntu-latest
@@ -14,11 +15,18 @@ jobs:
         with:
           ref: main
           fetch-depth: 0
-      - name: Export exact current main and record its identity
+      - name: Export current main and complete authenticated public evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           mkdir -p "$RUNNER_TEMP/residual-audit"
           git rev-parse HEAD > "$RUNNER_TEMP/residual-audit/main-sha.txt"
           git archive --format=tar HEAD > "$RUNNER_TEMP/residual-audit/main.tar"
+          gh api --paginate --slurp "repos/$GITHUB_REPOSITORY/issues?state=all&per_page=100" > "$RUNNER_TEMP/residual-audit/issues-pages.json"
+          gh api --paginate --slurp "repos/$GITHUB_REPOSITORY/issues/30/comments?per_page=100" > "$RUNNER_TEMP/residual-audit/ledger-pages.json"
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs?per_page=100" > "$RUNNER_TEMP/residual-audit/runs.json"
+          curl --fail --silent --show-error --max-time 30 'https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/data/paper-register.json' > "$RUNNER_TEMP/residual-audit/served-register.json"
+          date -u +%FT%TZ > "$RUNNER_TEMP/residual-audit/observed-at.txt"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: residual-intake-main-snapshot
