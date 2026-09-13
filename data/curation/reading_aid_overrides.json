@@ -226,6 +226,33 @@
       "synopsis": "The 1987 RAND/NIJ report analyses organised-crime influence in legitimate industries through the economics of intimidation, using New York Organized Crime Task Force data on racketeering and collusion in the Long Island garbage-collection industry. It examines how structural industry characteristics can sustain extortion or collusion and suppress competition.",
       "checkedAt": "2026-09-13",
       "note": "Parallel Search fetched the official RAND R-3525-NIJ PDF and matched Peter Reuter, the exact title and October 1987 report identity; RAND’s catalogue independently exposes the same report and download. Evidence basis: full_text. The existing candidate identity is preserved; no verbatim report text, eligibility decision or private full-text ingestion is claimed."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-09-EXTRA-8e1caef4c376-002",
+      "kind": "full_text_intro",
+      "sourceLabel": "M@n@gement full-text article located with Parallel Search",
+      "sourceUrl": "https://management-aims.com/index.php/mgmt/article/download/3955/9677",
+      "synopsis": "The article examines governance mechanisms in legally registered Mafia firms through an agency-theory lens, focusing on how criminal organisations structure control and constrain agency problems within businesses operating in the lawful economy.",
+      "checkedAt": "2026-09-13",
+      "note": "Parallel Search verified the exact Vrije Universiteit Amsterdam institutional record and fetched the open M@n@gement 15(3), 2012, pp. 273–282 article by Valérie Duplat, Philippe Very and Bertrand Monnet. Evidence basis: full_text. The public synopsis is a concise non-verbatim summary; no eligibility, canonical-identity or private full-text-ingestion claim is made."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-017",
+      "kind": "full_text_intro",
+      "sourceLabel": "University of Milan CROSS full-text article located with Parallel Search",
+      "sourceUrl": "https://riviste.unimi.it/index.php/cross/article/download/5/pdf/35200",
+      "synopsis": "Based on the MORE project, the article maps organised-crime infiltration of European businesses using judicial material from all 28 EU countries covering about 950 infiltrated firms. It examines sentinel crimes, strategies used to control and manage firms, and risk factors facilitating infiltration, including cash intensity and opaque business ownership.",
+      "checkedAt": "2026-09-13",
+      "note": "Parallel Search verified the UniCatt institutional record and fetched the official CROSS full text for DOI 10.13130/cross-11822. The publisher PDF confirms Michele Riccardi, Verena Zoppei, Daniela Andreatta, Antonio Bosisio, Georgiana Musat and Benjamin Villanyi, resolving the earlier observed spelling uncertainty in favour of Riccardi without silently rewriting candidate metadata. Evidence basis: full_text. No eligibility, canonical-identity or private full-text-ingestion claim is made."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-09-EXTRA-8e1caef4c376-004",
+      "kind": "verified_abstract_source",
+      "sourceLabel": "Utrecht University Repository exact record located with Parallel Search",
+      "sourceUrl": "https://dspace.library.uu.nl/handle/1874/414369",
+      "synopsis": "The chapter examines organised-crime infiltration through Dutch transportation companies in the context of transit crime, treating the Netherlands as particularly exposed because of its historical development and geographical role in cross-border flows.",
+      "checkedAt": "2026-09-13",
+      "note": "Parallel Search fetched the exact Utrecht University Repository record, matching Joras Ferwerda, Brigitte Unger, 2016 and DOI 10.4324/9781315640617-12. Evidence basis for this synopsis: abstract_only. The repository explicitly lists a 728.2 KB file named ferwerda.pdf and marks the collection open access, but a stable direct bitstream locator was not independently verified in this pass, so retrieval_coverage is not promoted from open_access_landing to full_text on that basis alone; claims beyond the repository abstract remain not_verifiable."
     }
   ]
 }
