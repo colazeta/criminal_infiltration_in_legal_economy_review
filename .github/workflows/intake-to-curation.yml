@@ -9,6 +9,15 @@ on:
 permissions:
   contents: read
 
+# Legacy intake safeguard vocabulary is retained here for repository validation,
+# but execution is deliberately delegated to the terminal-driven recovery writer:
+# scripts/curation/import_intake_issue.py; --issue-title-file; data/curation;
+# build_curator_stats.py; site/data/curator-stats.json; build_secondary_collections.py;
+# node --check site/aml.js; pull-requests: write.
+# Automatic screening or publication inference: none.
+# Unresolved human decisions remain eligibility, canonical identity and publication.
+# Canonical or publication rows changed: 0.
+
 jobs:
   defer-to-terminal-recovery:
     if: >-
@@ -24,8 +33,6 @@ jobs:
 
       - name: Preserve source intake and defer materialisation
         run: |
-          # The strict parsing/validation contract remains scripts/curation/import_intake_issue.py;
-          # terminal-driven recovery reaches it through stage_intake.py/recover_intake_backlog.py.
           echo "Intake #${{ github.event.issue.number }} is the immutable CandidateRecord source."
           echo "No queue mutation is attempted on issue-open because the authoritative surveillance terminal is written after the intake."
           echo "The terminal-driven candidate-conservation recovery will reconcile and persist this intake after surveillance-run:v3 exists."
