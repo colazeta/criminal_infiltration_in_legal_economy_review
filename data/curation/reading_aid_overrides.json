@@ -532,6 +532,33 @@
       "synopsis": "The 1983 NIJ-sponsored study uses a Delphi-like two-day group discussion with eight law-enforcement experts to derive business, governance and community indicators of organised-crime impacts. The indexed abstract presents the indicators as experience-based rather than theory-derived and intended to support comparison of cities affected by organised crime.",
       "checkedAt": "2026-09-13",
       "note": "Parallel Search matched NCJ 95265, R W Davis, C H Rogovin, 1983 and the 44-page NIJ-sponsored applied/empirical research record. Evidence basis: abstract_only. An authoritative NIJ/OJP abstract is available, but a stable direct PDF for NCJ 95265 was not independently resolved in this pass, so the candidate is not promoted to full_text. No private source ingestion or scientific decision is claimed."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-13-EXTRA-c71ea3b3c996-001",
+      "kind": "full_text_intro",
+      "sourceLabel": "LAGV Sciencesconf full-text working paper located with Parallel Search",
+      "sourceUrl": "https://lagv2019.sciencesconf.org/248734/document",
+      "synopsis": "The working paper uses a unique geolocated dataset on Italian firms and municipal-council dismissals for Mafia infiltration to study spillovers in the construction sector. It reports lower value added among construction firms in neighbouring municipalities, with larger effects where the absence of organised-crime influence from the dismissed municipal council lasts longer.",
+      "checkedAt": "2026-09-13",
+      "note": "Parallel Search fetched the complete LAGV/Sciencesconf manuscript and matched Massimiliano Ferraresi, Leonzio Rizzo, Riccardo Secomandi and the exact registered title. Evidence basis: full_text. Another already-registered CandidateRecord represents the same working-paper manifestation; this retrieval-only lane preserves that unresolved identity relation and does not silently merge or canonicalise the records. No verbatim text, private full-text ingestion, eligibility decision or scientific classification is claimed."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-13-EXTRA-c8d693f88061-001",
+      "kind": "publisher_summary",
+      "sourceLabel": "Cambridge publisher chapter summary located with Parallel Search",
+      "sourceUrl": "https://www.cambridge.org/core/books/economics-of-organised-crime/conspiracy-among-the-many-the-mafia-in-legitimate-industries/408430B12EABBB42BC570DB11B2FEE51",
+      "synopsis": "The chapter considers how the Mafia exercises influence in legitimate industries in Sicily and the United States, including the services it provides, the economic consequences of that influence and the conditions associated with entry into and exit from particular industries.",
+      "checkedAt": "2026-09-13",
+      "note": "Parallel Search fetched the Cambridge publisher manifestation and corroborated the exact title against the Springer DOI 10.1007/978-1-349-62853-7_5 and a later Taylor & Francis manifestation. Evidence basis: publisher_summary/abstract_only; the complete scholarly chapter body was not verified in this pass. The registered CandidateRecord has blank authors/year/DOI, and this retrieval-only lane does not silently fill metadata or merge the related manifestations. No private ingestion or scientific decision is claimed."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-13-EXTRA-ff172108cfd0-005",
+      "kind": "publisher_summary",
+      "sourceLabel": "Centre Thucydide article page located with Parallel Search",
+      "sourceUrl": "https://www.afri-ct.org/article/l-infiltration-mafieuse-dans-l",
+      "synopsis": "The article discusses Mafia infiltration of the legal economy through the relationship between legal and illegal economic activity, including laundering, racketeering and usury and the use of lawful economic activity as a vector of criminal influence.",
+      "checkedAt": "2026-09-13",
+      "note": "Parallel Search fetched the authoritative Centre Thucydide/AFRI article page matching the registered 2016 title. Evidence basis: partial text/publisher summary only; a complete scholarly full-text manifestation was not independently verified. No verbatim article text, OA-retention claim, private source ingestion, eligibility decision, canonicalisation or scientific classification is claimed."
     }
   ]
 }
