@@ -280,6 +280,24 @@
       "synopsis": "The 1987 symposium volume contains Mark H. Moore's chapter as its dedicated enterprise analysis of organised crime, beginning at page 51. The volume frames entrepreneurial characteristics as central to understanding organised crime and its vulnerabilities, placing the chapter within an economic and strategic approach to organised-crime control.",
       "checkedAt": "2026-09-13",
       "note": "Parallel Search fetched the official OJP digitised 215-page Major Issues in Organized Crime Control volume (NCJ 106775), whose contents identify Mark H. Moore and the exact chapter title; Harvard independently confirms the 1987 chapter identity in that volume. Evidence basis: full_text. No verbatim chapter text, eligibility decision, canonical-identity decision or private full-text ingestion is claimed."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-10-EXTRA-f276bc827f57-004",
+      "kind": "full_text_intro",
+      "sourceLabel": "Dalhousie University DalSpace full-text paper located with Parallel Search",
+      "sourceUrl": "https://dalspace.library.dal.ca/bitstreams/28c9ffcb-3553-4911-8f50-cce77cb8f705/download",
+      "synopsis": "Prepared for the Law Commission of Canada, the paper re-examines organised crime through the economic relationships required for successful criminal enterprise, contrasting traditional group-centred conceptions with market and economic perspectives and discussing implications for public policy and law enforcement.",
+      "checkedAt": "2026-09-13",
+      "note": "Parallel Search matched the exact OJP NCJ 194003 record for Margaret E. Beare and R. T. Naylor (April 1999) and fetched the complete Dalhousie DalSpace paper, whose title page states that it was prepared for the Law Commission of Canada and submitted 14 April 1999. Evidence basis: full_text. The stable DalSpace bitstream replaces the older DalSpace locator as retrieval support only; no verbatim text, scientific decision, canonical-identity decision or private full-text ingestion is claimed."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-10-EXTRA-f276bc827f57-005",
+      "kind": "publisher_summary",
+      "sourceLabel": "Harvard University Press book summary located with Parallel Search",
+      "sourceUrl": "https://www.hup.harvard.edu/books/9780674807426",
+      "synopsis": "Gambetta analyses the Sicilian Mafia as a supplier of private protection, using evidence including confessions from eight mafiosi to develop an economic and political account of Mafia protection and the conditions under which it is demanded and supplied.",
+      "checkedAt": "2026-09-13",
+      "note": "Parallel Search fetched the official Harvard University Press book page, matching Diego Gambetta and ISBN 9780674807426. Evidence basis: publisher_summary; no open full text was verified. HUP exposes a 1 February 1996 paperback manifestation while the prior institutional catalogue notes copyright 1993, so the 1993/1996 edition distinction remains explicit and the candidate's canonical year is not silently rewritten. Claims beyond the publisher summary remain not_verifiable."
     }
   ]
 }
