@@ -199,6 +199,33 @@
       "synopsis": "The paper builds a machine-learning predictor of Mafia infiltration in Italian local governments, using council dissolution for organised-crime infiltration as the outcome. The abstract reports up to 96% out-of-sample detection two years before formal identification and, using a geographic difference-in-discontinuities design, a lasting increase of up to 14 percentage points in predicted infiltration risk after aid exposure.",
       "checkedAt": "2026-09-13",
       "note": "Parallel Search fetched the exact CEPR DP19322 record and matched Gian Maria Campedelli, Gianmarco Daniele, Marco Le Moglie and the 2024 paper identity. Evidence basis: abstract_only. The CEPR page supports the prediction and geographic difference-in-discontinuities claims; no open full-text manifestation was verified in this pass, so claims beyond the abstract remain not_verifiable and no scientific decision is persisted."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-09-EXTRA-5e31cc756b0e-013",
+      "kind": "review_synopsis",
+      "sourceLabel": "Routledge chapter identity and University of Surrey author summary located with Parallel Search",
+      "sourceUrl": "https://www.taylorfrancis.com/chapters/edit/10.4324/9781315640617-2/organised-criminals-legal-economy-giulia-berlusconi",
+      "synopsis": "The chapter examines organised criminals’ relationship with the legal economy within a volume devoted to why, how and where criminal groups infiltrate legal businesses. The author’s institutional profile describes economic activity as a continuum from criminal to fully legal and identifies concealment, fraud and territorial control among drivers of infiltration.",
+      "checkedAt": "2026-09-13",
+      "note": "Parallel Search verified the exact Routledge chapter identity, Giulia Berlusconi and a 2016 first-published/eBook manifestation; the University of Surrey author profile cites the same chapter as 2017, pages 4–15, and supplies the substantive summary. Evidence basis: publisher/institutional summary only, not full_text. The 2016/2017 manifestation-date discrepancy is preserved and not silently reconciled; claims beyond the verified summaries remain not_verifiable and no scientific decision is persisted."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-10-003",
+      "kind": "full_text_intro",
+      "sourceLabel": "Public Safety Canada full-text Research Brief PDF located with Parallel Search",
+      "sourceUrl": "https://www.publicsafety.gc.ca/cnt/rsrcs/pblctns/rgnzd-crm-brf-27/rgnzd-crm-brf-27-eng.pdf",
+      "synopsis": "The brief evaluates corruption and organised-crime risks in Canadian commercial construction using a literature review, interviews and descriptive economic data from British Columbia and Quebec. It discusses structural exposure to intimidation, extortion and collusive bidding while stressing that Canadian prosecutions do not directly demonstrate organised-crime involvement in the sector.",
+      "checkedAt": "2026-09-13",
+      "note": "Parallel Search fetched the official Public Safety Canada landing page and linked complete PDF; the landing page is dated 21 December 2018. Evidence basis: full_text. The registered record has no author or year, and this pass does not invent missing authorship or silently rewrite candidate metadata; no verbatim text, scientific decision or private full-text ingestion is claimed."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-09-EXTRA-6b5b5e038ac4-004",
+      "kind": "full_text_intro",
+      "sourceLabel": "RAND full-text report located with Parallel Search",
+      "sourceUrl": "https://www.rand.org/content/dam/rand/pubs/reports/2007/R3525.pdf",
+      "synopsis": "The 1987 RAND/NIJ report analyses organised-crime influence in legitimate industries through the economics of intimidation, using New York Organized Crime Task Force data on racketeering and collusion in the Long Island garbage-collection industry. It examines how structural industry characteristics can sustain extortion or collusion and suppress competition.",
+      "checkedAt": "2026-09-13",
+      "note": "Parallel Search fetched the official RAND R-3525-NIJ PDF and matched Peter Reuter, the exact title and October 1987 report identity; RAND’s catalogue independently exposes the same report and download. Evidence basis: full_text. The existing candidate identity is preserved; no verbatim report text, eligibility decision or private full-text ingestion is claimed."
     }
   ]
 }
