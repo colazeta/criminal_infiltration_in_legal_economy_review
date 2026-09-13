@@ -23,6 +23,7 @@
     if (!raw || raw.length > 6000) return {countries:[],kind:'unresolved'};
     if (CODES.includes(raw)) return {countries:[raw],kind:'countries'};
     let text = normal(raw);
+    if (['northern ireland','northern cyprus'].includes(text)) return {countries:[],kind:'unresolved'};
     if (broad.has(text)) return {countries:[],kind:'supranational'};
     if (forbidden.test(text)) return {countries:[],kind:'unresolved'};
     // Only an entire list of recognised countries is codable. Never keyword-scan an abstract.
@@ -64,7 +65,7 @@
     for (const study of r.studies) {
       const fact = study.geography;
       if (!fact || !['reported','not_reported','not_verifiable','not_applicable','ambiguous'].includes(fact.status)) throw Error('invalid_geography_fact');
-      const row = {id:study.id,raw:fact.value,status:fact.status,countries:[],kind:'missing',evidence:[]};
+      const row = {id:study.id,raw:fact.value,status:fact.status,origin:fact.origin,countries:[],kind:'missing',evidence:[]};
       if (fact.status === 'reported' && fact.origin === 'source' && typeof fact.value === 'string' && fact.value.trim()) {
         if (!Array.isArray(fact.evidence_span_ids) || !fact.evidence_span_ids.length) throw Error('unsupported_geography');
         for (const id of fact.evidence_span_ids) {
@@ -153,7 +154,7 @@
         table.append(body);const scroll=el('div');scroll.className='table-scroll';scroll.append(table);chart.append(scroll);
       }
       const coverage=el('p','Copertura e dati mancanti: '+[...a.states].map(([key,n])=>`${stateLabels[key]||key}: ${n}`).join(' · '));quality.append(coverage);
-      for(const record of selected){const entry=index.rows.get(record.id);if(!entry?.studies?.length)continue;const block=el('details');block.append(el('summary',record.title));block.append(el('p',`Fonte consultata: ${coverageLabels[entry.coverage]||entry.coverage} · aggiornamento: ${entry.updatedAt||'non riportato'}`));entry.studies.forEach((study,i)=>{block.append(el('p',`Studio ${i+1} · Entità geografica: ${study.raw||stateLabels[entry.state]||study.status} · Paesi: ${study.countries.map(c=>labels.get(c)).join(', ')||'non codificati'}`));for(const evidence of study.evidence){const href=globalThis.CILEPaperResearch?.safeUrl(evidence.url);if(href){const a=el('a','Fonte · '+evidence.locator);a.href=href;a.rel='noreferrer noopener';const line=el('p');line.append(a);block.append(line);}}});detailBody.append(block);}
+      for(const record of selected){const entry=index.rows.get(record.id);if(!entry?.studies?.length)continue;const block=el('details');block.append(el('summary',record.title));block.append(el('p',`Fonte consultata: ${coverageLabels[entry.coverage]||entry.coverage} · aggiornamento: ${entry.updatedAt||'non riportato'}`));entry.studies.forEach((study,i)=>{block.append(el('p',`Studio ${i+1} · Entità geografica: ${study.raw||stateLabels[study.status]||study.status}${study.origin==='analyst'?' (interpretazione analitica, esclusa dai conteggi)':''} · Paesi: ${study.countries.map(c=>labels.get(c)).join(', ')||'non codificati'}`));for(const evidence of study.evidence){const href=globalThis.CILEPaperResearch?.safeUrl(evidence.url);if(href){const a=el('a','Fonte · '+evidence.locator);a.href=href;a.rel='noreferrer noopener';const line=el('p');line.append(a);block.append(line);}}});detailBody.append(block);}
     }
     index=createIndex(records,{selectResearch,onUpdate:render});
     function setRecords(records){selected=records;render();if(selected.length&&!index.progress.running&&!index.progress.attempted)index.scan();}
