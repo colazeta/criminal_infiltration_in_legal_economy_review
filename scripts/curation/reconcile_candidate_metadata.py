@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
-"""Prepare conservative candidate metadata repairs from dual-source retrieval evidence.
+"""Prepare conservative candidate metadata repairs from persisted retrieval evidence.
 
 This is a metadata-verifier step, not screening. It may repair a blank candidate
-DOI and move the candidate out of the metadata-fix lane only when the persisted
-retrieval ledger records concordant OpenAlex + Crossref title/year resolution,
-with no candidate metadata conflict or duplicate flag. It never changes intake
-assessment, screening decisions, canonical identity or publication state.
+DOI only when the persisted retrieval ledger records concordant OpenAlex +
+Crossref title/year resolution, with no candidate metadata conflict or duplicate
+flag. It may also replace a legacy ``http://`` source locator with its exact
+``https://`` counterpart when that scheme-only upgrade is declared in the
+governed verified-source-link repair ledger after authoritative verification.
+Neither path changes intake assessment, screening decisions, canonical identity
+or publication state.
 """
 
 from __future__ import annotations
@@ -18,10 +21,12 @@ import unicodedata
 from datetime import date
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlsplit
 
 
 ROOT = Path(__file__).resolve().parents[2]
 DOI_RE = re.compile(r"^10\.\d{4,9}/\S+$", re.IGNORECASE)
+SOURCE_LINK_REPAIRS = Path("data/curation/verified_source_link_repairs.json")
 
 
 class MetadataReconciliationError(ValueError):
@@ -158,6 +163,101 @@ def find_safe_repairs(
     return repairs
 
 
+def exact_https_upgrade(from_url: str, to_url: str) -> bool:
+    """Accept only a scheme-only HTTP→HTTPS repair with no authority/path drift."""
+
+    try:
+        before = urlsplit(from_url)
+        after = urlsplit(to_url)
+    except ValueError:
+        return False
+    if before.scheme != "http" or after.scheme != "https":
+        return False
+    if before.username or before.password or after.username or after.password:
+        return False
+    if not before.hostname or not after.hostname:
+        return False
+    return (
+        before.netloc == after.netloc
+        and before.path == after.path
+        and before.query == after.query
+        and before.fragment == after.fragment
+    )
+
+
+def load_source_link_repair_declarations(root: Path) -> list[dict[str, str]]:
+    path = root / SOURCE_LINK_REPAIRS
+    if not path.exists():
+        return []
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise MetadataReconciliationError(f"invalid verified source-link repair ledger: {exc}") from exc
+    if payload.get("schemaVersion") != 1 or not isinstance(payload.get("repairs"), list):
+        raise MetadataReconciliationError("verified source-link repair ledger has invalid schema")
+
+    declarations: list[dict[str, str]] = []
+    seen: set[str] = set()
+    for raw in payload["repairs"]:
+        if not isinstance(raw, dict):
+            raise MetadataReconciliationError("verified source-link repair entry is not an object")
+        candidate_id = clean(raw.get("candidate_id"))
+        from_url = clean(raw.get("from_url"))
+        to_url = clean(raw.get("to_url"))
+        source = clean(raw.get("source"))
+        basis = clean(raw.get("basis"))
+        checked_at = clean(raw.get("checked_at"))
+        if not candidate_id or candidate_id in seen:
+            raise MetadataReconciliationError("blank or duplicate verified source-link candidate")
+        seen.add(candidate_id)
+        if not exact_https_upgrade(from_url, to_url):
+            raise MetadataReconciliationError(f"unsafe source-link repair declaration: {candidate_id}")
+        if not source or not basis:
+            raise MetadataReconciliationError(f"source-link repair lacks provenance: {candidate_id}")
+        try:
+            checked_at = date.fromisoformat(checked_at).isoformat()
+        except ValueError as exc:
+            raise MetadataReconciliationError(f"invalid source-link repair date: {candidate_id}") from exc
+        declarations.append(
+            {
+                "candidate_id": candidate_id,
+                "from_url": from_url,
+                "to_url": to_url,
+                "source": source,
+                "basis": basis,
+                "checked_at": checked_at,
+            }
+        )
+    return declarations
+
+
+def find_safe_source_link_repairs(
+    queue_rows: list[dict[str, str]],
+    declarations: list[dict[str, str]],
+) -> list[dict[str, str]]:
+    queue = {clean(row.get("candidate_id")): row for row in queue_rows}
+    if "" in queue or len(queue) != len(queue_rows):
+        raise MetadataReconciliationError("blank or duplicate candidate in review queue")
+
+    repairs: list[dict[str, str]] = []
+    for declaration in declarations:
+        candidate_id = declaration["candidate_id"]
+        row = queue.get(candidate_id)
+        if row is None:
+            raise MetadataReconciliationError(f"source-link repair candidate is absent: {candidate_id}")
+        links = split_semicolon(row.get("source_links"))
+        has_from = declaration["from_url"] in links
+        has_to = declaration["to_url"] in links
+        if has_from and has_to:
+            raise MetadataReconciliationError(f"source-link repair is duplicated in queue: {candidate_id}")
+        if not has_from and has_to:
+            continue
+        if not has_from:
+            raise MetadataReconciliationError(f"source-link repair source is stale: {candidate_id}")
+        repairs.append(dict(declaration))
+    return repairs
+
+
 def apply_repairs(
     queue_rows: list[dict[str, str]],
     repairs: list[dict[str, str]],
@@ -176,6 +276,23 @@ def apply_repairs(
         row["verification_status"] = "metadata_verified"
         row["metadata_confidence"] = "high"
         row["review_stage"] = "abstract_full_text_review"
+        row["updated_at"] = updated_at
+
+
+def apply_source_link_repairs(
+    queue_rows: list[dict[str, str]],
+    repairs: list[dict[str, str]],
+    updated_at: str,
+) -> None:
+    repair_by_id = {repair["candidate_id"]: repair for repair in repairs}
+    for row in queue_rows:
+        repair = repair_by_id.get(clean(row.get("candidate_id")))
+        if repair is None:
+            continue
+        links = split_semicolon(row.get("source_links"))
+        row["source_links"] = "; ".join(
+            repair["to_url"] if link == repair["from_url"] else link for link in links
+        )
         row["updated_at"] = updated_at
 
 
@@ -206,25 +323,33 @@ def reconcile(root: Path, updated_at: str, *, check: bool = False) -> dict[str, 
         raise MetadataReconciliationError("review queue missing field(s): " + ", ".join(sorted(missing)))
 
     repairs = find_safe_repairs(queue_rows, retrieval_rows)
+    source_link_declarations = load_source_link_repair_declarations(root)
+    source_link_repairs = find_safe_source_link_repairs(queue_rows, source_link_declarations)
     summary = {
-        "schema_version": 1,
+        "schema_version": 2,
         "safe_repairs": len(repairs),
         "candidate_ids": [repair["candidate_id"] for repair in repairs],
         "repairs": repairs,
+        "safe_source_link_repairs": len(source_link_repairs),
+        "source_link_candidate_ids": [repair["candidate_id"] for repair in source_link_repairs],
+        "source_link_repairs": source_link_repairs,
         "scientific_decisions_changed": 0,
         "canonical_records_changed": 0,
         "publication_records_changed": 0,
     }
     if check:
-        if repairs:
+        pending = summary["candidate_ids"] + summary["source_link_candidate_ids"]
+        if pending:
             raise MetadataReconciliationError(
-                "safe candidate metadata repair(s) remain unapplied: "
-                + ", ".join(summary["candidate_ids"])
+                "safe candidate metadata repair(s) remain unapplied: " + ", ".join(pending)
             )
         return summary
 
     if repairs:
         apply_repairs(queue_rows, repairs, updated_at)
+    if source_link_repairs:
+        apply_source_link_repairs(queue_rows, source_link_repairs, updated_at)
+    if repairs or source_link_repairs:
         write_csv(queue_path, fields, queue_rows)
     return summary
 

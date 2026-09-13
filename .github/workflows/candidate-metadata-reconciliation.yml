@@ -6,6 +6,7 @@ on:
     paths:
       - data/curation/review_queue.csv
       - data/curation/retrieval_coverage.csv
+      - data/curation/verified_source_link_repairs.json
       - scripts/curation/reconcile_candidate_metadata.py
       - tests/test_candidate_metadata_reconciliation.py
       - .github/workflows/candidate-metadata-reconciliation.yml
@@ -43,7 +44,7 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Reconcile only dual-source candidate identifiers
+      - name: Reconcile only verified candidate metadata/provenance
         run: |
           action_date="$(date -u +%F)"
           python scripts/curation/reconcile_candidate_metadata.py \
@@ -103,7 +104,7 @@ jobs:
             data/curation/review_queue.csv \
             site/data/curator-stats.json site/data/paper-register.json \
             site/data/curator-options.json
-          git commit -m "Verify candidate identifiers from dual-source retrieval"
+          git commit -m "Verify candidate metadata and source provenance"
           git push origin "$branch"
 
           python3 - <<'PY' > "$RUNNER_TEMP/metadata-repair-body.md"
@@ -113,14 +114,22 @@ jobs:
           summary = json.load(open(os.path.join(os.environ["RUNNER_TEMP"], "metadata-repair-summary.json"), encoding="utf-8"))
           print("## Candidate metadata verification")
           print()
-          print(f"Safe dual-source repairs: **{summary['safe_repairs']}**")
+          print(f"Safe dual-source DOI repairs: **{summary['safe_repairs']}**")
           print()
           for repair in summary["repairs"]:
               print(f"- `{repair['candidate_id']}` → DOI `{repair['doi']}`")
               print(f"  - evidence: {repair['resolution_sources']} / {repair['match_method']} / {repair['match_confidence']}")
               print(f"  - persisted retrieval check: {repair['checked_at']}")
           print()
-          print("This PR changes candidate bibliography/workflow stage plus deterministic curator exports only. It makes **zero** eligibility, exclusion, canonicalisation or publication decisions.")
+          print(f"Safe verified HTTPS source-link repairs: **{summary['safe_source_link_repairs']}**")
+          print()
+          for repair in summary["source_link_repairs"]:
+              print(f"- `{repair['candidate_id']}`")
+              print(f"  - from: `{repair['from_url']}`")
+              print(f"  - to: `{repair['to_url']}`")
+              print(f"  - evidence: {repair['source']} / {repair['checked_at']}")
+          print()
+          print("This PR changes candidate bibliography/provenance plus deterministic curator exports only. It makes **zero** eligibility, exclusion, canonicalisation or publication decisions.")
           print("It is intentionally not auto-merged: candidate metadata repair remains a reviewed metadata-verifier action.")
           PY
 
@@ -128,7 +137,7 @@ jobs:
           pr_url="$(gh pr create \
             --base main \
             --head "$branch" \
-            --title "Verify candidate identifiers from dual-source retrieval" \
+            --title "Verify candidate metadata and source provenance" \
             --body-file "$RUNNER_TEMP/metadata-repair-body.md" 2>"$RUNNER_TEMP/pr-error.log")"
           status=$?
           set -e
@@ -144,4 +153,4 @@ jobs:
       - name: Report no safe repair
         if: steps.changes.outputs.changed != 'true'
         run: |
-          echo "No dual-source candidate metadata repair is currently safe to propose." >> "$GITHUB_STEP_SUMMARY"
+          echo "No verified candidate metadata/provenance repair is currently safe to propose." >> "$GITHUB_STEP_SUMMARY"

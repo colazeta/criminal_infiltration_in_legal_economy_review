@@ -1,14 +1,18 @@
 from __future__ import annotations
 
 import csv
+import json
 import tempfile
 import unittest
 from pathlib import Path
 
 from scripts.curation.reconcile_candidate_metadata import (
     MetadataReconciliationError,
+    exact_https_upgrade,
     find_safe_repairs,
+    find_safe_source_link_repairs,
     identity_repair_blockers,
+    load_source_link_repair_declarations,
     read_csv,
     reconcile,
     retrieval_index,
@@ -88,6 +92,29 @@ def write_csv(path: Path, fields: list[str], rows: list[dict[str, str]]) -> None
         writer.writerows(rows)
 
 
+def write_source_repairs(path: Path, candidate_id: str, from_url: str, to_url: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        json.dumps(
+            {
+                "schemaVersion": 1,
+                "purpose": "test fixture",
+                "repairs": [
+                    {
+                        "candidate_id": candidate_id,
+                        "from_url": from_url,
+                        "to_url": to_url,
+                        "source": "Parallel Search final publisher record",
+                        "checked_at": "2026-09-13",
+                        "basis": "Exact publisher identity and scheme-only HTTPS upgrade verified.",
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+
 class CandidateMetadataReconciliationTests(unittest.TestCase):
     def test_dual_source_title_year_match_is_safe_repair(self) -> None:
         repairs = find_safe_repairs([queue_row()], [retrieval_row()])
@@ -111,6 +138,27 @@ class CandidateMetadataReconciliationTests(unittest.TestCase):
             [retrieval_row()],
         )
         self.assertEqual(repairs, [])
+
+    def test_exact_https_upgrade_refuses_identity_drift(self) -> None:
+        self.assertTrue(exact_https_upgrade("http://cepr.org/publications/dp12140", "https://cepr.org/publications/dp12140"))
+        self.assertFalse(exact_https_upgrade("http://cepr.org/publications/dp12140", "https://example.org/publications/dp12140"))
+        self.assertFalse(exact_https_upgrade("http://cepr.org/publications/dp12140", "https://cepr.org/publications/dp99999"))
+        self.assertFalse(exact_https_upgrade("https://cepr.org/publications/dp12140", "https://cepr.org/publications/dp12140"))
+
+    def test_governed_https_repair_is_valid_before_or_after_application(self) -> None:
+        _, queue_rows = read_csv(ROOT / "data/curation/review_queue.csv")
+        declarations = load_source_link_repair_declarations(ROOT)
+        target = "CAND-ACADEMIC-2026-09-11-EXTRA-61e4d03af5c4-005"
+        declaration = next(item for item in declarations if item["candidate_id"] == target)
+        queue = {row["candidate_id"]: row for row in queue_rows}
+        links = queue[target]["source_links"].split("; ")
+        repairable = {item["candidate_id"] for item in find_safe_source_link_repairs(queue_rows, declarations)}
+        if target in repairable:
+            self.assertIn(declaration["from_url"], links)
+            self.assertNotIn(declaration["to_url"], links)
+        else:
+            self.assertNotIn(declaration["from_url"], links)
+            self.assertIn(declaration["to_url"], links)
 
     def test_current_governed_data_supports_exactly_four_pre_or_post_repair_records(self) -> None:
         _, queue_rows = read_csv(ROOT / "data/legacy/pre-oa-reset-2026-09-08/curation/review_queue.csv")
@@ -164,6 +212,7 @@ class CandidateMetadataReconciliationTests(unittest.TestCase):
             write_csv(root / "data/curation/retrieval_coverage.csv", RETRIEVAL_FIELDS, [retrieval_row()])
             summary = reconcile(root, "2026-09-05")
             self.assertEqual(summary["safe_repairs"], 1)
+            self.assertEqual(summary["safe_source_link_repairs"], 0)
             with (root / "data/curation/review_queue.csv").open(newline="", encoding="utf-8") as handle:
                 repaired = next(csv.DictReader(handle))
             self.assertEqual(repaired["doi"], "10.1080/17440572.2025.2567277")
@@ -174,6 +223,49 @@ class CandidateMetadataReconciliationTests(unittest.TestCase):
             self.assertEqual(repaired["current_decision"], "")
             self.assertIn("https://doi.org/10.1080/17440572.2025.2567277", repaired["source_links"])
             self.assertEqual(repaired["updated_at"], "2026-09-05")
+
+    def test_reconcile_source_link_upgrade_changes_only_locator_and_timestamp(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            candidate_id = "CAND-ACADEMIC-2026-09-01-002"
+            original = queue_row(
+                candidate_id=candidate_id,
+                doi="10.1111/jors.12354",
+                source_links="http://cepr.org/publications/dp12140",
+                verification_status="metadata_verified",
+                metadata_confidence="high",
+                review_stage="abstract_full_text_review",
+            )
+            write_csv(root / "data/curation/review_queue.csv", QUEUE_FIELDS, [original])
+            write_csv(root / "data/curation/retrieval_coverage.csv", RETRIEVAL_FIELDS, [retrieval_row()])
+            write_source_repairs(
+                root / "data/curation/verified_source_link_repairs.json",
+                candidate_id,
+                "http://cepr.org/publications/dp12140",
+                "https://cepr.org/publications/dp12140",
+            )
+            summary = reconcile(root, "2026-09-13")
+            self.assertEqual(summary["safe_repairs"], 0)
+            self.assertEqual(summary["safe_source_link_repairs"], 1)
+            with (root / "data/curation/review_queue.csv").open(newline="", encoding="utf-8") as handle:
+                repaired = next(csv.DictReader(handle))
+            self.assertEqual(repaired["source_links"], "https://cepr.org/publications/dp12140")
+            self.assertEqual(repaired["updated_at"], "2026-09-13")
+            for field in (
+                "title",
+                "doi",
+                "verification_status",
+                "metadata_confidence",
+                "intake_assessment",
+                "possible_duplicate",
+                "metadata_conflict",
+                "origin",
+                "review_stage",
+                "current_status",
+                "current_decision",
+            ):
+                self.assertEqual(repaired[field], original[field])
+            self.assertEqual(reconcile(root, "2026-09-13")["safe_source_link_repairs"], 0)
 
     def test_check_fails_when_safe_repair_remains(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
