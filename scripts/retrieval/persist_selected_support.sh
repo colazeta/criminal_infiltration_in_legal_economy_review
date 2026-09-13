@@ -66,10 +66,18 @@ EOF
   pr_url="$(gh pr create --base main --head "$branch" --title "Refresh validated reading-support projections" --body-file "$RUNNER_TEMP/selected-support-pr.md")" || pending "pr_creation_blocked"
 fi
 
-# A GITHUB_TOKEN-created PR may have no runnable checks. Never call that success.
+# PRs created with the repository GITHUB_TOKEN do not recursively trigger a PR
+# workflow. workflow_dispatch is the supported exception: dispatch the ordinary
+# archive quality workflow on the exact retained branch if this head has no
+# quality run yet, then await the resulting check. This is validation, not merge.
+quality_state="$(gh api "repos/$GITHUB_REPOSITORY/commits/$head_sha/check-runs" --jq '[.check_runs[] | select(.name == "quality" and .app.slug == "github-actions")] | if length == 0 then "missing" elif any(.status == "in_progress" or .status == "queued") then "pending" elif all(.conclusion == "success") then "success" elif any(.conclusion == "failure" or .conclusion == "action_required" or .conclusion == "cancelled") then "blocked" else "pending" end')" || pending "quality_read_failed"
+if [ "$quality_state" = "missing" ]; then
+  gh workflow run archive.yml --ref "$branch" || pending "quality_dispatch_failed"
+fi
+
 quality="pending"
 for attempt in $(seq 1 18); do
-  quality="$(gh api "repos/$GITHUB_REPOSITORY/commits/$head_sha/check-runs" --jq '[.check_runs[] | select(.name == "quality" and .app.slug == "github-actions") | .conclusion] | if length == 0 then "pending" elif all(. == "success") then "success" elif any(. == "failure" or . == "action_required" or . == "cancelled") then "blocked" else "pending" end')" || pending "quality_read_failed"
+  quality="$(gh api "repos/$GITHUB_REPOSITORY/commits/$head_sha/check-runs" --jq '[.check_runs[] | select(.name == "quality" and .app.slug == "github-actions")] | if length == 0 then "pending" elif any(.status == "in_progress" or .status == "queued") then "pending" elif all(.conclusion == "success") then "success" elif any(.conclusion == "failure" or .conclusion == "action_required" or .conclusion == "cancelled") then "blocked" else "pending" end')" || pending "quality_read_failed"
   [ "$quality" = "success" ] && break
   [ "$quality" = "blocked" ] && pending "quality_blocked"
   [ "$attempt" = 18 ] || sleep 10
