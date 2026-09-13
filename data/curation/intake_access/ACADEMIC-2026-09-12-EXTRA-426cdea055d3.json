@@ -1,0 +1,20 @@
+{
+  "batch_id": "ACADEMIC-2026-09-12-EXTRA-426cdea055d3",
+  "receipts": [
+    {
+      "access_status": "unknown",
+      "candidate_id": "CAND-ACADEMIC-2026-09-12-EXTRA-426cdea055d3-001"
+    },
+    {
+      "access_status": "unknown",
+      "candidate_id": "CAND-ACADEMIC-2026-09-12-EXTRA-426cdea055d3-002"
+    },
+    {
+      "access_status": "unknown",
+      "candidate_id": "CAND-ACADEMIC-2026-09-12-EXTRA-426cdea055d3-003"
+    }
+  ],
+  "schema_version": 2,
+  "source_body_sha256": "0fb0f103068b085616a77a46f2f0c1673e5d28797f4aad8092d47ec131079c7d",
+  "source_issue_number": 460
+}
