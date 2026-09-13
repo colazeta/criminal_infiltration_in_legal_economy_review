@@ -253,6 +253,33 @@
       "synopsis": "The chapter examines organised-crime infiltration through Dutch transportation companies in the context of transit crime, treating the Netherlands as particularly exposed because of its historical development and geographical role in cross-border flows.",
       "checkedAt": "2026-09-13",
       "note": "Parallel Search fetched the exact Utrecht University Repository record, matching Joras Ferwerda, Brigitte Unger, 2016 and DOI 10.4324/9781315640617-12. Evidence basis for this synopsis: abstract_only. The repository explicitly lists a 728.2 KB file named ferwerda.pdf and marks the collection open access, but a stable direct bitstream locator was not independently verified in this pass, so retrieval_coverage is not promoted from open_access_landing to full_text on that basis alone; claims beyond the repository abstract remain not_verifiable."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-10-EXTRA-dbc5cb0d9888-026",
+      "kind": "full_text_intro",
+      "sourceLabel": "LAGV Sciencesconf full-text working paper located with Parallel Search",
+      "sourceUrl": "https://lagv2019.sciencesconf.org/248734/document",
+      "synopsis": "The working paper uses a unique geolocated dataset on Italian firms and municipal-council dismissals for Mafia infiltration to study spillovers in the construction sector. It reports lower value added among construction firms in neighbouring municipalities, with larger effects where the absence of organised-crime influence from the dismissed municipal council lasts longer.",
+      "checkedAt": "2026-09-13",
+      "note": "Parallel Search fetched the complete LAGV/Sciencesconf manuscript and matched Massimiliano Ferraresi, Leonzio Rizzo, Riccardo Secomandi and the exact 2019 title. Evidence basis: full_text. The existing working-paper identity is preserved; no later manifestation is silently substituted or canonicalised, and no verbatim text, scientific decision or private full-text ingestion is claimed."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-10-EXTRA-dbc5cb0d9888-031",
+      "kind": "full_text_intro",
+      "sourceLabel": "Public Safety Canada full-text Research Brief no. 26 PDF located with Parallel Search",
+      "sourceUrl": "https://www.publicsafety.gc.ca/cnt/rsrcs/pblctns/rgnzd-crm-brf-26/rgnzd-crm-brf-26-eng.pdf",
+      "synopsis": "The brief reviews organised-crime exposure in Canadian securities markets using academic literature, interviews with law enforcement and securities regulators, and the governing legal and regulatory framework. It reports marginal evidence of traditional organised-crime infiltration in Canada while identifying vulnerability to insider-enabled fraud and noting the absence of prosecutions using criminal-organisation provisions for securities violations.",
+      "checkedAt": "2026-09-13",
+      "note": "Parallel Search fetched the exact official Public Safety Canada Research Brief no. 26 PDF. Evidence basis: full_text. The related full report, Economic Sectors Vulnerable to Organized Crime: Securities (Report No. 26), was also located in the official archive but is not silently substituted for the registered brief. The candidate's blank author/year fields are not rewritten here; no verbatim text, scientific decision or private full-text ingestion is claimed."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-10-EXTRA-f276bc827f57-001",
+      "kind": "full_text_intro",
+      "sourceLabel": "U.S. Office of Justice Programs full symposium volume located with Parallel Search",
+      "sourceUrl": "https://www.ojp.gov/pdffiles1/Digitization/106775NCJRS.pdf",
+      "synopsis": "The 1987 symposium volume contains Mark H. Moore's chapter as its dedicated enterprise analysis of organised crime, beginning at page 51. The volume frames entrepreneurial characteristics as central to understanding organised crime and its vulnerabilities, placing the chapter within an economic and strategic approach to organised-crime control.",
+      "checkedAt": "2026-09-13",
+      "note": "Parallel Search fetched the official OJP digitised 215-page Major Issues in Organized Crime Control volume (NCJ 106775), whose contents identify Mark H. Moore and the exact chapter title; Harvard independently confirms the 1987 chapter identity in that volume. Evidence basis: full_text. No verbatim chapter text, eligibility decision, canonical-identity decision or private full-text ingestion is claimed."
     }
   ]
 }
