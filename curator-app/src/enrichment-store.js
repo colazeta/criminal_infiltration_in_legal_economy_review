@@ -6,6 +6,8 @@ import {Hour40Schedule, iterationKey} from './enrichment-schedule.js';
 import { sha256 } from './review-v2.js';
 import { runEnrichment, handlePaperEnrichment, storeExtraction } from './paper-enrichment.js';
 
+import {readPublicResearch, publicResearchAudit} from './public-paper-research.js';
+
 const DOMAIN = 'CILE-ENRICH-SERVICE-v1';
 const encoder = new TextEncoder();
 const headers = { 'Cache-Control': 'no-store', 'Content-Type': 'application/json', 'X-Content-Type-Options': 'nosniff' };
@@ -137,12 +139,13 @@ export class EnrichmentStoreCore {
     try{
       const data=JSON.parse(body);
       if(!data||typeof data!=='object'||Array.isArray(data)||Object.keys(data).some(k=>!['operation','expected_commit','target_id','proposal','run_key'].includes(k)))return json({error_code:'invalid_service_envelope'},422);
-      if(!['verify','activate','deactivate','status','run','packet','proposal'].includes(data.operation))return json({error_code:'unknown_service_operation'},422);
+      if(!['verify','activate','deactivate','status','run','packet','proposal','public-research-audit'].includes(data.operation))return json({error_code:'unknown_service_operation'},422);
       if(data.expected_commit!==this.env.DEPLOY_COMMIT)return json({error_code:'stale_deployment'},409);
       if(data.operation==='verify')return json(await this.verify());
       if(data.operation==='activate'){await this.verify();await this.ctx.storage.put('activation:enrichment',{commit:this.env.DEPLOY_COMMIT,at:new Date(now).toISOString()});await this.schedule.start();return json(await this.aggregate())}
       if(data.operation==='deactivate'){await this.ctx.storage.delete('activation:enrichment');return json(await this.aggregate())}
       if(data.operation==='status')return json(await this.aggregate());
+      if(data.operation==='public-research-audit')return json(await publicResearchAudit(await this.environment()));
       const env=await this.environment();if(env.PAPER_ENRICHMENT_ENABLED!=='true')return json({error_code:'enrichment_inactive'},409);
       if(data.operation==='run'){
         if(this.schedule.busy)return json({status:'leased'});
@@ -165,6 +168,7 @@ export class EnrichmentStoreCore {
     const url=new URL(request.url);
     if(url.pathname==='/machine')return this.machine(request);
     const env=await this.environment();
+    if(url.pathname==='/public-research'&&request.method==='GET')return json(await readPublicResearch(env,url.searchParams.get('id')));
     if(url.pathname==='/tick')return json(await this.schedule.tick());
     if(url.pathname==='/api/paper-enrichment/status'&&request.method==='GET')return json(await this.aggregate());
     return handlePaperEnrichment(request,env,{login:env.CURATOR_LOGIN});

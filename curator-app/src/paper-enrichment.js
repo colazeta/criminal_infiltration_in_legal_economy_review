@@ -23,8 +23,8 @@ function validHttps(s) { try { const u = new URL(s); return u.protocol === 'http
 async function batch(db, list) { for (let i = 0; i < list.length; i += 40) await db.batch(list.slice(i, i + 40)); }
 
 // Supports exactly the JSON Schema keywords used by the versioned closed envelope.
-export function validateShape(value, spec = schema, path = '$') {
-  if (spec.$ref) return validateShape(value, schema.$defs[spec.$ref.split('/').at(-1)], path);
+export function validateShape(value, spec = schema, path = '$', root = schema) {
+  if (spec.$ref) return validateShape(value, root.$defs[spec.$ref.split('/').at(-1)], path, root);
   if ('const' in spec && value !== spec.const) err('schema_const:' + path);
   if (spec.enum && !spec.enum.includes(value)) err('schema_enum:' + path);
   const type = value === null ? 'null' : Array.isArray(value) ? 'array' : typeof value;
@@ -33,12 +33,12 @@ export function validateShape(value, spec = schema, path = '$') {
     for (const key of spec.required || []) if (!Object.hasOwn(value, key)) err('schema_required:' + path + '.' + key);
     for (const [key, child] of Object.entries(value)) {
       if (!Object.hasOwn(spec.properties || {}, key)) { if (spec.additionalProperties === false) err('schema_extra:' + path + '.' + key); }
-      else validateShape(child, spec.properties[key], path + '.' + key);
+      else validateShape(child, spec.properties[key], path + '.' + key, root);
     }
   }
   if (type === 'array') {
     if (spec.maxItems !== undefined && value.length > spec.maxItems) err('schema_array_limit:' + path);
-    for (let i = 0; i < value.length; i++) validateShape(value[i], spec.items, path + '[' + i + ']');
+    for (let i = 0; i < value.length; i++) validateShape(value[i], spec.items, path + '[' + i + ']', root);
   }
   if (type === 'string') {
     if ((spec.minLength !== undefined && value.length < spec.minLength) || (spec.maxLength !== undefined && value.length > spec.maxLength)) err('schema_length:' + path);

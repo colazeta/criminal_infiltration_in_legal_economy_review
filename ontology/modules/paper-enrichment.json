@@ -25,7 +25,7 @@
   ],
   "identity_rule": "candidate/canonical registry references remain separate; citation identifiers do not create canonical works",
   "scientific_state": "proposals only; extraction/classification runner blocked until calibrated",
-  "public_projection": "none; authenticated owner reads only",
+  "public_projection": "Raw proposals and sources remain authenticated only. Owner-authorised closed, candidate-bound research display is governed separately by ontology/modules/public-paper-research.json; scientific state remains unreviewed.",
   "schema_field_slots": {
     "/properties/schema_version": "extraction_schema_version",
     "/properties/protocol_version": "extraction_protocol_version",

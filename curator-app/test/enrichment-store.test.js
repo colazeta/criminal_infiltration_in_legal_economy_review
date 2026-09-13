@@ -32,3 +32,13 @@ test('activation requires exact deployment and storage check; disabling/redeploy
 test('machine interface is closed and cannot execute arbitrary SQL or publish',async()=>{const{core}=setup();await core.ready;for(const data of [{operation:'sql',sql:'DROP TABLE x'},{operation:'publish'}])assert.equal((await core.machine(await request(data))).status,422)});
 test('provider or model credentials do not choose the storage backend implicitly',()=>{assert.equal(enrichmentStore({}),null);assert.equal(enrichmentStore({PAPER_ENRICHMENT_STORAGE:'d1_r2',ENRICHMENT_STORE:{}}),null)});
 test('a changed migration receipt stops initialisation without rewriting data',async()=>{const{core,ctx,env,kv}=setup();await core.ready;kv.set('schema:enrichment','other');await assert.rejects(new EnrichmentStoreCore(ctx,env).ready,/additive_migration_required/)});
+test('public research audit is authenticated, read-only and independent of activation',async()=>{
+ const{core,db}=setup();await core.ready;
+ assert.equal((await core.environment()).PAPER_ENRICHMENT_ENABLED,'false');
+ const response=await core.machine(await request({operation:'public-research-audit'}));assert.equal(response.status,200);
+ const audit=await response.json();assert.equal(audit.counts.registered,0);assert.equal(audit.counts.stored_proposals,0);
+ for(const table of ['enrichment_targets','enrichment_sources','enrichment_jobs','enrichment_runs','enrichment_proposals'])assert.equal(db.prepare(`SELECT COUNT(*) n FROM ${table}`).get().n,0);
+ assert.equal((await core.environment()).PAPER_ENRICHMENT_ENABLED,'false');
+ const publicResponse=await core.fetch(new Request('https://enrichment.internal/public-research?id=CAND-UNKNOWN'));
+ assert.equal((await publicResponse.json()).availability,'not_registered');
+});

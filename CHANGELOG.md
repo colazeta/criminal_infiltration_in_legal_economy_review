@@ -153,3 +153,10 @@ follow semantic versioning while the project is in prerelease.
 - Independently reacquire the missing #225 article through real validated intake
   #579; do not whitelist it away or infer scientific acceptance.
 - Correct outdated writer/provider instructions and add fail-closed regression tests.
+
+## Public research-sheet integration — 2026-09-13
+
+- Add the owner-authorised, closed public research projection and its schema/ontology mapping for #597.
+- Link the existing paper dialog to current source-backed research context and six-class proposals; preserve study/analysis relationships, missingness and unvalidated status.
+- Keep private raw APIs, evidence bodies, reviewer identity and internal notes private; retain scientific/calibration gates unchanged.
+- Verify public content digests through the existing Worker delivery and observer, independently of unchanged candidate counts. No new scheduler or data store.

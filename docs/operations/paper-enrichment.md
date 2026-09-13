@@ -142,3 +142,12 @@ The D1 authorisation/account scope of the existing deployment token needs checki
 R2/queue readiness cannot be inferred from this failed D1 request. A storage-only
 fallback is now available so this enrichment module need not depend on discovery
 queue permissions. Neither path changes account permissions or subscribes to a plan.
+
+### Public research display authorised on 13 September 2026
+
+Raw extraction/source APIs remain private. The explicit owner requirement #597
+permits a separate closed, source-validated public display of existing research
+facts and six-class **proposals**, with missing/stale/withheld states visible.
+See `public-research-sheets.md` for the exact projection and privacy exclusions.
+This does not activate machine scientific extraction, accept a benchmark, or
+confirm any class or eligibility decision.

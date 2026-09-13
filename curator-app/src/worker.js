@@ -1,3 +1,4 @@
+import { PUBLIC_RESEARCH_PATH, servePublicResearch } from "./public-paper-research.js";
 "use strict";
 
 import { DurableObject } from "cloudflare:workers";
@@ -405,6 +406,7 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     if (url.pathname === "/version" && request.method === "GET") return Response.json({ commit: env.DEPLOY_COMMIT || null, ontology: "0.4.1" }, { headers: { "Cache-Control": "no-store" } });
+    if (url.pathname === PUBLIC_RESEARCH_PATH) return servePublicResearch(request,enrichmentStore(env));
     if (url.pathname === "/api/paper-enrichment-machine") {
       const store=enrichmentStore(env);
       if (!store) return Response.json({error_code:"private_storage_required"},{status:503,headers:{"Cache-Control":"no-store"}});

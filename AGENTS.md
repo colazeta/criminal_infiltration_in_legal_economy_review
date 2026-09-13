@@ -152,3 +152,16 @@ actual recovery job is queued or in progress, the owner may comment exactly
 an open maintenance issue as an active lease or create a duplicate request.
 See docs/operations/residual-intake-recovery.md. Evidence-pinned historical
 occurrence reconciliation cannot create candidates or fabricate a run terminal.
+
+## Public research-sheet scope — owner instruction, 2026-09-13
+
+Apply `docs/operations/public-research-sheets.md` and the closed
+`ontology/modules/public-paper-research.json` projection for issue #597. The owner
+requests existing recorded research context, including the six-class framework,
+in the public sheet **as explicitly unreviewed proposals**. This is an authorised
+display boundary, not a scientific acceptance or canonical-publication decision.
+Raw private source/proposal APIs, reviewer identities, internal working notes and
+original source bodies remain private. Source validation, historical decisions
+and calibration gates are unchanged. No classification is invented to fill a
+missing sheet. Existing Worker/Pages delivery and observer own verification;
+no additional scheduler or parallel research data store is authorised here.

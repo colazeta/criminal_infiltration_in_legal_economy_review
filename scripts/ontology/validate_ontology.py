@@ -488,6 +488,42 @@ def check_enrichment_contract(profile: dict[str, Any]) -> None:
         fail("enrichment_framework_vocabulary_drift")
 
 
+
+def check_public_research_contract(profile: dict[str, Any]) -> None:
+    module = load_json(ROOT / "ontology/modules/public-paper-research.json")
+    schema = load_json(ROOT / module["schema"])
+    private = load_json(ROOT / "schema/paper-enrichment.schema.json")
+    fields: set[str] = set()
+    def visit(spec: dict[str, Any], pointer: str) -> None:
+        if "properties" in spec:
+            if spec.get("additionalProperties") is not False or set(spec.get("required", [])) != set(spec["properties"]):
+                fail("public_research_schema_not_closed:" + pointer)
+            for name, child in spec["properties"].items():
+                path = pointer + "/properties/" + name
+                fields.add(path)
+                visit(child, path)
+        if "items" in spec:
+            visit(spec["items"], pointer + "/items")
+    visit(schema, "")
+    for name, spec in schema.get("$defs", {}).items():
+        visit(spec, "/$defs/" + name)
+    standard = {"schema:version", "schema:about", "schema:creativeWorkStatus", "schema:hasPart",
+                "schema:conditionsOfAccess", "schema:additionalType", "prov:wasDerivedFrom", "prov:wasGeneratedBy"}
+    if (module["profile_version"] != profile["version"] or module["schema_class"] not in profile["classes"]
+            or fields != set(module["schema_field_slots"])
+            or set(module["schema_field_slots"].values()) - set(profile["slots"]) - standard):
+        fail("public_research_mapping_drift")
+    if schema["$defs"] != private["$defs"]:
+        fail("public_research_scientific_semantics_drift")
+    research = schema["properties"]["research"]["properties"]
+    if research["assessment_state"] != {"const": "unreviewed_proposal"}:
+        fail("public_research_false_confirmation")
+    if {"target_id", "input_sha256", "generated_by", "analyst_limitations", "source_ids"} & set(research):
+        fail("public_research_private_fields")
+    if set(research["spans"]["items"]["properties"]) != {"id", "source_id", "locator"}:
+        fail("public_research_private_spans")
+
+
 def validate_all(*, quiet: bool = False) -> dict[str, int | str]:
     profile = load_json(PROFILE_PATH)
     external = load_json(EXTERNAL_PATH)
@@ -495,6 +531,7 @@ def validate_all(*, quiet: bool = False) -> dict[str, int | str]:
     check_profile(profile, external)
     check_private_v2_contract(profile)
     check_enrichment_contract(profile)
+    check_public_research_contract(profile)
     check_surveillance_source_policy(profile)
     check_intake_access_contract(profile)
     registration = load_json(ROOT / "ontology/modules/paper-register.json")

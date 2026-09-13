@@ -87,7 +87,7 @@ def verify_sheet_support(register_url: str, expected_register: Path) -> dict:
     receipt = compare_support(expected, json.loads(body))
     receipt['served_bytes_sha256'] = hashlib.sha256(body).hexdigest()
     receipt['renderer_assets'] = {}
-    for name in ('paper-register.js', 'paper-sheet-support.js'):
+    for name in ('paper-register.js', 'paper-sheet-support.js', 'paper-sheet-research.js', 'index.html', 'styles.css'):
         local = (site / name).read_bytes()
         served = public_bytes(base_url + '/' + name)
         if served != local:
