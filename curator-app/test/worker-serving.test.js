@@ -36,3 +36,11 @@ test("new private V2 routes reject unauthenticated requests; public links reach 
   assert.equal(response.status, 302);
   assert.equal(response.headers.get("Location"), "https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/stats.html");
 });
+test("public research route is distinct from private source and proposal routes", async () => {
+  const publicResponse = await worker.fetch(new Request("https://test.workers.dev/api/public-paper-research?id=CAND-UNKNOWN"), env);
+  assert.equal(publicResponse.status, 503); // Missing storage, not an auth bypass.
+  for (const path of ["/api/paper-enrichment/target?id=private", "/api/paper-enrichment/targets", "/api/paper-enrichment/status"]) {
+    assert.equal((await worker.fetch(new Request("https://test.workers.dev" + path), env)).status, 401);
+  }
+  assert.equal((await worker.fetch(new Request("https://test.workers.dev/api/public-paper-research?id=x&sql=SELECT"), env)).status, 400);
+});

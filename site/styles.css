@@ -2231,3 +2231,12 @@ footer p {
 .paper-sheet-body a { color: #000080; text-decoration: underline; }
 .paper-sheet button:focus-visible, #registered-papers button:focus-visible { outline: 2px dashed #000080; outline-offset: 3px; }
 @media (max-width: 480px) { .paper-sheet-body { padding: 10px; } .paper-sheet-body dl { grid-template-columns: 1fr; gap: 3px; } .paper-sheet-body dd { margin-bottom: 9px; } }
+
+/* Research context in the existing classic paper window. */
+.paper-research > details { margin: 12px 0; padding: 9px; border: 1px solid currentColor; }
+.paper-research details details { margin: 7px 0 7px 10px; }
+.paper-research summary { cursor: pointer; font-weight: bold; }
+.paper-research summary:focus-visible { outline: 2px dashed currentColor; outline-offset: 3px; }
+.paper-research div { margin: 10px 0; }
+.paper-research small { display: block; margin-top: 3px; }
+.paper-research span { white-space: pre-wrap; }

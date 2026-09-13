@@ -140,7 +140,10 @@
     }
     const support = el("section", "Caricamento dei dati arricchiti…");
     support.setAttribute("aria-live", "polite");
-    body.append(metadata, support);
+    const research = el("section", "Caricamento del contesto di ricerca…");
+    research.setAttribute("aria-live", "polite");
+    research.className = "paper-research";
+    body.append(metadata, research, support);
     body.append(el("h3", "Fonti registrate all’acquisizione"));
     for (const [index, url] of (record.sourceLinks || []).entries()) {
       try {
@@ -157,6 +160,9 @@
     if (!dialog.open) dialog.showModal();
     close.focus();
     const isCurrent = () => dialog.open && sequence === sheetSequence;
+    import("./paper-sheet-research.js")
+      .then(() => globalThis.CILEPaperResearch.load(research, record, isCurrent))
+      .catch(() => { if (isCurrent()) research.textContent = "Il pannello di ricerca non è disponibile; non è una conferma dell’assenza di analisi."; });
     import("./paper-sheet-support.js")
       .then(() => globalThis.CILEPaperSheetSupport.load(support, record, isCurrent))
       .catch(() => {

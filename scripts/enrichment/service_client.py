@@ -70,7 +70,7 @@ def current_commit():
 
 def main():
     p=argparse.ArgumentParser(description=__doc__)
-    p.add_argument('operation', choices=['verify','activate','deactivate','run','status','packet','proposal'])
+    p.add_argument('operation', choices=['verify','activate','deactivate','run','status','packet','proposal','public-research-audit'])
     p.add_argument('--expected-commit', default=os.environ.get('GITHUB_SHA'))
     p.add_argument('--target-id');p.add_argument('--input',type=Path);p.add_argument('--output',type=Path)
     args=p.parse_args()

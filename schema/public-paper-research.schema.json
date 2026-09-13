@@ -1,0 +1,639 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "projection_version",
+    "candidate",
+    "availability",
+    "research",
+    "revision"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "projection_version": {
+      "const": "CILE-PUBLIC-RESEARCH-1"
+    },
+    "candidate": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "title",
+        "doi",
+        "sourceLinks"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 106
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 3000
+        },
+        "doi": {
+          "type": "string",
+          "maxLength": 512
+        },
+        "sourceLinks": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "maxItems": 100
+        }
+      }
+    },
+    "availability": {
+      "enum": [
+        "available",
+        "not_assessed",
+        "stale",
+        "not_registered",
+        "withheld"
+      ]
+    },
+    "research": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "required": [
+        "protocol_version",
+        "codebook_version",
+        "source_coverage",
+        "summary",
+        "contribution",
+        "research_question",
+        "infiltration_definition",
+        "infiltration_operationalisation",
+        "authors_limitations",
+        "studies",
+        "datasets",
+        "analyses",
+        "variable_uses",
+        "findings",
+        "framework",
+        "assessment_state",
+        "generation_kind",
+        "updated_at",
+        "internal_notes",
+        "sources",
+        "spans"
+      ],
+      "properties": {
+        "protocol_version": {
+          "const": "CILE-ENRICH-1"
+        },
+        "codebook_version": {
+          "const": "1.0.0"
+        },
+        "source_coverage": {
+          "enum": [
+            "abstract_only",
+            "partial_text",
+            "full_text"
+          ]
+        },
+        "summary": {
+          "$ref": "#/$defs/fact"
+        },
+        "contribution": {
+          "$ref": "#/$defs/fact"
+        },
+        "research_question": {
+          "$ref": "#/$defs/fact"
+        },
+        "infiltration_definition": {
+          "$ref": "#/$defs/fact"
+        },
+        "infiltration_operationalisation": {
+          "$ref": "#/$defs/fact"
+        },
+        "authors_limitations": {
+          "$ref": "#/$defs/fact"
+        },
+        "studies": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/study"
+          },
+          "maxItems": 50
+        },
+        "datasets": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/dataset"
+          },
+          "maxItems": 100
+        },
+        "analyses": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/analysis"
+          },
+          "maxItems": 200
+        },
+        "variable_uses": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/variable_use"
+          },
+          "maxItems": 500
+        },
+        "findings": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/finding"
+          },
+          "maxItems": 300
+        },
+        "framework": {
+          "$ref": "#/$defs/framework"
+        },
+        "assessment_state": {
+          "const": "unreviewed_proposal"
+        },
+        "generation_kind": {
+          "enum": [
+            "automated",
+            "unspecified"
+          ]
+        },
+        "updated_at": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "internal_notes": {
+          "const": "not_released"
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "url",
+              "kind",
+              "version",
+              "checked_at"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "maxLength": 100
+              },
+              "url": {
+                "type": "string",
+                "maxLength": 2000
+              },
+              "kind": {
+                "enum": [
+                  "abstract",
+                  "publisher_summary",
+                  "full_text",
+                  "full_text_excerpt"
+                ]
+              },
+              "version": {
+                "type": "string",
+                "maxLength": 500
+              },
+              "checked_at": {
+                "type": "string",
+                "maxLength": 64
+              }
+            }
+          },
+          "maxItems": 100
+        },
+        "spans": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "source_id",
+              "locator"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "maxLength": 100
+              },
+              "source_id": {
+                "type": "string",
+                "maxLength": 100
+              },
+              "locator": {
+                "type": "string",
+                "maxLength": 500
+              }
+            }
+          },
+          "maxItems": 400
+        }
+      }
+    },
+    "revision": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/schema/public-paper-research.schema.json",
+  "$defs": {
+    "fact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "value",
+        "evidence_span_ids",
+        "origin"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "reported",
+            "not_reported",
+            "not_verifiable",
+            "not_applicable",
+            "ambiguous"
+          ]
+        },
+        "value": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 6000
+        },
+        "evidence_span_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "maxItems": 100
+        },
+        "origin": {
+          "enum": [
+            "source",
+            "analyst"
+          ]
+        }
+      }
+    },
+    "study": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "study_type",
+        "research_question",
+        "population",
+        "sampling",
+        "sample_size",
+        "observation_unit",
+        "analysis_unit",
+        "geography",
+        "period"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "study_type": {
+          "$ref": "#/$defs/fact"
+        },
+        "research_question": {
+          "$ref": "#/$defs/fact"
+        },
+        "population": {
+          "$ref": "#/$defs/fact"
+        },
+        "sampling": {
+          "$ref": "#/$defs/fact"
+        },
+        "sample_size": {
+          "$ref": "#/$defs/fact"
+        },
+        "observation_unit": {
+          "$ref": "#/$defs/fact"
+        },
+        "analysis_unit": {
+          "$ref": "#/$defs/fact"
+        },
+        "geography": {
+          "$ref": "#/$defs/fact"
+        },
+        "period": {
+          "$ref": "#/$defs/fact"
+        }
+      }
+    },
+    "dataset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "study_id",
+        "name",
+        "provider",
+        "accessibility",
+        "selection",
+        "coverage",
+        "limitations"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "study_id": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "name": {
+          "$ref": "#/$defs/fact"
+        },
+        "provider": {
+          "$ref": "#/$defs/fact"
+        },
+        "accessibility": {
+          "$ref": "#/$defs/fact"
+        },
+        "selection": {
+          "$ref": "#/$defs/fact"
+        },
+        "coverage": {
+          "$ref": "#/$defs/fact"
+        },
+        "limitations": {
+          "$ref": "#/$defs/fact"
+        }
+      }
+    },
+    "analysis": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "study_id",
+        "dataset_ids",
+        "design",
+        "method",
+        "comparison",
+        "identification",
+        "validation",
+        "robustness"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "study_id": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "dataset_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "maxItems": 100
+        },
+        "design": {
+          "$ref": "#/$defs/fact"
+        },
+        "method": {
+          "$ref": "#/$defs/fact"
+        },
+        "comparison": {
+          "$ref": "#/$defs/fact"
+        },
+        "identification": {
+          "$ref": "#/$defs/fact"
+        },
+        "validation": {
+          "$ref": "#/$defs/fact"
+        },
+        "robustness": {
+          "$ref": "#/$defs/fact"
+        }
+      }
+    },
+    "variable_use": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "analysis_id",
+        "dataset_ids",
+        "original_name",
+        "concept",
+        "operationalisation",
+        "unit",
+        "period",
+        "transformation",
+        "role"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "analysis_id": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "dataset_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "maxItems": 100
+        },
+        "original_name": {
+          "$ref": "#/$defs/fact"
+        },
+        "concept": {
+          "$ref": "#/$defs/fact"
+        },
+        "operationalisation": {
+          "$ref": "#/$defs/fact"
+        },
+        "unit": {
+          "$ref": "#/$defs/fact"
+        },
+        "period": {
+          "$ref": "#/$defs/fact"
+        },
+        "transformation": {
+          "$ref": "#/$defs/fact"
+        },
+        "role": {
+          "$ref": "#/$defs/fact"
+        }
+      }
+    },
+    "finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "analysis_id",
+        "variable_use_ids",
+        "statement",
+        "finding_type",
+        "direction",
+        "estimate",
+        "unit",
+        "uncertainty",
+        "reference_comparison",
+        "population_scope",
+        "temporal_scope",
+        "caveat"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "analysis_id": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "variable_use_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "maxItems": 100
+        },
+        "statement": {
+          "$ref": "#/$defs/fact"
+        },
+        "finding_type": {
+          "$ref": "#/$defs/fact"
+        },
+        "direction": {
+          "$ref": "#/$defs/fact"
+        },
+        "estimate": {
+          "$ref": "#/$defs/fact"
+        },
+        "unit": {
+          "$ref": "#/$defs/fact"
+        },
+        "uncertainty": {
+          "$ref": "#/$defs/fact"
+        },
+        "reference_comparison": {
+          "$ref": "#/$defs/fact"
+        },
+        "population_scope": {
+          "$ref": "#/$defs/fact"
+        },
+        "temporal_scope": {
+          "$ref": "#/$defs/fact"
+        },
+        "caveat": {
+          "$ref": "#/$defs/fact"
+        }
+      }
+    },
+    "framework": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "primary",
+        "rationale",
+        "secondary",
+        "alternative"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "proposed",
+            "insufficient_evidence",
+            "outside_framework"
+          ]
+        },
+        "primary": {
+          "enum": [
+            "aetiology",
+            "diagnosis",
+            "screening",
+            "therapy",
+            "prognosis",
+            "prevention",
+            null
+          ]
+        },
+        "rationale": {
+          "$ref": "#/$defs/fact"
+        },
+        "secondary": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "category",
+              "rationale"
+            ],
+            "properties": {
+              "category": {
+                "enum": [
+                  "aetiology",
+                  "diagnosis",
+                  "screening",
+                  "therapy",
+                  "prognosis",
+                  "prevention"
+                ]
+              },
+              "rationale": {
+                "$ref": "#/$defs/fact"
+              }
+            }
+          },
+          "maxItems": 5
+        },
+        "alternative": {
+          "enum": [
+            "aetiology",
+            "diagnosis",
+            "screening",
+            "therapy",
+            "prognosis",
+            "prevention",
+            null
+          ]
+        }
+      }
+    }
+  }
+}
