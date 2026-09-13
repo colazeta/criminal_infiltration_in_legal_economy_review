@@ -67,7 +67,8 @@ class ParallelSearchBatch19Tests(unittest.TestCase):
         self.assertEqual(self.overrides[CAPTURE]["kind"], "verified_abstract_source")
         self.assertIn("Discussion Paper 21805", self.overrides[CAPTURE]["note"])
         self.assertEqual(self.abstracts[CAPTURE]["coverage_status"], "available")
-        self.assertEqual(self.abstracts[CAPTURE]["source_url"], CAPTURE_CEPR)
+        self.assertEqual(self.abstracts[CAPTURE]["article_url"], CAPTURE_CEPR)
+        self.assertEqual(self.abstracts[CAPTURE]["match_type"], "verified_abstract_source")
         self.assertEqual(self.retrieval[CAPTURE]["resolution_status"], "unresolved")
         self.assertEqual(self.retrieval[CAPTURE]["full_text_url"].strip(), "")
 
