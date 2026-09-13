@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "purpose": "Non-decisional provenance repairs for legacy candidate source locators after exact authoritative HTTPS verification. These declarations may only replace an http:// locator with the byte-identical https:// form; they do not alter candidate identity, screening or scientific status.",
+  "repairs": [
+    {
+      "candidate_id": "CAND-ACADEMIC-2026-09-11-EXTRA-61e4d03af5c4-005",
+      "from_url": "http://cepr.org/publications/dp12140",
+      "to_url": "https://cepr.org/publications/dp12140",
+      "source": "Parallel Search final CEPR publisher record",
+      "checked_at": "2026-09-13",
+      "basis": "Exact CEPR DP12140 title, authors and 2017 publication identity matched at the authoritative HTTPS publisher URL."
+    }
+  ]
+}
