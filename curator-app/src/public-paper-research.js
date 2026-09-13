@@ -32,7 +32,7 @@ const COPY_WINDOW_WORDS=5,MAX_PUBLIC_COPY_WINDOWS=20000;
 function checkParaphrases(research,sources){
   // Fail closed on substantive verbatim overlap without retaining source-sized
   // n-gram sets. Only bounded public windows are retained; private source text is
-  // scanned once with a five-token rolling buffer.
+  // normalised once and scanned with a five-token rolling buffer.
   const byLast=new Map(),seen=new Set();let count=0;
   function add(pattern){
     const key=pattern.join(' ');if(seen.has(key))return;seen.add(key);
@@ -48,9 +48,9 @@ function checkParaphrases(research,sources){
   }
   visit(research);if(!count)return;
   for(const source of sources){
-    const tail=[];
-    for(const match of source.text.matchAll(/[\p{L}\p{N}]+/gu)){
-      const token=match[0].normalize('NFKC').toLowerCase();tail.push(token);if(tail.length>COPY_WINDOW_WORDS)tail.shift();
+    const tail=[],normalised=source.text.normalize('NFKC');
+    for(const match of normalised.matchAll(/[\p{L}\p{N}]+/gu)){
+      const token=match[0].toLowerCase();tail.push(token);if(tail.length>COPY_WINDOW_WORDS)tail.shift();
       if(tail.length!==COPY_WINDOW_WORDS)continue;
       for(const pattern of byLast.get(token)||[]){
         let same=true;for(let i=0;i<COPY_WINDOW_WORDS;i++)if(tail[i]!==pattern[i]){same=false;break}
