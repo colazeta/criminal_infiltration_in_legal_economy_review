@@ -7,47 +7,49 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class CandidateConservationWorkflowTests(unittest.TestCase):
-    def _workflow(self) -> str:
+    def _recovery(self) -> str:
         return (ROOT / ".github/workflows/recover-intake-backlog.yml").read_text(encoding="utf-8")
 
+    def _intake(self) -> str:
+        return (ROOT / ".github/workflows/intake-to-curation.yml").read_text(encoding="utf-8")
+
     def test_recovery_runs_after_terminal_and_has_periodic_safety_sweep(self) -> None:
-        workflow = self._workflow()
+        workflow = self._recovery()
         self.assertIn("issue_comment:", workflow)
         self.assertIn("github.event.issue.number == 30", workflow)
         self.assertIn("surveillance-run:v3", workflow)
         self.assertIn('cron: "55 * * * *"', workflow)
         self.assertIn("workflow_dispatch:", workflow)
-        self.assertIn("group: intake-to-curation-main", workflow)
 
-    def test_newer_global_recovery_supersedes_stale_recovery(self) -> None:
-        workflow = self._workflow()
-        compact = " ".join(line.lstrip("# ").strip() for line in workflow.splitlines())
-        self.assertIn("cancel-in-progress: true", workflow)
-        self.assertIn("immutable intake source of truth", compact)
-        self.assertIn("cancellation policy is recovery-only", compact)
+    def test_terminal_recovery_is_single_candidate_writer(self) -> None:
+        recovery = self._recovery()
+        intake = self._intake()
+        self.assertIn("group: candidate-conservation-main", recovery)
+        self.assertIn("cancel-in-progress: false", recovery)
+        self.assertIn("sole automatic CandidateRecord writer", recovery)
+        self.assertNotIn("stage_intake.py", intake)
+        self.assertNotIn("resolve_queue.py", intake)
+        self.assertIn("defer-to-terminal-recovery", intake)
+        self.assertIn("surveillance terminal is written after the intake", intake)
 
-    def test_automatic_recovery_never_comments_on_or_closes_the_ledger(self) -> None:
-        workflow = self._workflow()
-        self.assertIn('if [ "$EVENT_NAME" = "issues" ]', workflow)
-        self.assertIn("Candidate-conservation recovery", workflow)
-        self.assertIn("Enforce candidate-conservation invariant", workflow)
-        self.assertIn("Candidate conservation failed", workflow)
-
-    def test_candidate_records_cross_persistence_barrier_before_enrichment(self) -> None:
-        workflow = self._workflow()
-        barrier = workflow.index("Persist recovered CandidateRecords first")
-        finalise = workflow.index("Finalise intake issues after preservation barrier")
-        retrieval = workflow.index("Resolve paper access for preserved candidates")
-        abstracts = workflow.index("Backfill abstract coverage for preserved candidates")
+    def test_recovery_persists_before_source_intake_finalisation(self) -> None:
+        workflow = self._recovery()
+        barrier = workflow.index("Persist recovered CandidateRecords")
+        finalise = workflow.index("Finalise source intake issues after persistence")
         self.assertLess(barrier, finalise)
-        self.assertLess(finalise, retrieval)
-        self.assertLess(barrier, abstracts)
-        self.assertIn("continue-on-error: true", workflow)
-        self.assertIn("Optional enrichment may continue independently", workflow)
+        self.assertIn("data/curation/review_queue.csv", workflow)
+        self.assertIn("data/curation/intake_access", workflow)
 
-    def test_core_persistence_failure_is_a_conservation_failure(self) -> None:
-        workflow = self._workflow()
-        self.assertIn("steps.core_persist.outputs.persisted != 'true'", workflow)
+    def test_recovery_contains_no_optional_enrichment_before_completion(self) -> None:
+        workflow = self._recovery()
+        self.assertNotIn("resolve_queue.py", workflow)
+        self.assertNotIn("backfill_coverage.mjs", workflow)
+        self.assertNotIn("classify_access.py", workflow)
+        self.assertNotIn("reconcile_reading_aids.py", workflow)
+
+    def test_persistence_failure_is_a_conservation_failure(self) -> None:
+        workflow = self._recovery()
+        self.assertIn("steps.persist.outputs.persisted != 'true'", workflow)
         self.assertIn("did not cross the persistence barrier", workflow)
 
 
