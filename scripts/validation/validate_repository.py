@@ -629,10 +629,11 @@ def check_actions_pinned() -> None:
     safe_concurrency = (
         "concurrency:\n"
         "  group: archive-${{ github.workflow }}-${{ github.event_name == 'issue_comment' && github.run_id || github.ref }}\n"
-        "  cancel-in-progress: true"
+        "  cancel-in-progress: false\n"
+        "  queue: max"
     )
     if safe_concurrency not in workflow:
-        fail("Archive workflow must cancel superseded runs for the same ref")
+        fail("Archive workflow must retain active and queued publication runs")
     if "group: archive-pages\n      cancel-in-progress: false" not in workflow:
         fail("Ledger and push deployments must be serialised")
     for phrase in (
