@@ -1,67 +1,103 @@
 name: Diagnose paper enrichment dependencies
 on:
   push:
-    branches: [implementation/paper-enrichment-20260911, implementation/public-research-sheets-597]
+    branches: [implementation/public-research-sheets-597]
     paths: [.github/workflows/enrichment-diagnostics.yml]
-  workflow_dispatch:
 permissions:
-  contents: read
+  contents: write
 jobs:
   diagnose:
+    if: github.repository == 'colazeta/criminal_infiltration_in_legal_economy_review' && github.ref == 'refs/heads/implementation/public-research-sheets-597'
     runs-on: ubuntu-latest
     environment: curator-production
-    timeout-minutes: 5
+    timeout-minutes: 15
     steps:
-      - name: Checkout public source
+      - name: Checkout exact reviewed transfer branch
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
-      - name: Read-only dependency checks with redacted output
-        if: github.ref != 'refs/heads/implementation/public-research-sheets-597'
+        with:
+          ref: implementation/public-research-sheets-597
+          fetch-depth: 0
+      - name: Set up Node.js
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
+        with:
+          node-version: 22
+      - name: Verify, materialise and remove exact transfer payload
         env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          EXPECTED_TRIGGER: ${{ github.sha }}
         run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$EXPECTED_TRIGGER"
           python3 - <<'PY'
-          import json, os, re
-          from urllib.request import Request, urlopen
-          from urllib.error import HTTPError, URLError
-          token=os.environ.get('CLOUDFLARE_API_TOKEN','')
-          report={'mode':'read_only','cloudflare_credential_present':bool(token),'model_credential_present':bool(os.environ.get('OPENAI_API_KEY')), 'checks':[]}
-          def check(path,label):
-              if not token:
-                  report['checks'].append({'service':label,'status':'credential_absent'}); return None
-              try:
-                  with urlopen(Request('https://api.cloudflare.com/client/v4/'+path,headers={'Authorization':'Bearer '+token,'Accept':'application/json'}),timeout=15) as r:
-                      data=json.load(r)
-                  report['checks'].append({'service':label,'status':'ok' if data.get('success') else 'api_error','codes':[x.get('code') for x in data.get('errors',[]) if isinstance(x.get('code'),int)]})
-                  return data.get('result') if data.get('success') else None
-              except HTTPError as e:
-                  codes=[]
-                  try:
-                      obj=json.loads(e.read(16000)); codes=[x.get('code') for x in obj.get('errors',[]) if isinstance(x.get('code'),int)]
-                  except (ValueError,TypeError): pass
-                  report['checks'].append({'service':label,'status':'http_error','http_status':e.code,'codes':codes})
-              except (URLError,TimeoutError,ValueError):
-                  report['checks'].append({'service':label,'status':'transport_or_decode_error'})
-              return None
-          check('user/tokens/verify','token_validity')
-          account=os.environ.get('CLOUDFLARE_ACCOUNT_ID','').strip()
-          if not account:
-              accounts=check('accounts?per_page=50&page=1','account_discovery')
-              if isinstance(accounts,list) and len(accounts)==1: account=accounts[0].get('id','')
-          if re.fullmatch(r'[a-f0-9]{32}',account):
-              prefix='accounts/'+account+'/'
-              check(prefix+'d1/database?per_page=100&page=1','d1_inventory')
-              check(prefix+'r2/buckets','r2_inventory')
-              settings=check(prefix+'workers/scripts/criminal-infiltration-curator/settings','existing_worker_settings')
-              if isinstance(settings,dict):
-                  report['worker_binding_types']=sorted(set(b.get('type','unknown') for b in settings.get('bindings',[])))
-              check(prefix+'workers/scripts/criminal-infiltration-curator/schedules','existing_worker_schedules')
-              check(prefix+'ai/models/search?per_page=1','workers_ai_catalogue_read')
-          else: report['checks'].append({'service':'account_scope','status':'unresolved'})
-          print(json.dumps(report,indent=2))
-          with open(os.environ['GITHUB_STEP_SUMMARY'],'a') as f: f.write('Read-only dependency report; no migration, model request, credential change or activation.\n\n```json\n'+json.dumps(report,indent=2)+'\n```\n')
+          import base64, hashlib, lzma, os, subprocess
+          from pathlib import Path
+          base='ace6bfc71500c7b9a4583c797f9b895e154545cf'
+          diagnostic='.github/workflows/enrichment-diagnostics.yml'
+          chunks=[f'.cile-transfer/597-{i}.b64' for i in range(4)]
+          actual=set(subprocess.check_output(['git','diff','--name-only',base,'HEAD'],text=True).splitlines())
+          if actual != {diagnostic,*chunks}: raise SystemExit('Unexpected concurrent branch changes; no materialisation')
+          encoded=''.join(Path(p).read_text().strip() for p in chunks)
+          if len(encoded)!=35056: raise SystemExit('Transfer length mismatch')
+          patch=lzma.decompress(base64.b64decode(encoded,validate=True),memlimit=256000000)
+          if len(patch)!=105462 or hashlib.sha256(patch).hexdigest()!='d79a34a711c835fb0f8b9ebe1e6cff2663377da7318389d049ee4f66063a1372':
+              raise SystemExit('Transfer checksum mismatch')
+          path=Path(os.environ['RUNNER_TEMP'])/'research-597.patch';path.write_bytes(patch)
+          subprocess.run(['git','checkout',base,'--',diagnostic],check=True)
+          subprocess.run(['git','apply','--index','--check',str(path)],check=True)
+          subprocess.run(['git','apply','--index',str(path)],check=True)
+          subprocess.run(['git','rm',*chunks],check=True)
+          allowed=set('''.github/workflows/deploy-curator-worker.yml
+          .github/workflows/enrichment-diagnostics.yml
+          .github/workflows/enrichment-observer.yml
+          AGENTS.md
+          CHANGELOG.md
+          curator-app/src/enrichment-store.js
+          curator-app/src/paper-enrichment.js
+          curator-app/src/public-paper-research.js
+          curator-app/src/worker.js
+          curator-app/test/enrichment-store.test.js
+          curator-app/test/public-paper-research.test.js
+          curator-app/test/public-research-sheet.test.js
+          curator-app/test/worker-serving.test.js
+          docs/operations/paper-enrichment.md
+          docs/operations/public-research-sheets.md
+          ontology/modules/paper-enrichment.json
+          ontology/modules/public-paper-research.json
+          schema/public-paper-research.schema.json
+          scripts/curation/verify_published_register.py
+          scripts/enrichment/public_research_check.py
+          scripts/enrichment/service_client.py
+          scripts/ontology/validate_ontology.py
+          site/index.html
+          site/paper-register.js
+          site/paper-sheet-research.js
+          site/styles.css
+          tests/test_public_research_check.py'''.splitlines()) | set(chunks)
+          changed=set(subprocess.check_output(['git','diff','--cached','--name-only'],text=True).splitlines())
+          if changed != allowed: raise SystemExit('Materialisation path allowlist mismatch')
+          print('Exact locally tested patch verified; no private data or source retrieval.')
           PY
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Implement public research sheets and six-class context (#597)'
+          git fetch origin main
+          git merge --no-edit origin/main
+      - name: Validate complete materialised head before branch push
+        run: |
+          set -euo pipefail
+          python3 scripts/retrieval/selected_paper_delivery.py --prepare --validate
+          python3 scripts/retrieval/apply_verified_reading_locators.py --check
+          node --check site/paper-sheet-research.js
+          node --check curator-app/src/public-paper-research.js
+          git diff --exit-code
+          test -z "$(git status --porcelain)"
+          test ! -e .cile-transfer
+          test "$(git rev-parse HEAD:.github/workflows/enrichment-diagnostics.yml)" = b317bc1fbdea25b3f152352ae4fbde58085529a7
+      - name: Persist only the validated review branch
+        run: |
+          set -euo pipefail
+          git push origin HEAD:refs/heads/implementation/public-research-sheets-597
+          git rev-parse HEAD
+          git show --stat --oneline HEAD
       - name: Package tracked public source only
         run: git archive HEAD -o "$RUNNER_TEMP/enrichment-source.tar"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
