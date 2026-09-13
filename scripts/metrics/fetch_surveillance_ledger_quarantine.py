@@ -59,6 +59,9 @@ LATE_RECOVERY_TERMINALS = {
 
 _RAW_API_GET = _base.api_get
 _RAW_VERIFY_LEDGER_COMMENT_TIME = _base.verify_ledger_comment_time
+_LEDGER_BATCH_CLAIM = re.compile(
+    rf"\ADaily surveillance batch (?P<batch>{_base.BATCH_PATTERN}): "
+)
 
 
 def _quarantine_api_get(url: str, token: str):
@@ -137,6 +140,28 @@ def _target_batch(issue: dict) -> str:
     return batch_id
 
 
+def _comment_claims_batch(body: str, batch_id: str) -> bool:
+    """Return whether malformed ledger evidence claims exactly ``batch_id``.
+
+    Ordinary daily batch IDs are prefixes of same-day ``-EXTRA-`` batch IDs.  A
+    substring test therefore turns a malformed EXTRA terminal into a false error
+    for the ordinary batch.  Prefer the immutable ledger summary identity and use
+    an exact JSON ``batch_id`` field only as a fail-closed fallback when the
+    summary itself is malformed.
+    """
+    text = body.strip()
+    summary = _LEDGER_BATCH_CLAIM.match(text)
+    if summary is not None:
+        return summary.group("batch") == batch_id
+    return (
+        re.search(
+            rf'"batch_id"\s*:\s*"{re.escape(batch_id)}"',
+            text,
+        )
+        is not None
+    )
+
+
 def fetch_validated_run_for_intake(
     repository: str,
     ledger_issue: int,
@@ -173,7 +198,7 @@ def fetch_validated_run_for_intake(
             try:
                 run = _base.extract_run(body)
             except _base.MetricsError:
-                if batch_id in body:
+                if _comment_claims_batch(body, batch_id):
                     raise
                 continue
             if run is None or run.get("batch_id") != batch_id:
