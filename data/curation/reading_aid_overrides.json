@@ -433,6 +433,33 @@
       "synopsis": "The article investigates how Mafia groups infiltrate the legal economy in non-traditional territories in Northern Italy. The comparative study examines the mechanisms and local relational conditions through which Mafia actors become embedded beyond traditional strongholds.",
       "checkedAt": "2026-09-13",
       "note": "Parallel Search fetched the exact SAGE publisher record for DOI 10.1177/1477370818803050, matching Joselle Dagnes, Davide Donatiello, Valentina Moiso, Davide Pellegrino, Rocco Sciarrone and Luca Storti. The article was first published online in 2018 and appears in the 2020 issue; SAGE marks the article as restricted access, and the apparent PDF route resolves to the same restricted publisher surface rather than an accessible paper body. Evidence basis: abstract_only. No full-text claim, private source ingestion, eligibility decision or canonical-identity decision is inferred."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-13-EXTRA-4b57a3081215-004",
+      "kind": "verified_abstract_source",
+      "sourceLabel": "Oxford Academic publisher abstract located with Parallel Search",
+      "sourceUrl": "https://academic.oup.com/jleo/article/38/3/774/6409959",
+      "synopsis": "The article studies how collusion between organised crime and local politicians affects municipal public finances in Southern Italy over 1998–2016, identifying infiltration through council dissolutions for Mafia collusion. Difference-in-differences estimates report greater investment shares for construction and waste management and weaker collection of waste-related taxes in captured municipalities.",
+      "checkedAt": "2026-09-13",
+      "note": "Parallel Search resolved DOI 10.1093/jleo/ewab015 and fetched the exact Oxford Academic final article page, matching Marco Di Cataldo, Nicola Mastrorocco, the title and final journal manifestation. Evidence basis: abstract_only for this persisted synopsis. The HTML page exposed some substantive body text, but the direct final PDF fetch failed, so no full-text claim or OA-retention claim is made. Earlier Trinity College Dublin and Ca' Foscari working-paper manifestations remain distinct and are not silently substituted or canonicalised."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-13-EXTRA-4b57a3081215-005",
+      "kind": "verified_abstract_source",
+      "sourceLabel": "University of Bologna CRIS exact repository record located with Parallel Search",
+      "sourceUrl": "https://cris.unibo.it/handle/11585/1029770",
+      "synopsis": "The article asks why Mafia organisations sometimes coexist with public authorities, sometimes collude with them and sometimes threaten or attack them. It links these choices to local political and economic conditions and proposes three strategies toward public institutions: parasitic, collusive and adversarial.",
+      "checkedAt": "2026-09-13",
+      "note": "Parallel Search fetched the exact University of Bologna institutional record, matching Francesco Niccolò Moro, Aldo Paparo, Political Studies, 2025 and DOI 10.1177/00323217251384494. Evidence basis: abstract_only. The institutional profile labels the article open access, but no stable direct full-text file was independently fetched in this pass; the SAGE final article surface is explicitly restricted access. No full-text or private-ingestion claim is made."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-13-EXTRA-4b57a3081215-006",
+      "kind": "verified_abstract_source",
+      "sourceLabel": "ScienceDirect publisher abstract located with Parallel Search",
+      "sourceUrl": "https://www.sciencedirect.com/science/article/pii/S0167268124001628",
+      "synopsis": "The article assesses whether Italian municipal-council dissolution for Mafia influence under Law 164/1991 discourages violence against politicians. The study covers 2010–2019; its abstract reports difference-in-differences evidence that dissolution reduces violence in treated municipalities, with effects persisting for at least two electoral rounds.",
+      "checkedAt": "2026-09-13",
+      "note": "Parallel Search resolved DOI 10.1016/j.jebo.2024.04.027 and fetched the exact ScienceDirect final article record, matching Anna Laura Baraldi, Erasmo Papagni, Marco Stimolo and the 2024 journal manifestation. Evidence basis: abstract_only for the persisted synopsis. Earlier FEEM working-paper manifestations were located and explicitly related in RePEc, but they remain distinct and are not used to claim full text of the final article. No OA-retention or private-ingestion claim is made."
     }
   ]
 }
