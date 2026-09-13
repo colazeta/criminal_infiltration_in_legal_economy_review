@@ -1,0 +1,49 @@
+name: Candidate pipeline audit snapshot
+on:
+  push:
+    branches: [maintenance/single-candidate-writer-20260913]
+    paths: [.github/workflows/candidate-audit-snapshot.yml]
+permissions:
+  contents: read
+  issues: read
+  actions: read
+jobs:
+  snapshot:
+    if: github.actor == github.repository_owner
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Archive tracked public sources and read-only audit inputs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/candidate-audit"
+          git archive origin/main -o "$RUNNER_TEMP/candidate-audit/main.tar"
+          git archive HEAD -o "$RUNNER_TEMP/candidate-audit/pr489.tar"
+          git rev-parse origin/main HEAD > "$RUNNER_TEMP/candidate-audit/refs.txt"
+          gh api --paginate --slurp "repos/$GITHUB_REPOSITORY/issues?state=all&per_page=100" > "$RUNNER_TEMP/candidate-audit/issues-pages.json"
+          gh api --paginate --slurp "repos/$GITHUB_REPOSITORY/issues/30/comments?per_page=100" > "$RUNNER_TEMP/candidate-audit/ledger-pages.json"
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs?per_page=100" > "$RUNNER_TEMP/candidate-audit/runs.json"
+          python3 - <<'PY'
+          import json, os, pathlib, urllib.request
+          root=pathlib.Path(os.environ['RUNNER_TEMP'])/'candidate-audit'
+          url='https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/data/paper-register.json'
+          try:
+              with urllib.request.urlopen(urllib.request.Request(url,headers={'Cache-Control':'no-cache'}),timeout=30) as response:
+                  body=response.read(12000000)
+                  data=json.loads(body)
+                  (root/'served-register.json').write_bytes(body)
+                  print('Served register fetched:',response.status,'bytes:',len(body))
+          except Exception as exc:
+              (root/'served-register-error.txt').write_text(type(exc).__name__+': '+str(exc))
+              print('Live read unavailable:',type(exc).__name__)
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: candidate-pipeline-audit
+          path: ${{ runner.temp }}/candidate-audit
+          retention-days: 1
