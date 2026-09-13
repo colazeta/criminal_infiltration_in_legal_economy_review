@@ -28,6 +28,15 @@ boundary between discovery, editorial judgement and publication.
    `ontology/` and passes the ontology validator. A `ScholarlyWork` is not a DOI,
    URL, PDF or repository copy: alternative identifiers and manifestations must
    be reconciled around one canonical work whenever identity is established.
+9. Preserve every governed CandidateRecord across stage boundaries. Before new
+   discovery, check for completed intake batches whose candidates are not yet
+   represented or explicitly reconciled downstream. Such backlog is operational
+   debt and takes priority over additional recall: trigger/verify the governed
+   recovery path first. A discovery run, intake issue or successful search is not
+   sufficient evidence of preservation. The invariant is that no candidate from a
+   valid completed intake may remain orphaned solely because a downstream workflow
+   raced, failed or was skipped. Recovery is mechanical only and never supplies a
+   scientific eligibility or canonical-identity decision.
 
 ## Task routing and write boundaries
 
