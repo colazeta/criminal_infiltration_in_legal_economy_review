@@ -144,6 +144,8 @@ class RecoveryWorkflowTests(unittest.TestCase):
         self.assertIn("cancel-in-progress: false", workflow)
         self.assertIn("queue: max", workflow)
         self.assertIn("'[MAINTENANCE][INTAKE-RECOVERY]'", workflow)
+        self.assertIn('action_date="$(TZ=Europe/Rome date +%F)"', workflow)
+        self.assertNotIn('action_date="$(date -u +%F)"', workflow)
         self.assertIn("scripts/curation/recover_intake_backlog.py", workflow)
         self.assertIn("sorted(paginated_issues", script)
         self.assertIn("stage_candidates(", script)

@@ -70,7 +70,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          action_date="$(date -u +%F)"
+          action_date="$(TZ=Europe/Rome date +%F)"
           python scripts/curation/recover_intake_backlog.py \
             --repository "$GITHUB_REPOSITORY" \
             --owner "$GITHUB_REPOSITORY_OWNER" \
