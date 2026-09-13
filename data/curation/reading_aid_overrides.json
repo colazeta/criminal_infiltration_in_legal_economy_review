@@ -460,6 +460,33 @@
       "synopsis": "The article assesses whether Italian municipal-council dissolution for Mafia influence under Law 164/1991 discourages violence against politicians. The study covers 2010–2019; its abstract reports difference-in-differences evidence that dissolution reduces violence in treated municipalities, with effects persisting for at least two electoral rounds.",
       "checkedAt": "2026-09-13",
       "note": "Parallel Search resolved DOI 10.1016/j.jebo.2024.04.027 and fetched the exact ScienceDirect final article record, matching Anna Laura Baraldi, Erasmo Papagni, Marco Stimolo and the 2024 journal manifestation. Evidence basis: abstract_only for the persisted synopsis. Earlier FEEM working-paper manifestations were located and explicitly related in RePEc, but they remain distinct and are not used to claim full text of the final article. No OA-retention or private-ingestion claim is made."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-13-EXTRA-0da19cdc8206-001",
+      "kind": "full_text_intro",
+      "sourceLabel": "Springer open-access full-text article located with Parallel Search",
+      "sourceUrl": "https://link.springer.com/content/pdf/10.1007/s10657-025-09848-w.pdf",
+      "synopsis": "The article links firm-level Legality Rating scores to performance in Italian public-works procurement, combining contract-level procurement data with firm-level legality scores. Higher scores are associated with shorter delays and lower extra costs, treating legality certification as a potential mechanism for more efficient contract execution.",
+      "checkedAt": "2026-09-13",
+      "note": "Parallel Search resolved DOI 10.1007/s10657-025-09848-w and fetched the Springer final article, which is explicitly open access and identifies Elisabetta Iossa and Chiara Latour. Evidence basis: full_text. The earlier CEIS Research Paper 592 manifestation was located separately and is not silently substituted for or canonicalised with the final article. No verbatim paper text, private source ingestion, eligibility decision or scientific classification is claimed."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-13-EXTRA-0da19cdc8206-002",
+      "kind": "verified_abstract_source",
+      "sourceLabel": "SSRN exact current abstract record located with Parallel Search",
+      "sourceUrl": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4961758",
+      "synopsis": "The working paper studies whether Italy’s Legality Rating changes supplier access to public procurement and contract allocation. The certification incorporates firms’ efforts to prevent misconduct and criminal infiltration; the current SSRN abstract reports improved procurement access and contract execution along with positive aggregate participation and public-revenue effects.",
+      "checkedAt": "2026-09-13",
+      "note": "Parallel Search fetched the exact Carmine Pizzo SSRN record: 66 pages, first posted 23 October 2024 and last revised 20 May 2026. Evidence basis: abstract_only for the current revised manifestation. A full 19 September 2024 Bayes/City St George's manuscript with the same title was also fetched and read, but it is an earlier version and is not silently substituted for the current SSRN revision or used for a full-text promotion. No private source ingestion, eligibility decision or scientific classification is claimed."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-13-EXTRA-0da19cdc8206-003",
+      "kind": "full_text_intro",
+      "sourceLabel": "RFBerlin Discussion Paper 101/25 full-text PDF located with Parallel Search",
+      "sourceUrl": "https://www.rfberlin.com/wp-content/uploads/2025/10/25101.pdf",
+      "synopsis": "Using confidential criminal-investigation data, credit ratings and loan histories for Italian firms, the paper studies whether credit rationing increases organised-crime infiltration of distressed firms. A downgrade to substandard credit status is associated with a persistent fall in credit and higher subsequent infiltration risk, with threshold-based local-randomisation evidence supporting the relationship.",
+      "checkedAt": "2026-09-13",
+      "note": "Parallel Search fetched the exact RFBerlin Discussion Paper Series 101/25 PDF and matched Paolo Pinotti, Gianmarco Daniele, Marco De Simoni, Domenico Marchetti and Giovanna Marcolongo. Evidence basis: full_text. UIF Quaderno 32, CEPR and other 2025 manifestations were also located but are not silently substituted for or canonicalised with the registered RFBerlin manifestation. No verbatim paper text, private source ingestion, eligibility decision or scientific classification is claimed."
     }
   ]
 }
