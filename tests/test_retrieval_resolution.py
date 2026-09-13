@@ -86,12 +86,17 @@ class RetrievalResolutionTests(unittest.TestCase):
 
     def test_workflows_make_resolution_persistent_and_self_applying(self) -> None:
         workflow = (ROOT / ".github/workflows/retrieval-resolution.yml").read_text(encoding="utf-8")
+        persistence = (ROOT / "scripts/retrieval/persist_selected_support.sh").read_text(encoding="utf-8")
         intake = (ROOT / ".github/workflows/intake-to-curation.yml").read_text(encoding="utf-8")
         materialize = (ROOT / ".github/workflows/materialize-curation.yml").read_text(encoding="utf-8")
         self.assertIn("data/curation/review_queue.csv", workflow)
         self.assertIn("schedule:", workflow)
         self.assertIn("python scripts/retrieval/resolve_queue.py", workflow)
-        self.assertIn("gh pr merge", workflow)
+        self.assertIn("run: bash scripts/retrieval/persist_selected_support.sh", workflow)
+        self.assertIn('gh api --method PUT', persistence)
+        self.assertIn('-f sha="$head_sha"', persistence)
+        self.assertIn('pending "quality_not_successful"', persistence)
+        self.assertNotIn('HEAD:main', workflow + persistence)
         self.assertIn("resolve_queue.py", intake)
         self.assertIn("retrieval_coverage.csv", materialize)
         self.assertIn("sync_issue_retrieval.py", materialize)
