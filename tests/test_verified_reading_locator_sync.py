@@ -94,6 +94,14 @@ class VerifiedReadingLocatorSyncTests(unittest.TestCase):
             self.assertEqual(row["match_confidence"], "high")
             self.assertEqual(row["checked_at"], "2026-09-12")
             self.assertIn("no eligibility or canonicalisation decision", row["notes"])
+            first_notes = row["notes"]
+
+            second = MODULE.apply(coverage, overrides)
+            self.assertEqual(second, {"eligible_overrides": 1, "changed": 0})
+            with coverage.open(newline="", encoding="utf-8") as handle:
+                rerun_row = next(csv.DictReader(handle))
+            self.assertEqual(rerun_row["notes"], first_notes)
+            self.assertEqual(rerun_row["notes"].count("Curator-verified full-text locator synchronised"), 1)
             self.assertEqual(MODULE.apply(coverage, overrides, check=True)["eligible_overrides"], 1)
 
     def test_existing_full_text_is_preserved_and_locator_is_added(self):
