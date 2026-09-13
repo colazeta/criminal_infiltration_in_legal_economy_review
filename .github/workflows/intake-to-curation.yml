@@ -24,6 +24,8 @@ jobs:
 
       - name: Preserve source intake and defer materialisation
         run: |
+          # The strict parsing/validation contract remains scripts/curation/import_intake_issue.py;
+          # terminal-driven recovery reaches it through stage_intake.py/recover_intake_backlog.py.
           echo "Intake #${{ github.event.issue.number }} is the immutable CandidateRecord source."
           echo "No queue mutation is attempted on issue-open because the authoritative surveillance terminal is written after the intake."
           echo "The terminal-driven candidate-conservation recovery will reconcile and persist this intake after surveillance-run:v3 exists."
