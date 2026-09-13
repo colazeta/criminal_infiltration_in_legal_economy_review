@@ -1,6 +1,6 @@
 (() => {
   const pendingStatuses = new Set(["pending", "needs_full_text"]);
-  const state = { archive: [], register: [], includePending: false };
+  const state = { archive: [], register: [], includePending: false, geography: null };
   const $ = (selector) => document.querySelector(selector);
   const ui = {
     toggle: $("#include-pending-toggle"), scope: $("#bibliometric-scope-note"),
@@ -189,6 +189,7 @@
 
     ui.empty.hidden = data.length !== 0;
     ui.content.hidden = data.length === 0;
+    state.geography?.setRecords(data);
     if (!data.length) return;
 
     renderAnnual(data);
@@ -211,6 +212,18 @@
     state.archive = Array.isArray(archive.records) ? archive.records : [];
     state.register = Array.isArray(register.records) ? register.records : [];
     render();
+    Promise.all([import('./paper-sheet-research.js'), import('./study-geography.js')]).then(() => {
+      state.geography = globalThis.CILEStudyGeography.mount({
+        host: document.querySelector('#literature-statistics'),
+        records: state.archive.concat(pending()),
+        selectResearch: globalThis.CILEPaperResearch.selectRecord,
+      });
+      state.geography.setRecords(records());
+    }).catch(() => {
+      const note = cell('p', 'La geografia non può essere caricata. Nessun paese viene dedotto dai titoli o dalle affiliazioni.');
+      note.setAttribute('role', 'status');
+      document.querySelector('#literature-statistics').append(note);
+    });
   }).catch(() => {
     ui.error.hidden = false;
     ui.content.hidden = true;
