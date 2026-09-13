@@ -126,3 +126,10 @@ follow semantic versioning while the project is in prerelease.
 - Persist :40 tickets, recover missed/overlapping slots, reconcile completed effects after crashes, and wake pending work after release.
 - Tighten pilot generation so a proposed category always requires a source-backed rationale; do not weaken scientific validation.
 - Software tests and later production receipts remain distinct from content calibration.
+
+## 2026-09-13 — Bibliographic record sheets
+
+- Added keyboard/touch-accessible record windows and row double-click opening in the operational register, retaining the 1990s style.
+- Displays every field in the existing public projection and validated source links.
+- Abstracts remain explicitly unavailable in the public projection; private enrichment is not exported or misrepresented as public content. Connecting sourced abstracts requires a separate governed projection change.
+- No record, scientific decision or ontology contract changed.

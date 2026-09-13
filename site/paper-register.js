@@ -102,6 +102,59 @@
     });
   }
 
+  const dialog = document.createElement("dialog");
+  dialog.className = "paper-sheet";
+  dialog.setAttribute("aria-labelledby", "paper-sheet-title");
+  document.body.append(dialog);
+  let opener = null;
+  dialog.addEventListener("close", () => { if (opener?.isConnected) opener.focus(); });
+
+  function openSheet(record, button) {
+    opener = button;
+    dialog.replaceChildren();
+    const bar = el("div");
+    bar.className = "paper-sheet-bar";
+    bar.append(el("span", "Archivio · Scheda bibliografica"));
+    const close = el("button", "Chiudi ×");
+    close.type = "button";
+    close.addEventListener("click", () => dialog.close());
+    bar.append(close);
+    const body = el("div");
+    body.className = "paper-sheet-body";
+    const title = el("h2", record.title);
+    title.id = "paper-sheet-title";
+    body.append(title);
+    const metadata = el("dl");
+    for (const [label, value] of [
+      ["Autori", record.authors], ["Anno", record.year], ["Rivista / sede", record.venue],
+      ["DOI", record.doi], ["Identificativo", record.id],
+      ["Registrato il", record.registeredAt],
+      ["Stato della revisione", reviewLabels[record.reviewStatus] || record.reviewStatus],
+      ["Verifica dei metadati", record.metadataStatus === "metadata_verified" ? "Verificati" : "Da verificare"],
+      ["Accesso", accessLabels[record.accessStatus] || "Da verificare"],
+      ["Etichetta assegnata", record.topicCode],
+    ]) {
+      metadata.append(el("dt", label), el("dd", value || "Non disponibile"));
+    }
+    body.append(metadata, el("h3", "Abstract"));
+    body.append(el("p", "Abstract non disponibile nel registro pubblico. Consulta le fonti del paper; gli eventuali contenuti raccolti nell’area di arricchimento non sono ancora collegati a questa scheda."));
+    body.append(el("h3", "Fonti e accesso al paper"));
+    for (const [index, url] of (record.sourceLinks || []).entries()) {
+      try {
+        const parsed = new URL(url);
+        if (!["https:", "http:"].includes(parsed.protocol) || parsed.username || parsed.password) continue;
+        const link = el("a", `Fonte ${index + 1} · ${parsed.hostname}`);
+        link.href = parsed.href;
+        link.rel = "noreferrer";
+        const line = el("p"); line.append(link); body.append(line);
+      } catch (_) { /* Invalid source URLs are never rendered. */ }
+    }
+    body.append(el("p", "La registrazione non equivale all’inclusione scientifica. Gli stati di verifica si riferiscono al singolo record."));
+    dialog.append(bar, body);
+    if (!dialog.open) dialog.showModal();
+    close.focus();
+  }
+
   function render() {
     const found = filteredRecords();
     count.textContent = `${found.length} record visualizzati · ${records.length} registrati. Lavori da analizzare, non inclusioni scientifiche automatiche.`;
@@ -110,10 +163,19 @@
     for (const record of found) {
       const row = document.createElement("tr");
       const citation = document.createElement("td");
+      const open = el("button", "Apri scheda");
+      open.type = "button";
+      open.setAttribute("aria-haspopup", "dialog");
+      open.setAttribute("aria-label", "Apri scheda: " + record.title);
+      open.addEventListener("click", () => openSheet(record, open));
+      row.addEventListener("dblclick", (event) => {
+        if (!event.target.closest("a, button")) openSheet(record, open);
+      });
       citation.append(
         el("strong", record.title),
         el("p", [record.authors, record.year, record.venue].filter(Boolean).join(" · ") || "Metadati da completare"),
       );
+      citation.append(open);
       const status = el("td", reviewLabels[record.reviewStatus] || "Da verificare");
       if (record.topicCode) status.append(el("p", `Etichetta: ${record.topicCode}`));
       status.append(el("p", record.metadataStatus === "metadata_verified" ? "Metadati verificati" : "Metadati da verificare"));
