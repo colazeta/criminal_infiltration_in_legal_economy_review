@@ -31,6 +31,9 @@ from scripts.surveillance_identity import validate_cycle_run
 
 
 QUARANTINED_LEDGER_COMMENTS = {
+    # An intermediate exact copy of #341 was also superseded by 5652046564.
+    # See candidate-publication-runtime-audit.md; no counts or evidence are changed.
+    5647980951: "ACADEMIC-2026-09-12-EXTRA-7652f77d6fde",
     # Bounded-text audit 2026-09-13: originals remain immutable.
     5642881870: "ACADEMIC-2026-09-12-EXTRA-8943d605c4aa",
     5644857109: "ACADEMIC-2026-09-12-EXTRA-486aaf42fb90",
