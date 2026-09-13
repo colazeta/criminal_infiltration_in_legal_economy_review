@@ -352,6 +352,33 @@
       "synopsis": "The article develops an institutional account of organised crime as private ordering and tests it with extensive evidence from Japan. It argues that organised criminal groups supply protection and property-rights enforcement where formal legal institutions are inefficient and that their organisation and activities respond systematically to state law and enforcement structures.",
       "checkedAt": "2026-09-13",
       "note": "Parallel Search fetched the Chicago Unbound full text and institutional landing page, matching Curtis J. Milhaupt, Mark D. West, the exact title and University of Chicago Law Review 67(1), 2000. Evidence basis: full_text. The CandidateRecord's currently blank authors/year are not silently rewritten by this retrieval-only lane; metadata reconciliation remains separate. No private full-text ingestion, eligibility or canonical-identity decision is claimed."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-12-EXTRA-3ad3ee04659d-002",
+      "kind": "verified_abstract_source",
+      "sourceLabel": "FrancoAngeli publisher abstract located after Parallel Search identity resolution",
+      "sourceUrl": "https://www.francoangeli.it/riviste/articolo/78908",
+      "synopsis": "The study examines whether otherwise unconnected private firms change tax-avoidance and earnings-management practices when exposed to Mafia-connected peers. Using proprietary investigation data and a large sample of Lombardy private firms over 2006–2013, it measures industry and geographic exposure and reports lower effective tax rates with greater Mafia presence, while geographic proximity is associated with tax-related restatements and income-decreasing abnormal accruals.",
+      "checkedAt": "2026-09-13",
+      "note": "Parallel Search resolved the exact DOI/title identity and authors Pietro A. Bianchi Fedrigoni and Nicola Pecchiari; the final FrancoAngeli publisher record confirms Financial Reporting 2/2025, pp. 59–89 and DOI 10.3280/fr202519624. Evidence basis: abstract_only. The article body remains purchase-controlled and no open full-text manifestation was verified; claims beyond the publisher abstract remain not_verifiable, and no private source ingestion or scientific decision is inferred."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-12-EXTRA-335f7df7ae34-001",
+      "kind": "full_text_intro",
+      "sourceLabel": "PubMed Central full-text article located with Parallel Search",
+      "sourceUrl": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8024936",
+      "synopsis": "The article introduces a conceptual framework for analysing how organised-crime groups relate to territories. It argues that such groups exploit resources circulating in the contexts where they are embedded and can participate in transforming spaces into places, using this perspective to frame the special issue on ‘Spaces of Organised Crime’ rather than presenting a single causal firm-level design.",
+      "checkedAt": "2026-09-13",
+      "note": "Parallel Search fetched the exact PubMed Central scholarly article and matched the 2021 Trends in Organized Crime manifestation and DOI 10.1007/s12117-021-09415-0. Evidence basis: full_text. The full article is readable in PMC, but this connector read is not treated as governed private full-text ingestion; no eligibility, canonical-identity or framework-classification decision is inferred."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-11-EXTRA-61e4d03af5c4-001",
+      "kind": "full_text_intro",
+      "sourceLabel": "FrancoAngeli Open Access full-text book located with Parallel Search",
+      "sourceUrl": "https://series.francoangeli.it/index.php/oa/catalog/download/1465/1856/8153?inline=1",
+      "synopsis": "The book presents research on how organised crime affects firm performance and what happens after judicial removal, while also examining measurement of Mafia presence, infiltration of the legitimate economy, and the planning and control issues involved in assessing continuity and transition of criminally controlled firms under judicial administration.",
+      "checkedAt": "2026-09-13",
+      "note": "Parallel Search fetched the official FrancoAngeli Open Access catalogue and complete publisher PDF, matching Domenico Nicolò, the exact title and the 2025 publication identity. Evidence basis: full_text. The publisher page identifies the open-access manifestation; no private full-text retention is claimed here and no eligibility, canonical-identity or scientific-classification decision is inferred."
     }
   ]
 }
