@@ -1,0 +1,26 @@
+name: Residual intake audit snapshot
+on:
+  push:
+    branches: [maintenance/residual-intake-recovery-20260913]
+    paths: [.github/workflows/residual-intake-audit.yml]
+permissions:
+  contents: read
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: main
+          fetch-depth: 0
+      - name: Export exact current main and record its identity
+        run: |
+          mkdir -p "$RUNNER_TEMP/residual-audit"
+          git rev-parse HEAD > "$RUNNER_TEMP/residual-audit/main-sha.txt"
+          git archive --format=tar HEAD > "$RUNNER_TEMP/residual-audit/main.tar"
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: residual-intake-main-snapshot
+          path: ${{ runner.temp }}/residual-audit
+          retention-days: 1
