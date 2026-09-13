@@ -58,8 +58,13 @@ def split_semicolon(value: object) -> list[str]:
 
 def append_unique(value: object, addition: str) -> str:
     parts = split_semicolon(value)
-    if addition and addition not in parts:
-        parts.append(addition)
+    addition_parts = split_semicolon(addition)
+    if not addition_parts:
+        return "; ".join(parts)
+    width = len(addition_parts)
+    if any(parts[index : index + width] == addition_parts for index in range(len(parts) - width + 1)):
+        return "; ".join(parts)
+    parts.extend(addition_parts)
     return "; ".join(parts)
 
 

@@ -10,7 +10,7 @@ on:
   issue_comment:
     types: [created]
   workflow_run:
-    workflows: ["Recover intake backlog"]
+    workflows: ["Recover intake backlog", "Resolve curator paper access", "Backfill curator abstract coverage"]
     types: [completed]
     branches: [main]
 
@@ -43,7 +43,6 @@ jobs:
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           fetch-depth: 0
-
 
       - name: Validate immutable intake history
         env:
@@ -88,6 +87,9 @@ jobs:
           node --check site/bibliometrics.js
           node --check site/curator.js
           node --check site/curator-config.js
+          node --check site/curator-guided.js
+          node --check site/model.js
+          node --check site/review-v2.js
           node --check site/curator-consensus.js
           node --check site/curator-reading.js
           node --check site/curator-assisted-resolution.js
@@ -106,6 +108,30 @@ jobs:
           node --check curator-app/src/resolved-abstract.js
           node --check curator-app/src/worker.js
           node --test curator-app/test/*.test.js
+
+      - name: Audit selected-paper delivery state without inferring scientific approval
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            python3 scripts/retrieval/selected_paper_delivery.py --prepare \
+              --summary "$RUNNER_TEMP/selected-support-pr-audit.json"
+            prepared="$(git diff --name-only)"
+            unexpected="$(printf '%s\n' "$prepared" | grep -Ev '^(data/curation/(retrieval_coverage|abstract_coverage)\.csv|site/data/)' || true)"
+            if [ -n "$unexpected" ]; then
+              echo "::error::Selected-paper preparation changed unexpected paths"
+              printf '%s\n' "$unexpected"
+              exit 1
+            fi
+            if [ -n "$prepared" ]; then
+              echo "::error::Selected-paper projections are not committed on this head"
+              printf '%s\n' "$prepared"
+              echo "Materialise the deterministic support projections and rerun quality on the resulting head."
+              exit 1
+            fi
+          else
+            python3 scripts/retrieval/selected_paper_delivery.py --check
+          fi
 
   deploy:
     concurrency:
@@ -147,7 +173,7 @@ jobs:
           LEDGER_AUTHOR: ${{ github.repository_owner }}
         run: |
           # Canonical validation remains delegated to scripts/metrics/fetch_surveillance_ledger.py.
-          # The wrapper removes only the explicitly quarantined immutable #317 terminal first.
+          # The wrapper removes only the explicitly quarantined immutable terminal first.
           python scripts/metrics/fetch_surveillance_ledger_quarantine.py \
             --repository "$GITHUB_REPOSITORY" \
             --issue 30 \
@@ -165,7 +191,6 @@ jobs:
               --input "$RUNNER_TEMP/surveillance-ledger.json" \
               --as-of "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
           else
-            # No invalid telemetry counts; independent bibliographic gates still apply.
             python scripts/metrics/build_research_stats.py
             python scripts/metrics/mark_statistics_unavailable.py
           fi
@@ -182,6 +207,9 @@ jobs:
           node --check site/bibliometrics.js
           node --check site/curator.js
           node --check site/curator-config.js
+          node --check site/curator-guided.js
+          node --check site/model.js
+          node --check site/review-v2.js
           node --check site/curator-consensus.js
           node --check site/curator-reading.js
           node --check site/curator-assisted-resolution.js
@@ -200,6 +228,7 @@ jobs:
           node --check curator-app/src/resolved-abstract.js
           node --check curator-app/src/worker.js
           node --test curator-app/test/*.test.js
+          python3 scripts/retrieval/selected_paper_delivery.py --check
 
       - name: Configure Pages
         uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5

@@ -56,14 +56,19 @@ class CuratorResolvedLinkTests(unittest.TestCase):
         self.assertIn('attempts=6', deploy)
         self.assertIn('node --check site/curator-resolved-link.js', resolver)
 
-    def test_retrieval_writeback_prefers_pr_but_does_not_force_main(self) -> None:
+    def test_retrieval_writeback_requires_checked_pr_and_never_pushes_main(self) -> None:
         workflow = (ROOT / ".github/workflows/retrieval-resolution.yml").read_text(encoding="utf-8")
-        self.assertIn('gh pr create', workflow)
-        self.assertIn('git push origin HEAD:main', workflow)
-        self.assertIn('current_main', workflow)
-        self.assertIn('base_sha', workflow)
-        self.assertNotIn('--force', workflow)
-        self.assertIn('Validated fallback branch retained', workflow)
+        persistence = (ROOT / "scripts/retrieval/persist_selected_support.sh").read_text(encoding="utf-8")
+        self.assertIn('run: bash scripts/retrieval/persist_selected_support.sh', workflow)
+        self.assertIn('gh pr create', persistence)
+        self.assertIn('current_main', persistence)
+        self.assertIn('base_sha', persistence)
+        self.assertIn('pending "main_moved_reconciliation_required"', persistence)
+        self.assertIn('pending "quality_not_successful"', persistence)
+        self.assertIn('-f sha="$head_sha"', persistence)
+        self.assertIn('persistence_pending', persistence)
+        self.assertNotIn('HEAD:main', workflow + persistence)
+        self.assertNotIn('--force', workflow + persistence)
         self.assertIn('issues: write', workflow)
         self.assertGreaterEqual(workflow.count('sync_issue_retrieval.py'), 1)
 
