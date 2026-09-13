@@ -23,7 +23,7 @@
     if (!raw || raw.length > 6000) return {countries:[],kind:'unresolved'};
     if (CODES.includes(raw)) return {countries:[raw],kind:'countries'};
     let text = normal(raw);
-    if (['northern ireland','northern cyprus'].includes(text)) return {countries:[],kind:'unresolved'};
+    if (/\bnorth(?:ern)?\s+(?:ireland|cyprus)\b/.test(text)) return {countries:[],kind:'unresolved'};
     if (broad.has(text)) return {countries:[],kind:'supranational'};
     if (forbidden.test(text)) return {countries:[],kind:'unresolved'};
     // Only an entire list of recognised countries is codable. Never keyword-scan an abstract.
