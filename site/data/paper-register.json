@@ -23,11 +23,12 @@
       "authors": "Francesca Calamunci; Francesco Drago",
       "year": 2020,
       "venue": "IZA Discussion Papers",
-      "doi": "",
+      "doi": "10.1007/s40797-020-00128-x",
       "sourceLinks": [
-        "https://docs.iza.org/dp13028.pdf"
+        "https://docs.iza.org/dp13028.pdf",
+        "https://doi.org/10.1007/s40797-020-00128-x"
       ],
-      "metadataStatus": "metadata_partial",
+      "metadataStatus": "metadata_verified",
       "reviewStatus": "pending",
       "accessStatus": "unknown",
       "registeredAt": "2026-09-08",
@@ -955,11 +956,12 @@
       "authors": "Casey Ichniowski; Anne Preston",
       "year": 1989,
       "venue": "",
-      "doi": "",
+      "doi": "10.1177/001979398904200406",
       "sourceLinks": [
-        "https://scholarship.haverford.edu/cgi/viewcontent.cgi?article=1147&context=economics_facpubs"
+        "https://scholarship.haverford.edu/cgi/viewcontent.cgi?article=1147&context=economics_facpubs",
+        "https://doi.org/10.1177/001979398904200406"
       ],
-      "metadataStatus": "metadata_partial",
+      "metadataStatus": "metadata_verified",
       "reviewStatus": "pending",
       "accessStatus": "unknown",
       "registeredAt": "2026-09-11",
@@ -1628,11 +1630,12 @@
       "authors": "Salvatore Cincimino; Fabio La Rosa; Sergio Paternostro",
       "year": 2025,
       "venue": "",
-      "doi": "",
+      "doi": "10.1007/978-3-031-74523-2_19",
       "sourceLinks": [
-        "https://www.iris.unict.it/handle/20.500.11769/665869"
+        "https://www.iris.unict.it/handle/20.500.11769/665869",
+        "https://doi.org/10.1007/978-3-031-74523-2_19"
       ],
-      "metadataStatus": "metadata_partial",
+      "metadataStatus": "metadata_verified",
       "reviewStatus": "pending",
       "accessStatus": "unknown",
       "registeredAt": "2026-09-09",
@@ -1852,11 +1855,12 @@
       "authors": "",
       "year": null,
       "venue": "",
-      "doi": "",
+      "doi": "10.2307/1600326",
       "sourceLinks": [
-        "https://chicagounbound.uchicago.edu/cgi/viewcontent.cgi?article=5018&context=uclrev"
+        "https://chicagounbound.uchicago.edu/cgi/viewcontent.cgi?article=5018&context=uclrev",
+        "https://doi.org/10.2307/1600326"
       ],
-      "metadataStatus": "metadata_partial",
+      "metadataStatus": "metadata_verified",
       "reviewStatus": "pending",
       "accessStatus": "unknown",
       "registeredAt": "2026-09-10",
@@ -1980,11 +1984,12 @@
       "authors": "Niles Breuer; Federico Varese; Elena Racheva",
       "year": 2025,
       "venue": "",
-      "doi": "",
+      "doi": "10.1093/bjc/azaf041",
       "sourceLinks": [
-        "https://ora.ox.ac.uk/objects/uuid:abca2b8f-2c5e-4dd7-b66b-bd0da1b4849d/files/rsx61dp050"
+        "https://ora.ox.ac.uk/objects/uuid:abca2b8f-2c5e-4dd7-b66b-bd0da1b4849d/files/rsx61dp050",
+        "https://doi.org/10.1093/bjc/azaf041"
       ],
-      "metadataStatus": "metadata_partial",
+      "metadataStatus": "metadata_verified",
       "reviewStatus": "pending",
       "accessStatus": "unknown",
       "registeredAt": "2026-09-10",
@@ -2879,7 +2884,7 @@
       "venue": "CEPR Discussion Paper No. 12140",
       "doi": "",
       "sourceLinks": [
-        "http://cepr.org/publications/dp12140"
+        "https://cepr.org/publications/dp12140"
       ],
       "metadataStatus": "metadata_verified",
       "reviewStatus": "pending",
@@ -3298,11 +3303,12 @@
       "authors": "",
       "year": null,
       "venue": "Office of Justice Programs",
-      "doi": "",
+      "doi": "10.1007/s10610-004-4122-4",
       "sourceLinks": [
-        "https://ojp.gov/ncjrs/virtual-library/abstracts/international-crime-business-survey-findings-nine-central-eastern"
+        "https://ojp.gov/ncjrs/virtual-library/abstracts/international-crime-business-survey-findings-nine-central-eastern",
+        "https://doi.org/10.1007/s10610-004-4122-4"
       ],
-      "metadataStatus": "metadata_partial",
+      "metadataStatus": "metadata_verified",
       "reviewStatus": "pending",
       "accessStatus": "unknown",
       "registeredAt": "2026-09-13",
@@ -3426,11 +3432,12 @@
       "authors": "",
       "year": null,
       "venue": "The British Journal of Criminology",
-      "doi": "",
+      "doi": "10.1093/bjc/azw014",
       "sourceLinks": [
-        "https://academic.oup.com/bjc/article-abstract/57/3/589/2623919"
+        "https://academic.oup.com/bjc/article-abstract/57/3/589/2623919",
+        "https://doi.org/10.1093/bjc/azw014"
       ],
-      "metadataStatus": "metadata_partial",
+      "metadataStatus": "metadata_verified",
       "reviewStatus": "pending",
       "accessStatus": "unknown",
       "registeredAt": "2026-09-13",
@@ -3458,11 +3465,12 @@
       "authors": "",
       "year": null,
       "venue": "APSA Preprints",
-      "doi": "",
+      "doi": "10.33774/apsa-2021-kq3b6",
       "sourceLinks": [
-        "https://preprints.apsanet.org/engage/api-gateway/apsa/assets/orp/resource/item/601df8d1ed338ede6b4d16e3/original/how-criminal-organizations-expand-to-strong-states-migrant-exploitation-and-political-brokerage-in-northern-italy.pdf"
+        "https://preprints.apsanet.org/engage/api-gateway/apsa/assets/orp/resource/item/601df8d1ed338ede6b4d16e3/original/how-criminal-organizations-expand-to-strong-states-migrant-exploitation-and-political-brokerage-in-northern-italy.pdf",
+        "https://doi.org/10.33774/apsa-2021-kq3b6"
       ],
-      "metadataStatus": "metadata_partial",
+      "metadataStatus": "metadata_verified",
       "reviewStatus": "pending",
       "accessStatus": "unknown",
       "registeredAt": "2026-09-13",
@@ -3490,11 +3498,12 @@
       "authors": "Stier Anderson & Malone, LLC",
       "year": null,
       "venue": "Trends in Organized Crime, vol. 7 (2001-2002)",
-      "doi": "",
+      "doi": "10.1007/s12117-001-1021-7",
       "sourceLinks": [
-        "https://heinonline.org/hol-cgi-bin/get_pdf.cgi?handle=hein.journals%2Ftrndorgc7&section=14"
+        "https://heinonline.org/hol-cgi-bin/get_pdf.cgi?handle=hein.journals%2Ftrndorgc7&section=14",
+        "https://doi.org/10.1007/s12117-001-1021-7"
       ],
-      "metadataStatus": "metadata_partial",
+      "metadataStatus": "metadata_verified",
       "reviewStatus": "pending",
       "accessStatus": "unknown",
       "registeredAt": "2026-09-13",
@@ -3539,11 +3548,12 @@
       "authors": "",
       "year": null,
       "venue": "SSRN",
-      "doi": "",
+      "doi": "10.2139/ssrn.7417501",
       "sourceLinks": [
-        "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=7417501"
+        "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=7417501",
+        "https://doi.org/10.2139/ssrn.7417501"
       ],
-      "metadataStatus": "metadata_partial",
+      "metadataStatus": "metadata_verified",
       "reviewStatus": "pending",
       "accessStatus": "unknown",
       "registeredAt": "2026-09-13",
@@ -3812,11 +3822,12 @@
       "authors": "",
       "year": null,
       "venue": "",
-      "doi": "",
+      "doi": "10.1023/a:1008348805646",
       "sourceLinks": [
-        "https://openurl.ebsco.com/fulltext/gcd:15392324"
+        "https://openurl.ebsco.com/fulltext/gcd:15392324",
+        "https://doi.org/10.1023/a:1008348805646"
       ],
-      "metadataStatus": "metadata_partial",
+      "metadataStatus": "metadata_verified",
       "reviewStatus": "pending",
       "accessStatus": "unknown",
       "registeredAt": "2026-09-13",
@@ -3844,11 +3855,12 @@
       "authors": "",
       "year": null,
       "venue": "ECB Working Paper",
-      "doi": "",
+      "doi": "10.2139/ssrn.5290101",
       "sourceLinks": [
-        "https://www.ecb.europa.eu/pub/pdf/scpwps/ecb.wp3060~2ea4ebd7aa.en.pdf"
+        "https://www.ecb.europa.eu/pub/pdf/scpwps/ecb.wp3060~2ea4ebd7aa.en.pdf",
+        "https://doi.org/10.2139/ssrn.5290101"
       ],
-      "metadataStatus": "metadata_partial",
+      "metadataStatus": "metadata_verified",
       "reviewStatus": "pending",
       "accessStatus": "unknown",
       "registeredAt": "2026-09-13",
@@ -3860,11 +3872,12 @@
       "authors": "",
       "year": null,
       "venue": "",
-      "doi": "",
+      "doi": "10.1016/j.ejpoleco.2020.101923",
       "sourceLinks": [
-        "https://diposit.ub.edu/items/8e1d23dc-f076-4d72-89cc-6299be4be827"
+        "https://diposit.ub.edu/items/8e1d23dc-f076-4d72-89cc-6299be4be827",
+        "https://doi.org/10.1016/j.ejpoleco.2020.101923"
       ],
-      "metadataStatus": "metadata_partial",
+      "metadataStatus": "metadata_verified",
       "reviewStatus": "pending",
       "accessStatus": "unknown",
       "registeredAt": "2026-09-13",
@@ -3876,11 +3889,12 @@
       "authors": "",
       "year": null,
       "venue": "The British Journal of Criminology",
-      "doi": "",
+      "doi": "10.1093/bjc/azz004",
       "sourceLinks": [
-        "https://academic.oup.com/bjc/article/59/5/1217/5348024"
+        "https://academic.oup.com/bjc/article/59/5/1217/5348024",
+        "https://doi.org/10.1093/bjc/azz004"
       ],
-      "metadataStatus": "metadata_partial",
+      "metadataStatus": "metadata_verified",
       "reviewStatus": "pending",
       "accessStatus": "unknown",
       "registeredAt": "2026-09-13",
