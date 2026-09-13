@@ -298,6 +298,33 @@
       "synopsis": "Gambetta analyses the Sicilian Mafia as a supplier of private protection, using evidence including confessions from eight mafiosi to develop an economic and political account of Mafia protection and the conditions under which it is demanded and supplied.",
       "checkedAt": "2026-09-13",
       "note": "Parallel Search fetched the official Harvard University Press book page, matching Diego Gambetta and ISBN 9780674807426. Evidence basis: publisher_summary; no open full text was verified. HUP exposes a 1 February 1996 paperback manifestation while the prior institutional catalogue notes copyright 1993, so the 1993/1996 edition distinction remains explicit and the candidate's canonical year is not silently rewritten. Claims beyond the publisher summary remain not_verifiable."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-09-EXTRA-6b5b5e038ac4-030",
+      "kind": "full_text_intro",
+      "sourceLabel": "Bank of Italy Temi di discussione no. 1502 full-text PDF located with Parallel Search",
+      "sourceUrl": "https://www.bancaditalia.it/pubblicazioni/temi-discussione/2025/2025-1502/en_tema_1502.pdf",
+      "synopsis": "The 2025 Bank of Italy working paper studies whether financial distress increases Mafia infiltration of firms, using firm exposure to the Covid-19 shock and a firm-level infiltration proxy derived from investigative connections. It also examines whether extraordinary government support mitigated firms’ reliance on Mafia-linked liquidity.",
+      "checkedAt": "2026-09-13",
+      "note": "Parallel Search fetched the official Bank of Italy Temi di discussione no. 1502 PDF and matched Marco Castelluccio, Lucia Rizzica, the exact 2025 title and publication identity. Evidence basis: full_text. The earlier 2023 IFS working-paper CandidateRecord remains a distinct manifestation and is not silently merged or replaced. No verbatim text, private full-text ingestion, eligibility decision or canonicalisation is persisted here."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-10-EXTRA-f276bc827f57-007",
+      "kind": "verified_abstract_source",
+      "sourceLabel": "Rivisteweb publisher abstract located with Parallel Search",
+      "sourceUrl": "https://www.rivisteweb.it/doi/10.1425/23230",
+      "synopsis": "The article examines the links connecting Mafia groups with political, economic and professional spheres. It treats Mafia power as involving political action and the search for power, and emphasises the role of relationships with sectors of the ruling class and of bridge-building across otherwise different networks.",
+      "checkedAt": "2026-09-13",
+      "note": "Parallel Search fetched the exact Rivisteweb publisher record for Rocco Sciarrone, Stato e mercato 3/2006, pp. 369–402 and DOI 10.1425/23230, including its explicit Abstract section. Evidence basis: abstract_only. The article body is subscription/purchase access and was not verified as OA, so claims beyond the publisher abstract remain not_verifiable; no scientific decision is persisted."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-10-007",
+      "kind": "verified_abstract_source",
+      "sourceLabel": "OJP/NCJRS exact indexed abstract located with Parallel Search",
+      "sourceUrl": "https://www.ojp.gov/ncjrs/virtual-library/abstracts/crime-crime-control-and-yakuza-contemporary-japan",
+      "synopsis": "The 1997 article surveys contemporary Japanese crime and crime-control context alongside the role of the Yakuza, covering social features such as group duty and face as well as crime statistics and the position of gangsters in modern Japan.",
+      "checkedAt": "2026-09-13",
+      "note": "Parallel Search fetched the exact OJP/NCJRS record for NCJ 169383, K. Maguire, Criminologist 21(3), pp. 131–141, and its explicit Abstract section. Evidence basis: abstract_only. OJP states that no download is available, so full text was not verified and substantive details beyond the indexed abstract remain not_verifiable; no private source ingestion or scientific decision is inferred."
     }
   ]
 }
