@@ -55,8 +55,14 @@ class AbstractCoverageTests(unittest.TestCase):
         self.assertIn('Abstract text persisted: `no`', sync)
         self.assertIn('coverage_status', sync)
         workflow = (ROOT / ".github/workflows/abstract-coverage.yml").read_text(encoding="utf-8")
-        self.assertIn('sync_issue_coverage.py', workflow)
-        self.assertIn('git status --porcelain -- data/curation/abstract_coverage.csv', workflow)
+        persistence = (ROOT / "scripts/retrieval/persist_selected_support.sh").read_text(encoding="utf-8")
+        persist_at = workflow.index('run: bash scripts/retrieval/persist_selected_support.sh')
+        sync_at = workflow.index('python scripts/abstracts/sync_issue_coverage.py --repository')
+        self.assertLess(persist_at, sync_at)
+        self.assertIn('data/curation/abstract_coverage.csv', persistence)
+        self.assertIn('git diff --quiet -- "${paths[@]}"', persistence)
+        self.assertIn('persistence_pending', persistence)
+        self.assertIn('exit 1', persistence)
 
     def test_workflow_is_triggered_by_inputs_not_its_own_output(self) -> None:
         workflow = (ROOT / ".github/workflows/abstract-coverage.yml").read_text(encoding="utf-8")
