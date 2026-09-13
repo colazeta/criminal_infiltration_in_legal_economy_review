@@ -5,6 +5,11 @@ Recovery is deliberately sequential.  Earlier intake issues are staged first so
 later rediscoveries reconcile against the state produced by earlier batches.  A
 failure in one issue is recorded and does not erase successfully staged earlier
 batches; unresolved failures remain open for explicit repair.
+
+When new CandidateRecords are staged, their minimal retrieval/abstract/access
+coverage projections are scaffolded before the preservation commit.  This keeps
+candidate conservation independent from network enrichment while preserving the
+repository's one-to-one coverage invariant.
 """
 from __future__ import annotations
 
@@ -12,6 +17,7 @@ import argparse
 import csv
 import json
 import os
+import subprocess
 import sys
 from pathlib import Path
 
@@ -22,6 +28,10 @@ from fetch_surveillance_ledger import api_get, next_link  # noqa: E402
 from fetch_surveillance_ledger_quarantine import (  # noqa: E402
     PERMANENTLY_QUARANTINED_BATCHES,
     fetch_validated_run_for_intake,
+)
+from scripts.curation.scaffold_candidate_coverage import (  # noqa: E402
+    COVERAGE_PATHS,
+    scaffold_all,
 )
 from scripts.curation.stage_intake import IntakeImportError, stage_candidates  # noqa: E402
 
@@ -137,6 +147,22 @@ def recover(
     }
 
 
+def _stage_coverage_for_preservation(root: Path) -> None:
+    """Keep deterministic coverage projections in the same Actions commit.
+
+    The existing workflow explicitly stages the queue and intake-access receipts.
+    Git preserves already-staged paths when that later ``git add`` runs, so the
+    three coverage projections cross the same persistence barrier without making
+    network enrichment part of candidate conservation.
+    """
+    if os.environ.get("GITHUB_ACTIONS") != "true":
+        return
+    subprocess.run(
+        ["git", "-C", str(root), "add", *[str(path) for path in COVERAGE_PATHS]],
+        check=True,
+    )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, default=ROOT)
@@ -149,20 +175,31 @@ def main() -> None:
     token = os.environ.get("GH_TOKEN", "")
     if not token:
         raise SystemExit("[RECOVERY BLOCKED] GH_TOKEN is required")
+    root = args.root.resolve()
     result = recover(
-        args.root.resolve(),
+        root,
         args.repository,
         token,
         args.owner,
         args.ledger_issue,
         args.date,
     )
+    if result["added_candidates"]:
+        result["coverage_placeholders"] = scaffold_all(root, args.date)
+        _stage_coverage_for_preservation(root)
+    else:
+        result["coverage_placeholders"] = {
+            "retrieval": 0,
+            "abstract": 0,
+            "access": 0,
+        }
     args.output.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(
         f"[OK] Recovery staged {result['added_candidates']} candidate(s) from "
         f"{result['processed_batches']} batch(es), reconciled "
         f"{result['rediscovery_occurrences']} rediscovery occurrence(s), with "
-        f"{len(result['failures'])} unresolved batch(es)."
+        f"{len(result['failures'])} unresolved batch(es); "
+        f"coverage placeholders: {result['coverage_placeholders']}."
     )
 
 
