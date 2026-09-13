@@ -34,6 +34,9 @@ class SelectedPaperDeliveryWorkflowTests(unittest.TestCase):
         self.assertIn('branch="automation/selected-support-${diff_digest}"', text)
         self.assertIn('gh pr list --state open --base main --head "$branch"', text)
         self.assertIn('gh workflow run archive.yml --ref "$branch"', text)
+        self.assertIn("latest_quality_state()", text)
+        self.assertIn('[ "$quality_state" = "missing" ] || [ "$quality_state" = "blocked" ]', text)
+        self.assertIn("Dispatched replacement exact-head quality validation", text)
         self.assertIn("Reusing retained selected-support checkpoint", text)
         self.assertNotIn('selected-support-${GITHUB_RUN_ID}', text)
         self.assertNotIn("HEAD:main", text)
@@ -57,9 +60,11 @@ class SelectedPaperDeliveryWorkflowTests(unittest.TestCase):
         self.assertIn('if [ "$EVENT_NAME" = "pull_request" ]', text)
         self.assertIn('selected-support-pr-audit.json', text)
         self.assertIn("Selected-paper preparation changed unexpected paths", text)
+        self.assertIn("Selected-paper projections are not committed on this head", text)
+        self.assertIn('prepared="$(git diff --name-only)"', text)
         self.assertLess(
             text.index("selected_paper_delivery.py --prepare"),
-            text.index("Selected-paper preparation changed unexpected paths"),
+            text.index("Selected-paper projections are not committed on this head"),
         )
         for path in ("site/curator-guided.js", "site/model.js", "site/review-v2.js"):
             self.assertEqual(text.count("node --check " + path), 2)
