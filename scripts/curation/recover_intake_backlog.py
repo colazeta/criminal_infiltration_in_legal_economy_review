@@ -17,6 +17,11 @@ title under the same stable identifier is retained as audited manifestation
 telemetry, not treated as a reason to duplicate or block an entire intake. Weak
 citation/title matches remain secondary and conservative.
 
+A terminal-absent historical intake can never create a new CandidateRecord. It
+may be closed only when every source candidate is proven already represented by
+existing operational/canonical identity. Any residual candidate remains an
+explicit blocker until terminal evidence is repaired.
+
 When new CandidateRecords are staged, their minimal retrieval/abstract/access
 coverage projections are scaffolded before the preservation commit. This keeps
 candidate conservation independent from network enrichment while preserving the
@@ -40,7 +45,7 @@ from fetch_surveillance_ledger_quarantine import (  # noqa: E402
     PERMANENTLY_QUARANTINED_BATCHES,
     fetch_validated_run_for_intake,
 )
-from scripts.curation.import_intake_issue import read_queue  # noqa: E402
+from scripts.curation.import_intake_issue import parse_intake_issue, read_queue  # noqa: E402
 from scripts.curation.scaffold_candidate_coverage import (  # noqa: E402
     COVERAGE_PATHS,
     scaffold_all,
@@ -90,13 +95,7 @@ def reconcile_candidates_stable_first(
     queue: list[dict[str, str]],
     candidates: list[dict],
 ):
-    """Reconcile exact stable IDs before title/citation observations.
-
-    This mirrors the review protocol's identity order: DOI/stable identifier
-    first, then conservative citation/title-year keys. A title mismatch on an
-    exact stable identifier is preserved in audit telemetry as a manifestation
-    variant; it is not a second scholarly identity.
-    """
+    """Reconcile exact stable IDs before title/citation observations."""
     key_targets, titles = _inventory(root, queue)
     novel: list[dict] = []
     skipped: list[dict] = []
@@ -174,6 +173,26 @@ def _stage_candidates_stable_first(*args, **kwargs):
         stage_intake_module.reconcile_candidates = original
 
 
+def _reconciliation_result(
+    manifest: dict,
+    issue_number: int,
+    queue: list[dict[str, str]],
+    skipped: list[dict],
+    *,
+    terminal_absent: bool = False,
+) -> dict[str, object]:
+    return {
+        "batch_id": str(manifest["batch_id"]),
+        "issue_number": issue_number,
+        "added": [],
+        "skipped_existing": skipped,
+        "queue_total": len(queue),
+        "source_candidate_count": len(manifest["candidates"]),
+        "reconciliation_only": True,
+        "terminal_absent": terminal_absent,
+    }
+
+
 def reconcile_represented_issue(
     root: Path,
     issue: dict,
@@ -224,16 +243,37 @@ def reconcile_represented_issue(
             "represented batch still has unreconciled candidate identity/identities: "
             + unresolved
         )
+    return _reconciliation_result(manifest, int(issue_number), queue, skipped)
 
-    return {
-        "batch_id": str(manifest["batch_id"]),
-        "issue_number": int(issue_number),
-        "added": [],
-        "skipped_existing": skipped,
-        "queue_total": len(queue),
-        "source_candidate_count": len(manifest["candidates"]),
-        "reconciliation_only": True,
-    }
+
+def reconcile_terminal_absent_issue(
+    root: Path,
+    issue: dict,
+    owner: str,
+) -> dict[str, object]:
+    """Close an orphan intake only if no new identity would be materialised."""
+    author = ((issue.get("user") or {}).get("login") or "").strip()
+    if author != owner:
+        raise IntakeImportError("terminal-absent intake author is not the repository owner")
+    title = str(issue.get("title") or "")
+    manifest = parse_intake_issue(issue.get("body") or "", title)
+    _, queue = read_queue(root / "data/curation/review_queue.csv")
+    novel, skipped = reconcile_candidates_stable_first(
+        root, queue, list(manifest["candidates"])
+    )
+    if novel:
+        unresolved = ", ".join(str(candidate["candidate_id"]) for candidate in novel)
+        raise IntakeImportError(
+            "authenticated completed terminal is absent; unreconciled source candidate(s): "
+            + unresolved
+        )
+    return _reconciliation_result(
+        manifest,
+        int(issue["number"]),
+        queue,
+        skipped,
+        terminal_absent=True,
+    )
 
 
 def recover(
@@ -273,8 +313,8 @@ def recover(
                 repository, ledger_issue, [owner], token, cycle, issue
             )
             if run is None:
-                raise IntakeImportError("authenticated completed terminal is absent")
-            if batch_id in represented:
+                result = reconcile_terminal_absent_issue(root, issue, owner)
+            elif batch_id in represented:
                 result = reconcile_represented_issue(root, issue, run, imported_at)
             else:
                 result = _stage_candidates_stable_first(
