@@ -1,13 +1,19 @@
 #!/usr/bin/env python3
-"""Recover every open governed intake not yet represented in the curator queue.
+"""Recover every open governed intake not yet reconciled with the curator queue.
 
-Recovery is deliberately sequential.  Earlier intake issues are staged first so
-later rediscoveries reconcile against the state produced by earlier batches.  A
+Recovery is deliberately sequential. Earlier intake issues are staged first so
+later rediscoveries reconcile against the state produced by earlier batches. A
 failure in one issue is recorded and does not erase successfully staged earlier
 batches; unresolved failures remain open for explicit repair.
 
+A batch is never treated as preserved merely because *some* trace of the batch
+already exists. Represented-but-open intakes are revalidated candidate by
+candidate. They are finalised only when every source candidate is already
+materialised or exactly reconciled to an existing operational/canonical identity;
+otherwise the residual candidate is reported as an explicit blocker.
+
 When new CandidateRecords are staged, their minimal retrieval/abstract/access
-coverage projections are scaffolded before the preservation commit.  This keeps
+coverage projections are scaffolded before the preservation commit. This keeps
 candidate conservation independent from network enrichment while preserving the
 repository's one-to-one coverage invariant.
 """
@@ -29,11 +35,18 @@ from fetch_surveillance_ledger_quarantine import (  # noqa: E402
     PERMANENTLY_QUARANTINED_BATCHES,
     fetch_validated_run_for_intake,
 )
+from scripts.curation.import_intake_issue import read_queue  # noqa: E402
 from scripts.curation.scaffold_candidate_coverage import (  # noqa: E402
     COVERAGE_PATHS,
     scaffold_all,
 )
-from scripts.curation.stage_intake import IntakeImportError, stage_candidates  # noqa: E402
+from scripts.curation.stage_intake import (  # noqa: E402
+    IntakeImportError,
+    _normal,
+    _validate_context,
+    reconcile_candidates,
+    stage_candidates,
+)
 
 PREFIX = "[INTAKE][ACADEMIC] "
 
@@ -63,6 +76,74 @@ def represented_batches(root: Path) -> set[str]:
                     if token.startswith("batch:ACADEMIC-"):
                         represented.add(token[len("batch:"):])
     return represented
+
+
+def reconcile_represented_issue(
+    root: Path,
+    issue: dict,
+    run: dict,
+    imported_at: str,
+) -> dict[str, object]:
+    """Prove candidate conservation for an already-represented intake.
+
+    Exact candidate IDs from the immutable source issue are checked first. Any
+    source candidate not present under its original ID is then reconciled with the
+    same stable-identifier/citation logic used for normal intake staging. A batch
+    with even one unresolved residual candidate fails closed instead of being
+    silently skipped.
+    """
+    issue_number = str(issue["number"])
+    issue_title = str(issue.get("title") or "")
+    manifest, _ = _validate_context(
+        root,
+        issue.get("body") or "",
+        issue_title,
+        issue_number,
+        imported_at,
+        issue.get("created_at"),
+        run,
+    )
+    _, queue = read_queue(root / "data/curation/review_queue.csv")
+    queue_by_id = {row["candidate_id"]: row for row in queue}
+
+    skipped: list[dict] = []
+    remaining: list[dict] = []
+    for candidate in manifest["candidates"]:
+        candidate_id = str(candidate["candidate_id"])
+        existing = queue_by_id.get(candidate_id)
+        if existing is None:
+            remaining.append(candidate)
+            continue
+        if _normal(existing.get("title") or "") != _normal(candidate.get("title") or ""):
+            raise IntakeImportError(
+                f"Candidate ID {candidate_id} is materialised with an incompatible title"
+            )
+        skipped.append(
+            {
+                "candidate_id": candidate_id,
+                "existing_ids": [f"candidate:{candidate_id}"],
+                "matched_keys": [f"candidate_id:{candidate_id}"],
+            }
+        )
+
+    novel, exact_skipped = reconcile_candidates(root, queue, remaining)
+    skipped.extend(exact_skipped)
+    if novel:
+        unresolved = ", ".join(str(candidate["candidate_id"]) for candidate in novel)
+        raise IntakeImportError(
+            "represented batch still has unreconciled candidate identity/identities: "
+            + unresolved
+        )
+
+    return {
+        "batch_id": str(manifest["batch_id"]),
+        "issue_number": int(issue_number),
+        "added": [],
+        "skipped_existing": skipped,
+        "queue_total": len(queue),
+        "source_candidate_count": len(manifest["candidates"]),
+        "reconciliation_only": True,
+    }
 
 
 def recover(
@@ -97,30 +178,24 @@ def recover(
                 }
             )
             continue
-        if batch_id in represented:
-            ignored.append(
-                {
-                    "issue_number": number,
-                    "batch_id": batch_id,
-                    "reason": "already represented in queue or intake-access snapshot",
-                }
-            )
-            continue
         try:
             run = fetch_validated_run_for_intake(
                 repository, ledger_issue, [owner], token, cycle, issue
             )
             if run is None:
                 raise IntakeImportError("authenticated completed terminal is absent")
-            result = stage_candidates(
-                root,
-                issue.get("body") or "",
-                title,
-                str(number),
-                imported_at,
-                issue_created_at=issue.get("created_at"),
-                run=run,
-            )
+            if batch_id in represented:
+                result = reconcile_represented_issue(root, issue, run, imported_at)
+            else:
+                result = stage_candidates(
+                    root,
+                    issue.get("body") or "",
+                    title,
+                    str(number),
+                    imported_at,
+                    issue_created_at=issue.get("created_at"),
+                    run=run,
+                )
             processed.append(result)
             # A batch with additions has a snapshot/provenance marker. A
             # rediscovery-only batch is intentionally represented only by its
