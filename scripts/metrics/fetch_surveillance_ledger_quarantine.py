@@ -67,6 +67,10 @@ QUARANTINED_LEDGER_COMMENTS = {
     5648272072: "ACADEMIC-2026-09-12-EXTRA-38a999646d3f",
     5648606308: "ACADEMIC-2026-09-12-EXTRA-426cdea055d3",
     5651216526: "ACADEMIC-2026-09-13-EXTRA-76bb4c0cee3e",
+    # Audited telemetry correction 2026-09-14: immutable original misclassified
+    # one exact rediscovery as not-forwarded; replacement comment 5657166865
+    # preserves all search/intake evidence while correcting known/not-forwarded.
+    5657142525: "ACADEMIC-2026-09-14-EXTRA-8b3f2d6a91c4",
 }
 
 # These batches are not merely superseded malformed terminals: the audited run
