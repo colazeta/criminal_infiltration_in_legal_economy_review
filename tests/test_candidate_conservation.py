@@ -49,7 +49,7 @@ class CandidateConservationWorkflowTests(unittest.TestCase):
 
     def test_persistence_failure_is_a_conservation_failure(self) -> None:
         workflow = self._recovery()
-        self.assertIn("steps.persist.outputs.persisted != 'true'", workflow)
+        self.assertIn("steps.readback.outputs.verified != 'true'", workflow)
         self.assertIn("did not cross the persistence barrier", workflow)
 
 

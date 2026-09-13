@@ -10,7 +10,7 @@ on:
   issue_comment:
     types: [created]
   workflow_run:
-    workflows: ["Stage daily intake in curator queue"]
+    workflows: ["Recover intake backlog"]
     types: [completed]
     branches: [main]
 
@@ -19,7 +19,8 @@ permissions:
 
 concurrency:
   group: archive-${{ github.workflow }}-${{ github.event_name == 'issue_comment' && github.run_id || github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
+  queue: max
 
 jobs:
   quality:
@@ -110,6 +111,7 @@ jobs:
     concurrency:
       group: archive-pages
       cancel-in-progress: false
+      queue: max
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     needs: quality
     runs-on: ubuntu-latest
@@ -138,6 +140,8 @@ jobs:
           python-version: "3.11"
 
       - name: Fetch validated daily research metrics
+        id: metrics
+        continue-on-error: true
         env:
           GITHUB_TOKEN: ${{ github.token }}
           LEDGER_AUTHOR: ${{ github.repository_owner }}
@@ -151,12 +155,20 @@ jobs:
             --output "$RUNNER_TEMP/surveillance-ledger.json"
 
       - name: Build release artifact
+        env:
+          METRICS_OUTCOME: ${{ steps.metrics.outcome }}
         run: |
           python scripts/build_archive.py
           python scripts/build_secondary_collections.py
-          python scripts/metrics/build_research_stats.py \
-            --input "$RUNNER_TEMP/surveillance-ledger.json" \
-            --as-of "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          if [ "$METRICS_OUTCOME" = "success" ]; then
+            python scripts/metrics/build_research_stats.py \
+              --input "$RUNNER_TEMP/surveillance-ledger.json" \
+              --as-of "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          else
+            # No invalid telemetry counts; independent bibliographic gates still apply.
+            python scripts/metrics/build_research_stats.py
+            python scripts/metrics/mark_statistics_unavailable.py
+          fi
           python scripts/curation/build_curator_stats.py
           python scripts/curation/build_paper_register.py
           python scripts/curation/build_curator_options.py
@@ -200,3 +212,24 @@ jobs:
       - name: Deploy Pages
         id: deployment
         uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4
+
+      - name: Verify candidate identities on the served public site
+        env:
+          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+        run: |
+          python scripts/curation/verify_published_register.py \
+            --url "${PAGE_URL%/}/data/paper-register.json" \
+            --expected site/data/paper-register.json \
+            --receipt "$RUNNER_TEMP/candidate-publication.json"
+          {
+            echo '### Verified provisional-register publication'
+            echo '```json'
+            cat "$RUNNER_TEMP/candidate-publication.json"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Keep failed statistics visible as operational debt
+        if: always() && steps.metrics.outcome != 'success'
+        run: |
+          echo "::error::Daily statistics failed validation and were not published. Check the separate public-register verification before claiming candidate publication."
+          exit 1

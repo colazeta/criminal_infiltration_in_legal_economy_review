@@ -9,14 +9,7 @@ on:
 permissions:
   contents: read
 
-# Legacy intake safeguard vocabulary is retained here for repository validation,
-# but execution is deliberately delegated to the terminal-driven recovery writer:
-# scripts/curation/import_intake_issue.py; --issue-title-file; data/curation;
-# build_curator_stats.py; site/data/curator-stats.json; build_secondary_collections.py;
-# node --check site/aml.js; pull-requests: write.
-# Automatic screening or publication inference: none.
-# Unresolved human decisions remain eligibility, canonical identity and publication.
-# Canonical or publication rows changed: 0.
+# Issue-open preserves the immutable source; only terminal-driven recovery writes candidates.
 
 jobs:
   defer-to-terminal-recovery:

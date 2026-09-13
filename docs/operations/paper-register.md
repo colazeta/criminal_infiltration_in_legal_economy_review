@@ -67,3 +67,13 @@ Pause new v3 writers before rollback. Preserve original issues, snapshots and
 ledger comments. Keep readers that understand v2 and v3; do not revert to a reader
 that rejects retained v3 history. The public provisional projection may be hidden
 without deleting the underlying register or changing scientific decisions.
+
+## Completion and maintenance amendment — 2026-09-13
+
+Follow [the completion contract](candidate-pipeline-audit.md). The sole automatic
+CandidateRecord writer is terminal-driven recover-intake-backlog.yml; the issue-open
+workflow is read-only. Separate intake, main persistence, served provisional
+publication and scientific inclusion. Scaffolding and public projections persist
+atomically; network enrichment is optional downstream work. The archive verifies
+actual served records. Use the documented backlog-first maintenance exception and
+mandatory bounded-text terminal preflight. No scientific gate is relaxed.

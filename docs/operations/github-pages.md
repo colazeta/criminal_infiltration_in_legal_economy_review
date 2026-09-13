@@ -66,7 +66,10 @@ lanes, legacy/daily origin totals and routed secondary-collection totals.
 The workflow also runs once per day after the surveillance automation. It reads
 ledger #30, accepts only comments by the configured repository owner, validates
 their schema and creates `site/data/research-stats.json`. A read, author or
-validation failure stops deployment, leaving the previous valid site online.
+validation failure withholds unverified research statistics, displays an explicit
+unavailability banner and reports an operational failure. It does not block an
+independently validated provisional register; all scientific and candidate gates
+remain mandatory.
 The committed statistics file is an empty deterministic baseline used by pull
 request checks; the deployed artifact is enriched from the ledger.
 
@@ -127,3 +130,13 @@ Official GitHub guidance:
 - [Configuring a Pages publishing source](https://docs.github.com/en/pages/getting-started-with-github-pages/configuring-a-publishing-source-for-your-github-pages-site)
 - [Creating a GitHub Pages site](https://docs.github.com/en/pages/getting-started-with-github-pages/creating-a-github-pages-site)
 - [Using custom Pages workflows](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages)
+
+## Completion and maintenance amendment — 2026-09-13
+
+Follow [the completion contract](candidate-pipeline-audit.md). The sole automatic
+CandidateRecord writer is terminal-driven recover-intake-backlog.yml; the issue-open
+workflow is read-only. Separate intake, main persistence, served provisional
+publication and scientific inclusion. Scaffolding and public projections persist
+atomically; network enrichment is optional downstream work. The archive verifies
+actual served records. Use the documented backlog-first maintenance exception and
+mandatory bounded-text terminal preflight. No scientific gate is relaxed.

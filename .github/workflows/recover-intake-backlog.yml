@@ -16,9 +16,6 @@ permissions:
 
 # This is the sole automatic CandidateRecord writer. It is intentionally short:
 # preservation must complete before any optional retrieval or enrichment work.
-concurrency:
-  group: candidate-conservation-main
-  cancel-in-progress: false
 
 jobs:
   recover:
@@ -33,7 +30,12 @@ jobs:
        contains(github.event.comment.body, 'surveillance-run:v3')) ||
       github.event_name == 'schedule' ||
       github.event_name == 'workflow_dispatch'
+    concurrency:
+      group: candidate-conservation-main
+      cancel-in-progress: false
+      queue: max
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     permissions:
       contents: write
       issues: write
@@ -50,6 +52,11 @@ jobs:
         uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: "3.11"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: 22
 
       - name: Reconcile every outstanding governed intake
         id: recovery
@@ -73,17 +80,35 @@ jobs:
           print(f"quarantine_count={len(data['quarantined'])}")
           PY
 
-      - name: Validate candidate-preservation state
-        if: steps.recovery.outputs.added_count != '0'
+      - name: Build and validate the complete preservation transaction
+        id: projection
         run: |
+          python scripts/build_archive.py
+          python scripts/build_secondary_collections.py
+          python scripts/metrics/build_research_stats.py
+          python scripts/curation/build_curator_stats.py
+          python scripts/curation/build_curator_options.py
           python scripts/curation/build_legacy_queue.py --check
           python scripts/validation/validate_intake_history.py --base HEAD
-          python -m unittest discover -s tests -p 'test_intake_backlog_recovery.py'
-          python -m unittest discover -s tests -p 'test_candidate_conservation.py'
+          python scripts/validation/validate_repository.py
+          python scripts/ontology/validate_ontology.py
+          python scripts/ontology/build_model_browser.py
+          git diff --exit-code -- site/vocab/review-v2-model.json
+          python -m unittest discover -s tests -p 'test_*.py'
+          python scripts/validation/validate_archive.py
+          python scripts/validation/validate_site.py
+          for script in site/*.js curator-app/src/*.js; do node --check "$script"; done
+          node --test curator-app/test/*.test.js
+          python scripts/report_saturation.py
+          if git diff --quiet HEAD -- data/curation site/data; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Persist recovered CandidateRecords
         id: persist
-        if: steps.recovery.outputs.added_count != '0'
+        if: steps.projection.outputs.changed == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           ADDED_COUNT: ${{ steps.recovery.outputs.added_count }}
@@ -95,7 +120,9 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout -b "$branch"
-          git add data/curation/review_queue.csv data/curation/intake_access
+          git add data/curation/review_queue.csv data/curation/intake_access \
+            data/curation/retrieval_coverage.csv data/curation/abstract_coverage.csv \
+            data/curation/access_coverage.csv site/data
           git commit -m "Preserve recovered intake candidates"
           git push origin "$branch"
 
@@ -141,14 +168,36 @@ jobs:
 
       - name: Mark no-data recovery as preserved
         id: nochange
-        if: steps.recovery.outputs.added_count == '0'
+        if: steps.projection.outputs.changed == 'false'
         run: |
           echo "persisted=true" >> "$GITHUB_OUTPUT"
           echo "persistence=no-data-change" >> "$GITHUB_OUTPUT"
 
+      - name: Read back persisted candidate identities from main
+        id: readback
+        if: steps.persist.outputs.persisted == 'true' || steps.nochange.outputs.persisted == 'true'
+        run: |
+          git fetch origin main
+          git show origin/main:data/curation/review_queue.csv > "$RUNNER_TEMP/persisted-queue.csv"
+          git show origin/main:site/data/paper-register.json > "$RUNNER_TEMP/persisted-register.json"
+          python3 - <<'PY_READBACK'
+          import csv, json, os
+          from pathlib import Path
+          root = Path(os.environ['RUNNER_TEMP'])
+          report = json.loads((root/'intake-recovery.json').read_text())
+          queue = {r['candidate_id'] for r in csv.DictReader((root/'persisted-queue.csv').open())}
+          public = {r['id'] for r in json.loads((root/'persisted-register.json').read_text())['records']}
+          added = {cid for row in report['processed'] for cid in row['added']}
+          if queue != public or not added <= queue:
+              raise SystemExit('Persisted queue/public projection mismatch; no intake may be finalised')
+          print(f'Persisted identity read-back: {len(queue)} candidates; {len(added)} additions verified')
+          PY_READBACK
+          echo "verified=true" >> "$GITHUB_OUTPUT"
+          echo "sha=$(git rev-parse origin/main)" >> "$GITHUB_OUTPUT"
+
       - name: Finalise source intake issues after persistence
         if: >-
-          steps.persist.outputs.persisted == 'true' || steps.nochange.outputs.persisted == 'true'
+          steps.readback.outputs.verified == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           PERSISTENCE: ${{ steps.persist.outputs.persistence || steps.nochange.outputs.persistence }}
@@ -161,7 +210,7 @@ jobs:
             batch="$(jq -r '.batch_id' <<<"$row")"
             added="$(jq '.added | length' <<<"$row")"
             skipped="$(jq '.skipped_existing | length' <<<"$row")"
-            gh issue comment "$issue" --body "Candidate-preservation barrier completed for \`${batch}\`: ${added} new operational candidate(s) materialised and ${skipped} exact rediscovery occurrence(s) reconciled. No scientific eligibility or canonical duplicate decision was inferred. Persistence: ${PERSISTENCE}. Run: ${run_url}"
+            gh issue comment "$issue" --body "Candidate-preservation barrier completed for \`${batch}\`: ${added} new operational candidate(s) materialised and ${skipped} exact rediscovery occurrence(s) reconciled. Public deployment is tracked separately and is not yet claimed. No scientific eligibility or canonical duplicate decision was inferred. Persistence: ${PERSISTENCE}. Run: ${run_url}"
             gh issue close "$issue" --reason completed || true
           done
 
@@ -181,7 +230,7 @@ jobs:
           done
 
       - name: Refresh operational archive
-        if: steps.recovery.outputs.added_count != '0' && steps.persist.outputs.persisted == 'true'
+        if: steps.readback.outputs.verified == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh workflow run archive.yml --ref main
@@ -192,6 +241,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           EVENT_NAME: ${{ github.event_name }}
           TRIGGER_ISSUE: ${{ github.event.issue.number }}
+          VERIFIED: ${{ steps.readback.outputs.verified }}
           ADDED: ${{ steps.recovery.outputs.added_count }}
           PROCESSED: ${{ steps.recovery.outputs.processed_batches }}
           REDISCOVERIES: ${{ steps.recovery.outputs.rediscovery_count }}
@@ -200,10 +250,12 @@ jobs:
           PERSISTENCE: ${{ steps.persist.outputs.persistence || steps.nochange.outputs.persistence }}
         run: |
           run_url="https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
-          summary="Candidate conservation: ${PROCESSED:-0} governed batch(es) processed, ${ADDED:-0} CandidateRecord(s) materialised, ${REDISCOVERIES:-0} exact rediscovery occurrence(s) reconciled, ${QUARANTINED:-0} batch(es) quarantined, ${FAILURES:-0} unresolved batch(es). Persistence: ${PERSISTENCE:-not-persisted}. Run: ${run_url}"
+          materialised=0
+          if [ "$VERIFIED" = "true" ]; then materialised="${ADDED:-0}"; fi
+          summary="Candidate conservation: ${PROCESSED:-0} governed batch(es) processed, ${ADDED:-0} candidate(s) staged, ${materialised} CandidateRecord(s) verified on main, ${REDISCOVERIES:-0} exact rediscovery occurrence(s) reconciled, ${QUARANTINED:-0} batch(es) quarantined, ${FAILURES:-0} unresolved batch(es). Persistence: ${PERSISTENCE:-not-persisted}. Run: ${run_url}"
           if [ "$EVENT_NAME" = "issues" ] && [ -n "$TRIGGER_ISSUE" ]; then
             gh issue comment "$TRIGGER_ISSUE" --body "$summary"
-            if [ "${FAILURES:-0}" = "0" ] && [ -n "${PERSISTENCE:-}" ]; then
+            if [ "${FAILURES:-0}" = "0" ] && [ "$VERIFIED" = "true" ]; then
               gh issue close "$TRIGGER_ISSUE" --reason completed || true
             fi
           else
@@ -214,7 +266,7 @@ jobs:
         if: >-
           always() && steps.recovery.outcome == 'success' &&
           ((steps.recovery.outputs.failure_count != '' && steps.recovery.outputs.failure_count != '0') ||
-           (steps.recovery.outputs.added_count != '0' && steps.persist.outputs.persisted != 'true'))
+           (steps.recovery.outputs.added_count != '0' && steps.readback.outputs.verified != 'true'))
         run: |
           echo "::error::Candidate conservation failed: one or more governed CandidateRecords did not cross the persistence barrier."
           exit 1

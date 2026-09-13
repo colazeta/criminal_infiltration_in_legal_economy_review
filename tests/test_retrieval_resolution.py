@@ -92,7 +92,8 @@ class RetrievalResolutionTests(unittest.TestCase):
         self.assertIn("schedule:", workflow)
         self.assertIn("python scripts/retrieval/resolve_queue.py", workflow)
         self.assertIn("gh pr merge", workflow)
-        self.assertIn("resolve_queue.py", intake)
+        self.assertNotIn("resolve_queue.py", intake)
+        self.assertIn("defer-to-terminal-recovery", intake)
         self.assertIn("retrieval_coverage.csv", materialize)
         self.assertIn("sync_issue_retrieval.py", materialize)
 
