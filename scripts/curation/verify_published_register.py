@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
-"""Verify served candidate bibliography after deployment without a token.
+"""Verify served bibliography and enriched paper-sheet content after deployment.
 
 Saved intake, merge and deployment acceptance are not served-publication evidence.
-A later release may add records but must not omit or alter expected records.
 This verifier makes no scientific or access decision.
 """
 from __future__ import annotations
@@ -18,6 +17,7 @@ from urllib.parse import urlsplit
 from urllib.request import Request, urlopen
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from scripts.curation.build_paper_register import FIELDS
+from scripts.curation.build_paper_support import validate_payload as support_index
 MAX_BYTES = 16 * 1024 * 1024
 
 def record_index(payload: dict) -> dict[str, dict]:
@@ -47,6 +47,19 @@ def compare_registers(expected: dict, actual: dict) -> dict:
             'missing_records': 0, 'changed_records': 0,
             'expected_payload_sha256': hashlib.sha256(canonical).hexdigest()}
 
+def compare_support(expected: dict, actual: dict) -> dict:
+    required, served = support_index(expected), support_index(actual)
+    missing = sorted(required.keys() - served.keys())
+    changed = sorted(cid for cid in required.keys() & served.keys() if required[cid] != served[cid])
+    if missing or changed:
+        raise ValueError(f'Public sheet support mismatch: missing={missing[:10]}, changed={changed[:10]}')
+    return {'expected_records': len(required), 'served_records': len(served),
+            'reading_aids': sum(bool(r['readingAid'] and r['readingAid']['synopsis']) for r in required.values()),
+            'abstract_availability_verified': sum(bool(r['abstract'] and r['abstract']['status'] == 'available') for r in required.values()),
+            'retrieval_metadata': sum(r['retrieval'] is not None for r in required.values()),
+            'access_assessments': sum(r['access'] is not None for r in required.values()),
+            'missing_records': 0, 'changed_records': 0}
+
 def public_bytes(url: str) -> bytes:
     parsed = urlsplit(url)
     if parsed.scheme != 'https' or parsed.hostname != 'colazeta.github.io' or parsed.username or parsed.password:
@@ -60,6 +73,27 @@ def public_bytes(url: str) -> bytes:
     if len(body) > MAX_BYTES:
         raise ValueError('Public register exceeds the bounded read size')
     return body
+
+def verify_sheet_support(register_url: str, expected_register: Path) -> dict:
+    # The existing archive workflow calls this verifier after its normal build.
+    # Missing generated support or an old renderer is now a failed publication.
+    site = expected_register.parent.parent
+    suffix = '/data/paper-register.json'
+    if not register_url.endswith(suffix):
+        raise ValueError('Unexpected public-register path for sheet verification')
+    base_url = register_url[:-len(suffix)]
+    expected = json.loads((site / 'paper-support.json').read_text(encoding='utf-8'))
+    body = public_bytes(base_url + '/paper-support.json')
+    receipt = compare_support(expected, json.loads(body))
+    receipt['served_bytes_sha256'] = hashlib.sha256(body).hexdigest()
+    receipt['renderer_assets'] = {}
+    for name in ('paper-register.js', 'paper-sheet-support.js'):
+        local = (site / name).read_bytes()
+        served = public_bytes(base_url + '/' + name)
+        if served != local:
+            raise ValueError('Public sheet renderer is stale: ' + name)
+        receipt['renderer_assets'][name] = hashlib.sha256(served).hexdigest()
+    return receipt
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
@@ -78,10 +112,11 @@ def main() -> None:
         try:
             body = public_bytes(args.url)
             receipt = compare_registers(expected, json.loads(body))
+            receipt['paper_sheet_support'] = verify_sheet_support(args.url, args.expected)
             receipt.update(url=args.url, verified_at=datetime.now(timezone.utc).isoformat(),
                            served_bytes_sha256=hashlib.sha256(body).hexdigest(), attempt=attempt,
                            workflow_run_id=os.environ.get('GITHUB_RUN_ID'),
-                           scope='provisional_bibliography_only')
+                           scope='provisional_bibliography_and_public_reading_support')
             args.receipt.write_text(json.dumps(receipt, indent=2) + '\n')
             print(json.dumps(receipt, sort_keys=True))
             return

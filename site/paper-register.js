@@ -107,10 +107,12 @@
   dialog.setAttribute("aria-labelledby", "paper-sheet-title");
   document.body.append(dialog);
   let opener = null;
+  let sheetSequence = 0;
   dialog.addEventListener("close", () => { if (opener?.isConnected) opener.focus(); });
 
   function openSheet(record, button) {
     opener = button;
+    const sequence = ++sheetSequence;
     dialog.replaceChildren();
     const bar = el("div");
     bar.className = "paper-sheet-bar";
@@ -131,14 +133,15 @@
       ["Registrato il", record.registeredAt],
       ["Stato della revisione", reviewLabels[record.reviewStatus] || record.reviewStatus],
       ["Verifica dei metadati", record.metadataStatus === "metadata_verified" ? "Verificati" : "Da verificare"],
-      ["Accesso", accessLabels[record.accessStatus] || "Da verificare"],
+      ["Accesso all’acquisizione", accessLabels[record.accessStatus] || "Da verificare"],
       ["Etichetta assegnata", record.topicCode],
     ]) {
       metadata.append(el("dt", label), el("dd", value || "Non disponibile"));
     }
-    body.append(metadata, el("h3", "Abstract"));
-    body.append(el("p", "Abstract non disponibile nel registro pubblico. Consulta le fonti del paper; gli eventuali contenuti raccolti nell’area di arricchimento non sono ancora collegati a questa scheda."));
-    body.append(el("h3", "Fonti e accesso al paper"));
+    const support = el("section", "Caricamento dei dati arricchiti…");
+    support.setAttribute("aria-live", "polite");
+    body.append(metadata, support);
+    body.append(el("h3", "Fonti registrate all’acquisizione"));
     for (const [index, url] of (record.sourceLinks || []).entries()) {
       try {
         const parsed = new URL(url);
@@ -153,6 +156,12 @@
     dialog.append(bar, body);
     if (!dialog.open) dialog.showModal();
     close.focus();
+    const isCurrent = () => dialog.open && sequence === sheetSequence;
+    import("./paper-sheet-support.js")
+      .then(() => globalThis.CILEPaperSheetSupport.load(support, record, isCurrent))
+      .catch(() => {
+        if (isCurrent()) support.textContent = "Il pannello dei dati arricchiti non è disponibile. Ricarica la pagina; non è una conferma dell’assenza dell’abstract.";
+      });
   }
 
   function render() {
