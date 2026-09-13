@@ -514,6 +514,24 @@
       "synopsis": "The discussion paper studies how municipal bureaucrats respond when central-government dissolution abruptly removes politicians captured by the Mafia. Using dissolved Italian municipalities as the empirical setting, the abstract focuses on changes in bureaucratic behaviour after political capture is removed.",
       "checkedAt": "2026-09-13",
       "note": "Parallel Search fetched CEPR Discussion Paper 21805, matching Maria Carreri, Davide Cipullo, Marco Le Moglie and Alberto Perego and the exact registered title. Evidence basis: abstract_only. CEPR lists publication on 1 August 2026, but the registered CandidateRecord currently has a blank year and this retrieval-only lane does not rewrite it. No stable direct full-text bitstream was independently verified, so the record is not promoted to full_text; no private ingestion or scientific decision is claimed."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-13-EXTRA-60872f2c2bf0-001",
+      "kind": "full_text_intro",
+      "sourceLabel": "Persée full-text scholarly article located with Parallel Search",
+      "sourceUrl": "https://www.persee.fr/doc/ecoap_0013-0494_2012_num_65_3_3609",
+      "synopsis": "The article develops a typology of legal markets most exposed to Mafia infiltration, distinguishing how Mafia actors gain access and why they enter lawful markets. It then applies the framework to public procurement, examining ownership and control characteristics, the transition from corruption to Mafia infiltration, and economic effects in construction and public works.",
+      "checkedAt": "2026-09-13",
+      "note": "Parallel Search matched Clotilde Champeyrache, Économie appliquée 65(3), 2012, pp. 5–26 and fetched the complete Persée scholarly article text. Evidence basis: full_text. The registered CandidateRecord has no DOI and this retrieval-only lane does not invent one; the Persée manifestation is retained as the verified final scholarly source. No private full-text ingestion, eligibility decision, canonicalisation or scientific classification is claimed."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-13-EXTRA-7450b0e2f8a2-001",
+      "kind": "verified_abstract_source",
+      "sourceLabel": "NIJ/OJP exact abstract record located with Parallel Search",
+      "sourceUrl": "https://nij.ojp.gov/library/publications/indicators-impacts-organized-crime",
+      "synopsis": "The 1983 NIJ-sponsored study uses a Delphi-like two-day group discussion with eight law-enforcement experts to derive business, governance and community indicators of organised-crime impacts. The indexed abstract presents the indicators as experience-based rather than theory-derived and intended to support comparison of cities affected by organised crime.",
+      "checkedAt": "2026-09-13",
+      "note": "Parallel Search matched NCJ 95265, R W Davis, C H Rogovin, 1983 and the 44-page NIJ-sponsored applied/empirical research record. Evidence basis: abstract_only. An authoritative NIJ/OJP abstract is available, but a stable direct PDF for NCJ 95265 was not independently resolved in this pass, so the candidate is not promoted to full_text. No private source ingestion or scientific decision is claimed."
     }
   ]
 }
