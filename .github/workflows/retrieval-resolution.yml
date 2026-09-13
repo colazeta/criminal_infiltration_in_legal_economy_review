@@ -11,6 +11,13 @@ on:
       - scripts/retrieval/selected_paper_delivery.py
       - scripts/retrieval/persist_selected_support.sh
       - .github/workflows/retrieval-resolution.yml
+  pull_request:
+    branches: [main]
+    paths:
+      - data/curation/reading_aid_overrides.json
+      - scripts/retrieval/selected_paper_delivery.py
+      - scripts/retrieval/persist_selected_support.sh
+      - .github/workflows/retrieval-resolution.yml
   schedule:
     - cron: "20 5 * * 0"
   workflow_dispatch:
@@ -27,7 +34,14 @@ concurrency:
 
 jobs:
   resolve:
-    if: github.event_name != 'workflow_dispatch' || github.actor == github.repository_owner
+    if: >-
+      (github.event_name != 'workflow_dispatch' || github.actor == github.repository_owner) &&
+      (github.event_name != 'pull_request' ||
+       (github.actor == github.repository_owner &&
+        github.event.pull_request.user.login == github.repository_owner &&
+        github.event.pull_request.head.repo.full_name == github.repository &&
+        (startsWith(github.head_ref, 'maintenance/selected-paper-') ||
+         startsWith(github.head_ref, 'maintenance/parallel-search-'))))
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -40,10 +54,10 @@ jobs:
         with:
           node-version: 22
 
-      - name: Checkout main
+      - name: Checkout exact owned PR head or current main
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
-          ref: main
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || 'main' }}
           fetch-depth: 0
 
       - name: Set up Python
@@ -53,7 +67,12 @@ jobs:
 
       - name: Distinguish local source support from full queue refresh
         id: refresh
-        run: echo "mode=$(python3 scripts/retrieval/selected_paper_delivery.py --refresh-mode)" >> "$GITHUB_OUTPUT"
+        run: |
+          if [ "$GITHUB_EVENT_NAME" = pull_request ]; then
+            echo "mode=local" >> "$GITHUB_OUTPUT"
+          else
+            echo "mode=$(python3 scripts/retrieval/selected_paper_delivery.py --refresh-mode)" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Resolve every queue candidate and sync verified reading locators
         if: steps.refresh.outputs.mode == 'full'
@@ -84,13 +103,53 @@ jobs:
           node --check curator-app/src/worker.js
           bash -n scripts/retrieval/persist_selected_support.sh
 
+      - name: Retain validated preparation on its owning PR branch
+        if: github.event_name == 'pull_request'
+        run: |
+          set -euo pipefail
+          case "$GITHUB_HEAD_REF" in
+            maintenance/selected-paper-*|maintenance/parallel-search-*) ;;
+            *) echo "::error::Not an owned selected-paper branch"; exit 1 ;;
+          esac
+          paths=(data/curation/retrieval_coverage.csv data/curation/abstract_coverage.csv site/data)
+          if git diff --quiet -- "${paths[@]}"; then
+            echo "Verified support already prepared on the reviewed branch." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          while IFS= read -r path; do
+            case "$path" in
+              data/curation/retrieval_coverage.csv|data/curation/abstract_coverage.csv|site/data/*) ;;
+              *) echo "::error::Unexpected preparation path: $path"; exit 1 ;;
+            esac
+          done < <(git diff --name-only)
+          base_sha="$(git rev-parse HEAD)"
+          remote_sha="$(git ls-remote origin "refs/heads/$GITHUB_HEAD_REF" | cut -f1)"
+          [ "$remote_sha" = "$base_sha" ] || { echo "::error::PR head moved; reuse and reconcile this PR"; exit 1; }
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- "${paths[@]}"
+          git commit -m "Prepare verified reading-support projections for review"
+          git push origin "HEAD:refs/heads/$GITHUB_HEAD_REF"
+          {
+            echo "## Preparation retained; final-head CI still required"
+            echo "Branch: $GITHUB_HEAD_REF"
+            echo "Prepared head: $(git rev-parse HEAD)"
+            echo "Validated input: $base_sha"
+            echo "Next: inspect the generated diff and obtain ordinary CI on this new head before merge."
+            echo "No main write, publication, private ingestion or scientific approval occurred."
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "::error::Prepared branch checkpoint retained; final_head_validation_pending"
+          exit 1
+
       - name: Persist validated retrieval update
+        if: github.event_name != 'pull_request'
         env:
           GH_TOKEN: ${{ github.token }}
           GITHUB_TOKEN: ${{ github.token }}
         run: bash scripts/retrieval/persist_selected_support.sh
 
       - name: Reconcile issue support after confirmed persistence or unchanged coverage
+        if: github.event_name != 'pull_request'
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
