@@ -46,6 +46,7 @@ from fetch_surveillance_ledger_quarantine import (  # noqa: E402
     fetch_validated_run_for_intake,
 )
 from scripts.curation.import_intake_issue import parse_intake_issue, read_queue  # noqa: E402
+from scripts.curation.audited_intake_reconciliation import audited_occurrences  # noqa: E402
 from scripts.curation.scaffold_candidate_coverage import (  # noqa: E402
     COVERAGE_PATHS,
     scaffold_all,
@@ -258,9 +259,9 @@ def reconcile_terminal_absent_issue(
     title = str(issue.get("title") or "")
     manifest = parse_intake_issue(issue.get("body") or "", title)
     _, queue = read_queue(root / "data/curation/review_queue.csv")
-    novel, skipped = reconcile_candidates_stable_first(
-        root, queue, list(manifest["candidates"])
-    )
+    remaining, audited = audited_occurrences(issue, queue, list(manifest["candidates"]))
+    novel, skipped = reconcile_candidates_stable_first(root, queue, remaining)
+    skipped.extend(audited)
     if novel:
         unresolved = ", ".join(str(candidate["candidate_id"]) for candidate in novel)
         raise IntakeImportError(
