@@ -17,6 +17,11 @@ jobs:
       startsWith(github.event.issue.title, '[INTAKE][ACADEMIC] ')
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout governance contract read-only
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
       - name: Preserve source intake and defer materialisation
         run: |
           echo "Intake #${{ github.event.issue.number }} is the immutable CandidateRecord source."
