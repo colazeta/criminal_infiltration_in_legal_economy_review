@@ -172,6 +172,33 @@
       "synopsis": "The chapter analyses organised-crime infiltration of Italian firms by examining the territories, sectors and modi operandi associated with Italian mafias and also discusses the much thinner evidence available on infiltration by foreign organised-crime groups.",
       "checkedAt": "2026-09-13",
       "note": "Parallel Search fetched the exact Università Cattolica record matching Michele Riccardi, Cristina Soriani, Valentina Giampietri, the 2016 chapter and pages 119–140, with an explicit institutional Abstract section. Evidence basis: abstract_only. An exact Taylor & Francis publisher manifestation was also located, but no open full text was verified and its chapter identifier is not silently added or reconciled here; claims beyond the institutional abstract remain not_verifiable."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-09-014",
+      "kind": "full_text_intro",
+      "sourceLabel": "UIF Quaderno 32 full-text paper located with Parallel Search",
+      "sourceUrl": "https://uif.bancaditalia.it/pubblicazioni/quaderni/2025/quaderno-32-2025/QAR-32.pdf",
+      "synopsis": "The paper studies whether credit rationing makes distressed firms more vulnerable to organised-crime infiltration. Using confidential UIF mapping of firms potentially connected to organised crime and firm-level data for the universe of Italian companies over 2001–2020, it compares firms downgraded to substandard credit risk with firms not downgraded in the same year and reports a persistent contraction in credit together with a subsequent increase in infiltration risk.",
+      "checkedAt": "2026-09-13",
+      "note": "Parallel Search fetched the exact UIF Quaderno 32 PDF and matched title plus all five authors. Evidence basis: full_text. The candidate is already keyed to the UIF 2025 manifestation; SSRN/CESifo, CEPR, RFBerlin and Bocconi manifestations were also located but are not silently substituted for or canonicalised with it. No verbatim paper text, eligibility decision or private full-text ingestion is claimed."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-09-EXTRA-5e31cc756b0e-004",
+      "kind": "verified_abstract_source",
+      "sourceLabel": "SSRN exact abstract record located with Parallel Search",
+      "sourceUrl": "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4960619",
+      "synopsis": "The paper studies market spillovers from 57 anti-Mafia police operations in Northern and Central Italy from 2013 to 2020. The abstract reports that removing Mafia-connected firms increases non-criminal competitors’ performance by 7.7%, with larger effects in low-competition industries, and that effects vary with the criminal firm’s infiltration strategy and organisational role.",
+      "checkedAt": "2026-09-13",
+      "note": "Parallel Search fetched the exact SSRN record matching Francesco Ambrosini, Michele Fabrizi, Elisabetta Ipino and Antonio Parbonetti. Evidence basis: abstract_only. The current title is preserved together with the existing manifestation history: first posted 29 October 2024 and last revised 25 June 2025; the earlier discovered title is not treated as a second paper. No stable direct full-text URL was verified in this pass, so claims beyond the SSRN abstract remain not_verifiable."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-09-EXTRA-5e31cc756b0e-011",
+      "kind": "verified_abstract_source",
+      "sourceLabel": "CEPR DP19322 abstract record located with Parallel Search",
+      "sourceUrl": "https://cepr.org/publications/dp19322",
+      "synopsis": "The paper builds a machine-learning predictor of Mafia infiltration in Italian local governments, using council dissolution for organised-crime infiltration as the outcome. The abstract reports up to 96% out-of-sample detection two years before formal identification and, using a geographic difference-in-discontinuities design, a lasting increase of up to 14 percentage points in predicted infiltration risk after aid exposure.",
+      "checkedAt": "2026-09-13",
+      "note": "Parallel Search fetched the exact CEPR DP19322 record and matched Gian Maria Campedelli, Gianmarco Daniele, Marco Le Moglie and the 2024 paper identity. Evidence basis: abstract_only. The CEPR page supports the prediction and geographic difference-in-discontinuities claims; no open full-text manifestation was verified in this pass, so claims beyond the abstract remain not_verifiable and no scientific decision is persisted."
     }
   ]
 }
