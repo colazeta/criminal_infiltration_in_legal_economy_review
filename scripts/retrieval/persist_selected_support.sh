@@ -3,7 +3,6 @@
 set -euo pipefail
 : "${GITHUB_REPOSITORY:?}" "${GITHUB_RUN_ID:?}" "${RUNNER_TEMP:?}"
 base_sha="$(git rev-parse HEAD)"
-branch="automation/selected-support-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT:-1}"
 paths=(data/curation/retrieval_coverage.csv data/curation/abstract_coverage.csv site/data)
 if git diff --quiet -- "${paths[@]}"; then
   echo "Support projections already current; no repository write required." >> "$GITHUB_STEP_SUMMARY"
@@ -16,21 +15,19 @@ while IFS= read -r path; do
     *) echo "::error::Unexpected changed path in mechanical support update: $path"; exit 1 ;;
   esac
 done < <(git diff --name-only)
-git config user.name "github-actions[bot]"
-git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-git checkout -b "$branch"
-git add -- "${paths[@]}"
-git commit -m "Refresh validated reading-support projections"
-git push origin "$branch"
-head_sha="$(git rev-parse HEAD)"
+# Stable checkpoint identity: an identical validated mechanical diff from the same
+# main base must reuse the retained branch/PR rather than multiplying run-id branches.
+diff_digest="$( { printf '%s\n' "$base_sha"; git diff --binary -- "${paths[@]}"; } | sha256sum | cut -c1-20 )"
+branch="automation/selected-support-${diff_digest}"
 pr_url=""
+head_sha=""
 pending() {
   echo "::error::Support persistence is pending: $1"
   {
     echo "## Recoverable selected-support checkpoint"
     echo "Status: persistence_pending; not published and not scientifically approved."
     echo "Branch: $branch"
-    echo "Head: $head_sha"
+    echo "Head: ${head_sha:-not-yet-persisted}"
     echo "Validated base: $base_sha"
     echo "PR: ${pr_url:-creation blocked}"
     echo "Blocker: $1"
@@ -38,7 +35,22 @@ pending() {
   } >> "$GITHUB_STEP_SUMMARY"
   exit 1
 }
-cat > "$RUNNER_TEMP/selected-support-pr.md" <<EOF
+
+if git ls-remote --exit-code --heads origin "$branch" >/dev/null 2>&1; then
+  checkpoint="$(gh pr list --state open --base main --head "$branch" --json url,headRefOid --jq '.[0] | [.url, .headRefOid] | @tsv')" || pending "checkpoint_lookup_failed"
+  [ -n "$checkpoint" ] || pending "checkpoint_branch_without_open_pr"
+  IFS=$'\t' read -r pr_url head_sha <<< "$checkpoint"
+  [ -n "$pr_url" ] && [ -n "$head_sha" ] || pending "checkpoint_readback_incomplete"
+  echo "Reusing retained selected-support checkpoint: $pr_url" >> "$GITHUB_STEP_SUMMARY"
+else
+  git config user.name "github-actions[bot]"
+  git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+  git checkout -b "$branch"
+  git add -- "${paths[@]}"
+  git commit -m "Refresh validated reading-support projections"
+  git push origin "$branch"
+  head_sha="$(git rev-parse HEAD)"
+  cat > "$RUNNER_TEMP/selected-support-pr.md" <<EOF
 Mechanical retrieval/abstract-support and deterministic public projections only.
 
 Full AGENTS.md mandatory validation completed before this branch was committed.
@@ -49,15 +61,18 @@ check remain required before merge. No direct-main fallback is permitted.
 Base: $base_sha
 Head: $head_sha
 Source run: $GITHUB_RUN_ID
+Checkpoint digest: $diff_digest
 EOF
-pr_url="$(gh pr create --base main --head "$branch" --title "Refresh validated reading-support projections" --body-file "$RUNNER_TEMP/selected-support-pr.md")" || pending "pr_creation_blocked"
+  pr_url="$(gh pr create --base main --head "$branch" --title "Refresh validated reading-support projections" --body-file "$RUNNER_TEMP/selected-support-pr.md")" || pending "pr_creation_blocked"
+fi
+
 # A GITHUB_TOKEN-created PR may have no runnable checks. Never call that success.
 quality="pending"
-for attempt in 1 2 3 4 5 6; do
+for attempt in $(seq 1 18); do
   quality="$(gh api "repos/$GITHUB_REPOSITORY/commits/$head_sha/check-runs" --jq '[.check_runs[] | select(.name == "quality" and .app.slug == "github-actions") | .conclusion] | if length == 0 then "pending" elif all(. == "success") then "success" elif any(. == "failure" or . == "action_required" or . == "cancelled") then "blocked" else "pending" end')" || pending "quality_read_failed"
   [ "$quality" = "success" ] && break
   [ "$quality" = "blocked" ] && pending "quality_blocked"
-  [ "$attempt" = 6 ] || sleep 5
+  [ "$attempt" = 18 ] || sleep 10
 done
 [ "$quality" = "success" ] || pending "quality_not_successful"
 current_main="$(gh api "repos/$GITHUB_REPOSITORY/git/ref/heads/main" --jq .object.sha)" || pending "main_read_failed"
