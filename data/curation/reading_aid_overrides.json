@@ -406,6 +406,33 @@
       "synopsis": "The 1997 article compares Chinese Triads and Japanese Yakuza, discussing organisational structure, the use of fear and pressure, and major criminal revenue-generating activities. The indexed abstract describes substantial drug-derived funds for Triads and highly concentrated authority within Yakuza groups.",
       "checkedAt": "2026-09-13",
       "note": "Parallel Search fetched the exact OJP/NCJRS record for NCJ 169472, R. Harnischmacher, EuroCriminology 11 (1997), pp. 163–181, and its indexed abstract. Evidence basis: abstract_only. The fetched OJP record exposes no official full-text download, so claims beyond the indexed abstract remain not_verifiable; no private source ingestion or scientific decision is inferred."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-13-EXTRA-4b57a3081215-001",
+      "kind": "full_text_intro",
+      "sourceLabel": "Springer open-access full-text article located with Parallel Search",
+      "sourceUrl": "https://link.springer.com/content/pdf/10.1007/s10610-016-9329-7.pdf",
+      "synopsis": "The article asks how illegal business cartels create stability without formal legal enforcement. Drawing on an in-depth study of 14 Dutch cartels, it shows how informal social mechanisms coordinate, monitor and enforce agreements and manage internal conflict, emphasising trust and social organisation as conditions of cartel longevity.",
+      "checkedAt": "2026-09-13",
+      "note": "Parallel Search resolved the exact registered DOI and title at Springer and fetched the publisher full-text PDF, matching J. D. Jaspers and DOI 10.1007/s10610-016-9329-7. The paper states that it was published open access at SpringerLink. Evidence basis: full_text. No verbatim paper text, private source ingestion, eligibility decision, framework classification or canonical-identity decision is claimed."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-13-EXTRA-4b57a3081215-002",
+      "kind": "full_text_intro",
+      "sourceLabel": "Erasmus University Rotterdam institutional full-text article located with Parallel Search",
+      "sourceUrl": "https://repub.eur.nl/pub/116716/RePub-116716-OA.pdf",
+      "synopsis": "The article examines how corporate crime is organised by studying the longevity of illegal business cartels. A case-study analysis of 14 Dutch cartel cases finds that participants communicate frequently and depend on trust, which complicates concealment, and that durable cartels are socially embedded rather than isolated from their environment.",
+      "checkedAt": "2026-09-13",
+      "note": "Parallel Search fetched the exact Erasmus University Rotterdam repository full text, matching J. D. Jaspers, the 2019 article title and scholarly DOI 10.1007/s10611-019-09847-4. Evidence basis: full_text. The registered CandidateRecord currently has no DOI; this retrieval-only lane does not silently add or canonicalise the identifier. No private source ingestion, eligibility decision or scientific classification is claimed."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-13-EXTRA-4b57a3081215-003",
+      "kind": "verified_abstract_source",
+      "sourceLabel": "SAGE publisher abstract located with Parallel Search",
+      "sourceUrl": "https://journals.sagepub.com/doi/10.1177/1477370818803050",
+      "synopsis": "The article investigates how Mafia groups infiltrate the legal economy in non-traditional territories in Northern Italy. The comparative study examines the mechanisms and local relational conditions through which Mafia actors become embedded beyond traditional strongholds.",
+      "checkedAt": "2026-09-13",
+      "note": "Parallel Search fetched the exact SAGE publisher record for DOI 10.1177/1477370818803050, matching Joselle Dagnes, Davide Donatiello, Valentina Moiso, Davide Pellegrino, Rocco Sciarrone and Luca Storti. The article was first published online in 2018 and appears in the 2020 issue; SAGE marks the article as restricted access, and the apparent PDF route resolves to the same restricted publisher surface rather than an accessible paper body. Evidence basis: abstract_only. No full-text claim, private source ingestion, eligibility decision or canonical-identity decision is inferred."
     }
   ]
 }
