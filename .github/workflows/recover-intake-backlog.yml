@@ -25,6 +25,13 @@ jobs:
        github.event.issue.user.login == github.repository_owner &&
        github.event.issue.title == '[MAINTENANCE][INTAKE-RECOVERY]') ||
       (github.event_name == 'issue_comment' &&
+       github.actor == github.repository_owner &&
+       github.event.comment.user.login == github.repository_owner &&
+       github.event.issue.user.login == github.repository_owner &&
+       github.event.issue.number == 362 &&
+       github.event.issue.title == '[MAINTENANCE][INTAKE-RECOVERY]' &&
+       github.event.comment.body == '/recover-intake') ||
+      (github.event_name == 'issue_comment' &&
        github.event.issue.number == 30 &&
        github.event.comment.user.login == github.repository_owner &&
        contains(github.event.comment.body, 'surveillance-run:v3')) ||
@@ -241,6 +248,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           EVENT_NAME: ${{ github.event_name }}
           TRIGGER_ISSUE: ${{ github.event.issue.number }}
+          TRIGGER_TITLE: ${{ github.event.issue.title }}
           VERIFIED: ${{ steps.readback.outputs.verified }}
           ADDED: ${{ steps.recovery.outputs.added_count }}
           PROCESSED: ${{ steps.recovery.outputs.processed_batches }}
@@ -253,7 +261,7 @@ jobs:
           materialised=0
           if [ "$VERIFIED" = "true" ]; then materialised="${ADDED:-0}"; fi
           summary="Candidate conservation: ${PROCESSED:-0} governed batch(es) processed, ${ADDED:-0} candidate(s) staged, ${materialised} CandidateRecord(s) verified on main, ${REDISCOVERIES:-0} exact rediscovery occurrence(s) reconciled, ${QUARANTINED:-0} batch(es) quarantined, ${FAILURES:-0} unresolved batch(es). Persistence: ${PERSISTENCE:-not-persisted}. Run: ${run_url}"
-          if [ "$EVENT_NAME" = "issues" ] && [ -n "$TRIGGER_ISSUE" ]; then
+          if { [ "$EVENT_NAME" = "issues" ] || [ "$EVENT_NAME" = "issue_comment" ]; } && [ "$TRIGGER_TITLE" = "[MAINTENANCE][INTAKE-RECOVERY]" ] && [ -n "$TRIGGER_ISSUE" ]; then
             gh issue comment "$TRIGGER_ISSUE" --body "$summary"
             if [ "${FAILURES:-0}" = "0" ] && [ "$VERIFIED" = "true" ]; then
               gh issue close "$TRIGGER_ISSUE" --reason completed || true
@@ -261,6 +269,15 @@ jobs:
           else
             echo "$summary" >> "$GITHUB_STEP_SUMMARY"
           fi
+
+      - name: Retain candidate-conservation receipt
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: candidate-conservation-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/intake-recovery.json
+          if-no-files-found: warn
+          retention-days: 30
 
       - name: Enforce candidate-conservation invariant
         if: >-
