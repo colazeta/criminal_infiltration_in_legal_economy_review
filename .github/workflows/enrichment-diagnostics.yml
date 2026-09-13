@@ -1,7 +1,7 @@
 name: Diagnose paper enrichment dependencies
 on:
   push:
-    branches: [implementation/paper-enrichment-20260911]
+    branches: [implementation/paper-enrichment-20260911, implementation/public-research-sheets-597]
     paths: [.github/workflows/enrichment-diagnostics.yml]
   workflow_dispatch:
 permissions:
@@ -15,6 +15,7 @@ jobs:
       - name: Checkout public source
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
       - name: Read-only dependency checks with redacted output
+        if: github.ref != 'refs/heads/implementation/public-research-sheets-597'
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
