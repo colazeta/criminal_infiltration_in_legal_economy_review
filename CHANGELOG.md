@@ -142,3 +142,14 @@ follow semantic versioning while the project is in prerelease.
 - Displays every field in the existing public projection and validated source links.
 - Abstracts remain explicitly unavailable in the public projection; private enrichment is not exported or misrepresented as public content. Connecting sourced abstracts requires a separate governed projection change.
 - No record, scientific decision or ontology contract changed.
+
+### Fixed — 2026-09-13, residual intake recovery
+
+- Re-enable the existing hourly :40 discovery task; no duplicate scheduler.
+- Add an exact owner-only `/recover-intake` command on canonical request #362 so
+  a stale open issue cannot suppress a real retry; retain structured recovery receipts.
+- Reconcile only two evidence-pinned #225 occurrences to existing CandidateRecords,
+  preserving the original body, author variant and absent-terminal history.
+- Independently reacquire the missing #225 article through real validated intake
+  #579; do not whitelist it away or infer scientific acceptance.
+- Correct outdated writer/provider instructions and add fail-closed regression tests.

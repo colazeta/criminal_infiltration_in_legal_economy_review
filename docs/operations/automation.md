@@ -32,13 +32,15 @@ eligibility/publication decisions. The ledger comment contains counts and
 technical provenance only, never candidate metadata.
 
 This boundary applies to the external surveillance task. After that task has
-persisted a valid intake issue, the repository-owned
-`intake-to-curation.yml` workflow may mechanically prepare a branch and pull
-request containing the same candidates in the operational candidate queue. That
-downstream workflow may enrich metadata and access observations but performs no
-scientific screening and never edits the canonical registry. Its existing technical persistence path may merge validated
-pending queue rows under owner maintenance authority; this is not scientific
-approval or public corpus publication.
+persisted a valid intake and authenticated terminal, the repository-owned
+`recover-intake-backlog.yml` is the sole automatic CandidateRecord writer. The
+issue-open `intake-to-curation.yml` path is read-only. Recovery mechanically
+persists the queue, minimal coverage and closed public projection together;
+optional network enrichment is downstream and cannot withhold preservation.
+This technical persistence is not scientific approval or canonical publication.
+For owner-directed repair, use the authenticated `/recover-intake` comment on
+canonical maintenance issue #362 after checking actual active recovery runs.
+An open issue alone is not a lease. See [residual recovery](residual-intake-recovery.md).
 
 ## Batch contract
 
@@ -56,7 +58,7 @@ V2 is retained only for immutable ledger comments created before the v3 release
 merged at 2026-09-08T20:05:10Z (PR #204). New comments require v3; the gate uses
 GitHub creation time, so backdating payload timestamps cannot bypass it.
 The current operational registration protocol is `CILE-DAILY-v5`, independent of
-scientific protocol `CILE-4PT-OA-v3` and ontology profile 0.3.0.
+scientific protocol `CILE-4PT-OA-v3` and ontology profile 0.4.1.
 
 - Calculate exact date/window in `Europe/Rome`.
 - Batch ID: `ACADEMIC-YYYY-MM-DD`; no-op if that title/ID already exists.
