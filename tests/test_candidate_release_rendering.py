@@ -6,7 +6,12 @@ import sys
 import tempfile
 import unittest
 from unittest.mock import patch
-from scripts.curation.build_paper_register import build_payload, render_page, render_source_link
+from scripts.curation.build_paper_register import (
+    build_payload,
+    render_page,
+    render_source_link,
+    validate_enrichment_registry,
+)
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT/'scripts/metrics'))
 import fetch_surveillance_ledger_quarantine as ledger
@@ -28,6 +33,25 @@ class ReleaseRenderingTests(unittest.TestCase):
             self.assertFalse(any(url.startswith('http:') for url in parser.hrefs))
             self.assertIn(str(len(payload['records']))+' record registrati',page.read_text())
             self.assertEqual(payload,original)
+    def test_current_register_satisfies_private_enrichment_contract(self):
+        payload=build_payload(ROOT)
+        self.assertIs(validate_enrichment_registry(payload),payload)
+    def test_enrichment_registry_rejects_http_even_if_legacy_renderer_can_show_it(self):
+        payload={'schemaVersion':1,'records':[{
+            'id':'CAND-TEST-1','title':'Test','doi':'','sourceLinks':['http://example.org/paper']
+        }]}
+        with self.assertRaisesRegex(ValueError,'credential-free HTTPS'):
+            validate_enrichment_registry(payload)
+    def test_enrichment_registry_rejects_credentials_and_invalid_candidate_identity(self):
+        base={'schemaVersion':1,'records':[{
+            'id':'CAND-TEST-1','title':'Test','doi':'','sourceLinks':['https://example.org/paper']
+        }]}
+        credentials=copy.deepcopy(base); credentials['records'][0]['sourceLinks']=['https://user:pass@example.org/paper']
+        with self.assertRaisesRegex(ValueError,'credential-free HTTPS'):
+            validate_enrichment_registry(credentials)
+        invalid_id=copy.deepcopy(base); invalid_id['records'][0]['id']='candidate_test'
+        with self.assertRaisesRegex(ValueError,'invalid enrichment registry record'):
+            validate_enrichment_registry(invalid_id)
     def test_http_provenance_is_not_dropped_or_silently_upgraded(self):
         url='http://cepr.org/publications/dp12140'
         html=render_source_link(url,1)
