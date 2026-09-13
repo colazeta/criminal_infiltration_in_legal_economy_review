@@ -28,16 +28,36 @@ function safeText(value,privateIds){
   for(const token of value.match(/https?:\/\/[^\s<>"']+/g)||[])if(!safeResearchUrl(token))throw Error('publication_boundary');
 }
 const words=s=>s.normalize('NFKC').toLowerCase().match(/[\p{L}\p{N}]+/gu)||[];
+const COPY_WINDOW_WORDS=5,MAX_PUBLIC_COPY_WINDOWS=20000;
 function checkParaphrases(research,sources){
-  // A privacy/copyright guard, not a claim that model paraphrases are correct.
-  const sourceWindows=new Set();
-  for(const s of sources){const w=words(s.text);for(let i=0;i+25<=w.length;i++)sourceWindows.add(w.slice(i,i+25).join(' '))}
-  function visit(v){if(!v||typeof v!=='object')return;
+  // Fail closed on substantive verbatim overlap without retaining source-sized
+  // n-gram sets. Only bounded public windows are retained; private source text is
+  // scanned once with a five-token rolling buffer.
+  const byLast=new Map(),seen=new Set();let count=0;
+  function add(pattern){
+    const key=pattern.join(' ');if(seen.has(key))return;seen.add(key);
+    if(++count>MAX_PUBLIC_COPY_WINDOWS)throw Error('publication_limit');
+    const last=pattern.at(-1),list=byLast.get(last)||[];list.push(pattern);byLast.set(last,list);
+  }
+  function visit(v){
+    if(!v||typeof v!=='object')return;
     if(Object.hasOwn(v,'evidence_span_ids')&&typeof v.value==='string'){
-      const w=words(v.value);for(let i=0;i+25<=w.length;i++)if(sourceWindows.has(w.slice(i,i+25).join(' ')))throw Error('publication_boundary');
+      const w=words(v.value);for(let i=0;i+COPY_WINDOW_WORDS<=w.length;i++)add(w.slice(i,i+COPY_WINDOW_WORDS));
     }
     for(const child of Object.values(v))visit(child);
-  }visit(research);
+  }
+  visit(research);if(!count)return;
+  for(const source of sources){
+    const tail=[];
+    for(const match of source.text.matchAll(/[\p{L}\p{N}]+/gu)){
+      const token=match[0].normalize('NFKC').toLowerCase();tail.push(token);if(tail.length>COPY_WINDOW_WORDS)tail.shift();
+      if(tail.length!==COPY_WINDOW_WORDS)continue;
+      for(const pattern of byLast.get(token)||[]){
+        let same=true;for(let i=0;i<COPY_WINDOW_WORDS;i++)if(tail[i]!==pattern[i]){same=false;break}
+        if(same)throw Error('publication_boundary');
+      }
+    }
+  }
 }
 export function validatePublicResearch(payload){
   validateShape(payload,schema,'$',schema);
@@ -87,7 +107,9 @@ export async function projectResearch(target,proposal,sources){
     research.updated_at=proposal.created_at;
     research.internal_notes='not_released';
     research.sources=input.source_ids.map(id=>{const s=sources.find(s=>s.source_id===id);return{id:sourceMap.get(id),url:s.source_url,kind:s.evidence_kind,version:s.version_label,checked_at:s.observed_at}});
-    research.spans=input.spans.map(s=>({id:spanMap.get(s.id),source_id:sourceMap.get(s.source_id),locator:s.locator}));
+    // Private span locators can themselves contain evidence quotations. Publish a
+    // stable ordinal locator only; exact offsets/labels remain private evidence.
+    research.spans=input.spans.map((s,i)=>({id:spanMap.get(s.id),source_id:sourceMap.get(s.source_id),locator:`evidence segment ${i+1}`}));
     const ids=[target.target_id,proposal.proposal_id,...sources.flatMap(s=>[s.source_id,s.storage_key]),...input.spans.map(s=>s.id)];
     function inspect(v){if(typeof v==='string')safeText(v,ids);else if(v&&typeof v==='object')for(const x of Object.values(v))inspect(x)}inspect(research);
     checkParaphrases(research,sources);
