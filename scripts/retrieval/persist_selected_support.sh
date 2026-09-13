@@ -67,18 +67,34 @@ EOF
 fi
 
 # PRs created with the repository GITHUB_TOKEN do not recursively trigger a PR
-# workflow. workflow_dispatch is the supported exception: dispatch the ordinary
-# archive quality workflow on the exact retained branch if this head has no
-# quality run yet, then await the resulting check. This is validation, not merge.
-quality_state="$(gh api "repos/$GITHUB_REPOSITORY/commits/$head_sha/check-runs" --jq '[.check_runs[] | select(.name == "quality" and .app.slug == "github-actions")] | if length == 0 then "missing" elif any(.status == "in_progress" or .status == "queued") then "pending" elif all(.conclusion == "success") then "success" elif any(.conclusion == "failure" or .conclusion == "action_required" or .conclusion == "cancelled") then "blocked" else "pending" end')" || pending "quality_read_failed"
-if [ "$quality_state" = "missing" ]; then
+# workflow. workflow_dispatch is the supported exception. Evaluate only the most
+# recent exact-head quality check: historical failures/action_required outcomes
+# remain audit evidence but must not permanently poison a reusable checkpoint.
+latest_quality_state() {
+  gh api "repos/$GITHUB_REPOSITORY/commits/$head_sha/check-runs" --jq '
+    [.check_runs[] | select(.name == "quality" and .app.slug == "github-actions")]
+    | sort_by(.started_at // .created_at // "")
+    | if length == 0 then "missing"
+      else last
+      | if (.status == "in_progress" or .status == "queued") then "pending"
+        elif .conclusion == "success" then "success"
+        elif (.conclusion == "failure" or .conclusion == "action_required" or .conclusion == "cancelled") then "blocked"
+        else "pending"
+        end
+      end'
+}
+quality_state="$(latest_quality_state)" || pending "quality_read_failed"
+if [ "$quality_state" = "missing" ] || [ "$quality_state" = "blocked" ]; then
   gh workflow run archive.yml --ref "$branch" || pending "quality_dispatch_failed"
+  echo "Dispatched replacement exact-head quality validation for retained checkpoint." >> "$GITHUB_STEP_SUMMARY"
 fi
 
 quality="pending"
 for attempt in $(seq 1 18); do
-  quality="$(gh api "repos/$GITHUB_REPOSITORY/commits/$head_sha/check-runs" --jq '[.check_runs[] | select(.name == "quality" and .app.slug == "github-actions")] | if length == 0 then "pending" elif any(.status == "in_progress" or .status == "queued") then "pending" elif all(.conclusion == "success") then "success" elif any(.conclusion == "failure" or .conclusion == "action_required" or .conclusion == "cancelled") then "blocked" else "pending" end')" || pending "quality_read_failed"
+  quality="$(latest_quality_state)" || pending "quality_read_failed"
   [ "$quality" = "success" ] && break
+  # A blocked state after dispatch is terminal for this invocation, but the branch
+  # and PR remain the recoverable checkpoint for a later exact-head redispatch.
   [ "$quality" = "blocked" ] && pending "quality_blocked"
   [ "$attempt" = 18 ] || sleep 10
 done
