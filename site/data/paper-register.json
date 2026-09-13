@@ -4255,6 +4255,39 @@
       "accessStatus": "unknown",
       "registeredAt": "2026-09-13",
       "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-14-001",
+      "title": "Study of Property Ownership and Devolution in the Organized Crime Environment",
+      "authors": "M Libonati; H Edelhertz",
+      "year": 1983,
+      "venue": "National Institute of Justice",
+      "doi": "",
+      "sourceLinks": [
+        "https://uat.nij.ojp.gov/library/publications/study-property-ownership-and-devolution-organized-crime-environment",
+        "https://www.ojp.gov/pdffiles1/Digitization/95269NCJRS.pdf"
+      ],
+      "metadataStatus": "metadata_verified",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-14",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-14-002",
+      "title": "A REVIEW OF CORRUPTION AND ORGANIZED CRIME IN THE CONSTRUCTION INDUSTRY",
+      "authors": "Lars Flysjö",
+      "year": 2020,
+      "venue": "Malmö University, Faculty of Health and Society",
+      "doi": "",
+      "sourceLinks": [
+        "https://www.diva-portal.org/smash/get/diva2:1486107/FULLTEXT01.pdf"
+      ],
+      "metadataStatus": "metadata_verified",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-14",
+      "topicCode": ""
     }
   ]
 }
