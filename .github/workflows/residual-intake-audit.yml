@@ -23,6 +23,7 @@ jobs:
               p=Path(path);t=p.read_text();assert t.count(old)==1,(path,'context changed');p.write_text(t.replace(old,new))
           def append(path, text):
               p=Path(path);p.write_text(p.read_text()+text)
+          expr=lambda name: chr(36)+'{{ '+name+' }}'
           replace('scripts/curation/recover_intake_backlog.py',
               'from scripts.curation.import_intake_issue import parse_intake_issue, read_queue  # noqa: E402',
               'from scripts.curation.import_intake_issue import parse_intake_issue, read_queue  # noqa: E402\nfrom scripts.curation.audited_intake_reconciliation import audited_occurrences  # noqa: E402')
@@ -69,19 +70,18 @@ jobs:
             #579; do not whitelist it away or infer scientific acceptance.
           - Correct outdated writer/provider instructions and add fail-closed regression tests.
           ''')
-          # Validate the workflow locally, but do not push a workflow change with GITHUB_TOKEN.
           p=Path('.github/workflows/recover-intake-backlog.yml');t=p.read_text()
           old="      (github.event_name == 'issue_comment' &&\n       github.event.issue.number == 30 &&"
           new="      (github.event_name == 'issue_comment' &&\n       github.actor == github.repository_owner &&\n       github.event.comment.user.login == github.repository_owner &&\n       github.event.issue.user.login == github.repository_owner &&\n       github.event.issue.number == 362 &&\n       github.event.issue.title == '[MAINTENANCE][INTAKE-RECOVERY]' &&\n       github.event.comment.body == '/recover-intake') ||\n"+old
           assert t.count(old)==1;t=t.replace(old,new)
-          old='          TRIGGER_ISSUE: ${{ github.event.issue.number }}\n          VERIFIED:'
-          new='          TRIGGER_ISSUE: ${{ github.event.issue.number }}\n          TRIGGER_TITLE: ${{ github.event.issue.title }}\n          VERIFIED:'
+          old='          TRIGGER_ISSUE: '+expr('github.event.issue.number')+'\n          VERIFIED:'
+          new='          TRIGGER_ISSUE: '+expr('github.event.issue.number')+'\n          TRIGGER_TITLE: '+expr('github.event.issue.title')+'\n          VERIFIED:'
           assert t.count(old)==1;t=t.replace(old,new)
           old='          if [ "$EVENT_NAME" = "issues" ] && [ -n "$TRIGGER_ISSUE" ]; then'
           new='          if { [ "$EVENT_NAME" = "issues" ] || [ "$EVENT_NAME" = "issue_comment" ]; } && [ "$TRIGGER_TITLE" = "[MAINTENANCE][INTAKE-RECOVERY]" ] && [ -n "$TRIGGER_ISSUE" ]; then'
           assert t.count(old)==1;t=t.replace(old,new)
           old='      - name: Enforce candidate-conservation invariant'
-          new='      - name: Retain candidate-conservation receipt\n        if: always()\n        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4\n        with:\n          name: candidate-conservation-${{ github.run_id }}-${{ github.run_attempt }}\n          path: ${{ runner.temp }}/intake-recovery.json\n          if-no-files-found: warn\n          retention-days: 30\n\n'+old
+          new='      - name: Retain candidate-conservation receipt\n        if: always()\n        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4\n        with:\n          name: candidate-conservation-'+expr('github.run_id')+'-'+expr('github.run_attempt')+'\n          path: '+expr('runner.temp')+'/intake-recovery.json\n          if-no-files-found: warn\n          retention-days: 30\n\n'+old
           assert t.count(old)==1;p.write_text(t.replace(old,new))
           PY
       - name: Validate isolated branch
