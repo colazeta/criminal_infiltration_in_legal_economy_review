@@ -51,17 +51,16 @@ class ParallelSearchBatch18Tests(unittest.TestCase):
             self.assertIn("Parallel Search", record["sourceLabel"] + record["note"])
             self.assertLess(len(record["synopsis"].split()), 90)
 
-    def test_full_text_records_are_eligible_for_deterministic_locator_bridge(self) -> None:
+    def test_full_text_records_are_materialized_with_exact_verified_locators(self) -> None:
         for candidate_id, url in (
             (LEGALITY_EFFICIENCY, LEGALITY_EFFICIENCY_PDF),
             (LOAN_CANT_REFUSE, RFB_PDF),
         ):
             row = self.retrieval[candidate_id]
-            self.assertIn(row["resolution_status"], {"unresolved", "source_link_only", "open_access_landing", "full_text"})
-            if row["resolution_status"] == "full_text":
-                self.assertEqual(row["full_text_url"], url)
-                self.assertIn(url, row["source_urls"])
-                self.assertEqual(row["match_confidence"], "high")
+            self.assertEqual(row["resolution_status"], "full_text")
+            self.assertEqual(row["full_text_url"], url)
+            self.assertIn(url, row["source_urls"])
+            self.assertEqual(row["match_confidence"], "high")
 
     def test_current_pizzo_revision_is_not_promoted_from_earlier_full_text(self) -> None:
         record = self.overrides[PIZZO_CERTIFICATION]
@@ -69,7 +68,9 @@ class ParallelSearchBatch18Tests(unittest.TestCase):
         self.assertIn("last revised 20 May 2026", record["note"])
         self.assertIn("earlier version", record["note"])
         self.assertIn("not silently substituted", record["note"])
-        self.assertNotEqual(self.retrieval[PIZZO_CERTIFICATION]["full_text_url"].strip(), PIZZO_SSRN)
+        row = self.retrieval[PIZZO_CERTIFICATION]
+        self.assertEqual(row["resolution_status"], "unresolved")
+        self.assertEqual(row["full_text_url"].strip(), "")
 
     def test_related_working_paper_manifestations_remain_explicit(self) -> None:
         self.assertIn("CEIS Research Paper 592", self.overrides[LEGALITY_EFFICIENCY]["note"])
