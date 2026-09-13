@@ -9,6 +9,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 OVERRIDES = ROOT / "data" / "curation" / "reading_aid_overrides.json"
 RETRIEVAL = ROOT / "data" / "curation" / "retrieval_coverage.csv"
+ABSTRACT = ROOT / "data" / "curation" / "abstract_coverage.csv"
 QUEUE = ROOT / "data" / "curation" / "review_queue.csv"
 
 CAPTURED_POLITICIANS = "CAND-ACADEMIC-2026-09-13-EXTRA-4b57a3081215-004"
@@ -27,6 +28,8 @@ class ParallelSearchBatch17Tests(unittest.TestCase):
         cls.overrides = {row["candidateId"]: row for row in payload["records"]}
         with RETRIEVAL.open(newline="", encoding="utf-8-sig") as handle:
             cls.retrieval = {row["candidate_id"]: row for row in csv.DictReader(handle)}
+        with ABSTRACT.open(newline="", encoding="utf-8-sig") as handle:
+            cls.abstract = {row["candidate_id"]: row for row in csv.DictReader(handle)}
         with QUEUE.open(newline="", encoding="utf-8-sig") as handle:
             cls.queue = {row["candidate_id"]: row for row in csv.DictReader(handle)}
 
@@ -48,6 +51,18 @@ class ParallelSearchBatch17Tests(unittest.TestCase):
             self.assertIn("Evidence basis: abstract_only", record["note"])
             self.assertIn("Parallel Search", record["sourceLabel"] + record["note"])
             self.assertLess(len(record["synopsis"].split()), 90)
+
+    def test_verified_sources_are_materialized_in_abstract_coverage(self) -> None:
+        expected = {
+            CAPTURED_POLITICIANS: CAPTURED_POLITICIANS_RECORD,
+            MAFIA_STRATEGIES: MAFIA_STRATEGIES_RECORD,
+            NEUTRALIZING_TENTACLES: NEUTRALIZING_TENTACLES_RECORD,
+        }
+        for candidate_id, url in expected.items():
+            row = self.abstract[candidate_id]
+            self.assertEqual(row["abstract_status"], "available")
+            self.assertEqual(row["abstract_kind"], "verified_abstract_source")
+            self.assertEqual(row["abstract_source_url"], url)
 
     def test_abstract_only_records_are_not_promoted_to_full_text(self) -> None:
         for candidate_id, source_url in (
