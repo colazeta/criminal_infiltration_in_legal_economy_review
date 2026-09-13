@@ -379,6 +379,33 @@
       "synopsis": "The article studies a policy that screens firms applying for Italian public subsidies above a monetary threshold, using the resulting discontinuity in screening exposure to examine whether firms adjust applications to avoid checks and what this reveals about Mafia-linked access to public funds.",
       "checkedAt": "2026-09-13",
       "note": "Parallel Search fetched the exact Oxford Academic publisher record, matching Gianmarco Daniele, Gemma Dipoppa and the final article title; the page is access-controlled and only abstract-level evidence is used here. Evidence basis: abstract_only. An earlier 2018 working-paper manifestation titled Doing Business Below the Line: Screening, Mafias and Public Funds was located separately and is not silently substituted for or merged with the final article."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-12-EXTRA-38a999646d3f-001",
+      "kind": "full_text_intro",
+      "sourceLabel": "U.S. Office of Justice Programs digitised report located with Parallel Search",
+      "sourceUrl": "https://www.ncjrs.gov/pdffiles1/Digitization/95266NCJRS.pdf",
+      "synopsis": "The 1983 report examines existing data systems for identifying and measuring organised crime's effects on communities, businesses and government. It finds that available databases generally do not measure those impacts directly, while concluding that many systems could incorporate relevant impact measures without major changes to their collection methods.",
+      "checkedAt": "2026-09-13",
+      "note": "Parallel Search matched the exact OJP/NIJ record for NCJ 95266, N. Parisi, 1983, 29 pages, and fetched the linked official NCJRS digitised report. Evidence basis: full_text. The public synopsis is a conservative paraphrase of the verified report and official record; no verbatim text, private source ingestion, eligibility decision or scientific classification is claimed."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-12-EXTRA-38a999646d3f-003",
+      "kind": "full_text_intro",
+      "sourceLabel": "U.S. Office of Justice Programs digitised report located with Parallel Search",
+      "sourceUrl": "https://www.ncjrs.gov/pdffiles1/Digitization/55801NCJRS.pdf",
+      "synopsis": "The 1977 New Jersey Commission of Investigation report examines organised-crime involvement in legitimate ancillary businesses serving Atlantic City's emerging casino-hotel complex and develops recommendations in response to vulnerabilities identified by the investigation.",
+      "checkedAt": "2026-09-13",
+      "note": "Parallel Search matched the exact OJP/NCJRS record for NCJ 55801, 1977, 52 pages, and fetched the linked official digitised report. Evidence basis: full_text. The synopsis stays within the report's documented investigation and recommendations; no verbatim text, private source ingestion, eligibility decision or scientific classification is claimed."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-12-EXTRA-426cdea055d3-002",
+      "kind": "verified_abstract_source",
+      "sourceLabel": "OJP/NCJRS exact indexed abstract located with Parallel Search",
+      "sourceUrl": "https://www.ojp.gov/ncjrs/virtual-library/abstracts/chinese-triads-and-japanese-yakuza-how-dangerous-asian-mafia",
+      "synopsis": "The 1997 article compares Chinese Triads and Japanese Yakuza, discussing organisational structure, the use of fear and pressure, and major criminal revenue-generating activities. The indexed abstract describes substantial drug-derived funds for Triads and highly concentrated authority within Yakuza groups.",
+      "checkedAt": "2026-09-13",
+      "note": "Parallel Search fetched the exact OJP/NCJRS record for NCJ 169472, R. Harnischmacher, EuroCriminology 11 (1997), pp. 163–181, and its indexed abstract. Evidence basis: abstract_only. The fetched OJP record exposes no official full-text download, so claims beyond the indexed abstract remain not_verifiable; no private source ingestion or scientific decision is inferred."
     }
   ]
 }
