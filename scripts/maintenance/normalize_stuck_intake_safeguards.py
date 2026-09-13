@@ -20,7 +20,7 @@ from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
 
-TARGET_ISSUES = (338, 339, 340, 341, 342, 348, 349, 350, 351, 352)
+TARGET_ISSUES = (338, 339, 340, 341, 342, 348, 349, 350, 351, 352, 584)
 HEADING = "### Safeguards"
 CANONICAL_SECTION = """### Safeguards
 
