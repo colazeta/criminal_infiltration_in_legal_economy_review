@@ -1,0 +1,93 @@
+name: Temporary coordinated coverage repair
+
+on:
+  push:
+    branches:
+      - maintenance/parallel-search-reading-batch-13
+    paths:
+      - .github/workflows/temporary-coordinated-coverage-repair.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: temporary-coordinated-coverage-repair
+  cancel-in-progress: false
+
+jobs:
+  repair:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repair branch
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: maintenance/parallel-search-reading-batch-13
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: 22
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.11"
+
+      - name: Ensure PDF text extractor
+        run: |
+          if ! command -v pdftotext >/dev/null 2>&1; then
+            sudo apt-get update -qq
+            sudo apt-get install -y --no-install-recommends poppler-utils
+          fi
+
+      - name: Regenerate retrieval coverage
+        env:
+          OPENALEX_API_KEY: ${{ secrets.OPENALEX_API_KEY }}
+          UNPAYWALL_EMAIL: ${{ secrets.UNPAYWALL_EMAIL }}
+        run: |
+          action_date="$(date -u +%F)"
+          python scripts/retrieval/resolve_queue.py --date "$action_date" --max-age-days 30 --output "$RUNNER_TEMP/retrieval-summary.json"
+          python scripts/retrieval/apply_verified_reading_locators.py
+          python scripts/retrieval/resolve_queue.py --check
+          python scripts/retrieval/apply_verified_reading_locators.py --check
+
+      - name: Regenerate abstract coverage
+        env:
+          SEMANTIC_SCHOLAR_API_KEY: ${{ secrets.SEMANTIC_SCHOLAR_API_KEY }}
+          CORE_API_KEY: ${{ secrets.CORE_API_KEY }}
+          UNPAYWALL_EMAIL: ${{ secrets.UNPAYWALL_EMAIL }}
+        run: |
+          export ABSTRACT_COVERAGE_DATE="$(date -u +%F)"
+          node scripts/abstracts/backfill_coverage.mjs --summary "$RUNNER_TEMP/abstract-coverage-summary.json"
+          node scripts/abstracts/backfill_coverage.mjs --check
+          node scripts/abstracts/promote_verified_sources.mjs
+
+      - name: Regenerate access coverage
+        env:
+          UNPAYWALL_EMAIL: ${{ secrets.UNPAYWALL_EMAIL }}
+        run: |
+          action_date="$(date -u +%F)"
+          python scripts/access/classify_access.py --date "$action_date"
+          python scripts/access/reconcile_access_evidence.py
+          python scripts/access/classify_access.py --check
+          python scripts/access/reconcile_access_evidence.py --check
+
+      - name: Validate coordinated state
+        run: |
+          python scripts/curation/build_legacy_queue.py --check
+          python scripts/validation/validate_repository.py
+          python -m unittest discover -s tests -p 'test_*.py'
+
+      - name: Persist repaired projections and remove temporary workflow
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/temporary-coordinated-coverage-repair.yml
+          git add data/curation/retrieval_coverage.csv data/curation/abstract_coverage.csv data/curation/access_coverage.csv data/curation/access_evidence.csv
+          if git diff --cached --quiet; then
+            echo "No coordinated coverage repair was needed."
+            exit 0
+          fi
+          git commit -m "Repair candidate coverage projections atomically"
+          git push origin HEAD:maintenance/parallel-search-reading-batch-13
