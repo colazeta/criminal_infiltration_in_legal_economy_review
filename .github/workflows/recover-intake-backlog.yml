@@ -14,10 +14,14 @@ on:
 permissions:
   contents: read
 
-# Share the same mutation lease as the ordinary intake writer.
+# Recovery is idempotent and rescans the immutable intake source of truth. A newer
+# global recovery may therefore supersede an older recovery that has not crossed
+# its CandidateRecord persistence barrier. This avoids optional enrichment in an
+# obsolete run blocking candidate preservation indefinitely. This cancellation
+# policy is recovery-only; it does not change surveillance-run semantics.
 concurrency:
   group: intake-to-curation-main
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   recover:
