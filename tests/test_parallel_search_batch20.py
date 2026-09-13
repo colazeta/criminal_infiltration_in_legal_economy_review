@@ -9,6 +9,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 OVERRIDES = ROOT / "data" / "curation" / "reading_aid_overrides.json"
 RETRIEVAL = ROOT / "data" / "curation" / "retrieval_coverage.csv"
+ABSTRACT = ROOT / "data" / "curation" / "abstract_coverage.csv"
 QUEUE = ROOT / "data" / "curation" / "review_queue.csv"
 
 CHAMPEYRACHE = "CAND-ACADEMIC-2026-09-13-EXTRA-60872f2c2bf0-001"
@@ -25,6 +26,8 @@ class ParallelSearchBatch20Tests(unittest.TestCase):
         cls.overrides = {row["candidateId"]: row for row in payload["records"]}
         with RETRIEVAL.open(newline="", encoding="utf-8-sig") as handle:
             cls.retrieval = {row["candidate_id"]: row for row in csv.DictReader(handle)}
+        with ABSTRACT.open(newline="", encoding="utf-8-sig") as handle:
+            cls.abstract = {row["candidate_id"]: row for row in csv.DictReader(handle)}
         with QUEUE.open(newline="", encoding="utf-8-sig") as handle:
             cls.queue = {row["candidate_id"]: row for row in csv.DictReader(handle)}
 
@@ -57,10 +60,24 @@ class ParallelSearchBatch20Tests(unittest.TestCase):
         self.assertIn("Parallel Search", indicators["sourceLabel"] + indicators["note"])
         self.assertLess(len(indicators["synopsis"].split()), 90)
 
-    def test_abstract_only_ojp_source_never_claims_full_text(self) -> None:
-        indicators = self.retrieval[OJP_INDICATORS]
-        self.assertNotEqual(indicators["full_text_url"].strip(), OJP_INDICATORS_URL)
-        self.assertNotEqual(indicators["resolution_status"], "full_text")
+    def test_prepared_full_text_bridge_is_materialized_for_champeyrache(self) -> None:
+        row = self.retrieval[CHAMPEYRACHE]
+        self.assertEqual(row["resolution_status"], "full_text")
+        self.assertEqual(row["full_text_url"], CHAMPEYRACHE_URL)
+        self.assertIn(CHAMPEYRACHE_URL, row["source_urls"])
+        self.assertIn("Curator verified full text", row["resolution_sources"])
+        self.assertIn("reading_aid_override:full_text_intro", row["match_method"])
+
+    def test_ojp_abstract_is_materialized_without_full_text_promotion(self) -> None:
+        abstract = self.abstract[OJP_INDICATORS]
+        self.assertEqual(abstract["coverage_status"], "available")
+        self.assertEqual(abstract["match_type"], "verified_abstract_source")
+        self.assertEqual(abstract["article_url"], OJP_INDICATORS_URL)
+        self.assertIn("curator verified abstract source", abstract["providers_tried"])
+
+        retrieval = self.retrieval[OJP_INDICATORS]
+        self.assertNotEqual(retrieval["full_text_url"].strip(), OJP_INDICATORS_URL)
+        self.assertNotEqual(retrieval["resolution_status"], "full_text")
 
 
 if __name__ == "__main__":
