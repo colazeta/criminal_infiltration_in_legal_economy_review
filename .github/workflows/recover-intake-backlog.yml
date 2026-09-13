@@ -1,10 +1,15 @@
 name: Recover intake backlog
 
-run-name: "Recover intake backlog from issue #${{ github.event.issue.number }}"
+run-name: "Recover intake backlog (${{ github.event_name }})"
 
 on:
   issues:
     types: [opened, reopened]
+  issue_comment:
+    types: [created]
+  schedule:
+    - cron: "55 * * * *"
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -17,9 +22,16 @@ concurrency:
 jobs:
   recover:
     if: >-
-      github.actor == github.repository_owner &&
-      github.event.issue.user.login == github.repository_owner &&
-      github.event.issue.title == '[MAINTENANCE][INTAKE-RECOVERY]'
+      (github.event_name == 'issues' &&
+       github.actor == github.repository_owner &&
+       github.event.issue.user.login == github.repository_owner &&
+       github.event.issue.title == '[MAINTENANCE][INTAKE-RECOVERY]') ||
+      (github.event_name == 'issue_comment' &&
+       github.event.issue.number == 30 &&
+       github.event.comment.user.login == github.repository_owner &&
+       contains(github.event.comment.body, 'surveillance-run:v3')) ||
+      github.event_name == 'schedule' ||
+      github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -166,7 +178,7 @@ jobs:
             echo
             git diff --name-only main...HEAD | sed 's/^/- `/' | sed 's/$/`/'
             echo
-            echo "Source maintenance issue: #${{ github.event.issue.number }}"
+            echo "Trigger event: ${GITHUB_EVENT_NAME}"
           } > "$body_file"
 
           pr_url=""
@@ -257,6 +269,7 @@ jobs:
         if: always()
         env:
           GH_TOKEN: ${{ github.token }}
+          EVENT_NAME: ${{ github.event_name }}
           TRIGGER_ISSUE: ${{ github.event.issue.number }}
           ADDED: ${{ steps.recovery.outputs.added_count }}
           PROCESSED: ${{ steps.recovery.outputs.processed_batches }}
@@ -265,11 +278,31 @@ jobs:
           QUARANTINED: ${{ steps.recovery.outputs.quarantine_count }}
         run: |
           run_url="https://github.com/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
-          if [ "${{ job.status }}" != "success" ]; then
-            gh issue comment "$TRIGGER_ISSUE" --body "Intake backlog recovery encountered an operational failure before completion. Run: ${run_url}"
-            exit 0
+          summary="Intake backlog recovery run completed: ${PROCESSED:-0} governed batch(es) processed, ${ADDED:-0} new candidate(s) materialised, ${REDISCOVERIES:-0} exact rediscovery occurrence(s) reconciled, ${QUARANTINED:-0} audited batch(es) quarantined, ${FAILURES:-0} unresolved batch(es). Run: ${run_url}"
+
+          if [ "$EVENT_NAME" = "issues" ] && [ -n "$TRIGGER_ISSUE" ]; then
+            if [ "${{ job.status }}" != "success" ]; then
+              gh issue comment "$TRIGGER_ISSUE" --body "Intake backlog recovery encountered an operational failure before completion. Run: ${run_url}"
+              exit 0
+            fi
+            gh issue comment "$TRIGGER_ISSUE" --body "$summary"
+            if [ "${FAILURES:-0}" = "0" ]; then
+              gh issue close "$TRIGGER_ISSUE" --reason completed || true
+            fi
+          else
+            {
+              echo "### Candidate-conservation recovery"
+              echo
+              echo "$summary"
+            } >> "$GITHUB_STEP_SUMMARY"
           fi
-          gh issue comment "$TRIGGER_ISSUE" --body "Intake backlog recovery run completed: ${PROCESSED} governed batch(es) processed, ${ADDED} new candidate(s) materialised, ${REDISCOVERIES} exact rediscovery occurrence(s) reconciled, ${QUARANTINED} audited batch(es) quarantined, ${FAILURES} unresolved batch(es). Run: ${run_url}"
-          if [ "${FAILURES}" = "0" ]; then
-            gh issue close "$TRIGGER_ISSUE" --reason completed || true
-          fi
+
+      - name: Enforce candidate-conservation invariant
+        if: >-
+          always() &&
+          steps.recovery.outcome == 'success' &&
+          steps.recovery.outputs.failure_count != '' &&
+          steps.recovery.outputs.failure_count != '0'
+        run: |
+          echo "::error::Candidate conservation failed: one or more governed intake batches remain unresolved after recovery."
+          exit 1
