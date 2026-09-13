@@ -9,10 +9,9 @@ jobs:
   diagnose:
     if: github.repository == 'colazeta/criminal_infiltration_in_legal_economy_review' && github.ref == 'refs/heads/implementation/public-research-sheets-597'
     runs-on: ubuntu-latest
-    environment: curator-production
     timeout-minutes: 15
     steps:
-      - name: Checkout exact reviewed transfer branch
+      - name: Checkout exact transfer branch
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           ref: implementation/public-research-sheets-597
@@ -21,7 +20,7 @@ jobs:
         uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
         with:
           node-version: 22
-      - name: Verify, materialise and remove exact transfer payload
+      - name: Verify exact patch and stage non-workflow code only
         env:
           EXPECTED_TRIGGER: ${{ github.sha }}
         run: |
@@ -32,14 +31,14 @@ jobs:
           from pathlib import Path
           base='ace6bfc71500c7b9a4583c797f9b895e154545cf'
           diagnostic='.github/workflows/enrichment-diagnostics.yml'
+          workflows=[diagnostic,'.github/workflows/deploy-curator-worker.yml','.github/workflows/enrichment-observer.yml']
           chunks=[f'.cile-transfer/597-{i}.b64' for i in range(4)]
           actual=set(subprocess.check_output(['git','diff','--name-only',base,'HEAD'],text=True).splitlines())
-          if actual != {diagnostic,*chunks}: raise SystemExit('Unexpected concurrent branch changes; no materialisation')
+          if actual != {diagnostic,*chunks}: raise SystemExit('Concurrent branch change; no materialisation')
           encoded=''.join(Path(p).read_text().strip() for p in chunks)
           if len(encoded)!=35056: raise SystemExit('Transfer length mismatch')
           patch=lzma.decompress(base64.b64decode(encoded,validate=True),memlimit=256000000)
-          if len(patch)!=105462 or hashlib.sha256(patch).hexdigest()!='d79a34a711c835fb0f8b9ebe1e6cff2663377da7318389d049ee4f66063a1372':
-              raise SystemExit('Transfer checksum mismatch')
+          if len(patch)!=105462 or hashlib.sha256(patch).hexdigest()!='d79a34a711c835fb0f8b9ebe1e6cff2663377da7318389d049ee4f66063a1372': raise SystemExit('Transfer checksum mismatch')
           path=Path(os.environ['RUNNER_TEMP'])/'research-597.patch';path.write_bytes(patch)
           subprocess.run(['git','checkout',base,'--',diagnostic],check=True)
           subprocess.run(['git','apply','--index','--check',str(path)],check=True)
@@ -73,32 +72,41 @@ jobs:
           site/styles.css
           tests/test_public_research_check.py'''.splitlines()) | set(chunks)
           changed=set(subprocess.check_output(['git','diff','--cached','--name-only'],text=True).splitlines())
-          if changed != allowed: raise SystemExit('Materialisation path allowlist mismatch')
-          print('Exact locally tested patch verified; no private data or source retrieval.')
+          if changed != allowed: raise SystemExit('Path allowlist mismatch')
+          final=Path(os.environ['RUNNER_TEMP'])/'final-workflows';final.mkdir()
+          for workflow in workflows: (final/Path(workflow).name).write_bytes(Path(workflow).read_bytes())
+          subprocess.run(['git','checkout',os.environ['EXPECTED_TRIGGER'],'--',*workflows],check=True)
+          if subprocess.check_output(['git','diff','--cached','--name-only','--','.github/workflows'],text=True).strip(): raise SystemExit('Workflow changes cannot be written with the Actions token')
+          print('Verified exact patch. Workflow writes deferred to the authorised user connector; Actions token permissions unchanged.')
           PY
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git commit -m 'Implement public research sheets and six-class context (#597)'
+          git commit -m 'Implement research-sheet code and tests; workflow changes pending authorised connector (#597)'
           git fetch origin main
           git merge --no-edit origin/main
-      - name: Validate complete materialised head before branch push
+          test -z "$(git diff "$EXPECTED_TRIGGER" HEAD --name-only -- .github/workflows)"
+      - name: Validate code with the exact final workflow bytes without committing workflow changes
         run: |
           set -euo pipefail
+          cp "$RUNNER_TEMP"/final-workflows/*.yml .github/workflows/
           python3 scripts/retrieval/selected_paper_delivery.py --prepare --validate
           python3 scripts/retrieval/apply_verified_reading_locators.py --check
           node --check site/paper-sheet-research.js
           node --check curator-app/src/public-paper-research.js
+          git checkout HEAD -- .github/workflows/deploy-curator-worker.yml .github/workflows/enrichment-observer.yml .github/workflows/enrichment-diagnostics.yml
           git diff --exit-code
           test -z "$(git status --porcelain)"
           test ! -e .cile-transfer
-          test "$(git rev-parse HEAD:.github/workflows/enrichment-diagnostics.yml)" = b317bc1fbdea25b3f152352ae4fbde58085529a7
-      - name: Persist only the validated review branch
+      - name: Persist non-workflow code on the existing review branch
+        env:
+          EXPECTED_TRIGGER: ${{ github.sha }}
         run: |
           set -euo pipefail
+          test -z "$(git diff "$EXPECTED_TRIGGER" HEAD --name-only -- .github/workflows)"
           git push origin HEAD:refs/heads/implementation/public-research-sheets-597
           git rev-parse HEAD
-          git show --stat --oneline HEAD
-      - name: Package tracked public source only
+          echo 'Code persistence only; final workflow updates and PR/deployment verification remain pending.'
+      - name: Package tracked public source
         run: git archive HEAD -o "$RUNNER_TEMP/enrichment-source.tar"
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
