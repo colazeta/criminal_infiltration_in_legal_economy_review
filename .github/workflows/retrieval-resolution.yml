@@ -27,10 +27,11 @@ on:
 permissions:
   contents: read
 
-# Support persistence and curator-issue materialisation share one repository-wide
-# mutation lane. This is not a replacement for the persistent Cloudflare minute-40 queue.
+# Main/scheduled/manual persistence and curator issue mutation share one repository-wide
+# lane. PR preparation is branch-local and must not be stalled by an independent main
+# backfill; give each reviewed PR its own bounded lane instead.
 concurrency:
-  group: curator-support-persistence
+  group: ${{ github.event_name == 'pull_request' && format('selected-support-pr-{0}', github.event.pull_request.number) || 'curator-support-persistence' }}
   cancel-in-progress: false
   queue: max
 
