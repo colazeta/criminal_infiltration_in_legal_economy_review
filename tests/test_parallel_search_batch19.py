@@ -65,7 +65,7 @@ class ParallelSearchBatch19Tests(unittest.TestCase):
 
     def test_cepr_record_stays_abstract_only(self) -> None:
         self.assertEqual(self.overrides[CAPTURE]["kind"], "verified_abstract_source")
-        self.assertIn("DP21805", self.overrides[CAPTURE]["note"])
+        self.assertIn("Discussion Paper 21805", self.overrides[CAPTURE]["note"])
         self.assertEqual(self.abstracts[CAPTURE]["coverage_status"], "available")
         self.assertEqual(self.abstracts[CAPTURE]["source_url"], CAPTURE_CEPR)
         self.assertEqual(self.retrieval[CAPTURE]["resolution_status"], "unresolved")
