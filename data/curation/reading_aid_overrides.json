@@ -165,6 +165,15 @@
       "note": "Parallel Search fetched the exact OJP NCJRS record for NCJ 2300, M. K. Bers and 1970, and verified the linked official OJP digitised report. Evidence basis: full_text. The synopsis is a concise paraphrase of the verified report/official abstract; no verbatim report text, eligibility decision or private full-text ingestion is claimed."
     },
     {
+      "candidateId": "CAND-ACADEMIC-2026-09-09-EXTRA-85e203d4eb5a-009",
+      "kind": "verified_abstract_source",
+      "sourceLabel": "Università Cattolica institutional repository abstract located with Parallel Search",
+      "sourceUrl": "https://publicatt.unicatt.it/handle/10807/223872",
+      "synopsis": "The chapter analyses organised-crime infiltration of Italian firms by examining the territories, sectors and modi operandi associated with Italian mafias and also discusses the much thinner evidence available on infiltration by foreign organised-crime groups.",
+      "checkedAt": "2026-09-13",
+      "note": "Parallel Search fetched the exact Università Cattolica record matching Michele Riccardi, Cristina Soriani, Valentina Giampietri, the 2016 chapter and pages 119–140, with an explicit institutional Abstract section. Evidence basis: abstract_only. An exact Taylor & Francis publisher manifestation was also located, but no open full text was verified and its chapter identifier is not silently added or reconciled here; claims beyond the institutional abstract remain not_verifiable."
+    },
+    {
       "candidateId": "CAND-ACADEMIC-2026-09-09-014",
       "kind": "full_text_intro",
       "sourceLabel": "UIF Quaderno 32 full-text paper located with Parallel Search",
