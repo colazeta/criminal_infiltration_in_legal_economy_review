@@ -4672,6 +4672,23 @@
       "accessStatus": "unknown",
       "registeredAt": "2026-09-14",
       "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-14-EXTRA-f9c9c7ddebe4-001",
+      "title": "The Risks and Rewards of Organized Crime Investments in Real Estate",
+      "authors": "Marco Dugato; Serena Favarin; Luca Giommoni",
+      "year": 2015,
+      "venue": "The British Journal of Criminology",
+      "doi": "10.1093/bjc/azv002",
+      "sourceLinks": [
+        "https://academic.oup.com/bjc/article-abstract/55/5/944/482331",
+        "https://doi.org/10.1093/bjc/azv002"
+      ],
+      "metadataStatus": "metadata_verified",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-14",
+      "topicCode": ""
     }
   ]
 }
