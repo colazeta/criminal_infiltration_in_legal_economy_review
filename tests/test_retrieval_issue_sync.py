@@ -67,6 +67,51 @@ action
             syncer.paginated = original
         self.assertEqual(inventory[candidate_id]["number"], 464)
 
+    def test_issue_inventory_tolerates_same_issue_repeated_across_pages(self) -> None:
+        candidate_id = "CAND-ACADEMIC-2026-09-13-EXTRA-a6766e6649ed-006"
+        issue = {
+            "id": 5439991102,
+            "number": 563,
+            "body": f"<!-- curator-candidate:{candidate_id} -->\n",
+        }
+        original = syncer.paginated
+        seen_path = []
+        try:
+            def repeated(repository, token, path):
+                seen_path.append(path)
+                return [dict(issue), dict(issue)]
+
+            syncer.paginated = repeated
+            inventory = syncer.issue_inventory("owner/repo", "token")
+        finally:
+            syncer.paginated = original
+        self.assertEqual(inventory[candidate_id]["number"], 563)
+        self.assertEqual(
+            seen_path,
+            ["/issues?state=all&sort=created&direction=asc"],
+        )
+
+    def test_issue_inventory_rejects_distinct_issues_for_same_candidate(self) -> None:
+        candidate_id = "CAND-ACADEMIC-2026-09-13-EXTRA-a6766e6649ed-006"
+        original = syncer.paginated
+        try:
+            syncer.paginated = lambda repository, token, path: [
+                {
+                    "id": 1,
+                    "number": 563,
+                    "body": f"<!-- curator-candidate:{candidate_id} -->\n",
+                },
+                {
+                    "id": 2,
+                    "number": 999,
+                    "body": f"<!-- curator-candidate:{candidate_id} -->\n",
+                },
+            ]
+            with self.assertRaises(syncer.SyncError):
+                syncer.issue_inventory("owner/repo", "token")
+        finally:
+            syncer.paginated = original
+
 
 if __name__ == "__main__":
     unittest.main()
