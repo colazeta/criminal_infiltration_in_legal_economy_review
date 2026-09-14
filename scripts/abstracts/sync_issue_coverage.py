@@ -118,9 +118,24 @@ def read_coverage(path: Path) -> list[dict[str, str]]:
         return [dict(row) for row in csv.DictReader(handle)]
 
 
+def same_issue(left: dict, right: dict) -> bool:
+    """Return true only when two API rows identify the same GitHub issue."""
+    left_number = left.get("number")
+    right_number = right.get("number")
+    if isinstance(left_number, int) and left_number == right_number:
+        return True
+    left_id = left.get("id")
+    right_id = right.get("id")
+    return left_id is not None and left_id == right_id
+
+
 def issue_inventory(repository: str, token: str) -> dict[str, dict]:
     result: dict[str, dict] = {}
-    for issue in paginated(repository, token, "/issues?state=all"):
+    for issue in paginated(
+        repository,
+        token,
+        "/issues?state=all&sort=created&direction=asc",
+    ):
         if "pull_request" in issue:
             continue
         body = str(issue.get("body") or "")
@@ -128,7 +143,10 @@ def issue_inventory(repository: str, token: str) -> dict[str, dict]:
         if not match:
             continue
         candidate_id = match.group(1)
-        if candidate_id in result:
+        previous = result.get(candidate_id)
+        if previous is not None:
+            if same_issue(previous, issue):
+                continue
             raise SyncError(f"Multiple issues represent {candidate_id}")
         result[candidate_id] = issue
     return result
