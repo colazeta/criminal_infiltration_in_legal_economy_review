@@ -54,7 +54,7 @@
   function renderProgress(parent,data) {
     const p=progress(data),box=el('section');box.setAttribute('aria-label','Progresso verso il completamento');
     box.append(el('h4','Arricchimento end-to-end: non attestato come completato'));
-    const table=el('table'),head=el('tr');head.append(el('th','Passaggio'),el('th','Stato verificabile'));table.append(head);
+    const stages=el('dl');
     const unavailable=['stale','withheld','unknown'].includes(p.availability);
     const rows=[
       ['Fonte sufficiente',p.evidence?'Testo completo attestato nella proposta corrente':'Non attestabile da questa proiezione; un link al PDF non basta'],
@@ -64,8 +64,8 @@
       ['QA e adjudication','Nessuna attestazione finale disponibile nel contratto pubblico corrente'],
       ['Completed','No: una proposta, una sintesi o il full text non attestano il completamento']
     ];
-    for(const [label,value]of rows){const row=el('tr');row.append(el('th',label),el('td',value));table.append(row)}
-    box.append(table,el('p','I passaggi possono avanzare separatamente. I campi non riportati o non applicabili rimangono espliciti; non si inventano valori per completare la scheda.'));
+    for(const [label,value]of rows)stages.append(el('dt',label),el('dd',value));
+    box.append(stages,el('p','I passaggi possono avanzare separatamente. I campi non riportati o non applicabili rimangono espliciti; non si inventano valori per completare la scheda.'));
     parent.append(box);
   }
   function emptySections(parent) {
