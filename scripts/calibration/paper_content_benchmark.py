@@ -16,7 +16,8 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import quote
 from urllib.request import Request, build_opener, HTTPRedirectHandler, urlopen
 from scripts.enrichment.pilot import download
-from scripts.enrichment.focused import focused_requests, focused_proposal, PROTOCOL as EXTRACTOR_PROTOCOL
+from scripts.enrichment.focused import (focused_requests, focused_proposal, sanitise_critical_literals,
+                                        prompt_fingerprint, PROTOCOL as EXTRACTOR_PROTOCOL)
 
 ROOT = Path(__file__).resolve().parents[2]
 PROTOCOL = 'CILE-ABSTRACT-BENCHMARK-1'
@@ -128,6 +129,7 @@ def evaluate(binary, weights, work, packets, checkpoint):
             try:
                 requests = focused_requests(packet['sources'][0]['text'])
                 result['request_sha256'] = hashlib.sha256(canonical(requests).encode()).hexdigest()
+                result['prompt_sha256'] = prompt_fingerprint()
                 result['extractor_protocol'] = EXTRACTOR_PROTOCOL
                 outputs = {}
                 result['model_outputs_by_stage'] = outputs
@@ -143,10 +145,12 @@ def evaluate(binary, weights, work, packets, checkpoint):
                     if answer['choices'][0].get('finish_reason') != 'stop':
                         raise ValueError('benchmark_output_incomplete')
                     outputs[stage] = json.loads(answer['choices'][0]['message']['content'])
-                # Preserve the attempted content even if stricter conversion rejects it.
+                # Preserve attempted assertions exactly for later scientific assessment.
                 result['model_output'] = {**outputs['content'], **outputs['variables'],
                     'framework': {k: outputs['framework'][k] for k in ('category','rationale')}}
-                combined, proposal = focused_proposal(packet, outputs)
+                sanitised, warnings = sanitise_critical_literals(packet, outputs)
+                result['converter_warnings'] = warnings
+                combined, proposal = focused_proposal(packet, sanitised)
                 js = "import{validateExtraction}from'./curator-app/src/paper-enrichment.js';let s='';for await(const c of process.stdin)s+=c;const p=JSON.parse(s);validateExtraction(p.proposal,p.target,p.sources);"
                 checked = subprocess.run(['node','--input-type=module','-e',js],
                     input=canonical({'proposal':proposal,**packet}),text=True,cwd=ROOT,
@@ -161,7 +165,7 @@ def evaluate(binary, weights, work, packets, checkpoint):
                          'pilot_framework_shape','pilot_schema_keys','pilot_finding_limit','pilot_variable_limit',
                          'focused_stages_incomplete','focused_stage_keys','focused_invalid_abstention',
                          'focused_fact_shape','focused_invalid_missingness','focused_source_reference',
-                         'focused_nonliteral_critical_value','focused_variable_shape','benchmark_model_response_limit'}
+                         'focused_variable_shape','benchmark_model_response_limit'}
                 if isinstance(error, TimeoutError):
                     result['error_code'] = 'benchmark_model_timeout'
                 elif isinstance(error, HTTPError):
@@ -172,7 +176,8 @@ def evaluate(binary, weights, work, packets, checkpoint):
                     result['error_code'] = str(error) if str(error) in known else 'benchmark_case_failed_no_content_logged'
             results.append(result)
             checkpoint(results)
-            print(json.dumps({'case':i+1,'status':result['status'],'error_code':result.get('error_code')}), flush=True)
+            print(json.dumps({'case':i+1,'status':result['status'],'error_code':result.get('error_code'),
+                              'converter_warnings':len(result.get('converter_warnings',[]))}), flush=True)
     finally:
         process.terminate()
         try:
@@ -225,8 +230,9 @@ def main():
         results=evaluate(binary,weights,work,packets,checkpoint)
         seal_output(args.results_output,{'protocol':PROTOCOL,'results':results,'scientific_validation':False})
         valid=sum(r['status']=='structurally_valid_unreviewed' for r in results)
-        print(json.dumps({'cases':len(results),'structurally_valid':valid,'scientific_validation':False,
-                          'production_proposals_written':0}),flush=True)
+        warnings=sum(len(r.get('converter_warnings',[])) for r in results)
+        print(json.dumps({'cases':len(results),'structurally_valid':valid,'converter_warnings':warnings,
+                          'scientific_validation':False,'production_proposals_written':0}),flush=True)
         if valid!=len(results):
             raise RuntimeError('benchmark_structural_failures_require_review')
 

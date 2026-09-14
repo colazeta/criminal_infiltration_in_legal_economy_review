@@ -48,22 +48,6 @@ def canonical(value):
     return json.dumps(value, sort_keys=True, separators=(',', ':'), ensure_ascii=False)
 
 
-def prompt_fingerprint():
-    """Fingerprint reviewed instructions/contracts, never candidate/source content."""
-    identity = {
-        'identity': PROMPT_IDENTITY,
-        'protocol': PROTOCOL,
-        'stages': STAGES,
-        'limits': LIMITS,
-        'common': COMMON,
-        'content': CONTENT,
-        'variables': VARIABLES,
-        'framework': FRAMEWORK,
-        'schema_contract': 'focused-stage-schema-v1',
-    }
-    return hashlib.sha256(canonical(identity).encode()).hexdigest()
-
-
 def stage_schema(stage, text):
     ids = [block['id'] for block in source_blocks(text)]
     fact = {'type': 'object', 'additionalProperties': False,
@@ -90,38 +74,73 @@ def stage_schema(stage, text):
             'properties': props, 'required': list(props)}
 
 
-def focused_requests(text):
+def _request(stage, schema, blocks):
     prompts = {'content': CONTENT, 'variables': VARIABLES, 'framework': FRAMEWORK}
+    return {'messages': [{'role': 'system', 'content': COMMON + '\n' + prompts[stage] +
+                          '\nRequired output JSON schema:\n' + canonical(schema)},
+                         {'role': 'user', 'content': canonical({'abstract_blocks': blocks})}],
+            'temperature': 0, 'seed': 0, 'max_tokens': LIMITS[stage], 'stream': False,
+            'response_format': {'type': 'json_object', 'schema': schema}}
+
+
+def focused_requests(text):
     blocks = [{'id': block['id'], 'text': block['text']} for block in source_blocks(text)]
-    out = {}
+    return {stage: _request(stage, stage_schema(stage, text), blocks) for stage in STAGES}
+
+
+def _normalise_source_bound_schema(value):
+    """Replace only dynamic evidence-block enums; preserve the actual schema contract."""
+    if isinstance(value, list):
+        return [_normalise_source_bound_schema(item) for item in value]
+    if not isinstance(value, dict):
+        return value
+    result = {key: _normalise_source_bound_schema(item) for key, item in value.items()}
+    enum = result.get('enum')
+    if isinstance(enum, list) and enum and all(isinstance(item, str) and re.fullmatch(r'b\d+', item) for item in enum):
+        result['enum'] = ['<SOURCE_BLOCK_ID>']
+    return result
+
+
+def prompt_contract():
+    """Normalised source-independent form of the exact request builder used for inference."""
+    placeholder_blocks = [{'id': '<SOURCE_BLOCK_ID>', 'text': '<SOURCE_BLOCK_TEXT>'}]
+    requests = {}
     for stage in STAGES:
-        schema = stage_schema(stage, text)
-        out[stage] = {'messages': [{'role': 'system', 'content': COMMON + '\n' + prompts[stage] +
-                                   '\nRequired output JSON schema:\n' + canonical(schema)},
-                                  {'role': 'user', 'content': canonical({'abstract_blocks': blocks})}],
-                      'temperature': 0, 'seed': 0, 'max_tokens': LIMITS[stage], 'stream': False,
-                      'response_format': {'type': 'json_object', 'schema': schema}}
-    return out
+        schema = _normalise_source_bound_schema(stage_schema(stage, 'x'))
+        requests[stage] = _request(stage, schema, placeholder_blocks)
+    return {'identity': PROMPT_IDENTITY, 'protocol': PROTOCOL, 'requests': requests}
+
+
+def prompt_fingerprint():
+    """Hash the actual normalised request/schema contract, never candidate/source content."""
+    return hashlib.sha256(canonical(prompt_contract()).encode()).hexdigest()
 
 
 UNKNOWN = re.compile(r'^(?:null|not (?:specified|reported|provided|available|applicable|stated|mentioned)|unknown|n/?a|none)'
                      r'(?:\s+(?:in|from|by|within|to)\b.*)?[.]?$', re.I)
 
 
-def focused_proposal(packet, outputs):
+def sanitise_critical_literals(packet, outputs):
+    """Drop unsupported exact-string assertions while preserving them in caller-owned raw output.
+
+    This is fail-closed conversion, not scientific correction: unsupported critical
+    facts become unavailable and therefore cannot satisfy the completion gate.
+    """
     if not isinstance(outputs, dict) or set(outputs) != set(STAGES):
         raise ValueError('focused_stages_incomplete')
     text = next(s['text'] for s in packet['sources'] if s['evidence_kind'] == 'abstract')
     for stage in STAGES:
         if not isinstance(outputs[stage], dict) or set(outputs[stage]) != set(stage_schema(stage, text)['required']):
             raise ValueError('focused_stage_keys')
-    content, variables, framework = (outputs[key] for key in STAGES)
+    clean = json.loads(json.dumps(outputs))
+    content, variables, framework = (clean[key] for key in STAGES)
     if framework['category'] is not None and framework['abstention_reason'] is not None:
         raise ValueError('focused_invalid_abstention')
     if framework['category'] is None and framework['abstention_reason'] not in ('outside_framework', 'insufficient_evidence'):
         raise ValueError('focused_invalid_abstention')
     blocks = {block['id']: block for block in source_blocks(text)}
-    def validate_fact(value, literal=False):
+
+    def validate_shape(value):
         if value is None:
             return
         if not isinstance(value, dict) or set(value) != {'value', 'evidence_ids'}:
@@ -131,24 +150,53 @@ def focused_proposal(packet, outputs):
         ids = value['evidence_ids']
         if not isinstance(ids, list) or not ids or any(not isinstance(i, str) or i not in blocks for i in ids):
             raise ValueError('focused_source_reference')
-        if literal:
-            phrase = value['value']
-            matches = [match.start() for match in re.finditer(re.escape(phrase), text)]
-            if not matches or not any(all(any(blocks[k]['start'] <= j < blocks[k]['end'] for k in ids)
-                                           for j in range(i, i + len(phrase))) for i in matches):
-                raise ValueError('focused_nonliteral_critical_value')
-    critical = {'authors_limitations', 'infiltration_definition', 'infiltration_operationalisation', 'sample_size', 'period'}
+
+    def literal_supported(value):
+        if value is None:
+            return True
+        phrase, ids = value['value'], value['evidence_ids']
+        matches = [match.start() for match in re.finditer(re.escape(phrase), text)]
+        return bool(matches) and any(all(any(blocks[key]['start'] <= index < blocks[key]['end'] for key in ids)
+                                         for index in range(start, start + len(phrase))) for start in matches)
+
     for key in FACT_FIELDS:
-        validate_fact(content[key], key in critical)
+        validate_shape(content[key])
+    validate_shape(content['summary'])
     for finding in content['findings']:
-        validate_fact(finding)
+        validate_shape(finding)
     for variable in variables['variables']:
         if not isinstance(variable, dict) or set(variable) != {'name', 'operationalisation', 'role'}:
             raise ValueError('focused_variable_shape')
-        validate_fact(variable['name'], True)
-        validate_fact(variable['operationalisation'], True)
-        validate_fact(variable['role'])
-    validate_fact(framework['rationale'])
+        validate_shape(variable['name'])
+        validate_shape(variable['operationalisation'])
+        validate_shape(variable['role'])
+    validate_shape(framework['rationale'])
+
+    warnings = []
+    critical = {'authors_limitations', 'infiltration_definition', 'infiltration_operationalisation', 'sample_size', 'period'}
+    for key in critical:
+        if content[key] is not None and not literal_supported(content[key]):
+            warnings.append({'stage': 'content', 'field': key, 'reason': 'nonliteral_critical_value_dropped'})
+            content[key] = None
+
+    kept_variables = []
+    for index, variable in enumerate(variables['variables']):
+        if not literal_supported(variable['name']):
+            warnings.append({'stage': 'variables', 'field': 'name', 'index': index,
+                             'reason': 'nonliteral_variable_dropped'})
+            continue
+        if variable['operationalisation'] is not None and not literal_supported(variable['operationalisation']):
+            warnings.append({'stage': 'variables', 'field': 'operationalisation', 'index': index,
+                             'reason': 'nonliteral_operationalisation_dropped'})
+            variable['operationalisation'] = None
+        kept_variables.append(variable)
+    variables['variables'] = kept_variables
+    return clean, warnings
+
+
+def focused_proposal(packet, outputs):
+    clean, _warnings = sanitise_critical_literals(packet, outputs)
+    content, variables, framework = (clean[key] for key in STAGES)
     combined = {**content, **variables, 'framework': {k: framework[k] for k in ('category', 'rationale')}}
     proposal = prepare_proposal(packet, combined)
     if framework['category'] is None:
