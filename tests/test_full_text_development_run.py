@@ -11,11 +11,14 @@ from scripts.calibration.full_text_development_run import (
     EVIDENCE_REJECTION_POLICY,
     EVIDENCE_UNIQUENESS_SUFFIX,
     FIELD_SCOPED_ATOM_SCHEMA,
+    SYNTHESIS_FIELD_SCOPED_SCHEMA,
     RUNTIME_CHECKPOINT,
     RUNTIME_DIAGNOSTICS,
     SCIENTIFIC_CONFIG,
     bounded_chunk_request,
+    bounded_synthesis_request,
     field_scoped_atom_schema,
+    field_scoped_synthesis_schema,
     runtime_checkpoint_payload,
     runtime_chunk_system,
     runtime_extractor_fingerprint,
@@ -61,6 +64,7 @@ class FullTextDevelopmentRuntimeTests(unittest.TestCase):
         self.assertEqual(SCIENTIFIC_CONFIG['max_atoms_per_chunk'], 8)
         self.assertEqual(SCIENTIFIC_CONFIG['chunk_max_tokens'], 1600)
         self.assertEqual(FIELD_SCOPED_ATOM_SCHEMA, 'entity-field-paired-oneof-v1')
+        self.assertEqual(SYNTHESIS_FIELD_SCOPED_SCHEMA, 'destination-field-scoped-assignments-v1')
         fingerprint = runtime_extractor_fingerprint()
         self.assertRegex(fingerprint, r'^[0-9a-f]{64}$')
         self.assertEqual(fingerprint, runtime_extractor_fingerprint())
@@ -98,8 +102,56 @@ class FullTextDevelopmentRuntimeTests(unittest.TestCase):
         self.assertNotIn('summary', by_entity['analysis'])
         request_schema = bounded_chunk_request({'id': 'chunk-1', 'text': 'bounded source ' * 100})['response_format']['schema']
         self.assertEqual(request_schema, schema)
-        # Constructing a bounded request must not mutate the base module's schema function.
         self.assertIs(development.atom_schema, runtime._ORIGINAL_ATOM_SCHEMA)
+
+    def test_synthesis_decoder_scopes_assignment_fields_to_destination_group(self):
+        schema = field_scoped_synthesis_schema()
+        props = schema['properties']
+        self.assertEqual(
+            set(props['global_fields']['items']['properties']['field']['enum']),
+            set(development.GLOBAL_FIELDS),
+        )
+        group_kinds = {
+            'studies': 'study', 'datasets': 'dataset', 'analyses': 'analysis',
+            'variable_uses': 'variable_use', 'findings': 'finding',
+        }
+        for group, kind in group_kinds.items():
+            field_schema = props[group]['items']['properties']['fields']['items']['properties']['field']
+            self.assertEqual(set(field_schema['enum']), set(development.FIELD_BY_ENTITY[kind]))
+        self.assertNotIn(
+            'method', props['global_fields']['items']['properties']['field']['enum'],
+        )
+        self.assertNotIn(
+            'summary', props['analyses']['items']['properties']['fields']['items']['properties']['field']['enum'],
+        )
+
+    def test_bounded_synthesis_request_uses_scoped_schema_without_mutating_base_module(self):
+        atoms = [{
+            'id': 'atom-1', 'entity_type': 'analysis', 'entity_key': 'a',
+            'field': 'method', 'value': 'Method',
+            'span': {'id': 'span-1', 'start_offset': 0, 'end_offset': 1},
+        }]
+        request = bounded_synthesis_request(atoms)
+        self.assertEqual(request['max_tokens'], SCIENTIFIC_CONFIG['synthesis_max_tokens'])
+        self.assertEqual(request['response_format']['schema'], field_scoped_synthesis_schema())
+        self.assertIs(development.synthesis_schema, runtime._ORIGINAL_SYNTHESIS_SCHEMA)
+
+    def test_base_builder_still_rejects_wrong_destination_field(self):
+        atoms = [{
+            'id': 'atom-1', 'entity_type': 'analysis', 'entity_key': 'a',
+            'field': 'method', 'value': 'Method',
+            'span': {'id': 'span-1', 'start_offset': 0, 'end_offset': 1},
+        }]
+        synthesis = {
+            'global_fields': [{'field': 'method', 'value': 'Wrong destination', 'atom_ids': ['atom-1']}],
+            'studies': [], 'datasets': [], 'analyses': [], 'variable_uses': [], 'findings': [],
+            'framework': {'status': 'insufficient_evidence', 'primary': None, 'rationale': None,
+                          'secondary': [], 'alternative': None},
+        }
+        with self.assertRaisesRegex(ValueError, 'assignment_field'):
+            development.build_proposal(
+                {'target_id': 't', 'input_sha256': 'a' * 64}, {'source_id': 's'}, atoms, synthesis
+            )
 
     def test_ambiguous_repeated_evidence_is_still_rejected_by_base_validator(self):
         text = 'start ' + ('x' * 1200) + ' repeated evidence middle repeated evidence ' + ('y' * 1200)
@@ -199,7 +251,6 @@ class FullTextDevelopmentRuntimeTests(unittest.TestCase):
         self.assertEqual(atoms, [])
         self.assertEqual(persisted[-1]['status'], 'evidence_resolution_complete_model_pending')
         self.assertEqual(persisted[-1]['runtime_evidence_rejections']['nonliteral_atoms_omitted'], 1)
-        # A failure after this point cannot revert the already persisted audit payload.
         with self.assertRaises(RuntimeError):
             raise RuntimeError('synthetic_later_failure')
 
@@ -224,6 +275,7 @@ class FullTextDevelopmentRuntimeTests(unittest.TestCase):
         self.assertEqual(development.CHUNK_OVERLAP, 800)
         self.assertEqual(development.MAX_ATOMS_PER_CHUNK, 18)
         self.assertIs(development.atom_schema, runtime._ORIGINAL_ATOM_SCHEMA)
+        self.assertIs(development.synthesis_schema, runtime._ORIGINAL_SYNTHESIS_SCHEMA)
 
 
 if __name__ == '__main__':

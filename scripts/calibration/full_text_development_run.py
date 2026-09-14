@@ -57,6 +57,16 @@ EVIDENCE_REJECTION_POLICY = 'omit_nonliteral_or_nonunique_atom_after_structural_
 # accept and are never silently moved between entity types.
 FIELD_SCOPED_ATOM_SCHEMA = 'entity-field-paired-oneof-v1'
 
+# Run 34888989672 passed chunk-level entity/field validation, completed inference,
+# then failed `fulltext_assignment_field` while converting the synthesis graph.
+# The base synthesis JSON schema leaves assignment.field generic and relies on the
+# post-model destination validator to reject an assignment placed under the wrong
+# group. Preserve that validator unchanged and constrain only the decoder schema:
+# global assignments can select GLOBAL_FIELDS, each record kind can select only
+# its FIELD_BY_ENTITY fields, while framework rationale may cite any governed atom
+# field because it is an analyst interpretation grounded across source entities.
+SYNTHESIS_FIELD_SCOPED_SCHEMA = 'destination-field-scoped-assignments-v1'
+
 RUNTIME_DIAGNOSTICS = {
     'nonliteral_atoms_omitted': 0,
     'ambiguous_atoms_omitted': 0,
@@ -65,10 +75,12 @@ RUNTIME_DIAGNOSTICS = {
 RUNTIME_CHECKPOINT = {'output': None, 'payload': None}
 
 _ORIGINAL_CHUNK_REQUEST = development.chunk_request
+_ORIGINAL_SYNTHESIS_REQUEST = development.synthesis_request
 _ORIGINAL_EXTRACTOR_FINGERPRINT = development.extractor_fingerprint
 _ORIGINAL_RESOLVE_ATOMS = development.resolve_atoms
 _ORIGINAL_CHECKPOINT = development.checkpoint
 _ORIGINAL_ATOM_SCHEMA = development.atom_schema
+_ORIGINAL_SYNTHESIS_SCHEMA = development.synthesis_schema
 
 
 def runtime_chunk_system():
@@ -105,6 +117,95 @@ def field_scoped_atom_schema():
     }
 
 
+def field_scoped_assignment_schema(fields=None):
+    """Return the base assignment shape with an optional closed destination field enum."""
+    field = {'type': 'string', 'minLength': 1, 'maxLength': 80}
+    if fields is not None:
+        field = {'enum': sorted(fields)}
+    return {
+        'type': 'object', 'additionalProperties': False,
+        'properties': {
+            'field': field,
+            'value': {'type': 'string', 'minLength': 1, 'maxLength': 1000},
+            'atom_ids': {'type': 'array', 'minItems': 1, 'maxItems': 12,
+                         'items': {'type': 'string', 'minLength': 1, 'maxLength': 80}},
+        },
+        'required': ['field', 'value', 'atom_ids'],
+    }
+
+
+def field_scoped_record_schema(kind):
+    fields = development.FIELD_BY_ENTITY[kind]
+    props = {
+        'id': {'type': 'string', 'minLength': 1, 'maxLength': 80},
+        'fields': {'type': 'array', 'maxItems': len(fields),
+                   'items': field_scoped_assignment_schema(fields)},
+    }
+    required = ['id', 'fields']
+    if kind == 'dataset':
+        props['study_id'] = {'type': 'string', 'minLength': 1, 'maxLength': 80}
+        required.append('study_id')
+    elif kind == 'analysis':
+        props['study_id'] = {'type': 'string', 'minLength': 1, 'maxLength': 80}
+        props['dataset_ids'] = {'type': 'array', 'maxItems': 100,
+                                'items': {'type': 'string', 'maxLength': 80}}
+        required.extend(['study_id', 'dataset_ids'])
+    elif kind == 'variable_use':
+        props['analysis_id'] = {'type': 'string', 'minLength': 1, 'maxLength': 80}
+        props['dataset_ids'] = {'type': 'array', 'maxItems': 100,
+                                'items': {'type': 'string', 'maxLength': 80}}
+        required.extend(['analysis_id', 'dataset_ids'])
+    elif kind == 'finding':
+        props['analysis_id'] = {'type': 'string', 'minLength': 1, 'maxLength': 80}
+        props['variable_use_ids'] = {'type': 'array', 'maxItems': 100,
+                                     'items': {'type': 'string', 'maxLength': 80}}
+        required.extend(['analysis_id', 'variable_use_ids'])
+    return {'type': 'object', 'additionalProperties': False, 'properties': props, 'required': required}
+
+
+def field_scoped_synthesis_schema():
+    """Constrain synthesis destinations while leaving framework evidence cross-entity."""
+    framework_assignment = field_scoped_assignment_schema()
+    framework = {
+        'type': 'object', 'additionalProperties': False,
+        'properties': {
+            'status': {'enum': ['proposed', 'insufficient_evidence', 'outside_framework']},
+            'primary': {'enum': development.CATEGORIES + [None]},
+            'rationale': {'anyOf': [framework_assignment, {'type': 'null'}]},
+            'secondary': {
+                'type': 'array', 'maxItems': 5,
+                'items': {
+                    'type': 'object', 'additionalProperties': False,
+                    'properties': {
+                        'category': {'enum': development.CATEGORIES},
+                        'rationale': field_scoped_assignment_schema(),
+                    },
+                    'required': ['category', 'rationale'],
+                },
+            },
+            'alternative': {'enum': development.CATEGORIES + [None]},
+        },
+        'required': ['status', 'primary', 'rationale', 'secondary', 'alternative'],
+    }
+    return {
+        'type': 'object', 'additionalProperties': False,
+        'properties': {
+            'global_fields': {
+                'type': 'array', 'maxItems': len(development.GLOBAL_FIELDS),
+                'items': field_scoped_assignment_schema(development.GLOBAL_FIELDS),
+            },
+            'studies': {'type': 'array', 'maxItems': 50, 'items': field_scoped_record_schema('study')},
+            'datasets': {'type': 'array', 'maxItems': 100, 'items': field_scoped_record_schema('dataset')},
+            'analyses': {'type': 'array', 'maxItems': 200, 'items': field_scoped_record_schema('analysis')},
+            'variable_uses': {'type': 'array', 'maxItems': 500,
+                              'items': field_scoped_record_schema('variable_use')},
+            'findings': {'type': 'array', 'maxItems': 300, 'items': field_scoped_record_schema('finding')},
+            'framework': framework,
+        },
+        'required': ['global_fields', 'studies', 'datasets', 'analyses', 'variable_uses', 'findings', 'framework'],
+    }
+
+
 def runtime_extractor_fingerprint():
     stable = {
         'protocol': development.PROTOCOL,
@@ -114,6 +215,7 @@ def runtime_extractor_fingerprint():
         'synthesis_system': development.SYNTHESIS_SYSTEM,
         'field_by_entity': {key: sorted(value) for key, value in development.FIELD_BY_ENTITY.items()},
         'atom_schema_contract': FIELD_SCOPED_ATOM_SCHEMA,
+        'synthesis_schema_contract': SYNTHESIS_FIELD_SCOPED_SCHEMA,
         'paper_enrichment_schema_sha256': development.schema_digest(),
         'decoder_contract': 'llama.cpp-json-schema;temperature=0;seed=0',
         'evidence_rejection_policy': EVIDENCE_REJECTION_POLICY,
@@ -136,6 +238,19 @@ def bounded_chunk_request(chunk):
     if not system.startswith(development.CHUNK_SYSTEM):
         raise RuntimeError('fulltext_chunk_prompt_contract_changed')
     request['messages'][0]['content'] = runtime_chunk_system() + system[len(development.CHUNK_SYSTEM):]
+    return request
+
+
+def bounded_synthesis_request(atoms):
+    # As at chunk extraction, change only the decoder schema supplied to this one
+    # request. The base proposal builder/post-model validators remain authoritative.
+    original_synthesis_schema = development.synthesis_schema
+    development.synthesis_schema = field_scoped_synthesis_schema
+    try:
+        request = _ORIGINAL_SYNTHESIS_REQUEST(atoms)
+    finally:
+        development.synthesis_schema = original_synthesis_schema
+    request['max_tokens'] = SCIENTIFIC_CONFIG['synthesis_max_tokens']
     return request
 
 
@@ -258,6 +373,7 @@ def main():
     original_chunk_overlap = development.CHUNK_OVERLAP
     original_max_atoms = development.MAX_ATOMS_PER_CHUNK
     original_chunk_request = development.chunk_request
+    original_synthesis_request = development.synthesis_request
     original_fingerprint = development.extractor_fingerprint
     original_resolve_atoms = development.resolve_atoms
     original_checkpoint = development.checkpoint
@@ -272,6 +388,7 @@ def main():
     development.CHUNK_OVERLAP = SCIENTIFIC_CONFIG['chunk_overlap']
     development.MAX_ATOMS_PER_CHUNK = SCIENTIFIC_CONFIG['max_atoms_per_chunk']
     development.chunk_request = bounded_chunk_request
+    development.synthesis_request = bounded_synthesis_request
     development.extractor_fingerprint = runtime_extractor_fingerprint
     development.resolve_atoms = runtime_resolve_atoms
     development.checkpoint = runtime_checkpoint
@@ -284,6 +401,7 @@ def main():
         development.CHUNK_OVERLAP = original_chunk_overlap
         development.MAX_ATOMS_PER_CHUNK = original_max_atoms
         development.chunk_request = original_chunk_request
+        development.synthesis_request = original_synthesis_request
         development.extractor_fingerprint = original_fingerprint
         development.resolve_atoms = original_resolve_atoms
         development.checkpoint = original_checkpoint
