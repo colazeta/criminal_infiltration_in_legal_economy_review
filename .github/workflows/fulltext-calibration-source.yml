@@ -31,7 +31,8 @@ jobs:
       - name: Validate bounded source-capture contracts
         run: |
           python3 scripts/validation/validate_repository.py
-          python3 -m unittest tests.test_full_text_source_case tests.test_extraordinary_runs
+          python3 -m unittest tests.test_full_text_source_case
+          python3 -m unittest discover -s tests -p 'test_extraordinary_runs.py'
           node --test curator-app/test/sealed-audit.test.js
           command -v pdftotext >/dev/null
       - name: Capture existing candidate full text into source-only ciphertext
