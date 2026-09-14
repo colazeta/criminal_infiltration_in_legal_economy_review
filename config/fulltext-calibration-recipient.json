@@ -1,7 +1,7 @@
 {
   "protocol": "CILE-SEALED-AUDIT-1",
-  "public_key_spki": "MCowBQYDK2VuAyEAAf8Q2lSEVN/yzeK/3hP2kXR1hv8CXY7jueR/8ibQwUc=",
-  "public_key_sha256": "ff1cca9df2bd10fd97d810e58c0059446092a3820b6e2a1b393306ed51b429b7",
-  "expires_at": "2026-09-15T13:00:00Z",
-  "purpose": "One bounded owner-authorised full-text calibration source packet for an already registered candidate; no production source write or scientific acceptance."
+  "public_key_spki": "MCowBQYDK2VuAyEA929P7Zh3FY8M5Y1Db0d/KUwK2Ia12iYzJ4npb7KFLDI=",
+  "public_key_sha256": "1cd11288176bad34f7339f5852b78408510df19c995289986362018fe1122d65",
+  "expires_at": "2026-09-15T14:30:00Z",
+  "purpose": "Owner-authorised full-text calibration development: separate encrypted source and model-result checkpoints for an already registered candidate; no production scientific write or acceptance."
 }
