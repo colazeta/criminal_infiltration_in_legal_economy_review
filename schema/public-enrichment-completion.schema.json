@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/schema/public-enrichment-completion.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "projection_version",
+    "candidate_id",
+    "status",
+    "completed",
+    "completed_at",
+    "protocol_version",
+    "codebook_version",
+    "research_revision",
+    "reference_coverage",
+    "outgoing_references",
+    "revision"
+  ],
+  "properties": {
+    "schema_version": {"const": 1},
+    "projection_version": {"const": "CILE-PUBLIC-COMPLETION-1"},
+    "candidate_id": {"type": "string", "maxLength": 106},
+    "status": {"enum": ["accepted", "not_attested", "stale", "withheld", "not_registered"]},
+    "completed": {"type": "boolean"},
+    "completed_at": {"type": ["string", "null"], "maxLength": 64},
+    "protocol_version": {"type": ["string", "null"], "maxLength": 100},
+    "codebook_version": {"type": ["string", "null"], "maxLength": 100},
+    "research_revision": {"type": ["string", "null"], "pattern": "^[a-f0-9]{64}$"},
+    "reference_coverage": {
+      "type": "array",
+      "maxItems": 20,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["provider", "direction", "status", "returned_count", "provider_count", "observed_at"],
+        "properties": {
+          "provider": {"type": "string", "maxLength": 100},
+          "direction": {"enum": ["outgoing", "incoming"]},
+          "status": {"enum": ["partial", "provider_complete", "not_returned"]},
+          "returned_count": {"type": "integer", "minimum": 0},
+          "provider_count": {"type": ["integer", "null"], "minimum": 0},
+          "observed_at": {"type": "string", "maxLength": 64}
+        }
+      }
+    },
+    "outgoing_references": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["identifiers", "total_observed", "truncated"],
+      "properties": {
+        "identifiers": {"type": "array", "maxItems": 500, "items": {"type": "string", "maxLength": 1000}},
+        "total_observed": {"type": "integer", "minimum": 0},
+        "truncated": {"type": "boolean"}
+      }
+    },
+    "revision": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+  }
+}

@@ -2,7 +2,9 @@
    No new persistence: revalidate immutable evidence and derive a closed response. */
 import cycle from '../../config/archive-cycle.json' with {type:'json'};
 import schema from '../../schema/public-paper-research.schema.json' with {type:'json'};
+import completionSchema from '../../schema/public-enrichment-completion.schema.json' with {type:'json'};
 import {validateExtraction, validateShape, normalDoi} from './paper-enrichment.js';
+import {publicCompletionState} from './enrichment-adjudication.js';
 import {canonicalJson, sha256} from './review-v2.js';
 export const PUBLIC_RESEARCH_PATH='/api/public-paper-research';
 export const validCandidate=id=>typeof id==='string'&&/^CAND-[A-Za-z0-9-]{1,100}$/.test(id);
@@ -30,9 +32,6 @@ function safeText(value,privateIds){
 const words=s=>s.normalize('NFKC').toLowerCase().match(/[\p{L}\p{N}]+/gu)||[];
 const COPY_WINDOW_WORDS=5,MAX_PUBLIC_COPY_WINDOWS=20000;
 function checkParaphrases(research,sources){
-  // Fail closed on substantive verbatim overlap without retaining source-sized
-  // n-gram sets. Only bounded public windows are retained; private source text is
-  // normalised once and scanned with a five-token rolling buffer.
   const byLast=new Map(),seen=new Set();let count=0;
   function add(pattern){
     const key=pattern.join(' ');if(seen.has(key))return;seen.add(key);
@@ -71,6 +70,13 @@ export function validatePublicResearch(payload){
   }
   return payload;
 }
+export function validatePublicCompletion(payload){
+  validateShape(payload,completionSchema,'$',completionSchema);
+  if(payload.completed!==(payload.status==='accepted'))throw Error('public_completion_status_mismatch');
+  if(payload.completed&&(!payload.completed_at||payload.protocol_version!=='CILE-ENRICH-1'||payload.codebook_version!=='1.0.0'||!payload.research_revision))throw Error('public_completion_receipt_incomplete');
+  if(!payload.completed&&(payload.completed_at!==null||payload.protocol_version!==null||payload.codebook_version!==null))throw Error('public_completion_false_attestation');
+  return payload;
+}
 async function seal(candidate,availability,research=null){
   const out={schema_version:1,projection_version:'CILE-PUBLIC-RESEARCH-1',candidate,availability,research};
   out.revision=await sha256(canonicalJson(out));return validatePublicResearch(out);
@@ -107,8 +113,6 @@ export async function projectResearch(target,proposal,sources){
     research.updated_at=proposal.created_at;
     research.internal_notes='not_released';
     research.sources=input.source_ids.map(id=>{const s=sources.find(s=>s.source_id===id);return{id:sourceMap.get(id),url:s.source_url,kind:s.evidence_kind,version:s.version_label,checked_at:s.observed_at}});
-    // Private span locators can themselves contain evidence quotations. Publish a
-    // stable ordinal locator only; exact offsets/labels remain private evidence.
     research.spans=input.spans.map((s,i)=>({id:spanMap.get(s.id),source_id:sourceMap.get(s.source_id),locator:`evidence segment ${i+1}`}));
     const ids=[target.target_id,proposal.proposal_id,...sources.flatMap(s=>[s.source_id,s.storage_key]),...input.spans.map(s=>s.id)];
     function inspect(v){if(typeof v==='string')safeText(v,ids);else if(v&&typeof v==='object')for(const x of Object.values(v))inspect(x)}inspect(research);
@@ -136,20 +140,34 @@ export async function readPublicResearch(env,id){
         const text=await object.text();total+=text.length;if(total>8000000)throw Error('source_limit');sources.push({...s,text});
       }
     }catch{
-      // Preserve identity but publish neither unverifiable content nor private errors.
       const empty=await projectResearch(target,null,[]);return seal(empty.candidate,'withheld');
     }
   }
   return projectResearch(target,proposal,sources);
 }
+export async function readPublicCompletion(env,id){
+  if(!validCandidate(id))throw Error('invalid_candidate');
+  const research=await readPublicResearch(env,id);
+  let state=await publicCompletionState(env,id);
+  if(state.completed&&research.availability!=='available')state={...state,status:'withheld',completed:false,completed_at:null,protocol_version:null,codebook_version:null};
+  const out={schema_version:1,projection_version:'CILE-PUBLIC-COMPLETION-1',...state,
+    research_revision:research.availability==='available'?research.revision:null};
+  out.revision=await sha256(canonicalJson(out));
+  return validatePublicCompletion(out);
+}
 export async function publicResearchAudit(env){
   const targets=(await query(env.REVIEW_DB,'SELECT record_id FROM enrichment_targets WHERE active=1 AND cycle_id=? ORDER BY record_id LIMIT 10001',cycle.review_id).all()).results;
   if(targets.length>10000)throw Error('audit_limit');
-  const counts={registered:targets.length,available:0,not_assessed:0,stale:0,withheld:0,classified:0,automated:0};
+  const counts={registered:targets.length,available:0,not_assessed:0,stale:0,withheld:0,classified:0,automated:0,completed:0};
   counts.stored_proposals=Number((await query(env.REVIEW_DB,'SELECT COUNT(*) n FROM enrichment_proposals').first()).n);
   counts.stored_sources=Number((await query(env.REVIEW_DB,'SELECT COUNT(*) n FROM enrichment_sources').first()).n);
+  counts.stored_adjudication_receipts=Number((await query(env.REVIEW_DB,'SELECT COUNT(*) n FROM enrichment_adjudication_receipts').first()).n);
   const records=[];
-  for(const target of targets){const out=await readPublicResearch(env,target.record_id);counts[out.availability]++;if(out.research?.framework.primary)counts.classified++;if(out.research?.generation_kind==='automated')counts.automated++;records.push({id:target.record_id,availability:out.availability,revision:out.revision})}
+  for(const target of targets){
+    const out=await readPublicResearch(env,target.record_id),completion=await readPublicCompletion(env,target.record_id);
+    counts[out.availability]++;if(out.research?.framework.primary)counts.classified++;if(out.research?.generation_kind==='automated')counts.automated++;if(completion.completed)counts.completed++;
+    records.push({id:target.record_id,availability:out.availability,revision:out.revision,completion_status:completion.status,completion_revision:completion.revision});
+  }
   return{schema_version:1,projection_version:'CILE-PUBLIC-RESEARCH-1',counts,records};
 }
 export async function servePublicResearch(request,store){
@@ -158,12 +176,16 @@ export async function servePublicResearch(request,store){
   if(request.method==='OPTIONS')return new Response(null,{status:204,headers:{...h,'Access-Control-Allow-Methods':'GET','Access-Control-Max-Age':'300'}});
   const u=new URL(request.url);
   if(request.method!=='GET')return response({error:'method_not_allowed'},405);
-  if([...u.searchParams.keys()].some(k=>k!=='id')||u.searchParams.getAll('id').length!==1||!validCandidate(u.searchParams.get('id')))return response({error:'invalid_candidate'},400);
+  if([...u.searchParams.keys()].some(k=>!['id','view'].includes(k))||u.searchParams.getAll('id').length!==1||u.searchParams.getAll('view').length>1||!validCandidate(u.searchParams.get('id')))return response({error:'invalid_candidate'},400);
+  const view=u.searchParams.get('view');
+  if(view!==null&&view!=='completion')return response({error:'invalid_view'},400);
   if(!store)return response({error:'research_temporarily_unavailable'},503);
   try{
-    // Do not forward credentials, cookies or arbitrary request bodies/paths to private storage.
-    const internal=await store.fetch(new Request('https://enrichment.internal/public-research?id='+encodeURIComponent(u.searchParams.get('id'))));
+    const path=view==='completion'?'public-completion':'public-research';
+    const internal=await store.fetch(new Request(`https://enrichment.internal/${path}?id=`+encodeURIComponent(u.searchParams.get('id'))));
     if(!internal.ok)return response({error:'research_temporarily_unavailable'},503);
-    const data=await internal.json();validatePublicResearch(data);return response(data,200);
+    const data=await internal.json();
+    if(view==='completion')validatePublicCompletion(data);else validatePublicResearch(data);
+    return response(data,200);
   }catch{return response({error:'research_temporarily_unavailable'},503)}
 }

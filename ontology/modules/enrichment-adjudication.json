@@ -1,0 +1,63 @@
+{
+  "version": "1.0.0",
+  "profile_version": "0.4.1",
+  "protocol_version": "CILE-ENRICH-1",
+  "migrations": [
+    "curator-app/migrations/0003_paper_enrichment.sql",
+    "curator-app/migrations/0005_enrichment_adjudication.sql"
+  ],
+  "tables": {
+    "enrichment_calibration_receipts": {
+      "class": "ReviewEvent",
+      "fields": {
+        "calibration_id": "v2_receipt_id",
+        "protocol_version": "enrichment_protocol_version",
+        "codebook_version": "enrichment_codebook_version",
+        "model": "extraction_model",
+        "prompt_sha256": "extraction_prompt_sha256",
+        "benchmark_sha256": "cile:benchmarkSha256",
+        "metrics_sha256": "cile:metricsSha256",
+        "benchmark_size": "cile:benchmarkSize",
+        "reference_checked_cases": "cile:referenceCheckedCases",
+        "full_text_cases": "cile:fullTextCases",
+        "hard_cases": "cile:hardCases",
+        "manifest_sha256": "v2_manifest_sha256",
+        "repository": "v2_repository",
+        "pr_number": "v2_pr_number",
+        "reviewed_commit": "v2_reviewed_commit",
+        "human_login": "v2_human_login",
+        "human_review_id": "v2_human_review_id",
+        "approved_at": "v2_approved_at",
+        "imported_at": "v2_imported_at"
+      }
+    },
+    "enrichment_adjudication_receipts": {
+      "class": "PublicationState",
+      "fields": {
+        "receipt_id": "v2_receipt_id",
+        "target_id": "enrichment_target_id",
+        "input_sha256": "enrichment_input_sha256",
+        "proposal_id": "enrichment_proposal_id",
+        "proposal_sha256": "enrichment_payload_sha256",
+        "source_snapshot_sha256": "cile:sourceSnapshotSha256",
+        "reference_snapshot_sha256": "cile:referenceSnapshotSha256",
+        "calibration_id": "v2_receipt_id",
+        "checklist_sha256": "cile:checklistSha256",
+        "manifest_sha256": "v2_manifest_sha256",
+        "repository": "v2_repository",
+        "pr_number": "v2_pr_number",
+        "reviewed_commit": "v2_reviewed_commit",
+        "human_login": "v2_human_login",
+        "human_review_id": "v2_human_review_id",
+        "approved_at": "v2_approved_at",
+        "imported_at": "v2_imported_at"
+      }
+    }
+  },
+  "append_only_tables": [
+    "enrichment_calibration_receipts",
+    "enrichment_adjudication_receipts"
+  ],
+  "scientific_boundary": "Only exact-head, merged-PR human approvals create accepted receipts; engineering packets and software fixtures never do.",
+  "public_projection": "schema/public-enrichment-completion.schema.json"
+}
