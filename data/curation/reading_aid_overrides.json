@@ -586,6 +586,33 @@
       "synopsis": "The working paper studies Mafia infiltration in Sicily’s wind-power business in the context of renewable-energy incentives, examining the interaction of criminal actors with firms, local institutions and the development process.",
       "checkedAt": "2026-09-14",
       "note": "Parallel Search fetched the complete Bocconi GREEN Working Paper 04 PDF and matched Daniele Checchi, Michele Polo and the registered 2019 working-paper identity. Evidence basis: full_text. The later 2020 journal article with DOI 10.1007/s40797-020-00126-z remains a distinct manifestation and is not silently substituted or canonicalised. No private full-text ingestion, eligibility decision or scientific classification is claimed."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-14-EXTRA-8b3f2d6a91c4-002",
+      "kind": "verified_abstract_source",
+      "sourceLabel": "ScienceDirect final publisher abstract located with Parallel Search",
+      "sourceUrl": "https://www.sciencedirect.com/science/article/abs/pii/S0928765515000299",
+      "synopsis": "The article examines how organised crime affects regional waste management and disposal in Italy. The publisher abstract and highlights report that organised-crime presence in local institutions worsens waste-management performance, undermining legal disposal and sorted collection, with both local and neighbouring-area effects.",
+      "checkedAt": "2026-09-14",
+      "note": "Parallel Search fetched the exact ScienceDirect final article record and verified Alessio D’Amato, Massimiliano Mazzanti, Francesco Nicolli, Resource and Energy Economics 41 (2015), pp. 185–201 and DOI 10.1016/j.reseneeco.2015.04.003. Evidence basis: abstract_only. The final publisher surface exposes an article preview/abstract rather than a verified full-text manifestation, so no full-text, OA-retention, metadata-rewrite or scientific-decision claim is made."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-14-EXTRA-a6b4145d08dd-004",
+      "kind": "full_text_intro",
+      "sourceLabel": "UNODC full-text report located with Parallel Search",
+      "sourceUrl": "https://www.unodc.org/documents/bmb/environmental-crime/FINAL_for_printing_-_Cash_in_the_Trash.pdf",
+      "synopsis": "The UNODC report examines the roles of corruption, organised crime and money laundering in waste trafficking and the prevention and policy responses intended to reduce those risks.",
+      "checkedAt": "2026-09-14",
+      "note": "Parallel Search fetched the complete official UNODC report and matched the registered 2024 title and institutional identity. Evidence basis: full_text. The public aid is a concise paraphrase; no verbatim report text, private full-text ingestion, eligibility decision, canonicalisation, OA-retention inference or scientific classification is claimed."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-14-EXTRA-a6b4145d08dd-005",
+      "kind": "full_text_intro",
+      "sourceLabel": "Malmö University / DiVA full-text degree project located with Parallel Search",
+      "sourceUrl": "https://www.diva-portal.org/smash/get/diva2:1544272/FULLTEXT02",
+      "synopsis": "The criminology degree project applies a crime-script perspective to organised crime in the Swedish construction industry, structuring criminal activity as a process in order to identify how it operates and where preventive intervention may be possible.",
+      "checkedAt": "2026-09-14",
+      "note": "Parallel Search fetched the complete Malmö University / DiVA full-text degree project and matched Lars Flysjö, the exact title and the 2021 manifestation. Evidence basis: full_text. This is non-decisional reading support only; no private full-text ingestion, eligibility decision, canonicalisation, OA-retention inference or scientific classification is claimed."
     }
   ]
 }
