@@ -7,6 +7,7 @@ on:
       - scripts/calibration/paper_content_benchmark.py
       - scripts/calibration/paper_content_shard.py
       - scripts/enrichment/focused.py
+      - config/enrichment-benchmark-recipient.json
       - .github/workflows/enrichment-content-benchmark.yml
 permissions:
   contents: read
