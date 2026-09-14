@@ -39,8 +39,24 @@ quote repeats, extend it with exact contiguous surrounding source words until it
 within the evidence length limit. If no exact unique substring supports the complete value, omit the atom.
 Never invent an occurrence index, silently choose between repeated matches, or paraphrase the evidence."""
 
+# Run 34876598941 showed that prompt-only recovery is not sufficient: a model can
+# still emit an atom whose evidence is absent or repeated. The base validator must
+# remain fail-closed. The runtime therefore rejects only those individual atoms
+# before the base validator sees them, records only aggregate rejection diagnostics
+# in the encrypted checkpoint, and lets synthesis treat the resulting omission as
+# missing/not_verifiable. Malformed atoms and every other contract error still go
+# unchanged to the base validator and fail the whole development case.
+EVIDENCE_REJECTION_POLICY = 'omit_nonliteral_or_nonunique_atom_before_base_validation'
+RUNTIME_DIAGNOSTICS = {
+    'nonliteral_atoms_omitted': 0,
+    'ambiguous_atoms_omitted': 0,
+    'omission_digest': development.sha(development.canonical([])),
+}
+
 _ORIGINAL_CHUNK_REQUEST = development.chunk_request
 _ORIGINAL_EXTRACTOR_FINGERPRINT = development.extractor_fingerprint
+_ORIGINAL_RESOLVE_ATOMS = development.resolve_atoms
+_ORIGINAL_CHECKPOINT = development.checkpoint
 
 
 def runtime_chunk_system():
@@ -57,6 +73,7 @@ def runtime_extractor_fingerprint():
         'field_by_entity': {key: sorted(value) for key, value in development.FIELD_BY_ENTITY.items()},
         'paper_enrichment_schema_sha256': development.schema_digest(),
         'decoder_contract': 'llama.cpp-json-schema;temperature=0;seed=0',
+        'evidence_rejection_policy': EVIDENCE_REJECTION_POLICY,
     }
     return development.sha(development.canonical(stable))
 
@@ -69,6 +86,77 @@ def bounded_chunk_request(chunk):
         raise RuntimeError('fulltext_chunk_prompt_contract_changed')
     request['messages'][0]['content'] = runtime_chunk_system() + system[len(development.CHUNK_SYSTEM):]
     return request
+
+
+def _evidence_occurrences(source, evidence):
+    starts = []
+    at = 0
+    while True:
+        found = source.find(evidence, at)
+        if found < 0:
+            break
+        starts.append(found)
+        if len(starts) > 1:
+            break
+        at = found + 1
+    return len(starts)
+
+
+def runtime_resolve_atoms(chunks, outputs):
+    """Omit only unlocatable/non-unique atoms; keep the base validator unchanged.
+
+    The omission is scientific missingness, not successful evidence. No source text,
+    evidence quote or model value is placed in the diagnostics: only counts and a
+    stable digest of non-sensitive structural descriptors enter the encrypted
+    development checkpoint.
+    """
+    if len(chunks) != len(outputs):
+        return _ORIGINAL_RESOLVE_ATOMS(chunks, outputs)
+    sanitised = []
+    omitted = []
+    for chunk, output in zip(chunks, outputs):
+        if not isinstance(output, dict) or set(output) != {'atoms'} or not isinstance(output['atoms'], list):
+            sanitised.append(output)
+            continue
+        atoms = []
+        for index, raw in enumerate(output['atoms']):
+            # Do not mask malformed atoms or invalid field/entity contracts. Those
+            # remain the responsibility of the base validator and must still fail.
+            if (not isinstance(raw, dict) or
+                    set(raw) != {'entity_type', 'entity_key', 'field', 'value', 'evidence'} or
+                    not isinstance(raw.get('evidence'), str) or
+                    not raw['evidence'].strip() or len(raw['evidence']) > 500):
+                atoms.append(raw)
+                continue
+            occurrences = _evidence_occurrences(chunk['text'], raw['evidence'])
+            if occurrences == 1:
+                atoms.append(raw)
+                continue
+            reason = 'nonliteral' if occurrences == 0 else 'ambiguous'
+            omitted.append({
+                'chunk_id': chunk.get('id'), 'atom_index': index,
+                'entity_type': raw.get('entity_type'), 'field': raw.get('field'),
+                'reason': reason,
+            })
+        sanitised.append({'atoms': atoms})
+    RUNTIME_DIAGNOSTICS['nonliteral_atoms_omitted'] = sum(item['reason'] == 'nonliteral' for item in omitted)
+    RUNTIME_DIAGNOSTICS['ambiguous_atoms_omitted'] = sum(item['reason'] == 'ambiguous' for item in omitted)
+    RUNTIME_DIAGNOSTICS['omission_digest'] = development.sha(development.canonical(omitted))
+    return _ORIGINAL_RESOLVE_ATOMS(chunks, sanitised)
+
+
+def runtime_checkpoint_payload(payload):
+    return {
+        **payload,
+        'runtime_evidence_rejections': {
+            'policy': EVIDENCE_REJECTION_POLICY,
+            **RUNTIME_DIAGNOSTICS,
+        },
+    }
+
+
+def runtime_checkpoint(output, payload):
+    return _ORIGINAL_CHECKPOINT(output, runtime_checkpoint_payload(payload))
 
 
 def runtime_timeout(requested):
@@ -93,12 +181,21 @@ def main():
     original_max_atoms = development.MAX_ATOMS_PER_CHUNK
     original_chunk_request = development.chunk_request
     original_fingerprint = development.extractor_fingerprint
+    original_resolve_atoms = development.resolve_atoms
+    original_checkpoint = development.checkpoint
 
+    RUNTIME_DIAGNOSTICS.update({
+        'nonliteral_atoms_omitted': 0,
+        'ambiguous_atoms_omitted': 0,
+        'omission_digest': development.sha(development.canonical([])),
+    })
     development.CHUNK_CHARS = SCIENTIFIC_CONFIG['chunk_chars']
     development.CHUNK_OVERLAP = SCIENTIFIC_CONFIG['chunk_overlap']
     development.MAX_ATOMS_PER_CHUNK = SCIENTIFIC_CONFIG['max_atoms_per_chunk']
     development.chunk_request = bounded_chunk_request
     development.extractor_fingerprint = runtime_extractor_fingerprint
+    development.resolve_atoms = runtime_resolve_atoms
+    development.checkpoint = runtime_checkpoint
     development.post_model = lambda payload, timeout=300: runtime_post(original_post, payload, timeout)
     try:
         development.main()
@@ -109,6 +206,8 @@ def main():
         development.MAX_ATOMS_PER_CHUNK = original_max_atoms
         development.chunk_request = original_chunk_request
         development.extractor_fingerprint = original_fingerprint
+        development.resolve_atoms = original_resolve_atoms
+        development.checkpoint = original_checkpoint
 
 
 if __name__ == '__main__':
