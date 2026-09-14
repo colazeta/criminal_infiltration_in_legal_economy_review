@@ -148,7 +148,7 @@ export async function importCompletionApproval(env,{target_id,pr_number},get=git
   const receiptId=await sha256(canonicalJson([target_id,target.input_sha256,state.proposal.proposal_id,manifestHash,approval.reviewed_commit]));
   const existing=await S(env.REVIEW_DB,'SELECT * FROM enrichment_adjudication_receipts WHERE target_id=? AND input_sha256=? AND proposal_id=?',target_id,target.input_sha256,state.proposal.proposal_id).first();
   if(existing){if(existing.manifest_sha256!==manifestHash)throw Error('adjudication_receipt_conflict');return{receipt_id:existing.receipt_id,replayed:true}}
-  await S(env.REVIEW_DB,'INSERT INTO enrichment_adjudication_receipts VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+  await S(env.REVIEW_DB,'INSERT INTO enrichment_adjudication_receipts VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
     receiptId,target_id,target.input_sha256,state.proposal.proposal_id,state.proposal.payload_sha256,manifest.source_snapshot_sha256,
     manifest.reference_snapshot_sha256,manifest.calibration_id,checklistHash,manifestHash,approval.repository,approval.pr_number,
     approval.reviewed_commit,approval.human_login,approval.human_review_id,approval.approved_at,new Date(now).toISOString()).run();
