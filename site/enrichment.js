@@ -1,7 +1,8 @@
 "use strict";
 (() => {
   const $ = id => document.getElementById(id);
-  let targets = [], generation = 0;
+  let targets = [], generation = 0, documentUrl = null;
+  function clearDocument(){if(documentUrl){URL.revokeObjectURL(documentUrl);documentUrl=null}}
   const el = (tag,text) => { const n=document.createElement(tag); if(text!==undefined)n.textContent=String(text);return n; };
   function message(text) { $("enrich-status").textContent=text; }
   async function api(path) {
@@ -23,10 +24,12 @@
     }));
   }
   async function refresh() {
-    const serial=++generation;
+    clearDocument();const serial=++generation;
     try {
       const state=await api('status');const data=await api('targets');if(serial!==generation)return;
       targets=data.targets.map(t=>({...t,record:JSON.parse(t.record_json)}));list();
+      const requested=new URL(location.href).searchParams.get('candidate');
+      if(requested){const selected=targets.find(t=>t.record_id===requested||t.record.id===requested);if(selected){await open(selected.target_id);return}}
       $("enrich-scope").textContent=state.enabled?'Acquisizione meccanica abilitata':'Acquisizione meccanica disabilitata';
       const pane=$("enrich-detail");pane.replaceChildren(el('h1','Stato dell’arricchimento'),el('p','Estrazione scientifica automatica non attiva: calibrazione del modello ancora necessaria. Le proposte non sono decisioni approvate.'));
       if(state.scheduling){pane.append(el('h2','Iterazioni orarie alle :40'),el('p','Slot previsti distinti dalle esecuzioni effettive. Le iterazioni in attesa non vengono cancellate.'));
@@ -37,13 +40,22 @@
     }catch(e){$("enrich-detail").replaceChildren(el('h1','Accesso o configurazione richiesti'),el('p','Accedi dalla console curatoriale. Un archivio privato non disponibile resta un blocco esplicito.'));message(e.message);}
   }
   async function open(id) {
-    const serial=++generation;
+    clearDocument();const serial=++generation;
     try {
       const data=await api('target?id='+encodeURIComponent(id));if(serial!==generation)return;
       const pane=$("enrich-detail");pane.replaceChildren(el('h1',JSON.parse(data.target.record_json).title),el('p','Proposte non approvate. Le fonti originali restano private.'));
       pane.append(el('h2','Lavorazioni'));table(pane,data.jobs,['kind','status','error_code','due_at']);
       pane.append(el('h2','Fonti'));
       for(const source of data.sources){const b=el('button',source.evidence_kind+' · '+source.provider);const text=el('pre');b.addEventListener('click',async()=>{try{const s=await api('source?id='+encodeURIComponent(id)+'&source='+encodeURIComponent(source.source_id));if(serial===generation)text.textContent=s.text;}catch(e){message(e.message);}});pane.append(b,text);}
+      pane.append(el('h2','PDF conservati'));
+      const documentPane=el('section');pane.append(documentPane);
+      try{const listing=await api('documents?id='+encodeURIComponent(id));if(serial!==generation)return;
+        if(!listing.documents.length)documentPane.append(el('p','Nessun PDF originale conservato per questa versione. Un collegamento esterno non è una copia archiviata.'));
+        for(const d of listing.documents){const button=el('button','Leggi PDF · '+d.version_label+' · '+d.visibility),viewer=el('div');
+          button.addEventListener('click',async()=>{button.disabled=true;try{const response=await fetch('/api/paper-enrichment/document?id='+encodeURIComponent(id)+'&document='+d.document_id,{headers:{Authorization:'Bearer '+(sessionStorage.getItem('criminal-infiltration-curator-session')||'')}});if(!response.ok||!response.headers.get('Content-Type')?.startsWith('application/pdf'))throw Error('PDF non disponibile');const blob=await response.blob();if(serial!==generation)return;clearDocument();documentUrl=URL.createObjectURL(blob);const frame=el('iframe');frame.title='PDF originale conservato';frame.src=documentUrl;frame.className='enrichment-pdf-viewer';const link=el('a','Apri il PDF conservato in una nuova scheda');link.href=documentUrl;link.target='_blank';link.rel='noopener';viewer.replaceChildren(link,frame);}catch(e){message(e.message)}finally{button.disabled=false}});
+          documentPane.append(button,el('p',d.attribution+' · '+d.licence_status+' · '+d.byte_length+' byte · SHA-256 '+d.pdf_sha256),viewer);
+        }
+      }catch(e){documentPane.append(el('p','Stato dei PDF non verificabile: '+e.message))}
       pane.append(el('h2','Proposte di estrazione'));
       if(!data.proposals.length)pane.append(el('p','Nessuna proposta: non è stata eseguita un’estrazione scientifica.'));
       for(const p of data.proposals){
@@ -63,5 +75,6 @@
       more.addEventListener('click',async()=>{more.disabled=true;try{const d=await api('citations?id='+encodeURIComponent(id)+'&offset='+offset);if(serial!==generation)return;table(graph,d.edges,['direction','citing_identifier','cited_identifier','snapshot_id']);if(offset===0)table(graph,d.coverage,['direction','status','returned_count','provider_count','observed_at']);offset=d.next_offset;more.hidden=offset===null;}catch(e){message(e.message);}finally{more.disabled=false;}});pane.append(more,graph);message(data.target.record_id);
     }catch(e){message(e.message);}
   }
+  window.addEventListener('pagehide',clearDocument);
   $("enrich-refresh").addEventListener('click',refresh);$("enrich-filter").addEventListener('input',list);refresh();
 })();

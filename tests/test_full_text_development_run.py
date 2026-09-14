@@ -1,7 +1,14 @@
 """Runtime-budget tests only; no model, source or network access."""
 import unittest
 
-from scripts.calibration.full_text_development_run import runtime_post, runtime_timeout
+from scripts.calibration import full_text_development as development
+from scripts.calibration.full_text_development_run import (
+    SCIENTIFIC_CONFIG,
+    bounded_chunk_request,
+    runtime_extractor_fingerprint,
+    runtime_post,
+    runtime_timeout,
+)
 
 
 class FullTextDevelopmentRuntimeTests(unittest.TestCase):
@@ -25,6 +32,31 @@ class FullTextDevelopmentRuntimeTests(unittest.TestCase):
             runtime_post(timed_out, payload, 300)
         self.assertIs(seen['payload'], payload)
         self.assertEqual(seen['timeout'], 600)
+
+    def test_bounded_scientific_runtime_has_stable_explicit_fingerprint(self):
+        self.assertEqual(SCIENTIFIC_CONFIG['chunk_chars'], 6000)
+        self.assertEqual(SCIENTIFIC_CONFIG['chunk_overlap'], 400)
+        self.assertEqual(SCIENTIFIC_CONFIG['max_atoms_per_chunk'], 8)
+        self.assertEqual(SCIENTIFIC_CONFIG['chunk_max_tokens'], 1600)
+        fingerprint = runtime_extractor_fingerprint()
+        self.assertRegex(fingerprint, r'^[0-9a-f]{64}$')
+        self.assertEqual(fingerprint, runtime_extractor_fingerprint())
+
+    def test_chunk_request_expands_only_output_budget_after_incomplete_response(self):
+        chunk = {'id': 'chunk-1', 'text': 'Synthetic source evidence ' * 60}
+        request = bounded_chunk_request(chunk)
+        self.assertEqual(request['max_tokens'], 1600)
+        supplied = request['messages'][1]['content']
+        self.assertIn('Synthetic source evidence', supplied)
+        self.assertEqual(request['temperature'], 0)
+        self.assertEqual(request['seed'], 0)
+        self.assertEqual(SCIENTIFIC_CONFIG['chunk_chars'], 6000)
+        self.assertEqual(SCIENTIFIC_CONFIG['max_atoms_per_chunk'], 8)
+
+    def test_base_module_is_not_mutated_merely_by_importing_runtime_policy(self):
+        self.assertEqual(development.CHUNK_CHARS, 18000)
+        self.assertEqual(development.CHUNK_OVERLAP, 800)
+        self.assertEqual(development.MAX_ATOMS_PER_CHUNK, 18)
 
 
 if __name__ == '__main__':

@@ -1,0 +1,260 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "projection_version",
+    "candidate_id",
+    "candidate",
+    "availability",
+    "documents",
+    "bibliography"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "projection_version": {
+      "const": "CILE-PUBLIC-ASSETS-1"
+    },
+    "candidate_id": {
+      "type": "string",
+      "maxLength": 106
+    },
+    "candidate": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "title",
+        "doi",
+        "sourceLinks"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 106
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 3000
+        },
+        "doi": {
+          "type": "string",
+          "maxLength": 512
+        },
+        "sourceLinks": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "maxItems": 100
+        }
+      }
+    },
+    "availability": {
+      "enum": [
+        "registered",
+        "not_registered"
+      ]
+    },
+    "documents": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "document_id",
+          "source_url",
+          "version_label",
+          "pdf_sha256",
+          "byte_length",
+          "licence_url",
+          "attribution",
+          "observed_at"
+        ],
+        "properties": {
+          "document_id": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "source_url": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "version_label": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "pdf_sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "byte_length": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "licence_url": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "attribution": {
+            "type": "string",
+            "maxLength": 1000
+          },
+          "observed_at": {
+            "type": "string",
+            "maxLength": 64
+          }
+        }
+      }
+    },
+    "bibliography": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": false,
+      "required": [
+        "scope",
+        "coverage",
+        "declared_count",
+        "entries_count",
+        "source_url",
+        "version_label",
+        "observed_at",
+        "revision",
+        "entries",
+        "next_offset",
+        "assessment_state"
+      ],
+      "properties": {
+        "scope": {
+          "enum": [
+            "paper_bibliography",
+            "provider_references"
+          ]
+        },
+        "coverage": {
+          "enum": [
+            "partial",
+            "source_complete",
+            "not_reported"
+          ]
+        },
+        "declared_count": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "entries_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "source_url": {
+          "type": "string",
+          "maxLength": 2000
+        },
+        "version_label": {
+          "type": "string",
+          "maxLength": 200
+        },
+        "observed_at": {
+          "type": "string",
+          "maxLength": 64
+        },
+        "revision": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "entries": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "position",
+              "title",
+              "authors",
+              "year",
+              "venue",
+              "doi",
+              "url",
+              "unresolved_identity"
+            ],
+            "properties": {
+              "position": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "title": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "maxLength": 1000
+              },
+              "authors": {
+                "type": "array",
+                "maxItems": 200,
+                "items": {
+                  "type": "string",
+                  "maxLength": 200
+                }
+              },
+              "year": {
+                "type": [
+                  "integer",
+                  "null"
+                ],
+                "minimum": 1000
+              },
+              "venue": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "maxLength": 500
+              },
+              "doi": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "maxLength": 500
+              },
+              "url": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "maxLength": 2000
+              },
+              "unresolved_identity": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "next_offset": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "assessment_state": {
+          "const": "unreviewed_proposal"
+        }
+      }
+    }
+  }
+}

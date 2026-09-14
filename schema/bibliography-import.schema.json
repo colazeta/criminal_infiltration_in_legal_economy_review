@@ -1,0 +1,118 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "input_sha256",
+    "source_id",
+    "scope",
+    "coverage",
+    "declared_count",
+    "entries"
+  ],
+  "properties": {
+    "input_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "source_id": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "scope": {
+      "enum": [
+        "paper_bibliography",
+        "provider_references"
+      ]
+    },
+    "coverage": {
+      "enum": [
+        "partial",
+        "source_complete",
+        "not_reported"
+      ]
+    },
+    "declared_count": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    },
+    "entries": {
+      "type": "array",
+      "maxItems": 1000,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "position",
+          "title",
+          "authors",
+          "year",
+          "venue",
+          "doi",
+          "url",
+          "source_locator",
+          "unresolved_identity"
+        ],
+        "properties": {
+          "position": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "title": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 1000
+          },
+          "authors": {
+            "type": "array",
+            "maxItems": 200,
+            "items": {
+              "type": "string",
+              "maxLength": 200
+            }
+          },
+          "year": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 1000
+          },
+          "venue": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 500
+          },
+          "doi": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 500
+          },
+          "url": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "maxLength": 2000
+          },
+          "source_locator": {
+            "type": "string",
+            "maxLength": 500
+          },
+          "unresolved_identity": {
+            "type": "boolean"
+          }
+        }
+      }
+    }
+  }
+}

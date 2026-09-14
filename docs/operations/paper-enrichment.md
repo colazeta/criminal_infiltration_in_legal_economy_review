@@ -1,5 +1,7 @@
 # Paper enrichment: operational contract
 
+**Current delivery amendment (14 September 2026):** see [two-lane-delivery.md](two-lane-delivery.md). It supersedes the earlier proposal-only UI limitation, defines the current receipt-backed index/filter/statistics, private PDF and bibliography paths, explicit assessed-field policy, and daily discovery with durable query checkpoints. Historical observations below remain historical; no scientific acceptance is implied.
+
 Protocol **CILE-ENRICH-1** · ontology **0.4.1** · clinical codebook **1.0.0**.
 Owner implementation mandate: 11 September 2026. This authorises engineering and
 mechanical enrichment, not scientific inclusion or the approval of machine labels.

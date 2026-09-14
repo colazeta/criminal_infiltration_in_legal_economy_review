@@ -4,13 +4,13 @@ import {DatabaseSync} from 'node:sqlite';
 import {readFileSync} from 'node:fs';
 import {syncTargets,saveSource,storeExtraction} from '../src/paper-enrichment.js';
 import {canonicalJson,sha256} from '../src/review-v2.js';
-import {readPublicResearch,projectResearch,publicResearchAudit,servePublicResearch,safeResearchUrl,validatePublicResearch} from '../src/public-paper-research.js';
+import {readPublicResearch,projectResearch,publicResearchAudit,servePublicResearch,safeResearchUrl,validatePublicResearch,readPublicIndex,validatePublicIndex} from '../src/public-paper-research.js';
 const now=Date.parse('2026-09-13T17:00:00Z');
 export const record={id:'CAND-SYNTHETIC-RESEARCH',title:'Synthetic research fixture',doi:'10.1234/fixture',sourceLinks:['https://example.org/article']};
 const missing=()=>({status:'not_verifiable',value:null,origin:'source',evidence_span_ids:[]});
 const reported=(value,origin='source')=>({status:'reported',value,origin,evidence_span_ids:['private-span']});
 async function setup(){
- const db=new DatabaseSync(':memory:');db.exec('PRAGMA foreign_keys=ON');db.exec(readFileSync(new URL('../migrations/0003_paper_enrichment.sql',import.meta.url),'utf8'));db.exec(readFileSync(new URL('../migrations/0005_enrichment_adjudication.sql',import.meta.url),'utf8'));
+ const db=new DatabaseSync(':memory:');db.exec('PRAGMA foreign_keys=ON');db.exec(readFileSync(new URL('../migrations/0003_paper_enrichment.sql',import.meta.url),'utf8'));db.exec(readFileSync(new URL('../migrations/0005_enrichment_adjudication.sql',import.meta.url),'utf8'));db.exec(readFileSync(new URL('../migrations/0006_enrichment_delivery_assets.sql',import.meta.url),'utf8'));
  const adapter={prepare(sql){let v=[];return{bind(...args){v=args;return this},async first(){return db.prepare(sql).get(...v)||null},async all(){return{results:db.prepare(sql).all(...v)}},async run(){return{meta:{changes:db.prepare(sql).run(...v).changes}}}}},async batch(statements){db.exec('BEGIN');try{const r=[];for(const s of statements)r.push(await s.run());db.exec('COMMIT');return r}catch(e){db.exec('ROLLBACK');throw e}}};
  const kv=new Map(),env={REVIEW_DB:adapter,REVIEW_EVIDENCE:{async put(k,v){kv.set(k,v)},async get(k){return kv.has(k)?{async text(){return kv.get(k)}}:null}}};
  await syncTargets(env,{schemaVersion:1,records:[record]},now);
@@ -70,4 +70,32 @@ test('public transport allows only a bounded public candidate query and forwards
  for(const q of ['id=private-target','id='+record.id+'&sql=SELECT','id='+record.id+'&id='+record.id])assert.equal((await servePublicResearch(new Request('https://worker.example/api/public-paper-research?'+q),store)).status,400);
  assert.equal((await servePublicResearch(new Request('https://worker.example/api/public-paper-research?id='+record.id,{method:'POST'}),store)).status,405);
  assert.equal((await servePublicResearch(new Request('https://worker.example/api/public-paper-research?id='+record.id),null)).status,503);
+});
+
+test('public index pages use one stable snapshot and contain no source or reviewer text',async()=>{
+ const x=await setup();await x.persist();
+ const records=Array.from({length:121},(_,i)=>({...record,id:'CAND-INDEX-'+String(i).padStart(3,'0')}));
+ await syncTargets(x.env,{schemaVersion:1,records},now+10);
+ const first=await readPublicIndex(x.env);assert.equal(first.records.length,50);assert.equal(first.total,121);assert.equal(first.next_cursor,50);
+ const second=await readPublicIndex(x.env,50,first.index_revision);assert.equal(second.records.length,50);assert.equal(second.index_revision,first.index_revision);
+ const last=await readPublicIndex(x.env,100,first.index_revision);assert.equal(last.records.length,21);assert.equal(last.next_cursor,null);
+ const text=JSON.stringify([first,second,last]);for(const forbidden of ['PRIVATE REVIEWER NAME','PRIVATE WORKING NOTES','payload_json','storage_key','target_id','source_id'])assert.ok(!text.includes(forbidden));
+ await syncTargets(x.env,{schemaVersion:1,records:[...records,{...record,id:'CAND-INDEX-NEW'}]},now+20);
+ await assert.rejects(readPublicIndex(x.env,50,first.index_revision),/index_changed/);
+});
+test('index changes when research changes at the same candidate count and rejects injected approval',async()=>{
+ const x=await setup();await x.persist();const before=await readPublicIndex(x.env);
+ x.input.summary.value='Changed supported contextualisation';await storeExtraction(x.env,x.target,x.input,now+100);
+ const after=await readPublicIndex(x.env);assert.notEqual(before.index_revision,after.index_revision);assert.equal(after.total,1);
+ assert.equal(after.records[0].completion.completed,false);
+ const invalid=structuredClone(after);invalid.records[0].completion.completed=true;assert.throws(()=>validatePublicIndex(invalid));
+ invalid.records[0].completion.status='accepted';assert.throws(()=>validatePublicIndex(invalid));
+});
+test('index endpoint is bounded, credential-free and rejects arbitrary parameters',async()=>{
+ const x=await setup();let forwarded;
+ const store={async fetch(request){forwarded=request;return Response.json(await readPublicIndex(x.env))}};
+ const ok=await servePublicResearch(new Request('https://worker.example/api/public-paper-research?view=index',{headers:{Cookie:'private'}}),store);
+ assert.equal(ok.status,200);assert.equal(forwarded.headers.get('Cookie'),null);assert.equal((await ok.json()).total,1);
+ for(const suffix of ['&cursor=-1','&cursor=10001','&cursor=0&cursor=0','&id='+record.id,'&sql=SELECT','&revision=wrong'])assert.equal((await servePublicResearch(new Request('https://worker.example/api/public-paper-research?view=index'+suffix),store)).status,400);
+ await assert.rejects(readPublicIndex(x.env,1),/invalid_index_cursor/);
 });

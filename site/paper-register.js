@@ -11,7 +11,7 @@
     ['ai_full_text', 'AI: testo completo'], ['ai_partial_text', 'AI: testo parziale'],
     ['ai_abstract_only', 'AI: solo abstract'], ['unavailable', 'Stato non verificabile / analisi non aggiornata'],
   ];
-  const empty = () => ({support:'pending', summary:false, research:'pending', automated:false, coverage:null, classes:[], updatedAt:null});
+  const empty = () => ({support:'pending', summary:false, research:'pending', automated:false, coverage:null, classes:[], updatedAt:null, researchRevision:null, completion:null, completionVerified:false});
 
   function researchState(data) {
     if (!data || !['available', 'not_assessed', 'not_registered', 'stale', 'withheld'].includes(data.availability)) throw Error('invalid_availability');
@@ -33,13 +33,30 @@
       }
     }
     // Alternative coding and abstentions are not assigned contribution classes.
-    return {research:'available', automated:r.generation_kind === 'automated', coverage:r.source_coverage, classes, updatedAt:r.updated_at || null};
+    return {research:'available', automated:r.generation_kind === 'automated', coverage:r.source_coverage, classes, updatedAt:r.updated_at || null, researchRevision:data.revision || null};
   }
 
-  // Current public research is proposal-only. The final filter fails closed
-  // until an independently governed completion receipt is exposed and validated.
+  // All public views consume the accepted backend receipt, never a content heuristic.
+  function completionState(value, researchRevision, available) {
+    if(!value||!['accepted','not_attested','stale','withheld','not_registered'].includes(value.status)||typeof value.completed!=='boolean'||value.completed!==(value.status==='accepted')||!/^[a-f0-9]{64}$/.test(value.revision||''))throw Error('invalid_completion');
+    if(value.completed&&(!available||value.research_revision!==researchRevision||!Number.isFinite(Date.parse(value.completed_at))||value.protocol_version!=='CILE-ENRICH-1'||value.codebook_version!=='1.0.0'))throw Error('completion_revision_mismatch');
+    if(!value.completed&&(value.completed_at!==null||value.protocol_version!==null||value.codebook_version!==null))throw Error('false_completion_attestation');
+    return value;
+  }
   function isCompleted(entry) {
-    return false;
+    if(!entry?.completionVerified)return false;
+    try{return completionState(entry.completion,entry.researchRevision,entry.research==='available').completed}catch{return false}
+  }
+  function indexState(row,record) {
+    const c=row?.candidate,normal=s=>String(s||'').trim().replace(/^https?:\/\/(?:dx\.)?doi\.org\//i,'').toLowerCase();
+    if(!c||c.id!==record.id||c.title!==record.title||normal(c.doi)!==normal(record.doi)||JSON.stringify([...(c.sourceLinks||[])].sort())!==JSON.stringify([...(record.sourceLinks||[])].sort()))throw Error('index_identity_mismatch');
+    if(!['available','not_assessed','not_registered','stale','withheld'].includes(row.availability)||!/^[a-f0-9]{64}$/.test(row.research_revision||'')||!Array.isArray(row.classes)||row.classes.some(k=>!Object.hasOwn(CLASSES,k)))throw Error('invalid_index_row');
+    const available=row.availability==='available';
+    if(available&&(!Object.hasOwn(COVERAGE,row.source_coverage)||!['automated','unspecified'].includes(row.generation_kind)||!['proposed','outside_framework','insufficient_evidence'].includes(row.framework_status)))throw Error('invalid_index_research');
+    if(!available&&(row.source_coverage!==null||row.generation_kind!==null||row.framework_status!==null||row.classes.length)||row.framework_status!=='proposed'&&row.classes.length)throw Error('invalid_index_missingness');
+    const completion=completionState(row.completion,row.research_revision,available);
+    return {research:row.availability,automated:available&&row.generation_kind==='automated',coverage:row.source_coverage,classes:row.classes,updatedAt:null,
+      researchRevision:row.research_revision,completion,completionVerified:true,referenceCoverage:row.reference_coverage};
   }
 
   function matches(entry, mode='all', category='all') {
@@ -58,6 +75,7 @@
   function describe(entry) {
     if (!entry) return '';
     const parts = [];
+    if (isCompleted(entry)) parts.push('Arricchimento validato');
     if (entry.summary) parts.push('Sintesi disponibile');
     if (entry.research === 'available') {
       parts.push((entry.automated ? 'Analisi AI: ' : 'Analisi, origine non attestata: ') + COVERAGE[entry.coverage]);
@@ -76,7 +94,7 @@
     const timer = setTimeout(() => controller.abort(), 12000);
     try {
       const response = await fetcher(url, {cache:'no-store', credentials:'omit', signal:controller.signal});
-      if (!response.ok) throw Error('public_data_unavailable');
+      if (!response.ok) throw Object.assign(Error('public_data_unavailable'),{status:response.status});
       return await response.json();
     } finally { clearTimeout(timer); }
   }
@@ -110,35 +128,44 @@
       return supportPromise;
     }
     function scan() {
-      if (scanPromise) return scanPromise;
-      Object.assign(progress, {running:true, scanned:false, attempted:0, checked:0, errors:0});
-      for (const row of rows.values()) Object.assign(row, {research:'pending', automated:false, coverage:null, classes:[], updatedAt:null});
-      scanPromise = (async () => {
+      if(scanPromise)return scanPromise;
+      function reset(){
+        Object.assign(progress,{running:true,scanned:false,attempted:0,checked:0,errors:0,pages:0,indexRevision:null,indexTotal:null});
+        for(const row of rows.values())Object.assign(row,{research:'pending',automated:false,coverage:null,classes:[],updatedAt:null,researchRevision:null,completion:null,completionVerified:false});
+      }
+      reset();
+      scanPromise=(async()=>{
         try {
           await loadSupport();
-          let next = 0, consecutiveFailures = 0;
-          async function worker() {
-            while (next < records.length && consecutiveFailures < 4) {
-              const record = records[next++], row = rows.get(record.id);
-              try {
-                const payload = await read(ENDPOINT + '?id=' + encodeURIComponent(record.id));
-                Object.assign(row, researchState(selectResearch(payload, record)));
-                progress.checked++; consecutiveFailures = 0;
-              } catch {
-                Object.assign(row, {research:'error', automated:false, coverage:null, classes:[], updatedAt:null});
-                progress.errors++; consecutiveFailures++;
-              }
-              progress.attempted++;
-              if (progress.attempted % 12 === 0) onUpdate();
+          for(let restart=0;restart<2;restart++) {
+            let cursor=0,revision=null;const seen=new Set();
+            try {
+              do {
+                const page=await read(ENDPOINT+'?view=index&cursor='+cursor+(revision?'&revision='+revision:''));
+                if(page?.schema_version!==1||page.projection_version!=='CILE-PUBLIC-INDEX-1'||!/^[a-f0-9]{64}$/.test(page.index_revision||'')||!Number.isSafeInteger(page.total)||page.total<0||page.total>10000||!Array.isArray(page.records)||page.records.length>50)throw Error('invalid_index_page');
+                if(revision&&revision!==page.index_revision)throw Object.assign(Error('index_changed'),{status:409});
+                if(page.next_cursor!==null&&(!Number.isSafeInteger(page.next_cursor)||page.next_cursor!==cursor+page.records.length||page.next_cursor<=cursor||page.next_cursor>page.total))throw Error('invalid_index_cursor');
+                if(page.next_cursor===null&&cursor+page.records.length!==page.total)throw Error('incomplete_index_page');
+                revision=page.index_revision;progress.indexRevision=revision;progress.indexTotal=page.total;progress.pages++;
+                for(const item of page.records) {
+                  const id=item?.candidate?.id;if(typeof id!=='string'||seen.has(id))throw Error('duplicate_index_identity');seen.add(id);
+                  const record=records.find(r=>r.id===id);if(!record)continue;
+                  progress.attempted++;
+                  try{Object.assign(rows.get(id),indexState(item,record));progress.checked++}
+                  catch{Object.assign(rows.get(id),{research:'error',completion:null,completionVerified:false});progress.errors++}
+                }
+                cursor=page.next_cursor;onUpdate();
+              }while(cursor!==null);
+              break;
+            }catch(error) {
+              if(error.status===409&&restart===0){reset();onUpdate();continue}
+              throw error;
             }
           }
-          await Promise.all(Array.from({length:Math.min(4, records.length)}, worker));
-        } finally {
-          progress.running = false; progress.scanned = true; scanPromise = null; onUpdate();
-        }
+        }catch{progress.errors++}
+        finally{progress.running=false;progress.scanned=true;scanPromise=null;onUpdate()}
       })();
-      onUpdate();
-      return scanPromise;
+      onUpdate();return scanPromise;
     }
     return {rows, progress, loadSupport, scan};
   }
@@ -158,7 +185,7 @@
     mode.setAttribute('aria-describedby', status.id); category.setAttribute('aria-describedby', status.id);
     const completion = el('h3'); completion.id='register-completion-status'; completion.setAttribute('role','status');
     const breakdown = el('p'); breakdown.id='register-enrichment-breakdown';
-    const finalNote = el('p', 'Completed richiede estrazione completa, references verificate, categoria e QA/adjudication finale. Il contratto pubblico attuale espone soltanto proposte: il completamento non può essere attestato. Zero attestazioni visibili non sostituisce un audit del livello privato.');
+    const finalNote = el('p', 'Completato significa attestazione backend valida per la stessa versione dell’analisi, con fonti, riferimenti, valutazione del framework e revisione finale. Una non applicabilità motivata del framework non forza una categoria. Gli stati sconosciuti non sono conteggiati come assenze.');
     const note = el('p', 'Una sintesi non equivale a una lettura completa. “Analizzati dall’AI” richiede un’estrazione strutturata con origine automatica attestata. Le classi restano proposte non validate scientificamente; i soli DOI, link, metadati e abstract reperiti non bastano.');
     const panel = el('section'); panel.setAttribute('aria-label','Stato dell’elaborazione dei paper'); panel.append(status, completion, breakdown, finalNote, note);
     controls.append(first, second, refresh); controls.after(panel);
@@ -172,8 +199,10 @@
       const proposals=rows.filter(s=>s.research==='available');
       const fullText=proposals.filter(s=>s.coverage==='full_text').length;
       const classified=proposals.filter(s=>s.classes.length).length;
-      completion.textContent=`Completed attestati: ${completed} / ${p.total} record registrati. Percentuale finale: non attestabile dal contratto corrente.`;
-      breakdown.textContent=`Progressione osservata nei ${p.checked}/${p.total} stati analitici verificati: testo completo nelle proposte ${fullText}; estrazioni proposte ${proposals.length}; categorie proposte ${classified}. References: copertura non esposta. QA finale: attestazione non esposta. I conteggi sono indipendenti e non certificano completamento.`;
+      const complete=p.checked===p.total&&!p.errors&&p.scanned;
+      completion.textContent=complete?`Analisi completate e validate: ${completed} / ${p.total} record registrati. Quota: ${p.total?(100*completed/p.total).toFixed(1)+'%':'n/a'}.`:`Completamenti verificati finora: ${completed}; ${p.checked}/${p.total} stati verificati. Percentuale finale non attestabile finché la verifica è incompleta.`;
+      const references=rows.filter(s=>Array.isArray(s.referenceCoverage)&&s.referenceCoverage.length).length;
+      breakdown.textContent=`Nei ${p.checked}/${p.total} stati verificati: proposte su testo completo ${fullText}; estrazioni proposte ${proposals.length}; categorie proposte ${classified}; copertura citazionale documentata ${references}. Conteggi indipendenti: proposta, fonti, riferimenti e validazione restano distinti.`;
       const supportErrors = [...index.rows.values()].filter(s => s.support === 'error').length;
       const supportChecked = [...index.rows.values()].filter(s => s.support === 'checked').length;
       const supportPending = [...index.rows.values()].filter(s => s.support === 'pending').length;
@@ -202,7 +231,7 @@
       matches:record => matches(index.rows.get(record.id), mode.value, category.value),
       describe:record => describe(index.rows.get(record.id)),
       emptyMessage:() => {
-        if(mode.value==='completed')return 'Nessun completamento end-to-end attestabile: il contratto pubblico corrente contiene solo proposte, non ricevute finali di references e QA. Non vengono sostituiti paper parzialmente elaborati.';
+        if(mode.value==='completed')return index.progress.checked===records.length&&!index.progress.errors?'Nessuna analisi completata e validata nelle versioni correnti. Le proposte restano consultabili con gli altri filtri.':'Nessun completamento verificato finora: la verifica del registro non è completa.';
         if (mode.value === 'all' && category.value === 'all') return '';
         const incomplete = mode.value === 'summary' && category.value === 'all'
           ? [...index.rows.values()].some(row => row.support !== 'checked')
@@ -211,7 +240,7 @@
       },
     };
   }
-  globalThis.CILEPaperProcessing = {researchState, matches, describe, readJSON, createIndex, mount, isCompleted};
+  globalThis.CILEPaperProcessing = {researchState, matches, describe, readJSON, createIndex, mount, isCompleted, completionState, indexState};
 })();
 
 (() => {
@@ -378,7 +407,7 @@
     if (!dialog.open) dialog.showModal();
     close.focus();
     const isCurrent = () => dialog.open && sequence === sheetSequence;
-    import("./paper-sheet-research.js?v=completion-001")
+    import("./paper-sheet-research.js?v=delivery-002")
       .then(() => globalThis.CILEPaperResearch.load(research, record, isCurrent))
       .catch(() => { if (isCurrent()) research.textContent = "Il pannello di ricerca non è disponibile; non è una conferma dell’assenza di analisi."; });
     import("./paper-sheet-support.js")
@@ -467,7 +496,7 @@
       records = Array.isArray(payload.records) ? payload.records : [];
       populateFilters();
       render();
-      Promise.all([import("./paper-sheet-support.js"), import("./paper-sheet-research.js?v=completion-001")])
+      Promise.all([import("./paper-sheet-support.js"), import("./paper-sheet-research.js?v=delivery-002")])
         .then(() => {
           processing = globalThis.CILEPaperProcessing.mount({
             controls, records, onChange: render,

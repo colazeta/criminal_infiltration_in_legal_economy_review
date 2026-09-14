@@ -1,0 +1,251 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "projection_version",
+    "index_revision",
+    "total",
+    "records",
+    "next_cursor"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "projection_version": {
+      "const": "CILE-PUBLIC-INDEX-1"
+    },
+    "index_revision": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "total": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "records": {
+      "type": "array",
+      "maxItems": 50,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "candidate",
+          "availability",
+          "source_coverage",
+          "generation_kind",
+          "framework_status",
+          "classes",
+          "research_revision",
+          "completion",
+          "reference_coverage"
+        ],
+        "properties": {
+          "candidate": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "title",
+              "doi",
+              "sourceLinks"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "maxLength": 106
+              },
+              "title": {
+                "type": "string",
+                "maxLength": 3000
+              },
+              "doi": {
+                "type": "string",
+                "maxLength": 512
+              },
+              "sourceLinks": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "maxLength": 2000
+                },
+                "maxItems": 100
+              }
+            }
+          },
+          "availability": {
+            "enum": [
+              "available",
+              "not_assessed",
+              "stale",
+              "not_registered",
+              "withheld"
+            ]
+          },
+          "source_coverage": {
+            "enum": [
+              "abstract_only",
+              "partial_text",
+              "full_text",
+              null
+            ]
+          },
+          "generation_kind": {
+            "enum": [
+              "automated",
+              "unspecified",
+              null
+            ]
+          },
+          "framework_status": {
+            "enum": [
+              "proposed",
+              "outside_framework",
+              "insufficient_evidence",
+              null
+            ]
+          },
+          "classes": {
+            "type": "array",
+            "maxItems": 6,
+            "items": {
+              "enum": [
+                "aetiology",
+                "diagnosis",
+                "screening",
+                "therapy",
+                "prognosis",
+                "prevention"
+              ]
+            }
+          },
+          "research_revision": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "completion": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "status",
+              "completed",
+              "completed_at",
+              "protocol_version",
+              "codebook_version",
+              "research_revision",
+              "revision"
+            ],
+            "properties": {
+              "status": {
+                "enum": [
+                  "accepted",
+                  "not_attested",
+                  "stale",
+                  "withheld",
+                  "not_registered"
+                ]
+              },
+              "completed": {
+                "type": "boolean"
+              },
+              "completed_at": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "maxLength": 64
+              },
+              "protocol_version": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "maxLength": 100
+              },
+              "codebook_version": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "maxLength": 100
+              },
+              "research_revision": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "revision": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            }
+          },
+          "reference_coverage": {
+            "type": "array",
+            "maxItems": 20,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "provider",
+                "direction",
+                "status",
+                "returned_count",
+                "provider_count",
+                "observed_at"
+              ],
+              "properties": {
+                "provider": {
+                  "type": "string",
+                  "maxLength": 100
+                },
+                "direction": {
+                  "enum": [
+                    "outgoing",
+                    "incoming"
+                  ]
+                },
+                "status": {
+                  "enum": [
+                    "partial",
+                    "provider_complete",
+                    "not_returned"
+                  ]
+                },
+                "returned_count": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "provider_count": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ],
+                  "minimum": 0
+                },
+                "observed_at": {
+                  "type": "string",
+                  "maxLength": 64
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "next_cursor": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0
+    }
+  }
+}

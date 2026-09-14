@@ -1,5 +1,7 @@
 # Academic intake automation
 
+**Current delivery amendment (14 September 2026):** see [two-lane-delivery.md](two-lane-delivery.md). It supersedes the earlier proposal-only UI limitation, defines the current receipt-backed index/filter/statistics, private PDF and bibliography paths, explicit assessed-field policy, and daily discovery with durable query checkpoints. Historical observations below remain historical; no scientific acceptance is implied.
+
 ## Purpose
 
 The dedicated living-review automation runs a conservative surveillance intake using Exa

@@ -1,0 +1,30 @@
+{
+  "profile_version": "0.4.1",
+  "protocol": "CILE-QUERY-CHECKPOINT-1",
+  "class": "QueryExecution",
+  "checkpoint_issue": 696,
+  "fields": {
+    "protocol": "cile:protocol",
+    "cycle_id": "cile:cycle_id",
+    "batch_id": "cile:batch_id",
+    "provider": "cile:provider",
+    "query_id": "cile:query_id",
+    "attempt": "cile:attempt",
+    "query": "cile:query",
+    "observed_at": "cile:observed_at",
+    "query_status": "cile:query_status",
+    "occurrences": "cile:occurrences",
+    "limitation": "cile:limitation",
+    "checkpoint_id": "cile:checkpoint_id",
+    "sha256": "cile:sha256",
+    "part": "cile:part",
+    "parts": "cile:parts",
+    "content": "cile:content",
+    "rank": "cile:rank",
+    "url": "cile:url",
+    "title": "cile:title",
+    "doi": "cile:doi",
+    "year": "cile:year"
+  },
+  "semantics": "A complete checkpoint is a durably retained observation, not a complete surveillance batch. Historical failed batches cannot be relabelled or counted as newly executed queries. No automatic eligibility, canonical identity or intake."
+}

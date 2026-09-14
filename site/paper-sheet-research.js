@@ -20,10 +20,11 @@
   }
   // UI-only diagnostic over the existing closed projection. No approval is inferred.
   // CILE-PUBLIC-RESEARCH-1 contains proposals, not completion/adjudication receipts.
-  function progress(data) {
+  function progress(data,completion=null) {
     const result={completed:false, evidence:false, extraction:false, classification:false,
       references:null, adjudication:null, fields:0, resolved:0, unresolved:0,
       availability:data?.availability||'unknown'};
+    if(completion){result.adjudication=completion.status;result.references=completion.reference_coverage;result.completed=Boolean(globalThis.CILEPaperProcessing?.isCompleted({completionVerified:true,completion,researchRevision:data?.revision,research:data?.availability}))}
     if(data?.availability!=='available'||!data.research)return result;
     const r=data.research;
     if(r.assessment_state!=='unreviewed_proposal')throw Error('unsupported_completion_contract');
@@ -51,32 +52,33 @@
     // completeness. Unknown citation/QA state is never silently turned into zero.
     return result;
   }
-  function renderProgress(parent,data) {
-    const p=progress(data),box=el('section');box.setAttribute('aria-label','Progresso verso il completamento');
-    box.append(el('h4','Arricchimento end-to-end: non attestato come completato'));
+  function renderProgress(parent,data,completion=null) {
+    const p=progress(data,completion),box=el('section');box.setAttribute('aria-label','Progresso verso il completamento');
+    box.append(el('h4',p.completed?'Arricchimento completo e validato':'Arricchimento end-to-end: non attestato come completato'));
     const stages=el('dl');
     const unavailable=['stale','withheld','unknown'].includes(p.availability);
     const rows=[
       ['Fonte sufficiente',p.evidence?'Testo completo attestato nella proposta corrente':'Non attestabile da questa proiezione; un link al PDF non basta'],
       ['Estrazione scientifica',p.extraction?`Proposta presente; ${p.resolved}/${p.fields} campi documentati o esplicitamente mancanti nella proposta, ${p.unresolved} da chiarire. Completezza e correttezza da validare`:(unavailable?'Stato non verificabile':'Nessuna proposta corrente visibile')],
-      ['References e citazioni','Copertura non esposta dalla proiezione attuale; non equivale a zero references'],
+      ['References e citazioni',completion?'Copertura per fonte e direzione nella sezione Riferimenti':'Copertura non verificabile; non equivale a zero references'],
       ['Classificazione nelle sei classi',p.classification?'Categoria proposta, non ancora validata':'Nessuna categoria validata attestata'],
-      ['QA e adjudication','Nessuna attestazione finale disponibile nel contratto pubblico corrente'],
-      ['Completed','No: una proposta, una sintesi o il full text non attestano il completamento']
+      ['QA e adjudication',completion?(p.completed?'Accettata il '+completion.completed_at:'Stato dell’attestazione: '+completion.status):'Attestazione non verificabile'],
+      ['Completed',p.completed?'Sì: attestazione valida per questa versione':'No: una proposta, una sintesi o il full text non attestano il completamento']
     ];
     for(const [label,value]of rows)stages.append(el('dt',label),el('dd',value));
     box.append(stages,el('p','I passaggi possono avanzare separatamente. I campi non riportati o non applicabili rimangono espliciti; non si inventano valori per completare la scheda.'));
     parent.append(box);
   }
   function emptySections(parent) {
-    for(const title of ['Domanda, contributo e definizione del fenomeno','Collocazione nel framework delle sei classi','Studi, campione, periodo e geografia','Dataset e fonti dei dati','Disegno, metodi, identificazione e robustezza','Variabili e operazionalizzazione','Risultati, stime, incertezza e limiti','References e citazioni','Fonti consultate, versioni e QA']){
+    for(const title of ['Domanda, contributo e definizione del fenomeno','Collocazione nel framework delle sei classi','Studi, campione, periodo e geografia','Dataset e fonti dei dati','Disegno, metodi, identificazione e robustezza','Variabili e operazionalizzazione','Risultati, stime, incertezza e limiti','Fonti consultate, versioni e QA']){
       const box=section(parent,title);box.append(el('p','Contenuto non disponibile nella proiezione corrente. Questo spazio non rappresenta un dato estratto né una validazione.'));
     }
   }
   function section(parent,title,open=false){const d=el('details');d.open=open;d.append(el('summary',title));parent.append(d);return d}
-  function render(parent,data){
+  function render(parent,data,completion=null){
     parent.replaceChildren(el('h3','Contesto della ricerca'));
-    renderProgress(parent,data);
+    renderProgress(parent,data,completion);
+    renderReferences(parent,completion);
     const expand=el('button','Mostra tutti i campi'),collapse=el('button','Richiudi le sezioni');
     expand.type=collapse.type='button';
     expand.onclick=()=>parent.querySelectorAll('details').forEach(d=>{d.open=true});
@@ -129,14 +131,68 @@
         const fs=section(box,`Risultati di questa analisi (${findings.length})`);findings.forEach(f=>{const b=item(fs,f,'Risultato · '+f.id);b.append(el('p','Variabili collegate: '+(f.variable_use_ids.join(', ')||'Nessuna registrata')))});
       });
     });
-    const references=section(parent,'References e citazioni',true);
-    references.append(el('p','La bibliografia del paper e le citazioni ricevute non sono ancora esposte dalla proiezione pubblica corrente. Le fonti consultate mostrate sotto non sono la bibliografia. Stato e copertura dei provider non sono verificabili qui, e non vengono rappresentati come zero o come completi.'));
+
     const limits=section(parent,'Limiti e stato dell’analisi');fact(limits,LABELS.authors_limitations,r.authors_limitations);
     limits.append(el('p','Le osservazioni di lavoro interne non sono pubblicate automaticamente. Le motivazioni analitiche pubbliche sono distinte dalle affermazioni degli autori.'));
     limits.append(el('p','Non riportato significa non riportato nella fonte consultata, non assente dall’intero articolo. Nessuna approvazione scientifica è implicita.'));
     const provenance=section(parent,'Fonti consultate e versioni');
     r.sources.forEach(s=>{const p=el('p'),href=safeUrl(s.url);if(href){const a=el('a',href);a.href=href;a.rel='noreferrer noopener';p.append(a)}p.append(el('span',` · ${s.kind} · ${s.version||'Versione non specificata'} · Acquisita: ${s.checked_at}`));provenance.append(p)});
     provenance.append(el('p',`Protocollo ${r.protocol_version} · Codebook ${r.codebook_version}`));
+  }
+  function selectCompletion(data,record,research) {
+    if(data?.schema_version!==1||data.projection_version!=='CILE-PUBLIC-COMPLETION-1'||data.candidate_id!==record.id||!Array.isArray(data.reference_coverage)||!Array.isArray(data.outgoing_references?.identifiers))throw Error('invalid_completion_projection');
+    if(!globalThis.CILEPaperProcessing)throw Error('completion_validator_unavailable');
+    globalThis.CILEPaperProcessing.completionState(data,research.revision,research.availability==='available');
+    return data;
+  }
+  function renderReferences(parent,completion) {
+    const box=section(parent,'References e citazioni',true);
+    if(!completion){box.append(el('p','Bibliografia e citazioni ricevute non sono verificabili in questo momento. Le fonti consultate non sono la bibliografia.'));return}
+    if(!completion.reference_coverage.length)box.append(el('p','Copertura citazionale non ancora documentata: non equivale all’assenza di riferimenti.'));
+    for(const c of completion.reference_coverage)box.append(el('p',`${c.provider} · ${c.direction==='incoming'?'Citazioni ricevute':'Riferimenti in uscita'} · ${c.status} · Osservati nell’unità di copertura: ${c.returned_count}; dichiarati: ${c.provider_count===null?'non disponibili':c.provider_count} · ${c.observed_at}`));
+    box.append(el('p','Copertura riferita alla fonte e alla data indicate, non all’intero grafo citazionale. Gli identificativi riconciliati non sostituiscono le voci bibliografiche ancora irrisolte.'));
+    const refs=completion.outgoing_references;
+    box.append(el('p',`Identificativi bibliografici osservati: ${refs.total_observed}${refs.truncated?' (lista parziale)':''}.`));
+    const list=el('ol');
+    for(const identifier of refs.identifiers){
+      const item=el('li'),doi=identifier.startsWith('doi:')?identifier.slice(4):null;
+      const href=doi&&/^10\.\d{4,9}\/\S+$/.test(doi)?safeUrl('https://doi.org/'+encodeURIComponent(doi)):safeUrl(identifier);
+      if(href){const a=el('a',identifier);a.href=href;a.rel='noreferrer noopener';item.append(a)}else item.textContent=identifier;
+      list.append(item);
+    }
+    box.append(list);
+  }
+  const ASSETS_ENDPOINT='https://criminal-infiltration-curator.colazeta-research.workers.dev/api/public-paper-assets';
+  function selectAssets(data,record){
+    if(data?.schema_version!==1||data.projection_version!=='CILE-PUBLIC-ASSETS-1'||data.candidate_id!==record.id||!Array.isArray(data.documents)||data.documents.length>100)throw Error('invalid_assets');
+    if(data.availability==='registered'){
+      const c=data.candidate,n=v=>String(v||'').trim().toLowerCase().replace(/^https?:\/\/(dx\.)?doi\.org\//,'');
+      if(!c||c.id!==record.id||c.title!==record.title||n(c.doi)!==n(record.doi)||JSON.stringify([...(c.sourceLinks||[])].sort())!==JSON.stringify([...(record.sourceLinks||[])].sort()))throw Error('assets_identity_mismatch');
+    }else if(data.availability!=='not_registered'||data.candidate!==null)throw Error('invalid_assets');
+    for(const d of data.documents)if(!/^[a-f0-9]{64}$/.test(d.document_id)||!safeUrl(d.source_url)||!safeUrl(d.licence_url)||typeof d.attribution!=='string')throw Error('invalid_public_document');
+    if(data.bibliography){const b=data.bibliography;if(!['paper_bibliography','provider_references'].includes(b.scope)||!['partial','source_complete','not_reported'].includes(b.coverage)||b.assessment_state!=='unreviewed_proposal'||!Array.isArray(b.entries)||b.entries.length>100||!safeUrl(b.source_url)||!/^[a-f0-9]{64}$/.test(b.revision))throw Error('invalid_bibliography');}
+    return data;
+  }
+  async function loadAssets(parent,record,isCurrent=()=>true){
+    const box=section(parent,'PDF conservati e bibliografia dettagliata',true);box.append(el('p','Verifica del documento e dei riferimenti in corso.'));
+    let revision=null,next=0;const seen=new Set();
+    async function page(){
+      const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),12000);
+      try{const response=await fetch(ASSETS_ENDPOINT+'?id='+encodeURIComponent(record.id)+'&offset='+next+(revision?'&revision='+revision:''),{cache:'no-store',credentials:'omit',signal:controller.signal});if(!response.ok)throw Error('assets_unavailable');const data=selectAssets(await response.json(),record);if(!isCurrent())return;
+        if(next===0){box.replaceChildren(el('summary','PDF conservati e bibliografia dettagliata'));
+          if(!data.documents.length)box.append(el('p','Nessuna copia pubblica attestata. Le eventuali copie riservate si leggono nella console di arricchimento dopo l’accesso; un link esterno non equivale a una copia conservata.'));
+          const privateReader=el('a','Apri la console riservata per questo paper');privateReader.href='https://criminal-infiltration-curator.colazeta-research.workers.dev/enrichment.html?candidate='+encodeURIComponent(record.id);privateReader.target='_blank';privateReader.rel='noopener noreferrer';box.append(privateReader);
+          for(const d of data.documents){const link=el('a','Leggi PDF conservato · '+d.version_label);link.href=ASSETS_ENDPOINT+'?id='+encodeURIComponent(record.id)+'&document='+d.document_id;link.target='_blank';link.rel='noopener noreferrer';box.append(link,el('p',d.attribution+' · '+d.byte_length+' byte · '+d.licence_url));}
+        }
+        const b=data.bibliography;if(!b){box.append(el('p','Bibliografia dettagliata non ancora registrata; gli identificativi citazionali sono mostrati separatamente.'));return}
+        if(revision&&revision!==b.revision)throw Error('bibliography_changed');revision=b.revision;
+        if(next===0)box.append(el('p',`${b.scope==='paper_bibliography'?'Bibliografia del testo':'Riferimenti forniti dal provider'} · ${b.coverage} · ${b.entries_count} voci registrate; totale dichiarato ${b.declared_count===null?'non noto':b.declared_count} · ${b.observed_at}. Metadati proposti, non accettazione scientifica.`));
+        const list=el('ol');list.start=next+1;
+        for(const e of b.entries){if(!Number.isSafeInteger(e.position)||seen.has(e.position)||!Array.isArray(e.authors))throw Error('bibliography_identity');seen.add(e.position);const item=el('li',[e.authors.join('; '),e.year,e.title||'Titolo non riconciliato',e.venue].filter(v=>v!==null&&v!=='').join(' · '));if(e.doi||e.url){const href=safeUrl(e.doi?'https://doi.org/'+encodeURIComponent(e.doi):e.url);if(href){const a=el('a',' Fonte');a.href=href;a.rel='noopener noreferrer';item.append(a)}}if(e.unresolved_identity)item.append(el('span',' · Identità bibliografica da riconciliare'));list.append(item)}box.append(list);
+        next=b.next_offset;if(next!==null){if(!Number.isSafeInteger(next)||next<seen.size||next>1000)throw Error('bibliography_cursor');const more=el('button','Altri riferimenti');more.type='button';more.onclick=()=>{more.remove();page()};box.append(more)}
+      }catch{if(isCurrent())box.append(el('p','Stato del documento o della bibliografia non verificabile. Nessun dato mancante viene interpretato come assenza.'))}finally{clearTimeout(timer)}
+    }
+    await page();
   }
   async function load(parent,record,isCurrent=()=>true){
     parent.setAttribute('aria-busy','true');
@@ -145,11 +201,14 @@
       const response=await fetch(ENDPOINT+'?id='+encodeURIComponent(record.id),{cache:'no-store',credentials:'omit',signal:controller.signal});
       if(!response.ok)throw Error('public_research_unavailable');
       const data=selectRecord(await response.json(),record);
-      if(isCurrent())render(parent,data);
+      if(!isCurrent())return;
+      let completion=null;
+      try{const response=await fetch(ENDPOINT+'?view=completion&id='+encodeURIComponent(record.id),{cache:'no-store',credentials:'omit',signal:controller.signal});if(response.ok)completion=selectCompletion(await response.json(),record,data)}catch{}
+      if(isCurrent()){render(parent,data,completion);loadAssets(parent,record,isCurrent);}
     }catch{if(isCurrent())parent.textContent='Il contesto di ricerca non è verificabile in questo momento. Un errore di caricamento o un disallineamento dei metadati non significa che l’analisi sia assente.'}
     finally{clearTimeout(timeout);if(isCurrent())parent.setAttribute('aria-busy','false')}
   }
-  globalThis.CILEPaperResearch={render,load,selectRecord,safeUrl,progress,renderProgress};
+  globalThis.CILEPaperResearch={render,load,selectRecord,safeUrl,progress,renderProgress,selectCompletion,renderReferences,selectAssets,loadAssets};
 })();
 
 /* Read-only geography derived from source-grounded study.geography facts.

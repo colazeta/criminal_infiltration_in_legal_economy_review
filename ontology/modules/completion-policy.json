@@ -1,0 +1,79 @@
+{
+  "version": "CILE-COMPLETION-POLICY-2",
+  "profile_version": "0.4.1",
+  "framework_outcomes": [
+    "proposed",
+    "outside_framework"
+  ],
+  "mandatory": {
+    "root": [
+      "summary",
+      "contribution",
+      "research_question",
+      "infiltration_definition",
+      "infiltration_operationalisation",
+      "authors_limitations"
+    ],
+    "studies": [
+      "study_type",
+      "research_question",
+      "population",
+      "sampling",
+      "sample_size",
+      "observation_unit",
+      "analysis_unit",
+      "geography",
+      "period"
+    ],
+    "datasets": [
+      "name",
+      "provider",
+      "selection",
+      "coverage",
+      "limitations"
+    ],
+    "analyses": [
+      "design",
+      "method",
+      "comparison",
+      "identification",
+      "validation",
+      "robustness"
+    ],
+    "variable_uses": [
+      "original_name",
+      "operationalisation",
+      "unit",
+      "role",
+      "period",
+      "transformation"
+    ],
+    "findings": [
+      "statement",
+      "finding_type",
+      "estimate",
+      "uncertainty",
+      "reference_comparison",
+      "population_scope",
+      "temporal_scope",
+      "caveat",
+      "direction",
+      "unit"
+    ]
+  },
+  "optional": {
+    "root": [
+      "analyst_limitations"
+    ],
+    "studies": [],
+    "datasets": [
+      "accessibility"
+    ],
+    "analyses": [],
+    "variable_uses": [
+      "concept"
+    ],
+    "findings": []
+  },
+  "semantics": "An optional unresolved fact remains explicit, is counted in the review packet and cannot be silently rewritten. Not-reported/not-applicable remain source-scope assessments requiring independent human acceptance. Empty groups require review; schema validity alone does not attest completeness. Framework non-applicability requires a source-grounded analyst rationale and human acceptance, not a forced class."
+}

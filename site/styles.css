@@ -2240,3 +2240,6 @@ footer p {
 .paper-research div { margin: 10px 0; }
 .paper-research small { display: block; margin-top: 3px; }
 .paper-research span { white-space: pre-wrap; }
+
+/* Original PDF bytes are loaded with the existing curator session, never token URLs. */
+.enrichment-pdf-viewer { width: 100%; height: 70vh; border: 1px solid currentColor; }

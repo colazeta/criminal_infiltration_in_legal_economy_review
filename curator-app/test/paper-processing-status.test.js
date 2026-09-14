@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
+import {indexRow,indexPage} from './index-fixture.js';
 
 function setup(fetch) {
   class Element {
@@ -16,7 +17,7 @@ function setup(fetch) {
   const context=vm.createContext({document,fetch,AbortController,setTimeout,clearTimeout,URL});
   vm.runInContext(fs.readFileSync(new URL('../../site/paper-register.js',import.meta.url),'utf8'),context);
   const controls=document.createElement('form');
-  const filter=context.CILEPaperProcessing.mount({controls,records:[{id:'synthetic'}],onChange:()=>{},selectSupport:p=>p,selectResearch:p=>p});
+  const filter=context.CILEPaperProcessing.mount({controls,records:[{id:'synthetic',title:'Synthetic',doi:'',sourceLinks:[]}],onChange:()=>{},selectSupport:p=>p,selectResearch:p=>p});
   return {controls,filter,status:()=>controls.following.children[0].textContent};
 }
 const tick=()=>new Promise(resolve=>setImmediate(resolve));
@@ -36,7 +37,7 @@ test('pending summary and research states do not assert zero processed papers',a
 test('complete research responses cannot hide failed synopsis reads in the combined filter',async()=>{
   const view=setup(async url=>{
     if(url.startsWith('./')) throw Error('support offline');
-    return {ok:true,json:async()=>({availability:'not_assessed',research:null})};
+    return {ok:true,json:async()=>indexPage([indexRow({id:'synthetic',title:'Synthetic',doi:'',sourceLinks:[]})])};
   });
   await tick();
   const select=view.controls.children[0].children[0];select.value='content';select.fire('change');await tick();

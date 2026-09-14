@@ -343,3 +343,14 @@ jobs:
         env:
           CURATOR_SESSION_SECRET: ${{ secrets.CURATOR_SESSION_SECRET }}
         run: python3 -m scripts.enrichment.public_research_check
+
+      - name: Retain and read back the reviewed private PDF seed
+        working-directory: .
+        env:
+          CURATOR_SESSION_SECRET: ${{ secrets.CURATOR_SESSION_SECRET }}
+        run: |
+          if ! command -v pdftotext >/dev/null; then
+            sudo apt-get update -qq
+            sudo apt-get install -y --no-install-recommends poppler-utils
+          fi
+          python3 -m scripts.enrichment.retain_document

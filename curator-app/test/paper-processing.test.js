@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
+import {indexRow,indexPage} from './index-fixture.js';
 
 const source = fs.readFileSync(new URL('../../site/paper-register.js', import.meta.url), 'utf8');
 function api(extra={}) {
@@ -75,7 +76,7 @@ test('actual summaries count, metadata warnings and empty strings do not', async
 });
 
 test('matching candidate identity is required for every research response', async () => {
-  const index = A.createIndex([candidate], dependencies(async url => url.startsWith('./') ? {records:{[candidate.id]:support()}} : {...projection(),candidateId:'other'}));
+  const index = A.createIndex([candidate], dependencies(async url => url.startsWith('./') ? {records:{[candidate.id]:support()}} : indexPage([indexRow({...candidate,title:'Other identity'},projection())])));
   await index.scan();
   assert.equal(index.rows.get(candidate.id).research,'error');
   assert.equal(A.matches(index.rows.get(candidate.id),'ai'),false);
@@ -93,7 +94,7 @@ test('transport failure preserves explicit uncertainty', async () => {
   const index = A.createIndex([candidate], dependencies(async () => { throw Error('offline'); }));
   await index.scan();
   const row = index.rows.get(candidate.id);
-  assert.equal(row.support,'error'); assert.equal(row.research,'error');
+  assert.equal(row.support,'error'); assert.equal(row.research,'pending');
   assert.equal(index.progress.checked,0); assert.equal(index.progress.errors,1);
   assert.equal(A.matches(row,'content'),false);
   assert.match(A.describe(row), /non verificabile/);
@@ -110,18 +111,19 @@ test('bad HTTP status fails instead of supplying zero analysis', async () => {
   await assert.rejects(() => A.readJSON('https://example.org/public', async () => ({ok:false})), /unavailable/);
 });
 
-test('at most four concurrent reads and no duplicate overlapping scan', async () => {
+test('one index request replaces fifteen paper requests without overlapping scans', async () => {
   const records = Array.from({length:15}, (_,i) => ({...candidate,id:'c'+i}));
   let active=0, max=0, requests=0;
   const index = A.createIndex(records, dependencies(async url => {
     if (url.startsWith('./')) return {records:Object.fromEntries(records.map(r => [r.id,{readingAid:null}]))};
     active++; requests++; max=Math.max(max,active);
     await new Promise(resolve => setTimeout(resolve,2)); active--;
-    return {...projection(), candidateId:new URL(url).searchParams.get('id')};
+    assert.equal(new URL(url).searchParams.get('view'),'index');
+    return indexPage(records.map(r=>indexRow(r,projection())));
   }));
   const one=index.scan(), two=index.scan(); assert.equal(one,two);
   await one;
-  assert.ok(max<=4); assert.equal(requests,15); assert.equal(index.progress.checked,15);
+  assert.equal(max,1); assert.equal(requests,1); assert.equal(index.progress.checked,15);
   assert.equal(index.progress.running,false);
 });
 
@@ -143,7 +145,7 @@ test('refresh observes changed content at the same record count and clears old p
   const index = A.createIndex([candidate], dependencies(async url => {
     if (url.startsWith('./')) return {records:{[candidate.id]:{readingAid:null}}};
     if (mode===2) throw Error('offline');
-    return {...projection({source_coverage:mode===0?'abstract_only':'full_text'}),candidateId:candidate.id};
+    return indexPage([indexRow(candidate,projection({source_coverage:mode===0?'abstract_only':'full_text'}))]);
   }));
   await index.scan(); assert.equal(A.matches(index.rows.get(candidate.id),'ai_full_text'),false);
   mode=1; await index.scan(); assert.equal(A.matches(index.rows.get(candidate.id),'ai_full_text'),true);
@@ -184,8 +186,7 @@ test('mounted controls filter real loaded projections, compose classes and reset
   const mountedAPI=api({document,fetch:async url => {
     if (url.startsWith('./')) return {ok:true,json:async()=>({records:{[candidate.id]:support(),'candidate-b':{readingAid:null}}})};
     requestCount++;
-    const id=new URL(url).searchParams.get('id');
-    return {ok:true,json:async()=>id===candidate.id?{...projection(),candidateId:id}:{availability:'not_assessed',research:null,candidateId:id}};
+    return {ok:true,json:async()=>indexPage([indexRow(candidate,projection()),indexRow(records[1])])};
   }});
   const filter=mountedAPI.mount({controls,records,onChange:()=>redraws++,selectSupport:dependencies(()=>{}).selectSupport,selectResearch:identity});
   await tick();
@@ -196,10 +197,10 @@ test('mounted controls filter real loaded projections, compose classes and reset
   assert.equal(filter.matches(candidate),true); assert.equal(filter.matches(records[1]),false);
   assert.equal(filter.emptyMessage(),'','fully checked summary filter is not an incomplete research scan');
   mode.value='ai_full_text'; mode.fire('change'); await tick();
-  assert.equal(requestCount,2); assert.equal(filter.matches(candidate),true); assert.equal(filter.matches(records[1]),false);
+  assert.equal(requestCount,1); assert.equal(filter.matches(candidate),true); assert.equal(filter.matches(records[1]),false);
   category.value='diagnosis'; category.fire('change'); assert.equal(filter.matches(candidate),true);
   category.value='prognosis'; category.fire('change'); assert.equal(filter.matches(candidate),false);
-  assert.equal(requestCount,2,'changing a filter does not start another completed scan');
+  assert.equal(requestCount,1,'changing a filter does not start another completed scan');
   controls.fire('reset'); assert.equal(mode.value,'all'); assert.equal(category.value,'all');
   assert.equal(filter.matches(records[1]),true); assert.equal(button.disabled,false); assert.ok(redraws>0);
   assert.equal(controls.following.children[0].attributes.role,'status');
@@ -226,10 +227,44 @@ test('all six current contribution classes are supported and no topic code subst
 
 test('refresh button reloads analysis without a new candidate or a new page build', async () => {
   const document=fakeDocument(),controls=document.createElement('form'); let coverage='abstract_only';
-  const mountedAPI=api({document,fetch:async url=>({ok:true,json:async()=>url.startsWith('./')?{records:{[candidate.id]:support()}}:{...projection({source_coverage:coverage}),candidateId:candidate.id}})});
+  const mountedAPI=api({document,fetch:async url=>({ok:true,json:async()=>url.startsWith('./')?{records:{[candidate.id]:support()}}:indexPage([indexRow(candidate,projection({source_coverage:coverage}))])})});
   const filter=mountedAPI.mount({controls,records:[candidate],onChange:()=>{},selectSupport:dependencies(()=>{}).selectSupport,selectResearch:identity});
   await tick();const mode=controls.children[0].children[0];mode.value='ai_full_text';mode.fire('change');await tick();
   assert.equal(filter.matches(candidate),false);
   coverage='full_text';controls.children[2].fire('click');await tick();
   assert.equal(filter.matches(candidate),true);
+});
+
+
+test('multiple index pages have bounded requests, stable identity and one revision',async()=>{
+ const records=Array.from({length:121},(_,i)=>({...candidate,id:'CAND-PAGE-'+i}));let requests=0;
+ const index=A.createIndex(records,dependencies(async url=>{
+  if(url.startsWith('./'))return{records:Object.fromEntries(records.map(r=>[r.id,{readingAid:null}]))};
+  const u=new URL(url),offset=Number(u.searchParams.get('cursor'));requests++;
+  if(offset)assert.equal(u.searchParams.get('revision'),'c'.repeat(64));
+  return indexPage(records.slice(offset,offset+50).map(r=>indexRow(r,projection())),{total:records.length,next:offset+50<records.length?offset+50:null});
+ }));
+ await index.scan();assert.equal(requests,3);assert.equal(index.progress.checked,121);assert.equal(index.progress.errors,0);
+});
+test('a changed index restarts once; repeated changes preserve unknowns and do not loop',async()=>{
+ const records=[candidate];let calls=0;
+ const index=A.createIndex(records,dependencies(async url=>{
+  if(url.startsWith('./'))return{records:{[candidate.id]:support()}};
+  calls++;throw Object.assign(Error('index_changed'),{status:409});
+ }));
+ await index.scan();assert.equal(calls,2);assert.equal(index.progress.checked,0);assert.equal(index.progress.errors,1);assert.equal(A.isCompleted(index.rows.get(candidate.id)),false);
+});
+test('accepted backend completion is identical across filters and rejects mismatched revisions',()=>{
+ const row=indexRow(candidate,projection(),true),state=A.indexState(row,candidate);
+ assert.equal(A.isCompleted(state),true);assert.equal(A.matches(state,'completed'),true);
+ row.completion.research_revision='d'.repeat(64);assert.throws(()=>A.indexState(row,candidate),/revision/);
+ assert.equal(A.isCompleted({...A.researchState(projection()),completed:true,approved:true}),false);
+});
+test('outside-framework completion does not create or require a seventh contribution class',()=>{
+ const row=indexRow(candidate,projection({framework:{status:'outside_framework',primary:null,secondary:[],alternative:null}}),true),state=A.indexState(row,candidate);
+ assert.equal(A.matches(state,'completed'),true);assert.equal(state.classes.length,0);assert.equal(A.matches(state,'completed','diagnosis'),false);
+});
+test('incomplete pagination cannot certify a complete scan',async()=>{
+ const index=A.createIndex([candidate],dependencies(async url=>url.startsWith('./')?{records:{[candidate.id]:support()}}:indexPage([],{total:1})));
+ await index.scan();assert.equal(index.progress.checked,0);assert.equal(index.progress.errors,1);
 });

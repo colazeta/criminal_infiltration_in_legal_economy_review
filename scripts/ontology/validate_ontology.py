@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import sqlite3
 import re
 import sys
 from collections import defaultdict
@@ -18,6 +19,7 @@ from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT))
 PROFILE_PATH = ROOT / "ontology/cile-review-profile.yaml"
 CONTRACT_PATH = ROOT / "ontology/mappings/artifact-contracts.json"
 EXTERNAL_PATH = ROOT / "ontology/mappings/external-vocabularies.json"
@@ -524,6 +526,59 @@ def check_public_research_contract(profile: dict[str, Any]) -> None:
         fail("public_research_private_spans")
 
 
+def check_delivery_contract(profile: dict[str, Any]) -> None:
+    """Check every additive delivery table, public/import field and assessed-fact role."""
+    def valid_slot(value: str) -> bool:
+        return value in profile["slots"] or (":" in value and value.split(":", 1)[0] in profile["prefixes"])
+    def schema_fields(spec: dict[str, Any], pointer: str = "") -> set[str]:
+        result: set[str] = set()
+        if isinstance(spec.get("type"), list) and any(not isinstance(x, str) for x in spec["type"]):
+            fail("delivery_invalid_schema_type:" + pointer)
+        if "properties" in spec:
+            if spec.get("additionalProperties") is not False or set(spec.get("required", [])) != set(spec["properties"]):
+                fail("delivery_schema_not_closed:" + pointer)
+            for name, child in spec["properties"].items():
+                path = pointer + "/properties/" + name
+                result.add(path); result.update(schema_fields(child, path))
+        if "items" in spec:
+            result.update(schema_fields(spec["items"], pointer + "/items"))
+        return result
+    assets = load_json(ROOT / "ontology/modules/enrichment-delivery-assets.json")
+    index = load_json(ROOT / "ontology/modules/public-enrichment-index.json")
+    with sqlite3.connect(":memory:") as db:
+        for migration in assets["migrations"]:
+            db.executescript((ROOT / migration).read_text())
+        for table, contract in assets["tables"].items():
+            if contract["class"] not in profile["classes"]:
+                fail("delivery_unmapped_class:" + table)
+            fields = {row[1] for row in db.execute(f'PRAGMA table_info("{table}")')}
+            if fields != set(contract["fields"]) or not all(valid_slot(v) for v in contract["fields"].values()):
+                fail("delivery_unmapped_table:" + table)
+            for action in ("update", "delete"):
+                if not db.execute("SELECT 1 FROM sqlite_master WHERE type='trigger' AND name=?", (f"{table}_no_{action}",)).fetchone():
+                    fail("delivery_mutable_history:" + table)
+    mappings = {**assets["schemas"], index["schema"]: index}
+    for path, contract in mappings.items():
+        fields = schema_fields(load_json(ROOT / path))
+        if fields != set(contract["schema_field_slots"]) or not all(valid_slot(v) for v in contract["schema_field_slots"].values()):
+            fail("delivery_unmapped_schema:" + path)
+    policy = load_json(ROOT / "ontology/modules/completion-policy.json")
+    extraction = load_json(ROOT / "schema/paper-enrichment.schema.json")
+    groups = {"root": extraction["properties"], **{group: extraction["$defs"][name]["properties"] for group, name in {
+        "studies":"study", "datasets":"dataset", "analyses":"analysis", "variable_uses":"variable_use", "findings":"finding"}.items()}}
+    for group, props in groups.items():
+        expected = {key for key, spec in props.items() if spec.get("$ref") == "#/$defs/fact"}
+        mandatory, optional = set(policy["mandatory"][group]), set(policy["optional"][group])
+        if mandatory & optional or mandatory | optional != expected:
+            fail("delivery_fact_policy_drift:" + group)
+    checkpoint = load_json(ROOT / "ontology/modules/query-checkpoint.json")
+    from scripts.query_checkpoint import FIELDS, ROW, ISSUE
+    if checkpoint["class"] not in profile["classes"] or checkpoint["checkpoint_issue"] != ISSUE or not (FIELDS | ROW) <= set(checkpoint["fields"]):
+        fail("delivery_checkpoint_mapping")
+    if any(module["profile_version"] != profile["version"] for module in [assets, index, policy, checkpoint]):
+        fail("delivery_profile_drift")
+
+
 def validate_all(*, quiet: bool = False) -> dict[str, int | str]:
     profile = load_json(PROFILE_PATH)
     external = load_json(EXTERNAL_PATH)
@@ -532,6 +587,7 @@ def validate_all(*, quiet: bool = False) -> dict[str, int | str]:
     check_private_v2_contract(profile)
     check_enrichment_contract(profile)
     check_public_research_contract(profile)
+    check_delivery_contract(profile)
     check_surveillance_source_policy(profile)
     check_intake_access_contract(profile)
     registration = load_json(ROOT / "ontology/modules/paper-register.json")
