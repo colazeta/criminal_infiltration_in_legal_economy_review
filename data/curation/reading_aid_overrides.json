@@ -613,6 +613,33 @@
       "synopsis": "The criminology degree project applies a crime-script perspective to organised crime in the Swedish construction industry, structuring criminal activity as a process in order to identify how it operates and where preventive intervention may be possible.",
       "checkedAt": "2026-09-14",
       "note": "Parallel Search fetched the complete Malmö University / DiVA full-text degree project and matched Lars Flysjö, the exact title and the 2021 manifestation. Evidence basis: full_text. This is non-decisional reading support only; no private full-text ingestion, eligibility decision, canonicalisation, OA-retention inference or scientific classification is claimed."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-14-EXTRA-bc96956790e3-001",
+      "kind": "full_text_intro",
+      "sourceLabel": "UNODC East and Southeast Asia full-text technical policy brief located with Parallel Search",
+      "sourceUrl": "https://www.unodc.org/roseap/uploads/documents/Publications/2024/Casino_Underground_Banking_Report_2024.pdf",
+      "synopsis": "The technical policy brief examines how casinos, junkets and related payment and underground-banking infrastructure are used by transnational organised-crime networks in East and Southeast Asia. It draws on government data, financial intelligence, court and law-enforcement material and distinguishes licensed or ostensibly lawful casino businesses from illegal online-gambling and scam operations.",
+      "checkedAt": "2026-09-14",
+      "note": "Parallel Search fetched and read the complete official UNODC report and matched the exact registered title, institutional identity and January 2024 manifestation. Evidence basis: full_text. The mixed boundary between lawful casino businesses and illegal gambling/cyberfraud operations remains an explicit scientific-review question; no private full-text ingestion, eligibility decision, canonicalisation or OA-retention inference is claimed."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-14-EXTRA-a6b4145d08dd-006",
+      "kind": "full_text_intro",
+      "sourceLabel": "Nordic Council of Ministers / TemaNord 2025:530 full-text report located with Parallel Search",
+      "sourceUrl": "https://pub.norden.org/temanord2025-530/temanord2025-530.pdf",
+      "synopsis": "The report reviews organised-crime prevention measures in Denmark and Sweden through strategic-programme analysis, a systematic review of evaluated interventions and study visits. It discusses measures aimed at criminal groups’ access to lawful companies and public-sector organisations, including sectors such as health care, education, currency exchange and waste processing.",
+      "checkedAt": "2026-09-14",
+      "note": "Parallel Search fetched and read the complete official TemaNord 2025:530 report and verified the registered 2025 manifestation. Evidence basis: full_text. Authorship remains a metadata-repair question in the CandidateRecord and is not silently supplied here; no private full-text ingestion, eligibility decision, canonicalisation or scientific classification is claimed."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-14-EXTRA-eafcc7998720-001",
+      "kind": "full_text_intro",
+      "sourceLabel": "U.S. Office of Justice Programs / NCJRS full-text report located with Parallel Search",
+      "sourceUrl": "https://www.ojp.gov/pdffiles1/Digitization/82661NCJRS.pdf",
+      "synopsis": "The Pennsylvania Crime Commission report documents a three-year investigation into organised-crime influence in profit-making health-care plans and the marketing, accounting and investment practices of legitimate providers, focusing on three named health-care companies with union contracts.",
+      "checkedAt": "2026-09-14",
+      "note": "Parallel Search matched NCJ 82661 and the 1981 Pennsylvania Crime Commission report, then fetched and read the complete official NCJRS digitisation. Evidence basis: full_text. The public synopsis does not infer that every documented practice meets the review's sustained-infiltration threshold; authorship remains unrecorded in the CandidateRecord and is not invented here. No private full-text ingestion, eligibility decision, canonicalisation or scientific classification is claimed."
     }
   ]
 }
