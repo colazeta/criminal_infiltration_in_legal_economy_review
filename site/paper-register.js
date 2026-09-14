@@ -6,7 +6,7 @@
   const COVERAGE = {abstract_only:'solo abstract', partial_text:'testo parziale', full_text:'testo completo'};
   const SUMMARY_KINDS = new Set(['verified_abstract_source', 'publisher_summary', 'full_text_intro', 'review_synopsis']);
   const MODES = [
-    ['all', 'Tutti i paper'], ['content', 'Già elaborati: sintesi o analisi'],
+    ['all', 'Tutti i paper'], ['completed', 'Completati e validati (end-to-end)'], ['content', 'Già elaborati: sintesi o analisi'],
     ['summary', 'Con sintesi disponibile'], ['ai', 'Analizzati dall’AI: analisi strutturata'],
     ['ai_full_text', 'AI: testo completo'], ['ai_partial_text', 'AI: testo parziale'],
     ['ai_abstract_only', 'AI: solo abstract'], ['unavailable', 'Stato non verificabile / analisi non aggiornata'],
@@ -36,12 +36,18 @@
     return {research:'available', automated:r.generation_kind === 'automated', coverage:r.source_coverage, classes, updatedAt:r.updated_at || null};
   }
 
+  // Current public research is proposal-only. The final filter fails closed
+  // until an independently governed completion receipt is exposed and validated.
+  function isCompleted(entry) {
+    return false;
+  }
+
   function matches(entry, mode='all', category='all') {
     const s = entry || empty();
     const available = s.research === 'available';
     const ai = available && s.automated;
     const modes = {
-      all:true, content:s.summary || available, summary:s.summary, ai,
+      all:true, completed:isCompleted(s), content:s.summary || available, summary:s.summary, ai,
       ai_full_text:ai && s.coverage === 'full_text', ai_partial_text:ai && s.coverage === 'partial_text',
       ai_abstract_only:ai && s.coverage === 'abstract_only',
       unavailable:s.support === 'error' || ['error','stale','withheld'].includes(s.research),
@@ -150,8 +156,11 @@
     const refresh = el('button', 'Aggiorna stato delle analisi'); refresh.type='button';
     const status = el('p'); status.id='register-processing-status'; status.setAttribute('role','status'); status.setAttribute('aria-live','polite');
     mode.setAttribute('aria-describedby', status.id); category.setAttribute('aria-describedby', status.id);
+    const completion = el('h3'); completion.id='register-completion-status'; completion.setAttribute('role','status');
+    const breakdown = el('p'); breakdown.id='register-enrichment-breakdown';
+    const finalNote = el('p', 'Completed richiede estrazione completa, references verificate, categoria e QA/adjudication finale. Il contratto pubblico attuale espone soltanto proposte: il completamento non può essere attestato. Zero attestazioni visibili non sostituisce un audit del livello privato.');
     const note = el('p', 'Una sintesi non equivale a una lettura completa. “Analizzati dall’AI” richiede un’estrazione strutturata con origine automatica attestata. Le classi restano proposte non validate scientificamente; i soli DOI, link, metadati e abstract reperiti non bastano.');
-    const panel = el('section'); panel.setAttribute('aria-label','Stato dell’elaborazione dei paper'); panel.append(status, note);
+    const panel = el('section'); panel.setAttribute('aria-label','Stato dell’elaborazione dei paper'); panel.append(status, completion, breakdown, finalNote, note);
     controls.append(first, second, refresh); controls.after(panel);
     let index;
     function update() {
@@ -159,6 +168,12 @@
       const p = index.progress;
       const summaries = [...index.rows.values()].filter(s => s.summary).length;
       const ai = [...index.rows.values()].filter(s => matches(s, 'ai')).length;
+      const rows=[...index.rows.values()],completed=rows.filter(isCompleted).length;
+      const proposals=rows.filter(s=>s.research==='available');
+      const fullText=proposals.filter(s=>s.coverage==='full_text').length;
+      const classified=proposals.filter(s=>s.classes.length).length;
+      completion.textContent=`Completed attestati: ${completed} / ${p.total} record registrati. Percentuale finale: non attestabile dal contratto corrente.`;
+      breakdown.textContent=`Progressione osservata nei ${p.checked}/${p.total} stati analitici verificati: testo completo nelle proposte ${fullText}; estrazioni proposte ${proposals.length}; categorie proposte ${classified}. References: copertura non esposta. QA finale: attestazione non esposta. I conteggi sono indipendenti e non certificano completamento.`;
       const supportErrors = [...index.rows.values()].filter(s => s.support === 'error').length;
       const supportChecked = [...index.rows.values()].filter(s => s.support === 'checked').length;
       const supportPending = [...index.rows.values()].filter(s => s.support === 'pending').length;
@@ -187,6 +202,7 @@
       matches:record => matches(index.rows.get(record.id), mode.value, category.value),
       describe:record => describe(index.rows.get(record.id)),
       emptyMessage:() => {
+        if(mode.value==='completed')return 'Nessun completamento end-to-end attestabile: il contratto pubblico corrente contiene solo proposte, non ricevute finali di references e QA. Non vengono sostituiti paper parzialmente elaborati.';
         if (mode.value === 'all' && category.value === 'all') return '';
         const incomplete = mode.value === 'summary' && category.value === 'all'
           ? [...index.rows.values()].some(row => row.support !== 'checked')
@@ -195,7 +211,7 @@
       },
     };
   }
-  globalThis.CILEPaperProcessing = {researchState, matches, describe, readJSON, createIndex, mount};
+  globalThis.CILEPaperProcessing = {researchState, matches, describe, readJSON, createIndex, mount, isCompleted};
 })();
 
 (() => {
