@@ -9,6 +9,7 @@
     "link.springer.com": {"host_type": "publisher", "operator": "Springer Nature"},
     "link.springernature.com": {"host_type": "publisher", "operator": "Springer Nature"},
     "www.aeaweb.org": {"host_type": "publisher", "operator": "American Economic Association"},
+    "docs.iza.org": {"host_type": "publisher", "operator": "IZA – Institute of Labor Economics"},
     "iris.unicatt.it": {"host_type": "repository", "operator": "Università Cattolica del Sacro Cuore"},
     "eprints.lse.ac.uk": {"host_type": "repository", "operator": "London School of Economics"},
     "eprints.whiterose.ac.uk": {"host_type": "repository", "operator": "White Rose universities"},
