@@ -82,6 +82,34 @@ test('changed scientific input cannot inherit an accepted receipt',async()=>{
   await syncTargets(env,{schemaVersion:1,records:[{...record,title:'Changed title'}]},now+2000);
   const state=await publicCompletionState(env,record.id);assert.equal(state.completed,false);assert.equal(state.status,'stale');
 });
+test('a newer proposal appearing during GitHub approval invalidates the reviewed packet',async()=>{
+  const {env,target,proposal,sqlite}=await prepared();
+  await importCalibrationApproval(env,{calibration_id:'CAL-2026-001',pr_number:10},approvedGet(calibrationManifest),now);
+  const packet=await completionPacket(env,target.target_id),manifest={...packet.manifest,checklist:Object.fromEntries(Object.keys(packet.manifest.checklist).map(k=>[k,true]))};
+  const base=approvedGet(manifest,11);let raced=false;
+  const get=async path=>{
+    if(!raced&&path.endsWith('/pulls/11')){
+      raced=true;
+      const newer=structuredClone(proposal);newer.summary=reported('Newer unreviewed summary');
+      await storeExtraction(env,target,newer,now+500);
+    }
+    return base(path);
+  };
+  await assert.rejects(importCompletionApproval(env,{target_id:target.target_id,pr_number:11},get,now+1000),/completion_packet_stale/);
+  assert.equal(sqlite.prepare('SELECT COUNT(*) n FROM enrichment_adjudication_receipts').get().n,0);
+});
+test('public approval verification does not require an unconfigured GitHub token',async()=>{
+  const env={GITHUB_REPOSITORY:'colazeta/test',CURATOR_LOGIN:'owner'};
+  const manifest={action:'fixture'};
+  const out=await verifiedManifest(env,10,'scientific-approvals/x.json',approvedGet(manifest));
+  assert.deepEqual(out.manifest,manifest);assert.equal(out.approval.reviewed_commit,head);
+});
+test('historical active targets from another cycle cannot supply current completion',async()=>{
+  const {env,sqlite}=setup();
+  sqlite.prepare('INSERT INTO enrichment_targets VALUES (?,?,?,?,?,?,1,?,?)').run('old-target','old-review','candidate',record.id,'a'.repeat(64),JSON.stringify(record),'2025-01-01T00:00:00Z','2025-01-01T00:00:00Z');
+  const state=await publicCompletionState(env,record.id);
+  assert.equal(state.status,'not_registered');assert.equal(state.completed,false);
+});
 test('verified manifest rejects approval superseded by changes-requested',async()=>{
   const get=async path=>{
     if(path.includes('/reviews'))return[
