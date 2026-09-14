@@ -80,8 +80,8 @@ class FocusedTests(unittest.TestCase):
         self.assertEqual({w['reason'] for w in warnings},
                          {'nonliteral_operationalisation_dropped','nonliteral_critical_value_dropped'})
         combined,proposal=focused_proposal(packet,outputs)
-        self.assertEqual(proposal['sample_size']['status'],'not_verifiable')
-        self.assertIsNone(proposal['sample_size']['value'])
+        self.assertEqual(proposal['studies'][0]['sample_size']['status'],'not_verifiable')
+        self.assertIsNone(proposal['studies'][0]['sample_size']['value'])
         self.assertEqual(proposal['variable_uses'][0]['operationalisation']['status'],'not_verifiable')
 
     def test_nonliteral_variable_name_drops_the_variable_not_the_evidence_gate(self):
@@ -107,7 +107,7 @@ class FocusedTests(unittest.TestCase):
         clean,warnings=sanitise_critical_literals(packet,outputs)
         self.assertIsNone(clean['content']['sample_size'])
         self.assertEqual(warnings[0]['reason'],'nonliteral_critical_value_dropped')
-        self.assertEqual(focused_proposal(packet,outputs)[1]['sample_size']['status'],'not_verifiable')
+        self.assertEqual(focused_proposal(packet,outputs)[1]['studies'][0]['sample_size']['status'],'not_verifiable')
 
     def test_incomplete_stages_and_inconsistent_abstention_fail_closed(self):
         packet,outputs=self.data();del outputs['variables']
