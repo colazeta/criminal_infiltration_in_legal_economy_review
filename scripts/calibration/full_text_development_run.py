@@ -25,8 +25,16 @@ SCIENTIFIC_CONFIG = {
     'chunk_overlap': 400,
     'max_atoms_per_chunk': 8,
     'chunk_max_tokens': 1600,
-    'synthesis_max_tokens': 3500,
+    'synthesis_max_tokens': 4500,
 }
+
+# Run 34900857749 failed with `fulltext_model_output_incomplete` after #703 changed
+# only the synthesis decoder schema. The chunk request, chunk decoder, source,
+# model, seed and 1,600-token chunk budget were unchanged from run 34888989672,
+# which completed chunk extraction and reached synthesis validation. Therefore
+# recover this newly observed truncation by increasing only the bounded synthesis
+# response budget. `finish_reason != stop` remains fail-closed; partial output is
+# never accepted and the changed budget is bound into the extractor fingerprint.
 
 # Run 34864185215 reached literal-evidence validation but failed because at least
 # one model-returned exact quote occurred more than once inside its source window.
