@@ -4,6 +4,7 @@ import cycle from '../../config/archive-cycle.json' with {type:'json'};
 import schema from '../../schema/public-paper-research.schema.json' with {type:'json'};
 import completionSchema from '../../schema/public-enrichment-completion.schema.json' with {type:'json'};
 import indexSchema from '../../schema/public-enrichment-index.schema.json' with {type:'json'};
+import completionPolicy from '../../ontology/modules/completion-policy.json' with {type:'json'};
 import {validateExtraction, validateShape, normalDoi} from './paper-enrichment.js';
 import {publicCompletionState} from './enrichment-adjudication.js';
 import {canonicalJson, sha256} from './review-v2.js';
@@ -181,7 +182,8 @@ export async function publicIndexSnapshot(env) {
   // These tables are append-only. The full target/input mapping also detects removals or changed identities.
   for(const [table,id] of [['enrichment_sources','source_id'],['enrichment_proposals','proposal_id'],['enrichment_adjudication_receipts','receipt_id'],['enrichment_calibration_receipts','calibration_id'],['enrichment_citation_coverage','coverage_id'],['enrichment_citation_observations','observation_id'],['enrichment_documents','document_id'],['enrichment_bibliography_snapshots','bibliography_id']])
     stamps.push(await query(env.REVIEW_DB,`SELECT COUNT(*) n,MAX(${id}) last FROM ${table}`).first());
-  return {targets,revision:await sha256(canonicalJson({targets,stamps}))};
+  const projection_contract=await sha256(canonicalJson({research:schema,completion:completionSchema,index:indexSchema,policy:completionPolicy}));
+  return {targets,revision:await sha256(canonicalJson({deployment:env.DEPLOY_COMMIT||'local-unversioned',projection_contract,targets,stamps}))};
 }
 export function validatePublicIndex(payload) {
   validateShape(payload,indexSchema,'$',indexSchema);
