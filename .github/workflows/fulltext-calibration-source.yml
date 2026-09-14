@@ -9,8 +9,10 @@ on:
       - config/fulltext-calibration-recipient.json
       - scripts/calibration/full_text_source_case.py
       - scripts/calibration/full_text_development.py
+      - scripts/calibration/full_text_development_run.py
       - tests/test_full_text_source_case.py
       - tests/test_full_text_development.py
+      - tests/test_full_text_development_run.py
 
 permissions:
   contents: read
@@ -42,7 +44,7 @@ jobs:
       - name: Validate bounded source-capture contracts
         run: |
           python3 scripts/validation/validate_repository.py
-          python3 -m unittest tests.test_full_text_source_case tests.test_full_text_development
+          python3 -m unittest tests.test_full_text_source_case tests.test_full_text_development tests.test_full_text_development_run
           python3 -m unittest discover -s tests -p 'test_extraordinary_runs.py'
           node --test curator-app/test/sealed-audit.test.js
           command -v pdftotext >/dev/null
@@ -94,11 +96,11 @@ jobs:
         run: |
           python3 scripts/validation/validate_repository.py
           python3 scripts/ontology/validate_ontology.py
-          python3 -m unittest tests.test_full_text_source_case tests.test_full_text_development
+          python3 -m unittest tests.test_full_text_source_case tests.test_full_text_development tests.test_full_text_development_run
           node --test curator-app/test/sealed-audit.test.js
       - name: Run one exact-source full-text development case without production writes
         run: |
-          python3 -m scripts.calibration.full_text_development \
+          python3 -m scripts.calibration.full_text_development_run \
             --candidate-id CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-002 \
             --url https://docs.iza.org/dp13028.pdf \
             --expected-pdf-sha256 2e69ba5344af0c85cbe9d3a14e6e3dcc1c9ba907934cbc7937e2674c6efc42b2 \
