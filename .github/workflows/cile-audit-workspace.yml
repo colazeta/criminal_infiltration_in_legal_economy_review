@@ -1,0 +1,24 @@
+name: CILE audit workspace snapshot
+on:
+  push:
+    branches: [maintenance/cile-audit-closure-20260914]
+    paths: [.github/workflows/cile-audit-workspace.yml]
+permissions:
+  contents: read
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Archive tracked public source only
+        run: |
+          mkdir -p "$RUNNER_TEMP/cile-audit"
+          git archive --format=tar HEAD > "$RUNNER_TEMP/cile-audit/source.tar"
+          git rev-parse HEAD > "$RUNNER_TEMP/cile-audit/commit.txt"
+      - uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa
+        with:
+          name: cile-audit-workspace
+          path: ${{ runner.temp }}/cile-audit
+          retention-days: 1
