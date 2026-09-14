@@ -1,5 +1,6 @@
 /* Independent scientific acceptance for candidate-bound enrichment.
    Engineering can prepare packets; only an exact-head human approval can create a receipt. */
+import cycle from '../../config/archive-cycle.json' with {type:'json'};
 import {canonicalJson, sha256} from './review-v2.js';
 import {fetchWithTimeout} from './network.js';
 
@@ -17,14 +18,16 @@ const exact=(value,keys,label)=>{
 const sortObjects=list=>[...list].sort((a,b)=>canonicalJson(a).localeCompare(canonicalJson(b)));
 
 async function github(path,token){
-  const response=await fetchWithTimeout(`https://api.github.com${path}`,{
-    headers:{Authorization:`Bearer ${token}`,Accept:'application/vnd.github+json','User-Agent':'cile-enrichment-approval','X-GitHub-Api-Version':'2022-11-28'}
-  },10000);
+  const headers={Accept:'application/vnd.github+json','User-Agent':'cile-enrichment-approval','X-GitHub-Api-Version':'2022-11-28'};
+  // This repository is public. A token is an optional rate-limit optimisation, not
+  // a hidden production dependency for rare human-approval verification reads.
+  if(typeof token==='string'&&token.trim())headers.Authorization=`Bearer ${token}`;
+  const response=await fetchWithTimeout(`https://api.github.com${path}`,{headers},10000);
   if(!response.ok)throw Error('github_approval_verification_failed');
   return response.json();
 }
 export async function verifiedManifest(env,prNumber,path,get=github){
-  if(!env.GITHUB_REPOSITORY||!env.GITHUB_TOKEN||!env.CURATOR_LOGIN)throw Error('approval_environment_unavailable');
+  if(!env.GITHUB_REPOSITORY||!env.CURATOR_LOGIN)throw Error('approval_environment_unavailable');
   if(!Number.isSafeInteger(prNumber)||prNumber<1||!/^[A-Za-z0-9._/-]{1,180}$/.test(path))throw Error('invalid_approval_request');
   const root=`/repos/${env.GITHUB_REPOSITORY}`;
   const pr=await get(`${root}/pulls/${prNumber}`,env.GITHUB_TOKEN);
@@ -37,6 +40,7 @@ export async function verifiedManifest(env,prNumber,path,get=github){
   const authoritative=reviews.filter(r=>r.user?.login===env.CURATOR_LOGIN&&r.user?.type==='User'&&['APPROVED','CHANGES_REQUESTED','DISMISSED'].includes(r.state));
   const review=authoritative.at(-1);
   if(!review||review.state!=='APPROVED'||review.commit_id!==pr.head.sha)throw Error('exact_head_human_approval_required');
+  if(typeof review.submitted_at!=='string'||!Number.isFinite(Date.parse(review.submitted_at)))throw Error('approval_timestamp_invalid');
   const file=await get(`${root}/contents/${path}?ref=${pr.head.sha}`,env.GITHUB_TOKEN);
   if(file.encoding!=='base64'||file.size>12000)throw Error('approval_manifest_invalid');
   let manifest;
@@ -52,8 +56,10 @@ function inspectFacts(value,state){
   }
   for(const child of Object.values(value))inspectFacts(child,state);
 }
-async function proposalState(env,target){
-  const proposal=await S(env.REVIEW_DB,'SELECT * FROM enrichment_proposals WHERE target_id=? AND input_sha256=? ORDER BY created_at DESC,proposal_id DESC LIMIT 1',target.target_id,target.input_sha256).first();
+async function proposalState(env,target,proposalId=null){
+  const proposal=proposalId
+    ?await S(env.REVIEW_DB,'SELECT * FROM enrichment_proposals WHERE proposal_id=? AND target_id=? AND input_sha256=?',proposalId,target.target_id,target.input_sha256).first()
+    :await S(env.REVIEW_DB,'SELECT * FROM enrichment_proposals WHERE target_id=? AND input_sha256=? ORDER BY created_at DESC,proposal_id DESC LIMIT 1',target.target_id,target.input_sha256).first();
   if(!proposal)return null;
   let input;try{input=JSON.parse(proposal.payload_json)}catch{throw Error('proposal_integrity_failure')}
   if(await sha256(canonicalJson(input))!==proposal.payload_sha256||input.target_id!==target.target_id||input.input_sha256!==target.input_sha256)throw Error('proposal_integrity_failure');
@@ -97,7 +103,7 @@ async function calibrationFor(env,input,calibrationId=null){
   return row;
 }
 export async function completionPacket(env,targetId){
-  const target=await S(env.REVIEW_DB,'SELECT * FROM enrichment_targets WHERE target_id=? AND active=1',targetId).first();
+  const target=await S(env.REVIEW_DB,'SELECT * FROM enrichment_targets WHERE target_id=? AND active=1 AND cycle_id=?',targetId,cycle.review_id).first();
   if(!target)throw Error('target_not_found');
   const state=await proposalState(env,target);if(!state)throw Error('proposal_required');
   const source_snapshot_sha256=await sourceSnapshot(env,target,state.input);
@@ -107,6 +113,7 @@ export async function completionPacket(env,targetId){
   return {
     status:'ready_for_human_review',
     candidate_id:record.id,
+    proposal_id:state.proposal.proposal_id,
     manifest:{
       action:'approve_enrichment_completion',candidate_id:record.id,protocol_version:PROTOCOL,codebook_version:CODEBOOK,
       input_sha256:target.input_sha256,proposal_sha256:state.proposal.payload_sha256,source_snapshot_sha256,
@@ -142,14 +149,24 @@ export async function importCompletionApproval(env,{target_id,pr_number},get=git
   exact(manifest,keys,'completion_manifest');exact(manifest.checklist,CHECKS,'completion_checklist');
   const expected={...packet.manifest,checklist:Object.fromEntries(CHECKS.map(k=>[k,true]))};
   if(canonicalJson(manifest)!==canonicalJson(expected))throw Error('completion_manifest_mismatch');
-  const target=await S(env.REVIEW_DB,'SELECT * FROM enrichment_targets WHERE target_id=? AND active=1',target_id).first();
-  const state=await proposalState(env,target);await calibrationFor(env,state.input,manifest.calibration_id);
+
+  // Re-read every mutable selector after the external GitHub verification. A
+  // concurrent proposal/input/reference update must invalidate the reviewed
+  // packet instead of being silently attached to its human approval.
+  const target=await S(env.REVIEW_DB,'SELECT * FROM enrichment_targets WHERE target_id=? AND active=1 AND cycle_id=?',target_id,cycle.review_id).first();
+  if(!target||target.input_sha256!==manifest.input_sha256)throw Error('completion_packet_stale');
+  const state=await proposalState(env,target);
+  if(!state||state.proposal.proposal_id!==packet.proposal_id||state.proposal.payload_sha256!==manifest.proposal_sha256)throw Error('completion_packet_stale');
+  if(await sourceSnapshot(env,target,state.input)!==manifest.source_snapshot_sha256)throw Error('completion_packet_stale');
+  if((await referenceState(env,target,approval.approved_at)).hash!==manifest.reference_snapshot_sha256)throw Error('completion_packet_stale');
+  await calibrationFor(env,state.input,manifest.calibration_id);
+
   const checklistHash=await sha256(canonicalJson(manifest.checklist)),manifestHash=await sha256(canonicalJson(manifest));
-  const receiptId=await sha256(canonicalJson([target_id,target.input_sha256,state.proposal.proposal_id,manifestHash,approval.reviewed_commit]));
-  const existing=await S(env.REVIEW_DB,'SELECT * FROM enrichment_adjudication_receipts WHERE target_id=? AND input_sha256=? AND proposal_id=?',target_id,target.input_sha256,state.proposal.proposal_id).first();
+  const receiptId=await sha256(canonicalJson([target_id,target.input_sha256,packet.proposal_id,manifestHash,approval.reviewed_commit]));
+  const existing=await S(env.REVIEW_DB,'SELECT * FROM enrichment_adjudication_receipts WHERE target_id=? AND input_sha256=? AND proposal_id=?',target_id,target.input_sha256,packet.proposal_id).first();
   if(existing){if(existing.manifest_sha256!==manifestHash)throw Error('adjudication_receipt_conflict');return{receipt_id:existing.receipt_id,replayed:true}}
   await S(env.REVIEW_DB,'INSERT INTO enrichment_adjudication_receipts VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
-    receiptId,target_id,target.input_sha256,state.proposal.proposal_id,state.proposal.payload_sha256,manifest.source_snapshot_sha256,
+    receiptId,target_id,target.input_sha256,packet.proposal_id,state.proposal.payload_sha256,manifest.source_snapshot_sha256,
     manifest.reference_snapshot_sha256,manifest.calibration_id,checklistHash,manifestHash,approval.repository,approval.pr_number,
     approval.reviewed_commit,approval.human_login,approval.human_review_id,approval.approved_at,new Date(now).toISOString()).run();
   if(!await S(env.REVIEW_DB,'SELECT receipt_id FROM enrichment_adjudication_receipts WHERE receipt_id=?',receiptId).first())throw Error('adjudication_receipt_readback_failed');
@@ -164,21 +181,22 @@ function latestCoverage(list){
   return [...by.values()].sort((a,b)=>(a.provider+a.direction).localeCompare(b.provider+b.direction));
 }
 export async function publicCompletionState(env,candidateId){
-  const target=await S(env.REVIEW_DB,'SELECT * FROM enrichment_targets WHERE record_id=? AND active=1',candidateId).first();
+  const target=await S(env.REVIEW_DB,'SELECT * FROM enrichment_targets WHERE record_id=? AND active=1 AND cycle_id=?',candidateId,cycle.review_id).first();
   if(!target)return{candidate_id:candidateId,status:'not_registered',completed:false,completed_at:null,protocol_version:null,codebook_version:null,reference_coverage:[],outgoing_references:{identifiers:[],total_observed:0,truncated:false}};
   const coverage=await rows(env.REVIEW_DB,'SELECT provider,direction,status,returned_count,provider_count,observed_at FROM enrichment_citation_coverage WHERE target_id=? AND input_sha256=? ORDER BY observed_at',target.target_id,target.input_sha256);
   const outgoing=await rows(env.REVIEW_DB,"SELECT DISTINCT cited_identifier identifier FROM enrichment_citation_observations WHERE target_id=? AND input_sha256=? AND direction='outgoing' ORDER BY cited_identifier LIMIT 501",target.target_id,target.input_sha256);
   const total=Number((await S(env.REVIEW_DB,"SELECT COUNT(DISTINCT cited_identifier) n FROM enrichment_citation_observations WHERE target_id=? AND input_sha256=? AND direction='outgoing'",target.target_id,target.input_sha256).first())?.n||0);
   const references={identifiers:outgoing.slice(0,500).map(x=>x.identifier),total_observed:total,truncated:total>500};
+  const priorReceipt=await S(env.REVIEW_DB,'SELECT receipt_id FROM enrichment_adjudication_receipts WHERE target_id=? AND input_sha256<>? LIMIT 1',target.target_id,target.input_sha256).first();
   const proposal=await S(env.REVIEW_DB,'SELECT * FROM enrichment_proposals WHERE target_id=? AND input_sha256=? ORDER BY created_at DESC,proposal_id DESC LIMIT 1',target.target_id,target.input_sha256).first();
-  if(!proposal)return{candidate_id:candidateId,status:'not_attested',completed:false,completed_at:null,protocol_version:null,codebook_version:null,reference_coverage:latestCoverage(coverage),outgoing_references:references};
+  if(!proposal)return{candidate_id:candidateId,status:priorReceipt?'stale':'not_attested',completed:false,completed_at:null,protocol_version:null,codebook_version:null,reference_coverage:latestCoverage(coverage),outgoing_references:references};
   const receipt=await S(env.REVIEW_DB,'SELECT * FROM enrichment_adjudication_receipts WHERE target_id=? AND input_sha256=? AND proposal_id=? ORDER BY approved_at DESC LIMIT 1',target.target_id,target.input_sha256,proposal.proposal_id).first();
   if(!receipt){
-    const older=await S(env.REVIEW_DB,'SELECT receipt_id FROM enrichment_adjudication_receipts WHERE target_id=? LIMIT 1',target.target_id).first();
+    const older=priorReceipt||await S(env.REVIEW_DB,'SELECT receipt_id FROM enrichment_adjudication_receipts WHERE target_id=? LIMIT 1',target.target_id).first();
     return{candidate_id:candidateId,status:older?'stale':'not_attested',completed:false,completed_at:null,protocol_version:null,codebook_version:null,reference_coverage:latestCoverage(coverage),outgoing_references:references};
   }
   try{
-    const state=await proposalState(env,target);
+    const state=await proposalState(env,target,proposal.proposal_id);
     if(state.proposal.payload_sha256!==receipt.proposal_sha256)throw Error('stale_receipt');
     if(await sourceSnapshot(env,target,state.input)!==receipt.source_snapshot_sha256)throw Error('stale_receipt');
     if((await referenceState(env,target,receipt.approved_at)).hash!==receipt.reference_snapshot_sha256)throw Error('stale_receipt');
