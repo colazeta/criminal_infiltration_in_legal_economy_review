@@ -43,7 +43,7 @@ jobs:
           command -v pdftotext >/dev/null
       - name: Capture existing candidate full text into source-only ciphertext
         run: |
-          python3 scripts/calibration/full_text_source_case.py \
+          python3 -m scripts.calibration.full_text_source_case \
             --candidate-id CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-002 \
             --url https://docs.iza.org/dp13028.pdf \
             --retention-basis 'Owner-authorised private research analysis of an anonymously downloadable IZA Discussion Paper; no redistribution; source copyright remains with the rights holder.' \
