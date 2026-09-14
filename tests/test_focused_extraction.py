@@ -1,10 +1,10 @@
 """Synthetic focused-extractor tests. No real sources, inference or gold labels."""
-import hashlib
 import json
 import subprocess
 import unittest
 from scripts.enrichment.focused import (STAGES, LIMITS, focused_requests, focused_proposal,
-                                       canonical, UNKNOWN, CONTENT, VARIABLES, FRAMEWORK)
+                                       canonical, UNKNOWN, CONTENT, VARIABLES, FRAMEWORK,
+                                       prompt_fingerprint)
 from scripts.enrichment.pilot import FACT_FIELDS
 
 TEXT = 'Synthetic study: 20 firms in 2010–2012. We compare profitability. Profitability means net income divided by revenue.'
@@ -36,6 +36,13 @@ class FocusedTests(unittest.TestCase):
             self.assertEqual(request['temperature'],0)
             self.assertNotIn('tools',request)
 
+    def test_prompt_identity_is_source_independent_but_requests_remain_source_bound(self):
+        fingerprint=prompt_fingerprint()
+        self.assertRegex(fingerprint,r'^[a-f0-9]{64}$')
+        other='Synthetic study: 31 contracts in 2019. We analyse bidding.'
+        self.assertEqual(prompt_fingerprint(),fingerprint)
+        self.assertNotEqual(canonical(focused_requests(TEXT)),canonical(focused_requests(other)))
+
     def test_complete_literal_proposal_passes_existing_native_schema(self):
         packet,outputs=self.data()
         combined,proposal=focused_proposal(packet,outputs)
@@ -45,10 +52,10 @@ class FocusedTests(unittest.TestCase):
         js="import{validateExtraction}from'./curator-app/src/paper-enrichment.js';let s='';for await(const c of process.stdin)s+=c;let p=JSON.parse(s);validateExtraction(p.proposal,p.target,p.sources);"
         result=subprocess.run(['node','--input-type=module','-e',js],input=json.dumps({**packet,'proposal':proposal}),text=True,capture_output=True)
         self.assertEqual(result.returncode,0,'Synthetic packet failed native schema validation')
-        self.assertEqual(proposal['generated_by']['prompt_sha256'],hashlib.sha256(canonical(focused_requests(TEXT)).encode()).hexdigest())
+        self.assertEqual(proposal['generated_by']['prompt_sha256'],prompt_fingerprint())
 
     def test_unknown_strings_must_be_null(self):
-        for value in ['Not specified in the abstract.', 'unknown', 'Not reported', 'N/A']:
+        for value in ['Not specified in the abstract.', 'unknown', 'Not reported', 'N/A', 'null']:
             packet,outputs=self.data();outputs['content']['sample_size']=fact(value)
             with self.assertRaisesRegex(ValueError,'invalid_missingness'): focused_proposal(packet,outputs)
         self.assertIsNone(UNKNOWN.fullmatch('The model did not report a significant difference.'))
