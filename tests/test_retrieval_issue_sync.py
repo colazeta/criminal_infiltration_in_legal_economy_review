@@ -91,6 +91,27 @@ action
             ["/issues?state=all&sort=created&direction=asc"],
         )
 
+    def test_issue_inventory_fails_closed_if_repeated_issue_body_changes(self) -> None:
+        candidate_id = "CAND-ACADEMIC-2026-09-13-EXTRA-a6766e6649ed-006"
+        original = syncer.paginated
+        try:
+            syncer.paginated = lambda repository, token, path: [
+                {
+                    "id": 5439991102,
+                    "number": 563,
+                    "body": f"<!-- curator-candidate:{candidate_id} -->\n\nold body\n",
+                },
+                {
+                    "id": 5439991102,
+                    "number": 563,
+                    "body": f"<!-- curator-candidate:{candidate_id} -->\n\nnewer body\n",
+                },
+            ]
+            with self.assertRaisesRegex(syncer.SyncError, "changed during pagination"):
+                syncer.issue_inventory("owner/repo", "token")
+        finally:
+            syncer.paginated = original
+
     def test_issue_inventory_rejects_distinct_issues_for_same_candidate(self) -> None:
         candidate_id = "CAND-ACADEMIC-2026-09-13-EXTRA-a6766e6649ed-006"
         original = syncer.paginated
