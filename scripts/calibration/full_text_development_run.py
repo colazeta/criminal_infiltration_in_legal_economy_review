@@ -27,8 +27,24 @@ SCIENTIFIC_CONFIG = {
     'synthesis_max_tokens': 3500,
 }
 
+# Run 34864185215 reached literal-evidence validation but failed because at least
+# one model-returned exact quote occurred more than once inside its source window.
+# Do not guess which occurrence was intended and do not weaken the validator.
+# Instead require the model to extend a repeated quote with literal surrounding
+# text until the evidence locator is unique, or to omit that atom. The downstream
+# source-first comparison will measure any resulting omission.
+EVIDENCE_UNIQUENESS_SUFFIX = """Evidence location is part of the evidence contract. Before emitting an atom,
+ensure the exact evidence substring occurs exactly once in this source window. If the shortest adequate
+quote repeats, extend it with exact contiguous surrounding source words until it is unique while remaining
+within the evidence length limit. If no exact unique substring supports the complete value, omit the atom.
+Never invent an occurrence index, silently choose between repeated matches, or paraphrase the evidence."""
+
 _ORIGINAL_CHUNK_REQUEST = development.chunk_request
 _ORIGINAL_EXTRACTOR_FINGERPRINT = development.extractor_fingerprint
+
+
+def runtime_chunk_system():
+    return development.CHUNK_SYSTEM + '\n' + EVIDENCE_UNIQUENESS_SUFFIX
 
 
 def runtime_extractor_fingerprint():
@@ -36,7 +52,7 @@ def runtime_extractor_fingerprint():
         'protocol': development.PROTOCOL,
         'model': development.MODEL,
         **SCIENTIFIC_CONFIG,
-        'chunk_system': development.CHUNK_SYSTEM,
+        'chunk_system': runtime_chunk_system(),
         'synthesis_system': development.SYNTHESIS_SYSTEM,
         'field_by_entity': {key: sorted(value) for key, value in development.FIELD_BY_ENTITY.items()},
         'paper_enrichment_schema_sha256': development.schema_digest(),
@@ -48,6 +64,10 @@ def runtime_extractor_fingerprint():
 def bounded_chunk_request(chunk):
     request = _ORIGINAL_CHUNK_REQUEST(chunk)
     request['max_tokens'] = SCIENTIFIC_CONFIG['chunk_max_tokens']
+    system = request['messages'][0]['content']
+    if not system.startswith(development.CHUNK_SYSTEM):
+        raise RuntimeError('fulltext_chunk_prompt_contract_changed')
+    request['messages'][0]['content'] = runtime_chunk_system() + system[len(development.CHUNK_SYSTEM):]
     return request
 
 
