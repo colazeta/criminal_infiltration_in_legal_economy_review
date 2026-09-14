@@ -1,0 +1,56 @@
+name: Capture full-text calibration source
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/fulltext-calibration-source.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fulltext-calibration-source
+  cancel-in-progress: false
+
+jobs:
+  source-only:
+    if: github.repository == 'colazeta/criminal_infiltration_in_legal_economy_review' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - name: Checkout reviewed code without retained credentials
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Set up Node for recipient encryption
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
+        with:
+          node-version: '22'
+      - name: Validate bounded source-capture contracts
+        run: |
+          python3 scripts/validation/validate_repository.py
+          python3 -m unittest tests.test_full_text_source_case tests.test_extraordinary_runs
+          node --test curator-app/test/sealed-audit.test.js
+          command -v pdftotext >/dev/null
+      - name: Capture existing candidate full text into source-only ciphertext
+        run: |
+          python3 scripts/calibration/full_text_source_case.py \
+            --candidate-id CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-002 \
+            --url https://docs.iza.org/dp13028.pdf \
+            --retention-basis 'Owner-authorised private research analysis of an anonymously downloadable IZA Discussion Paper; no redistribution; source copyright remains with the rights holder.' \
+            --licence-status 'IZA copyright; publicly downloadable discussion paper; no redistribution' \
+            --output "$RUNNER_TEMP/fulltext-source.sealed.json"
+      - name: Retain only recipient-encrypted source checkpoint
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: fulltext-calibration-source-cand-002
+          path: ${{ runner.temp }}/fulltext-source.sealed.json
+          if-no-files-found: ignore
+          retention-days: 1
+      - name: Remove scratch material even after failure
+        if: always()
+        run: |
+          rm -f "$RUNNER_TEMP/fulltext-source.sealed.json"

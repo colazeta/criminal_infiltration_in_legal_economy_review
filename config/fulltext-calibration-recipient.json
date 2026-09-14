@@ -1,0 +1,7 @@
+{
+  "protocol": "CILE-SEALED-AUDIT-1",
+  "public_key_spki": "MCowBQYDK2VuAyEAAf8Q2lSEVN/yzeK/3hP2kXR1hv8CXY7jueR/8ibQwUc=",
+  "public_key_sha256": "ff1cca9df2bd10fd97d810e58c0059446092a3820b6e2a1b393306ed51b429b7",
+  "expires_at": "2026-09-15T13:00:00Z",
+  "purpose": "One bounded owner-authorised full-text calibration source packet for an already registered candidate; no production source write or scientific acceptance."
+}
