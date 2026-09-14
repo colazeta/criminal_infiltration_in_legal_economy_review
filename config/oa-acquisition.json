@@ -13,6 +13,7 @@
     "eprints.lse.ac.uk": {"host_type": "repository", "operator": "London School of Economics"},
     "eprints.whiterose.ac.uk": {"host_type": "repository", "operator": "White Rose universities"},
     "repository.essex.ac.uk": {"host_type": "repository", "operator": "University of Essex"},
-    "pureportal.coventry.ac.uk": {"host_type": "repository", "operator": "Coventry University"}
+    "pureportal.coventry.ac.uk": {"host_type": "repository", "operator": "Coventry University"},
+    "www.econstor.eu": {"host_type": "repository", "operator": "ZBW – Leibniz Information Centre for Economics / EconStor"}
   }
 }
