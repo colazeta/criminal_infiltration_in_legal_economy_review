@@ -15,11 +15,15 @@ SYNTHESIS_TIMEOUT_SECONDS = 720
 # chunk on the current four-CPU runner. Smaller windows preserve complete source
 # coverage through overlap while increasing total atom capacity (about 14 chunks
 # × 8 atoms rather than 5 × 18) and bounding each individual model request.
+# The first 6k/1,000-token execution returned an explicit incomplete model output
+# rather than timing out. Eight governed atoms can legitimately require more than
+# 1,000 output tokens, so raise only the response budget while retaining the same
+# source-window size, atom cap, evidence contract and finite runtime.
 SCIENTIFIC_CONFIG = {
     'chunk_chars': 6000,
     'chunk_overlap': 400,
     'max_atoms_per_chunk': 8,
-    'chunk_max_tokens': 1000,
+    'chunk_max_tokens': 1600,
     'synthesis_max_tokens': 3500,
 }
 
