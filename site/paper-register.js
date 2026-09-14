@@ -378,7 +378,7 @@
     if (!dialog.open) dialog.showModal();
     close.focus();
     const isCurrent = () => dialog.open && sequence === sheetSequence;
-    import("./paper-sheet-research.js")
+    import("./paper-sheet-research.js?v=completion-001")
       .then(() => globalThis.CILEPaperResearch.load(research, record, isCurrent))
       .catch(() => { if (isCurrent()) research.textContent = "Il pannello di ricerca non è disponibile; non è una conferma dell’assenza di analisi."; });
     import("./paper-sheet-support.js")
@@ -467,7 +467,7 @@
       records = Array.isArray(payload.records) ? payload.records : [];
       populateFilters();
       render();
-      Promise.all([import("./paper-sheet-support.js"), import("./paper-sheet-research.js")])
+      Promise.all([import("./paper-sheet-support.js"), import("./paper-sheet-research.js?v=completion-001")])
         .then(() => {
           processing = globalThis.CILEPaperProcessing.mount({
             controls, records, onChange: render,
