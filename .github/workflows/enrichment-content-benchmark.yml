@@ -4,6 +4,7 @@ on:
   push:
     branches: [main]
     paths:
+      - config/enrichment-benchmark-recipient.json
       - scripts/calibration/paper_content_benchmark.py
       - scripts/calibration/paper_content_shard.py
       - scripts/enrichment/focused.py
