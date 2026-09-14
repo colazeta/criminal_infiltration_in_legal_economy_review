@@ -47,6 +47,16 @@ Never invent an occurrence index, silently choose between repeated matches, or p
 # omission becomes scientific missingness, never accepted evidence, and aggregate
 # diagnostics are checkpointed immediately after evidence resolution.
 EVIDENCE_REJECTION_POLICY = 'omit_nonliteral_or_nonunique_atom_after_structural_validation'
+
+# Run 34883540426 reached structural validation but failed with
+# `fulltext_atom_field_scope`: the generic decoder schema allowed every governed
+# field for every entity and relied on the post-model validator to reject an
+# invalid entity/field pairing. Keep that validator unchanged, but make the
+# constrained decoder express the same closed field map up front. This is a model
+# output constraint, not a recoding rule: invalid pairings remain impossible to
+# accept and are never silently moved between entity types.
+FIELD_SCOPED_ATOM_SCHEMA = 'entity-field-paired-oneof-v1'
+
 RUNTIME_DIAGNOSTICS = {
     'nonliteral_atoms_omitted': 0,
     'ambiguous_atoms_omitted': 0,
@@ -58,10 +68,41 @@ _ORIGINAL_CHUNK_REQUEST = development.chunk_request
 _ORIGINAL_EXTRACTOR_FINGERPRINT = development.extractor_fingerprint
 _ORIGINAL_RESOLVE_ATOMS = development.resolve_atoms
 _ORIGINAL_CHECKPOINT = development.checkpoint
+_ORIGINAL_ATOM_SCHEMA = development.atom_schema
 
 
 def runtime_chunk_system():
     return development.CHUNK_SYSTEM + '\n' + EVIDENCE_UNIQUENESS_SUFFIX
+
+
+def field_scoped_atom_schema():
+    """Constrain entity/field pairs in the JSON decoder without changing review semantics."""
+    branches = []
+    for entity_type, fields in development.FIELD_BY_ENTITY.items():
+        branches.append({
+            'type': 'object',
+            'additionalProperties': False,
+            'properties': {
+                'entity_type': {'const': entity_type},
+                'entity_key': {'type': 'string', 'minLength': 1, 'maxLength': 80},
+                'field': {'enum': sorted(fields)},
+                'value': {'type': 'string', 'minLength': 1, 'maxLength': 1000},
+                'evidence': {'type': 'string', 'minLength': 1, 'maxLength': 500},
+            },
+            'required': ['entity_type', 'entity_key', 'field', 'value', 'evidence'],
+        })
+    return {
+        'type': 'object',
+        'additionalProperties': False,
+        'properties': {
+            'atoms': {
+                'type': 'array',
+                'maxItems': development.MAX_ATOMS_PER_CHUNK,
+                'items': {'oneOf': branches},
+            },
+        },
+        'required': ['atoms'],
+    }
 
 
 def runtime_extractor_fingerprint():
@@ -72,6 +113,7 @@ def runtime_extractor_fingerprint():
         'chunk_system': runtime_chunk_system(),
         'synthesis_system': development.SYNTHESIS_SYSTEM,
         'field_by_entity': {key: sorted(value) for key, value in development.FIELD_BY_ENTITY.items()},
+        'atom_schema_contract': FIELD_SCOPED_ATOM_SCHEMA,
         'paper_enrichment_schema_sha256': development.schema_digest(),
         'decoder_contract': 'llama.cpp-json-schema;temperature=0;seed=0',
         'evidence_rejection_policy': EVIDENCE_REJECTION_POLICY,
@@ -80,7 +122,15 @@ def runtime_extractor_fingerprint():
 
 
 def bounded_chunk_request(chunk):
-    request = _ORIGINAL_CHUNK_REQUEST(chunk)
+    # The reviewed base request builder reads development.atom_schema dynamically.
+    # Swap only for construction of this one request, then restore immediately so
+    # importing this runtime policy never mutates the base scientific module.
+    original_atom_schema = development.atom_schema
+    development.atom_schema = field_scoped_atom_schema
+    try:
+        request = _ORIGINAL_CHUNK_REQUEST(chunk)
+    finally:
+        development.atom_schema = original_atom_schema
     request['max_tokens'] = SCIENTIFIC_CONFIG['chunk_max_tokens']
     system = request['messages'][0]['content']
     if not system.startswith(development.CHUNK_SYSTEM):

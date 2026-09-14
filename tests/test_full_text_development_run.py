@@ -10,10 +10,12 @@ from scripts.calibration import full_text_development_run as runtime
 from scripts.calibration.full_text_development_run import (
     EVIDENCE_REJECTION_POLICY,
     EVIDENCE_UNIQUENESS_SUFFIX,
+    FIELD_SCOPED_ATOM_SCHEMA,
     RUNTIME_CHECKPOINT,
     RUNTIME_DIAGNOSTICS,
     SCIENTIFIC_CONFIG,
     bounded_chunk_request,
+    field_scoped_atom_schema,
     runtime_checkpoint_payload,
     runtime_chunk_system,
     runtime_extractor_fingerprint,
@@ -58,6 +60,7 @@ class FullTextDevelopmentRuntimeTests(unittest.TestCase):
         self.assertEqual(SCIENTIFIC_CONFIG['chunk_overlap'], 400)
         self.assertEqual(SCIENTIFIC_CONFIG['max_atoms_per_chunk'], 8)
         self.assertEqual(SCIENTIFIC_CONFIG['chunk_max_tokens'], 1600)
+        self.assertEqual(FIELD_SCOPED_ATOM_SCHEMA, 'entity-field-paired-oneof-v1')
         fingerprint = runtime_extractor_fingerprint()
         self.assertRegex(fingerprint, r'^[0-9a-f]{64}$')
         self.assertEqual(fingerprint, runtime_extractor_fingerprint())
@@ -79,6 +82,24 @@ class FullTextDevelopmentRuntimeTests(unittest.TestCase):
         self.assertEqual(request['seed'], 0)
         self.assertEqual(SCIENTIFIC_CONFIG['chunk_chars'], 6000)
         self.assertEqual(SCIENTIFIC_CONFIG['max_atoms_per_chunk'], 8)
+
+    def test_decoder_schema_pairs_each_entity_with_only_its_governed_fields(self):
+        schema = field_scoped_atom_schema()
+        branches = schema['properties']['atoms']['items']['oneOf']
+        self.assertEqual(len(branches), len(development.FIELD_BY_ENTITY))
+        by_entity = {
+            branch['properties']['entity_type']['const']: set(branch['properties']['field']['enum'])
+            for branch in branches
+        }
+        self.assertEqual(by_entity, {key: set(value) for key, value in development.FIELD_BY_ENTITY.items()})
+        self.assertIn('summary', by_entity['global'])
+        self.assertNotIn('method', by_entity['global'])
+        self.assertIn('method', by_entity['analysis'])
+        self.assertNotIn('summary', by_entity['analysis'])
+        request_schema = bounded_chunk_request({'id': 'chunk-1', 'text': 'bounded source ' * 100})['response_format']['schema']
+        self.assertEqual(request_schema, schema)
+        # Constructing a bounded request must not mutate the base module's schema function.
+        self.assertIs(development.atom_schema, runtime._ORIGINAL_ATOM_SCHEMA)
 
     def test_ambiguous_repeated_evidence_is_still_rejected_by_base_validator(self):
         text = 'start ' + ('x' * 1200) + ' repeated evidence middle repeated evidence ' + ('y' * 1200)
@@ -202,6 +223,7 @@ class FullTextDevelopmentRuntimeTests(unittest.TestCase):
         self.assertEqual(development.CHUNK_CHARS, 18000)
         self.assertEqual(development.CHUNK_OVERLAP, 800)
         self.assertEqual(development.MAX_ATOMS_PER_CHUNK, 18)
+        self.assertIs(development.atom_schema, runtime._ORIGINAL_ATOM_SCHEMA)
 
 
 if __name__ == '__main__':
