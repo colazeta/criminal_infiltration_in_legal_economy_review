@@ -18,12 +18,73 @@
     if(data.research&&(data.research.assessment_state!=='unreviewed_proposal'||!COVERAGE[data.research.source_coverage]||!['proposed','insufficient_evidence','outside_framework'].includes(data.research.framework?.status)))throw Error('invalid_research_state');
     return data;
   }
+  // UI-only diagnostic over the existing closed projection. No approval is inferred.
+  // CILE-PUBLIC-RESEARCH-1 contains proposals, not completion/adjudication receipts.
+  function progress(data) {
+    const result={completed:false, evidence:false, extraction:false, classification:false,
+      references:null, adjudication:null, fields:0, resolved:0, unresolved:0,
+      availability:data?.availability||'unknown'};
+    if(data?.availability!=='available'||!data.research)return result;
+    const r=data.research;
+    if(r.assessment_state!=='unreviewed_proposal')throw Error('unsupported_completion_contract');
+    result.extraction=true;
+    result.evidence=r.source_coverage==='full_text'&&Array.isArray(r.sources)&&r.sources.some(s=>s.kind==='full_text');
+    result.classification=r.framework?.status==='proposed'&&Object.hasOwn(CLASSES,r.framework.primary);
+    const spans=new Set((r.spans||[]).map(s=>s.id));
+    const inspect=v=>{
+      result.fields++;
+      const sourced=v?.status==='reported'&&typeof v.value==='string'&&v.value.trim()&&
+        Array.isArray(v.evidence_span_ids)&&v.evidence_span_ids.length&&v.evidence_span_ids.every(id=>spans.has(id));
+      const assessedMissing=result.evidence&&['not_reported','not_applicable'].includes(v?.status);
+      if(sourced||assessedMissing)result.resolved++;else result.unresolved++;
+    };
+    ['summary','contribution','research_question','infiltration_definition','infiltration_operationalisation','authors_limitations'].forEach(k=>inspect(r[k]));
+    const groups={
+      studies:['study_type','research_question','population','sampling','sample_size','observation_unit','analysis_unit','geography','period'],
+      datasets:['name','provider','accessibility','selection','coverage','limitations'],
+      analyses:['design','method','comparison','identification','validation','robustness'],
+      variable_uses:['original_name','concept','operationalisation','unit','period','transformation','role'],
+      findings:['statement','finding_type','direction','estimate','unit','uncertainty','reference_comparison','population_scope','temporal_scope','caveat']
+    };
+    for(const [group,keys]of Object.entries(groups))for(const row of r[group]||[])keys.forEach(k=>inspect(row[k]));
+    // A resolved field is not a quality judgement. Empty collections do not certify
+    // completeness. Unknown citation/QA state is never silently turned into zero.
+    return result;
+  }
+  function renderProgress(parent,data) {
+    const p=progress(data),box=el('section');box.setAttribute('aria-label','Progresso verso il completamento');
+    box.append(el('h4','Arricchimento end-to-end: non attestato come completato'));
+    const table=el('table'),head=el('tr');head.append(el('th','Passaggio'),el('th','Stato verificabile'));table.append(head);
+    const unavailable=['stale','withheld','unknown'].includes(p.availability);
+    const rows=[
+      ['Fonte sufficiente',p.evidence?'Testo completo attestato nella proposta corrente':'Non attestabile da questa proiezione; un link al PDF non basta'],
+      ['Estrazione scientifica',p.extraction?`Proposta presente; ${p.resolved}/${p.fields} campi documentati o esplicitamente mancanti nella proposta, ${p.unresolved} da chiarire. Completezza e correttezza da validare`:(unavailable?'Stato non verificabile':'Nessuna proposta corrente visibile')],
+      ['References e citazioni','Copertura non esposta dalla proiezione attuale; non equivale a zero references'],
+      ['Classificazione nelle sei classi',p.classification?'Categoria proposta, non ancora validata':'Nessuna categoria validata attestata'],
+      ['QA e adjudication','Nessuna attestazione finale disponibile nel contratto pubblico corrente'],
+      ['Completed','No: una proposta, una sintesi o il full text non attestano il completamento']
+    ];
+    for(const [label,value]of rows){const row=el('tr');row.append(el('th',label),el('td',value));table.append(row)}
+    box.append(table,el('p','I passaggi possono avanzare separatamente. I campi non riportati o non applicabili rimangono espliciti; non si inventano valori per completare la scheda.'));
+    parent.append(box);
+  }
+  function emptySections(parent) {
+    for(const title of ['Domanda, contributo e definizione del fenomeno','Collocazione nel framework delle sei classi','Studi, campione, periodo e geografia','Dataset e fonti dei dati','Disegno, metodi, identificazione e robustezza','Variabili e operazionalizzazione','Risultati, stime, incertezza e limiti','References e citazioni','Fonti consultate, versioni e QA']){
+      const box=section(parent,title);box.append(el('p','Contenuto non disponibile nella proiezione corrente. Questo spazio non rappresenta un dato estratto né una validazione.'));
+    }
+  }
   function section(parent,title,open=false){const d=el('details');d.open=open;d.append(el('summary',title));parent.append(d);return d}
   function render(parent,data){
     parent.replaceChildren(el('h3','Contesto della ricerca'));
+    renderProgress(parent,data);
+    const expand=el('button','Mostra tutti i campi'),collapse=el('button','Richiudi le sezioni');
+    expand.type=collapse.type='button';
+    expand.onclick=()=>parent.querySelectorAll('details').forEach(d=>{d.open=true});
+    collapse.onclick=()=>parent.querySelectorAll('details').forEach(d=>{d.open=false});
+    parent.append(expand,collapse);
     if(data.availability!=='available'){
       const messages={not_assessed:'Non è ancora disponibile un’estrazione scientifica per questo paper. Nessuna classe è stata attribuita.',not_registered:'Il paper non è ancora presente nell’indice analitico corrente. Questo non significa che sia fuori dal framework.',stale:'Esiste un’analisi riferita a una versione precedente dei metadati. Non viene mostrata come analisi corrente.',withheld:'È presente materiale analitico, ma la sua pubblicazione non ha superato i controlli su fonti, integrità o riservatezza. Nessuna classificazione viene dedotta in sua sostituzione.'};
-      parent.append(el('p',messages[data.availability]));return;
+      parent.append(el('p',messages[data.availability]));emptySections(parent);return;
     }
     const r=data.research,f=r.framework,sourceMap=new Map(r.sources.map(s=>[s.id,s])),spans=new Map(r.spans.map(s=>[s.id,s]));
     function fact(parent,label,v){
@@ -68,6 +129,8 @@
         const fs=section(box,`Risultati di questa analisi (${findings.length})`);findings.forEach(f=>{const b=item(fs,f,'Risultato · '+f.id);b.append(el('p','Variabili collegate: '+(f.variable_use_ids.join(', ')||'Nessuna registrata')))});
       });
     });
+    const references=section(parent,'References e citazioni',true);
+    references.append(el('p','La bibliografia del paper e le citazioni ricevute non sono ancora esposte dalla proiezione pubblica corrente. Le fonti consultate mostrate sotto non sono la bibliografia. Stato e copertura dei provider non sono verificabili qui, e non vengono rappresentati come zero o come completi.'));
     const limits=section(parent,'Limiti e stato dell’analisi');fact(limits,LABELS.authors_limitations,r.authors_limitations);
     limits.append(el('p','Le osservazioni di lavoro interne non sono pubblicate automaticamente. Le motivazioni analitiche pubbliche sono distinte dalle affermazioni degli autori.'));
     limits.append(el('p','Non riportato significa non riportato nella fonte consultata, non assente dall’intero articolo. Nessuna approvazione scientifica è implicita.'));
@@ -86,7 +149,7 @@
     }catch{if(isCurrent())parent.textContent='Il contesto di ricerca non è verificabile in questo momento. Un errore di caricamento o un disallineamento dei metadati non significa che l’analisi sia assente.'}
     finally{clearTimeout(timeout);if(isCurrent())parent.setAttribute('aria-busy','false')}
   }
-  globalThis.CILEPaperResearch={render,load,selectRecord,safeUrl};
+  globalThis.CILEPaperResearch={render,load,selectRecord,safeUrl,progress,renderProgress};
 })();
 
 /* Read-only geography derived from source-grounded study.geography facts.
