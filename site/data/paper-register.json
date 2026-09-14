@@ -4466,6 +4466,38 @@
       "topicCode": ""
     },
     {
+      "id": "CAND-ACADEMIC-2026-09-14-EXTRA-962e7c8b450c-001",
+      "title": "ORGANISED CRIME: A growing threat to democracy",
+      "authors": "",
+      "year": 2025,
+      "venue": "Council of the European Union",
+      "doi": "",
+      "sourceLinks": [
+        "https://www.consilium.europa.eu/media/3cpejugj/2025_683_art_organisedcrime_web_july-2025.pdf"
+      ],
+      "metadataStatus": "metadata_partial",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-14",
+      "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-14-EXTRA-962e7c8b450c-002",
+      "title": "Report on Organized Crime and the Legal Economy",
+      "authors": "",
+      "year": null,
+      "venue": "UNICRI",
+      "doi": "",
+      "sourceLinks": [
+        "https://unicri.org/in_focus/on/organized_crime_legal_economy"
+      ],
+      "metadataStatus": "metadata_partial",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-14",
+      "topicCode": ""
+    },
+    {
       "id": "CAND-ACADEMIC-2026-09-14-EXTRA-a6b4145d08dd-001",
       "title": "Food Crime: Deterrence of a Potential Money Laundering Typology Through Blockchain and Generative Artificial Intelligence (Gen AI)",
       "authors": "",
