@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {DatabaseSync} from 'node:sqlite';
 import {readFileSync} from 'node:fs';
 import {syncTargets,saveSource,storeExtraction} from '../src/paper-enrichment.js';
+import {canonicalJson,sha256} from '../src/review-v2.js';
 import {importCalibrationApproval,importCompletionApproval,completionPacket,publicCompletionState,verifiedManifest} from '../src/enrichment-adjudication.js';
 
 const now=Date.parse('2026-09-14T09:00:00Z');
@@ -47,9 +48,10 @@ function approvedGet(manifest,pr=10,{reviewCommit=head,state='APPROVED'}={}){
 }
 const calibrationManifest={action:'approve_enrichment_calibration',calibration_id:'CAL-2026-001',protocol_version:'CILE-ENRICH-1',codebook_version:'1.0.0',model:'model-1',prompt_sha256:'b'.repeat(64),benchmark_sha256:'c'.repeat(64),metrics_sha256:'d'.repeat(64),benchmark_size:12,reference_checked_cases:12,full_text_cases:4,hard_cases:3,heterogeneous_designs:true,source_fidelity_checked:true,omissions_checked:true,classification_agreement_checked:true,field_accuracy_checked:true,cost_limits_checked:true};
 
-test('adjudication migration starts empty and is append-only',()=>{
+test('adjudication migration starts empty and installs append-only triggers',()=>{
   const {sqlite}=setup();assert.equal(sqlite.prepare('SELECT COUNT(*) n FROM enrichment_adjudication_receipts').get().n,0);
-  assert.throws(()=>sqlite.exec("DELETE FROM enrichment_adjudication_receipts"),/append_only/);
+  for(const name of ['enrichment_calibration_receipts_no_update','enrichment_calibration_receipts_no_delete','enrichment_adjudication_receipts_no_update','enrichment_adjudication_receipts_no_delete'])
+    assert.equal(sqlite.prepare("SELECT COUNT(*) n FROM sqlite_master WHERE type='trigger' AND name=?").get(name).n,1,name);
 });
 test('completion packet fails closed before accepted calibration',async()=>{
   const {env,target}=await prepared();await assert.rejects(completionPacket(env,target.target_id),/accepted_calibration_required/);
