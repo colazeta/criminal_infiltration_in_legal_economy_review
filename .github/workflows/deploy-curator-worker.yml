@@ -10,6 +10,7 @@ on:
       - "schema/public-paper-research.schema.json"
       - "schema/paper-enrichment.schema.json"
       - "config/archive-cycle.json"
+      - "config/verified-document-seed.json"
       - "site/curate.html"
       - "site/curator.js"
       - "site/curator-config.js"

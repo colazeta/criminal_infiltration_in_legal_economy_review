@@ -12,7 +12,7 @@ import os
 import re
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
-from urllib.parse import urlsplit
+from urllib.parse import urlsplit, parse_qsl, unquote
 from urllib.request import Request, build_opener, HTTPRedirectHandler
 from scripts.surveillance_identity import BATCH_PATTERN
 ROOT=Path(__file__).resolve().parents[1]
@@ -52,7 +52,7 @@ def validate(data,now=None):
         ranks.add(row['rank'])
         u=urlsplit(row['url'])
         if u.scheme!='https' or not u.hostname or u.username or u.password or len(row['url'])>2000:raise ValueError('checkpoint_source_url')
-        if any(re.search(r'token|secret|signature|session|api.?key|authorization|^sig$|^key$|x-amz|x-goog',k,re.I) for k in [v.split('=')[0] for v in u.query.split('&')]):raise ValueError('checkpoint_private_locator')
+        if any(re.search(r'token|secret|signature|session|api.?key|authorization|^sig$|^key$|x-amz|x-goog',k,re.I) for k in [unquote(key) for key,_ in parse_qsl(u.query,keep_blank_values=True)]):raise ValueError('checkpoint_private_locator')
         if not isinstance(row['title'],str) or not row['title'].strip() or len(row['title'])>2000:raise ValueError('checkpoint_title')
         if row['doi'] is not None and (not isinstance(row['doi'],str) or len(row['doi'])>500):raise ValueError('checkpoint_doi')
         if row['year'] is not None and (type(row['year']) is not int or not 1000<=row['year']<=when.year+1):raise ValueError('checkpoint_year')

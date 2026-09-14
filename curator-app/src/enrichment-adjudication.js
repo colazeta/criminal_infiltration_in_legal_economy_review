@@ -3,7 +3,7 @@
 import cycle from '../../config/archive-cycle.json' with {type:'json'};
 import {canonicalJson, sha256} from './review-v2.js';
 import {fetchWithTimeout} from './network.js';
-import {COMPLETION_POLICY,inspectCompletionFacts,validateFrameworkAssessment} from './completion-policy.js';
+import {COMPLETION_POLICY,inspectCompletionFacts,validateFrameworkAssessment,groupReviewTemplate,validateGroupReview,possibleGroupReviews} from './completion-policy.js';
 
 const PROTOCOL='CILE-ENRICH-1', CODEBOOK='1.0.0';
 const CLASSES=new Set(['aetiology','diagnosis','screening','therapy','prognosis','prevention']);
@@ -124,7 +124,7 @@ export async function completionPacket(env,targetId){
       action:'approve_enrichment_completion',completion_policy:COMPLETION_POLICY,candidate_id:record.id,protocol_version:PROTOCOL,codebook_version:CODEBOOK,
       input_sha256:target.input_sha256,proposal_sha256:state.proposal.payload_sha256,source_snapshot_sha256,
       reference_snapshot_sha256:reference.hash,calibration_id:calibration.calibration_id,
-      checklist:Object.fromEntries(CHECKS.map(k=>[k,null]))
+      checklist:{...Object.fromEntries(CHECKS.map(k=>[k,null])),...groupReviewTemplate(state.input)}
     },
     reference_coverage:reference.coverage.map(({provider,direction,status,returned_count,provider_count,observed_at})=>({provider,direction,status,returned_count,provider_count,observed_at}))
   };
@@ -152,8 +152,10 @@ export async function importCompletionApproval(env,{target_id,pr_number},get=git
   const path=`scientific-approvals/enrichment-completion-${packet.candidate_id}.json`;
   const {manifest,approval}=await verifiedManifest(env,pr_number,path,get);
   const keys=['action','completion_policy','candidate_id','protocol_version','codebook_version','input_sha256','proposal_sha256','source_snapshot_sha256','reference_snapshot_sha256','calibration_id','checklist'];
-  exact(manifest,keys,'completion_manifest');exact(manifest.checklist,CHECKS,'completion_checklist');
-  const expected={...packet.manifest,checklist:Object.fromEntries(CHECKS.map(k=>[k,true]))};
+  exact(manifest,keys,'completion_manifest');exact(manifest.checklist,Object.keys(packet.manifest.checklist),'completion_checklist');
+  const groups=Object.fromEntries(Object.entries(packet.manifest.checklist).filter(([key])=>!CHECKS.includes(key)));
+  validateGroupReview(groups,manifest.checklist);
+  const expected={...packet.manifest,checklist:{...Object.fromEntries(CHECKS.map(k=>[k,true])),...Object.fromEntries(Object.keys(groups).map(key=>[key,manifest.checklist[key]]))}};
   if(canonicalJson(manifest)!==canonicalJson(expected))throw Error('completion_manifest_mismatch');
 
   // Re-read every mutable selector after the external GitHub verification. A
@@ -167,7 +169,7 @@ export async function importCompletionApproval(env,{target_id,pr_number},get=git
   if((await referenceState(env,target,approval.approved_at)).hash!==manifest.reference_snapshot_sha256)throw Error('completion_packet_stale');
   await calibrationFor(env,state.input,manifest.calibration_id);
 
-  const checklistHash=await sha256(canonicalJson(manifest.checklist)),manifestHash=await sha256(canonicalJson(manifest));
+  const checklistHash=await sha256(canonicalJson({policy:COMPLETION_POLICY,checklist:manifest.checklist})),manifestHash=await sha256(canonicalJson(manifest));
   const receiptId=await sha256(canonicalJson([target_id,target.input_sha256,packet.proposal_id,manifestHash,approval.reviewed_commit]));
   const existing=await S(env.REVIEW_DB,'SELECT * FROM enrichment_adjudication_receipts WHERE target_id=? AND input_sha256=? AND proposal_id=?',target_id,target.input_sha256,packet.proposal_id).first();
   if(existing){if(existing.manifest_sha256!==manifestHash)throw Error('adjudication_receipt_conflict');return{receipt_id:existing.receipt_id,replayed:true}}
@@ -204,6 +206,12 @@ export async function publicCompletionState(env,candidateId){
   try{
     const state=await proposalState(env,target,proposal.proposal_id);
     if(state.proposal.payload_sha256!==receipt.proposal_sha256)throw Error('stale_receipt');
+    let checklistValid=false;
+    for(const groups of possibleGroupReviews(state.input)){
+      const checklist={...Object.fromEntries(CHECKS.map(k=>[k,true])),...groups};
+      if(await sha256(canonicalJson({policy:COMPLETION_POLICY,checklist}))===receipt.checklist_sha256){checklistValid=true;break}
+    }
+    if(!checklistValid)throw Error('completion_policy_receipt_stale');
     if(await sourceSnapshot(env,target,state.input)!==receipt.source_snapshot_sha256)throw Error('stale_receipt');
     if((await referenceState(env,target,receipt.approved_at)).hash!==receipt.reference_snapshot_sha256)throw Error('stale_receipt');
     await calibrationFor(env,state.input,receipt.calibration_id);

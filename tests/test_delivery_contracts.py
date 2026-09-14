@@ -18,3 +18,7 @@ class DeliveryContractTests(unittest.TestCase):
         runbook=(ROOT/'docs/operations/two-lane-delivery.md').read_text()
         self.assertIn('once daily',runbook);self.assertIn('CILE-HOUR40-1',runbook)
         self.assertNotIn('schedule:',(ROOT/'.github/workflows/deploy-curator-worker.yml').read_text())
+
+    def test_seed_only_corrections_trigger_existing_deployment(self):
+        workflow=(ROOT/'.github/workflows/deploy-curator-worker.yml').read_text()
+        self.assertIn('      - "config/verified-document-seed.json"',workflow.split('permissions:')[0])

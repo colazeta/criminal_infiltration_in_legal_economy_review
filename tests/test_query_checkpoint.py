@@ -23,3 +23,9 @@ class QueryCheckpointTests(unittest.TestCase):
     def test_replayed_parts_are_idempotent_and_untrusted_authors_rejected(self):
         d=self.fixture();c=self.comments(d);self.assertEqual(collect(c+c),collect(c));c[0]['user']['login']='unknown'
         with self.assertRaises(ValueError):collect(c)
+
+    def test_percent_encoded_credential_keys_never_enter_public_checkpoint(self):
+        for query in ['%74oken=opaque','X-Amz-%53ignature=opaque','%2574oken=opaque','signature=opaque','api%5fkey=opaque','x-goog-signature=opaque']:
+            d=self.fixture();d['occurrences'][0]['url']='https://example.org/paper?'+query
+            with self.assertRaisesRegex(ValueError,'checkpoint_private_locator'):validate(d)
+        d=self.fixture();d['occurrences'][0]['url']='https://example.org/paper?paper%5fid=123';validate(d)

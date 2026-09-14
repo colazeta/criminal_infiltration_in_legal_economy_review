@@ -27,3 +27,26 @@ export function validateFrameworkAssessment(framework) {
   if(framework.status==='outside_framework'&&(framework.primary!==null||framework.secondary?.length||framework.alternative!==null))throw Error('outside_framework_cannot_assign_categories');
   return framework.status;
 }
+
+export function groupReviewTemplate(input) {
+  return Object.fromEntries(Object.entries(policy.group_assessment_fields).map(([group,key])=>{
+    if(!Array.isArray(input[group]))throw Error('completion_group_missing');
+    return [key,input[group].length?'recorded':null];
+  }));
+}
+export function validateGroupReview(template,checklist) {
+  for(const [key,value]of Object.entries(template)) {
+    const accepted=value==='recorded'?checklist[key]==='recorded':policy.group_missingness_outcomes.includes(checklist[key]);
+    if(!accepted)throw Error('empty_group_assessment_required:'+key);
+  }
+}
+// A finite set (at most 32) permits validation of the retained checklist hash
+// without exposing or re-fetching the private human decision manifest.
+export function possibleGroupReviews(input) {
+  let choices=[{}];
+  for(const [key,value]of Object.entries(groupReviewTemplate(input))) {
+    const values=value==='recorded'?['recorded']:policy.group_missingness_outcomes;
+    choices=choices.flatMap(row=>values.map(item=>({...row,[key]:item})));
+  }
+  return choices;
+}

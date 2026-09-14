@@ -75,5 +75,17 @@
     ],
     "findings": []
   },
-  "semantics": "An optional unresolved fact remains explicit, is counted in the review packet and cannot be silently rewritten. Not-reported/not-applicable remain source-scope assessments requiring independent human acceptance. Empty groups require review; schema validity alone does not attest completeness. Framework non-applicability requires a source-grounded analyst rationale and human acceptance, not a forced class."
+  "semantics": "An optional unresolved fact remains explicit, is counted in the review packet and cannot be silently rewritten. Not-reported/not-applicable remain source-scope assessments requiring independent human acceptance. Empty groups require review; schema validity alone does not attest completeness. Framework non-applicability requires a source-grounded analyst rationale and human acceptance, not a forced class.",
+  "group_assessment_fields": {
+    "studies": "studies_assessment",
+    "datasets": "datasets_assessment",
+    "analyses": "analyses_assessment",
+    "variable_uses": "variable_uses_assessment",
+    "findings": "findings_assessment"
+  },
+  "group_missingness_outcomes": [
+    "not_reported",
+    "not_applicable"
+  ],
+  "group_assessment_semantics": "Every empty governed group requires its own exact-head human missingness assessment: not_reported or not_applicable after full-text examination. Engineering packets leave these null; true, recorded, missing or uncertain are invalid for an empty group. Non-empty groups are recorded. The version-bound checklist digest is retained in the immutable receipt."
 }

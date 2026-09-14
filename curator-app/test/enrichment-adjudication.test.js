@@ -39,6 +39,7 @@ async function prepared(){
   x.sqlite.prepare('INSERT INTO enrichment_citation_coverage VALUES (?,?,?,?,?,?,?,?,?,?,?,?)').run('cov-i',target.target_id,target.input_sha256,'OpenAlex','incoming','2026-09-14T09:01:00Z','https://api.openalex.org/works',1,1,null,'provider_complete','2026-09-14T09:01:00Z');
   return{...x,target,proposal};
 }
+const reviewedChecklist=packet=>Object.fromEntries(Object.entries(packet.manifest.checklist).map(([k,v])=>[k,k.endsWith('_assessment')?(v==='recorded'?'recorded':'not_applicable'):true]));
 const encoded=value=>Buffer.from(JSON.stringify(value)).toString('base64');
 function approvedGet(manifest,pr=10,{reviewCommit=head,state='APPROVED'}={}){
   return async path=>{
@@ -70,7 +71,7 @@ test('only an exact accepted current packet creates a completion receipt',async(
   await importCalibrationApproval(env,{calibration_id:'CAL-2026-001',pr_number:10},approvedGet(calibrationManifest),now);
   const packet=await completionPacket(env,target.target_id);
   assert.equal(packet.status,'ready_for_human_review');assert.equal(packet.manifest.checklist.bibliography_reviewed,null);
-  const manifest={...packet.manifest,checklist:Object.fromEntries(Object.keys(packet.manifest.checklist).map(k=>[k,true]))};
+  const manifest={...packet.manifest,checklist:reviewedChecklist(packet)};
   const out=await importCompletionApproval(env,{target_id:target.target_id,pr_number:11},approvedGet(manifest,11),now+1000);
   assert.equal(out.replayed,false);assert.equal(sqlite.prepare('SELECT COUNT(*) n FROM enrichment_adjudication_receipts').get().n,1);
   const publicState=await publicCompletionState(env,record.id);assert.equal(publicState.completed,true);assert.equal(publicState.status,'accepted');
@@ -79,7 +80,7 @@ test('only an exact accepted current packet creates a completion receipt',async(
 test('changed scientific input cannot inherit an accepted receipt',async()=>{
   const {env,target}=await prepared();
   await importCalibrationApproval(env,{calibration_id:'CAL-2026-001',pr_number:10},approvedGet(calibrationManifest),now);
-  const packet=await completionPacket(env,target.target_id),manifest={...packet.manifest,checklist:Object.fromEntries(Object.keys(packet.manifest.checklist).map(k=>[k,true]))};
+  const packet=await completionPacket(env,target.target_id),manifest={...packet.manifest,checklist:reviewedChecklist(packet)};
   await importCompletionApproval(env,{target_id:target.target_id,pr_number:11},approvedGet(manifest,11),now+1000);
   await syncTargets(env,{schemaVersion:1,records:[{...record,title:'Changed title'}]},now+2000);
   const state=await publicCompletionState(env,record.id);assert.equal(state.completed,false);assert.equal(state.status,'stale');
@@ -87,7 +88,7 @@ test('changed scientific input cannot inherit an accepted receipt',async()=>{
 test('a newer proposal appearing during GitHub approval invalidates the reviewed packet',async()=>{
   const {env,target,proposal,sqlite}=await prepared();
   await importCalibrationApproval(env,{calibration_id:'CAL-2026-001',pr_number:10},approvedGet(calibrationManifest),now);
-  const packet=await completionPacket(env,target.target_id),manifest={...packet.manifest,checklist:Object.fromEntries(Object.keys(packet.manifest.checklist).map(k=>[k,true]))};
+  const packet=await completionPacket(env,target.target_id),manifest={...packet.manifest,checklist:reviewedChecklist(packet)};
   const base=approvedGet(manifest,11);let raced=false;
   const get=async path=>{
     if(!raced&&path.endsWith('/pulls/11')){
@@ -130,7 +131,7 @@ test('a grounded outside-framework assessment may complete only with calibration
  await importCalibrationApproval(x.env,{calibration_id:'CAL-2026-001',pr_number:10},approvedGet(calibrationManifest),now);
  const packet=await completionPacket(x.env,x.target.target_id);assert.equal(packet.completion_policy,'CILE-COMPLETION-POLICY-2');
  assert.equal(packet.manifest.checklist.framework_reviewed,null);
- const manifest={...packet.manifest,checklist:Object.fromEntries(Object.keys(packet.manifest.checklist).map(k=>[k,true]))};
+ const manifest={...packet.manifest,checklist:reviewedChecklist(packet)};
  await importCompletionApproval(x.env,{target_id:x.target.target_id,pr_number:11},approvedGet(manifest,11),now+1000);
  assert.equal((await publicCompletionState(x.env,record.id)).completed,true);
 });
@@ -150,4 +151,20 @@ test('provider coverage cannot substitute for a current actual-paper bibliograph
   const x=await prepared();await importCalibrationApproval(x.env,{calibration_id:'CAL-2026-001',pr_number:10},approvedGet(calibrationManifest),now);
   await importBibliography(x.env,x.target.target_id,{input_sha256:x.target.input_sha256,source_id:x.proposal.source_ids[0],scope:'paper_bibliography',coverage:'partial',declared_count:null,entries:[]},now+60000);
   await assert.rejects(completionPacket(x.env,x.target.target_id),/paper_bibliography_assessment_required/);
+});
+
+test('empty groups require explicit individual human missingness decisions, not generic checklist booleans',async()=>{
+  const x=await prepared();await importCalibrationApproval(x.env,{calibration_id:'CAL-2026-001',pr_number:10},approvedGet(calibrationManifest),now);
+  const packet=await completionPacket(x.env,x.target.target_id);
+  const keys=['studies','datasets','analyses','variable_uses','findings'].map(k=>k+'_assessment');
+  for(const key of keys)assert.equal(packet.manifest.checklist[key],null);
+  for(const key of keys)for(const bad of [null,true,'recorded','not_verifiable','ambiguous']) {
+    const manifest={...packet.manifest,checklist:{...reviewedChecklist(packet),[key]:bad}};
+    await assert.rejects(importCompletionApproval(x.env,{target_id:x.target.target_id,pr_number:11},approvedGet(manifest,11),now+1000),/empty_group_assessment_required/);
+  }
+  assert.equal(x.sqlite.prepare('SELECT COUNT(*) n FROM enrichment_adjudication_receipts').get().n,0);
+  const manifest={...packet.manifest,checklist:reviewedChecklist(packet)};
+  manifest.checklist.datasets_assessment='not_reported';
+  await importCompletionApproval(x.env,{target_id:x.target.target_id,pr_number:11},approvedGet(manifest,11),now+1000);
+  assert.equal((await publicCompletionState(x.env,record.id)).completed,true);
 });
