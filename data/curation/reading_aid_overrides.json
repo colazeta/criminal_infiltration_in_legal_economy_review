@@ -559,6 +559,33 @@
       "synopsis": "The article discusses Mafia infiltration of the legal economy through the relationship between legal and illegal economic activity, including laundering, racketeering and usury and the use of lawful economic activity as a vector of criminal influence.",
       "checkedAt": "2026-09-13",
       "note": "Parallel Search fetched the authoritative Centre Thucydide/AFRI article page matching the registered 2016 title. Evidence basis: partial text/publisher summary only; a complete scholarly full-text manifestation was not independently verified. No verbatim article text, OA-retention claim, private source ingestion, eligibility decision, canonicalisation or scientific classification is claimed."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-14-001",
+      "kind": "full_text_intro",
+      "sourceLabel": "U.S. Office of Justice Programs / NCJRS full-text report located with Parallel Search",
+      "sourceUrl": "https://www.ojp.gov/pdffiles1/Digitization/95269NCJRS.pdf",
+      "synopsis": "The report examines how property interests associated with organised-crime activity are created, held, transferred and devolved, focusing on ownership and control rather than treating asset evidence alone as proof of participation in the legal economy.",
+      "checkedAt": "2026-09-14",
+      "note": "Parallel Search fetched the complete official OJP/NCJRS report and matched M. Libonati, H. Edelhertz, the 1983 identity and NCJ 95269. Evidence basis: full_text. Asset-only relevance remains a separate eligibility question; no private full-text ingestion, eligibility decision, canonicalisation or scientific classification is claimed."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-14-002",
+      "kind": "full_text_intro",
+      "sourceLabel": "Malmö University / DiVA institutional full-text thesis located with Parallel Search",
+      "sourceUrl": "https://www.diva-portal.org/smash/get/diva2:1486107/FULLTEXT01.pdf",
+      "synopsis": "The literature review examines corruption and organised crime in the construction industry, synthesising factors associated with their emergence and interaction, including informal networks, corrupt practices and criminal entrepreneurship.",
+      "checkedAt": "2026-09-14",
+      "note": "Parallel Search fetched the complete institutional DiVA PDF and matched Lars Flysjö, Malmö University, the exact title and 2020 manifestation. Evidence basis: full_text. This is non-decisional reading support only; no private full-text ingestion, eligibility decision, canonicalisation or scientific classification is claimed."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-14-EXTRA-8b3f2d6a91c4-001",
+      "kind": "full_text_intro",
+      "sourceLabel": "Bocconi GREEN Working Paper 04 full-text PDF located with Parallel Search",
+      "sourceUrl": "https://green.unibocconi.eu/sites/default/files/media/attach/GREEN_wp04.pdf",
+      "synopsis": "The working paper studies Mafia infiltration in Sicily’s wind-power business in the context of renewable-energy incentives, examining the interaction of criminal actors with firms, local institutions and the development process.",
+      "checkedAt": "2026-09-14",
+      "note": "Parallel Search fetched the complete Bocconi GREEN Working Paper 04 PDF and matched Daniele Checchi, Michele Polo and the registered 2019 working-paper identity. Evidence basis: full_text. The later 2020 journal article with DOI 10.1007/s40797-020-00126-z remains a distinct manifestation and is not silently substituted or canonicalised. No private full-text ingestion, eligibility decision or scientific classification is claimed."
     }
   ]
 }
