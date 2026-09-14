@@ -37,19 +37,21 @@ class FullTextDevelopmentRuntimeTests(unittest.TestCase):
         self.assertEqual(SCIENTIFIC_CONFIG['chunk_chars'], 6000)
         self.assertEqual(SCIENTIFIC_CONFIG['chunk_overlap'], 400)
         self.assertEqual(SCIENTIFIC_CONFIG['max_atoms_per_chunk'], 8)
-        self.assertEqual(SCIENTIFIC_CONFIG['chunk_max_tokens'], 1000)
+        self.assertEqual(SCIENTIFIC_CONFIG['chunk_max_tokens'], 1600)
         fingerprint = runtime_extractor_fingerprint()
         self.assertRegex(fingerprint, r'^[0-9a-f]{64}$')
         self.assertEqual(fingerprint, runtime_extractor_fingerprint())
 
-    def test_chunk_request_reduces_per_call_output_budget_without_altering_source(self):
+    def test_chunk_request_expands_only_output_budget_after_incomplete_response(self):
         chunk = {'id': 'chunk-1', 'text': 'Synthetic source evidence ' * 60}
         request = bounded_chunk_request(chunk)
-        self.assertEqual(request['max_tokens'], 1000)
+        self.assertEqual(request['max_tokens'], 1600)
         supplied = request['messages'][1]['content']
         self.assertIn('Synthetic source evidence', supplied)
         self.assertEqual(request['temperature'], 0)
         self.assertEqual(request['seed'], 0)
+        self.assertEqual(SCIENTIFIC_CONFIG['chunk_chars'], 6000)
+        self.assertEqual(SCIENTIFIC_CONFIG['max_atoms_per_chunk'], 8)
 
     def test_base_module_is_not_mutated_merely_by_importing_runtime_policy(self):
         self.assertEqual(development.CHUNK_CHARS, 18000)
