@@ -667,6 +667,33 @@
       "synopsis": "The paper studies the expansion of organised criminal groups into high-value agricultural markets, using the Mexican avocado sector alongside cross-national evidence to examine how criminal market expansion relates to violence.",
       "checkedAt": "2026-09-14",
       "note": "Parallel Search fetched and read the complete University of South Carolina scholarly manuscript and separately resolved the final Cambridge manifestation, DOI 10.1017/S0020818325100763. Evidence basis: full_text for the institutional manuscript. The repository manuscript and final publisher version remain explicitly related manifestations and are not silently substituted or canonicalised; no private full-text ingestion, eligibility decision or scientific classification is claimed."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-14-EXTRA-632dc0bcd186-001",
+      "kind": "full_text_intro",
+      "sourceLabel": "Europol full-text joint report located with Parallel Search",
+      "sourceUrl": "https://www.europol.europa.eu/cms/sites/default/files/documents/Europol_Joint-report_Criminal%20networks%20in%20EU%20ports_Public_version.pdf",
+      "synopsis": "The joint report examines how criminal networks infiltrate European ports, focusing on corruption and insider access involving actors in otherwise lawful port and logistics operations and on measures intended to reduce those vulnerabilities.",
+      "checkedAt": "2026-09-14",
+      "note": "Parallel Search fetched and read the complete official Europol report and matched the registered 2023 title and institutional identity. Evidence basis: full_text. The report's discussion of lawful port and logistics actors does not by itself determine scientific eligibility; no private full-text ingestion, eligibility decision, canonicalisation or scientific classification is claimed."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-14-EXTRA-632dc0bcd186-002",
+      "kind": "full_text_intro",
+      "sourceLabel": "OpenEdition / Belgeo full-text article located with Parallel Search",
+      "sourceUrl": "https://journals.openedition.org/belgeo/58516?lang=en",
+      "synopsis": "The article examines Italy's response to agribusiness crime and the reuse of agricultural assets confiscated from organised-crime groups, connecting anti-mafia enforcement with the regeneration and governance of confiscated agricultural land.",
+      "checkedAt": "2026-09-14",
+      "note": "Parallel Search resolved DOI 10.4000/belgeo.58516 and fetched the complete OpenEdition/Belgeo article, matching Giuseppe Muti, the exact registered title and the 2022 manifestation. Evidence basis: full_text. No verbatim article text, private full-text ingestion, eligibility decision, canonicalisation or scientific classification is claimed."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-14-EXTRA-632dc0bcd186-003",
+      "kind": "full_text_intro",
+      "sourceLabel": "Australian Institute of Criminology full-text report located with Parallel Search",
+      "sourceUrl": "https://www.aic.gov.au/sites/default/files/2020-05/rpp076.pdf",
+      "synopsis": "The national study examines organised and other crime affecting Australia's fishing industry, drawing on industry and enforcement evidence to identify crime types, vulnerabilities and regulatory or prevention implications across the sector.",
+      "checkedAt": "2026-09-14",
+      "note": "Parallel Search fetched and read the complete Australian Institute of Criminology Research and Public Policy Series 76 PDF and matched Judy Putt, Katherine Anderson, the registered 2007 title and ISBN 9781921185427. Evidence basis: full_text. No verbatim report text, private full-text ingestion, eligibility decision, canonicalisation or scientific classification is claimed."
     }
   ]
 }
