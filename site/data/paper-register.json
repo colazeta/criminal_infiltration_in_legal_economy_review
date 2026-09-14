@@ -4448,6 +4448,22 @@
       "accessStatus": "unknown",
       "registeredAt": "2026-09-14",
       "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-14-EXTRA-eafcc7998720-001",
+      "title": "Health Care Fraud - A Rising Threat",
+      "authors": "",
+      "year": 1981,
+      "venue": "Pennsylvania Crime Commission",
+      "doi": "",
+      "sourceLinks": [
+        "https://ojp.gov/ncjrs/virtual-library/abstracts/health-care-fraud-rising-threat"
+      ],
+      "metadataStatus": "metadata_partial",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-14",
+      "topicCode": ""
     }
   ]
 }
