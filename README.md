@@ -139,8 +139,7 @@ separate broader AML collection while remaining explicitly outside the review
 corpus.
 
 The complete rule is in [the eligibility codebook](docs/methodology/eligibility.md).
-The repository does not redistribute full text; it publishes curated metadata,
-classifications, provenance and lawful external links.
+Original source bytes remain in the existing private enrichment store. Public PDF reading is available only for independently verified reusable rights with attribution; free download alone is not permission. Metadata, proposals, scientific acceptance and public copying remain distinct. See [the current delivery contract](docs/operations/two-lane-delivery.md).
 
 ## Version and citation
 
@@ -166,3 +165,7 @@ The private enrichment module is independent of daily discovery. It stores
 abstract/source provenance, citation coverage and source-grounded extraction
 proposals. Scientific automation remains blocked pending real-paper calibration.
 A deployed schema is not proof that the scheduler or a model is active.
+
+## Current delivery contract
+
+See [two-lane delivery](docs/operations/two-lane-delivery.md): daily incremental discovery; hourly completion-first enrichment; durable query observations; receipt-backed public index, filters and statistics; private original PDF reader and finite bibliography snapshots. This is engineering infrastructure, not a claim that calibration is accepted or all papers have been analysed.

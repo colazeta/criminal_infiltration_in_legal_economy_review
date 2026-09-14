@@ -80,7 +80,7 @@ test('all-field expansion reaches nested datasets, methods, variables, findings 
   parent.querySelectorAll('button').find(b=>b.textContent==='Mostra tutti i campi').fire('click');
   assert.ok(parent.querySelectorAll('details').every(d=>d.open));
   for(const text of ['Italy','50','Synthetic dataset','Panel analysis','Comparison design','Alternative model','Exposure','Recorded risk','Null finding','[-1,1]','References e citazioni','Fonti consultate e versioni'])assert.ok(parent.textContent.includes(text),text);
-  assert.match(parent.textContent,/non sono ancora esposte/);assert.match(parent.textContent,/non validata scientificamente/);
+  assert.match(parent.textContent,/non sono verificabili/);assert.match(parent.textContent,/non validata scientificamente/);
 });
 
 test('Completed control gives no false percentage or positive result and composes with reset',async()=>{
@@ -89,8 +89,8 @@ test('Completed control gives no false percentage or positive result and compose
   const filter=processing.mount({controls,records:[candidate],onChange:()=>{},selectSupport:()=>({readingAid:null}),selectResearch:sheet.selectRecord});
   const mode=controls.children[0].children[0];assert.ok(mode.children.some(o=>o.value==='completed'));
   mode.value='completed';mode.fire('change');await new Promise(resolve=>setImmediate(resolve));
-  assert.equal(filter.matches(candidate),false);assert.match(filter.emptyMessage(),/attestabile/);
-  assert.match(controls.following.textContent,/Percentuale finale: non attestabile/);assert.doesNotMatch(controls.following.textContent,/100%/);
+  assert.equal(filter.matches(candidate),false);assert.match(filter.emptyMessage(),/verifica del registro non è completa/);
+  assert.match(controls.following.textContent,/Percentuale finale non attestabile/);assert.doesNotMatch(controls.following.textContent,/100%/);
   controls.fire('reset');assert.equal(filter.matches(candidate),true);
 });
 

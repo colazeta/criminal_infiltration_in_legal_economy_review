@@ -44,3 +44,12 @@ test("public research route is distinct from private source and proposal routes"
   }
   assert.equal((await worker.fetch(new Request("https://test.workers.dev/api/public-paper-research?id=x&sql=SELECT"), env)).status, 400);
 });
+
+test("private document URLs require curator authentication and only the enrichment shell permits blob frames",async()=>{
+  for(const path of ["/api/paper-enrichment/documents?id=private","/api/paper-enrichment/document?id=private&document=x"])
+    assert.equal((await worker.fetch(new Request("https://test.workers.dev"+path),env)).status,401);
+  const page=await worker.fetch(new Request("https://test.workers.dev/enrichment.html"),env);
+  assert.match(page.headers.get("Content-Security-Policy"),/frame-src blob:/);
+  const other=await worker.fetch(new Request("https://test.workers.dev/curate.html"),env);
+  assert.doesNotMatch(other.headers.get("Content-Security-Policy"),/frame-src blob:/);
+});

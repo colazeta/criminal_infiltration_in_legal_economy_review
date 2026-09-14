@@ -7,7 +7,7 @@ import adjudicationMigration from '../src/enrichment-adjudication-migration.json
 import {EnrichmentStoreCore,sqliteAdapter,privateTextStore,serviceSignature,enrichmentStore} from '../src/enrichment-store.js';
 import {sha256} from '../src/review-v2.js';
 const secret='test-only-secret-never-used-in-production-0123456789';
-function setup(){
+export function setup(){
  const db=new DatabaseSync(':memory:');db.exec('PRAGMA foreign_keys=ON');const kv=new Map();let alarm=null;
  const storage={sql:{exec(sql,...v){let rows=[];if(sql.includes('CREATE TABLE'))db.exec(sql);else rows=db.prepare(sql).all(...v);return{toArray:()=>rows}}},
   async getAlarm(){return alarm},async setAlarm(t){alarm=t},
@@ -22,10 +22,10 @@ function setup(){
  const ctx={storage,blockConcurrencyWhile:fn=>fn()},core=new EnrichmentStoreCore(ctx,env);
  return{db,kv,storage,ctx,env,core};
 }
-async function request(data,now=Date.now(),key=secret){const body=JSON.stringify({expected_commit:'abc',...data}),ts=String(now),nonce=crypto.randomUUID();return new Request('https://enrichment.internal/machine',{method:'POST',body,headers:{'Content-Type':'application/json','X-Enrichment-Timestamp':ts,'X-Enrichment-Nonce':nonce,'X-Enrichment-Signature':await serviceSignature(key,ts,nonce,body)}})}
+export async function request(data,now=Date.now(),key=secret){const body=JSON.stringify({expected_commit:'abc',...data}),ts=String(now),nonce=crypto.randomUUID();return new Request('https://enrichment.internal/machine',{method:'POST',body,headers:{'Content-Type':'application/json','X-Enrichment-Timestamp':ts,'X-Enrichment-Nonce':nonce,'X-Enrichment-Signature':await serviceSignature(key,ts,nonce,body)}})}
 test('bundled migration is byte-identical to the normative additive SQL',async()=>{const text=readFileSync(new URL('../migrations/0003_paper_enrichment.sql',import.meta.url),'utf8');assert.equal(migration.sql,text);assert.equal(await sha256(text),migration.sha256)});
 test('adjudication migration is byte-identical to its additive SQL',async()=>{const text=readFileSync(new URL('../migrations/0005_enrichment_adjudication.sql',import.meta.url),'utf8');assert.equal(adjudicationMigration.sql,text);assert.equal(await sha256(text),adjudicationMigration.sha256)});
-test('Durable Object initialises only enrichment tables and is inactive until readback activation',async()=>{const{core,db}=setup();await core.ready;assert.equal((await core.environment()).PAPER_ENRICHMENT_ENABLED,'false');assert.equal(db.prepare("SELECT COUNT(*) n FROM sqlite_master WHERE type='table'").get().n,20);assert.equal((await core.verify()).verified,true)});
+test('Durable Object initialises only enrichment tables and is inactive until readback activation',async()=>{const{core,db}=setup();await core.ready;assert.equal((await core.environment()).PAPER_ENRICHMENT_ENABLED,'false');assert.equal(db.prepare("SELECT COUNT(*) n FROM sqlite_master WHERE type='table'").get().n,22);assert.equal((await core.verify()).verified,true)});
 test('database adapter preserves atomic proposal transactions and change counts',async()=>{const{core,db,storage}=setup();await core.ready;const a=sqliteAdapter(storage);const sql='INSERT INTO enrichment_targets VALUES (?,?,?,?,?,?,1,?,?)';const stmt=a.prepare(sql).bind('t','c','candidate','r','a'.repeat(64),'{}','now','now');await assert.rejects(a.batch([stmt,stmt]));assert.equal(db.prepare('SELECT COUNT(*) n FROM enrichment_targets').get().n,0);assert.equal((await stmt.run()).meta.changes,1);assert.equal((await a.prepare('UPDATE enrichment_targets SET active=0 WHERE target_id=?').bind('absent').run()).meta.changes,0)});
 test('private content larger than a single KV value is chunked and read back intact',async()=>{const{storage}=setup(),store=privateTextStore(storage),text='α😀'.repeat(400000);await store.put('a',text);assert.equal(await(await store.get('a')).text(),text);await store.put('a',text);await assert.rejects(store.put('a','altered'),/immutable/)});
 test('missing chunks and tampering are rejected, not returned as source evidence',async()=>{const{storage,kv}=setup(),store=privateTextStore(storage);await store.put('a','Evidence');kv.set('evidence:a:0','altered');await assert.rejects(store.get('a'),/integrity/);kv.delete('evidence:a:0');await assert.rejects(store.get('a'),/incomplete/)});

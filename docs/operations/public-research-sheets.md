@@ -1,5 +1,7 @@
 # Public paper research context
 
+**Current delivery amendment (14 September 2026):** see [two-lane-delivery.md](two-lane-delivery.md). It supersedes the earlier proposal-only UI limitation, defines the current receipt-backed index/filter/statistics, private PDF and bibliography paths, explicit assessed-field policy, and daily discovery with durable query checkpoints. Historical observations below remain historical; no scientific acceptance is implied.
+
 Owner instruction and issue #597, 13 September 2026. This extends the public
 paper **display**, not scientific eligibility, canonical identity or acceptance
 of model-generated extraction. The original 1990s dialog, double-click and

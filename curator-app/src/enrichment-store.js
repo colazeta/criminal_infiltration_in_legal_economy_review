@@ -1,5 +1,7 @@
 /* SQLite/KV adapter for an isolated private Durable Object, not a D1 permission bypass.
    Both backends implement the same versioned enrichment contract; canonical tables are absent. */
+import deliveryMigration from './enrichment-delivery-migration.json' with {type:'json'};
+import {privateBinaryStore,importDocument,importBibliography,retainProviderBibliography,listDocuments,documentResponse,publicAssets} from './enrichment-assets.js';
 import migration from './enrichment-migration.json' with { type: 'json' };
 import scheduleMigration from './enrichment-schedule-migration.json' with { type: 'json' };
 import adjudicationMigration from './enrichment-adjudication-migration.json' with { type: 'json' };
@@ -7,7 +9,7 @@ import {Hour40Schedule, iterationKey} from './enrichment-schedule.js';
 import { sha256 } from './review-v2.js';
 import { runEnrichment, handlePaperEnrichment, storeExtraction } from './paper-enrichment.js';
 import {completionPacket, importCalibrationApproval, importCompletionApproval} from './enrichment-adjudication.js';
-import {readPublicResearch, readPublicCompletion, publicResearchAudit} from './public-paper-research.js';
+import {readPublicResearch, readPublicCompletion, publicResearchAudit, readPublicIndex} from './public-paper-research.js';
 
 const DOMAIN = 'CILE-ENRICH-SERVICE-v1';
 const encoder = new TextEncoder();
@@ -82,7 +84,12 @@ export class EnrichmentStoreCore {
       const adjudicationApplied=await ctx.storage.get('schema:enrichment-adjudication');
       if(adjudicationApplied && adjudicationApplied!==adjudicationHash)throw Error('additive_adjudication_migration_required');
       if(!adjudicationApplied)await ctx.storage.transaction(async tx=>{ctx.storage.sql.exec(adjudicationMigration.sql);await tx.put('schema:enrichment-adjudication',adjudicationHash)});
-      this.db=sqliteAdapter(ctx.storage); this.evidence=privateTextStore(ctx.storage);
+      const deliveryHash=await sha256(deliveryMigration.sql);
+      if(deliveryHash!==deliveryMigration.sha256)throw Error('delivery_migration_integrity');
+      const deliveryApplied=await ctx.storage.get('schema:enrichment-delivery');
+      if(deliveryApplied&&deliveryApplied!==deliveryHash)throw Error('additive_delivery_migration_required');
+      if(!deliveryApplied)await ctx.storage.transaction(async tx=>{ctx.storage.sql.exec(deliveryMigration.sql);await tx.put('schema:enrichment-delivery',deliveryHash)});
+      this.db=sqliteAdapter(ctx.storage); this.evidence=privateTextStore(ctx.storage);this.documents=privateBinaryStore(ctx.storage);
       this.schedule=new Hour40Schedule(ctx.storage,
         async(at,attempt)=>runEnrichment(await this.environment(),{iterationSlot:at,iterationAttempt:attempt}),
         async(at,attempt)=>this.db.prepare('SELECT run_id,status,selected_job_id,error_code FROM enrichment_runs WHERE scheduled_slot=?').bind(iterationKey(at,attempt)).first(),
@@ -92,12 +99,12 @@ export class EnrichmentStoreCore {
   async environment() {
     await this.ready;
     const activation=await this.ctx.storage.get('activation:enrichment');
-    return {...this.env, REVIEW_DB:this.db, REVIEW_EVIDENCE:this.evidence,
+    return {...this.env, REVIEW_DB:this.db, REVIEW_EVIDENCE:this.evidence, REVIEW_DOCUMENTS:this.documents,
       PAPER_ENRICHMENT_ENABLED:this.env.PAPER_ENRICHMENT_ENABLED==='true'&&activation?.commit===this.env.DEPLOY_COMMIT?'true':'false'};
   }
   async aggregate() {
     const env=await this.environment(),counts={};
-    for(const table of ['targets','sources','citation_observations','proposals','calibration_receipts','adjudication_receipts'])counts[table]=Number((await this.db.prepare(`SELECT COUNT(*) n FROM enrichment_${table}`).first()).n);
+    for(const table of ['targets','sources','citation_observations','proposals','calibration_receipts','adjudication_receipts','documents','bibliography_snapshots'])counts[table]=Number((await this.db.prepare(`SELECT COUNT(*) n FROM enrichment_${table}`).first()).n);
     const response=await handlePaperEnrichment(new Request('https://enrichment.internal/api/paper-enrichment/status'),env,{login:env.CURATOR_LOGIN});
     return {...await response.json(),storage_backend:'durable_object_sqlite',counts,scheduling:this.schedule.status(),commit:this.env.DEPLOY_COMMIT};
   }
@@ -108,7 +115,7 @@ export class EnrichmentStoreCore {
     try{if(await this.ctx.storage.get(key)!==text)throw Error('storage_readback_failed')}finally{await this.ctx.storage.delete(key)}
     await this.db.prepare("UPDATE enrichment_targets SET active=active WHERE target_id='__readiness_probe__'").run();
     return {verified:true,storage_backend:'durable_object_sqlite',migration_sha256:migration.sha256,
-      adjudication_migration_sha256:adjudicationMigration.sha256,commit:this.env.DEPLOY_COMMIT};
+      adjudication_migration_sha256:adjudicationMigration.sha256,delivery_migration_sha256:deliveryMigration.sha256,commit:this.env.DEPLOY_COMMIT};
   }
   async authorise(request,body,now) {
     const timestamp=request.headers.get('X-Enrichment-Timestamp'),nonce=request.headers.get('X-Enrichment-Nonce'),signature=request.headers.get('X-Enrichment-Signature');
@@ -139,14 +146,14 @@ export class EnrichmentStoreCore {
       while(true){const{done,value}=await reader.read();if(done)break;total+=value.byteLength;if(total>8400000){await reader.cancel();return json({error_code:'payload_too_large'},413)}parts.push(value)}
       const raw=new Uint8Array(total);let at=0;for(const part of parts){raw.set(part,at);at+=part.byteLength}
       body=new TextDecoder('utf-8',{fatal:true}).decode(raw);
-      if(body.length>2100000)return json({error_code:'payload_too_large'},413);
+      if(body.length>8400000)return json({error_code:'payload_too_large'},413);
       await this.authorise(request,body,now);
     }catch{return json({error_code:'service_authentication_required'},401)}
     try{
       const data=JSON.parse(body);
-      const allowedFields=['operation','expected_commit','target_id','proposal','run_key','calibration_id','pr_number'];
+      const allowedFields=['operation','expected_commit','target_id','proposal','run_key','calibration_id','pr_number','source','document','bibliography','document_id'];
       if(!data||typeof data!=='object'||Array.isArray(data)||Object.keys(data).some(k=>!allowedFields.includes(k)))return json({error_code:'invalid_service_envelope'},422);
-      const operations=['verify','activate','deactivate','status','run','packet','proposal','public-research-audit','completion-packet','calibration-approval','completion-approval'];
+      const operations=['verify','activate','deactivate','status','run','packet','proposal','public-research-audit','completion-packet','calibration-approval','completion-approval','source','document','documents','document-check','bibliography','provider-bibliography'];
       if(!operations.includes(data.operation))return json({error_code:'unknown_service_operation'},422);
       if(data.expected_commit!==this.env.DEPLOY_COMMIT)return json({error_code:'stale_deployment'},409);
       if(data.operation==='verify')return json(await this.verify());
@@ -166,6 +173,12 @@ export class EnrichmentStoreCore {
         if(Number(count.n)>=12)return json({error_code:'manual_daily_budget_exhausted'},429);
         return json(await runEnrichment(env,{now,runKey:data.run_key}));
       }
+      if(data.operation==='source')return handlePaperEnrichment(new Request('https://enrichment.internal/api/paper-enrichment/source?id='+encodeURIComponent(data.target_id),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data.source)}),env,{login:env.CURATOR_LOGIN});
+      if(data.operation==='document')return json(await importDocument(env,data.target_id,data.document,now),201);
+      if(data.operation==='documents')return json({documents:await listDocuments(env,data.target_id)});
+      if(data.operation==='document-check'){const r=await documentResponse(env,data.target_id,data.document_id,new Request('https://enrichment.internal/document',{method:'HEAD'}));return json({readable:r.ok,byte_length:Number(r.headers.get('Content-Length')),etag:r.headers.get('ETag'),content_type:r.headers.get('Content-Type'),scope:'authenticated_reader_route_bytes_checked'})}
+      if(data.operation==='provider-bibliography')return json(await retainProviderBibliography(env,data.target_id,now));
+      if(data.operation==='bibliography')return json(await importBibliography(env,data.target_id,data.bibliography,now),201);
       if(data.operation==='packet')return json(await this.packet(data));
       if(data.operation==='proposal'){
         const target=await this.db.prepare('SELECT * FROM enrichment_targets WHERE target_id=? AND active=1').bind(data.target_id).first();if(!target)return json({error_code:'target_not_found'},404);
@@ -180,6 +193,12 @@ export class EnrichmentStoreCore {
     const url=new URL(request.url);
     if(url.pathname==='/machine')return this.machine(request);
     const env=await this.environment();
+    if(url.pathname==='/public-index'&&request.method==='GET'){try{return json(await readPublicIndex(env,Number(url.searchParams.get('cursor')||0),url.searchParams.get('revision')))}catch(error){return json({error_code:error.message},error.status||503)}}
+    if(url.pathname==='/public-assets'&&['GET','HEAD'].includes(request.method)){
+      try{const candidate=url.searchParams.get('id'),doc=url.searchParams.get('document');if(doc){const t=await this.db.prepare('SELECT target_id FROM enrichment_targets WHERE record_id=? AND active=1').bind(candidate).first();if(!t)return json({error:'not_found'},404);return await documentResponse(env,t.target_id,doc,request,{publicOnly:true})}return json(await publicAssets(env,candidate,Number(url.searchParams.get('offset')||0),url.searchParams.get('revision')))}catch(e){return json({error:e.code||'assets_unavailable'},e.status||503)}
+    }
+    if(url.pathname==='/api/paper-enrichment/documents'&&request.method==='GET'){try{return json({documents:await listDocuments(env,url.searchParams.get('id'))})}catch(e){return json({error:e.code||'documents_unavailable'},e.status||503)}}
+    if(url.pathname==='/api/paper-enrichment/document'&&['GET','HEAD'].includes(request.method)){try{return await documentResponse(env,url.searchParams.get('id'),url.searchParams.get('document'),request)}catch(e){return json({error:e.code||'document_unavailable'},e.status||503)}}
     if(url.pathname==='/public-research'&&request.method==='GET')return json(await readPublicResearch(env,url.searchParams.get('id')));
     if(url.pathname==='/public-completion'&&request.method==='GET')return json(await readPublicCompletion(env,url.searchParams.get('id')));
     if(url.pathname==='/tick')return json(await this.schedule.tick());

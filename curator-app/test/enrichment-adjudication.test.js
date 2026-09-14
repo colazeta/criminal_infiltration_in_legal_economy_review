@@ -1,3 +1,4 @@
+import {importBibliography} from '../src/enrichment-assets.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {DatabaseSync} from 'node:sqlite';
@@ -11,7 +12,7 @@ const head='a'.repeat(40);
 function setup(){
   const sqlite=new DatabaseSync(':memory:');sqlite.exec('PRAGMA foreign_keys=ON');
   sqlite.exec(readFileSync(new URL('../migrations/0003_paper_enrichment.sql',import.meta.url),'utf8'));
-  sqlite.exec(readFileSync(new URL('../migrations/0005_enrichment_adjudication.sql',import.meta.url),'utf8'));
+  sqlite.exec(readFileSync(new URL('../migrations/0005_enrichment_adjudication.sql',import.meta.url),'utf8'));sqlite.exec(readFileSync(new URL('../migrations/0006_enrichment_delivery_assets.sql',import.meta.url),'utf8'));
   const db={sqlite,prepare(sql){let v=[];return{bind(...a){v=a;return this},async first(){return sqlite.prepare(sql).get(...v)||null},async all(){return{results:sqlite.prepare(sql).all(...v)}},async run(){return{meta:{changes:Number(sqlite.prepare(sql).run(...v).changes)}}}}},async batch(ss){sqlite.exec('BEGIN');try{const r=[];for(const s of ss)r.push(await s.run());sqlite.exec('COMMIT');return r}catch(e){sqlite.exec('ROLLBACK');throw e}}};
   const evidence=new Map(),env={REVIEW_DB:db,REVIEW_EVIDENCE:{async put(k,v){evidence.set(k,v)},async get(k){return evidence.has(k)?{async text(){return evidence.get(k)}}:null}},GITHUB_REPOSITORY:'colazeta/test',GITHUB_TOKEN:'token',CURATOR_LOGIN:'owner'};
   return{sqlite,db,evidence,env};
@@ -31,12 +32,14 @@ async function prepared(){
     studies:[],datasets:[],analyses:[],variable_uses:[],findings:[],
     framework:{status:'proposed',primary:'diagnosis',rationale:reported('Grounded class rationale','analyst'),secondary:[],alternative:null}};
   await storeExtraction(x.env,target,proposal,now+1);
+  await importBibliography(x.env,target.target_id,{input_sha256:target.input_sha256,source_id:sourceId,scope:'paper_bibliography',coverage:'not_reported',declared_count:null,entries:[]},now);
   x.sqlite.prepare('INSERT INTO enrichment_citation_observations VALUES (?,?,?,?,?,?,?,?,?,?)').run('obs-o',target.target_id,target.input_sha256,'Crossref','outgoing','doi:self','doi:ref','crossref:s1','https://api.crossref.org/works/x','2026-09-14T09:01:00Z');
   x.sqlite.prepare('INSERT INTO enrichment_citation_observations VALUES (?,?,?,?,?,?,?,?,?,?)').run('obs-i',target.target_id,target.input_sha256,'OpenAlex','incoming','https://openalex.org/W2','https://openalex.org/W1','2026-09-14T09:01:00Z','https://api.openalex.org/works','2026-09-14T09:01:00Z');
   x.sqlite.prepare('INSERT INTO enrichment_citation_coverage VALUES (?,?,?,?,?,?,?,?,?,?,?,?)').run('cov-o',target.target_id,target.input_sha256,'Crossref','outgoing','crossref:s1','https://api.crossref.org/works/x',1,1,null,'provider_complete','2026-09-14T09:01:00Z');
   x.sqlite.prepare('INSERT INTO enrichment_citation_coverage VALUES (?,?,?,?,?,?,?,?,?,?,?,?)').run('cov-i',target.target_id,target.input_sha256,'OpenAlex','incoming','2026-09-14T09:01:00Z','https://api.openalex.org/works',1,1,null,'provider_complete','2026-09-14T09:01:00Z');
   return{...x,target,proposal};
 }
+const reviewedChecklist=packet=>Object.fromEntries(Object.entries(packet.manifest.checklist).map(([k,v])=>[k,k.endsWith('_assessment')?(v==='recorded'?'recorded':'not_applicable'):true]));
 const encoded=value=>Buffer.from(JSON.stringify(value)).toString('base64');
 function approvedGet(manifest,pr=10,{reviewCommit=head,state='APPROVED'}={}){
   return async path=>{
@@ -68,7 +71,7 @@ test('only an exact accepted current packet creates a completion receipt',async(
   await importCalibrationApproval(env,{calibration_id:'CAL-2026-001',pr_number:10},approvedGet(calibrationManifest),now);
   const packet=await completionPacket(env,target.target_id);
   assert.equal(packet.status,'ready_for_human_review');assert.equal(packet.manifest.checklist.bibliography_reviewed,null);
-  const manifest={...packet.manifest,checklist:Object.fromEntries(Object.keys(packet.manifest.checklist).map(k=>[k,true]))};
+  const manifest={...packet.manifest,checklist:reviewedChecklist(packet)};
   const out=await importCompletionApproval(env,{target_id:target.target_id,pr_number:11},approvedGet(manifest,11),now+1000);
   assert.equal(out.replayed,false);assert.equal(sqlite.prepare('SELECT COUNT(*) n FROM enrichment_adjudication_receipts').get().n,1);
   const publicState=await publicCompletionState(env,record.id);assert.equal(publicState.completed,true);assert.equal(publicState.status,'accepted');
@@ -77,7 +80,7 @@ test('only an exact accepted current packet creates a completion receipt',async(
 test('changed scientific input cannot inherit an accepted receipt',async()=>{
   const {env,target}=await prepared();
   await importCalibrationApproval(env,{calibration_id:'CAL-2026-001',pr_number:10},approvedGet(calibrationManifest),now);
-  const packet=await completionPacket(env,target.target_id),manifest={...packet.manifest,checklist:Object.fromEntries(Object.keys(packet.manifest.checklist).map(k=>[k,true]))};
+  const packet=await completionPacket(env,target.target_id),manifest={...packet.manifest,checklist:reviewedChecklist(packet)};
   await importCompletionApproval(env,{target_id:target.target_id,pr_number:11},approvedGet(manifest,11),now+1000);
   await syncTargets(env,{schemaVersion:1,records:[{...record,title:'Changed title'}]},now+2000);
   const state=await publicCompletionState(env,record.id);assert.equal(state.completed,false);assert.equal(state.status,'stale');
@@ -85,7 +88,7 @@ test('changed scientific input cannot inherit an accepted receipt',async()=>{
 test('a newer proposal appearing during GitHub approval invalidates the reviewed packet',async()=>{
   const {env,target,proposal,sqlite}=await prepared();
   await importCalibrationApproval(env,{calibration_id:'CAL-2026-001',pr_number:10},approvedGet(calibrationManifest),now);
-  const packet=await completionPacket(env,target.target_id),manifest={...packet.manifest,checklist:Object.fromEntries(Object.keys(packet.manifest.checklist).map(k=>[k,true]))};
+  const packet=await completionPacket(env,target.target_id),manifest={...packet.manifest,checklist:reviewedChecklist(packet)};
   const base=approvedGet(manifest,11);let raced=false;
   const get=async path=>{
     if(!raced&&path.endsWith('/pulls/11')){
@@ -119,4 +122,49 @@ test('verified manifest rejects approval superseded by changes-requested',async(
     return{encoding:'base64',size:2,content:encoded({})};
   };
   await assert.rejects(verifiedManifest({GITHUB_REPOSITORY:'colazeta/test',GITHUB_TOKEN:'token',CURATOR_LOGIN:'owner'},10,'scientific-approvals/x.json',get),/exact_head/);
+});
+
+test('a grounded outside-framework assessment may complete only with calibration and human acceptance',async()=>{
+ const x=await prepared();x.proposal.framework={status:'outside_framework',primary:null,secondary:[],alternative:null,rationale:reported('The contribution is outside the defined contribution classes','analyst')};
+ await storeExtraction(x.env,x.target,x.proposal,now+2);
+ await assert.rejects(completionPacket(x.env,x.target.target_id),/accepted_calibration_required/);
+ await importCalibrationApproval(x.env,{calibration_id:'CAL-2026-001',pr_number:10},approvedGet(calibrationManifest),now);
+ const packet=await completionPacket(x.env,x.target.target_id);assert.equal(packet.completion_policy,'CILE-COMPLETION-POLICY-2');
+ assert.equal(packet.manifest.checklist.framework_reviewed,null);
+ const manifest={...packet.manifest,checklist:reviewedChecklist(packet)};
+ await importCompletionApproval(x.env,{target_id:x.target.target_id,pr_number:11},approvedGet(manifest,11),now+1000);
+ assert.equal((await publicCompletionState(x.env,record.id)).completed,true);
+});
+test('optional uncertainty is reported while required uncertainty and unsupported abstention remain blocking',async()=>{
+ const x=await prepared();await importCalibrationApproval(x.env,{calibration_id:'CAL-2026-001',pr_number:10},approvedGet(calibrationManifest),now);
+ x.proposal.analyst_limitations={status:'not_verifiable',value:null,evidence_span_ids:[],origin:'analyst'};
+ await storeExtraction(x.env,x.target,x.proposal,now+2);
+ let packet=await completionPacket(x.env,x.target.target_id);assert.deepEqual(packet.optional_unresolved,['analyst_limitations']);
+ x.proposal.research_question={status:'not_verifiable',value:null,evidence_span_ids:[],origin:'source'};
+ await storeExtraction(x.env,x.target,x.proposal,now+3);await assert.rejects(completionPacket(x.env,x.target.target_id),/unresolved_mandatory_facts/);
+ x.proposal.research_question=missing();x.proposal.framework={status:'insufficient_evidence',primary:null,secondary:[],alternative:null,rationale:missing()};
+ await storeExtraction(x.env,x.target,x.proposal,now+4);await assert.rejects(completionPacket(x.env,x.target.target_id),/framework_assessment_required/);
+ x.proposal.framework.status='outside_framework';await storeExtraction(x.env,x.target,x.proposal,now+5);await assert.rejects(completionPacket(x.env,x.target.target_id),/grounded_rationale/);
+});
+
+test('provider coverage cannot substitute for a current actual-paper bibliography assessment',async()=>{
+  const x=await prepared();await importCalibrationApproval(x.env,{calibration_id:'CAL-2026-001',pr_number:10},approvedGet(calibrationManifest),now);
+  await importBibliography(x.env,x.target.target_id,{input_sha256:x.target.input_sha256,source_id:x.proposal.source_ids[0],scope:'paper_bibliography',coverage:'partial',declared_count:null,entries:[]},now+60000);
+  await assert.rejects(completionPacket(x.env,x.target.target_id),/paper_bibliography_assessment_required/);
+});
+
+test('empty groups require explicit individual human missingness decisions, not generic checklist booleans',async()=>{
+  const x=await prepared();await importCalibrationApproval(x.env,{calibration_id:'CAL-2026-001',pr_number:10},approvedGet(calibrationManifest),now);
+  const packet=await completionPacket(x.env,x.target.target_id);
+  const keys=['studies','datasets','analyses','variable_uses','findings'].map(k=>k+'_assessment');
+  for(const key of keys)assert.equal(packet.manifest.checklist[key],null);
+  for(const key of keys)for(const bad of [null,true,'recorded','not_verifiable','ambiguous']) {
+    const manifest={...packet.manifest,checklist:{...reviewedChecklist(packet),[key]:bad}};
+    await assert.rejects(importCompletionApproval(x.env,{target_id:x.target.target_id,pr_number:11},approvedGet(manifest,11),now+1000),/empty_group_assessment_required/);
+  }
+  assert.equal(x.sqlite.prepare('SELECT COUNT(*) n FROM enrichment_adjudication_receipts').get().n,0);
+  const manifest={...packet.manifest,checklist:reviewedChecklist(packet)};
+  manifest.checklist.datasets_assessment='not_reported';
+  await importCompletionApproval(x.env,{target_id:x.target.target_id,pr_number:11},approvedGet(manifest,11),now+1000);
+  assert.equal((await publicCompletionState(x.env,record.id)).completed,true);
 });

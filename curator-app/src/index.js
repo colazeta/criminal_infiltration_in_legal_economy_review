@@ -218,7 +218,7 @@ function curatorAssetHeaders(headers, path) {
     result.set("Cache-Control", "no-store");
     result.set(
       "Content-Security-Policy",
-      "default-src 'self'; base-uri 'none'; connect-src 'self'; form-action 'none'; frame-ancestors 'none'; img-src 'self' data:; script-src 'self'; style-src 'self'",
+      "default-src 'self'; base-uri 'none'; connect-src 'self'; form-action 'none'; frame-ancestors 'none'; img-src 'self' data:; script-src 'self'; style-src 'self'" + (path === "/enrichment.html" ? "; frame-src blob:" : ""),
     );
   }
   return result;

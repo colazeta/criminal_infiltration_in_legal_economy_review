@@ -1,5 +1,7 @@
 # Filtering papers by actual processing
 
+**Current delivery amendment (14 September 2026):** see [two-lane-delivery.md](two-lane-delivery.md). It supersedes the earlier proposal-only UI limitation, defines the current receipt-backed index/filter/statistics, private PDF and bibliography paths, explicit assessed-field policy, and daily discovery with durable query checkpoints. Historical observations below remain historical; no scientific acceptance is implied.
+
 Owner extension to issue #597, 13 September 2026: make papers already processed
 by AI discoverable without opening every sheet. This is a read-only interface
 filter, not a research decision, new extraction lane or scheduler.

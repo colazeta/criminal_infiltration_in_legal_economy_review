@@ -165,3 +165,7 @@ original source bodies remain private. Source validation, historical decisions
 and calibration gates are unchanged. No classification is invented to fill a
 missing sheet. Existing Worker/Pages delivery and observer own verification;
 no additional scheduler or parallel research data store is authorised here.
+
+## Two-lane completion delivery — owner instruction, 2026-09-14
+
+Apply `docs/operations/two-lane-delivery.md`. The existing discovery task is daily; enrichment remains hourly. Durable non-decisional query checkpoint fragments may be appended to the single existing operational issue #696 before terminal intake. This is a narrow write-boundary extension, not candidate registration or a completed run. The same mandate authorises original-byte retention in the existing private enrichment store and public reading only for independently verified reusable rights. Private evidence, scientific acceptance and historical decisions remain protected. CILE-COMPLETION-POLICY-2 permits independently accepted grounded framework non-applicability and explicitly distinguishes mandatory/optional facts. No acceptance is inferred from this engineering mandate.

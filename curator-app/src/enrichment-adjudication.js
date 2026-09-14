@@ -3,6 +3,7 @@
 import cycle from '../../config/archive-cycle.json' with {type:'json'};
 import {canonicalJson, sha256} from './review-v2.js';
 import {fetchWithTimeout} from './network.js';
+import {COMPLETION_POLICY,inspectCompletionFacts,validateFrameworkAssessment,groupReviewTemplate,validateGroupReview,possibleGroupReviews} from './completion-policy.js';
 
 const PROTOCOL='CILE-ENRICH-1', CODEBOOK='1.0.0';
 const CLASSES=new Set(['aetiology','diagnosis','screening','therapy','prognosis','prevention']);
@@ -48,14 +49,6 @@ export async function verifiedManifest(env,prNumber,path,get=github){
   return {manifest,approval:{repository:env.GITHUB_REPOSITORY,pr_number:prNumber,reviewed_commit:pr.head.sha,human_login:env.CURATOR_LOGIN,human_review_id:String(review.id),approved_at:review.submitted_at}};
 }
 
-function inspectFacts(value,state){
-  if(!value||typeof value!=='object')return;
-  if(!Array.isArray(value)&&Object.hasOwn(value,'evidence_span_ids')){
-    state.total++;
-    if(['ambiguous','not_verifiable'].includes(value.status))state.unresolved++;
-  }
-  for(const child of Object.values(value))inspectFacts(child,state);
-}
 async function proposalState(env,target,proposalId=null){
   const proposal=proposalId
     ?await S(env.REVIEW_DB,'SELECT * FROM enrichment_proposals WHERE proposal_id=? AND target_id=? AND input_sha256=?',proposalId,target.target_id,target.input_sha256).first()
@@ -65,8 +58,9 @@ async function proposalState(env,target,proposalId=null){
   if(await sha256(canonicalJson(input))!==proposal.payload_sha256||input.target_id!==target.target_id||input.input_sha256!==target.input_sha256)throw Error('proposal_integrity_failure');
   if(input.protocol_version!==PROTOCOL||input.codebook_version!==CODEBOOK)throw Error('proposal_contract_mismatch');
   if(input.source_coverage!=='full_text')throw Error('full_text_required');
-  if(input.framework?.status!=='proposed'||!CLASSES.has(input.framework.primary))throw Error('six_class_coding_required');
-  const facts={total:0,unresolved:0};inspectFacts(input,facts);
+  validateFrameworkAssessment(input.framework);
+  if(input.framework.status==='proposed'&&!CLASSES.has(input.framework.primary))throw Error('six_class_coding_required');
+  const facts=inspectCompletionFacts(input);
   if(facts.unresolved)throw Error('unresolved_mandatory_facts');
   if(!text(input.generated_by?.model,200)||!isSha(input.generated_by?.prompt_sha256))throw Error('accepted_calibration_required');
   return {proposal,input,facts};
@@ -82,7 +76,13 @@ async function sourceSnapshot(env,target,input){
     list.push(publicHashFields);
   }
   if(!list.some(s=>s.evidence_kind==='full_text'))throw Error('full_text_required');
-  return sha256(canonicalJson(sortObjects(list)));
+  const documents=[];
+  for(const source of list){
+    const docs=await rows(env.REVIEW_DB,'SELECT source_id,pdf_sha256,source_text_sha256,storage_key,visibility,licence_status,licence_url,rights_verified,observed_at FROM enrichment_documents WHERE target_id=? AND input_sha256=? AND source_id=? ORDER BY observed_at,document_id',target.target_id,target.input_sha256,source.source_id);
+    if(new URL(source.source_url).pathname.toLowerCase().endsWith('.pdf')&&!docs.length)throw Error('original_pdf_retention_required');
+    for(const doc of docs){const bytes=await env.REVIEW_DOCUMENTS?.get(doc.storage_key);if(!bytes)throw Error('document_integrity_failure');const hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',bytes)),b=>b.toString(16).padStart(2,'0')).join('');if(hash!==doc.pdf_sha256||doc.source_text_sha256!==source.content_sha256)throw Error('document_integrity_failure');const {storage_key,...safe}=doc;documents.push(safe)}
+  }
+  return sha256(canonicalJson({sources:sortObjects(list),documents:sortObjects(documents)}));
 }
 async function referenceState(env,target,upTo=null){
   const suffix=upTo?' AND observed_at<=?':'';
@@ -90,7 +90,11 @@ async function referenceState(env,target,upTo=null){
   const observations=await rows(env.REVIEW_DB,`SELECT provider,direction,citing_identifier,cited_identifier,snapshot_id,observed_at FROM enrichment_citation_observations WHERE target_id=? AND input_sha256=?${suffix} ORDER BY provider,direction,snapshot_id,observation_id`,...params);
   const coverage=await rows(env.REVIEW_DB,`SELECT provider,direction,snapshot_id,returned_count,provider_count,next_cursor,status,observed_at FROM enrichment_citation_coverage WHERE target_id=? AND input_sha256=?${suffix} ORDER BY provider,direction,snapshot_id,coverage_id`,...params);
   if(!coverage.some(r=>r.direction==='outgoing')||!coverage.some(r=>r.direction==='incoming'))throw Error('reference_coverage_required');
-  return {observations,coverage,hash:await sha256(canonicalJson({observations,coverage}))};
+  const bibliography=await rows(env.REVIEW_DB,`SELECT source_id,scope,coverage,declared_count,entries_count,payload_json,payload_sha256,observed_at FROM enrichment_bibliography_snapshots WHERE target_id=? AND input_sha256=?${suffix} ORDER BY observed_at,bibliography_id`,...params);
+  const paper=bibliography.filter(row=>row.scope==='paper_bibliography').at(-1);
+  if(!paper||!['source_complete','not_reported'].includes(paper.coverage))throw Error('paper_bibliography_assessment_required');
+  for(const row of bibliography)if(await sha256(row.payload_json)!==row.payload_sha256)throw Error('bibliography_integrity_failure');
+  return {observations,coverage,bibliography,hash:await sha256(canonicalJson({observations,coverage,bibliography}))};
 }
 async function calibrationFor(env,input,calibrationId=null){
   const sql=calibrationId
@@ -112,13 +116,15 @@ export async function completionPacket(env,targetId){
   const record=JSON.parse(target.record_json);
   return {
     status:'ready_for_human_review',
+    completion_policy:COMPLETION_POLICY,
+    optional_unresolved:state.facts.optional_unresolved_paths,
     candidate_id:record.id,
     proposal_id:state.proposal.proposal_id,
     manifest:{
-      action:'approve_enrichment_completion',candidate_id:record.id,protocol_version:PROTOCOL,codebook_version:CODEBOOK,
+      action:'approve_enrichment_completion',completion_policy:COMPLETION_POLICY,candidate_id:record.id,protocol_version:PROTOCOL,codebook_version:CODEBOOK,
       input_sha256:target.input_sha256,proposal_sha256:state.proposal.payload_sha256,source_snapshot_sha256,
       reference_snapshot_sha256:reference.hash,calibration_id:calibration.calibration_id,
-      checklist:Object.fromEntries(CHECKS.map(k=>[k,null]))
+      checklist:{...Object.fromEntries(CHECKS.map(k=>[k,null])),...groupReviewTemplate(state.input)}
     },
     reference_coverage:reference.coverage.map(({provider,direction,status,returned_count,provider_count,observed_at})=>({provider,direction,status,returned_count,provider_count,observed_at}))
   };
@@ -145,9 +151,11 @@ export async function importCompletionApproval(env,{target_id,pr_number},get=git
   const packet=await completionPacket(env,target_id);
   const path=`scientific-approvals/enrichment-completion-${packet.candidate_id}.json`;
   const {manifest,approval}=await verifiedManifest(env,pr_number,path,get);
-  const keys=['action','candidate_id','protocol_version','codebook_version','input_sha256','proposal_sha256','source_snapshot_sha256','reference_snapshot_sha256','calibration_id','checklist'];
-  exact(manifest,keys,'completion_manifest');exact(manifest.checklist,CHECKS,'completion_checklist');
-  const expected={...packet.manifest,checklist:Object.fromEntries(CHECKS.map(k=>[k,true]))};
+  const keys=['action','completion_policy','candidate_id','protocol_version','codebook_version','input_sha256','proposal_sha256','source_snapshot_sha256','reference_snapshot_sha256','calibration_id','checklist'];
+  exact(manifest,keys,'completion_manifest');exact(manifest.checklist,Object.keys(packet.manifest.checklist),'completion_checklist');
+  const groups=Object.fromEntries(Object.entries(packet.manifest.checklist).filter(([key])=>!CHECKS.includes(key)));
+  validateGroupReview(groups,manifest.checklist);
+  const expected={...packet.manifest,checklist:{...Object.fromEntries(CHECKS.map(k=>[k,true])),...Object.fromEntries(Object.keys(groups).map(key=>[key,manifest.checklist[key]]))}};
   if(canonicalJson(manifest)!==canonicalJson(expected))throw Error('completion_manifest_mismatch');
 
   // Re-read every mutable selector after the external GitHub verification. A
@@ -161,7 +169,7 @@ export async function importCompletionApproval(env,{target_id,pr_number},get=git
   if((await referenceState(env,target,approval.approved_at)).hash!==manifest.reference_snapshot_sha256)throw Error('completion_packet_stale');
   await calibrationFor(env,state.input,manifest.calibration_id);
 
-  const checklistHash=await sha256(canonicalJson(manifest.checklist)),manifestHash=await sha256(canonicalJson(manifest));
+  const checklistHash=await sha256(canonicalJson({policy:COMPLETION_POLICY,checklist:manifest.checklist})),manifestHash=await sha256(canonicalJson(manifest));
   const receiptId=await sha256(canonicalJson([target_id,target.input_sha256,packet.proposal_id,manifestHash,approval.reviewed_commit]));
   const existing=await S(env.REVIEW_DB,'SELECT * FROM enrichment_adjudication_receipts WHERE target_id=? AND input_sha256=? AND proposal_id=?',target_id,target.input_sha256,packet.proposal_id).first();
   if(existing){if(existing.manifest_sha256!==manifestHash)throw Error('adjudication_receipt_conflict');return{receipt_id:existing.receipt_id,replayed:true}}
@@ -198,6 +206,12 @@ export async function publicCompletionState(env,candidateId){
   try{
     const state=await proposalState(env,target,proposal.proposal_id);
     if(state.proposal.payload_sha256!==receipt.proposal_sha256)throw Error('stale_receipt');
+    let checklistValid=false;
+    for(const groups of possibleGroupReviews(state.input)){
+      const checklist={...Object.fromEntries(CHECKS.map(k=>[k,true])),...groups};
+      if(await sha256(canonicalJson({policy:COMPLETION_POLICY,checklist}))===receipt.checklist_sha256){checklistValid=true;break}
+    }
+    if(!checklistValid)throw Error('completion_policy_receipt_stale');
     if(await sourceSnapshot(env,target,state.input)!==receipt.source_snapshot_sha256)throw Error('stale_receipt');
     if((await referenceState(env,target,receipt.approved_at)).hash!==receipt.reference_snapshot_sha256)throw Error('stale_receipt');
     await calibrationFor(env,state.input,receipt.calibration_id);

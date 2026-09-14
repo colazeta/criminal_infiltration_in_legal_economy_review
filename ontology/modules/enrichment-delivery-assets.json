@@ -1,0 +1,125 @@
+{
+  "profile_version": "0.4.1",
+  "migrations": [
+    "curator-app/migrations/0006_enrichment_delivery_assets.sql"
+  ],
+  "tables": {
+    "enrichment_documents": {
+      "class": "Manifestation",
+      "fields": {
+        "document_id": "cile:document_id",
+        "target_id": "cile:target_id",
+        "input_sha256": "cile:input_sha256",
+        "source_id": "cile:source_id",
+        "source_url": "cile:source_url",
+        "pdf_sha256": "cile:pdf_sha256",
+        "source_text_sha256": "cile:source_text_sha256",
+        "byte_length": "cile:byte_length",
+        "storage_key": "cile:storage_key",
+        "version_label": "cile:version_label",
+        "retention_basis": "cile:retention_basis",
+        "licence_status": "cile:licence_status",
+        "licence_url": "cile:licence_url",
+        "attribution": "cile:attribution",
+        "visibility": "cile:visibility",
+        "rights_verified": "cile:rights_verified",
+        "observed_at": "cile:observed_at"
+      }
+    },
+    "enrichment_bibliography_snapshots": {
+      "class": "CitationCoverage",
+      "fields": {
+        "bibliography_id": "cile:bibliography_id",
+        "target_id": "cile:target_id",
+        "input_sha256": "cile:input_sha256",
+        "source_id": "cile:source_id",
+        "scope": "cile:scope",
+        "coverage": "cile:coverage",
+        "declared_count": "cile:declared_count",
+        "entries_count": "cile:entries_count",
+        "payload_json": "cile:payload_json",
+        "payload_sha256": "cile:payload_sha256",
+        "observed_at": "cile:observed_at"
+      }
+    }
+  },
+  "schemas": {
+    "schema/document-import.schema.json": {
+      "schema_field_slots": {
+        "/properties/input_sha256": "cile:input_sha256",
+        "/properties/source_id": "cile:source_id",
+        "/properties/pdf_sha256": "cile:pdf_sha256",
+        "/properties/source_text_sha256": "cile:source_text_sha256",
+        "/properties/bytes_base64": "cile:bytes_base64",
+        "/properties/retention_basis": "cile:retention_basis",
+        "/properties/licence_status": "cile:licence_status",
+        "/properties/licence_url": "cile:licence_url",
+        "/properties/attribution": "cile:attribution",
+        "/properties/visibility": "cile:visibility",
+        "/properties/rights_verified": "cile:rights_verified"
+      }
+    },
+    "schema/bibliography-import.schema.json": {
+      "schema_field_slots": {
+        "/properties/input_sha256": "cile:input_sha256",
+        "/properties/source_id": "cile:source_id",
+        "/properties/scope": "cile:scope",
+        "/properties/coverage": "cile:coverage",
+        "/properties/declared_count": "cile:declared_count",
+        "/properties/entries": "cile:entries",
+        "/properties/entries/items/properties/position": "cile:position",
+        "/properties/entries/items/properties/title": "cile:title",
+        "/properties/entries/items/properties/authors": "cile:authors",
+        "/properties/entries/items/properties/year": "cile:year",
+        "/properties/entries/items/properties/venue": "cile:venue",
+        "/properties/entries/items/properties/doi": "cile:doi",
+        "/properties/entries/items/properties/url": "cile:url",
+        "/properties/entries/items/properties/source_locator": "cile:source_locator",
+        "/properties/entries/items/properties/unresolved_identity": "cile:unresolved_identity"
+      }
+    },
+    "schema/public-enrichment-assets.schema.json": {
+      "schema_field_slots": {
+        "/properties/schema_version": "cile:schema_version",
+        "/properties/projection_version": "cile:projection_version",
+        "/properties/candidate_id": "cile:candidate_id",
+        "/properties/candidate": "cile:candidate",
+        "/properties/candidate/properties/id": "cile:id",
+        "/properties/candidate/properties/title": "cile:title",
+        "/properties/candidate/properties/doi": "cile:doi",
+        "/properties/candidate/properties/sourceLinks": "cile:sourceLinks",
+        "/properties/availability": "cile:availability",
+        "/properties/documents": "cile:documents",
+        "/properties/documents/items/properties/document_id": "cile:document_id",
+        "/properties/documents/items/properties/source_url": "cile:source_url",
+        "/properties/documents/items/properties/version_label": "cile:version_label",
+        "/properties/documents/items/properties/pdf_sha256": "cile:pdf_sha256",
+        "/properties/documents/items/properties/byte_length": "cile:byte_length",
+        "/properties/documents/items/properties/licence_url": "cile:licence_url",
+        "/properties/documents/items/properties/attribution": "cile:attribution",
+        "/properties/documents/items/properties/observed_at": "cile:observed_at",
+        "/properties/bibliography": "cile:bibliography",
+        "/properties/bibliography/properties/scope": "cile:scope",
+        "/properties/bibliography/properties/coverage": "cile:coverage",
+        "/properties/bibliography/properties/declared_count": "cile:declared_count",
+        "/properties/bibliography/properties/entries_count": "cile:entries_count",
+        "/properties/bibliography/properties/source_url": "cile:source_url",
+        "/properties/bibliography/properties/version_label": "cile:version_label",
+        "/properties/bibliography/properties/observed_at": "cile:observed_at",
+        "/properties/bibliography/properties/revision": "cile:revision",
+        "/properties/bibliography/properties/entries": "cile:entries",
+        "/properties/bibliography/properties/entries/items/properties/position": "cile:position",
+        "/properties/bibliography/properties/entries/items/properties/title": "cile:title",
+        "/properties/bibliography/properties/entries/items/properties/authors": "cile:authors",
+        "/properties/bibliography/properties/entries/items/properties/year": "cile:year",
+        "/properties/bibliography/properties/entries/items/properties/venue": "cile:venue",
+        "/properties/bibliography/properties/entries/items/properties/doi": "cile:doi",
+        "/properties/bibliography/properties/entries/items/properties/url": "cile:url",
+        "/properties/bibliography/properties/entries/items/properties/unresolved_identity": "cile:unresolved_identity",
+        "/properties/bibliography/properties/next_offset": "cile:next_offset",
+        "/properties/bibliography/properties/assessment_state": "cile:assessment_state"
+      }
+    }
+  },
+  "privacy_boundary": "Original bytes remain private unless the authenticated operator supplies independently verified redistribution rights. No private source IDs enter the public projection. Bibliography is a proposal, never a new corpus nomination."
+}

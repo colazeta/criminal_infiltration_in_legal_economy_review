@@ -3,6 +3,8 @@
 import cycle from '../../config/archive-cycle.json' with {type:'json'};
 import schema from '../../schema/public-paper-research.schema.json' with {type:'json'};
 import completionSchema from '../../schema/public-enrichment-completion.schema.json' with {type:'json'};
+import indexSchema from '../../schema/public-enrichment-index.schema.json' with {type:'json'};
+import completionPolicy from '../../ontology/modules/completion-policy.json' with {type:'json'};
 import {validateExtraction, validateShape, normalDoi} from './paper-enrichment.js';
 import {publicCompletionState} from './enrichment-adjudication.js';
 import {canonicalJson, sha256} from './review-v2.js';
@@ -145,9 +147,9 @@ export async function readPublicResearch(env,id){
   }
   return projectResearch(target,proposal,sources);
 }
-export async function readPublicCompletion(env,id){
+export async function readPublicCompletion(env,id,research=null){
   if(!validCandidate(id))throw Error('invalid_candidate');
-  const research=await readPublicResearch(env,id);
+  research=research||await readPublicResearch(env,id);
   let state=await publicCompletionState(env,id);
   if(state.completed&&research.availability!=='available')state={...state,status:'withheld',completed:false,completed_at:null,protocol_version:null,codebook_version:null};
   const out={schema_version:1,projection_version:'CILE-PUBLIC-COMPLETION-1',...state,
@@ -164,18 +166,77 @@ export async function publicResearchAudit(env){
   counts.stored_adjudication_receipts=Number((await query(env.REVIEW_DB,'SELECT COUNT(*) n FROM enrichment_adjudication_receipts').first()).n);
   const records=[];
   for(const target of targets){
-    const out=await readPublicResearch(env,target.record_id),completion=await readPublicCompletion(env,target.record_id);
+    const out=await readPublicResearch(env,target.record_id),completion=await readPublicCompletion(env,target.record_id,out);
     counts[out.availability]++;if(out.research?.framework.primary)counts.classified++;if(out.research?.generation_kind==='automated')counts.automated++;if(completion.completed)counts.completed++;
     records.push({id:target.record_id,availability:out.availability,revision:out.revision,completion_status:completion.status,completion_revision:completion.revision});
   }
   return{schema_version:1,projection_version:'CILE-PUBLIC-RESEARCH-1',counts,records};
 }
+
+const INDEX_PAGE_SIZE=50;
+const indexError=(message,status=409)=>Object.assign(Error(message),{status});
+export async function publicIndexSnapshot(env) {
+  const targets=(await query(env.REVIEW_DB,'SELECT record_id,input_sha256,record_json FROM enrichment_targets WHERE active=1 AND cycle_id=? ORDER BY record_id',cycle.review_id).all()).results;
+  if(targets.length>10000)throw indexError('index_limit',503);
+  const stamps=[];
+  // These tables are append-only. The full target/input mapping also detects removals or changed identities.
+  for(const [table,id] of [['enrichment_sources','source_id'],['enrichment_proposals','proposal_id'],['enrichment_adjudication_receipts','receipt_id'],['enrichment_calibration_receipts','calibration_id'],['enrichment_citation_coverage','coverage_id'],['enrichment_citation_observations','observation_id'],['enrichment_documents','document_id'],['enrichment_bibliography_snapshots','bibliography_id']])
+    stamps.push(await query(env.REVIEW_DB,`SELECT COUNT(*) n,MAX(${id}) last FROM ${table}`).first());
+  const projection_contract=await sha256(canonicalJson({research:schema,completion:completionSchema,index:indexSchema,policy:completionPolicy}));
+  return {targets,revision:await sha256(canonicalJson({deployment:env.DEPLOY_COMMIT||'local-unversioned',projection_contract,targets,stamps}))};
+}
+export function validatePublicIndex(payload) {
+  validateShape(payload,indexSchema,'$',indexSchema);
+  if(payload.total>10000||payload.next_cursor!==null&&payload.next_cursor>payload.total)throw Error('invalid_index_cursor');
+  const ids=new Set();
+  for(const row of payload.records){
+    const c=row.candidate;
+    if(!c||!validCandidate(c.id)||ids.has(c.id)||c.sourceLinks.some(u=>!safeResearchUrl(u)))throw Error('invalid_index_identity');
+    ids.add(c.id);
+    const available=row.availability==='available',s=row.completion;
+    if(!available&&(row.source_coverage!==null||row.generation_kind!==null||row.framework_status!==null||row.classes.length))throw Error('invalid_index_proposal');
+    if(available&&(!row.source_coverage||!row.generation_kind||!row.framework_status))throw Error('invalid_index_proposal');
+    if(row.framework_status!=='proposed'&&row.classes.length)throw Error('invalid_index_classes');
+    if(s.completed!==(s.status==='accepted')||s.completed&&(!available||s.research_revision!==row.research_revision||!s.completed_at||s.protocol_version!=='CILE-ENRICH-1'||s.codebook_version!=='1.0.0'))throw Error('invalid_index_completion');
+    if(!s.completed&&(s.completed_at!==null||s.protocol_version!==null||s.codebook_version!==null))throw Error('invalid_index_attestation');
+  }
+  return payload;
+}
+export async function readPublicIndex(env,cursor=0,revision=null) {
+  if(!Number.isSafeInteger(cursor)||cursor<0||cursor>10000||cursor>0&&!/^[a-f0-9]{64}$/.test(revision||''))throw indexError('invalid_index_cursor',400);
+  const snapshot=await publicIndexSnapshot(env);
+  if(revision!==null&&revision!==snapshot.revision)throw indexError('index_changed');
+  if(cursor>snapshot.targets.length)throw indexError('index_changed');
+  const records=[];
+  for(const target of snapshot.targets.slice(cursor,cursor+INDEX_PAGE_SIZE)) {
+    const out=await readPublicResearch(env,target.record_id),done=await readPublicCompletion(env,target.record_id,out),r=out.research;
+    records.push({candidate:out.candidate,availability:out.availability,
+      source_coverage:r?.source_coverage||null,generation_kind:r?.generation_kind||null,framework_status:r?.framework.status||null,
+      classes:r?.framework.status==='proposed'?[r.framework.primary,...r.framework.secondary.map(s=>s.category)]:[],
+      research_revision:out.revision,completion:Object.fromEntries(['status','completed','completed_at','protocol_version','codebook_version','research_revision','revision'].map(k=>[k,done[k]])),reference_coverage:done.reference_coverage});
+  }
+  if((await publicIndexSnapshot(env)).revision!==snapshot.revision)throw indexError('index_changed');
+  return validatePublicIndex({schema_version:1,projection_version:'CILE-PUBLIC-INDEX-1',index_revision:snapshot.revision,total:snapshot.targets.length,records,
+    next_cursor:cursor+records.length<snapshot.targets.length?cursor+records.length:null});
+}
+
 export async function servePublicResearch(request,store){
   const h={'Cache-Control':'no-store','Content-Type':'application/json','X-Content-Type-Options':'nosniff','Access-Control-Allow-Origin':'https://colazeta.github.io','Vary':'Origin'};
   const response=(data,status)=>Response.json(data,{status,headers:h});
   if(request.method==='OPTIONS')return new Response(null,{status:204,headers:{...h,'Access-Control-Allow-Methods':'GET','Access-Control-Max-Age':'300'}});
   const u=new URL(request.url);
   if(request.method!=='GET')return response({error:'method_not_allowed'},405);
+  if(u.searchParams.get('view')==='index') {
+    if([...u.searchParams.keys()].some(k=>!['view','cursor','revision'].includes(k))||[...u.searchParams.keys()].some(k=>u.searchParams.getAll(k).length!==1))return response({error:'invalid_index_request'},400);
+    const cursor=u.searchParams.get('cursor')||'0',revision=u.searchParams.get('revision');
+    if(!/^(0|[1-9][0-9]{0,4})$/.test(cursor)||Number(cursor)>10000||revision!==null&&!/^[a-f0-9]{64}$/.test(revision))return response({error:'invalid_index_request'},400);
+    if(!store)return response({error:'research_temporarily_unavailable'},503);
+    try {
+      const internal=await store.fetch(new Request('https://enrichment.internal/public-index?cursor='+cursor+(revision?'&revision='+revision:'')));
+      if(!internal.ok)return response({error:internal.status===409?'index_changed':'research_temporarily_unavailable'},internal.status===409?409:503);
+      return response(validatePublicIndex(await internal.json()),200);
+    }catch{return response({error:'research_temporarily_unavailable'},503)}
+  }
   if([...u.searchParams.keys()].some(k=>!['id','view'].includes(k))||u.searchParams.getAll('id').length!==1||u.searchParams.getAll('view').length>1||!validCandidate(u.searchParams.get('id')))return response({error:'invalid_candidate'},400);
   const view=u.searchParams.get('view');
   if(view!==null&&view!=='completion')return response({error:'invalid_view'},400);

@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "input_sha256",
+    "source_id",
+    "pdf_sha256",
+    "source_text_sha256",
+    "bytes_base64",
+    "retention_basis",
+    "licence_status",
+    "licence_url",
+    "attribution",
+    "visibility",
+    "rights_verified"
+  ],
+  "properties": {
+    "input_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "source_id": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "pdf_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "source_text_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "bytes_base64": {
+      "type": "string",
+      "maxLength": 5592408
+    },
+    "retention_basis": {
+      "type": "string",
+      "maxLength": 2000
+    },
+    "licence_status": {
+      "type": "string",
+      "maxLength": 200
+    },
+    "licence_url": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "maxLength": 2000
+    },
+    "attribution": {
+      "type": "string",
+      "maxLength": 1000
+    },
+    "visibility": {
+      "enum": [
+        "private",
+        "public"
+      ]
+    },
+    "rights_verified": {
+      "type": "boolean"
+    }
+  }
+}

@@ -21,13 +21,15 @@ class NoRedirect(HTTPRedirectHandler):
 _PRIVATE_HTTP = build_opener(NoRedirect())
 
 
-def call(operation, *, expected_commit, target_id=None, proposal=None, run_key=None):
+def call(operation, *, expected_commit, target_id=None, proposal=None, run_key=None, source=None, document=None, bibliography=None, document_id=None):
     secret = os.environ.get('CURATOR_SESSION_SECRET', '')
     if len(secret) < 32:
         raise RuntimeError('service_credential_unavailable')
     payload = {'operation': operation, 'expected_commit': expected_commit}
     if target_id is not None: payload['target_id'] = target_id
     if proposal is not None: payload['proposal'] = proposal
+    for name, value in [('source', source), ('document', document), ('bibliography', bibliography), ('document_id', document_id)]:
+        if value is not None: payload[name] = value
     if operation == 'run': payload['run_key'] = run_key or 'manual:' + str(uuid.uuid4())
     body = json.dumps(payload, ensure_ascii=False, separators=(',', ':')).encode()
     timestamp, nonce = str(int(time.time() * 1000)), str(uuid.uuid4())

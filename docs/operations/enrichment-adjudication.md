@@ -1,5 +1,7 @@
 # Scientific enrichment completion gate
 
+**Current delivery amendment (14 September 2026):** see [two-lane-delivery.md](two-lane-delivery.md). It supersedes the earlier proposal-only UI limitation, defines the current receipt-backed index/filter/statistics, private PDF and bibliography paths, explicit assessed-field policy, and daily discovery with durable query checkpoints. Historical observations below remain historical; no scientific acceptance is implied.
+
 Protocol **CILE-ENRICH-1** remains proposal-first. This document defines the
 separate, additive gate that may attest an already registered CandidateRecord as
 fully enriched. It creates no candidate, eligibility decision, canonical work or
