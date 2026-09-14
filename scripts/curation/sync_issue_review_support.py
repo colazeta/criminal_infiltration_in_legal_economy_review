@@ -143,6 +143,8 @@ def issue_inventory(repository: str, token: str) -> dict[str, dict]:
         previous = result.get(candidate_id)
         if previous is not None:
             if same_issue(previous, issue):
+                if str(previous.get("body") or "") != body:
+                    raise SyncError(f"Issue {candidate_id} changed during pagination; retry")
                 continue
             raise SyncError(f"Multiple issues represent {candidate_id}")
         result[candidate_id] = issue
