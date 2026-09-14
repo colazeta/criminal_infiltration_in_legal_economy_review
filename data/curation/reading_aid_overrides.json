@@ -585,7 +585,7 @@
       "sourceUrl": "https://green.unibocconi.eu/sites/default/files/media/attach/GREEN_wp04.pdf",
       "synopsis": "The working paper studies Mafia infiltration in Sicily’s wind-power business in the context of renewable-energy incentives, examining the interaction of criminal actors with firms, local institutions and the development process.",
       "checkedAt": "2026-09-14",
-      "note": "Parallel Search fetched the complete Bocconi GREEN Working Paper 04 PDF and matched Daniele Checchi, Michele Polo and the registered 2019 working-paper identity. Evidence basis: full_text. The later 2020 journal article with DOI 10.1007/s40797-020-00126-z remains a distinct manifestation and is not silently substituted or canonicalised. No private full-text ingestion, eligibility decision or scientific classification is claimed."
+      "note": "Parallel Search fetched the complete Bocconi GREEN Working Paper 04 PDF and matched Daniele Checchi, Michele Polo and the registered 2019 working-paper identity. Evidence basis: full_text. The later 2020 journal article with DOI 10.1007/s40797-020-00126-z remains a distinct manifestation and is not silently substituted or canonicalised. No private full-text ingestion, eligibility decision, canonicalisation or scientific classification is claimed."
     },
     {
       "candidateId": "CAND-ACADEMIC-2026-09-14-EXTRA-8b3f2d6a91c4-002",
@@ -640,6 +640,33 @@
       "synopsis": "The Pennsylvania Crime Commission report documents a three-year investigation into organised-crime influence in profit-making health-care plans and the marketing, accounting and investment practices of legitimate providers, focusing on three named health-care companies with union contracts.",
       "checkedAt": "2026-09-14",
       "note": "Parallel Search matched NCJ 82661 and the 1981 Pennsylvania Crime Commission report, then fetched and read the complete official NCJRS digitisation. Evidence basis: full_text. The public synopsis does not infer that every documented practice meets the review's sustained-infiltration threshold; authorship remains unrecorded in the CandidateRecord and is not invented here. No private full-text ingestion, eligibility decision, canonicalisation or scientific classification is claimed."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-14-EXTRA-a6b4145d08dd-001",
+      "kind": "full_text_intro",
+      "sourceLabel": "Springer open-access full-text article located with Parallel Search",
+      "sourceUrl": "https://link.springer.com/article/10.1007/s10610-025-09641-0",
+      "synopsis": "The article examines food crime as a potential money-laundering typology and evaluates technological deterrence through blockchain and generative artificial intelligence, combining a structured literature review with topic modelling to map the evidence base and its principal research themes.",
+      "checkedAt": "2026-09-14",
+      "note": "Parallel Search resolved the exact registered DOI 10.1007/s10610-025-09641-0 and fetched the complete Springer open-access article; the Charles Sturt University repository independently corroborates the scholarly identity. Evidence basis: full_text. No copied article text, private full-text ingestion, eligibility decision, canonicalisation or scientific classification is claimed."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-14-EXTRA-a6b4145d08dd-002",
+      "kind": "verified_abstract_source",
+      "sourceLabel": "University of Hull institutional repository abstract located with Parallel Search",
+      "sourceUrl": "https://hull-repository.worktribe.com/output/3945326/organized-crime-in-the-agri-food-industry",
+      "synopsis": "The chapter examines organised crime in the agri-food industry and situates criminal activity within the legitimate agri-food economy and its supply chains.",
+      "checkedAt": "2026-09-14",
+      "note": "Parallel Search fetched the exact University of Hull repository record matching Alice Rizzuti, the registered chapter title and the 2022 manifestation, with an abstract. Evidence basis: abstract_only. The repository exposes a parent-book DOI alongside the registered chapter DOI 10.4324/9781003198635-12; the chapter identity is preserved and no identifier is silently rewritten. No stable full-text bitstream for the exact chapter was independently verified, and no private ingestion or scientific decision is claimed."
+    },
+    {
+      "candidateId": "CAND-ACADEMIC-2026-09-14-EXTRA-a6b4145d08dd-003",
+      "kind": "full_text_intro",
+      "sourceLabel": "University of South Carolina Scholar Commons full-text manuscript located with Parallel Search",
+      "sourceUrl": "https://scholarcommons.sc.edu/cgi/viewcontent.cgi?article=1127&context=poli_facpub",
+      "synopsis": "The paper studies the expansion of organised criminal groups into high-value agricultural markets, using the Mexican avocado sector alongside cross-national evidence to examine how criminal market expansion relates to violence.",
+      "checkedAt": "2026-09-14",
+      "note": "Parallel Search fetched and read the complete University of South Carolina scholarly manuscript and separately resolved the final Cambridge manifestation, DOI 10.1017/S0020818325100763. Evidence basis: full_text for the institutional manuscript. The repository manuscript and final publisher version remain explicitly related manifestations and are not silently substituted or canonicalised; no private full-text ingestion, eligibility decision or scientific classification is claimed."
     }
   ]
 }
