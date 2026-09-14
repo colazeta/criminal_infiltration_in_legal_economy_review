@@ -2,10 +2,11 @@
    Both backends implement the same versioned enrichment contract; canonical tables are absent. */
 import migration from './enrichment-migration.json' with { type: 'json' };
 import scheduleMigration from './enrichment-schedule-migration.json' with { type: 'json' };
+import adjudicationMigration from './enrichment-adjudication-migration.json' with { type: 'json' };
 import {Hour40Schedule, iterationKey} from './enrichment-schedule.js';
 import { sha256 } from './review-v2.js';
 import { runEnrichment, handlePaperEnrichment, storeExtraction } from './paper-enrichment.js';
-
+import {completionPacket, importCalibrationApproval, importCompletionApproval, publicCompletionState} from './enrichment-adjudication.js';
 import {readPublicResearch, publicResearchAudit} from './public-paper-research.js';
 
 const DOMAIN = 'CILE-ENRICH-SERVICE-v1';
@@ -76,6 +77,11 @@ export class EnrichmentStoreCore {
       const scheduleApplied=await ctx.storage.get('schema:enrichment-schedule');
       if(scheduleApplied && scheduleApplied!==scheduleHash)throw Error('additive_schedule_migration_required');
       if(!scheduleApplied)await ctx.storage.transaction(async tx=>{ctx.storage.sql.exec(scheduleMigration.sql);await tx.put('schema:enrichment-schedule',scheduleHash)});
+      const adjudicationHash=await sha256(adjudicationMigration.sql);
+      if(adjudicationHash!==adjudicationMigration.sha256)throw Error('adjudication_migration_integrity');
+      const adjudicationApplied=await ctx.storage.get('schema:enrichment-adjudication');
+      if(adjudicationApplied && adjudicationApplied!==adjudicationHash)throw Error('additive_adjudication_migration_required');
+      if(!adjudicationApplied)await ctx.storage.transaction(async tx=>{ctx.storage.sql.exec(adjudicationMigration.sql);await tx.put('schema:enrichment-adjudication',adjudicationHash)});
       this.db=sqliteAdapter(ctx.storage); this.evidence=privateTextStore(ctx.storage);
       this.schedule=new Hour40Schedule(ctx.storage,
         async(at,attempt)=>runEnrichment(await this.environment(),{iterationSlot:at,iterationAttempt:attempt}),
@@ -91,7 +97,7 @@ export class EnrichmentStoreCore {
   }
   async aggregate() {
     const env=await this.environment(),counts={};
-    for(const table of ['targets','sources','citation_observations','proposals'])counts[table]=Number((await this.db.prepare(`SELECT COUNT(*) n FROM enrichment_${table}`).first()).n);
+    for(const table of ['targets','sources','citation_observations','proposals','calibration_receipts','adjudication_receipts'])counts[table]=Number((await this.db.prepare(`SELECT COUNT(*) n FROM enrichment_${table}`).first()).n);
     const response=await handlePaperEnrichment(new Request('https://enrichment.internal/api/paper-enrichment/status'),env,{login:env.CURATOR_LOGIN});
     return {...await response.json(),storage_backend:'durable_object_sqlite',counts,scheduling:this.schedule.status(),commit:this.env.DEPLOY_COMMIT};
   }
@@ -100,9 +106,9 @@ export class EnrichmentStoreCore {
     const key='probe:'+crypto.randomUUID(),text='private-storage-roundtrip:'+crypto.randomUUID();
     await this.ctx.storage.put(key,text);
     try{if(await this.ctx.storage.get(key)!==text)throw Error('storage_readback_failed')}finally{await this.ctx.storage.delete(key)}
-    // A real write-capability check, without inventing a candidate or a research receipt.
     await this.db.prepare("UPDATE enrichment_targets SET active=active WHERE target_id='__readiness_probe__'").run();
-    return {verified:true,storage_backend:'durable_object_sqlite',migration_sha256:migration.sha256,commit:this.env.DEPLOY_COMMIT};
+    return {verified:true,storage_backend:'durable_object_sqlite',migration_sha256:migration.sha256,
+      adjudication_migration_sha256:adjudicationMigration.sha256,commit:this.env.DEPLOY_COMMIT};
   }
   async authorise(request,body,now) {
     const timestamp=request.headers.get('X-Enrichment-Timestamp'),nonce=request.headers.get('X-Enrichment-Nonce'),signature=request.headers.get('X-Enrichment-Signature');
@@ -118,7 +124,7 @@ export class EnrichmentStoreCore {
     const target=data.target_id?await this.db.prepare('SELECT * FROM enrichment_targets WHERE target_id=? AND active=1').bind(data.target_id).first():
       await this.db.prepare("SELECT t.* FROM enrichment_targets t WHERE t.active=1 AND EXISTS(SELECT 1 FROM enrichment_sources s WHERE s.target_id=t.target_id AND s.input_sha256=t.input_sha256 AND s.evidence_kind IN ('abstract','full_text','full_text_excerpt')) AND NOT EXISTS(SELECT 1 FROM enrichment_proposals p WHERE p.target_id=t.target_id AND p.input_sha256=t.input_sha256) ORDER BY t.first_seen_at,t.target_id LIMIT 1").first();
     if(!target)return {status:'no_source_ready'};
-    const sources=(await this.db.prepare("SELECT * FROM enrichment_sources WHERE target_id=? AND input_sha256=? AND evidence_kind IN ('abstract','full_text','full_text_excerpt') ORDER BY CASE evidence_kind WHEN 'full_text' THEN 0 ELSE 1 END,observed_at DESC LIMIT 3").bind(target.target_id,target.input_sha256).all()).results;
+    const sources=(await this.db.prepare("SELECT * FROM enrichment_sources WHERE target_id=? AND input_sha256=? AND s.evidence_kind IN ('abstract','full_text','full_text_excerpt') ORDER BY CASE evidence_kind WHEN 'full_text' THEN 0 ELSE 1 END,observed_at DESC LIMIT 3".replace(' AND s.evidence_kind',' AND evidence_kind')).bind(target.target_id,target.input_sha256).all()).results;
     const out=[];
     for(const source of sources){const object=await this.evidence.get(source.storage_key);if(!object)throw Error('source_unavailable');const text=await object.text();if(await sha256(text)!==source.content_sha256)throw Error('source_integrity_failure');out.push({...source,text})}
     return {status:out.length?'source_ready':'no_source_ready',target,sources:out,scientific_status:'unreviewed'};
@@ -138,15 +144,21 @@ export class EnrichmentStoreCore {
     }catch{return json({error_code:'service_authentication_required'},401)}
     try{
       const data=JSON.parse(body);
-      if(!data||typeof data!=='object'||Array.isArray(data)||Object.keys(data).some(k=>!['operation','expected_commit','target_id','proposal','run_key'].includes(k)))return json({error_code:'invalid_service_envelope'},422);
-      if(!['verify','activate','deactivate','status','run','packet','proposal','public-research-audit'].includes(data.operation))return json({error_code:'unknown_service_operation'},422);
+      const allowedFields=['operation','expected_commit','target_id','proposal','run_key','calibration_id','pr_number'];
+      if(!data||typeof data!=='object'||Array.isArray(data)||Object.keys(data).some(k=>!allowedFields.includes(k)))return json({error_code:'invalid_service_envelope'},422);
+      const operations=['verify','activate','deactivate','status','run','packet','proposal','public-research-audit','completion-packet','calibration-approval','completion-approval'];
+      if(!operations.includes(data.operation))return json({error_code:'unknown_service_operation'},422);
       if(data.expected_commit!==this.env.DEPLOY_COMMIT)return json({error_code:'stale_deployment'},409);
       if(data.operation==='verify')return json(await this.verify());
       if(data.operation==='activate'){await this.verify();await this.ctx.storage.put('activation:enrichment',{commit:this.env.DEPLOY_COMMIT,at:new Date(now).toISOString()});await this.schedule.start();return json(await this.aggregate())}
       if(data.operation==='deactivate'){await this.ctx.storage.delete('activation:enrichment');return json(await this.aggregate())}
       if(data.operation==='status')return json(await this.aggregate());
       if(data.operation==='public-research-audit')return json(await publicResearchAudit(await this.environment()));
-      const env=await this.environment();if(env.PAPER_ENRICHMENT_ENABLED!=='true')return json({error_code:'enrichment_inactive'},409);
+      const env=await this.environment();
+      if(data.operation==='completion-packet')return json(await completionPacket(env,data.target_id));
+      if(data.operation==='calibration-approval')return json(await importCalibrationApproval(env,{calibration_id:data.calibration_id,pr_number:data.pr_number},undefined,now),201);
+      if(data.operation==='completion-approval')return json(await importCompletionApproval(env,{target_id:data.target_id,pr_number:data.pr_number},undefined,now),201);
+      if(env.PAPER_ENRICHMENT_ENABLED!=='true')return json({error_code:'enrichment_inactive'},409);
       if(data.operation==='run'){
         if(this.schedule.busy)return json({status:'leased'});
         if(!/^manual:[0-9a-f-]{36}$/.test(data.run_key||''))return json({error_code:'manual_run_key_required'},422);
@@ -169,6 +181,7 @@ export class EnrichmentStoreCore {
     if(url.pathname==='/machine')return this.machine(request);
     const env=await this.environment();
     if(url.pathname==='/public-research'&&request.method==='GET')return json(await readPublicResearch(env,url.searchParams.get('id')));
+    if(url.pathname==='/public-completion'&&request.method==='GET')return json(await publicCompletionState(env,url.searchParams.get('id')));
     if(url.pathname==='/tick')return json(await this.schedule.tick());
     if(url.pathname==='/api/paper-enrichment/status'&&request.method==='GET')return json(await this.aggregate());
     return handlePaperEnrichment(request,env,{login:env.CURATOR_LOGIN});
