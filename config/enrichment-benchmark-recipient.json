@@ -1,7 +1,7 @@
 {
   "protocol": "CILE-SEALED-AUDIT-1",
-  "public_key_spki": "MCowBQYDK2VuAyEAbnnhDABmyB6pwLm36Ey1qsg9rkbJDK3BxoIqbRCEGis=",
-  "public_key_sha256": "52e60dc332ae454813901fee59ff739ea3e554673ef28b3e9534f2e8e52dfe7d",
-  "expires_at": "2026-09-12T00:00:00Z",
-  "purpose": "Bounded repeated abstract benchmark after loss of the former session-only research transport key; no account authentication or production data access."
+  "public_key_spki": "MCowBQYDK2VuAyEAueg0z9K4ZfUU89TNq0Zd8t5etcDF+hWEyZRzAHFYQgw=",
+  "public_key_sha256": "f7c6e71e90a7c7cd56054dd702a78402e80ed33679fa19cc6dfdb4ffe8609fef",
+  "expires_at": "2026-09-15T11:45:00Z",
+  "purpose": "Owner-authorised 14 September calibration continuation: separate source-first reference assessment and bounded existing abstract development test. No production or account access; not full-text calibration acceptance."
 }
