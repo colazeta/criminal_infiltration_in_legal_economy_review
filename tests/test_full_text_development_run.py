@@ -1,11 +1,16 @@
 """Runtime-budget tests only; no model, source or network access."""
 import re
+import tempfile
 import unittest
+from pathlib import Path
+from unittest.mock import patch
 
 from scripts.calibration import full_text_development as development
+from scripts.calibration import full_text_development_run as runtime
 from scripts.calibration.full_text_development_run import (
     EVIDENCE_REJECTION_POLICY,
     EVIDENCE_UNIQUENESS_SUFFIX,
+    RUNTIME_CHECKPOINT,
     RUNTIME_DIAGNOSTICS,
     SCIENTIFIC_CONFIG,
     bounded_chunk_request,
@@ -25,6 +30,7 @@ class FullTextDevelopmentRuntimeTests(unittest.TestCase):
             'ambiguous_atoms_omitted': 0,
             'omission_digest': development.sha(development.canonical([])),
         })
+        RUNTIME_CHECKPOINT.update({'output': None, 'payload': None})
 
     def test_operational_timeout_extension_is_bounded_and_monotone(self):
         self.assertEqual(runtime_timeout(300), 600)
@@ -90,6 +96,12 @@ class FullTextDevelopmentRuntimeTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'ambiguous_evidence'):
             development.resolve_atoms(chunks, outputs)
 
+    def _prime_checkpoint(self):
+        RUNTIME_CHECKPOINT.update({
+            'output': Path('/tmp/non-secret-test-checkpoint'),
+            'payload': {'status': 'chunk_extraction_in_progress', 'chunks_completed': 1},
+        })
+
     def test_runtime_omits_only_nonliteral_or_nonunique_atoms_and_preserves_unique_atoms(self):
         chunk = {
             'id': 'chunk-1', 'start': 0, 'utf16_start': 0,
@@ -112,18 +124,63 @@ class FullTextDevelopmentRuntimeTests(unittest.TestCase):
                 'evidence': 'not present in source',
             },
         ]}]
-        atoms = runtime_resolve_atoms([chunk], outputs)
+        self._prime_checkpoint()
+        persisted = []
+        with patch.object(runtime, '_ORIGINAL_CHECKPOINT', side_effect=lambda output, payload: persisted.append((output, payload))):
+            atoms = runtime_resolve_atoms([chunk], outputs)
         self.assertEqual(len(atoms), 1)
         self.assertEqual(atoms[0]['field'], 'research_question')
         self.assertEqual(RUNTIME_DIAGNOSTICS['ambiguous_atoms_omitted'], 1)
         self.assertEqual(RUNTIME_DIAGNOSTICS['nonliteral_atoms_omitted'], 1)
         self.assertRegex(RUNTIME_DIAGNOSTICS['omission_digest'], r'^[0-9a-f]{64}$')
+        self.assertEqual(len(persisted), 1)
+        self.assertEqual(persisted[0][1]['status'], 'evidence_resolution_complete_model_pending')
+        self.assertEqual(persisted[0][1]['runtime_evidence_rejections']['ambiguous_atoms_omitted'], 1)
+        self.assertEqual(persisted[0][1]['runtime_evidence_rejections']['nonliteral_atoms_omitted'], 1)
 
     def test_runtime_does_not_hide_malformed_atoms(self):
         chunk = {'id': 'chunk-1', 'start': 0, 'utf16_start': 0, 'text': 'literal evidence'}
         malformed = {'atoms': [{'entity_type': 'global', 'field': 'summary', 'value': 'x', 'evidence': 'literal evidence'}]}
         with self.assertRaisesRegex(ValueError, 'atom_shape'):
             runtime_resolve_atoms([chunk], [malformed])
+
+    def test_runtime_validates_field_scope_before_evidence_filtering(self):
+        chunk = {'id': 'chunk-1', 'start': 0, 'utf16_start': 0, 'text': 'repeated evidence repeated evidence'}
+        invalid = {'atoms': [{
+            'entity_type': 'global', 'entity_key': 'paper', 'field': 'method',
+            'value': 'Invalid global method', 'evidence': 'repeated evidence',
+        }]}
+        with self.assertRaisesRegex(ValueError, 'atom_field_scope'):
+            runtime_resolve_atoms([chunk], [invalid])
+        self.assertEqual(RUNTIME_DIAGNOSTICS['ambiguous_atoms_omitted'], 0)
+
+    def test_runtime_validates_atom_limit_before_evidence_filtering(self):
+        chunk = {'id': 'chunk-1', 'start': 0, 'utf16_start': 0, 'text': 'repeated evidence repeated evidence'}
+        atom = {
+            'entity_type': 'global', 'entity_key': 'paper', 'field': 'summary',
+            'value': 'Repeated', 'evidence': 'repeated evidence',
+        }
+        outputs = [{'atoms': [dict(atom) for _ in range(development.MAX_ATOMS_PER_CHUNK + 1)]}]
+        with self.assertRaisesRegex(ValueError, 'atom_limit'):
+            runtime_resolve_atoms([chunk], outputs)
+        self.assertEqual(RUNTIME_DIAGNOSTICS['ambiguous_atoms_omitted'], 0)
+
+    def test_resolution_checkpoint_precedes_later_synthesis_failure(self):
+        chunk = {'id': 'chunk-1', 'start': 0, 'utf16_start': 0, 'text': 'only source words'}
+        outputs = [{'atoms': [{
+            'entity_type': 'global', 'entity_key': 'paper', 'field': 'summary',
+            'value': 'Unsupported', 'evidence': 'missing words',
+        }]}]
+        self._prime_checkpoint()
+        persisted = []
+        with patch.object(runtime, '_ORIGINAL_CHECKPOINT', side_effect=lambda output, payload: persisted.append(payload)):
+            atoms = runtime_resolve_atoms([chunk], outputs)
+        self.assertEqual(atoms, [])
+        self.assertEqual(persisted[-1]['status'], 'evidence_resolution_complete_model_pending')
+        self.assertEqual(persisted[-1]['runtime_evidence_rejections']['nonliteral_atoms_omitted'], 1)
+        # A failure after this point cannot revert the already persisted audit payload.
+        with self.assertRaises(RuntimeError):
+            raise RuntimeError('synthetic_later_failure')
 
     def test_encrypted_checkpoint_diagnostics_expose_counts_not_source_text(self):
         RUNTIME_DIAGNOSTICS.update({
@@ -137,7 +194,9 @@ class FullTextDevelopmentRuntimeTests(unittest.TestCase):
         self.assertEqual(audit['nonliteral_atoms_omitted'], 2)
         self.assertEqual(audit['ambiguous_atoms_omitted'], 1)
         self.assertTrue(re.fullmatch(r'[0-9a-f]{64}', audit['omission_digest']))
-        self.assertNotIn('evidence', ''.join(audit).lower().replace('runtime_evidence_rejections', ''))
+        self.assertNotIn('source_text', audit)
+        self.assertNotIn('quote', audit)
+        self.assertNotIn('value', audit)
 
     def test_base_module_is_not_mutated_merely_by_importing_runtime_policy(self):
         self.assertEqual(development.CHUNK_CHARS, 18000)
