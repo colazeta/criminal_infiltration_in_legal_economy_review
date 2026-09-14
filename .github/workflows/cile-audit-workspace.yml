@@ -4,51 +4,57 @@ on:
     branches: [maintenance/cile-audit-closure-20260914]
     paths: [.github/workflows/cile-audit-workspace.yml]
 permissions:
-  contents: write
+  contents: read
 jobs:
   materialise:
     if: github.repository == 'colazeta/criminal_infiltration_in_legal_economy_review' && github.ref == 'refs/heads/maintenance/cile-audit-closure-20260914'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
           persist-credentials: false
           fetch-depth: 0
-      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
         with:
           node-version: 22
-      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:
           python-version: '3.11'
-      - name: Verify and apply the exact owner-audited public-source patch
+      - name: Recover exact patch and preserve the current main changes
         run: |
           python3 - <<'PY'
-          import base64, hashlib, lzma, os, pathlib, subprocess
-          expected = {'0':'7d9a8ad8da55bd437eedbe9d312ad036d856a51589bcd37b54ba5657666e91fd','1':'733de56515f32beb74a356e8d6906247102532b146b5d7bab645b5b87823f842','2a':'ffcaa6fd7886f315e974be368f19ddad366a1070f5772bc5378dbbc27c25f9e2','2b':'64e0b916301247ab93861db5df64adc93b75def6e672f571befa1ea3685093cf','3':'557cea5bb6cd82996812a5fb5439b67e209c5758864bf9d22cd9ad98b5d503a8'}
+          import base64,hashlib,lzma,os,pathlib,subprocess
+          expected={'0':'7d9a8ad8da55bd437eedbe9d312ad036d856a51589bcd37b54ba5657666e91fd','1':'733de56515f32beb74a356e8d6906247102532b146b5d7bab645b5b87823f842','2a':'ffcaa6fd7886f315e974be368f19ddad366a1070f5772bc5378dbbc27c25f9e2','2b':'64e0b916301247ab93861db5df64adc93b75def6e672f571befa1ea3685093cf','3':'557cea5bb6cd82996812a5fb5439b67e209c5758864bf9d22cd9ad98b5d503a8'}
           chunks=[]
-          for key, digest in expected.items():
-              content=pathlib.Path('.cile-audit-transfer-'+key+'.b64').read_text().strip()
-              actual=hashlib.sha256(content.encode()).hexdigest()
-              print('Transfer part',key,'length',len(content),'sha256',actual)
-              assert actual == digest, 'transport_part_hash_mismatch_'+key
-              chunks.append(content)
-          compressed=base64.b64decode(''.join(chunks),validate=True)
+          for key,digest in expected.items():
+              value=pathlib.Path('.cile-audit-transfer-'+key+'.b64').read_text().strip()
+              assert hashlib.sha256(value.encode()).hexdigest()==digest
+              chunks.append(value)
           decoder=lzma.LZMADecompressor(memlimit=256*1024*1024)
-          patch=decoder.decompress(compressed,max_length=1000000)
-          assert decoder.eof and not decoder.unused_data
-          assert len(patch)==231147
+          patch=decoder.decompress(base64.b64decode(''.join(chunks),validate=True),max_length=1000000)
+          assert decoder.eof and not decoder.unused_data and len(patch)==231147
           assert hashlib.sha256(patch).hexdigest()=='266ef02124fb312556b4eb04436a8eef337fe9a7b586033ec81a9bef42a09a0a'
-          destination=pathlib.Path(os.environ['RUNNER_TEMP'])/'audited.diff'
-          destination.write_bytes(patch)
-          subprocess.run(['git','apply','--check',str(destination)],check=True)
-          subprocess.run(['git','apply',str(destination)],check=True)
+          out=pathlib.Path(os.environ['RUNNER_TEMP'])/'audit-recovery';out.mkdir()
+          (out/'original-audited.diff').write_bytes(patch)
+          subprocess.run(['git','apply','--check',str(out/'original-audited.diff')],check=True)
+          subprocess.run(['git','apply',str(out/'original-audited.diff')],check=True)
           for key in expected:pathlib.Path('.cile-audit-transfer-'+key+'.b64').unlink()
           pathlib.Path('.github/workflows/cile-audit-workspace.yml').unlink()
+          subprocess.run(['git','config','user.name','CILE maintenance recovery'],check=True)
+          subprocess.run(['git','config','user.email','maintenance@invalid.example'],check=True)
           subprocess.run(['git','add','-A'],check=True)
-          assert not list(pathlib.Path('.').glob('.cile-audit-transfer-*'))
+          subprocess.run(['git','commit','-m','Recover existing audit implementation locally for inspection'],check=True)
+          # Normal local merge, not a reset/rebase or remote write. Fail on conflicts.
+          subprocess.run(['git','merge','--no-edit','origin/main'],check=True)
+          subprocess.run(['git','archive','--format=tar','-o',str(out/'workspace.tar'),'HEAD'],check=True)
+          subprocess.run(['git','bundle','create',str(out/'workspace.bundle'),'HEAD','refs/remotes/origin/main'],check=True)
+          (out/'final.diff').write_bytes(subprocess.check_output(['git','diff','origin/main','HEAD']))
+          (out/'changed-files.txt').write_bytes(subprocess.check_output(['git','diff','--name-status','origin/main','HEAD']))
+          print('LOCAL_INSPECTION_HEAD='+subprocess.check_output(['git','rev-parse','HEAD']).decode().strip())
+          print('MAIN_BASE='+subprocess.check_output(['git','rev-parse','origin/main']).decode().strip())
           PY
-      - name: Validate materialised maintenance tree
+      - name: Validate recovered maintenance tree
         run: |
           set -euo pipefail
           python3 scripts/validation/validate_repository.py
@@ -66,47 +72,20 @@ jobs:
           python3 scripts/report_saturation.py
           python3 scripts/retrieval/selected_paper_delivery.py --check
           git diff --exit-code
-      - name: Store unreferenced reviewed-maintenance commit for connector readback
-        env:
-          GH_TOKEN: ${{ github.token }}
+      - name: Save non-decisional inspection manifest
+        if: always()
         run: |
           python3 - <<'PY'
-          import hashlib,json,os,pathlib,subprocess,urllib.request
-          repo=os.environ['GITHUB_REPOSITORY']; parent=os.environ['GITHUB_SHA']
-          assert repo=='colazeta/criminal_infiltration_in_legal_economy_review'
-          assert os.environ['GITHUB_REF']=='refs/heads/maintenance/cile-audit-closure-20260914'
-          class NoRedirect(urllib.request.HTTPRedirectHandler):
-              def redirect_request(self,*args,**kwargs): return None
-          opener=urllib.request.build_opener(NoRedirect)
-          def request(path,payload=None):
-              req=urllib.request.Request('https://api.github.com/repos/'+repo+path,data=None if payload is None else json.dumps(payload).encode(),headers={'Authorization':'Bearer '+os.environ['GH_TOKEN'],'Accept':'application/vnd.github+json','Content-Type':'application/json','X-GitHub-Api-Version':'2022-11-28'},method='GET' if payload is None else 'POST')
-              with opener.open(req,timeout=30) as response:return json.load(response)
-          def git(*args):return subprocess.check_output(['git',*args])
-          assert git('rev-parse','HEAD').decode().strip()==parent
-          base_tree=git('rev-parse','HEAD^{tree}').decode().strip()
-          statuses=git('diff','--cached','--name-status','--no-renames').decode().splitlines()
-          assert 1<=len(statuses)<=100
-          entries=[]; hashes={}
-          for line in statuses:
-              status,path=line.split('\t',1)
-              if status=='D':entries.append({'path':path,'mode':'100644','type':'blob','sha':None});continue
-              assert not path.startswith('.cile-audit-transfer-') and path!='.github/workflows/cile-audit-workspace.yml'
-              data=git('show',':'+path)
-              assert len(data)<1000000
-              entries.append({'path':path,'mode':'100644','type':'blob','content':data.decode('utf-8')})
-              hashes[path]=hashlib.sha256(data).hexdigest()
-          assert not any(path.startswith('data/') for path in hashes)
-          tree=request('/git/trees',{'base_tree':base_tree,'tree':entries})
-          commit=request('/git/commits',{'message':'Implement owner-audited two-lane delivery, receipt-backed UI, private PDF originals and reference checkpoints','tree':tree['sha'],'parents':[parent]})
-          receipt={'parent':parent,'commit':commit['sha'],'tree':tree['sha'],'patch_sha256':'266ef02124fb312556b4eb04436a8eef337fe9a7b586033ec81a9bef42a09a0a','file_sha256':hashes,'deleted':[line.split('\t',1)[1] for line in statuses if line.startswith('D\t')],'ref_updated':False,'scientific_acceptance':False,'validation':'full mandatory local commands passed in this runner'}
-          folder=pathlib.Path(os.environ['RUNNER_TEMP'])/'materialisation-receipt';folder.mkdir()
-          (folder/'receipt.json').write_text(json.dumps(receipt,indent=2)+'\n')
-          print('UNREFERENCED_MAINTENANCE_COMMIT='+commit['sha'])
-          print('VALIDATED_TREE='+tree['sha'])
-          # No branch/ref/PR/main/publication mutation is performed by this workflow.
+          import hashlib,json,os,pathlib,subprocess
+          out=pathlib.Path(os.environ['RUNNER_TEMP'])/'audit-recovery';out.mkdir(exist_ok=True)
+          def git(*args):return subprocess.check_output(['git',*args]).decode().strip()
+          manifest={'run_id':os.environ['GITHUB_RUN_ID'],'trigger_head':os.environ['GITHUB_SHA'],'local_head':git('rev-parse','HEAD'),'main_base':git('rev-parse','origin/main'),'remote_writes':False,'scientific_acceptance':False,'files':{p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in out.iterdir() if p.is_file()}}
+          (out/'manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')
           PY
-      - uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        if: always()
         with:
-          name: cile-audit-materialisation-receipt
-          path: ${{ runner.temp }}/materialisation-receipt
-          retention-days: 1
+          name: cile-audit-recovery-workspace
+          path: ${{ runner.temp }}/audit-recovery
+          retention-days: 3
+          if-no-files-found: error
