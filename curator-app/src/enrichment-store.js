@@ -6,8 +6,8 @@ import adjudicationMigration from './enrichment-adjudication-migration.json' wit
 import {Hour40Schedule, iterationKey} from './enrichment-schedule.js';
 import { sha256 } from './review-v2.js';
 import { runEnrichment, handlePaperEnrichment, storeExtraction } from './paper-enrichment.js';
-import {completionPacket, importCalibrationApproval, importCompletionApproval, publicCompletionState} from './enrichment-adjudication.js';
-import {readPublicResearch, publicResearchAudit} from './public-paper-research.js';
+import {completionPacket, importCalibrationApproval, importCompletionApproval} from './enrichment-adjudication.js';
+import {readPublicResearch, readPublicCompletion, publicResearchAudit} from './public-paper-research.js';
 
 const DOMAIN = 'CILE-ENRICH-SERVICE-v1';
 const encoder = new TextEncoder();
@@ -124,7 +124,7 @@ export class EnrichmentStoreCore {
     const target=data.target_id?await this.db.prepare('SELECT * FROM enrichment_targets WHERE target_id=? AND active=1').bind(data.target_id).first():
       await this.db.prepare("SELECT t.* FROM enrichment_targets t WHERE t.active=1 AND EXISTS(SELECT 1 FROM enrichment_sources s WHERE s.target_id=t.target_id AND s.input_sha256=t.input_sha256 AND s.evidence_kind IN ('abstract','full_text','full_text_excerpt')) AND NOT EXISTS(SELECT 1 FROM enrichment_proposals p WHERE p.target_id=t.target_id AND p.input_sha256=t.input_sha256) ORDER BY t.first_seen_at,t.target_id LIMIT 1").first();
     if(!target)return {status:'no_source_ready'};
-    const sources=(await this.db.prepare("SELECT * FROM enrichment_sources WHERE target_id=? AND input_sha256=? AND s.evidence_kind IN ('abstract','full_text','full_text_excerpt') ORDER BY CASE evidence_kind WHEN 'full_text' THEN 0 ELSE 1 END,observed_at DESC LIMIT 3".replace(' AND s.evidence_kind',' AND evidence_kind')).bind(target.target_id,target.input_sha256).all()).results;
+    const sources=(await this.db.prepare("SELECT * FROM enrichment_sources WHERE target_id=? AND input_sha256=? AND evidence_kind IN ('abstract','full_text','full_text_excerpt') ORDER BY CASE evidence_kind WHEN 'full_text' THEN 0 ELSE 1 END,observed_at DESC LIMIT 3").bind(target.target_id,target.input_sha256).all()).results;
     const out=[];
     for(const source of sources){const object=await this.evidence.get(source.storage_key);if(!object)throw Error('source_unavailable');const text=await object.text();if(await sha256(text)!==source.content_sha256)throw Error('source_integrity_failure');out.push({...source,text})}
     return {status:out.length?'source_ready':'no_source_ready',target,sources:out,scientific_status:'unreviewed'};
@@ -181,7 +181,7 @@ export class EnrichmentStoreCore {
     if(url.pathname==='/machine')return this.machine(request);
     const env=await this.environment();
     if(url.pathname==='/public-research'&&request.method==='GET')return json(await readPublicResearch(env,url.searchParams.get('id')));
-    if(url.pathname==='/public-completion'&&request.method==='GET')return json(await publicCompletionState(env,url.searchParams.get('id')));
+    if(url.pathname==='/public-completion'&&request.method==='GET')return json(await readPublicCompletion(env,url.searchParams.get('id')));
     if(url.pathname==='/tick')return json(await this.schedule.tick());
     if(url.pathname==='/api/paper-enrichment/status'&&request.method==='GET')return json(await this.aggregate());
     return handlePaperEnrichment(request,env,{login:env.CURATOR_LOGIN});
