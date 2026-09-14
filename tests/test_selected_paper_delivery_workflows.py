@@ -66,6 +66,24 @@ class SelectedPaperDeliveryWorkflowTests(unittest.TestCase):
         self.assertLess(text.index('pending "quality_not_successful"'), text.index("--method PUT"))
         subprocess.run(["bash", "-n", "scripts/retrieval/persist_selected_support.sh"], cwd=ROOT, check=True)
 
+    def test_reused_checkpoint_is_exactly_the_validated_tree_and_missing_pr_is_recovered(self):
+        text = (ROOT / "scripts/retrieval/persist_selected_support.sh").read_text()
+        self.assertIn('checkpoint_index="$RUNNER_TEMP/selected-support-index"', text)
+        self.assertIn('GIT_INDEX_FILE="$checkpoint_index" git read-tree "$base_sha"', text)
+        self.assertIn('GIT_INDEX_FILE="$checkpoint_index" git add -A -- "${paths[@]}"', text)
+        self.assertIn('expected_tree="$(GIT_INDEX_FILE="$checkpoint_index" git write-tree)"', text)
+        self.assertIn('git fetch --no-tags origin "$branch"', text)
+        self.assertIn('merge_base="$(git merge-base "$base_sha" "$head_sha")"', text)
+        self.assertIn('[ "$merge_base" = "$base_sha" ] || pending "checkpoint_base_mismatch"', text)
+        self.assertIn('remote_tree="$(git rev-parse "$head_sha^{tree}")"', text)
+        self.assertIn('[ "$remote_tree" = "$expected_tree" ] || pending "checkpoint_head_mismatch"', text)
+        self.assertIn('\n  verify_remote_checkpoint\n  checkpoint="$(gh pr list', text)
+        self.assertIn("create_checkpoint_pr()", text)
+        self.assertIn("Recovered selected-support PR for retained validated branch", text)
+        self.assertIn('select(.headRefOid == "', text)
+        self.assertNotIn('pending "checkpoint_branch_without_open_pr"', text)
+        subprocess.run(["bash", "-n", "scripts/retrieval/persist_selected_support.sh"], cwd=ROOT, check=True)
+
     def test_owned_pr_preparation_dispatches_final_head_quality(self):
         text = (ROOT / ".github/workflows/retrieval-resolution.yml").read_text()
         self.assertIn('gh workflow run archive.yml --ref "$GITHUB_HEAD_REF"', text)

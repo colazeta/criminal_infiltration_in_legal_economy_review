@@ -36,20 +36,17 @@ pending() {
   exit 1
 }
 
-if git ls-remote --exit-code --heads origin "$branch" >/dev/null 2>&1; then
-  checkpoint="$(gh pr list --state open --base main --head "$branch" --json url,headRefOid --jq '.[0] | [.url, .headRefOid] | @tsv')" || pending "checkpoint_lookup_failed"
-  [ -n "$checkpoint" ] || pending "checkpoint_branch_without_open_pr"
-  IFS=$'\t' read -r pr_url head_sha <<< "$checkpoint"
-  [ -n "$pr_url" ] && [ -n "$head_sha" ] || pending "checkpoint_readback_incomplete"
-  echo "Reusing retained selected-support checkpoint: $pr_url" >> "$GITHUB_STEP_SUMMARY"
-else
-  git config user.name "github-actions[bot]"
-  git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-  git checkout -b "$branch"
-  git add -- "${paths[@]}"
-  git commit -m "Refresh validated reading-support projections"
-  git push origin "$branch"
-  head_sha="$(git rev-parse HEAD)"
+# Build the exact tree that the already-validated working copy would persist,
+# without mutating the real index. A reused remote branch must match this tree and
+# descend from the validated base before it can be trusted or auto-merged.
+checkpoint_index="$RUNNER_TEMP/selected-support-index"
+rm -f "$checkpoint_index"
+GIT_INDEX_FILE="$checkpoint_index" git read-tree "$base_sha" || pending "checkpoint_expected_tree_failed"
+GIT_INDEX_FILE="$checkpoint_index" git add -A -- "${paths[@]}" || pending "checkpoint_expected_tree_failed"
+expected_tree="$(GIT_INDEX_FILE="$checkpoint_index" git write-tree)" || pending "checkpoint_expected_tree_failed"
+rm -f "$checkpoint_index"
+
+write_pr_body() {
   cat > "$RUNNER_TEMP/selected-support-pr.md" <<EOF
 Mechanical retrieval/abstract-support and deterministic public projections only.
 
@@ -63,7 +60,61 @@ Head: $head_sha
 Source run: $GITHUB_RUN_ID
 Checkpoint digest: $diff_digest
 EOF
-  pr_url="$(gh pr create --base main --head "$branch" --title "Refresh validated reading-support projections" --body-file "$RUNNER_TEMP/selected-support-pr.md")" || pending "pr_creation_blocked"
+}
+
+create_checkpoint_pr() {
+  write_pr_body
+  local created=""
+  if created="$(gh pr create --base main --head "$branch" --title "Refresh validated reading-support projections" --body-file "$RUNNER_TEMP/selected-support-pr.md")"; then
+    pr_url="$created"
+  else
+    # PR creation can fail after the server accepted the mutation. Read back the
+    # exact head before declaring the checkpoint blocked or attempting anything else.
+    pr_url="$(gh pr list --state open --base main --head "$branch" --json url,headRefOid --jq '.[0] | select(.headRefOid == "'"$head_sha"'") | .url')" || true
+    [ -n "$pr_url" ] || pending "pr_creation_blocked"
+  fi
+  [ -n "$pr_url" ] || pending "pr_creation_blocked"
+}
+
+verify_remote_checkpoint() {
+  git fetch --no-tags origin "$branch" || pending "checkpoint_fetch_failed"
+  head_sha="$(git rev-parse FETCH_HEAD)" || pending "checkpoint_readback_incomplete"
+  local merge_base remote_tree
+  merge_base="$(git merge-base "$base_sha" "$head_sha")" || pending "checkpoint_base_mismatch"
+  [ "$merge_base" = "$base_sha" ] || pending "checkpoint_base_mismatch"
+  remote_tree="$(git rev-parse "$head_sha^{tree}")" || pending "checkpoint_readback_incomplete"
+  [ "$remote_tree" = "$expected_tree" ] || pending "checkpoint_head_mismatch"
+}
+
+if git ls-remote --exit-code --heads origin "$branch" >/dev/null 2>&1; then
+  verify_remote_checkpoint
+  checkpoint="$(gh pr list --state open --base main --head "$branch" --json url,headRefOid --jq '.[0] | [.url, .headRefOid] | @tsv')" || pending "checkpoint_lookup_failed"
+  if [ -n "$checkpoint" ]; then
+    pr_head_sha=""
+    IFS=$'\t' read -r pr_url pr_head_sha <<< "$checkpoint"
+    [ -n "$pr_url" ] && [ -n "$pr_head_sha" ] || pending "checkpoint_readback_incomplete"
+    [ "$pr_head_sha" = "$head_sha" ] || pending "checkpoint_pr_head_mismatch"
+    echo "Reusing retained selected-support checkpoint: $pr_url" >> "$GITHUB_STEP_SUMMARY"
+  else
+    # Recover a branch that was successfully pushed before PR creation failed.
+    create_checkpoint_pr
+    checkpoint="$(gh pr list --state open --base main --head "$branch" --json url,headRefOid --jq '.[0] | [.url, .headRefOid] | @tsv')" || pending "checkpoint_lookup_failed"
+    [ -n "$checkpoint" ] || pending "checkpoint_pr_readback_missing"
+    pr_head_sha=""
+    IFS=$'\t' read -r pr_url pr_head_sha <<< "$checkpoint"
+    [ -n "$pr_url" ] && [ "$pr_head_sha" = "$head_sha" ] || pending "checkpoint_pr_head_mismatch"
+    echo "Recovered selected-support PR for retained validated branch: $pr_url" >> "$GITHUB_STEP_SUMMARY"
+  fi
+else
+  git config user.name "github-actions[bot]"
+  git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+  git checkout -b "$branch"
+  git add -- "${paths[@]}"
+  git commit -m "Refresh validated reading-support projections"
+  git push origin "$branch" || pending "checkpoint_push_failed"
+  head_sha="$(git rev-parse HEAD)"
+  [ "$(git rev-parse "$head_sha^{tree}")" = "$expected_tree" ] || pending "checkpoint_head_mismatch"
+  create_checkpoint_pr
 fi
 
 # PRs created with the repository GITHUB_TOKEN do not recursively trigger a PR
