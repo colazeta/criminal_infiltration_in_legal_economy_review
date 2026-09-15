@@ -6,9 +6,16 @@ seed, decoder, evidence policy or proposal validation. It only reuses a raw chun
 output when the candidate id, extractor fingerprint and complete request hash are
 identical. Checkpoints remain in the existing authenticated private store and no
 source/model output is printed or written to GitHub artifacts by this wrapper.
+
+An optional operational pass budget can bound how many previously-missing chunks
+one process computes. Exhausting that budget after durable private checkpointing
+is a successful partial pass unless the caller explicitly requires completion.
+This is scheduling only: cache hits, requests, model settings and the eventual
+scientific proposal remain byte-for-byte governed by the existing contracts.
 """
 import json
 import os
+from pathlib import Path
 import re
 import sys
 
@@ -18,6 +25,7 @@ from scripts.enrichment.service_client import call as service_call
 
 PROTOCOL = 'CILE-FULLTEXT-DEV-CHUNK-1'
 _ORIGINAL_RUNTIME_POST = runtime.runtime_post
+PASS_STATE = {'limit': None, 'new_chunks': 0, 'reused_chunks': 0}
 
 
 def candidate_id_from_argv(argv=None):
@@ -36,6 +44,37 @@ def checkpoint_service_commit():
     if not re.fullmatch(r'[0-9a-f]{40}', value):
         raise RuntimeError('fulltext_checkpoint_service_commit_unavailable')
     return value
+
+
+def pass_limit():
+    value = os.environ.get('FULLTEXT_MAX_NEW_CHUNKS', '').strip()
+    if not value:
+        return None
+    if not re.fullmatch(r'[1-9][0-9]{0,2}', value) or int(value) > 50:
+        raise RuntimeError('fulltext_checkpoint_pass_limit_invalid')
+    return int(value)
+
+
+def pass_requires_complete():
+    value = os.environ.get('FULLTEXT_REQUIRE_COMPLETE', '0').strip()
+    if value not in {'0', '1'}:
+        raise RuntimeError('fulltext_checkpoint_pass_completion_invalid')
+    return value == '1'
+
+
+def reset_pass_state(limit=None):
+    PASS_STATE.update({'limit': limit, 'new_chunks': 0, 'reused_chunks': 0})
+
+
+def write_pass_status(status):
+    if status not in {'partial', 'complete', 'incomplete'}:
+        raise RuntimeError('fulltext_checkpoint_pass_status_invalid')
+    value = os.environ.get('FULLTEXT_PASS_STATUS_FILE', '').strip()
+    if not value:
+        return
+    path = Path(value)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(status + '\n', encoding='utf-8')
 
 
 def chunk_request(payload):
@@ -86,14 +125,19 @@ def resumable_post(original, payload, timeout=300, *, service=service_call, cand
             raise RuntimeError('fulltext_checkpoint_identity_mismatch')
         output = checkpoint.get('output')
         runtime._validate_original_atom_contracts([{'id': identity['chunk_id']}], [output])
+        PASS_STATE['reused_chunks'] += 1
         print(json.dumps({
             'event': 'private_chunk_checkpoint', 'candidate_id': candidate_id,
             'chunk_id': identity['chunk_id'], 'status': 'reused',
             'request_sha256': identity['request_sha256'],
-        }, separators=(',', ':')))
+        }, separators=(',', ':')), flush=True)
         return output
     if result.get('status') != 'missing':
         raise RuntimeError('fulltext_checkpoint_service_invalid_response')
+
+    limit = PASS_STATE.get('limit')
+    if limit is not None and PASS_STATE['new_chunks'] >= limit:
+        raise RuntimeError('fulltext_checkpoint_pass_budget_exhausted')
 
     output = _ORIGINAL_RUNTIME_POST(original, payload, timeout)
     runtime._validate_original_atom_contracts([{'id': identity['chunk_id']}], [output])
@@ -105,20 +149,45 @@ def resumable_post(original, payload, timeout=300, *, service=service_call, cand
         raise RuntimeError('fulltext_checkpoint_service_unavailable') from error
     if receipt.get('status') != 'stored' or receipt.get('request_sha256') != identity['request_sha256']:
         raise RuntimeError('fulltext_checkpoint_service_invalid_response')
+    PASS_STATE['new_chunks'] += 1
     print(json.dumps({
         'event': 'private_chunk_checkpoint', 'candidate_id': candidate_id,
         'chunk_id': identity['chunk_id'], 'status': 'stored',
         'request_sha256': identity['request_sha256'],
         'output_sha256': receipt.get('output_sha256'),
-    }, separators=(',', ':')))
+    }, separators=(',', ':')), flush=True)
     return output
+
+
+def pass_event(status):
+    return json.dumps({
+        'event': 'private_chunk_pass',
+        'status': status,
+        'new_chunks': PASS_STATE['new_chunks'],
+        'reused_chunks': PASS_STATE['reused_chunks'],
+    }, separators=(',', ':'))
 
 
 def main():
     original = runtime.runtime_post
+    limit = pass_limit()
+    require_complete = pass_requires_complete()
+    reset_pass_state(limit)
     runtime.runtime_post = resumable_post
     try:
-        runtime.main()
+        try:
+            runtime.main()
+        except RuntimeError as error:
+            if str(error) != 'fulltext_checkpoint_pass_budget_exhausted':
+                raise
+            status = 'incomplete' if require_complete else 'partial'
+            write_pass_status(status)
+            print(pass_event(status), flush=True)
+            if require_complete:
+                raise
+            return
+        write_pass_status('complete')
+        print(pass_event('complete'), flush=True)
     finally:
         runtime.runtime_post = original
 
