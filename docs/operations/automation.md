@@ -30,6 +30,8 @@ The external scouting step may write only the governed operational evidence requ
 3. at most one structured v3 intake issue for new candidates from the completed batch;
 4. exactly one schema-valid terminal surveillance ledger comment for the batch on issue #30.
 
+For compatibility with the metrics validator and `docs/operations/daily-metrics.md`, the terminal is the **aggregate comment per batch**. A **successful zero-candidate run** still writes that aggregate terminal. `partial` and `failed` runs use the governed incomplete-run semantics rather than inventing zero counts.
+
 It must not edit repository files, branches, PRs, canonical registries, scientific decisions or publication acceptance directly. Mechanical CandidateRecord preservation occurs through the repository-owned recovery writer. Candidate identity-resolution comments do not create CandidateRecords.
 
 A failed/partial provider call is not a zero-result query and must not manufacture intake counts.
