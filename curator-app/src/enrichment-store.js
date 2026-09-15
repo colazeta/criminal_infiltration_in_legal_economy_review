@@ -84,7 +84,7 @@ export class EnrichmentStoreCore {
       const adjudicationHash=await sha256(adjudicationMigration.sql);
       if(adjudicationHash!==adjudicationMigration.sha256)throw Error('adjudication_migration_integrity');
       const adjudicationApplied=await ctx.storage.get('schema:enrichment-adjudication');
-      if(adjudicationApplied && adjudicationApplied!==adjudicationHash)throw Error('additive_adjudication_required');
+      if(adjudicationApplied && adjudicationApplied!==adjudicationHash)throw Error('additive_adjudication_migration_required');
       if(!adjudicationApplied)await ctx.storage.transaction(async tx=>{ctx.storage.sql.exec(adjudicationMigration.sql);await tx.put('schema:enrichment-adjudication',adjudicationHash)});
       const deliveryHash=await sha256(deliveryMigration.sql);
       if(deliveryHash!==deliveryMigration.sha256)throw Error('delivery_migration_integrity');
