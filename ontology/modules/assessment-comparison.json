@@ -1,0 +1,28 @@
+{
+  "version": "1.0.0",
+  "profile_version": "0.4.1",
+  "protocols": [
+    "CILE-ASSESSMENT-REFERENCE-1",
+    "CILE-ASSESSMENT-COMPARISON-1"
+  ],
+  "storage": "Private immutable REVIEW_EVIDENCE checkpoints through the authenticated enrichment service; never a public projection or human decision store.",
+  "classes": {
+    "reference_assessment": "AssistantRecommendation",
+    "independent_comparison": "AssistantRecommendation",
+    "source_basis": "Evidence"
+  },
+  "identity": {
+    "candidate_id": "v2_candidate_id",
+    "input_sha256": "enrichment_input_sha256",
+    "source_snapshot_sha256": "enrichment_content_sha256",
+    "request_sha256": "enrichment_payload_sha256",
+    "reference_sha256": "enrichment_payload_sha256",
+    "proposal_revision": "enrichment_payload_sha256"
+  },
+  "rules": [
+    "Reference assessment is produced from a current source-only packet and persisted/read back before any proposal projection is supplied to the comparison step.",
+    "Comparison binds the exact candidate input, source snapshot, persisted reference digest and current privacy-filtered proposal revision.",
+    "These artefacts are assessment evidence only: they do not create calibration acceptance, human approval, canonical identity, public completion or validation.",
+    "No original source text, reviewer prose, private identifiers or credentials are emitted to public repository artefacts or logs."
+  ]
+}
