@@ -30,7 +30,7 @@ class FullTextDevelopmentResumeTests(unittest.TestCase):
     def env(self):
         return patch.dict(os.environ, {
             'CURATOR_SESSION_SECRET': 'x' * 40,
-            'GITHUB_SHA': 'a' * 40,
+            'CALIBRATION_CHECKPOINT_SERVICE_COMMIT': 'a' * 40,
         }, clear=False)
 
     def test_cache_miss_persists_new_output_without_rewriting_request(self):
@@ -39,6 +39,7 @@ class FullTextDevelopmentResumeTests(unittest.TestCase):
         calls = []
         def service(operation, **kwargs):
             calls.append((operation, kwargs))
+            self.assertEqual(kwargs['expected_commit'], 'a' * 40)
             if operation == 'development-checkpoint-get': return {'status': 'missing'}
             cp = kwargs['checkpoint']
             self.assertEqual(cp['request_sha256'], expected_hash)
@@ -64,6 +65,7 @@ class FullTextDevelopmentResumeTests(unittest.TestCase):
         }
         def service(operation, **kwargs):
             self.assertEqual(operation, 'development-checkpoint-get')
+            self.assertEqual(kwargs['expected_commit'], 'a' * 40)
             return {'status': 'found', 'checkpoint': {**identity, 'output': self.output()}}
         with self.env(), patch.object(resume.runtime, 'runtime_extractor_fingerprint', return_value='b' * 64), \
                 patch.object(resume.runtime, '_validate_original_atom_contracts'):
@@ -97,11 +99,11 @@ class FullTextDevelopmentResumeTests(unittest.TestCase):
                                       service=lambda *_a, **_k: (_ for _ in ()).throw(RuntimeError('transport')),
                                       candidate_id=self.candidate)
 
-    def test_candidate_and_commit_guards_fail_closed(self):
+    def test_candidate_and_service_commit_guards_fail_closed(self):
         with self.assertRaisesRegex(RuntimeError, 'candidate_unavailable'):
             resume.candidate_id_from_argv(['script', '--candidate-id', 'bad'])
-        with patch.dict(os.environ, {'GITHUB_SHA': 'bad'}, clear=False), self.assertRaisesRegex(RuntimeError, 'commit_unavailable'):
-            resume.exact_commit()
+        with patch.dict(os.environ, {'CALIBRATION_CHECKPOINT_SERVICE_COMMIT': 'bad'}, clear=False), self.assertRaisesRegex(RuntimeError, 'service_commit_unavailable'):
+            resume.checkpoint_service_commit()
 
 
 if __name__ == '__main__':
