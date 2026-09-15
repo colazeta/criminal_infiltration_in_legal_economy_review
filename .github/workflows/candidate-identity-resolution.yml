@@ -26,6 +26,7 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+      issues: write
     steps:
       - name: Set up Node.js
         uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
@@ -104,6 +105,7 @@ jobs:
             site/data/curator-options.json
           git commit -m "Resolve reviewed candidate identity blocker"
           git push origin "$branch"
+          head_sha="$(git rev-parse HEAD)"
 
           python3 - <<'PY' > "$RUNNER_TEMP/identity-resolution-body.md"
           import json
@@ -135,6 +137,21 @@ jobs:
             echo "::warning::Validated identity-resolution branch was created, but PR creation was blocked."
             echo "Validated branch retained: $branch" >> "$GITHUB_STEP_SUMMARY"
             sed -n '1,20p' "$RUNNER_TEMP/pr-error.log" >> "$GITHUB_STEP_SUMMARY"
+            cat > "$RUNNER_TEMP/recovery-ticket.md" <<EOF
+          <!-- cile-validated-branch-recovery:1 -->
+          CILE validated branch recovery ticket.
+
+          - kind: candidate-identity-resolution
+          - branch: \`$branch\`
+          - head_sha: \`$head_sha\`
+          - base: \`main\`
+          - workflow_run_id: \`$GITHUB_RUN_ID\`
+          - workflow_attempt: \`$GITHUB_RUN_ATTEMPT\`
+          - state: \`validated_branch_without_pr\`
+
+          The workflow completed validation and pushed the branch but repository policy blocked PR creation. The next authorised automation activation must first check whether a PR already exists for this exact branch/head. If not, create the PR through the authenticated GitHub connector. Do not rerun the metadata/identity work merely to obtain another branch.
+          EOF
+            gh issue comment 696 --body-file "$RUNNER_TEMP/recovery-ticket.md"
             exit 0
           fi
           echo "Identity-resolution PR opened for review: $pr_url" >> "$GITHUB_STEP_SUMMARY"
