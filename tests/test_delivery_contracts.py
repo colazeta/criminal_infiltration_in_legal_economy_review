@@ -28,13 +28,38 @@ class DeliveryContractTests(unittest.TestCase):
 
     def test_hourly_hybrid_lanes_reuse_existing_scheduler_and_persistence_first_contract(self):
         runbook = (ROOT / 'docs/operations/two-lane-delivery.md').read_text()
+        current = (ROOT / 'docs/operations/hourly-hybrid-v4.md').read_text()
         self.assertIn('Lane A runs at :10 and Lane B at :40', runbook)
         self.assertIn('exactly two project-wide scouting windows per day', runbook)
         self.assertIn('Parallel Search is the default discovery provider', runbook)
         self.assertIn('CILE-HOUR40-1', runbook)
         self.assertIn('durable paper-stage transition', runbook)
+        self.assertIn('CILE-IDENTITY-RESOLUTION-2', runbook)
+        self.assertIn('forwarded_to_intake', runbook)
+        self.assertIn('soft-close', runbook)
+        self.assertIn('cile-validated-branch-recovery:1', runbook)
+        self.assertIn('PERSIST', current)
+        self.assertIn('ENRICH', current)
+        self.assertIn('RESOLVE', current)
+        self.assertIn('oldest pending CILE-IDENTITY-RESOLUTION-2 observation is at least 24 hours old', current)
         self.assertNotIn('Complete up to three existing candidates', runbook)
         self.assertNotIn('schedule:', (ROOT / '.github/workflows/deploy-curator-worker.yml').read_text())
+
+    def test_surveillance_docs_use_current_provider_order(self):
+        automation = (ROOT / 'docs/operations/automation.md').read_text()
+        novelty = (ROOT / 'docs/operations/novelty-depth.md').read_text()
+        self.assertIn('Parallel Search is the default scheduled discovery provider', automation)
+        self.assertIn('Parallel Search by default', novelty)
+        self.assertNotIn('Exa is always primary', automation)
+        self.assertNotIn('Parallel Search is **not** a co-equal daily source', novelty)
+
+    def test_identity_and_calibration_v4_contracts_are_executable(self):
+        identity = (ROOT / 'docs/operations/identity-resolution.md').read_text()
+        calibration = (ROOT / 'docs/operations/calibration-trace-audit.md').read_text()
+        self.assertIn('scripts.identity_resolution_v2', identity)
+        self.assertIn('observation_key', identity)
+        self.assertIn('fulltext-calibration-trace-audit.yml', calibration)
+        self.assertIn('checkpoint-reuse', calibration)
 
     def test_seed_only_corrections_trigger_existing_deployment(self):
         workflow = (ROOT / '.github/workflows/deploy-curator-worker.yml').read_text()

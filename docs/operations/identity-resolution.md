@@ -1,52 +1,72 @@
 # Durable discovery identity resolution
 
-Owner mandate: 15 September 2026. This contract closes the gap between a completed scouting query and later candidate handling. It does not change scientific eligibility, canonical-work identity, source rights or curator acceptance.
+Owner mandate: 15 September 2026. Current protocol: **CILE-IDENTITY-RESOLUTION-2**. The earlier v1 renderer remains readable for historical records but must not be used for new unresolved-identity writes.
 
-## Why this exists
+This contract closes the gap between completed scouting and later candidate handling. It is bibliographic/operational only. It does not decide scientific eligibility, canonical ScholarlyWork identity, source rights, framework class or publication acceptance.
 
-A completed scouting window may end with retrieved scholarly-looking identities that cannot be conservatively classified as known, a manifestation of a known work, a new CandidateRecord, or not-forwarded during the bounded search run. Those identities must not disappear into aggregate telemetry. They enter a durable resolution queue and must later receive an explicit operational terminal outcome.
+## Two keys, two purposes
 
-## RESOLVE mode
+Each retrieved occurrence has an `observation_key`, derived from provider + DOI + normalised title + year + URL. It identifies the concrete observation/manifestation and is the append-only state-machine key.
 
-The hourly hybrid router includes `RESOLVE` in addition to `SCOUT`, `PERSIST`, `ENRICH`, Lane-B `ENGINEER`, and `NOOP`.
+Each record also has an `identity_key`, derived independently of provider and URL: DOI when present; otherwise normalised title/year and authors when available. This is a conservative bibliographic grouping aid, not a canonical-work decision. Different observations may therefore share one `identity_key` while retaining distinct `observation_key` values.
 
-`RESOLVE` is selected when unresolved discovery identities exist and the lane is not required to execute its owned scouting window or a higher-priority safe persistence transition. It is not scientific screening. Its purpose is bibliographic identity closure.
+## RESOLVE mode and state machine
 
-Use `python3 -m scripts.identity_resolution <input.json> --output <comments.json>` to validate and render `CILE-IDENTITY-RESOLUTION-1` comments. Append validated comments to the existing operational checkpoint thread #696 and read them back. This is an owner-authorised narrow extension of the #696 non-decisional write boundary.
+The hourly hybrid router contains `RESOLVE` alongside `SCOUT`, `PERSIST`, `ENRICH`, Lane-B `ENGINEER`, and `NOOP`.
 
-The protocol permits bibliographic metadata only: title, HTTPS URL, DOI when observed, year, provider/query identifiers, operational status/outcome, CandidateRecord id where already governed, and a short non-private rationale. Do not include abstracts, full text, evidence quotations, reviewer identity, internal notes or credentials.
+A newly unresolved scouting observation must first be persisted as:
 
-## State machine
+- `pending` — identity could not be safely closed during the scouting window.
 
-Each identity has a stable `identity_key` derived from provider + DOI + title + year + URL.
+A pending observation may then become:
 
-An identity first appears as:
+- `forwarded_to_intake` — candidate-bound verification supports forwarding as a distinct plausible scholarly work, but the normal governed v3 intake has not yet materialised a CandidateRecord; or
+- `resolved` with exactly one terminal outcome:
+  - `known_exact_work` — reconciled to an existing CandidateRecord;
+  - `known_work_new_manifestation` — a new version/repository/publisher manifestation of an existing CandidateRecord;
+  - `new_candidate` — only after the normal v3 intake/recovery path has materialised the referenced CandidateRecord;
+  - `not_forwarded` — the observation should not enter CandidateRecord intake under the operational standard, with a reason.
 
-- `pending`: identity could not be safely closed during the scouting window.
+`forwarded_to_intake` may terminate only as `new_candidate`. A resolved observation is immutable. Conflicting later terminals are invalid. Ambiguity remains pending rather than being guessed.
 
-It must eventually receive exactly one current terminal interpretation in a later append-only comment:
+## Stateful validation
 
-- `known_exact_work`: reconciled to an existing CandidateRecord;
-- `known_work_new_manifestation`: a new version/repository/publisher manifestation of an existing CandidateRecord;
-- `new_candidate`: the normal governed intake path has already created the referenced CandidateRecord;
-- `not_forwarded`: the retrieved result should not become a CandidateRecord under the operational intake standard, with the reason recorded.
+Use:
 
-A `new_candidate` terminal does not itself create the CandidateRecord and cannot bypass v3 intake. A known-work terminal does not make a canonical ScholarlyWork decision. If ambiguity remains, the identity stays pending rather than being guessed.
+```bash
+python3 -m scripts.identity_resolution_v2 input.json \
+  --history prior-records.json \
+  --output comments.json
+```
 
-## Work selection
+`prior-records.json` is the ordered array of already persisted CILE-IDENTITY-RESOLUTION-2 canonical records for the relevant observations, reconstructed from issue #696 and read back before a new append. The validator reduces the history and rejects illegal or conflicting transitions.
 
-At the end of every completed scouting window, persist every identity still counted as `unresolved_identity` into this queue before closeout. On later activations, process pending identities in bounded groups. Do not repeatedly run the same generic query; use candidate-bound verification sufficient to reach one terminal state.
+For outcomes that reference a CandidateRecord, the validator also checks the current `data/curation/review_queue.csv`; a syntactically valid but absent CandidateRecord id is rejected. This makes CandidateRecord existence a machine-enforced invariant rather than a prompt-only convention.
 
-Unresolved identities are operational debt. A lane must not indefinitely accumulate new unresolved identities while an older pending queue can be safely resolved. Prefer the oldest feasible pending identities and report the number entering and leaving the queue.
+The rendered comments use marker `<!-- cile-identity-resolution:2 -->` and contain bibliographic metadata only. Never include abstracts, full text, evidence quotations, reviewer identity, private working notes or credentials.
+
+## Work selection and intake handoff
+
+At the end of every completed scouting window, persist every observation still counted as `unresolved_identity` as `pending` before closeout and read it back. On later activations, process the oldest feasible pending observations in bounded groups.
+
+When candidate-bound verification establishes a distinct plausible scholarly work, record `forwarded_to_intake` and route it through the **normal governed v3 intake/recovery path**. Do not create a CandidateRecord by writing a resolution comment. Once the CandidateRecord is materialised, append `resolved/new_candidate` referencing that real id.
+
+Do not repeatedly rerun the generic scouting query to resolve an identity. Use only candidate-bound verification needed to reach one of the operational states above.
+
+## Fairness and starvation guard
+
+Paper-stage throughput remains the primary operational KPI. Therefore, outside a due scouting window, prefer `PERSIST` and executable `ENRICH` work over `RESOLVE` when both are immediately available. However unresolved debt must not starve: if the oldest pending observation is at least 24 hours old, or the pending queue reaches 20 observations, the next non-scout activation with no unfinished safe write must route to `RESOLVE` before opening more enrichment research.
 
 ## Reporting
 
 Report separately:
 
-- unresolved identities created by the scouting window;
-- pending identities examined in `RESOLVE`;
-- terminals by outcome;
-- identities still pending and their concrete blocker;
-- new CandidateRecords actually materialised through the normal intake path.
+- unresolved observations created by scouting;
+- pending observations examined in `RESOLVE`;
+- `forwarded_to_intake` handoffs;
+- terminal outcomes by type;
+- observations still pending and their concrete blocker;
+- new CandidateRecords actually materialised through normal intake;
+- paper-stage transitions produced elsewhere.
 
-Do not count a resolution comment itself as a durable paper-stage transition unless it causes an authorised CandidateRecord persistence step elsewhere. Resolution throughput and paper-enrichment throughput remain separate metrics.
+Resolution comments themselves do not count as paper enrichment unless a CandidateRecord stage transition is durably persisted and read back.
