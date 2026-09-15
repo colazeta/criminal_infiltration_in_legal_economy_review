@@ -1,5 +1,7 @@
 # Hourly hybrid automation v4 — current operational contract
 
+> **Superseded for KPI priority, work selection, WIP control and completion-convergence reporting by `docs/operations/completion-first-v5.md` (owner mandate, 15 September 2026).** The cadence, provider, identity-resolution, branch-recovery, anti-repeat and soft-close rules below remain in force unless v5 explicitly changes them.
+
 Owner mandate: 15 September 2026. This document is the **current operational source of truth** for the two ChatGPT automation lanes. Where older wording in `automation.md`, `novelty-depth.md` or historical runbooks conflicts on cadence, provider order, work routing, identity-resolution state or runtime closeout, this document prevails. Scientific eligibility, rights, ontology and human acceptance rules are not superseded.
 
 ## Cadence and roles
