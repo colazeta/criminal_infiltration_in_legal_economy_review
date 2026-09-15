@@ -14,7 +14,7 @@ Until the public projection/UI is migrated, any legacy `completed=true` field th
 
 Lane A runs at :10 and Lane B at :40. Both are assessment/enrichment workers by default; scouting is bounded inside them. Lane A owns 08:00–20:00 Europe/Rome; Lane B owns 20:00–08:00. There are exactly two project-wide scouting windows per day.
 
-Keep the existing private enrichment service, namespace, claims, fencing, catch-up semantics and immutable attempts. Candidate ownership remains stable by SHA256 modulo 2; timestamps and hash assignment are not locks.
+Keep the existing `CILE-HOUR40-1` private enrichment service, namespace, claims, fencing, catch-up semantics and immutable attempts. Candidate ownership remains stable by SHA256 modulo 2; timestamps and hash assignment are not locks.
 
 For scheduled scouting, **Parallel Search is the default discovery provider**. Exa is optional only when positively available and materially useful. Consensus and Scite are excluded from scheduled surveillance.
 
@@ -33,7 +33,7 @@ Identity debt keeps the v4 starvation guard.
 
 ## Completion-first work selection
 
-The primary unit of success is a paper whose distance to complete assessment decreases. A durable stage transition is required evidence but is only a secondary metric.
+The primary unit of success is a paper whose distance to complete assessment decreases. A `durable paper-stage transition` is required evidence but is only a secondary metric.
 
 Before substantial research, establish the authorised writer/claim/dispatch path for the intended next assessment gate. Do not build read-only cohorts when persistence is unavailable. Record the blocker once and move to another executable assessment gate.
 
@@ -57,7 +57,7 @@ CAND-002 currently has a persisted structured proposal. Its next assessment gate
 
 Preserve CILE-IDENTITY-RESOLUTION-2 append-only state, real CandidateRecord existence checks, `pending → resolved` / `pending → forwarded_to_intake → resolved/new_candidate`, and the existing starvation guard. Do not manufacture pending identities from the historical exact reconstruction deficit.
 
-Validated branch recovery remains mandatory: an exact validated branch/head ahead of main with no PR is recovered through the authenticated connector rather than by rerunning the underlying work.
+Validated branch recovery remains mandatory. The v4 `cile-validated-branch-recovery:1` ticket is still authoritative: an exact validated branch/head ahead of main with no PR is recovered through the authenticated connector rather than by rerunning the underlying work.
 
 ## Engineering discipline
 
@@ -71,7 +71,7 @@ Failure clusters continue to follow `calibration-trace-audit.md`; no unchanged r
 
 ## Soft close and anti-repeat
 
-At roughly 20 minutes, open no new paper cohort, search family, engineering branch or external workflow. Finish/persist/read back in-flight work or leave exact recoverable state. Do not poll long jobs to fill the activation.
+At roughly 20 minutes, enter **soft-close**: open no new paper cohort, search family, engineering branch or external workflow. Finish/persist/read back in-flight work or leave exact recoverable state. Do not poll long jobs to fill the activation.
 
 Do not repeat an unchanged zero-progress retrieval/selection/inference strategy until its prerequisite changes.
 
