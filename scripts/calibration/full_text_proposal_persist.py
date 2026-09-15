@@ -19,6 +19,7 @@ import hashlib
 import json
 import os
 import re
+import sys
 from pathlib import Path
 
 from scripts.calibration import full_text_development as development
@@ -59,7 +60,8 @@ def retained_binding(candidate_id, source_url, pdf_sha256, text_sha256, expected
     packet = service('packet', expected_commit=expected_commit, target_id=target_id)
     target = packet.get('target') if isinstance(packet, dict) else None
     sources = packet.get('sources') if isinstance(packet, dict) else None
-    if not isinstance(target, dict) or target.get('record_id') != candidate_id:
+    if not isinstance(target, dict) or target.get('record_id') != candidate_id \
+            or target.get('target_id') != target_id:
         raise RuntimeError('fulltext_production_target_unavailable')
     if not HEX64.fullmatch(str(target.get('input_sha256', ''))):
         raise RuntimeError('fulltext_production_target_invalid')
@@ -184,7 +186,10 @@ def run(args, service=service_call):
     original_resolution_checkpoint = runtime._persist_resolution_checkpoint
     original_pass_limit = v2.pass_limit
     original_requires_complete = v2.pass_requires_complete
+    original_argv = sys.argv
     receipt = {'value': None}
+    output = Path(os.environ.get('RUNNER_TEMP', '/tmp')) / 'fulltext-production-proposal.noartifact'
+    output.unlink(missing_ok=True)
 
     def retained_acquire(url):
         if url != binding['source_url']:
@@ -210,7 +215,9 @@ def run(args, service=service_call):
         prior = runtime.RUNTIME_CHECKPOINT.get('payload')
         if not isinstance(prior, dict):
             raise RuntimeError('fulltext_resolution_checkpoint_unavailable')
-        runtime.RUNTIME_CHECKPOINT['payload'] = {**copy.deepcopy(prior), 'status': 'evidence_resolution_complete_model_pending'}
+        runtime.RUNTIME_CHECKPOINT['payload'] = {
+            **copy.deepcopy(prior), 'status': 'evidence_resolution_complete_model_pending',
+        }
 
     development.acquire_pdf = retained_acquire
     development.extract_text = retained_extract
@@ -218,15 +225,27 @@ def run(args, service=service_call):
     runtime._persist_resolution_checkpoint = private_resolution_checkpoint
     v2.pass_limit = lambda: 0
     v2.pass_requires_complete = lambda: True
+    sys.argv = [
+        original_argv[0],
+        '--candidate-id', args.candidate_id,
+        '--url', args.url,
+        '--expected-pdf-sha256', args.expected_pdf_sha256,
+        '--expected-text-sha256', args.expected_text_sha256,
+        '--output', str(output),
+    ]
     try:
         v5.main()
+        if output.exists():
+            raise RuntimeError('fulltext_production_artifact_forbidden')
     finally:
+        sys.argv = original_argv
         development.acquire_pdf = original_acquire
         development.extract_text = original_extract
         runtime.runtime_checkpoint = original_runtime_checkpoint
         runtime._persist_resolution_checkpoint = original_resolution_checkpoint
         v2.pass_limit = original_pass_limit
         v2.pass_requires_complete = original_requires_complete
+        output.unlink(missing_ok=True)
 
     if receipt['value'] is None:
         raise RuntimeError('fulltext_production_proposal_not_persisted')
