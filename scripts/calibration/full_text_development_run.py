@@ -11,6 +11,7 @@ from scripts.calibration import full_text_development as development
 
 CHUNK_TIMEOUT_SECONDS = 600
 SYNTHESIS_TIMEOUT_SECONDS = 720
+SYNTHESIS_COMPLETION_TIMEOUT_SECONDS = 1200
 
 # The 18k-character configuration timed out twice before completing its first
 # chunk on the current four-CPU runner. Smaller windows preserve complete source
@@ -35,6 +36,12 @@ SCIENTIFIC_CONFIG = {
 # recover this newly observed truncation by increasing only the bounded synthesis
 # response budget. `finish_reason != stop` remains fail-closed; partial output is
 # never accepted and the changed budget is bound into the extractor fingerprint.
+# Run 34906117062 then preserved the same scientific request but timed out after
+# the larger 4,500-token synthesis budget was introduced. Keep the scientific
+# request and fingerprint unchanged; extend only that synthesis call's operational
+# completion allowance to 20 minutes. Chunk requests remain capped at 10 minutes,
+# and explicit longer caller timeouts remain monotone. This stays below the 70-minute
+# workflow bound with observed chunk-extraction time and still fails closed.
 
 # Run 34864185215 reached literal-evidence validation but failed because at least
 # one model-returned exact quote occurred more than once inside its source window.
@@ -369,8 +376,11 @@ def runtime_timeout(requested):
 
 
 def runtime_post(original, payload, timeout=300):
+    effective_timeout = runtime_timeout(timeout)
+    if timeout > 300:
+        effective_timeout = max(effective_timeout, SYNTHESIS_COMPLETION_TIMEOUT_SECONDS)
     try:
-        return original(payload, timeout=runtime_timeout(timeout))
+        return original(payload, timeout=effective_timeout)
     except TimeoutError:
         raise RuntimeError('fulltext_model_timeout') from None
 
