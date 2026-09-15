@@ -1,0 +1,152 @@
+name: Full-text calibration trace audit
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/fulltext-calibration-trace-audit.yml
+      - scripts/calibration/full_text_trace_audit.py
+      - scripts/calibration/full_text_trace_audit_run.py
+      - tests/test_full_text_trace_audit.py
+
+permissions:
+  contents: read
+
+concurrency:
+  group: fulltext-calibration-trace-audit
+  cancel-in-progress: false
+
+jobs:
+  audit:
+    if: github.repository == 'colazeta/criminal_infiltration_in_legal_economy_review' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    environment: curator-production
+    timeout-minutes: 45
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: Checkout reviewed code without retained credentials
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+
+      - name: Set up Node for private checkpoint access
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
+        with:
+          node-version: '22'
+
+      - name: Set up Python for isolated audit synthesis
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12'
+
+      - name: Install bounded PDF text dependency
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends poppler-utils
+          command -v pdftotext >/dev/null
+
+      - name: Validate audit contracts
+        run: |
+          python3 scripts/validation/validate_repository.py
+          python3 scripts/ontology/validate_ontology.py
+          python3 -m unittest tests.test_full_text_trace_audit tests.test_full_text_development tests.test_full_text_development_run tests.test_full_text_development_resume
+          node --test curator-app/test/calibration-development-checkpoint.test.js
+
+      - name: Resolve compatible authenticated private checkpoint deployment
+        env:
+          CURATOR_SESSION_SECRET: ${{ secrets.CURATOR_SESSION_SECRET }}
+        run: |
+          python3 - <<'PY'
+          import os,time
+          from scripts.enrichment.service_client import call,current_commit
+          probe={
+              'protocol':'CILE-FULLTEXT-DEV-CHUNK-1',
+              'candidate_id':'CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-002',
+              'extractor_fingerprint':'0'*64,
+              'request_sha256':'0'*64,
+              'chunk_id':'chunk-9999',
+          }
+          last='unobserved'
+          for attempt in range(1,19):
+              try:
+                  deployed=current_commit()
+                  result=call('development-checkpoint-get',expected_commit=deployed,checkpoint=probe)
+                  if result.get('status') in {'missing','found'}:
+                      with open(os.environ['GITHUB_ENV'],'a',encoding='utf-8') as handle:
+                          handle.write('CALIBRATION_CHECKPOINT_SERVICE_COMMIT='+deployed+'\n')
+                      break
+                  last='unexpected_checkpoint_probe_status'
+              except Exception as error:
+                  last=type(error).__name__
+              if attempt==18: raise SystemExit(f'compatible_private_checkpoint_service_unavailable:{last}')
+              time.sleep(10)
+          PY
+
+      - name: Run checkpoint-reuse-only structural audit
+        id: trace
+        env:
+          CURATOR_SESSION_SECRET: ${{ secrets.CURATOR_SESSION_SECRET }}
+          FULLTEXT_TRACE_AUDIT_FILE: ${{ runner.temp }}/fulltext-trace-audit.json
+          FULLTEXT_PASS_STATUS_FILE: ${{ runner.temp }}/fulltext-audit-pass-status.txt
+        run: |
+          set +e
+          python3 -m scripts.calibration.full_text_trace_audit_run \
+            --candidate-id CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-002 \
+            --url https://docs.iza.org/dp13028.pdf \
+            --expected-pdf-sha256 2e69ba5344af0c85cbe9d3a14e6e3dcc1c9ba907934cbc7937e2674c6efc42b2 \
+            --expected-text-sha256 d79a8f1caa0621af4916eed119cb39db1af5819f903efe22726e1432105d5924 \
+            --output "$RUNNER_TEMP/fulltext-audit-proposal.sealed.json" \
+            >"$RUNNER_TEMP/audit-run.log" 2>&1
+          model_status=$?
+          set -e
+          rm -f "$RUNNER_TEMP/fulltext-audit-proposal.sealed.json" "$RUNNER_TEMP/fulltext-audit-pass-status.txt"
+          if [ ! -s "$FULLTEXT_TRACE_AUDIT_FILE" ]; then
+            echo "Audit did not reach synthesis; no structural output was created." >&2
+            sed -n '1,80p' "$RUNNER_TEMP/audit-run.log" >&2
+            exit 1
+          fi
+          echo "model_status=$model_status" >> "$GITHUB_OUTPUT"
+          python3 - <<'PY'
+          import json,os
+          path=os.environ['FULLTEXT_TRACE_AUDIT_FILE']
+          payload=json.load(open(path,encoding='utf-8'))
+          allowed={'protocol','record_counts','duplicate_record_ids','relation_failures','failure_families','structural_digest'}
+          if set(payload)!=allowed: raise SystemExit('unsafe_audit_shape')
+          if payload.get('protocol')!='CILE-FULLTEXT-TRACE-AUDIT-1': raise SystemExit('unsafe_audit_protocol')
+          text=json.dumps(payload,sort_keys=True)
+          for forbidden in ('evidence','source_text','model_output','title','value','atom_ids'):
+              if forbidden in payload: raise SystemExit('unsafe_audit_field')
+          print(text)
+          PY
+
+      - name: Persist non-sensitive audit result on grouped-audit ledger
+        env:
+          GH_TOKEN: ${{ github.token }}
+          FULLTEXT_TRACE_AUDIT_FILE: ${{ runner.temp }}/fulltext-trace-audit.json
+          MODEL_STATUS: ${{ steps.trace.outputs.model_status }}
+        run: |
+          python3 - <<'PY' > "$RUNNER_TEMP/audit-comment.md"
+          import json,os
+          payload=json.load(open(os.environ['FULLTEXT_TRACE_AUDIT_FILE'],encoding='utf-8'))
+          print('<!-- cile-fulltext-trace-audit:1 -->')
+          print('### Private structural trace audit — non-sensitive output')
+          print()
+          print(f"- workflow head: `{os.environ['GITHUB_SHA']}`")
+          print(f"- audit synthesis process exit status: `{os.environ['MODEL_STATUS']}`")
+          print(f"- record counts: `{json.dumps(payload['record_counts'],sort_keys=True)}`")
+          print(f"- duplicate record ids: `{json.dumps(payload['duplicate_record_ids'],sort_keys=True)}`")
+          print(f"- relation failures: `{json.dumps(payload['relation_failures'],sort_keys=True)}`")
+          print(f"- failure families: `{json.dumps(payload['failure_families'])}`")
+          print(f"- structural digest: `{payload['structural_digest']}`")
+          print()
+          print('This audit reused existing private chunk checkpoints only. It exposes no source text, model content, record ids, evidence quotations or reviewer material. It is audit evidence, not a scientific proposal or completion receipt.')
+          PY
+          gh issue comment 714 --body-file "$RUNNER_TEMP/audit-comment.md"
+
+      - name: Remove all audit scratch
+        if: always()
+        run: |
+          rm -f "$RUNNER_TEMP/fulltext-trace-audit.json" "$RUNNER_TEMP/audit-run.log" "$RUNNER_TEMP/audit-comment.md" "$RUNNER_TEMP/fulltext-audit-proposal.sealed.json" "$RUNNER_TEMP/fulltext-audit-pass-status.txt"
