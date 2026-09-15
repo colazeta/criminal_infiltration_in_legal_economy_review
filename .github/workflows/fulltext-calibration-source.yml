@@ -81,6 +81,8 @@ jobs:
     runs-on: ubuntu-24.04
     environment: curator-production
     timeout-minutes: 70
+    outputs:
+      complete: ${{ steps.run-development.outputs.complete }}
     steps:
       - name: Checkout the same reviewed code without retained credentials
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
@@ -135,25 +137,261 @@ jobs:
               if attempt==36: raise SystemExit(f'compatible_private_checkpoint_service_unavailable:{last}')
               time.sleep(10)
           PY
-      - name: Run one exact-source full-text development case with private chunk resume
+      - name: Run bounded exact-source development pass 1
+        id: run-development
         env:
           CURATOR_SESSION_SECRET: ${{ secrets.CURATOR_SESSION_SECRET }}
+          FULLTEXT_MAX_NEW_CHUNKS: '3'
+          FULLTEXT_REQUIRE_COMPLETE: '0'
+          FULLTEXT_PASS_STATUS_FILE: ${{ runner.temp }}/fulltext-pass-status.txt
         run: |
+          rm -f "$FULLTEXT_PASS_STATUS_FILE"
           python3 -m scripts.calibration.full_text_development_resume \
             --candidate-id CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-002 \
             --url https://docs.iza.org/dp13028.pdf \
             --expected-pdf-sha256 2e69ba5344af0c85cbe9d3a14e6e3dcc1c9ba907934cbc7937e2674c6efc42b2 \
             --expected-text-sha256 d79a8f1caa0621af4916eed119cb39db1af5819f903efe22726e1432105d5924 \
             --output "$RUNNER_TEMP/fulltext-development.sealed.json"
-      - name: Retain only recipient-encrypted model checkpoint
+          status="$(tr -d '\r\n' < "$FULLTEXT_PASS_STATUS_FILE")"
+          case "$status" in
+            complete) echo 'complete=true' >> "$GITHUB_OUTPUT" ;;
+            partial) echo 'complete=false' >> "$GITHUB_OUTPUT" ;;
+            *) echo "unexpected pass status: $status" >&2; exit 1 ;;
+          esac
+      - name: Retain only recipient-encrypted model checkpoint for pass 1
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: fulltext-calibration-development-cand-002
+          name: fulltext-calibration-development-cand-002-pass-1
           path: ${{ runner.temp }}/fulltext-development.sealed.json
           if-no-files-found: ignore
           retention-days: 1
-      - name: Remove encrypted scratch after artifact handling
+      - name: Remove encrypted scratch after pass 1
         if: always()
         run: |
-          rm -f "$RUNNER_TEMP/fulltext-development.sealed.json"
+          rm -f "$RUNNER_TEMP/fulltext-development.sealed.json" "$RUNNER_TEMP/fulltext-pass-status.txt"
+
+  development-2:
+    if: github.repository == 'colazeta/criminal_infiltration_in_legal_economy_review' && github.ref == 'refs/heads/main' && needs.development.result == 'success' && needs.development.outputs.complete != 'true'
+    needs: development
+    runs-on: ubuntu-24.04
+    environment: curator-production
+    timeout-minutes: 70
+    outputs:
+      complete: ${{ steps.run-development.outputs.complete }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12'
+      - name: Install bounded PDF text dependency
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends poppler-utils
+      - name: Resolve authenticated private checkpoint deployment
+        env:
+          CURATOR_SESSION_SECRET: ${{ secrets.CURATOR_SESSION_SECRET }}
+        run: |
+          python3 - <<'PY'
+          import os
+          from scripts.enrichment.service_client import call,current_commit
+          probe={'protocol':'CILE-FULLTEXT-DEV-CHUNK-1','candidate_id':'CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-002','extractor_fingerprint':'0'*64,'request_sha256':'0'*64,'chunk_id':'chunk-9999'}
+          deployed=current_commit(); result=call('development-checkpoint-get',expected_commit=deployed,checkpoint=probe)
+          if result.get('status') not in {'missing','found'}: raise SystemExit('compatible_private_checkpoint_service_unavailable')
+          with open(os.environ['GITHUB_ENV'],'a',encoding='utf-8') as handle: handle.write('CALIBRATION_CHECKPOINT_SERVICE_COMMIT='+deployed+'\n')
+          PY
+      - name: Run bounded exact-source development pass 2
+        id: run-development
+        env:
+          CURATOR_SESSION_SECRET: ${{ secrets.CURATOR_SESSION_SECRET }}
+          FULLTEXT_MAX_NEW_CHUNKS: '3'
+          FULLTEXT_REQUIRE_COMPLETE: '0'
+          FULLTEXT_PASS_STATUS_FILE: ${{ runner.temp }}/fulltext-pass-status.txt
+        run: |
+          rm -f "$FULLTEXT_PASS_STATUS_FILE"
+          python3 -m scripts.calibration.full_text_development_resume --candidate-id CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-002 --url https://docs.iza.org/dp13028.pdf --expected-pdf-sha256 2e69ba5344af0c85cbe9d3a14e6e3dcc1c9ba907934cbc7937e2674c6efc42b2 --expected-text-sha256 d79a8f1caa0621af4916eed119cb39db1af5819f903efe22726e1432105d5924 --output "$RUNNER_TEMP/fulltext-development.sealed.json"
+          status="$(tr -d '\r\n' < "$FULLTEXT_PASS_STATUS_FILE")"
+          case "$status" in complete) echo 'complete=true' >> "$GITHUB_OUTPUT" ;; partial) echo 'complete=false' >> "$GITHUB_OUTPUT" ;; *) exit 1 ;; esac
+      - if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: fulltext-calibration-development-cand-002-pass-2
+          path: ${{ runner.temp }}/fulltext-development.sealed.json
+          if-no-files-found: ignore
+          retention-days: 1
+      - if: always()
+        run: rm -f "$RUNNER_TEMP/fulltext-development.sealed.json" "$RUNNER_TEMP/fulltext-pass-status.txt"
+
+  development-3:
+    if: github.repository == 'colazeta/criminal_infiltration_in_legal_economy_review' && github.ref == 'refs/heads/main' && needs.development-2.result == 'success' && needs.development-2.outputs.complete != 'true'
+    needs: development-2
+    runs-on: ubuntu-24.04
+    environment: curator-production
+    timeout-minutes: 70
+    outputs:
+      complete: ${{ steps.run-development.outputs.complete }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12'
+      - name: Install bounded PDF text dependency
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends poppler-utils
+      - name: Resolve authenticated private checkpoint deployment
+        env:
+          CURATOR_SESSION_SECRET: ${{ secrets.CURATOR_SESSION_SECRET }}
+        run: |
+          python3 - <<'PY'
+          import os
+          from scripts.enrichment.service_client import call,current_commit
+          probe={'protocol':'CILE-FULLTEXT-DEV-CHUNK-1','candidate_id':'CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-002','extractor_fingerprint':'0'*64,'request_sha256':'0'*64,'chunk_id':'chunk-9999'}
+          deployed=current_commit(); result=call('development-checkpoint-get',expected_commit=deployed,checkpoint=probe)
+          if result.get('status') not in {'missing','found'}: raise SystemExit('compatible_private_checkpoint_service_unavailable')
+          with open(os.environ['GITHUB_ENV'],'a',encoding='utf-8') as handle: handle.write('CALIBRATION_CHECKPOINT_SERVICE_COMMIT='+deployed+'\n')
+          PY
+      - name: Run bounded exact-source development pass 3
+        id: run-development
+        env:
+          CURATOR_SESSION_SECRET: ${{ secrets.CURATOR_SESSION_SECRET }}
+          FULLTEXT_MAX_NEW_CHUNKS: '3'
+          FULLTEXT_REQUIRE_COMPLETE: '0'
+          FULLTEXT_PASS_STATUS_FILE: ${{ runner.temp }}/fulltext-pass-status.txt
+        run: |
+          rm -f "$FULLTEXT_PASS_STATUS_FILE"
+          python3 -m scripts.calibration.full_text_development_resume --candidate-id CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-002 --url https://docs.iza.org/dp13028.pdf --expected-pdf-sha256 2e69ba5344af0c85cbe9d3a14e6e3dcc1c9ba907934cbc7937e2674c6efc42b2 --expected-text-sha256 d79a8f1caa0621af4916eed119cb39db1af5819f903efe22726e1432105d5924 --output "$RUNNER_TEMP/fulltext-development.sealed.json"
+          status="$(tr -d '\r\n' < "$FULLTEXT_PASS_STATUS_FILE")"
+          case "$status" in complete) echo 'complete=true' >> "$GITHUB_OUTPUT" ;; partial) echo 'complete=false' >> "$GITHUB_OUTPUT" ;; *) exit 1 ;; esac
+      - if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: fulltext-calibration-development-cand-002-pass-3
+          path: ${{ runner.temp }}/fulltext-development.sealed.json
+          if-no-files-found: ignore
+          retention-days: 1
+      - if: always()
+        run: rm -f "$RUNNER_TEMP/fulltext-development.sealed.json" "$RUNNER_TEMP/fulltext-pass-status.txt"
+
+  development-4:
+    if: github.repository == 'colazeta/criminal_infiltration_in_legal_economy_review' && github.ref == 'refs/heads/main' && needs.development-3.result == 'success' && needs.development-3.outputs.complete != 'true'
+    needs: development-3
+    runs-on: ubuntu-24.04
+    environment: curator-production
+    timeout-minutes: 70
+    outputs:
+      complete: ${{ steps.run-development.outputs.complete }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12'
+      - name: Install bounded PDF text dependency
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends poppler-utils
+      - name: Resolve authenticated private checkpoint deployment
+        env:
+          CURATOR_SESSION_SECRET: ${{ secrets.CURATOR_SESSION_SECRET }}
+        run: |
+          python3 - <<'PY'
+          import os
+          from scripts.enrichment.service_client import call,current_commit
+          probe={'protocol':'CILE-FULLTEXT-DEV-CHUNK-1','candidate_id':'CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-002','extractor_fingerprint':'0'*64,'request_sha256':'0'*64,'chunk_id':'chunk-9999'}
+          deployed=current_commit(); result=call('development-checkpoint-get',expected_commit=deployed,checkpoint=probe)
+          if result.get('status') not in {'missing','found'}: raise SystemExit('compatible_private_checkpoint_service_unavailable')
+          with open(os.environ['GITHUB_ENV'],'a',encoding='utf-8') as handle: handle.write('CALIBRATION_CHECKPOINT_SERVICE_COMMIT='+deployed+'\n')
+          PY
+      - name: Run bounded exact-source development pass 4
+        id: run-development
+        env:
+          CURATOR_SESSION_SECRET: ${{ secrets.CURATOR_SESSION_SECRET }}
+          FULLTEXT_MAX_NEW_CHUNKS: '3'
+          FULLTEXT_REQUIRE_COMPLETE: '0'
+          FULLTEXT_PASS_STATUS_FILE: ${{ runner.temp }}/fulltext-pass-status.txt
+        run: |
+          rm -f "$FULLTEXT_PASS_STATUS_FILE"
+          python3 -m scripts.calibration.full_text_development_resume --candidate-id CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-002 --url https://docs.iza.org/dp13028.pdf --expected-pdf-sha256 2e69ba5344af0c85cbe9d3a14e6e3dcc1c9ba907934cbc7937e2674c6efc42b2 --expected-text-sha256 d79a8f1caa0621af4916eed119cb39db1af5819f903efe22726e1432105d5924 --output "$RUNNER_TEMP/fulltext-development.sealed.json"
+          status="$(tr -d '\r\n' < "$FULLTEXT_PASS_STATUS_FILE")"
+          case "$status" in complete) echo 'complete=true' >> "$GITHUB_OUTPUT" ;; partial) echo 'complete=false' >> "$GITHUB_OUTPUT" ;; *) exit 1 ;; esac
+      - if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: fulltext-calibration-development-cand-002-pass-4
+          path: ${{ runner.temp }}/fulltext-development.sealed.json
+          if-no-files-found: ignore
+          retention-days: 1
+      - if: always()
+        run: rm -f "$RUNNER_TEMP/fulltext-development.sealed.json" "$RUNNER_TEMP/fulltext-pass-status.txt"
+
+  development-5:
+    if: github.repository == 'colazeta/criminal_infiltration_in_legal_economy_review' && github.ref == 'refs/heads/main' && needs.development-4.result == 'success' && needs.development-4.outputs.complete != 'true'
+    needs: development-4
+    runs-on: ubuntu-24.04
+    environment: curator-production
+    timeout-minutes: 70
+    outputs:
+      complete: ${{ steps.run-development.outputs.complete }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
+        with:
+          python-version: '3.12'
+      - name: Install bounded PDF text dependency
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends poppler-utils
+      - name: Resolve authenticated private checkpoint deployment
+        env:
+          CURATOR_SESSION_SECRET: ${{ secrets.CURATOR_SESSION_SECRET }}
+        run: |
+          python3 - <<'PY'
+          import os
+          from scripts.enrichment.service_client import call,current_commit
+          probe={'protocol':'CILE-FULLTEXT-DEV-CHUNK-1','candidate_id':'CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-002','extractor_fingerprint':'0'*64,'request_sha256':'0'*64,'chunk_id':'chunk-9999'}
+          deployed=current_commit(); result=call('development-checkpoint-get',expected_commit=deployed,checkpoint=probe)
+          if result.get('status') not in {'missing','found'}: raise SystemExit('compatible_private_checkpoint_service_unavailable')
+          with open(os.environ['GITHUB_ENV'],'a',encoding='utf-8') as handle: handle.write('CALIBRATION_CHECKPOINT_SERVICE_COMMIT='+deployed+'\n')
+          PY
+      - name: Run bounded exact-source development pass 5 and require completion
+        id: run-development
+        env:
+          CURATOR_SESSION_SECRET: ${{ secrets.CURATOR_SESSION_SECRET }}
+          FULLTEXT_MAX_NEW_CHUNKS: '3'
+          FULLTEXT_REQUIRE_COMPLETE: '1'
+          FULLTEXT_PASS_STATUS_FILE: ${{ runner.temp }}/fulltext-pass-status.txt
+        run: |
+          rm -f "$FULLTEXT_PASS_STATUS_FILE"
+          python3 -m scripts.calibration.full_text_development_resume --candidate-id CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-002 --url https://docs.iza.org/dp13028.pdf --expected-pdf-sha256 2e69ba5344af0c85cbe9d3a14e6e3dcc1c9ba907934cbc7937e2674c6efc42b2 --expected-text-sha256 d79a8f1caa0621af4916eed119cb39db1af5819f903efe22726e1432105d5924 --output "$RUNNER_TEMP/fulltext-development.sealed.json"
+          status="$(tr -d '\r\n' < "$FULLTEXT_PASS_STATUS_FILE")"
+          test "$status" = complete
+          echo 'complete=true' >> "$GITHUB_OUTPUT"
+      - if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: fulltext-calibration-development-cand-002-pass-5
+          path: ${{ runner.temp }}/fulltext-development.sealed.json
+          if-no-files-found: ignore
+          retention-days: 1
+      - if: always()
+        run: rm -f "$RUNNER_TEMP/fulltext-development.sealed.json" "$RUNNER_TEMP/fulltext-pass-status.txt"
