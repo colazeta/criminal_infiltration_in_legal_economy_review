@@ -26,7 +26,7 @@ def candidate_id_from_argv(argv=None):
         value = values[values.index('--candidate-id') + 1]
     except (ValueError, IndexError):
         raise RuntimeError('fulltext_checkpoint_candidate_unavailable') from None
-    if not re.fullmatch(r'CAND-[A-Z0-9][A-Z0-9._-]{1,199}', value):
+    if not re.fullmatch(r'CAND-[A-Za-z0-9][A-Za-z0-9._-]{1,199}', value):
         raise RuntimeError('fulltext_checkpoint_candidate_unavailable')
     return value
 
