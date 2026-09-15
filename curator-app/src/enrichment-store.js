@@ -10,6 +10,7 @@ import { sha256 } from './review-v2.js';
 import { runEnrichment, handlePaperEnrichment, storeExtraction } from './paper-enrichment.js';
 import {completionPacket, importCalibrationApproval, importCompletionApproval} from './enrichment-adjudication.js';
 import {readPublicResearch, readPublicCompletion, publicResearchAudit, readPublicIndex} from './public-paper-research.js';
+import {readDevelopmentCheckpoint,writeDevelopmentCheckpoint} from './calibration-development-checkpoint.js';
 
 const DOMAIN = 'CILE-ENRICH-SERVICE-v1';
 const encoder = new TextEncoder();
@@ -151,9 +152,9 @@ export class EnrichmentStoreCore {
     }catch{return json({error_code:'service_authentication_required'},401)}
     try{
       const data=JSON.parse(body);
-      const allowedFields=['operation','expected_commit','target_id','proposal','run_key','calibration_id','pr_number','source','document','bibliography','document_id'];
+      const allowedFields=['operation','expected_commit','target_id','proposal','run_key','calibration_id','pr_number','source','document','bibliography','document_id','checkpoint'];
       if(!data||typeof data!=='object'||Array.isArray(data)||Object.keys(data).some(k=>!allowedFields.includes(k)))return json({error_code:'invalid_service_envelope'},422);
-      const operations=['verify','activate','deactivate','status','run','packet','proposal','public-research-audit','completion-packet','calibration-approval','completion-approval','source','document','documents','document-check','bibliography','provider-bibliography'];
+      const operations=['verify','activate','deactivate','status','run','packet','proposal','public-research-audit','completion-packet','calibration-approval','completion-approval','source','document','documents','document-check','bibliography','provider-bibliography','development-checkpoint-get','development-checkpoint-put'];
       if(!operations.includes(data.operation))return json({error_code:'unknown_service_operation'},422);
       if(data.expected_commit!==this.env.DEPLOY_COMMIT)return json({error_code:'stale_deployment'},409);
       if(data.operation==='verify')return json(await this.verify());
@@ -166,6 +167,8 @@ export class EnrichmentStoreCore {
       if(data.operation==='calibration-approval')return json(await importCalibrationApproval(env,{calibration_id:data.calibration_id,pr_number:data.pr_number},undefined,now),201);
       if(data.operation==='completion-approval')return json(await importCompletionApproval(env,{target_id:data.target_id,pr_number:data.pr_number},undefined,now),201);
       if(env.PAPER_ENRICHMENT_ENABLED!=='true')return json({error_code:'enrichment_inactive'},409);
+      if(data.operation==='development-checkpoint-get')return json(await readDevelopmentCheckpoint(this.evidence,data.checkpoint));
+      if(data.operation==='development-checkpoint-put')return json(await writeDevelopmentCheckpoint(this.evidence,data.checkpoint),201);
       if(data.operation==='run'){
         if(this.schedule.busy)return json({status:'leased'});
         if(!/^manual:[0-9a-f-]{36}$/.test(data.run_key||''))return json({error_code:'manual_run_key_required'},422);
@@ -185,7 +188,7 @@ export class EnrichmentStoreCore {
         return json(await storeExtraction(env,target,data.proposal,now),201);
       }
       return json({error_code:'unknown_service_operation'},422);
-    }catch(error){return json({error_code:error.code||'service_operation_failed'},error.status||500)}
+    }catch(error){return json({error_code:error.code||error.message||'service_operation_failed'},error.status||500)}
   }
   async alarm() { await this.ready; return this.schedule.tick(); }
   async fetch(request) {

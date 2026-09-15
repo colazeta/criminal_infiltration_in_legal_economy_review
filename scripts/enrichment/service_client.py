@@ -21,14 +21,16 @@ class NoRedirect(HTTPRedirectHandler):
 _PRIVATE_HTTP = build_opener(NoRedirect())
 
 
-def call(operation, *, expected_commit, target_id=None, proposal=None, run_key=None, source=None, document=None, bibliography=None, document_id=None):
+def call(operation, *, expected_commit, target_id=None, proposal=None, run_key=None, source=None, document=None,
+         bibliography=None, document_id=None, checkpoint=None):
     secret = os.environ.get('CURATOR_SESSION_SECRET', '')
     if len(secret) < 32:
         raise RuntimeError('service_credential_unavailable')
     payload = {'operation': operation, 'expected_commit': expected_commit}
     if target_id is not None: payload['target_id'] = target_id
     if proposal is not None: payload['proposal'] = proposal
-    for name, value in [('source', source), ('document', document), ('bibliography', bibliography), ('document_id', document_id)]:
+    for name, value in [('source', source), ('document', document), ('bibliography', bibliography),
+                        ('document_id', document_id), ('checkpoint', checkpoint)]:
         if value is not None: payload[name] = value
     if operation == 'run': payload['run_key'] = run_key or 'manual:' + str(uuid.uuid4())
     body = json.dumps(payload, ensure_ascii=False, separators=(',', ':')).encode()
@@ -53,7 +55,10 @@ def call(operation, *, expected_commit, target_id=None, proposal=None, run_key=N
             data = json.loads(raw)
             code = data.get('error_code') or (data.get('error', {}).get('code') if isinstance(data.get('error'), dict) else None)
             allowed = {'service_authentication_required', 'private_storage_required', 'stale_deployment',
-                       'service_operation_failed', 'enrichment_inactive', 'payload_too_large'}
+                       'service_operation_failed', 'enrichment_inactive', 'payload_too_large',
+                       'development_checkpoint_conflict', 'development_checkpoint_invalid',
+                       'development_checkpoint_corrupt', 'development_checkpoint_identity_mismatch',
+                       'development_checkpoint_too_large'}
             if code in allowed: suffix = ':' + code
         except (ValueError, TypeError, AttributeError):
             suffix = ':non_json_response'
