@@ -1,8 +1,11 @@
 #!/usr/bin/env python3
-"""Retain one reviewed, hash-pinned registered PDF in the existing private store.
+"""Retain reviewed PDFs in the existing private store.
 
-No model, citation search, public redistribution or scientific decision. The original
-PDF and extracted text are never printed, committed or uploaded as workflow artifacts.
+The fixed reviewed seed remains hash-pinned. After its readback, a bounded B-shard
+frontier reuses only already-governed public-full-text access evidence and the
+candidate-bound F1 lease. No model, citation search, public redistribution or
+scientific decision is performed. Original PDF/text bodies are never printed,
+committed or uploaded as workflow artifacts.
 """
 import argparse
 import base64
@@ -14,6 +17,7 @@ from pathlib import Path
 from scripts.calibration.full_text_source_case import candidate, extract_text, norm
 from scripts.oa_acquisition import acquire_pdf
 from scripts.enrichment.service_client import call
+from scripts.enrichment.retain_frontier_documents import run_frontier
 
 ROOT = Path(__file__).resolve().parents[2]
 FIELDS = {'protocol','candidate_id','source_url','pdf_sha256','text_sha256','version_label',
@@ -87,18 +91,24 @@ def main():
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('--manifest',type=Path,default=ROOT/'config/verified-document-seed.json')
     p.add_argument('--expected-commit',default=os.environ.get('GITHUB_SHA'))
+    p.add_argument('--frontier-limit',type=int,default=3)
     a=p.parse_args()
     if not re.fullmatch(r'[a-f0-9]{40}',a.expected_commit or ''):
         p.error('An exact reviewed/deployed commit is required.')
-    result=retain(json.loads(a.manifest.read_text()),a.expected_commit)
+    if a.frontier_limit < 1 or a.frontier_limit > 6:
+        p.error('--frontier-limit must be between 1 and 6')
+    seed=retain(json.loads(a.manifest.read_text()),a.expected_commit)
     cycle=json.loads((ROOT/'config/archive-cycle.json').read_text())['review_id']
-    target_id=hashlib.sha256((cycle+':candidate:'+result['candidate_id']).encode()).hexdigest()
-    result['provider_bibliography']=call('provider-bibliography',expected_commit=a.expected_commit,target_id=target_id)
-    print(json.dumps(result,indent=2))
+    target_id=hashlib.sha256((cycle+':candidate:'+seed['candidate_id']).encode()).hexdigest()
+    seed['provider_bibliography']=call('provider-bibliography',expected_commit=a.expected_commit,target_id=target_id)
+    frontier=run_frontier(a.expected_commit,a.frontier_limit)
+    print(json.dumps({'seed':seed,'frontier':frontier},indent=2))
+    if frontier and not any(item['status'] in {'retained_readback_verified','already_retained_current_input'} for item in frontier):
+        raise RuntimeError('frontier_retention_no_success')
 
 if __name__=='__main__':
     try:main()
     except Exception as error:
         code=str(error)
-        if not re.fullmatch(r'(?:document_[a-z_]+|enrichment_service_[a-z0-9_:]+|invalid_document_manifest)',code):code='document_retention_failed'
+        if not re.fullmatch(r'(?:document_[a-z_]+|frontier_[a-z_]+|enrichment_service_[a-z0-9_:]+|invalid_document_manifest)',code):code='document_retention_failed'
         raise SystemExit(code) from None
