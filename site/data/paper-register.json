@@ -40,12 +40,13 @@
       "authors": "Jaime Arellano-Bover; Marco De Simoni; Luigi Guiso; Rocco Macchiavello; Domenico J. Marchetti; Mounu Prem",
       "year": 2024,
       "venue": "CESifo Working Paper No. 11043",
-      "doi": "",
+      "doi": "10.31235/osf.io/sr6ep_v1",
       "sourceLinks": [
         "https://hdl.handle.net/10419/296132",
-        "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4793899"
+        "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4793899",
+        "https://doi.org/10.31235/osf.io/sr6ep_v1"
       ],
-      "metadataStatus": "metadata_partial",
+      "metadataStatus": "metadata_verified",
       "reviewStatus": "pending",
       "accessStatus": "unknown",
       "registeredAt": "2026-09-08",
