@@ -11,7 +11,7 @@ from scripts.calibration import full_text_development as development
 
 CHUNK_TIMEOUT_SECONDS = 600
 SYNTHESIS_TIMEOUT_SECONDS = 720
-SYNTHESIS_COMPLETION_TIMEOUT_SECONDS = 1200
+SYNTHESIS_COMPLETION_TIMEOUT_SECONDS = 1800
 
 # The 18k-character configuration timed out twice before completing its first
 # chunk on the current four-CPU runner. Smaller windows preserve complete source
@@ -26,7 +26,7 @@ SCIENTIFIC_CONFIG = {
     'chunk_overlap': 400,
     'max_atoms_per_chunk': 8,
     'chunk_max_tokens': 1600,
-    'synthesis_max_tokens': 4500,
+    'synthesis_max_tokens': 6000,
 }
 
 # Run 34900857749 failed with `fulltext_model_output_incomplete` after #703 changed
@@ -37,11 +37,15 @@ SCIENTIFIC_CONFIG = {
 # response budget. `finish_reason != stop` remains fail-closed; partial output is
 # never accepted and the changed budget is bound into the extractor fingerprint.
 # Run 34906117062 then preserved the same scientific request but timed out after
-# the larger 4,500-token synthesis budget was introduced. Keep the scientific
-# request and fingerprint unchanged; extend only that synthesis call's operational
-# completion allowance to 20 minutes. Chunk requests remain capped at 10 minutes,
-# and explicit longer caller timeouts remain monotone. This stays below the 70-minute
-# workflow bound with observed chunk-extraction time and still fails closed.
+# the larger 4,500-token synthesis budget was introduced. #705 kept that request
+# unchanged and extended only the completion allowance to 20 minutes. Successor
+# run 34914763034 no longer timed out but again returned
+# `fulltext_model_output_incomplete` under the 4,500-token synthesis cap after all
+# chunk work had completed. Increase only that bounded response cap to 6,000 and
+# its operational completion allowance to 30 minutes. Source, model, seed, chunk
+# coverage, atom capacity, decoder/field rules, evidence rejection and fail-closed
+# validation remain unchanged. The token-cap change is bound into the extractor
+# fingerprint; the timeout remains operational and outside that fingerprint.
 
 # Run 34864185215 reached literal-evidence validation but failed because at least
 # one model-returned exact quote occurred more than once inside its source window.
