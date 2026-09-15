@@ -1,17 +1,22 @@
 #!/usr/bin/env python3
 """Resume exact full-text chunk inference from authenticated private checkpoints.
 
-This wrapper does not change the scientific request, extractor fingerprint, model,
-seed, decoder, evidence policy or proposal validation. It only reuses a raw chunk
-output when the candidate id, extractor fingerprint and complete request hash are
-identical. Checkpoints remain in the existing authenticated private store and no
-source/model output is printed or written to GitHub artifacts by this wrapper.
+This wrapper reuses a raw chunk output only when the candidate id, extractor
+fingerprint and complete request hash are identical. Checkpoints remain in the
+existing authenticated private store and no source/model output is printed or
+written to GitHub artifacts by this wrapper.
 
 An optional operational pass budget can bound how many previously-missing chunks
 one process computes. Exhausting that budget after durable private checkpointing
 is a successful partial pass unless the caller explicitly requires completion.
 This is scheduling only: cache hits, requests, model settings and the eventual
-scientific proposal remain byte-for-byte governed by the existing contracts.
+scientific proposal remain governed by the existing contracts.
+
+The production resume path also tightens the synthesis decoder so each assignment
+may cite only resolved atom ids with the same destination entity type and field.
+The base proposal validator remains unchanged and fail-closed. Because this is a
+model-output constraint, its version is included in the existing stable extractor
+fingerprint during the run.
 """
 import json
 import os
@@ -24,8 +29,155 @@ from scripts.calibration import full_text_development_run as runtime
 from scripts.enrichment.service_client import call as service_call
 
 PROTOCOL = 'CILE-FULLTEXT-DEV-CHUNK-1'
+SYNTHESIS_ATOM_SCOPED_SCHEMA = 'destination-field-and-atom-scoped-assignments-v2'
 _ORIGINAL_RUNTIME_POST = runtime.runtime_post
 PASS_STATE = {'limit': None, 'new_chunks': 0, 'reused_chunks': 0}
+
+
+def _compatible_assignment_branches(fields, atoms, entity_type=None):
+    """Return one decoder branch per field with only compatible resolved atom ids."""
+    branches = []
+    for field in sorted(fields):
+        atom_ids = sorted({
+            atom['id'] for atom in atoms
+            if atom.get('field') == field and (
+                entity_type is None or atom.get('entity_type') == entity_type
+            )
+        })
+        if not atom_ids:
+            continue
+        branch = runtime.field_scoped_assignment_schema({field})
+        branch['properties']['field'] = {'const': field}
+        branch['properties']['atom_ids']['items'] = {'enum': atom_ids}
+        branch['properties']['atom_ids']['maxItems'] = min(12, len(atom_ids))
+        branches.append(branch)
+    return branches
+
+
+def _assignment_array_schema(fields, atoms, entity_type=None):
+    branches = _compatible_assignment_branches(fields, atoms, entity_type)
+    if not branches:
+        return {
+            'type': 'array', 'maxItems': 0,
+            'items': runtime.field_scoped_assignment_schema(fields),
+        }
+    return {
+        'type': 'array', 'maxItems': len(branches),
+        'items': {'oneOf': branches},
+    }
+
+
+def _atom_scoped_record_schema(kind, atoms):
+    schema = runtime.field_scoped_record_schema(kind)
+    schema['properties']['fields'] = _assignment_array_schema(
+        development.FIELD_BY_ENTITY[kind], atoms, kind,
+    )
+    return schema
+
+
+def atom_scoped_synthesis_schema(atoms):
+    """Constrain synthesis citations to the destination entity/field atom scope.
+
+    Framework rationale is intentionally cross-entity, as in the reviewed base
+    policy, but it may still cite only atoms whose field equals the rationale
+    assignment field. If no resolved atom can support a destination, that
+    assignment array is decoder-constrained to remain empty rather than inviting a
+    reference that the unchanged base validator would have to reject later.
+    """
+    framework_branches = _compatible_assignment_branches(
+        development.ALL_FIELDS, atoms, entity_type=None,
+    )
+    if framework_branches:
+        framework_assignment = {'oneOf': framework_branches}
+        framework_rationale = {'anyOf': [framework_assignment, {'type': 'null'}]}
+        framework_secondary = {
+            'type': 'array', 'maxItems': 5,
+            'items': {
+                'type': 'object', 'additionalProperties': False,
+                'properties': {
+                    'category': {'enum': development.CATEGORIES},
+                    'rationale': framework_assignment,
+                },
+                'required': ['category', 'rationale'],
+            },
+        }
+    else:
+        framework_rationale = {'type': 'null'}
+        framework_secondary = {
+            'type': 'array', 'maxItems': 0,
+            'items': {'type': 'object'},
+        }
+    framework = {
+        'type': 'object', 'additionalProperties': False,
+        'properties': {
+            'status': {'enum': ['proposed', 'insufficient_evidence', 'outside_framework']},
+            'primary': {'enum': development.CATEGORIES + [None]},
+            'rationale': framework_rationale,
+            'secondary': framework_secondary,
+            'alternative': {'enum': development.CATEGORIES + [None]},
+        },
+        'required': ['status', 'primary', 'rationale', 'secondary', 'alternative'],
+    }
+    return {
+        'type': 'object', 'additionalProperties': False,
+        'properties': {
+            'global_fields': _assignment_array_schema(
+                development.GLOBAL_FIELDS, atoms, 'global',
+            ),
+            'studies': {
+                'type': 'array', 'maxItems': 50,
+                'items': _atom_scoped_record_schema('study', atoms),
+            },
+            'datasets': {
+                'type': 'array', 'maxItems': 100,
+                'items': _atom_scoped_record_schema('dataset', atoms),
+            },
+            'analyses': {
+                'type': 'array', 'maxItems': 200,
+                'items': _atom_scoped_record_schema('analysis', atoms),
+            },
+            'variable_uses': {
+                'type': 'array', 'maxItems': 500,
+                'items': _atom_scoped_record_schema('variable_use', atoms),
+            },
+            'findings': {
+                'type': 'array', 'maxItems': 300,
+                'items': _atom_scoped_record_schema('finding', atoms),
+            },
+            'framework': framework,
+        },
+        'required': [
+            'global_fields', 'studies', 'datasets', 'analyses',
+            'variable_uses', 'findings', 'framework',
+        ],
+    }
+
+
+def atom_scoped_bounded_synthesis_request(atoms):
+    """Build the existing synthesis request with atom-compatible decoder choices."""
+    original_synthesis_schema = development.synthesis_schema
+    development.synthesis_schema = lambda: atom_scoped_synthesis_schema(atoms)
+    try:
+        request = runtime._ORIGINAL_SYNTHESIS_REQUEST(atoms)
+    finally:
+        development.synthesis_schema = original_synthesis_schema
+    request['max_tokens'] = runtime.SCIENTIFIC_CONFIG['synthesis_max_tokens']
+    return request
+
+
+def install_assignment_scope():
+    """Install the v2 synthesis decoder for one resume-run process and return prior state."""
+    prior = (
+        runtime.SYNTHESIS_FIELD_SCOPED_SCHEMA,
+        runtime.bounded_synthesis_request,
+    )
+    runtime.SYNTHESIS_FIELD_SCOPED_SCHEMA = SYNTHESIS_ATOM_SCOPED_SCHEMA
+    runtime.bounded_synthesis_request = atom_scoped_bounded_synthesis_request
+    return prior
+
+
+def restore_assignment_scope(prior):
+    runtime.SYNTHESIS_FIELD_SCOPED_SCHEMA, runtime.bounded_synthesis_request = prior
 
 
 def candidate_id_from_argv(argv=None):
@@ -170,6 +322,7 @@ def pass_event(status):
 
 def main():
     original = runtime.runtime_post
+    assignment_scope = install_assignment_scope()
     limit = pass_limit()
     require_complete = pass_requires_complete()
     reset_pass_state(limit)
@@ -190,6 +343,7 @@ def main():
         print(pass_event('complete'), flush=True)
     finally:
         runtime.runtime_post = original
+        restore_assignment_scope(assignment_scope)
 
 
 if __name__ == '__main__':
