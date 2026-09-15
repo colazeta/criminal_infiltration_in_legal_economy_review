@@ -2,7 +2,7 @@ import { sha256 } from './review-v2.js';
 
 export const DEVELOPMENT_CHECKPOINT_PROTOCOL='CILE-FULLTEXT-DEV-CHUNK-1';
 const HEX64=/^[0-9a-f]{64}$/;
-const CANDIDATE=/^CAND-[A-Z0-9][A-Z0-9._-]{1,199}$/;
+const CANDIDATE=/^CAND-[A-Za-z0-9][A-Za-z0-9._-]{1,199}$/;
 const CHUNK=/^chunk-[1-9][0-9]{0,3}$/;
 const allowedIdentity=new Set(['protocol','candidate_id','extractor_fingerprint','request_sha256','chunk_id']);
 const allowedStored=new Set([...allowedIdentity,'output']);
