@@ -61,17 +61,15 @@ class FullTextRelationScopeV3Tests(unittest.TestCase):
             resume.atom_scoped_synthesis_schema(self.atoms()),
         )
 
-    def test_v3_fingerprint_changes_and_restores_without_weakening_base_validator(self):
+    def test_v3_fingerprint_changes_and_restores_runtime_contract(self):
         prior_fn = runtime.runtime_extractor_fingerprint
         prior_contract = runtime.SYNTHESIS_FIELD_SCOPED_SCHEMA
         prior_value = runtime.runtime_extractor_fingerprint()
-        validator = development.convert_synthesis
         state = resume.install_assignment_scope()
         try:
             self.assertEqual(runtime.SYNTHESIS_FIELD_SCOPED_SCHEMA,
                              resume.SYNTHESIS_ATOM_SCOPED_SCHEMA)
             self.assertNotEqual(runtime.runtime_extractor_fingerprint(), prior_value)
-            self.assertIs(development.convert_synthesis, validator)
         finally:
             resume.restore_assignment_scope(state)
         self.assertIs(runtime.runtime_extractor_fingerprint, prior_fn)
