@@ -41,7 +41,7 @@ class DeliveryContractTests(unittest.TestCase):
         self.assertIn('PERSIST', current)
         self.assertIn('ENRICH', current)
         self.assertIn('RESOLVE', current)
-        self.assertIn('oldest pending observation is at least 24 hours old', current)
+        self.assertIn('oldest pending CILE-IDENTITY-RESOLUTION-2 observation is at least 24 hours old', current)
         self.assertNotIn('Complete up to three existing candidates', runbook)
         self.assertNotIn('schedule:', (ROOT / '.github/workflows/deploy-curator-worker.yml').read_text())
 
