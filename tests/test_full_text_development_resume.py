@@ -166,7 +166,7 @@ class FullTextDevelopmentResumeTests(unittest.TestCase):
         with self.env(), patch.object(resume.runtime, 'runtime_extractor_fingerprint', return_value='b' * 64), \
                 patch.object(resume.runtime, '_validate_original_atom_contracts'):
             with self.assertRaisesRegex(RuntimeError, 'fulltext_checkpoint_conflict'):
-                resume.resumable_post(lambda *_: self.output(), self.request(), 300,
+                resume.resumable_post(lambda *_args, **_kwargs: self.output(), self.request(), 300,
                                       service=service, candidate_id=self.candidate)
 
     def test_candidate_service_commit_and_pass_guards_fail_closed(self):
