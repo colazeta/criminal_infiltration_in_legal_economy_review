@@ -16,8 +16,20 @@ function store(){
 }
 const candidate='CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-002';
 const hex=x=>x.repeat(64);
+const missing=()=>({status:'not_reported',value:null,evidence_span_ids:[],origin:'source'});
+const reported=(value,origin='source')=>({status:'reported',value,evidence_span_ids:['span-1'],origin});
+const assessment={
+  schema_version:1,protocol_version:'CILE-ENRICH-1',codebook_version:'1.0.0',target_id:'target-1',input_sha256:hex('a'),
+  generated_by:{agent:'independent-reference:test',model:'reference-model',prompt_sha256:hex('1')},
+  source_ids:['source-1'],source_coverage:'full_text',
+  spans:[{id:'span-1',source_id:'source-1',start_offset:0,end_offset:1,locator:'evidence 1'}],
+  summary:reported('Independent grounded summary'),contribution:missing(),research_question:missing(),infiltration_definition:missing(),
+  infiltration_operationalisation:missing(),authors_limitations:missing(),analyst_limitations:missing(),
+  studies:[],datasets:[],analyses:[],variable_uses:[],findings:[],
+  framework:{status:'proposed',primary:'diagnosis',rationale:reported('Grounded independent classification','analyst'),secondary:[],alternative:null},
+};
 const referenceIdentity={protocol:ASSESSMENT_REFERENCE_PROTOCOL,candidate_id:candidate,input_sha256:hex('a'),source_snapshot_sha256:hex('b'),request_sha256:hex('c'),stage:'reference'};
-const reference={...referenceIdentity,output:{assessment:{schema_version:1,marker:'private-reference'}}};
+const reference={...referenceIdentity,output:{assessment}};
 const comparisonIdentity={protocol:ASSESSMENT_COMPARISON_PROTOCOL,candidate_id:candidate,input_sha256:hex('a'),source_snapshot_sha256:hex('b'),proposal_revision:hex('d'),reference_sha256:hex('e'),request_sha256:hex('f'),stage:'comparison'};
 const comparison={...comparisonIdentity,output:{comparison:{protocol:ASSESSMENT_COMPARISON_PROTOCOL,candidate_id:candidate,input_sha256:hex('a'),source_snapshot_sha256:hex('b'),proposal_revision:hex('d'),reference_sha256:hex('e'),assessor:{agent:'independent-reference:test',model:'test-model',prompt_sha256:hex('1')},source_fidelity:'pass',omissions:'none',classification_agreement:'agree',field_accuracy:'pass',mandatory_disagreement_paths:[],optional_disagreement_paths:[],compared_at:'2026-09-15T17:45:00Z'}}};
 
@@ -35,7 +47,15 @@ test('reference checkpoint is immutable, private-store keyed and read back exact
   assert.match(await developmentCheckpointKey(referenceIdentity),/^assessment-frontier:/);
   const read=await readDevelopmentCheckpoint(s,referenceIdentity);
   assert.equal(read.status,'found');assert.deepEqual(read.checkpoint,reference);
-  await assert.rejects(writeDevelopmentCheckpoint(s,{...reference,output:{assessment:{schema_version:1,marker:'changed'}}}),/development_checkpoint_conflict/);
+  const changed=structuredClone(reference);changed.output.assessment.summary=reported('Changed summary');
+  await assert.rejects(writeDevelopmentCheckpoint(s,changed),/development_checkpoint_conflict/);
+});
+
+test('reference checkpoint rejects non-independent or mandatory unresolved assessment',()=>{
+  const wrongAgent=structuredClone(reference);wrongAgent.output.assessment.generated_by.agent='automated-production';
+  assert.throws(()=>validateDevelopmentCheckpoint(wrongAgent,{stored:true}),/development_checkpoint_invalid/);
+  const unresolved=structuredClone(reference);unresolved.output.assessment.research_question={status:'ambiguous',value:'unclear',evidence_span_ids:['span-1'],origin:'source'};
+  assert.throws(()=>validateDevelopmentCheckpoint(unresolved,{stored:true}),/development_checkpoint_invalid/);
 });
 
 test('comparison checkpoint binds candidate, source, proposal revision and reference digest',async()=>{
