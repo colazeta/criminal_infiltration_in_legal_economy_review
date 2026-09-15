@@ -88,7 +88,7 @@ class FullTextDevelopmentResumeTests(unittest.TestCase):
         with self.env():
             result = resume.resumable_post(original, synthesis, 420, service=lambda *_a, **_k: self.fail('no service'))
         self.assertEqual(result, {'ok': True})
-        self.assertEqual(called, [(synthesis, 720)])
+        self.assertEqual(called, [(synthesis, 1800)])
 
     def test_private_service_failure_fails_closed_instead_of_recomputing(self):
         with self.env(), patch.object(resume.runtime, 'runtime_extractor_fingerprint', return_value='b' * 64):
