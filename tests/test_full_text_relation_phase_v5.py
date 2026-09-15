@@ -4,21 +4,29 @@ import unittest
 from unittest.mock import patch
 
 from scripts.calibration import full_text_development as development
-from scripts.calibration import full_text_development_resume_v5 as phase
+
+phase = None
 
 
 class FullTextRelationPhaseV5Tests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        """Import v5 only when this test class starts, not during discovery.
+
+        The v5 execution module temporarily replaces shared v2 extension points.
+        Deferring import prevents unittest discovery from mutating the reviewed
+        v4 compatibility surface before the older regression modules execute.
+        """
+        global phase
+        from scripts.calibration import full_text_development_resume_v5 as phase_module
+        phase = phase_module
+
     def setUp(self):
         phase.reset_diagnostics()
 
     @classmethod
     def tearDownClass(cls):
-        """Restore reviewed v4 hooks after direct v5-module regression coverage.
-
-        The production entry point imports v5 lazily. These tests import the v5
-        module directly, so restore the shared v2 extension points before later
-        v4 compatibility tests execute in the same unittest process.
-        """
+        """Restore reviewed v4 hooks after direct v5-module regression coverage."""
         phase.v2.SYNTHESIS_ATOM_SCOPED_SCHEMA = phase.v4.SYNTHESIS_ATOM_SCOPED_SCHEMA
         phase.v2.atom_scoped_synthesis_schema = phase.v4.atom_scoped_synthesis_schema
         phase.v2.atom_scoped_bounded_synthesis_request = phase.v4.atom_scoped_bounded_synthesis_request
