@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "purpose": "Reviewed metadata-verifier declarations that resolve stale operational identity blockers without making scientific eligibility or canonical-publication decisions.",
+  "resolutions": [
+    {
+      "candidate_id": "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-003",
+      "resolution": "same_work_manifestation",
+      "expected_possible_duplicate_sha256": "11dc70a190770bbfdd7e29a7441034378a6605c488b817521fb128c0cd8707b1",
+      "resolved_doi": "10.31235/osf.io/sr6ep_v1",
+      "evidence_sources": [
+        "OpenAlex",
+        "Crossref",
+        "EconStor via Parallel Search"
+      ],
+      "evidence_methods": [
+        "OpenAlex:title_year",
+        "Crossref:title_year",
+        "Parallel Search:exact_title_authors_year",
+        "EconStor:repository_pdf"
+      ],
+      "checked_at": "2026-09-15",
+      "basis": "Persisted retrieval evidence now establishes the exact Mafias and Firms title/authors/year across OpenAlex and Crossref and independently verifies the IZA DP 16893 manifestation via EconStor. The earlier possible-duplicate note concerned an unresolved manifestation relation and is stale. This declaration does not merge CandidateRecords or make a canonical-work or scientific eligibility decision."
+    }
+  ]
+}
