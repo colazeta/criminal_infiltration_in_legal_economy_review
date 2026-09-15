@@ -1,4 +1,6 @@
 import { sha256 } from './review-v2.js';
+import { validateShape } from './paper-enrichment.js';
+import { inspectCompletionFacts, validateFrameworkAssessment } from './completion-policy.js';
 
 export const DEVELOPMENT_CHECKPOINT_PROTOCOL='CILE-FULLTEXT-DEV-CHUNK-1';
 export const ASSESSMENT_REFERENCE_PROTOCOL='CILE-ASSESSMENT-REFERENCE-1';
@@ -25,8 +27,15 @@ function allowedStored(protocol){return new Set([...identityFields(protocol),'ou
 
 function validateAssessmentReferenceOutput(output){
   if(!object(output)||Object.keys(output).length!==1||!object(output.assessment))throw failure('development_checkpoint_invalid');
-  const raw=JSON.stringify(output.assessment);
+  const assessment=output.assessment,raw=JSON.stringify(assessment);
   if(raw.length<2||raw.length>480000)throw failure('development_checkpoint_invalid');
+  try{
+    validateShape(assessment);
+    if(assessment.source_coverage!=='full_text')throw Error('full_text_required');
+    if(typeof assessment.generated_by?.agent!=='string'||!assessment.generated_by.agent.startsWith('independent-reference:'))throw Error('independent_reference_agent_required');
+    if(inspectCompletionFacts(assessment).unresolved)throw Error('unresolved_mandatory_facts');
+    validateFrameworkAssessment(assessment.framework);
+  }catch{throw failure('development_checkpoint_invalid')}
 }
 function validateAssessmentComparisonOutput(output){
   if(!object(output)||Object.keys(output).length!==1||!object(output.comparison))throw failure('development_checkpoint_invalid');
