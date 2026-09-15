@@ -17,7 +17,8 @@ class FullTextSynthesisTimeoutRecoveryTests(unittest.TestCase):
         self.assertEqual(runtime.runtime_post(call, payload, 420), {'ok': True})
         self.assertIs(seen['value'], payload)
         self.assertEqual(seen['timeout'], runtime.SYNTHESIS_COMPLETION_TIMEOUT_SECONDS)
-        self.assertEqual(seen['timeout'], 1200)
+        self.assertEqual(seen['timeout'], 1800)
+        self.assertEqual(runtime.SCIENTIFIC_CONFIG['synthesis_max_tokens'], 6000)
 
     def test_chunk_post_keeps_existing_window(self):
         seen = {}
@@ -37,8 +38,8 @@ class FullTextSynthesisTimeoutRecoveryTests(unittest.TestCase):
             seen['timeout'] = timeout
             return {}
 
-        runtime.runtime_post(call, {}, 1300)
-        self.assertEqual(seen['timeout'], 1300)
+        runtime.runtime_post(call, {}, 1900)
+        self.assertEqual(seen['timeout'], 1900)
 
 
 if __name__ == '__main__':
