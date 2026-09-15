@@ -1,6 +1,6 @@
 # Two-lane delivery and recovery
 
-Owner implementation mandate: 14 September 2026; persistence-first/identity-resolution v4 amendment: 15 September 2026. `docs/operations/hourly-hybrid-v4.md` is the current operational source of truth for routing, provider order, runtime closeout and SLOs. This file records the delivery architecture and scientific boundaries.
+Owner implementation mandate: 14 September 2026; persistence-first/identity-resolution v4 amendment: 15 September 2026; completion-first v5 amendment: 15 September 2026. `docs/operations/completion-first-v5.md` is the current operational source of truth for KPI priority, work selection, WIP control and completion-convergence reporting. `docs/operations/hourly-hybrid-v4.md` remains authoritative for cadence, provider order, identity-resolution, branch-recovery, anti-repeat and runtime closeout where v5 does not explicitly supersede it. This file records the delivery architecture and scientific boundaries.
 
 ## Hourly hybrid lanes and scouting windows
 
@@ -14,23 +14,38 @@ For scheduled scouting, **Parallel Search is the default discovery provider**. E
 
 ## Current work router
 
-A due owned scouting window selects `SCOUT`. Otherwise, after resuming any unfinished safe write, use:
+A due owned scouting window selects `SCOUT`. Otherwise, after resuming any unfinished safe write, use the completion-first v5 router. The retained v4 concepts remain:
 
 1. `PERSIST` — verified work can be durably written now;
-2. `ENRICH` — an owned CandidateRecord has an executable next stage and real persistence path;
-3. `RESOLVE` — pending CILE-IDENTITY-RESOLUTION-2 debt can be advanced;
-4. Lane B only: `ENGINEER` — a demonstrated shared blocker or mandatory gate prevents corpus progress;
-5. `NOOP` — no safe executable work remains.
+2. `ENRICH`/`COMPLETE` — an owned CandidateRecord has an executable next completion gate and real persistence path;
+3. `CALIBRATION_CASE` — an owned selected heterogeneous calibration case can advance;
+4. `RESOLVE` — pending CILE-IDENTITY-RESOLUTION-2 debt can be advanced;
+5. Lane B only: `ENGINEER` — a demonstrated shared blocker or mandatory gate prevents completion progress;
+6. `NOOP` — no safe executable work remains.
 
-Paper-stage throughput is primary, so executable `ENRICH` normally precedes `RESOLVE`. Identity debt has a starvation guard: oldest pending ≥24h or pending queue ≥20 makes the next eligible non-scout activation route to `RESOLVE` before new enrichment research.
+Completion convergence is primary. Identity debt retains its starvation guard: oldest pending ≥24h or pending queue ≥20 makes the next eligible non-scout activation route to `RESOLVE` before opening new ordinary enrichment research.
 
-## Persistence-first work selection
+## Persistence-first and completion-first work selection
 
-The unit of productive work is a **durable paper-stage transition**. Before substantial candidate research, establish the authorised writer/claim/dispatch path for the intended next stage. If it cannot be persisted in the activation, do not create a read-only cohort. Record the blocker/recheck condition once and select another executable stage.
+The unit of productive work remains a **durable paper-stage transition**, but under v5 that is a secondary diagnostic unless it also reduces the paper's distance to `completed=true`.
+
+Before substantial candidate research, establish the authorised writer/claim/dispatch path for the intended next completion gate. If it cannot be persisted in the activation, do not create a read-only cohort. Record the blocker/recheck condition once and select another executable completion gate.
 
 A paper counts as materially progressed only after the new stage is written and read back successfully. Searches, locator rereads, issue comments, timestamps, CI checks, unchanged validation and engineering commits count as zero paper enrichment.
 
+The primary operational view is now the completion frontier defined in `completion-first-v5.md`: deepest reached gate, first unmet gate and whether completion distance decreased. Ordinary active completion WIP is capped at six project-wide papers; blocked papers are parked with an exact recheck condition rather than left as unlimited WIP.
+
 If an activation examines candidates but produces zero durable transitions, persist the common blocker key. The next activation may not repeat the same retrieval/selection/inference strategy unless that prerequisite changed.
+
+## Heterogeneous calibration is global P0
+
+The current completion predicate requires an accepted heterogeneous calibration receipt before paper-specific completion can be attested. Until that global gate is satisfied, the 12–18 paper calibration cohort is a project-wide P0.
+
+Report `reference-checked calibration cases / 12 minimum` every non-scout activation. Cases count only after the independent/reference comparison is actually completed and persisted; proposal persistence alone does not increment the calibration numerator.
+
+`CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-002` is currently the deepest calibration/frontier case because its private structured proposal has been persisted and read back. Its next intended gate is source-first independent comparison, not another unchanged inference run.
+
+Select the remaining cohort deliberately for heterogeneity and completion feasibility, including full-text and hard cases, varied designs and missingness/source conditions, under `enrichment-adjudication.md`.
 
 ## Stateful discovery identity closure
 
@@ -56,13 +71,15 @@ At completed-window closeout, every observation counted as `unresolved_identity`
 
 The final batch still owns the governed v3 intake/terminal semantics. Partial evidence never manufactures a completed W1–W7 run or an inclusion decision.
 
-## Engineering discipline and calibration
+## Engineering discipline and proof obligation
 
-Lane A is the paper-production lane and does not open shared engineering/calibration repairs. Lane B alone owns shared throughput/persistence/calibration engineering, and only after higher-priority persist/enrich/required-resolve work is unavailable.
+Lane A is the paper-production lane and does not open shared engineering/calibration repairs. Lane B alone owns shared throughput/persistence/calibration engineering, and only after higher-priority persist/complete/calibration-case/required-resolve work is unavailable.
 
-Engineering is bounded tracked work and counts as zero paper enrichment until later real paper transitions demonstrate a gain. Do not extend timeouts or repeat unchanged model paths merely to obtain a different result.
+Engineering is bounded tracked work and counts as zero paper enrichment until later real paper transitions demonstrate a gain. Under v5, a shared engineering change must demonstrate at least one downstream completion-gate transition within the next two eligible automation activations. If it does not, record it as unproven engineering debt and do not continue engineering the same class without new trace evidence.
 
-Failure clusters follow `docs/operations/calibration-trace-audit.md`. The current CAND-002 #711–#713 cluster crossed the stop threshold. The bounded private trace-audit workflow may recover only non-sensitive structural counts/digests and must not expose private source/model content. A class-level reviewed conclusion is required before further production calibration.
+If Lane A reports no actionable authorised writer/claim for ordinary completion work in two consecutive eligible activations, Lane B treats the missing generic governed writer/claim path as a shared throughput blocker before unrelated optimisation work.
+
+Failure clusters follow `docs/operations/calibration-trace-audit.md`. Do not extend timeouts or repeat unchanged model paths merely to obtain a different result.
 
 ## Soft runtime close
 
@@ -86,8 +103,10 @@ Actual-paper bibliography, provider references and incoming citations remain dis
 
 ## Acceptance, verification and reporting
 
-Report separately: scouting observations/intake; identity-resolution debt; durable paper-stage transitions; source/document readiness; proposals/framework/bibliography state; accepted receipts; engineering/audit changes; and public revision identity.
+Report separately: scouting observations/intake; identity-resolution debt; completion-frontier state; source/document readiness; proposals/framework/bibliography state; independent comparison; calibration numerator; review-ready papers; accepted receipts; engineering/audit changes; and public revision identity.
 
-The primary operational KPI is distinct papers with a durable stage transition. When zero advance, report the common blocker and what must change before retry. Global CI/deployment/public-index verification is required after relevant state changes, not as an unchanged activity loop.
+The primary operational KPI is now papers whose completion distance decreased, followed by deepest gate reached, calibration progress toward 12 minimum, review-ready papers and final completions. Distinct papers with a durable stage transition remains a secondary operational metric and never substitutes for convergence.
+
+Global CI/deployment/public-index verification is required after relevant state changes, not as an unchanged activity loop.
 
 Maintenance changes follow `AGENTS.md` validation/merge rules. Scientific/canonical decisions retain their independent curator/human gates.
