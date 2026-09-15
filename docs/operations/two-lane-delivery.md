@@ -1,75 +1,93 @@
 # Two-lane delivery and recovery
 
-Owner implementation mandate: 14 September 2026; persistence-first v3 amendment: 15 September 2026. These amendments change operational cadence, provider order, work selection and delivery contracts, not historical evidence or scientific acceptance. Linked issues: #676, #678 and operational checkpoint thread #696.
+Owner implementation mandate: 14 September 2026; persistence-first/identity-resolution v4 amendment: 15 September 2026. `docs/operations/hourly-hybrid-v4.md` is the current operational source of truth for routing, provider order, runtime closeout and SLOs. This file records the delivery architecture and scientific boundaries.
 
 ## Hourly hybrid lanes and scouting windows
 
-The existing automation is a two-lane hourly system. Lane A runs at :10 and Lane B at :40. Both lanes are enrichment workers by default; scouting is a bounded mode inside those workers, not a separate scheduler. Lane A owns the AM scouting window 08:00–20:00 Europe/Rome. Lane B owns the PM scouting window 20:00–08:00 the next day, labelled by the opening date. There are exactly two project-wide scouting windows per day. A successful zero-result completed batch is useful surveillance, not saturation.
+The existing automation is a two-lane hourly system. **Lane A runs at :10 and Lane B at :40.** Both lanes are enrichment/recovery workers by default; scouting is a bounded mode inside them, not another scheduler. Lane A owns 08:00–20:00 Europe/Rome; Lane B owns 20:00–08:00. There are **exactly two project-wide scouting windows per day**.
 
-Keep the existing `CILE-HOUR40-1` private enrichment service, namespace, catch-up semantics, fencing and immutable attempts. The :10/:40 conversational workers route work through existing governed persistence paths; this amendment does not create or authorise a second private scheduler.
+Keep the existing `CILE-HOUR40-1` private enrichment service, namespace, catch-up semantics, fencing and immutable attempts. The conversational workers route through existing governed persistence paths; they do not create a second private scheduler.
 
-Candidate ownership is stable by `hashlib.sha256(candidate_id.encode("utf-8")).digest()[0] % 2`, with Lane A = 0 and Lane B = 1. Positively observed live work keeps its current owner until safely released. Hash assignment, trigger staggering, issue notes and scheduler timestamps are not locks: actual transactional claims, leases, fencing and version guards remain authoritative. Do not create another scheduler or infer concurrent work from an open issue or a task timestamp.
+Candidate ownership remains stable by `hashlib.sha256(candidate_id.encode("utf-8")).digest()[0] % 2`, Lane A = 0, Lane B = 1. Hash assignment and timestamps are not locks. Actual transactional claims, leases, fencing and version guards remain authoritative.
 
-For scheduled scouting, Parallel Search is the default discovery provider. Exa may be used only when it is positively known to be available and when it materially adds recall or verification value. A known exhausted quota must not be probed again in every scouting window. Do not use Consensus or Scite for scheduled discovery. Preserve the governed W1–W7 query families, identity reconciliation, terminal validation, retry/backoff/idempotency and current v3 intake semantics. Provider limits, failures and uncertainty remain visible; a failed or partial request is not a zero-result search.
+For scheduled scouting, **Parallel Search is the default discovery provider**. Exa is optional only when positively available and materially useful. Consensus and Scite are excluded from scheduled surveillance. W1–W7/adaptive depth are governed by `novelty-depth.md`.
 
-Before scouting, reconcile valid intake/publication debt through the existing #362 recovery writer when required, without cancelling live jobs. Read query checkpoints and the existing novelty/depth frontier. Use recently changed/indexed metadata when the approved provider actually exposes those dates; publication year alone is not a reliable incremental watermark. Keep last successfully completed source window/cursor distinct from last attempted time. Windows overlap and exact identities deduplicate. Do not invent a provider cursor or transfer one provider's watermark to another. Weekly exploration rotates underserved language/geography/sector/period/query families and backward/forward seeds within one of the two existing windows; it is not another scheduler or a substitution for formal E1–E3 saturation cycles. Expansion resumes known frontier/debt rather than repeating the same first search page.
+## Current work router
 
-## Durable observations before terminal intake
+A due owned scouting window selects `SCOUT`. Otherwise, after resuming any unfinished safe write, use:
 
-`python3 -m scripts.query_checkpoint input.json --output checkpoint-comments.json` validates and renders an immutable query checkpoint. After each actual enumerable query, append its returned comment parts to existing issue #696 with the authenticated GitHub connector and read them back **before** the next query. The optional `--publish` path performs the same idempotent append/readback using an already authorised GitHub token; it never creates one. No copied abstract, full text, private notes or credentials are accepted by the closed field validator. Multipart fragments preserve long result sets without truncating them. An incomplete fragment set remains a pending checkpoint, not a completed query. A failed query remains failed even when its observations are retained.
+1. `PERSIST` — verified work can be durably written now;
+2. `ENRICH` — an owned CandidateRecord has an executable next stage and real persistence path;
+3. `RESOLVE` — pending CILE-IDENTITY-RESOLUTION-2 debt can be advanced;
+4. Lane B only: `ENGINEER` — a demonstrated shared blocker or mandatory gate prevents corpus progress;
+5. `NOOP` — no safe executable work remains.
 
-Read existing identities before retrying. Exact replays are no-ops; different content under one key is a conflict, requiring an explicitly identified new attempt. After a crash, resume an unterminalised batch only within the current run/lease/identity contract. A checkpoint from a terminal failed historical batch supplies recovery seeds, not a backdated successful query. Reverify those seeds in a fresh authorised batch before normal candidate intake. The valid final batch still owns at most one v3 intake and exactly one immutable terminal in #30. Partial query evidence never manufactures a completed seven-query run or an inclusion decision. The final-provider totals remain separate from an abandoned provider's retained observations.
+Paper-stage throughput is primary, so executable `ENRICH` normally precedes `RESOLVE`. Identity debt has a starvation guard: oldest pending ≥24h or pending queue ≥20 makes the next eligible non-scout activation route to `RESOLVE` before new enrichment research.
 
 ## Persistence-first work selection
 
-The unit of productive work is a **durable paper-stage transition**, not a search, locator read, comment, timestamp, CI check or attempted analysis. At preflight, read current main/deployed state, one compact queue/status snapshot and the latest relevant checkpoint once. Resume any real unfinished safe write first. Reuse that snapshot during the activation and refresh only changed inputs, actual live claims and conflicting paths immediately before relevant writes.
+The unit of productive work is a **durable paper-stage transition**. Before substantial candidate research, establish the authorised writer/claim/dispatch path for the intended next stage. If it cannot be persisted in the activation, do not create a read-only cohort. Record the blocker/recheck condition once and select another executable stage.
 
-Each activation selects exactly one primary mode:
+A paper counts as materially progressed only after the new stage is written and read back successfully. Searches, locator rereads, issue comments, timestamps, CI checks, unchanged validation and engineering commits count as zero paper enrichment.
 
-- `SCOUT`: the lane's owned AM/PM scouting window is genuinely due and unsatisfied;
-- `PERSIST`: already verified work can be durably written now;
-- `ENRICH`: at least one owned candidate has an executable next stage and an authorised persistence path is positively available;
-- `ENGINEER`: Lane B only, when one demonstrated shared bottleneck blocks multiple papers or an indispensable scientific gate and no higher-value persistible paper work should run first;
-- `NOOP`: no safe persistible work is available after checking blockers and prerequisites.
+If an activation examines candidates but produces zero durable transitions, persist the common blocker key. The next activation may not repeat the same retrieval/selection/inference strategy unless that prerequisite changed.
 
-Before substantial candidate research, positively establish the writer/claim/dispatch path for the intended next stage. If that stage cannot be persisted in the activation, do not build a large read-only cohort. Inspect only enough to identify the precise shared blocker, record its prerequisite/recheck trigger once, and select another actionable candidate. Do not repeatedly research candidates whose blocker has not changed. A missing source or human decision blocks that stage, not other safe work.
+## Stateful discovery identity closure
 
-Build the working cohort only from candidates whose next stage is currently executable. Prefer homogeneous micro-batches and replenish from the actionable pool while safe runtime remains. There is no fixed one-/three-/ten-paper cap or minimum quota. Volume never overrides source isolation, evidence quality, transactional writes, provider limits or scientific gates. Reserve about 20% of workable slots for the oldest feasible incomplete candidates so difficult/no-DOI cases are not permanently starved.
+Use `docs/operations/identity-resolution.md` and CILE-IDENTITY-RESOLUTION-2. Each provider observation is append-only state keyed by `observation_key`, with provider-independent `identity_key` only as a bibliographic grouping aid.
 
-A paper counts as materially progressed only after the new stage is written through an authorised path and read back successfully. Examples include metadata verified→persisted, source verified→retained, PDF available→retained/read back, retained document→structured proposal persisted, proposal→accepted assessment and accepted assessment→public projection. Locator rereads, unchanged metadata checks, issue comments, public-index scans and unchanged replays contribute zero to paper progress.
+New unresolved observations are `pending`. They may resolve directly to known/not-forwarded outcomes, or use the explicit intake bridge:
 
-If an enrichment activation examines candidates but produces zero durable candidate-stage transitions, persist the common cause and blocker key. The next activation for that lane must not repeat the same selection/retrieval strategy unless the recorded prerequisite has changed. Repeated unchanged blocker checks, repeated whole-index scans and unchanged whole-paper inference retries are prohibited as substitutes for progress.
+`pending → forwarded_to_intake → resolved/new_candidate`.
 
-Lane A is the normal paper-production worker and must not open shared engineering/calibration repair work. Lane B alone owns shared throughput/persistence/calibration engineering. `ENGINEER` is justified only for a measured or directly observed common bottleneck affecting multiple papers or a mandatory scientific gate. Choose the smallest bounded change that removes that blocker, preserve immutable receipts/fencing/privacy/tests, and validate/deploy through the existing governed path. A merged engineering PR is reported separately and counts as zero paper enrichment until subsequent paper-stage transitions actually persist. Do not extend timeouts or rerun the same failed model path unchanged.
+A resolution comment cannot create a CandidateRecord. `new_candidate` is valid only after the normal v3 intake/recovery path has materialised the referenced CandidateRecord. Conflicting terminal states are rejected by the stateful validator.
 
-Engineering repairs are bounded tracked work, not a substitute for processing the corpus. Read actual source and latest comments before repairing a supposedly missing feature. #681 already added receipt infrastructure; #692/#693 already added and recovered full-text development. The full-text development harness is not the accepted heterogeneous 12–18-case calibration. Preserve source-first/blinded reference assessments, exact model/extractor fingerprint and per-case request hash. No production scientific extractor is activated until the independent acceptance gate passes. Completed means an accepted current receipt, not successful inference, a PDF, an abstract, a proposed class or a green workflow.
+## Validated branch recovery
+
+Candidate metadata/identity workflows can validate and push an automation branch while repository token policy blocks PR creation. This is recoverable delivery debt, not a reason to rerun the underlying work.
+
+Such workflows persist `cile-validated-branch-recovery:1` on #696 with branch/head/base/run identity. The next Lane-A/B activation, before new research, checks unresolved tickets. If the exact branch/head remains ahead of main and has no PR, it opens the PR through the authenticated GitHub connector. A validated branch must not remain without a PR for more than one subsequent activation unless a concrete connector/policy blocker is recorded.
+
+## Durable scouting observations
+
+`python3 -m scripts.query_checkpoint` validates and renders immutable query checkpoints. After each enumerable query, append/read back its permitted checkpoint before the next query. Incomplete fragments remain pending; a failed query remains failed.
+
+At completed-window closeout, every observation counted as `unresolved_identity` must also exist as a durable CILE-IDENTITY-RESOLUTION-2 `pending` record. Aggregate counts without reconstructable identities are incomplete state.
+
+The final batch still owns the governed v3 intake/terminal semantics. Partial evidence never manufactures a completed W1–W7 run or an inclusion decision.
+
+## Engineering discipline and calibration
+
+Lane A is the paper-production lane and does not open shared engineering/calibration repairs. Lane B alone owns shared throughput/persistence/calibration engineering, and only after higher-priority persist/enrich/required-resolve work is unavailable.
+
+Engineering is bounded tracked work and counts as zero paper enrichment until later real paper transitions demonstrate a gain. Do not extend timeouts or repeat unchanged model paths merely to obtain a different result.
+
+Failure clusters follow `docs/operations/calibration-trace-audit.md`. The current CAND-002 #711–#713 cluster crossed the stop threshold. The bounded private trace-audit workflow may recover only non-sensitive structural counts/digests and must not expose private source/model content. A class-level reviewed conclusion is required before further production calibration.
+
+## Soft runtime close
+
+At roughly 20 minutes of active work, enter soft-close: do not open a new paper cohort, search family, engineering branch or external workflow. Finish/persist/read back work already in flight, or leave an exact recoverable checkpoint/run/branch for the next activation. Do not poll long-running external jobs simply to fill the hour. Transactional safety and required terminalisation take precedence over the soft-close threshold.
 
 ## Completion policy and public index
 
-`ontology/modules/completion-policy.json` is CILE-COMPLETION-POLICY-2. Every fact in the source schema is assigned explicitly to mandatory or optional review. Optional unresolved analyst notes, dataset accessibility or canonical variable concept remain displayed and counted in the private review packet; they are never silently rewritten. Effect units, operationalisation and other substantive facts remain mandatory assessments. `not_reported` and `not_applicable` require suitable source scope and independent review. Empty arrays never prove that a paper has no studies, variables or findings. Each empty group has its own null assessment in the review checklist. Only an exact-head human decision of `not_reported` or `not_applicable` after full-text examination can close it; a generic true checklist cannot. Non-empty groups are marked `recorded`. The receipt binds the policy and complete group-level checklist digest.
+`ontology/modules/completion-policy.json` remains CILE-COMPLETION-POLICY-2. Scientific completion requires the current accepted receipt and mandatory review checklist; inference success, PDF availability, abstract availability, proposed framework class or green CI are not completion.
 
-Framework assessment can conclude with a grounded proposed class or grounded `outside_framework`; the latter requires a source-supported analyst rationale and independent acceptance. `insufficient_evidence` does not qualify. This prevents forced coding without inventing a seventh class. The receipt manifest binds this policy version. No prior manifest/decision is edited or implicitly accepted under the new policy.
+Framework assessment may be a grounded proposed class or grounded `outside_framework` only under the existing independent acceptance rules. `insufficient_evidence` does not qualify.
 
-`/api/public-paper-research?view=index` returns closed 50-record pages bound to a revision over the current register inputs and append-only scientific/source/reference/receipt state. Changed snapshots return 409; the browser discards the inconsistent scan and retries once. Unknown, failed, stale and withheld remain distinct. Detail retrieval is lazy. The archive filter, paper badge and statistics use the same current-completion predicate and current public-research revision. The registered CandidateRecord denominator is explicit; incomplete coverage has no final percentage. Canonical/eligible works remain a separately labelled population.
+The public research index remains revision-bound, lazy-detail and fail-closed. Unknown, failed, stale and withheld are distinct. The registered CandidateRecord denominator remains separate from canonical/eligible work populations.
 
 ## Original PDF and bibliography delivery
 
-Migration 0006 adds document and bibliography tables to the **existing** private store. Original PDF bytes are chunked, immutable, hash checked and independently read back; a header is not scientific validation. The signed machine `source` operation uses the existing curator source-import validator. `document` binds exact original PDF bytes to the current retained full-text source and source-text hash; `document-check` exercises the same authenticated reader byte path. Four MiB is the explicit original-byte limit; a larger file is a local blocker, never silently truncated. Source retention, original PDF retention, public redistribution and scientific acceptance remain different permissions.
+The existing private store remains the only authorised location for retained source/full-text/document/bibliography data. Exact original bytes are hash checked/read back; a downloadable file does not imply redistribution rights. Private research retention and public redistribution remain separate permissions.
 
-`python3 -m scripts.enrichment.retain_document --manifest <reviewed manifest> --expected-commit <deployed SHA>` handles one already-registered, allowlisted, hash-pinned source. It reuses a matching retained copy, otherwise uses the existing OA acquisition boundary, extracts private text, verifies identity/hashes and imports via the existing signed service. It writes no source text or PDF to GitHub/Pages/workflow artifacts. The seed manifest is the previously verified IZA Discussion Paper 13028 and explicitly permits **private research only**, not redistribution. Its original author/year/version and retention basis remain attributed; it is not silently replaced by the journal manifestation. The existing Worker deployment performs an idempotent seed readback acceptance check, not a new recurring repair workflow.
+`python3 -m scripts.enrichment.retain_document` handles reviewed, registered, allowlisted, hash-pinned sources through the existing signed service. Source text/PDF bytes must not enter GitHub, Pages or ordinary workflow artifacts.
 
-Private originals are opened from the authenticated enrichment console using an authenticated fetch and a revocable blob URL. No session token enters the URL. Public copies use a separate route and require the operator's independently verified reusable licence, licence URL and attribution. A later private-only rights record removes the earlier public copy from the public reader. The service validates the supplied authorisation; it does not infer a licence from free download or certify the legal evidence itself. The initial seed remains private. Public UI explicitly distinguishes an external locator, a public retained copy and possible authenticated private copies.
-
-Bibliography import retains actual-paper and provider-reference snapshots separately. Each entry preserves position, original available title/authors/year/venue/DOI/URL, source locator and unresolved identity. Missing DOI does not drop a reference. Source-complete requires a declared finite count matching the retained entries; partial and not-reported are distinct. Public pages expose only safe bibliographic fields, provenance, observation time and a frozen paginated snapshot. No new corpus nominations come from citation edges. Completion binds a source-complete or independently reviewed not-reported **actual-paper bibliography**, not merely provider identifiers; incoming citations remain provider/direction/as-of observations. Original PDF bytes are required for PDF-backed sources before completion, and their provenance binds the source snapshot.
+Actual-paper bibliography, provider references and incoming citations remain distinct. Completion requires the current governed bibliography/null-assessment rules and cannot be inferred from provider citation coverage.
 
 ## Acceptance, verification and reporting
 
-Report separately: scouting observations; valid intake; durable paper-stage transitions; source readiness; original PDFs retained/readable; abstract/partial/full-text proposals; framework proposed/not applicable/insufficient; bibliography coverage; accepted current receipts; engineering changes; and public version identity. Count distinct papers, not fields, sources, edges or stage events added together. Unknown is not zero.
+Report separately: scouting observations/intake; identity-resolution debt; durable paper-stage transitions; source/document readiness; proposals/framework/bibliography state; accepted receipts; engineering/audit changes; and public revision identity.
 
-The primary operational KPI is distinct papers with a durable stage transition in the activation. Report the actionable pool size, distinct papers examined, distinct papers durably advanced, per-paper `from_stage→to_stage` transitions with storage/readback evidence, final completions, unchanged papers and blocked papers grouped by blocker key/prerequisite. If zero papers advance, name the common cause and state what must change before that strategy may be retried.
+The primary operational KPI is distinct papers with a durable stage transition. When zero advance, report the common blocker and what must change before retry. Global CI/deployment/public-index verification is required after relevant state changes, not as an unchanged activity loop.
 
-Global CI/deployment/public-index verification is required after a relevant state change or to resolve an outstanding pending transition. Do not repeatedly rescan an unchanged full index or poll unchanged workflows merely to reconfirm no progress. Reports may carry forward the most recent verified completed numerator/registered denominator only with its original observation time; do not create a fresh timestamp without a fresh revision-bound verification.
-
-Maintenance completion requires full AGENTS checks on the final branch head, reviewed diff/threads, expected-head merge, actual Worker/Pages readback and one real retained-document verification when those surfaces were changed. This does not supply the outstanding heterogeneous calibration/reference assessment or human paper adjudication. #676/#678 stay open until their scientific acceptance criteria have real evidence.
-
-The signed `provider-bibliography` operation reuses the current retained Crossref metadata, preserves finite bibliographic fields and unresolved entries, and emits only a provider-scoped snapshot. It makes no new external call and cannot satisfy actual-paper bibliography acceptance. The verified-document seed invokes it after original-byte readback; recurring enrichment should invoke it on current metadata sources without repeating unchanged snapshots.
+Maintenance changes follow `AGENTS.md` validation/merge rules. Scientific/canonical decisions retain their independent curator/human gates.
