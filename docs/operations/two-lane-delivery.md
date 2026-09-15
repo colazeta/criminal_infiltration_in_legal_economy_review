@@ -16,7 +16,7 @@ Lane A runs at :10 and Lane B at :40. Both are assessment/enrichment workers by 
 
 Keep the existing private enrichment service, namespace, claims, fencing, catch-up semantics and immutable attempts. Candidate ownership remains stable by SHA256 modulo 2; timestamps and hash assignment are not locks.
 
-Scheduled scouting uses Parallel Search by default. Exa is optional only when positively available and materially useful. Consensus and Scite are excluded from scheduled surveillance.
+For scheduled scouting, **Parallel Search is the default discovery provider**. Exa is optional only when positively available and materially useful. Consensus and Scite are excluded from scheduled surveillance.
 
 ## Current router
 
