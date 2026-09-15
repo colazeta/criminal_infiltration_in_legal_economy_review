@@ -38,7 +38,7 @@ def exact_commit():
     return value
 
 
-def chunk_identity(payload, candidate_id):
+def chunk_request(payload):
     if not isinstance(payload, dict):
         return None
     try:
@@ -47,15 +47,23 @@ def chunk_identity(payload, candidate_id):
         return None
     if not isinstance(user, dict) or set(user) != {'chunk_id', 'text'}:
         return None
-    chunk_id = user.get('chunk_id')
-    if not re.fullmatch(r'chunk-[1-9][0-9]{0,3}', str(chunk_id)):
+    if not re.fullmatch(r'chunk-[1-9][0-9]{0,3}', str(user.get('chunk_id'))):
+        return None
+    if not isinstance(user.get('text'), str):
+        return None
+    return user
+
+
+def chunk_identity(payload, candidate_id):
+    user = chunk_request(payload)
+    if user is None:
         return None
     return {
         'protocol': PROTOCOL,
         'candidate_id': candidate_id,
         'extractor_fingerprint': runtime.runtime_extractor_fingerprint(),
         'request_sha256': development.sha(development.canonical(payload)),
-        'chunk_id': chunk_id,
+        'chunk_id': user['chunk_id'],
     }
 
 
@@ -63,10 +71,10 @@ def resumable_post(original, payload, timeout=300, *, service=service_call, cand
     """Return a matching private checkpoint or persist one newly generated chunk."""
     if not os.environ.get('CURATOR_SESSION_SECRET'):
         return _ORIGINAL_RUNTIME_POST(original, payload, timeout)
+    if chunk_request(payload) is None:
+        return _ORIGINAL_RUNTIME_POST(original, payload, timeout)
     candidate_id = candidate_id or candidate_id_from_argv()
     identity = chunk_identity(payload, candidate_id)
-    if identity is None:
-        return _ORIGINAL_RUNTIME_POST(original, payload, timeout)
     commit = exact_commit()
     try:
         result = service('development-checkpoint-get', expected_commit=commit, checkpoint=identity)
