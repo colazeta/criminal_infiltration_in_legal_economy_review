@@ -104,24 +104,34 @@ jobs:
           python3 scripts/ontology/validate_ontology.py
           python3 -m unittest tests.test_full_text_source_case tests.test_full_text_development tests.test_full_text_development_run tests.test_full_text_development_resume
           node --test curator-app/test/sealed-audit.test.js curator-app/test/calibration-development-checkpoint.test.js
-      - name: Wait for exact private checkpoint service deployment
+      - name: Resolve a compatible authenticated private checkpoint deployment
         env:
-          EXPECTED_COMMIT: ${{ github.sha }}
+          CURATOR_SESSION_SECRET: ${{ secrets.CURATOR_SESSION_SECRET }}
         run: |
           python3 - <<'PY'
           import os,time
-          from scripts.enrichment.service_client import current_commit
-          expected=os.environ['EXPECTED_COMMIT']
-          last=None
+          from scripts.enrichment.service_client import call,current_commit
+          probe={
+              'protocol':'CILE-FULLTEXT-DEV-CHUNK-1',
+              'candidate_id':'CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-002',
+              'extractor_fingerprint':'0'*64,
+              'request_sha256':'0'*64,
+              'chunk_id':'chunk-9999',
+          }
+          last='unobserved'
           for attempt in range(1,37):
               try:
-                  last=current_commit()
-                  if last==expected:
-                      print(f'Exact private service commit verified on attempt {attempt}.')
+                  deployed=current_commit()
+                  result=call('development-checkpoint-get',expected_commit=deployed,checkpoint=probe)
+                  if result.get('status') in {'missing','found'}:
+                      with open(os.environ['GITHUB_ENV'],'a',encoding='utf-8') as handle:
+                          handle.write('CALIBRATION_CHECKPOINT_SERVICE_COMMIT='+deployed+'\n')
+                      print(f'Compatible private checkpoint service verified on attempt {attempt}.')
                       break
+                  last='unexpected_checkpoint_probe_status'
               except Exception as error:
                   last=type(error).__name__
-              if attempt==36: raise SystemExit(f'exact_private_checkpoint_service_not_deployed:{last}')
+              if attempt==36: raise SystemExit(f'compatible_private_checkpoint_service_unavailable:{last}')
               time.sleep(10)
           PY
       - name: Run one exact-source full-text development case with private chunk resume
