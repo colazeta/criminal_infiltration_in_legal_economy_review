@@ -136,33 +136,14 @@ def index_rows(rows: list[dict[str, str]], label: str) -> dict[str, dict[str, st
     return index
 
 
-def validate_resolution(
-    declaration: dict[str, Any],
-    queue_row: dict[str, str],
-    retrieval_row: dict[str, str],
-) -> dict[str, str]:
+def _validate_retrieval_evidence(
+    declaration: dict[str, Any], queue_row: dict[str, str], retrieval_row: dict[str, str]
+) -> str:
     candidate_id = declaration["candidate_id"]
-    if clean(queue_row.get("origin")) != "daily_surveillance":
-        raise IdentityResolutionError(f"resolution candidate is not surveillance-origin: {candidate_id}")
-    if clean(queue_row.get("current_status")) != "pending" or clean(queue_row.get("current_decision")):
-        raise IdentityResolutionError(f"resolution candidate already has a scientific decision: {candidate_id}")
-    if clean(queue_row.get("review_stage")) != "metadata_fix":
-        raise IdentityResolutionError(f"resolution candidate is not at metadata_fix: {candidate_id}")
-    if clean(queue_row.get("verification_status")) != "metadata_partial":
-        raise IdentityResolutionError(f"resolution candidate is not metadata_partial: {candidate_id}")
-    if clean(queue_row.get("metadata_conflict")):
-        raise IdentityResolutionError(f"metadata conflict requires separate review: {candidate_id}")
-
-    blocker = clean(queue_row.get("possible_duplicate"))
-    if not blocker:
-        return {"candidate_id": candidate_id, "status": "already_applied"}
-    if sha256_text(blocker) != declaration["expected_possible_duplicate_sha256"]:
-        raise IdentityResolutionError(f"possible_duplicate blocker changed since review: {candidate_id}")
     if normalise_title(queue_row.get("title")) != normalise_title(retrieval_row.get("title")):
         raise IdentityResolutionError(f"queue/retrieval title mismatch: {candidate_id}")
     if clean(retrieval_row.get("match_confidence")) != "high":
         raise IdentityResolutionError(f"identity resolution is not high confidence: {candidate_id}")
-
     sources = set(split_semicolon(retrieval_row.get("resolution_sources")))
     methods = set(split_semicolon(retrieval_row.get("match_method")))
     if not set(declaration["evidence_sources"]).issubset(sources):
@@ -173,7 +154,6 @@ def validate_resolution(
         raise IdentityResolutionError(f"dual-source identity evidence is absent: {candidate_id}")
     if not {"OpenAlex:title_year", "Crossref:title_year"}.issubset(methods):
         raise IdentityResolutionError(f"dual title/year evidence is absent: {candidate_id}")
-
     declared_doi = declaration["resolved_doi"]
     persisted_doi = normalise_doi(retrieval_row.get("resolved_doi"))
     if declared_doi and declared_doi != persisted_doi:
@@ -182,9 +162,41 @@ def validate_resolution(
         doi_url = clean(retrieval_row.get("doi_url"))
         if doi_url.lower() != f"https://doi.org/{declared_doi}".lower():
             raise IdentityResolutionError(f"persisted DOI URL disagrees: {candidate_id}")
+    return declared_doi
+
+
+def validate_resolution(
+    declaration: dict[str, Any],
+    queue_row: dict[str, str],
+    retrieval_row: dict[str, str],
+) -> dict[str, str]:
+    candidate_id = declaration["candidate_id"]
+    if clean(queue_row.get("origin")) != "daily_surveillance":
+        raise IdentityResolutionError(f"resolution candidate is not surveillance-origin: {candidate_id}")
+    if clean(queue_row.get("current_status")) != "pending" or clean(queue_row.get("current_decision")):
+        raise IdentityResolutionError(f"resolution candidate already has a scientific decision: {candidate_id}")
+    if clean(queue_row.get("metadata_conflict")):
+        raise IdentityResolutionError(f"metadata conflict requires separate review: {candidate_id}")
+
+    declared_doi = _validate_retrieval_evidence(declaration, queue_row, retrieval_row)
+    blocker = clean(queue_row.get("possible_duplicate"))
+    if not blocker:
+        if clean(queue_row.get("review_stage")) != "abstract_full_text_review":
+            raise IdentityResolutionError(f"resolved candidate has unexpected review stage: {candidate_id}")
+        if clean(queue_row.get("verification_status")) != "metadata_verified":
+            raise IdentityResolutionError(f"resolved candidate is not metadata_verified: {candidate_id}")
+        if declared_doi and normalise_doi(queue_row.get("doi")) != declared_doi:
+            raise IdentityResolutionError(f"resolved queue DOI disagrees with declaration: {candidate_id}")
+        return {"candidate_id": candidate_id, "status": "already_applied", "doi": declared_doi}
+
+    if clean(queue_row.get("review_stage")) != "metadata_fix":
+        raise IdentityResolutionError(f"resolution candidate is not at metadata_fix: {candidate_id}")
+    if clean(queue_row.get("verification_status")) != "metadata_partial":
+        raise IdentityResolutionError(f"resolution candidate is not metadata_partial: {candidate_id}")
+    if sha256_text(blocker) != declaration["expected_possible_duplicate_sha256"]:
+        raise IdentityResolutionError(f"possible_duplicate blocker changed since review: {candidate_id}")
     if clean(queue_row.get("doi")) and normalise_doi(queue_row.get("doi")) != declared_doi:
         raise IdentityResolutionError(f"existing queue DOI disagrees with reviewed identity: {candidate_id}")
-
     return {"candidate_id": candidate_id, "status": "apply", "doi": declared_doi}
 
 
@@ -199,19 +211,9 @@ def resolve(root: Path, updated_at: str, *, check: bool = False) -> dict[str, An
     declarations = load_ledger(root)
 
     required = {
-        "candidate_id",
-        "title",
-        "doi",
-        "source_links",
-        "verification_status",
-        "metadata_confidence",
-        "possible_duplicate",
-        "metadata_conflict",
-        "origin",
-        "review_stage",
-        "current_status",
-        "current_decision",
-        "updated_at",
+        "candidate_id", "title", "doi", "source_links", "verification_status",
+        "metadata_confidence", "possible_duplicate", "metadata_conflict", "origin",
+        "review_stage", "current_status", "current_decision", "updated_at",
     }
     missing = required - set(fields)
     if missing:
