@@ -1,6 +1,7 @@
 """Private checkpoint resume tests; no source, model or network access."""
 import json
 import os
+from pathlib import Path
 import unittest
 from unittest.mock import patch
 
@@ -104,6 +105,13 @@ class FullTextDevelopmentResumeTests(unittest.TestCase):
             resume.candidate_id_from_argv(['script', '--candidate-id', 'bad'])
         with patch.dict(os.environ, {'CALIBRATION_CHECKPOINT_SERVICE_COMMIT': 'bad'}, clear=False), self.assertRaisesRegex(RuntimeError, 'service_commit_unavailable'):
             resume.checkpoint_service_commit()
+
+    def test_development_workflow_scopes_private_secret_to_production_environment(self):
+        workflow = Path('.github/workflows/fulltext-calibration-source.yml').read_text(encoding='utf-8')
+        development_job = workflow.split('\n  development:\n', 1)[1]
+        header = development_job.split('\n    steps:\n', 1)[0]
+        self.assertIn('    environment: curator-production\n', header)
+        self.assertIn('CURATOR_SESSION_SECRET: ${{ secrets.CURATOR_SESSION_SECRET }}', development_job)
 
 
 if __name__ == '__main__':
