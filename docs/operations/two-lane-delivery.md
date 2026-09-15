@@ -1,112 +1,93 @@
 # Two-lane delivery and recovery
 
-Owner implementation mandate: 14 September 2026; persistence-first/identity-resolution v4 amendment: 15 September 2026; completion-first v5 amendment: 15 September 2026. `docs/operations/completion-first-v5.md` is the current operational source of truth for KPI priority, work selection, WIP control and completion-convergence reporting. `docs/operations/hourly-hybrid-v4.md` remains authoritative for cadence, provider order, identity-resolution, branch-recovery, anti-repeat and runtime closeout where v5 does not explicitly supersede it. This file records the delivery architecture and scientific boundaries.
+Owner implementation mandate: 14 September 2026; persistence-first/identity-resolution v4 amendment and assessment-completion v5.1 amendment: 15 September 2026. `docs/operations/completion-first-v5.md` is the current source of truth for KPI priority, work selection, WIP control and the meaning of `Completed`. `docs/operations/hourly-hybrid-v4.md` remains authoritative for cadence, provider order, identity-resolution, branch recovery, anti-repeat and runtime closeout where v5.1 does not supersede it.
+
+## Critical terminology
+
+**Completed = assessment complete.** It means the current paper has a complete, persisted, source-grounded assessment under the F0–F5 predicate in `completion-first-v5.md`. It does not require owner/human validation.
+
+**Validated / Accepted** is separate. Calibration acceptance, exact-head human review and adjudication receipts belong to the validation track. A paper can be `Completed=yes, Validated=no`.
+
+Until the public projection/UI is migrated, any legacy `completed=true` field that still means accepted adjudication must be described as a legacy validation/acceptance field and must not be used as the operational Completed KPI.
 
 ## Hourly hybrid lanes and scouting windows
 
-The existing automation is a two-lane hourly system. **Lane A runs at :10 and Lane B at :40.** Both lanes are enrichment/recovery workers by default; scouting is a bounded mode inside them, not another scheduler. Lane A owns 08:00–20:00 Europe/Rome; Lane B owns 20:00–08:00. There are **exactly two project-wide scouting windows per day**.
+Lane A runs at :10 and Lane B at :40. Both are assessment/enrichment workers by default; scouting is bounded inside them. Lane A owns 08:00–20:00 Europe/Rome; Lane B owns 20:00–08:00. There are exactly two project-wide scouting windows per day.
 
-Keep the existing `CILE-HOUR40-1` private enrichment service, namespace, catch-up semantics, fencing and immutable attempts. The conversational workers route through existing governed persistence paths; they do not create a second private scheduler.
+Keep the existing `CILE-HOUR40-1` private enrichment service, namespace, claims, fencing, catch-up semantics and immutable attempts. Candidate ownership remains stable by SHA256 modulo 2; timestamps and hash assignment are not locks.
 
-Candidate ownership remains stable by `hashlib.sha256(candidate_id.encode("utf-8")).digest()[0] % 2`, Lane A = 0, Lane B = 1. Hash assignment and timestamps are not locks. Actual transactional claims, leases, fencing and version guards remain authoritative.
+For scheduled scouting, **Parallel Search is the default discovery provider**. Exa is optional only when positively available and materially useful. Consensus and Scite are excluded from scheduled surveillance.
 
-For scheduled scouting, **Parallel Search is the default discovery provider**. Exa is optional only when positively available and materially useful. Consensus and Scite are excluded from scheduled surveillance. W1–W7/adaptive depth are governed by `novelty-depth.md`.
+## Current router
 
-## Current work router
+A due owned scouting window selects `SCOUT`. Otherwise resume unfinished safe writes, then route:
 
-A due owned scouting window selects `SCOUT`. Otherwise, after resuming any unfinished safe write, use the completion-first v5 router. The retained v4 concepts remain:
+1. `PERSIST` — finish/read back an assessment-gate write;
+2. `COMPLETE` — advance the deepest owned paper toward `F5_ASSESSMENT_COMPLETE`;
+3. `CALIBRATION_CASE` — advance validation/calibration evidence without displacing executable assessment-completion work;
+4. `RESOLVE` — advance required CILE-IDENTITY-RESOLUTION-2 debt;
+5. Lane B only: `ENGINEER` — remove a demonstrated blocker to an assessment gate or the separate validation track;
+6. `NOOP`.
 
-1. `PERSIST` — verified work can be durably written now;
-2. `ENRICH`/`COMPLETE` — an owned CandidateRecord has an executable next completion gate and real persistence path;
-3. `CALIBRATION_CASE` — an owned selected heterogeneous calibration case can advance;
-4. `RESOLVE` — pending CILE-IDENTITY-RESOLUTION-2 debt can be advanced;
-5. Lane B only: `ENGINEER` — a demonstrated shared blocker or mandatory gate prevents completion progress;
-6. `NOOP` — no safe executable work remains.
+Identity debt keeps the v4 starvation guard.
 
-Completion convergence is primary. Identity debt retains its starvation guard: oldest pending ≥24h or pending queue ≥20 makes the next eligible non-scout activation route to `RESOLVE` before opening new ordinary enrichment research.
+## Completion-first work selection
 
-## Persistence-first and completion-first work selection
+The primary unit of success is a paper whose distance to complete assessment decreases. A `durable paper-stage transition` is required evidence but is only a secondary metric.
 
-The unit of productive work remains a **durable paper-stage transition**, but under v5 that is a secondary diagnostic unless it also reduces the paper's distance to `completed=true`.
+Before substantial research, establish the authorised writer/claim/dispatch path for the intended next assessment gate. Do not build read-only cohorts when persistence is unavailable. Record the blocker once and move to another executable assessment gate.
 
-Before substantial candidate research, establish the authorised writer/claim/dispatch path for the intended next completion gate. If it cannot be persisted in the activation, do not create a read-only cohort. Record the blocker/recheck condition once and select another executable completion gate.
+The primary frontier is:
 
-A paper counts as materially progressed only after the new stage is written and read back successfully. Searches, locator rereads, issue comments, timestamps, CI checks, unchanged validation and engineering commits count as zero paper enrichment.
+`F0 metadata/source → F1 full text → F2 proposal persisted → F3 independent comparison → F4 bibliography/references ready → F5 assessment complete`.
 
-The primary operational view is now the completion frontier defined in `completion-first-v5.md`: deepest reached gate, first unmet gate and whether completion distance decreased. Ordinary active completion WIP is capped at six project-wide papers; blocked papers are parked with an exact recheck condition rather than left as unlimited WIP.
+`F6 validation ready → F7 validated` is a separate quality/acceptance track and does not define Completed.
 
-If an activation examines candidates but produces zero durable transitions, persist the common blocker key. The next activation may not repeat the same retrieval/selection/inference strategy unless that prerequisite changed.
+Ordinary active assessment WIP is capped at six project-wide papers. Blocked papers are parked with exact blocker/recheck conditions.
 
-## Heterogeneous calibration is global P0
+## Calibration track
 
-The current completion predicate requires an accepted heterogeneous calibration receipt before paper-specific completion can be attested. Until that global gate is satisfied, the 12–18 paper calibration cohort is a project-wide P0.
+The 12–18 case heterogeneous calibration remains important for scientific validation and scaling confidence, but it is not a prerequisite for `Completed` under v5.1.
 
-Report `reference-checked calibration cases / 12 minimum` every non-scout activation. Cases count only after the independent/reference comparison is actually completed and persisted; proposal persistence alone does not increment the calibration numerator.
+Report `reference-checked calibration cases / 12 minimum` separately. Cases enter that numerator only after their independent/reference comparison is completed and persisted.
 
-`CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-002` is currently the deepest calibration/frontier case because its private structured proposal has been persisted and read back. Its next intended gate is source-first independent comparison, not another unchanged inference run.
+CAND-002 currently has a persisted structured proposal. Its next assessment gate is source-first independent comparison, not another unchanged synthesis run.
 
-Select the remaining cohort deliberately for heterogeneity and completion feasibility, including full-text and hard cases, varied designs and missingness/source conditions, under `enrichment-adjudication.md`.
+## Stateful identity closure and branch recovery
 
-## Stateful discovery identity closure
+Preserve CILE-IDENTITY-RESOLUTION-2 append-only state, real CandidateRecord existence checks, `pending → resolved` / `pending → forwarded_to_intake → resolved/new_candidate`, and the existing starvation guard. Do not manufacture pending identities from the historical exact reconstruction deficit.
 
-Use `docs/operations/identity-resolution.md` and CILE-IDENTITY-RESOLUTION-2. Each provider observation is append-only state keyed by `observation_key`, with provider-independent `identity_key` only as a bibliographic grouping aid.
+Validated branch recovery remains mandatory. The v4 `cile-validated-branch-recovery:1` ticket is still authoritative: an exact validated branch/head ahead of main with no PR is recovered through the authenticated connector rather than by rerunning the underlying work.
 
-New unresolved observations are `pending`. They may resolve directly to known/not-forwarded outcomes, or use the explicit intake bridge:
+## Engineering discipline
 
-`pending → forwarded_to_intake → resolved/new_candidate`.
+Lane A does not open shared engineering. Lane B owns shared engineering only after higher-priority completion work is unavailable.
 
-A resolution comment cannot create a CandidateRecord. `new_candidate` is valid only after the normal v3 intake/recovery path has materialised the referenced CandidateRecord. Conflicting terminal states are rejected by the stateful validator.
+Engineering itself counts zero assessment completion. A shared engineering change must demonstrate at least one downstream F0–F5 gate transition within the next two eligible activations or be recorded as unproven engineering debt.
 
-## Validated branch recovery
+If Lane A lacks an authorised ordinary completion writer/claim in two consecutive eligible activations, Lane B treats that as a shared blocker before unrelated optimisation.
 
-Candidate metadata/identity workflows can validate and push an automation branch while repository token policy blocks PR creation. This is recoverable delivery debt, not a reason to rerun the underlying work.
+Failure clusters continue to follow `calibration-trace-audit.md`; no unchanged retries or exception-by-exception patching.
 
-Such workflows persist `cile-validated-branch-recovery:1` on #696 with branch/head/base/run identity. The next Lane-A/B activation, before new research, checks unresolved tickets. If the exact branch/head remains ahead of main and has no PR, it opens the PR through the authenticated GitHub connector. A validated branch must not remain without a PR for more than one subsequent activation unless a concrete connector/policy blocker is recorded.
+## Soft close and anti-repeat
 
-## Durable scouting observations
+At roughly 20 minutes, enter **soft-close**: open no new paper cohort, search family, engineering branch or external workflow. Finish/persist/read back in-flight work or leave exact recoverable state. Do not poll long jobs to fill the activation.
 
-`python3 -m scripts.query_checkpoint` validates and renders immutable query checkpoints. After each enumerable query, append/read back its permitted checkpoint before the next query. Incomplete fragments remain pending; a failed query remains failed.
+Do not repeat an unchanged zero-progress retrieval/selection/inference strategy until its prerequisite changes.
 
-At completed-window closeout, every observation counted as `unresolved_identity` must also exist as a durable CILE-IDENTITY-RESOLUTION-2 `pending` record. Aggregate counts without reconstructable identities are incomplete state.
+## Completion versus validation reporting
 
-The final batch still owns the governed v3 intake/terminal semantics. Partial evidence never manufactures a completed W1–W7 run or an inclusion decision.
+Every activation reports separately:
 
-## Engineering discipline and proof obligation
+- `Assessment Completed / registered` — primary Completed KPI;
+- `Validated / Assessment Completed` — separate scientific/human acceptance KPI;
+- assessment frontier and first unmet F0–F5 gate;
+- papers whose assessment distance decreased;
+- independent comparison and bibliography/reference progress;
+- calibration numerator;
+- validation-ready/validated transitions;
+- blockers and recheck conditions;
+- engineering proof status; and
+- exact next action most directly reducing distance to complete assessment.
 
-Lane A is the paper-production lane and does not open shared engineering/calibration repairs. Lane B alone owns shared throughput/persistence/calibration engineering, and only after higher-priority persist/complete/calibration-case/required-resolve work is unavailable.
-
-Engineering is bounded tracked work and counts as zero paper enrichment until later real paper transitions demonstrate a gain. Under v5, a shared engineering change must demonstrate at least one downstream completion-gate transition within the next two eligible automation activations. If it does not, record it as unproven engineering debt and do not continue engineering the same class without new trace evidence.
-
-If Lane A reports no actionable authorised writer/claim for ordinary completion work in two consecutive eligible activations, Lane B treats the missing generic governed writer/claim path as a shared throughput blocker before unrelated optimisation work.
-
-Failure clusters follow `docs/operations/calibration-trace-audit.md`. Do not extend timeouts or repeat unchanged model paths merely to obtain a different result.
-
-## Soft runtime close
-
-At roughly 20 minutes of active work, enter soft-close: do not open a new paper cohort, search family, engineering branch or external workflow. Finish/persist/read back work already in flight, or leave an exact recoverable checkpoint/run/branch for the next activation. Do not poll long-running external jobs simply to fill the hour. Transactional safety and required terminalisation take precedence over the soft-close threshold.
-
-## Completion policy and public index
-
-`ontology/modules/completion-policy.json` remains CILE-COMPLETION-POLICY-2. Scientific completion requires the current accepted receipt and mandatory review checklist; inference success, PDF availability, abstract availability, proposed framework class or green CI are not completion.
-
-Framework assessment may be a grounded proposed class or grounded `outside_framework` only under the existing independent acceptance rules. `insufficient_evidence` does not qualify.
-
-The public research index remains revision-bound, lazy-detail and fail-closed. Unknown, failed, stale and withheld are distinct. The registered CandidateRecord denominator remains separate from canonical/eligible work populations.
-
-## Original PDF and bibliography delivery
-
-The existing private store remains the only authorised location for retained source/full-text/document/bibliography data. Exact original bytes are hash checked/read back; a downloadable file does not imply redistribution rights. Private research retention and public redistribution remain separate permissions.
-
-`python3 -m scripts.enrichment.retain_document` handles reviewed, registered, allowlisted, hash-pinned sources through the existing signed service. Source text/PDF bytes must not enter GitHub, Pages or ordinary workflow artifacts.
-
-Actual-paper bibliography, provider references and incoming citations remain distinct. Completion requires the current governed bibliography/null-assessment rules and cannot be inferred from provider citation coverage.
-
-## Acceptance, verification and reporting
-
-Report separately: scouting observations/intake; identity-resolution debt; completion-frontier state; source/document readiness; proposals/framework/bibliography state; independent comparison; calibration numerator; review-ready papers; accepted receipts; engineering/audit changes; and public revision identity.
-
-The primary operational KPI is now papers whose completion distance decreased, followed by deepest gate reached, calibration progress toward 12 minimum, review-ready papers and final completions. Distinct papers with a durable stage transition remains a secondary operational metric and never substitutes for convergence.
-
-Global CI/deployment/public-index verification is required after relevant state changes, not as an unchanged activity loop.
-
-Maintenance changes follow `AGENTS.md` validation/merge rules. Scientific/canonical decisions retain their independent curator/human gates.
+Human acceptance remains protected and must never be fabricated. The terminology split changes what `Completed` means operationally; it does not weaken evidence, privacy, rights, ontology, scientific review or exact-head acceptance requirements for `Validated`.
