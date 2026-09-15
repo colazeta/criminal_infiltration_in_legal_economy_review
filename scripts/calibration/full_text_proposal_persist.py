@@ -25,7 +25,6 @@ from pathlib import Path
 from scripts.calibration import full_text_development as development
 from scripts.calibration import full_text_development_run as runtime
 from scripts.calibration import full_text_development_resume_v2 as v2
-from scripts.calibration import full_text_development_resume_v5 as v5
 from scripts.enrichment.service_client import call as service_call
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -174,6 +173,11 @@ def persist_proposal(payload, binding, expected_commit, service=service_call):
 
 
 def run(args, service=service_call):
+    # Import only at execution time: v5 intentionally installs runtime hooks in v2 at
+    # import, and test/utility consumers of this transport module must not mutate the
+    # process-wide calibration contract merely by importing the persistence helpers.
+    from scripts.calibration import full_text_development_resume_v5 as v5
+
     commit = os.environ.get('CALIBRATION_CHECKPOINT_SERVICE_COMMIT', '')
     binding = retained_binding(
         args.candidate_id, args.url, args.expected_pdf_sha256, args.expected_text_sha256,
