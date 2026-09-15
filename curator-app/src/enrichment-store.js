@@ -11,6 +11,7 @@ import { runEnrichment, handlePaperEnrichment, storeExtraction } from './paper-e
 import {completionPacket, importCalibrationApproval, importCompletionApproval} from './enrichment-adjudication.js';
 import {readPublicResearch, readPublicCompletion, publicResearchAudit, readPublicIndex} from './public-paper-research.js';
 import {readDevelopmentCheckpoint,writeDevelopmentCheckpoint} from './calibration-development-checkpoint.js';
+import {claimF1Retention,assertF1RetentionClaim,releaseF1RetentionClaim,abortF1RetentionClaim} from './frontier-retention-claim.js';
 
 const DOMAIN = 'CILE-ENRICH-SERVICE-v1';
 const encoder = new TextEncoder();
@@ -83,7 +84,7 @@ export class EnrichmentStoreCore {
       const adjudicationHash=await sha256(adjudicationMigration.sql);
       if(adjudicationHash!==adjudicationMigration.sha256)throw Error('adjudication_migration_integrity');
       const adjudicationApplied=await ctx.storage.get('schema:enrichment-adjudication');
-      if(adjudicationApplied && adjudicationApplied!==adjudicationHash)throw Error('additive_adjudication_migration_required');
+      if(adjudicationApplied && adjudicationApplied!==adjudicationHash)throw Error('additive_adjudication_required');
       if(!adjudicationApplied)await ctx.storage.transaction(async tx=>{ctx.storage.sql.exec(adjudicationMigration.sql);await tx.put('schema:enrichment-adjudication',adjudicationHash)});
       const deliveryHash=await sha256(deliveryMigration.sql);
       if(deliveryHash!==deliveryMigration.sha256)throw Error('delivery_migration_integrity');
@@ -154,7 +155,7 @@ export class EnrichmentStoreCore {
       const data=JSON.parse(body);
       const allowedFields=['operation','expected_commit','target_id','proposal','run_key','calibration_id','pr_number','source','document','bibliography','document_id','checkpoint'];
       if(!data||typeof data!=='object'||Array.isArray(data)||Object.keys(data).some(k=>!allowedFields.includes(k)))return json({error_code:'invalid_service_envelope'},422);
-      const operations=['verify','activate','deactivate','status','run','packet','proposal','public-research-audit','completion-packet','calibration-approval','completion-approval','source','document','documents','document-check','bibliography','provider-bibliography','development-checkpoint-get','development-checkpoint-put'];
+      const operations=['verify','activate','deactivate','status','run','packet','proposal','public-research-audit','completion-packet','calibration-approval','completion-approval','source','document','documents','document-check','bibliography','provider-bibliography','development-checkpoint-get','development-checkpoint-put','document-retention-claim','source-claimed','document-claimed','document-retention-release','document-retention-abort'];
       if(!operations.includes(data.operation))return json({error_code:'unknown_service_operation'},422);
       if(data.expected_commit!==this.env.DEPLOY_COMMIT)return json({error_code:'stale_deployment'},409);
       if(data.operation==='verify')return json(await this.verify());
@@ -169,12 +170,23 @@ export class EnrichmentStoreCore {
       if(env.PAPER_ENRICHMENT_ENABLED!=='true')return json({error_code:'enrichment_inactive'},409);
       if(data.operation==='development-checkpoint-get')return json(await readDevelopmentCheckpoint(this.evidence,data.checkpoint));
       if(data.operation==='development-checkpoint-put')return json(await writeDevelopmentCheckpoint(this.evidence,data.checkpoint),201);
+      if(data.operation==='document-retention-claim')return json(await claimF1Retention(env,data.target_id,now),201);
+      if(data.operation==='document-retention-release')return json(await releaseF1RetentionClaim(env,data.target_id,data.checkpoint,now));
+      if(data.operation==='document-retention-abort')return json(await abortF1RetentionClaim(env,data.target_id,data.checkpoint,now));
       if(data.operation==='run'){
         if(this.schedule.busy)return json({status:'leased'});
         if(!/^manual:[0-9a-f-]{36}$/.test(data.run_key||''))return json({error_code:'manual_run_key_required'},422);
         const today=new Date(now).toISOString().slice(0,10), count=await this.db.prepare("SELECT COUNT(*) n FROM enrichment_runs WHERE scheduled_slot LIKE ?").bind(today+'%manual:%').first();
         if(Number(count.n)>=12)return json({error_code:'manual_daily_budget_exhausted'},429);
         return json(await runEnrichment(env,{now,runKey:data.run_key}));
+      }
+      if(data.operation==='source-claimed'){
+        await assertF1RetentionClaim(env,data.target_id,data.checkpoint,now);
+        return handlePaperEnrichment(new Request('https://enrichment.internal/api/paper-enrichment/source?id='+encodeURIComponent(data.target_id),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data.source)}),env,{login:env.CURATOR_LOGIN});
+      }
+      if(data.operation==='document-claimed'){
+        await assertF1RetentionClaim(env,data.target_id,data.checkpoint,now);
+        return json(await importDocument(env,data.target_id,data.document,now),201);
       }
       if(data.operation==='source')return handlePaperEnrichment(new Request('https://enrichment.internal/api/paper-enrichment/source?id='+encodeURIComponent(data.target_id),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data.source)}),env,{login:env.CURATOR_LOGIN});
       if(data.operation==='document')return json(await importDocument(env,data.target_id,data.document,now),201);
