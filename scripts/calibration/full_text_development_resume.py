@@ -31,10 +31,10 @@ def candidate_id_from_argv(argv=None):
     return value
 
 
-def exact_commit():
-    value = os.environ.get('GITHUB_SHA', '')
+def checkpoint_service_commit():
+    value = os.environ.get('CALIBRATION_CHECKPOINT_SERVICE_COMMIT', '')
     if not re.fullmatch(r'[0-9a-f]{40}', value):
-        raise RuntimeError('fulltext_checkpoint_commit_unavailable')
+        raise RuntimeError('fulltext_checkpoint_service_commit_unavailable')
     return value
 
 
@@ -75,7 +75,7 @@ def resumable_post(original, payload, timeout=300, *, service=service_call, cand
         return _ORIGINAL_RUNTIME_POST(original, payload, timeout)
     candidate_id = candidate_id or candidate_id_from_argv()
     identity = chunk_identity(payload, candidate_id)
-    commit = exact_commit()
+    commit = checkpoint_service_commit()
     try:
         result = service('development-checkpoint-get', expected_commit=commit, checkpoint=identity)
     except RuntimeError as error:
