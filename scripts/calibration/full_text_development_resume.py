@@ -2,17 +2,23 @@
 """Current full-text calibration entry point.
 
 The reviewed v4 API remains import-compatible for existing regression tests and
-checkpoint tooling. Executable calibration is delegated to the single bounded
-v5 class-level remediation authorised by grouped trace audit #714.
+checkpoint tooling. Executable calibration is delegated lazily to the single
+bounded v5 class-level remediation authorised by grouped trace audit #714.
+
+The v5 module intentionally installs runtime hooks for its execution path. It is
+therefore imported only inside ``main`` so importing this compatibility module
+does not mutate the reviewed v4 contract used by checkpoint/regression tooling.
 """
 from scripts.calibration.full_text_development_resume_v4 import *  # noqa: F401,F403
 from scripts.calibration.full_text_development_resume_v4 import (  # noqa: F401
     _ORIGINAL_BUILD_PROPOSAL,
     _normalise_variable_analysis_relations,
 )
-from scripts.calibration import full_text_development_resume_v5 as v5
 
-main = v5.main
+
+def main():
+    from scripts.calibration import full_text_development_resume_v5 as v5
+    return v5.main()
 
 
 if __name__ == '__main__':
