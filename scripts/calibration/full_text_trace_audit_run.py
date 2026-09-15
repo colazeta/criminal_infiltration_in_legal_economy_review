@@ -4,6 +4,11 @@
 The runner reuses the existing exact-source/checkpoint machinery and intercepts the
 synthesis graph immediately before proposal validation. Only a non-sensitive
 structural count/digest file is written outside the encrypted scratch path.
+
+Audit mode is checkpoint-reuse only: if any expected chunk checkpoint is absent,
+the run fails closed instead of performing new chunk inference. The only model
+call permitted by this audit is the synthesis call over already retained exact
+chunk outputs.
 """
 
 from __future__ import annotations
@@ -39,13 +44,22 @@ def main() -> int:
     resume.reset_relation_diagnostics()
     prior_build = development.build_proposal
     prior_checkpoint_payload = runtime.runtime_checkpoint_payload
+    prior_pass_limit = resume.v2.pass_limit
+    prior_requires_complete = resume.v2.pass_requires_complete
     development.build_proposal = auditing_build_proposal
     runtime.runtime_checkpoint_payload = resume.relation_checkpoint_payload
+    # Zero is deliberately injected here rather than accepted by the production
+    # environment parser. In v2 resumable_post, a missing checkpoint therefore
+    # raises pass_budget_exhausted before any new chunk model call can occur.
+    resume.v2.pass_limit = lambda: 0
+    resume.v2.pass_requires_complete = lambda: True
     try:
         return resume.v2.main()
     finally:
         development.build_proposal = prior_build
         runtime.runtime_checkpoint_payload = prior_checkpoint_payload
+        resume.v2.pass_limit = prior_pass_limit
+        resume.v2.pass_requires_complete = prior_requires_complete
 
 
 if __name__ == "__main__":
