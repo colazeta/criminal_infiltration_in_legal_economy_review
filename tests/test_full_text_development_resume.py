@@ -52,7 +52,7 @@ class FullTextDevelopmentResumeTests(unittest.TestCase):
                 patch.object(resume.runtime, '_validate_original_atom_contracts'):
             result = resume.resumable_post(original, request, 300, service=service, candidate_id=self.candidate)
         self.assertEqual(result, self.output())
-        self.assertEqual(original_calls, [(request, 300)])
+        self.assertEqual(original_calls, [(request, 600)])
         self.assertEqual([item[0] for item in calls], ['development-checkpoint-get', 'development-checkpoint-put'])
 
     def test_cache_hit_skips_local_model_call(self):
@@ -88,7 +88,7 @@ class FullTextDevelopmentResumeTests(unittest.TestCase):
         with self.env():
             result = resume.resumable_post(original, synthesis, 420, service=lambda *_a, **_k: self.fail('no service'))
         self.assertEqual(result, {'ok': True})
-        self.assertEqual(called, [(synthesis, 420)])
+        self.assertEqual(called, [(synthesis, 720)])
 
     def test_private_service_failure_fails_closed_instead_of_recomputing(self):
         with self.env(), patch.object(resume.runtime, 'runtime_extractor_fingerprint', return_value='b' * 64):
