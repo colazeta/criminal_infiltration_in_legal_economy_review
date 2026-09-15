@@ -16,6 +16,25 @@ from scripts.calibration.full_text_development_resume_v4 import (  # noqa: F401
 )
 
 
+def relation_normalising_build_proposal(target, source, atoms, synthesis):
+    """Preserve the reviewed v4 patchable compatibility surface."""
+    try:
+        return _ORIGINAL_BUILD_PROPOSAL(target, source, atoms, synthesis)
+    except ValueError as error:
+        if str(error) != 'fulltext_variable_relation':
+            raise
+
+    repaired, changes = _normalise_variable_analysis_relations(synthesis)
+    proposal = _ORIGINAL_BUILD_PROPOSAL(target, source, atoms, repaired)
+    synthesis.clear()
+    synthesis.update(repaired)
+    RELATION_DIAGNOSTICS.update({
+        'normalised_variable_relations': len(changes),
+        'normalisation_digest': development.sha(development.canonical(changes)),
+    })
+    return proposal
+
+
 def main():
     from scripts.calibration import full_text_development_resume_v5 as v5
     return v5.main()
