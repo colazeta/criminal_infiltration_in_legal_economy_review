@@ -11,6 +11,21 @@ class FullTextRelationPhaseV5Tests(unittest.TestCase):
     def setUp(self):
         phase.reset_diagnostics()
 
+    @classmethod
+    def tearDownClass(cls):
+        """Restore reviewed v4 hooks after direct v5-module regression coverage.
+
+        The production entry point imports v5 lazily. These tests import the v5
+        module directly, so restore the shared v2 extension points before later
+        v4 compatibility tests execute in the same unittest process.
+        """
+        phase.v2.SYNTHESIS_ATOM_SCOPED_SCHEMA = phase.v4.SYNTHESIS_ATOM_SCOPED_SCHEMA
+        phase.v2.atom_scoped_synthesis_schema = phase.v4.atom_scoped_synthesis_schema
+        phase.v2.atom_scoped_bounded_synthesis_request = phase.v4.atom_scoped_bounded_synthesis_request
+        phase.v2.install_assignment_scope = phase.v4.install_assignment_scope
+        phase.v2.restore_assignment_scope = phase.v4.restore_assignment_scope
+        phase.v2.resumable_post = phase.v4.resumable_post
+
     @staticmethod
     def atoms():
         return [
