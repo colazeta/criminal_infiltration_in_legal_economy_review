@@ -14,7 +14,6 @@ import hashlib
 import json
 import os
 import subprocess
-import sys
 from pathlib import Path
 from urllib.parse import quote
 from urllib.request import Request, urlopen
@@ -23,8 +22,8 @@ from scripts.enrichment.service_client import ORIGIN, call, current_commit
 
 REFERENCE_PROTOCOL = 'CILE-ASSESSMENT-REFERENCE-1'
 COMPARISON_PROTOCOL = 'CILE-ASSESSMENT-COMPARISON-1'
-HEX64 = set('0123456789abcdef')
 ROOT = Path(__file__).resolve().parents[2]
+CYCLE = json.loads((ROOT / 'config/archive-cycle.json').read_text(encoding='utf-8'))
 
 
 def canonical(value) -> str:
@@ -34,6 +33,10 @@ def canonical(value) -> str:
 def sha(value) -> str:
     raw = value if isinstance(value, (bytes, bytearray)) else canonical(value).encode()
     return hashlib.sha256(raw).hexdigest()
+
+
+def target_id(candidate_id: str) -> str:
+    return hashlib.sha256(f"{CYCLE['review_id']}:candidate:{candidate_id}".encode()).hexdigest()
 
 
 def private_write(path: Path, value) -> None:
@@ -69,17 +72,8 @@ def source_snapshot(packet: dict) -> str:
     return sha({'candidate_id': target.get('record_id'), 'input_sha256': target.get('input_sha256'), 'sources': rows})
 
 
-def current_source_packet(candidate_id: str, expected_commit: str) -> dict:
-    result = call('packet', expected_commit=expected_commit, target_id=None)
-    # Packet without a target may select another candidate, so use the candidate's
-    # target id only after resolving it from an explicitly retained packet file.
-    if result.get('status') != 'source_ready' or result.get('target', {}).get('record_id') != candidate_id:
-        raise RuntimeError('candidate_source_packet_not_selected')
-    return result
-
-
-def source_packet_by_target(target_id: str, candidate_id: str, expected_commit: str) -> dict:
-    result = call('packet', expected_commit=expected_commit, target_id=target_id)
+def source_packet_by_target(target: str, candidate_id: str, expected_commit: str) -> dict:
+    result = call('packet', expected_commit=expected_commit, target_id=target)
     if result.get('status') != 'source_ready' or result.get('target', {}).get('record_id') != candidate_id:
         raise RuntimeError('candidate_source_packet_unavailable')
     source_snapshot(result)
@@ -106,16 +100,16 @@ def persist_reference(args) -> None:
     retained = load_object(args.packet, 'source_packet')
     target = retained.get('target') or {}
     candidate_id = target.get('record_id')
-    target_id = target.get('target_id')
-    if candidate_id != args.candidate_id or not isinstance(target_id, str):
+    current_target_id = target.get('target_id')
+    if candidate_id != args.candidate_id or current_target_id != target_id(candidate_id):
         raise RuntimeError('reference_candidate_binding_failure')
-    current = source_packet_by_target(target_id, candidate_id, commit)
+    current = source_packet_by_target(current_target_id, candidate_id, commit)
     retained_snapshot, current_snapshot = source_snapshot(retained), source_snapshot(current)
     if retained_snapshot != current_snapshot or target.get('input_sha256') != current['target'].get('input_sha256'):
         raise RuntimeError('reference_source_packet_stale')
     assessment = load_object(args.assessment, 'reference_assessment')
     native_validate(current, assessment)
-    if assessment.get('target_id') != target_id or assessment.get('input_sha256') != target.get('input_sha256'):
+    if assessment.get('target_id') != current_target_id or assessment.get('input_sha256') != target.get('input_sha256'):
         raise RuntimeError('reference_assessment_binding_failure')
     agent = (assessment.get('generated_by') or {}).get('agent','')
     if not isinstance(agent, str) or not agent.startswith('independent-reference:'):
@@ -127,7 +121,7 @@ def persist_reference(args) -> None:
     checkpoint = {'protocol':REFERENCE_PROTOCOL,'candidate_id':candidate_id,'input_sha256':target['input_sha256'],
                   'source_snapshot_sha256':current_snapshot,'request_sha256':request_sha,'stage':'reference',
                   'output':{'assessment':assessment}}
-    receipt = call('development-checkpoint-put', expected_commit=commit, checkpoint=checkpoint)
+    call('development-checkpoint-put', expected_commit=commit, checkpoint=checkpoint)
     identity = {key: checkpoint[key] for key in ('protocol','candidate_id','input_sha256','source_snapshot_sha256','request_sha256','stage')}
     readback = call('development-checkpoint-get', expected_commit=commit, checkpoint=identity)
     if readback.get('status') != 'found' or sha(readback['checkpoint']['output']['assessment']) != assessment_sha:
@@ -140,7 +134,8 @@ def persist_reference(args) -> None:
 
 def source_packet(args) -> None:
     commit = args.expected_commit or current_commit()
-    packet = source_packet_by_target(args.target_id, args.candidate_id, commit)
+    candidate_target = target_id(args.candidate_id)
+    packet = source_packet_by_target(candidate_target, args.candidate_id, commit)
     snapshot = source_snapshot(packet)
     private_write(args.output, packet)
     print(canonical({'status':'source_first_packet_written','candidate_id':args.candidate_id,'input_sha256':packet['target']['input_sha256'],
@@ -189,8 +184,6 @@ def persist_comparison(args) -> None:
     candidate_id = packet.get('candidate_id')
     if candidate_id != args.candidate_id:
         raise RuntimeError('comparison_candidate_binding_failure')
-    # The current proposal projection is re-read immediately before persistence;
-    # any changed revision invalidates the comparison rather than silently inheriting it.
     current = public_research(candidate_id)
     if current.get('revision') != packet.get('proposal_revision'):
         raise RuntimeError('comparison_proposal_projection_stale')
@@ -204,7 +197,7 @@ def persist_comparison(args) -> None:
                   'source_snapshot_sha256':packet['source_snapshot_sha256'],'proposal_revision':packet['proposal_revision'],
                   'reference_sha256':packet['reference_sha256'],'request_sha256':request_sha,'stage':'comparison',
                   'output':{'comparison':comparison}}
-    receipt = call('development-checkpoint-put', expected_commit=commit, checkpoint=checkpoint)
+    call('development-checkpoint-put', expected_commit=commit, checkpoint=checkpoint)
     identity = {key: checkpoint[key] for key in ('protocol','candidate_id','input_sha256','source_snapshot_sha256','proposal_revision','reference_sha256','request_sha256','stage')}
     readback = call('development-checkpoint-get', expected_commit=commit, checkpoint=identity)
     if readback.get('status') != 'found' or sha(readback['checkpoint']['output']['comparison']) != sha(comparison):
@@ -222,7 +215,7 @@ def parser() -> argparse.ArgumentParser:
     sub = p.add_subparsers(dest='command', required=True)
     def common(q):
         q.add_argument('--candidate-id', required=True);q.add_argument('--expected-commit')
-    q=sub.add_parser('source-packet');common(q);q.add_argument('--target-id',required=True);q.add_argument('--output',type=Path,required=True);q.set_defaults(func=source_packet)
+    q=sub.add_parser('source-packet');common(q);q.add_argument('--output',type=Path,required=True);q.set_defaults(func=source_packet)
     q=sub.add_parser('persist-reference');common(q);q.add_argument('--packet',type=Path,required=True);q.add_argument('--assessment',type=Path,required=True);q.add_argument('--identity-output',type=Path);q.set_defaults(func=persist_reference)
     q=sub.add_parser('comparison-packet');common(q);q.add_argument('--reference-identity',type=Path,required=True);q.add_argument('--output',type=Path,required=True);q.set_defaults(func=comparison_packet)
     q=sub.add_parser('persist-comparison');common(q);q.add_argument('--packet',type=Path,required=True);q.add_argument('--comparison',type=Path,required=True);q.add_argument('--identity-output',type=Path);q.set_defaults(func=persist_comparison)
