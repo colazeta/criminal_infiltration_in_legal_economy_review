@@ -155,13 +155,16 @@ export class EnrichmentStoreCore {
     return nonce;
   }
   async recordNonce(nonce,now) {
+    let phase='transaction';
     try{
       await this.ctx.storage.transaction(async tx=>{const key='nonce:'+nonce;if(await tx.get(key))throw Error('service_replay');await tx.put(key,now)});
-      const expired=[];for(const[key,time]of await this.ctx.storage.list({prefix:'nonce:',limit:128}))if(now-time>300000)expired.push(key);
-      if(expired.length)await this.ctx.storage.delete(expired);
+      phase='list';
+      const entries=await this.ctx.storage.list({prefix:'nonce:',limit:128}),expired=[];
+      for(const[key,time]of entries)if(now-time>300000)expired.push(key);
+      if(expired.length){phase='delete';await this.ctx.storage.delete(expired)}
     }catch(error){
       if(error?.message==='service_replay')throw error;
-      const unavailable=Error('service_auth_state_unavailable');unavailable.code='service_auth_state_unavailable';unavailable.status=503;throw unavailable;
+      const code=`service_auth_nonce_${phase}_unavailable`,unavailable=Error(code);unavailable.code=code;unavailable.status=503;throw unavailable;
     }
   }
   async packet(data) {
@@ -190,7 +193,7 @@ export class EnrichmentStoreCore {
       await this.recordNonce(nonce,now);
     }catch(error){
       if(error?.message==='service_replay')return json({error_code:'service_authentication_required'},401);
-      return json({error_code:'service_auth_state_unavailable'},503);
+      return json({error_code:error?.code||'service_auth_state_unavailable'},error?.status||503);
     }
     try{
       const data=JSON.parse(body);
