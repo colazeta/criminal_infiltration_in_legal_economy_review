@@ -230,15 +230,16 @@
     },
     {
       "id": "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-015",
-      "title": "A machine learning approach for the detection of firms linked to organised crime in Italy",
-      "authors": "",
+      "title": "A machine learning approach for the detection of firms linked to organised crime in Italy, based on balance sheet data",
+      "authors": "Pasquale Cariello; Marco De Simoni; Stefano Iezzi",
       "year": 2024,
       "venue": "UIF, Quaderni dell'antiriciclaggio, n. 22",
       "doi": "",
       "sourceLinks": [
+        "https://uif.bancaditalia.it/pubblicazioni/quaderni/2024/quaderno-22-2024/index.html",
         "https://uif.bancaditalia.it/pubblicazioni/quaderni/2024/quaderno-22-2024/quaderno-22-2024.pdf"
       ],
-      "metadataStatus": "metadata_partial",
+      "metadataStatus": "metadata_verified",
       "reviewStatus": "pending",
       "accessStatus": "unknown",
       "registeredAt": "2026-09-08",
