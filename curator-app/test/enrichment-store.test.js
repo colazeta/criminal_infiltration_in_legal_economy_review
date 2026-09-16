@@ -4,7 +4,7 @@ import {DatabaseSync} from 'node:sqlite';
 import {readFileSync} from 'node:fs';
 import migration from '../src/enrichment-migration.json' with {type:'json'};
 import adjudicationMigration from '../src/enrichment-adjudication-migration.json' with {type:'json'};
-import {EnrichmentStoreCore,sqliteAdapter,privateTextStore,serviceSignature,enrichmentStore} from '../src/enrichment-store.js';
+import {EnrichmentStoreCore,sqliteAdapter,privateTextStore,serviceSignature,enrichmentStore,readinessErrorCode} from '../src/enrichment-store.js';
 import {sha256} from '../src/review-v2.js';
 const secret='test-only-secret-never-used-in-production-0123456789';
 export function setup(){
@@ -33,7 +33,18 @@ test('unsigned, expired, wrong-key and replayed machine requests cannot access p
 test('activation requires exact deployment and storage check; disabling/redeployment fail closed',async()=>{const{core,env}=setup();await core.ready;assert.equal((await core.machine(await request({operation:'activate',expected_commit:'stale'}))).status,409);assert.equal((await core.machine(await request({operation:'activate'}))).status,200);assert.equal((await core.environment()).PAPER_ENRICHMENT_ENABLED,'true');env.PAPER_ENRICHMENT_ENABLED='false';assert.equal((await core.environment()).PAPER_ENRICHMENT_ENABLED,'false');env.PAPER_ENRICHMENT_ENABLED='true';env.DEPLOY_COMMIT='changed';assert.equal((await core.environment()).PAPER_ENRICHMENT_ENABLED,'false')});
 test('machine interface is closed and cannot execute arbitrary SQL or publish',async()=>{const{core}=setup();await core.ready;for(const data of [{operation:'sql',sql:'DROP TABLE x'},{operation:'publish'}])assert.equal((await core.machine(await request(data))).status,422)});
 test('provider or model credentials do not choose the storage backend implicitly',()=>{assert.equal(enrichmentStore({}),null);assert.equal(enrichmentStore({PAPER_ENRICHMENT_STORAGE:'d1_r2',ENRICHMENT_STORE:{}}),null)});
-test('a changed migration receipt stops initialisation without rewriting data',async()=>{const{core,ctx,env,kv}=setup();await core.ready;kv.set('schema:enrichment','other');await assert.rejects(new EnrichmentStoreCore(ctx,env).ready,/additive_migration_required/)});
+test('a changed migration receipt keeps the store callable but fail-closed without rewriting data',async()=>{
+ const{core,ctx,env,kv}=setup();await core.ready;kv.set('schema:enrichment','other');
+ const broken=new EnrichmentStoreCore(ctx,env);await broken.ready;
+ assert.equal(kv.get('schema:enrichment'),'other');
+ await assert.rejects(broken.requireReady(),/additive_migration_required/);
+ const unsigned=await broken.fetch(new Request('https://enrichment.internal/machine',{method:'POST',body:'{}',headers:{'Content-Type':'application/json'}}));
+ assert.equal(unsigned.status,401);
+ const verified=await broken.fetch(await request({operation:'verify'}));
+ assert.equal(verified.status,503);assert.deepEqual(await verified.json(),{error_code:'additive_migration_required'});
+ await assert.rejects(broken.fetch(new Request('https://enrichment.internal/public-research?id=CAND-UNKNOWN')),/additive_migration_required/);
+});
+test('unexpected initialisation details collapse to a closed phase code',()=>{assert.equal(readinessErrorCode(Error('private table/object detail'),'schedule_migration'),'store_init_schedule_migration_failed');assert.equal(readinessErrorCode(Error('private detail'),'not-a-phase'),'store_init_unknown_failed')});
 test('public research audit is authenticated, read-only and independent of activation',async()=>{
  const{core,db}=setup();await core.ready;
  assert.equal((await core.environment()).PAPER_ENRICHMENT_ENABLED,'false');

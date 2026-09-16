@@ -18,6 +18,18 @@ const encoder = new TextEncoder();
 const headers = { 'Cache-Control': 'no-store', 'Content-Type': 'application/json', 'X-Content-Type-Options': 'nosniff' };
 const json = (data, status=200) => new Response(JSON.stringify(data), {status,headers});
 const hex = bytes => [...bytes].map(x=>x.toString(16).padStart(2,'0')).join('');
+const SAFE_READINESS_ERRORS=new Set([
+  'sqlite_storage_required','migration_bundle_integrity','additive_migration_required',
+  'schedule_migration_integrity','additive_schedule_migration_required',
+  'adjudication_migration_integrity','additive_adjudication_migration_required',
+  'delivery_migration_integrity','additive_delivery_migration_required','storage_readback_failed',
+]);
+const READINESS_PHASES=new Set(['sqlite','base_migration','schedule_migration','adjudication_migration','delivery_migration','adapters','scheduler']);
+export function readinessErrorCode(error,phase){
+  const code=typeof error?.message==='string'?error.message:'';
+  if(SAFE_READINESS_ERRORS.has(code))return code;
+  return `store_init_${READINESS_PHASES.has(phase)?phase:'unknown'}_failed`;
+}
 async function signingKey(secret) {
   if (typeof secret !== 'string' || secret.length < 32) throw Error('service_credential_unavailable');
   const master=await crypto.subtle.importKey('raw',encoder.encode(secret),{name:'HMAC',hash:'SHA-256'},false,['sign']);
@@ -68,38 +80,53 @@ export function privateTextStore(storage) {
 
 export class EnrichmentStoreCore {
   constructor(ctx,env) {
-    this.ctx=ctx; this.env=env;
+    this.ctx=ctx; this.env=env; this.readinessError=null;
     this.ready=ctx.blockConcurrencyWhile(async()=>{
-      if(!ctx.storage.sql)throw Error('sqlite_storage_required');
-      const digest=await sha256(migration.sql);
-      if(digest!==migration.sha256)throw Error('migration_bundle_integrity');
-      const applied=await ctx.storage.get('schema:enrichment');
-      if(applied && applied!==digest)throw Error('additive_migration_required');
-      if(!applied)await ctx.storage.transaction(async tx=>{ctx.storage.sql.exec(migration.sql);await tx.put('schema:enrichment',digest)});
-      const scheduleHash=await sha256(scheduleMigration.sql);
-      if(scheduleHash!==scheduleMigration.sha256)throw Error('schedule_migration_integrity');
-      const scheduleApplied=await ctx.storage.get('schema:enrichment-schedule');
-      if(scheduleApplied && scheduleApplied!==scheduleHash)throw Error('additive_schedule_migration_required');
-      if(!scheduleApplied)await ctx.storage.transaction(async tx=>{ctx.storage.sql.exec(scheduleMigration.sql);await tx.put('schema:enrichment-schedule',scheduleHash)});
-      const adjudicationHash=await sha256(adjudicationMigration.sql);
-      if(adjudicationHash!==adjudicationMigration.sha256)throw Error('adjudication_migration_integrity');
-      const adjudicationApplied=await ctx.storage.get('schema:enrichment-adjudication');
-      if(adjudicationApplied && adjudicationApplied!==adjudicationHash)throw Error('additive_adjudication_migration_required');
-      if(!adjudicationApplied)await ctx.storage.transaction(async tx=>{ctx.storage.sql.exec(adjudicationMigration.sql);await tx.put('schema:enrichment-adjudication',adjudicationHash)});
-      const deliveryHash=await sha256(deliveryMigration.sql);
-      if(deliveryHash!==deliveryMigration.sha256)throw Error('delivery_migration_integrity');
-      const deliveryApplied=await ctx.storage.get('schema:enrichment-delivery');
-      if(deliveryApplied&&deliveryApplied!==deliveryHash)throw Error('additive_delivery_migration_required');
-      if(!deliveryApplied)await ctx.storage.transaction(async tx=>{ctx.storage.sql.exec(deliveryMigration.sql);await tx.put('schema:enrichment-delivery',deliveryHash)});
-      this.db=sqliteAdapter(ctx.storage); this.evidence=privateTextStore(ctx.storage);this.documents=privateBinaryStore(ctx.storage);
-      this.schedule=new Hour40Schedule(ctx.storage,
-        async(at,attempt)=>runEnrichment(await this.environment(),{iterationSlot:at,iterationAttempt:attempt}),
-        async(at,attempt)=>this.db.prepare('SELECT run_id,status,selected_job_id,error_code FROM enrichment_runs WHERE scheduled_slot=?').bind(iterationKey(at,attempt)).first(),
-        async()=> (await this.environment()).PAPER_ENRICHMENT_ENABLED==='true');
+      let phase='sqlite';
+      try{
+        if(!ctx.storage.sql)throw Error('sqlite_storage_required');
+        phase='base_migration';
+        const digest=await sha256(migration.sql);
+        if(digest!==migration.sha256)throw Error('migration_bundle_integrity');
+        const applied=await ctx.storage.get('schema:enrichment');
+        if(applied && applied!==digest)throw Error('additive_migration_required');
+        if(!applied)await ctx.storage.transaction(async tx=>{ctx.storage.sql.exec(migration.sql);await tx.put('schema:enrichment',digest)});
+        phase='schedule_migration';
+        const scheduleHash=await sha256(scheduleMigration.sql);
+        if(scheduleHash!==scheduleMigration.sha256)throw Error('schedule_migration_integrity');
+        const scheduleApplied=await ctx.storage.get('schema:enrichment-schedule');
+        if(scheduleApplied && scheduleApplied!==scheduleHash)throw Error('additive_schedule_migration_required');
+        if(!scheduleApplied)await ctx.storage.transaction(async tx=>{ctx.storage.sql.exec(scheduleMigration.sql);await tx.put('schema:enrichment-schedule',scheduleHash)});
+        phase='adjudication_migration';
+        const adjudicationHash=await sha256(adjudicationMigration.sql);
+        if(adjudicationHash!==adjudicationMigration.sha256)throw Error('adjudication_migration_integrity');
+        const adjudicationApplied=await ctx.storage.get('schema:enrichment-adjudication');
+        if(adjudicationApplied && adjudicationApplied!==adjudicationHash)throw Error('additive_adjudication_migration_required');
+        if(!adjudicationApplied)await ctx.storage.transaction(async tx=>{ctx.storage.sql.exec(adjudicationMigration.sql);await tx.put('schema:enrichment-adjudication',adjudicationHash)});
+        phase='delivery_migration';
+        const deliveryHash=await sha256(deliveryMigration.sql);
+        if(deliveryHash!==deliveryMigration.sha256)throw Error('delivery_migration_integrity');
+        const deliveryApplied=await ctx.storage.get('schema:enrichment-delivery');
+        if(deliveryApplied&&deliveryApplied!==deliveryHash)throw Error('additive_delivery_migration_required');
+        if(!deliveryApplied)await ctx.storage.transaction(async tx=>{ctx.storage.sql.exec(deliveryMigration.sql);await tx.put('schema:enrichment-delivery',deliveryHash)});
+        phase='adapters';
+        this.db=sqliteAdapter(ctx.storage); this.evidence=privateTextStore(ctx.storage);this.documents=privateBinaryStore(ctx.storage);
+        phase='scheduler';
+        this.schedule=new Hour40Schedule(ctx.storage,
+          async(at,attempt)=>runEnrichment(await this.environment(),{iterationSlot:at,iterationAttempt:attempt}),
+          async(at,attempt)=>this.db.prepare('SELECT run_id,status,selected_job_id,error_code FROM enrichment_runs WHERE scheduled_slot=?').bind(iterationKey(at,attempt)).first(),
+          async()=> (await this.environment()).PAPER_ENRICHMENT_ENABLED==='true');
+      }catch(error){
+        this.readinessError=readinessErrorCode(error,phase);
+      }
     });
   }
-  async environment() {
+  async requireReady(){
     await this.ready;
+    if(this.readinessError){const error=Error(this.readinessError);error.code=this.readinessError;error.status=503;throw error}
+  }
+  async environment() {
+    await this.requireReady();
     const activation=await this.ctx.storage.get('activation:enrichment');
     return {...this.env, REVIEW_DB:this.db, REVIEW_EVIDENCE:this.evidence, REVIEW_DOCUMENTS:this.documents,
       PAPER_ENRICHMENT_ENABLED:this.env.PAPER_ENRICHMENT_ENABLED==='true'&&activation?.commit===this.env.DEPLOY_COMMIT?'true':'false'};
@@ -111,7 +138,7 @@ export class EnrichmentStoreCore {
     return {...await response.json(),storage_backend:'durable_object_sqlite',counts,scheduling:this.schedule.status(),commit:this.env.DEPLOY_COMMIT};
   }
   async verify() {
-    await this.ready;
+    await this.requireReady();
     const key='probe:'+crypto.randomUUID(),text='private-storage-roundtrip:'+crypto.randomUUID();
     await this.ctx.storage.put(key,text);
     try{if(await this.ctx.storage.get(key)!==text)throw Error('storage_readback_failed')}finally{await this.ctx.storage.delete(key)}
@@ -202,13 +229,13 @@ export class EnrichmentStoreCore {
       return json({error_code:'unknown_service_operation'},422);
     }catch(error){return json({error_code:error.code||error.message||'service_operation_failed'},error.status||500)}
   }
-  async alarm() { await this.ready; return this.schedule.tick(); }
+  async alarm() { await this.requireReady(); return this.schedule.tick(); }
   async fetch(request) {
     const url=new URL(request.url);
-    // Authenticate the private machine envelope before awaiting store readiness. This keeps
-    // initialisation failures observable only through the existing authenticated service.
+    // Authenticate the private machine envelope before requiring a healthy store. A failed
+    // initialisation remains visible only to the signed service; public routes stay fail-closed.
     if(url.pathname==='/machine')return this.machine(request);
-    await this.ready;
+    await this.requireReady();
     const env=await this.environment();
     if(url.pathname==='/public-index'&&request.method==='GET'){try{return json(await readPublicIndex(env,Number(url.searchParams.get('cursor')||0),url.searchParams.get('revision')))}catch(error){return json({error_code:error.message},error.status||503)}}
     if(url.pathname==='/public-assets'&&['GET','HEAD'].includes(request.method)){
