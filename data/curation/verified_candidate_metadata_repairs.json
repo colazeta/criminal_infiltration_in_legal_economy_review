@@ -65,6 +65,40 @@
       ],
       "checked_at": "2026-09-15",
       "basis": "The DOI-bound Elsevier/ScienceDirect record and the independent CSUC research portal record agree on the article identity, authors, year and venue. The existing queue bibliography is already correct; this reviewed declaration clears only the mechanical metadata-verification gate and makes no eligibility, canonical-identity, framework, completion, rights or publication decision."
+    },
+    {
+      "candidate_id": "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-015",
+      "expected": {
+        "title": "A machine learning approach for the detection of firms linked to organised crime in Italy",
+        "doi": "",
+        "authors": "",
+        "year": "2024",
+        "venue": "UIF, Quaderni dell'antiriciclaggio, n. 22",
+        "verification_status": "metadata_partial",
+        "metadata_confidence": "",
+        "review_stage": "metadata_fix",
+        "current_status": "pending",
+        "current_decision": "",
+        "possible_duplicate": "",
+        "metadata_conflict": ""
+      },
+      "replacement": {
+        "title": "A machine learning approach for the detection of firms linked to organised crime in Italy, based on balance sheet data",
+        "authors": "Pasquale Cariello; Marco De Simoni; Stefano Iezzi",
+        "source_links": "https://uif.bancaditalia.it/pubblicazioni/quaderni/2024/quaderno-22-2024/index.html; https://uif.bancaditalia.it/pubblicazioni/quaderni/2024/quaderno-22-2024/quaderno-22-2024.pdf"
+      },
+      "evidence": [
+        {
+          "role": "primary_metadata",
+          "url": "https://uif.bancaditalia.it/pubblicazioni/quaderni/2024/quaderno-22-2024/index.html"
+        },
+        {
+          "role": "independent_catalogue",
+          "url": "https://katalog.slub-dresden.de/en/id/0-1799287548"
+        }
+      ],
+      "checked_at": "2026-09-16",
+      "basis": "The official UIF publication record identifies Quaderno dell'antiriciclaggio no. 22 and names Pasquale Cariello, Marco De Simoni and Stefano Iezzi; the independent SLUB catalogue independently records the same no. 22, authors and 2024 manifestation. The official English title includes the balance-sheet-data subtitle. This repair clears only the mechanical F0 bibliographic verification gate and makes no eligibility, canonical-identity, framework, completion, rights, validation or publication decision."
     }
   ]
 }
