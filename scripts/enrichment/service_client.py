@@ -30,7 +30,10 @@ _SAFE_CODES = {'service_authentication_required', 'private_storage_required', 's
                'schedule_migration_integrity', 'additive_schedule_migration_required',
                'adjudication_migration_integrity', 'additive_adjudication_migration_required',
                'delivery_migration_integrity', 'additive_delivery_migration_required',
-               'storage_readback_failed'}
+               'storage_readback_failed', 'store_init_sqlite_failed',
+               'store_init_base_migration_failed', 'store_init_schedule_migration_failed',
+               'store_init_adjudication_migration_failed', 'store_init_delivery_migration_failed',
+               'store_init_adapters_failed', 'store_init_scheduler_failed', 'store_init_unknown_failed'}
 
 
 def classify_private_error(value):
