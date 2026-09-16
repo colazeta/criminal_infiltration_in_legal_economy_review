@@ -229,6 +229,38 @@
       ],
       "checked_at": "2026-09-16",
       "basis": "The DOI-bound University of Chicago Press record and the independent University of Oxford Sociology record agree on Federico Varese, the exact article title, the 2020 publication, Crime and Justice volume 49 and DOI 10.1086/708870. This repair fills the venue and adds independent institutional provenance while clearing only the mechanical F0 metadata-verification gate; it makes no eligibility, canonical-identity, framework, completion, rights, validation or publication decision."
+    },
+    {
+      "candidate_id": "CAND-ACADEMIC-2026-09-09-006",
+      "expected": {
+        "title": "The effects of mafia infiltration on public procurement performance",
+        "doi": "10.1016/j.ejpoleco.2020.101923",
+        "authors": "Diego Ravenda; Michele G. Giuranno; Maika M. Valencia-Silva; Josep María Argilés-Bosch; Josep García-Blandón",
+        "year": "2020",
+        "venue": "European Journal of Political Economy",
+        "verification_status": "metadata_partial",
+        "metadata_confidence": "",
+        "review_stage": "metadata_fix",
+        "current_status": "pending",
+        "current_decision": "",
+        "possible_duplicate": "",
+        "metadata_conflict": ""
+      },
+      "replacement": {
+        "source_links": "https://doi.org/10.1016/j.ejpoleco.2020.101923; https://merit.url.edu/ca/publications/the-effects-of-mafia-infiltration-on-public-procurement-performan-4"
+      },
+      "evidence": [
+        {
+          "role": "primary_metadata",
+          "url": "https://doi.org/10.1016/j.ejpoleco.2020.101923"
+        },
+        {
+          "role": "independent_institutional",
+          "url": "https://merit.url.edu/ca/publications/the-effects-of-mafia-infiltration-on-public-procurement-performan-4"
+        }
+      ],
+      "checked_at": "2026-09-16",
+      "basis": "The DOI-bound record and the independent Universitat Ramon Llull research portal agree on the exact article identity, authors, 2020 publication, European Journal of Political Economy volume 64 and article 101923. The queue bibliography is already substantively correct; this declaration adds independent institutional provenance and clears only the mechanical F0 metadata-verification gate. It makes no eligibility, canonical-identity, framework, completion, rights, validation or publication decision."
     }
   ]
 }
