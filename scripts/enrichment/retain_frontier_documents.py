@@ -20,7 +20,7 @@ from pathlib import Path
 
 from scripts.calibration.full_text_source_case import extract_text
 from scripts.enrichment.service_client import call
-from scripts.oa_acquisition import acquire_pdf
+from scripts.oa_acquisition import acquire_pdf, authorised_host
 
 ROOT = Path(__file__).resolve().parents[2]
 ACCESS = ROOT / 'data/curation/access_coverage.csv'
@@ -56,6 +56,14 @@ def title_matches(title: str, text: str) -> bool:
     return len(words) >= 4 and prefix in head and overlap >= required
 
 
+def acquisition_authorised(url: str) -> bool:
+    try:
+        authorised_host(url)
+    except ValueError:
+        return False
+    return True
+
+
 def frontier(limit: int) -> list[tuple[dict, dict]]:
     records = json.loads(REGISTER.read_text(encoding='utf-8'))['records']
     by_id = {record['id']: record for record in records}
@@ -73,6 +81,8 @@ def frontier(limit: int) -> list[tuple[dict, dict]]:
             if row.get('access_status') != 'open' or row.get('access_kind') != 'public_full_text':
                 continue
             if row.get('evidence_source') != 'Governed PDF fetch' or not row.get('access_url', '').startswith('https://'):
+                continue
+            if not acquisition_authorised(row.get('access_url', '')):
                 continue
             if identity_text(row.get('title', '')) != identity_text(record.get('title', '')):
                 continue
