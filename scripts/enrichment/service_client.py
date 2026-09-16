@@ -22,8 +22,10 @@ class NoRedirect(HTTPRedirectHandler):
 _PRIVATE_HTTP = build_opener(NoRedirect())
 
 _SAFE_CODES = {'service_authentication_required', 'service_auth_state_unavailable',
-               'service_auth_nonce_transaction_unavailable', 'service_auth_nonce_list_unavailable',
-               'service_auth_nonce_delete_unavailable', 'private_storage_required', 'stale_deployment',
+               'service_auth_nonce_transaction_unavailable', 'service_auth_nonce_get_unavailable',
+               'service_auth_nonce_put_unavailable', 'service_auth_nonce_commit_unavailable',
+               'service_auth_nonce_list_unavailable', 'service_auth_nonce_delete_unavailable',
+               'private_storage_required', 'stale_deployment',
                'service_operation_failed', 'enrichment_inactive', 'payload_too_large',
                'development_checkpoint_conflict', 'development_checkpoint_invalid',
                'development_checkpoint_corrupt', 'development_checkpoint_identity_mismatch',
