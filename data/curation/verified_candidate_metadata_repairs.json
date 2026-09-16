@@ -117,7 +117,6 @@
         "metadata_conflict": ""
       },
       "replacement": {
-        "doi": "10.3406/ecoap.2012.3609",
         "source_links": "https://www.persee.fr/doc/ecoap_0013-0494_2012_num_65_3_3609; https://library.au.int/mafia-et-%C3%A9conomie-l%C3%A9gale-typologie-des-march%C3%A9s-infiltr%C3%A9s"
       },
       "evidence": [
@@ -131,7 +130,7 @@
         }
       ],
       "checked_at": "2026-09-16",
-      "basis": "The Persée article record identifies Clotilde Champeyrache, Économie appliquée 65(3), September 2012, pp. 5–26 and explicitly records DOI 10.3406/ecoap.2012.3609. The independent African Union Library catalogue independently matches the same author, title, journal, 2012 manifestation, volume/issue and pages. This repair records the DOI and second source without making an eligibility, canonical-identity, framework, completion, rights, validation or publication decision."
+      "basis": "Persée and the independent African Union Library catalogue agree on Clotilde Champeyrache, the exact title, Économie appliquée, the 2012 manifestation, volume/issue and pages. Persée currently exposes DOI 10.3406/ecoap.2012.3609, but this candidate's governed batch contract explicitly preserves an empty DOI at this stage; Lane A therefore does not change that field. This repair adds the independent bibliographic source and clears only the mechanical F0 metadata-verification gate, without making an eligibility, canonical-identity, framework, completion, rights, validation or publication decision."
     }
   ]
 }
