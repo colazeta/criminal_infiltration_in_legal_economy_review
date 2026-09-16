@@ -71,10 +71,13 @@ QUARANTINED_LEDGER_COMMENTS = {
     # one exact rediscovery as not-forwarded; replacement comment 5657166865
     # preserves all search/intake evidence while correcting known/not-forwarded.
     5657142525: "ACADEMIC-2026-09-14-EXTRA-8b3f2d6a91c4",
-    # Bounded-text recovery 2026-09-16: the immutable original has one
-    # limitation over the 180-character contract. Replacement 5702142537 keeps
-    # every count and substantive fact while shortening only that limitation.
+    # 2026-09-16 recovery chain for ACADEMIC-2026-09-15-EXTRA-29aa300f6e53.
+    # The original exceeded the 180-character limitation contract. Its first
+    # replacement corrected that field but still exceeded the ten-note bound and
+    # lacked the required `Exa fallback:` prefix. Both remain immutable evidence;
+    # replacement 5702314461 is the fully contract-conformant terminal.
     5686212375: "ACADEMIC-2026-09-15-EXTRA-29aa300f6e53",
+    5702142537: "ACADEMIC-2026-09-15-EXTRA-29aa300f6e53",
 }
 
 # These batches are not merely superseded malformed terminals: the audited run
@@ -148,7 +151,7 @@ LATE_RECOVERY_TERMINALS = {
         "run_date": "2026-09-12",
         "created_rome_date": "2026-09-13",
     },
-    5702142537: {
+    5702314461: {
         "batch_id": "ACADEMIC-2026-09-15-EXTRA-29aa300f6e53",
         "run_date": "2026-09-15",
         "created_rome_date": "2026-09-16",
