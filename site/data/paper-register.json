@@ -1538,9 +1538,10 @@
       "venue": "arXiv",
       "doi": "10.48550/arxiv.1403.5071",
       "sourceLinks": [
-        "https://arxiv.org/abs/1403.5071"
+        "https://arxiv.org/abs/1403.5071",
+        "https://dblp.org/rec/journals/corr/Gurciullo14"
       ],
-      "metadataStatus": "metadata_partial",
+      "metadataStatus": "metadata_verified",
       "reviewStatus": "pending",
       "accessStatus": "unknown",
       "registeredAt": "2026-09-09",
