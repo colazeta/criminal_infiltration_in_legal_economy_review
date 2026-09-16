@@ -26,6 +26,15 @@ class EnrichmentReadinessErrorTests(unittest.TestCase):
             with self.assertRaisesRegex(RuntimeError, r'^enrichment_service_http_503:service_auth_state_unavailable$'):
                 client.call('verify', expected_commit='a' * 40)
 
+    def test_closed_nonce_phase_code_is_preserved_without_private_text(self):
+        body = io.BytesIO(b'{"error_code":"service_auth_nonce_list_unavailable","private":"never disclose"}')
+        error = HTTPError(client.ORIGIN, 503, 'failure', {}, body)
+        with patch.dict(os.environ, {'CURATOR_SESSION_SECRET': 'synthetic-test-only-' + 'x' * 40}), \
+             patch.object(client._PRIVATE_HTTP, 'open', side_effect=error):
+            with self.assertRaisesRegex(RuntimeError, r'^enrichment_service_http_503:service_auth_nonce_list_unavailable$') as caught:
+                client.call('verify', expected_commit='a' * 40)
+        self.assertNotIn('never disclose', str(caught.exception))
+
     def test_sql_failures_are_classified_without_returning_server_text(self):
         raw = 'SQLITE_ERROR: no such table: private_internal_name'
         body = io.BytesIO(json_bytes({'error_code': raw}))
