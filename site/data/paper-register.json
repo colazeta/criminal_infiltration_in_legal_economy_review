@@ -3796,9 +3796,10 @@
       "venue": "Économie appliquée",
       "doi": "",
       "sourceLinks": [
-        "https://www.persee.fr/doc/ecoap_0013-0494_2012_num_65_3_3609"
+        "https://www.persee.fr/doc/ecoap_0013-0494_2012_num_65_3_3609",
+        "https://library.au.int/mafia-et-%C3%A9conomie-l%C3%A9gale-typologie-des-march%C3%A9s-infiltr%C3%A9s"
       ],
-      "metadataStatus": "metadata_partial",
+      "metadataStatus": "metadata_verified",
       "reviewStatus": "pending",
       "accessStatus": "unknown",
       "registeredAt": "2026-09-13",
