@@ -71,6 +71,10 @@ QUARANTINED_LEDGER_COMMENTS = {
     # one exact rediscovery as not-forwarded; replacement comment 5657166865
     # preserves all search/intake evidence while correcting known/not-forwarded.
     5657142525: "ACADEMIC-2026-09-14-EXTRA-8b3f2d6a91c4",
+    # Bounded-text recovery 2026-09-16: the immutable original has one
+    # limitation over the 180-character contract. Replacement 5702142537 keeps
+    # every count and substantive fact while shortening only that limitation.
+    5686212375: "ACADEMIC-2026-09-15-EXTRA-29aa300f6e53",
 }
 
 # These batches are not merely superseded malformed terminals: the audited run
@@ -144,6 +148,11 @@ LATE_RECOVERY_TERMINALS = {
         "run_date": "2026-09-12",
         "created_rome_date": "2026-09-13",
     },
+    5702142537: {
+        "batch_id": "ACADEMIC-2026-09-15-EXTRA-29aa300f6e53",
+        "run_date": "2026-09-15",
+        "created_rome_date": "2026-09-16",
+    },
 }
 
 _RAW_API_GET = _base.api_get
@@ -177,7 +186,6 @@ def _verify_ledger_comment_time_with_recovery(run: dict, comment: dict) -> None:
     if recovery is None:
         _RAW_VERIFY_LEDGER_COMMENT_TIME(run, comment)
         return
-
     if run.get("batch_id") != recovery["batch_id"] or run.get("run_date") != recovery["run_date"]:
         raise _base.MetricsError("late recovery terminal identity disagrees with recovery record")
 
