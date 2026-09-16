@@ -33,6 +33,38 @@
       ],
       "checked_at": "2026-09-15",
       "basis": "The DOI-bound Springer version of record and the Sapienza institutional record independently agree on the article identity, authors, year and venue. This repair clears mechanical bibliographic verification only; it makes no eligibility, canonical-identity, framework, completion or publication decision."
+    },
+    {
+      "candidate_id": "CAND-ACADEMIC-2026-09-09-002",
+      "expected": {
+        "title": "Money laundering through the strategic management of accounting transactions",
+        "doi": "10.1016/j.cpa.2018.08.003",
+        "authors": "Diego Ravenda; Maika M. Valencia-Silva; Josep M. Argiles-Bosch; Josep García-Blandón",
+        "year": "2019",
+        "venue": "Critical Perspectives on Accounting",
+        "verification_status": "metadata_partial",
+        "metadata_confidence": "",
+        "review_stage": "metadata_fix",
+        "current_status": "pending",
+        "current_decision": "",
+        "possible_duplicate": "",
+        "metadata_conflict": ""
+      },
+      "replacement": {
+        "venue": "Critical Perspectives on Accounting"
+      },
+      "evidence": [
+        {
+          "role": "primary_metadata",
+          "url": "https://www.sciencedirect.com/science/article/abs/pii/S1045235418302612"
+        },
+        {
+          "role": "independent_institutional",
+          "url": "https://portalrecerca.csuc.cat/article/doi/10.1016/j.cpa.2018.08.003"
+        }
+      ],
+      "checked_at": "2026-09-15",
+      "basis": "The DOI-bound Elsevier/ScienceDirect record and the independent CSUC research portal record agree on the article identity, authors, year and venue. The existing queue bibliography is already correct; this reviewed declaration clears only the mechanical metadata-verification gate and makes no eligibility, canonical-identity, framework, completion, rights or publication decision."
     }
   ]
 }
