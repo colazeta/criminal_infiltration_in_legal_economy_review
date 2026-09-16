@@ -370,9 +370,10 @@
       "venue": "Global Crime",
       "doi": "10.1080/17440572.2024.2402848",
       "sourceLinks": [
-        "https://doi.org/10.1080/17440572.2024.2402848"
+        "https://doi.org/10.1080/17440572.2024.2402848",
+        "https://publicatt.unicatt.it/handle/10807/304181"
       ],
-      "metadataStatus": "metadata_partial",
+      "metadataStatus": "metadata_verified",
       "reviewStatus": "pending",
       "accessStatus": "unknown",
       "registeredAt": "2026-09-09",
@@ -2516,14 +2517,15 @@
     {
       "id": "CAND-ACADEMIC-2026-09-10-EXTRA-dbc5cb0d9888-023",
       "title": "‘Familiness’ diversification and recognition: intergenerational changes in mobile ‘ndrangheta families in Australia",
-      "authors": "",
+      "authors": "Anna Sergi",
       "year": 2024,
       "venue": "Trends in Organized Crime",
       "doi": "10.1007/s12117-024-09537-1",
       "sourceLinks": [
-        "https://link.springer.com/article/10.1007/s12117-024-09537-1"
+        "https://link.springer.com/article/10.1007/s12117-024-09537-1",
+        "https://repository.essex.ac.uk/38811/"
       ],
-      "metadataStatus": "metadata_partial",
+      "metadataStatus": "metadata_verified",
       "reviewStatus": "pending",
       "accessStatus": "unknown",
       "registeredAt": "2026-09-10",
@@ -2580,14 +2582,15 @@
     {
       "id": "CAND-ACADEMIC-2026-09-10-EXTRA-dbc5cb0d9888-027",
       "title": "Proxy targeting and multiplex resilience for organized crime network disruption in corporate interlock and communications networks",
-      "authors": "",
+      "authors": "Niles Breuer",
       "year": 2025,
       "venue": "Social Network Analysis and Mining",
       "doi": "10.1007/s13278-025-01506-y",
       "sourceLinks": [
-        "https://link.springer.com/article/10.1007/s13278-025-01506-y"
+        "https://link.springer.com/article/10.1007/s13278-025-01506-y",
+        "https://ora.ox.ac.uk/objects/uuid:31545b33-27a7-4877-a461-557c580e291e"
       ],
-      "metadataStatus": "metadata_partial",
+      "metadataStatus": "metadata_verified",
       "reviewStatus": "pending",
       "accessStatus": "unknown",
       "registeredAt": "2026-09-10",
