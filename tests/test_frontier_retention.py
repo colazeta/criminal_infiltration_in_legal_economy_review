@@ -1,7 +1,7 @@
 import unittest
 from pathlib import Path
 
-from scripts.enrichment.retain_frontier_documents import frontier, owns_b, title_matches
+from scripts.enrichment.retain_frontier_documents import acquisition_authorised, frontier, owns_b, title_matches
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -10,7 +10,16 @@ class FrontierRetentionTests(unittest.TestCase):
     def test_known_b_owned_public_full_text_candidates_are_selectable(self):
         selected = {record['id'] for record, _ in frontier(6)}
         self.assertIn('CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-002', selected)
+        self.assertIn('CAND-ACADEMIC-2026-09-09-EXTRA-6b5b5e038ac4-013', selected)
         self.assertTrue(all(owns_b(candidate_id) for candidate_id in selected))
+
+    def test_frontier_uses_only_origins_authorised_for_byte_acquisition(self):
+        self.assertTrue(acquisition_authorised('https://docs.iza.org/dp13028.pdf'))
+        self.assertTrue(acquisition_authorised('https://link.springer.com/content/pdf/10.1007/s11187-018-0003-y.pdf'))
+        self.assertFalse(acquisition_authorised('https://www.nhh.no/paper.pdf'))
+        self.assertFalse(acquisition_authorised('https://iris.uniroma1.it/paper.pdf'))
+        self.assertFalse(acquisition_authorised('https://research.vu.nl/paper.pdf'))
+        self.assertTrue(all(acquisition_authorised(row['access_url']) for _, row in frontier(6)))
 
     def test_title_identity_tolerates_layout_and_punctuation_only(self):
         title = 'Tough on criminal wealth? Exploring the link between organized crime’s asset confiscation and regional entrepreneurship'
@@ -35,6 +44,7 @@ class FrontierRetentionTests(unittest.TestCase):
         self.assertIn("'rights_verified': False", source)
         self.assertIn("'licence_status': 'not_verified'", source)
         self.assertIn("row.get('evidence_source') != 'Governed PDF fetch'", source)
+        self.assertIn('acquisition_authorised', source)
 
 
 if __name__ == '__main__':
