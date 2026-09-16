@@ -99,6 +99,39 @@
       ],
       "checked_at": "2026-09-16",
       "basis": "The official UIF publication record identifies Quaderno dell'antiriciclaggio no. 22 and names Pasquale Cariello, Marco De Simoni and Stefano Iezzi; the independent SLUB catalogue independently records the same no. 22, authors and 2024 manifestation. The official English title includes the balance-sheet-data subtitle. This repair clears only the mechanical F0 bibliographic verification gate and makes no eligibility, canonical-identity, framework, completion, rights, validation or publication decision."
+    },
+    {
+      "candidate_id": "CAND-ACADEMIC-2026-09-13-EXTRA-60872f2c2bf0-001",
+      "expected": {
+        "title": "Mafia et économie légale : typologie des marchés infiltrés",
+        "doi": "",
+        "authors": "Clotilde Champeyrache",
+        "year": "2012",
+        "venue": "Économie appliquée",
+        "verification_status": "metadata_partial",
+        "metadata_confidence": "",
+        "review_stage": "metadata_fix",
+        "current_status": "pending",
+        "current_decision": "",
+        "possible_duplicate": "",
+        "metadata_conflict": ""
+      },
+      "replacement": {
+        "doi": "10.3406/ecoap.2012.3609",
+        "source_links": "https://www.persee.fr/doc/ecoap_0013-0494_2012_num_65_3_3609; https://library.au.int/mafia-et-%C3%A9conomie-l%C3%A9gale-typologie-des-march%C3%A9s-infiltr%C3%A9s"
+      },
+      "evidence": [
+        {
+          "role": "primary_metadata",
+          "url": "https://www.persee.fr/doc/ecoap_0013-0494_2012_num_65_3_3609"
+        },
+        {
+          "role": "independent_catalogue",
+          "url": "https://library.au.int/mafia-et-%C3%A9conomie-l%C3%A9gale-typologie-des-march%C3%A9s-infiltr%C3%A9s"
+        }
+      ],
+      "checked_at": "2026-09-16",
+      "basis": "The Persée article record identifies Clotilde Champeyrache, Économie appliquée 65(3), September 2012, pp. 5–26 and explicitly records DOI 10.3406/ecoap.2012.3609. The independent African Union Library catalogue independently matches the same author, title, journal, 2012 manifestation, volume/issue and pages. This repair records the DOI and second source without making an eligibility, canonical-identity, framework, completion, rights, validation or publication decision."
     }
   ]
 }
