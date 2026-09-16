@@ -5,6 +5,7 @@ import hashlib
 import hmac
 import json
 import os
+import re
 import time
 import uuid
 from pathlib import Path
@@ -19,6 +20,44 @@ class NoRedirect(HTTPRedirectHandler):
         raise RuntimeError('service_redirect_refused')
 
 _PRIVATE_HTTP = build_opener(NoRedirect())
+
+_SAFE_CODES = {'service_authentication_required', 'private_storage_required', 'stale_deployment',
+               'service_operation_failed', 'enrichment_inactive', 'payload_too_large',
+               'development_checkpoint_conflict', 'development_checkpoint_invalid',
+               'development_checkpoint_corrupt', 'development_checkpoint_identity_mismatch',
+               'development_checkpoint_too_large', 'sqlite_storage_required',
+               'migration_bundle_integrity', 'additive_migration_required',
+               'schedule_migration_integrity', 'additive_schedule_migration_required',
+               'adjudication_migration_integrity', 'additive_adjudication_migration_required',
+               'delivery_migration_integrity', 'additive_delivery_migration_required',
+               'storage_readback_failed'}
+
+
+def classify_private_error(value):
+    """Return a closed diagnostic class; never return the server-supplied text."""
+    if not isinstance(value, str) or not value:
+        return None
+    if value in _SAFE_CODES:
+        return value
+    lowered = value.casefold()
+    patterns = (
+        (r'no such table', 'store_sql_missing_table'),
+        (r'no such column', 'store_sql_missing_column'),
+        (r'(?:table|index|trigger).*(?:already exists)|already exists', 'store_sql_already_exists'),
+        (r'(?:constraint|unique constraint|foreign key)', 'store_sql_constraint_error'),
+        (r'(?:database is locked|database is busy|\bbusy\b|\blocked\b)', 'store_sql_busy'),
+        (r'(?:cannot start a transaction|within a transaction|transaction)', 'store_transaction_error'),
+        (r'(?:sqlite|sql error|syntax error|near .+ syntax)', 'store_sql_error'),
+        (r'(?:storage|durable object storage|kv)', 'store_storage_error'),
+        (r'(?:is not a function|cannot read propert|undefined|null is not|not iterable)', 'store_runtime_shape_error'),
+        (r'(?:maximum call stack|out of memory|memory limit|cpu time)', 'store_runtime_resource_error'),
+    )
+    for pattern, category in patterns:
+        if re.search(pattern, lowered):
+            return category
+    # A short one-way fingerprint distinguishes repeated unknown failures without disclosing text.
+    fingerprint = hashlib.sha256(value.encode('utf-8', errors='replace')).hexdigest()[:12]
+    return 'store_unknown_error_' + fingerprint
 
 
 def call(operation, *, expected_commit, target_id=None, proposal=None, run_key=None, source=None, document=None,
@@ -54,17 +93,9 @@ def call(operation, *, expected_commit, target_id=None, proposal=None, run_key=N
             raw = error.read(4096)
             data = json.loads(raw)
             code = data.get('error_code') or (data.get('error', {}).get('code') if isinstance(data.get('error'), dict) else None)
-            allowed = {'service_authentication_required', 'private_storage_required', 'stale_deployment',
-                       'service_operation_failed', 'enrichment_inactive', 'payload_too_large',
-                       'development_checkpoint_conflict', 'development_checkpoint_invalid',
-                       'development_checkpoint_corrupt', 'development_checkpoint_identity_mismatch',
-                       'development_checkpoint_too_large', 'sqlite_storage_required',
-                       'migration_bundle_integrity', 'additive_migration_required',
-                       'schedule_migration_integrity', 'additive_schedule_migration_required',
-                       'adjudication_migration_integrity', 'additive_adjudication_migration_required',
-                       'delivery_migration_integrity', 'additive_delivery_migration_required',
-                       'storage_readback_failed'}
-            if code in allowed: suffix = ':' + code
+            category = classify_private_error(code)
+            if category:
+                suffix = ':' + category
         except (ValueError, TypeError, AttributeError):
             suffix = ':non_json_response'
         raise RuntimeError('enrichment_service_http_' + str(error.code) + suffix) from None
