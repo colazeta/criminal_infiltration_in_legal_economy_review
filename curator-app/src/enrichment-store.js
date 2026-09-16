@@ -157,7 +157,15 @@ export class EnrichmentStoreCore {
   async recordNonce(nonce,now) {
     let phase='transaction';
     try{
-      await this.ctx.storage.transaction(async tx=>{const key='nonce:'+nonce;if(await tx.get(key))throw Error('service_replay');await tx.put(key,now)});
+      await this.ctx.storage.transaction(async tx=>{
+        const key='nonce:'+nonce;
+        phase='get';
+        const prior=await tx.get(key);
+        if(prior)throw Error('service_replay');
+        phase='put';
+        await tx.put(key,now);
+        phase='commit';
+      });
       phase='list';
       const entries=await this.ctx.storage.list({prefix:'nonce:',limit:128}),expired=[];
       for(const[key,time]of entries)if(now-time>300000)expired.push(key);
