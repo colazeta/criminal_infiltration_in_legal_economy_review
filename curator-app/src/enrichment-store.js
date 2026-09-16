@@ -204,9 +204,11 @@ export class EnrichmentStoreCore {
   }
   async alarm() { await this.ready; return this.schedule.tick(); }
   async fetch(request) {
-    await this.ready;
     const url=new URL(request.url);
+    // Authenticate the private machine envelope before awaiting store readiness. This keeps
+    // initialisation failures observable only through the existing authenticated service.
     if(url.pathname==='/machine')return this.machine(request);
+    await this.ready;
     const env=await this.environment();
     if(url.pathname==='/public-index'&&request.method==='GET'){try{return json(await readPublicIndex(env,Number(url.searchParams.get('cursor')||0),url.searchParams.get('revision')))}catch(error){return json({error_code:error.message},error.status||503)}}
     if(url.pathname==='/public-assets'&&['GET','HEAD'].includes(request.method)){
