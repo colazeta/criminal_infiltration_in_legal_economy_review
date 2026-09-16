@@ -21,7 +21,7 @@ class NoRedirect(HTTPRedirectHandler):
 
 _PRIVATE_HTTP = build_opener(NoRedirect())
 
-_SAFE_CODES = {'service_authentication_required', 'private_storage_required', 'stale_deployment',
+_SAFE_CODES = {'service_authentication_required', 'service_auth_state_unavailable', 'private_storage_required', 'stale_deployment',
                'service_operation_failed', 'enrichment_inactive', 'payload_too_large',
                'development_checkpoint_conflict', 'development_checkpoint_invalid',
                'development_checkpoint_corrupt', 'development_checkpoint_identity_mismatch',
@@ -58,7 +58,6 @@ def classify_private_error(value):
     for pattern, category in patterns:
         if re.search(pattern, lowered):
             return category
-    # A short one-way fingerprint distinguishes repeated unknown failures without disclosing text.
     fingerprint = hashlib.sha256(value.encode('utf-8', errors='replace')).hexdigest()[:12]
     return 'store_unknown_error_' + fingerprint
 
@@ -90,7 +89,6 @@ def call(operation, *, expected_commit, target_id=None, proposal=None, run_key=N
         if len(raw) > 9000000: raise RuntimeError('service_response_limit')
         return json.loads(raw)
     except HTTPError as error:
-        # No raw server body, input, signature, or authentication material enters logs.
         suffix = ''
         try:
             raw = error.read(4096)

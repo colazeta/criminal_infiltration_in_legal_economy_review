@@ -152,9 +152,17 @@ export class EnrichmentStoreCore {
     const bytes=Uint8Array.from(signature.match(/../g).map(x=>parseInt(x,16)));
     const valid=await crypto.subtle.verify('HMAC',await signingKey(this.env.SESSION_SECRET),bytes,encoder.encode(`${DOMAIN}\n${timestamp}\n${nonce}\n${body}`));
     if(!valid)throw Error('service_authentication_required');
-    await this.ctx.storage.transaction(async tx=>{const key='nonce:'+nonce;if(await tx.get(key))throw Error('service_replay');await tx.put(key,now)});
-    const expired=[];for(const[key,time]of await this.ctx.storage.list({prefix:'nonce:',limit:128}))if(now-time>300000)expired.push(key);
-    if(expired.length)await this.ctx.storage.delete(expired);
+    return nonce;
+  }
+  async recordNonce(nonce,now) {
+    try{
+      await this.ctx.storage.transaction(async tx=>{const key='nonce:'+nonce;if(await tx.get(key))throw Error('service_replay');await tx.put(key,now)});
+      const expired=[];for(const[key,time]of await this.ctx.storage.list({prefix:'nonce:',limit:128}))if(now-time>300000)expired.push(key);
+      if(expired.length)await this.ctx.storage.delete(expired);
+    }catch(error){
+      if(error?.message==='service_replay')throw error;
+      const unavailable=Error('service_auth_state_unavailable');unavailable.code='service_auth_state_unavailable';unavailable.status=503;throw unavailable;
+    }
   }
   async packet(data) {
     const target=data.target_id?await this.db.prepare('SELECT * FROM enrichment_targets WHERE target_id=? AND active=1').bind(data.target_id).first():
@@ -167,7 +175,7 @@ export class EnrichmentStoreCore {
   }
   async machine(request,now=Date.now()) {
     if(request.method!=='POST'||!request.headers.get('Content-Type')?.startsWith('application/json'))return json({error_code:'service_authentication_required'},401);
-    let body;
+    let body,nonce;
     try {
       if (Number(request.headers.get('Content-Length')) > 8400000) return json({error_code:'payload_too_large'},413);
       const reader=request.body?.getReader(),parts=[];let total=0;
@@ -176,8 +184,14 @@ export class EnrichmentStoreCore {
       const raw=new Uint8Array(total);let at=0;for(const part of parts){raw.set(part,at);at+=part.byteLength}
       body=new TextDecoder('utf-8',{fatal:true}).decode(raw);
       if(body.length>8400000)return json({error_code:'payload_too_large'},413);
-      await this.authorise(request,body,now);
+      nonce=await this.authorise(request,body,now);
     }catch{return json({error_code:'service_authentication_required'},401)}
+    try{
+      await this.recordNonce(nonce,now);
+    }catch(error){
+      if(error?.message==='service_replay')return json({error_code:'service_authentication_required'},401);
+      return json({error_code:'service_auth_state_unavailable'},503);
+    }
     try{
       const data=JSON.parse(body);
       const allowedFields=['operation','expected_commit','target_id','proposal','run_key','calibration_id','pr_number','source','document','bibliography','document_id','checkpoint'];
