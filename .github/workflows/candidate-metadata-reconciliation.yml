@@ -7,8 +7,11 @@ on:
       - data/curation/review_queue.csv
       - data/curation/retrieval_coverage.csv
       - data/curation/verified_source_link_repairs.json
+      - data/curation/verified_candidate_metadata_repairs.json
       - scripts/curation/reconcile_candidate_metadata.py
+      - scripts/curation/apply_verified_candidate_metadata_repairs.py
       - tests/test_candidate_metadata_reconciliation.py
+      - tests/test_verified_candidate_metadata_repairs.py
       - .github/workflows/candidate-metadata-reconciliation.yml
   schedule:
     - cron: "10 6 * * 0"
@@ -31,9 +34,7 @@ jobs:
       issues: write
     steps:
       - name: Set up Node.js
-        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
-        with:
-          node-version: 22
+        uses: actions/setup-node@a0853c24544627f5838078e36cf38b85af677262 # v4
 
       - name: Checkout main
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
@@ -44,6 +45,16 @@ jobs:
         uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
         with:
           python-version: "3.11"
+
+      - name: Apply reviewed explicit candidate metadata repairs
+        run: |
+          action_date="$(date -u +%F)"
+          python scripts/curation/apply_verified_candidate_metadata_repairs.py \
+            --date "$action_date" \
+            --output "$RUNNER_TEMP/verified-metadata-repair-summary.json"
+          python scripts/curation/apply_verified_candidate_metadata_repairs.py \
+            --date "$action_date" \
+            --check
 
       - name: Reconcile only verified candidate metadata/provenance
         run: |
@@ -113,8 +124,18 @@ jobs:
           import json
           import os
 
+          reviewed = json.load(open(os.path.join(os.environ["RUNNER_TEMP"], "verified-metadata-repair-summary.json"), encoding="utf-8"))
           summary = json.load(open(os.path.join(os.environ["RUNNER_TEMP"], "metadata-repair-summary.json"), encoding="utf-8"))
           print("## Candidate metadata verification")
+          print()
+          print(f"Reviewed explicit bibliographic repairs: **{reviewed['safe_verified_metadata_repairs']}**")
+          print()
+          for repair in reviewed["repairs"]:
+              print(f"- `{repair['candidate_id']}`")
+              for field, value in repair["replacement"].items():
+                  print(f"  - {field}: `{value}`")
+              print(f"  - evidence: {', '.join(repair['evidence_urls'])}")
+              print(f"  - verified: {repair['checked_at']}")
           print()
           print(f"Safe dual-source DOI repairs: **{summary['safe_repairs']}**")
           print()
