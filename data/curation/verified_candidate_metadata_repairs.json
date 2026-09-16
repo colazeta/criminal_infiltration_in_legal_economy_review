@@ -163,6 +163,39 @@
       ],
       "checked_at": "2026-09-16",
       "basis": "The arXiv record and independent DBLP catalogue agree on Stefano Gurciullo, the exact title, the 2014 manifestation and arXiv identifier 1403.5071. The queue already records the corresponding arXiv DOI. This repair adds the independent bibliographic source and clears only the mechanical F0 metadata-verification gate; it makes no eligibility, canonical-identity, framework, completion, rights, validation or publication decision."
+    },
+    {
+      "candidate_id": "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-009",
+      "expected": {
+        "title": "The extra‐legal governance of corruption: Tracing the organization of corruption in public procurement",
+        "doi": "10.1111/gove.12648",
+        "authors": "Mihály Fazekas; Salvatore Sberna; Alberto Vannucci",
+        "year": "2021",
+        "venue": "",
+        "verification_status": "metadata_partial",
+        "metadata_confidence": "",
+        "review_stage": "metadata_fix",
+        "current_status": "pending",
+        "current_decision": "",
+        "possible_duplicate": "",
+        "metadata_conflict": ""
+      },
+      "replacement": {
+        "venue": "Governance",
+        "source_links": "https://doi.org/10.1111/gove.12648; https://research.ceu.edu/en/publications/the-extra-legal-governance-of-corruption-tracing-the-organization/"
+      },
+      "evidence": [
+        {
+          "role": "primary_metadata",
+          "url": "https://doi.org/10.1111/gove.12648"
+        },
+        {
+          "role": "independent_institutional",
+          "url": "https://research.ceu.edu/en/publications/the-extra-legal-governance-of-corruption-tracing-the-organization/"
+        }
+      ],
+      "checked_at": "2026-09-16",
+      "basis": "The DOI-bound Wiley record and the independent Central European University research portal agree on the article identity, authors and Governance publication. Wiley records first online publication on 15 November 2021; the queue's 2021 year is therefore retained. This repair fills the venue and adds the independent institutional source while clearing only the mechanical F0 metadata-verification gate; it makes no eligibility, canonical-identity, framework, completion, rights, validation or publication decision."
     }
   ]
 }
