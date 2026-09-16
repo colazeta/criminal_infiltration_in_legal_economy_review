@@ -28,7 +28,7 @@ test('valid HMAC authentication is distinct from anti-replay persistence', async
   assert.equal(await core.authorise(request,body,Date.now()),nonce);
 });
 
-test('signed request with unavailable nonce storage gets a closed service-state error', async()=>{
+test('nonce reservation transaction failure gets a closed phase code', async()=>{
   const core=Object.create(EnrichmentStoreCore.prototype);
   core.ctx={storage:{
     async transaction(){throw Error('private storage implementation detail')},
@@ -36,7 +36,29 @@ test('signed request with unavailable nonce storage gets a closed service-state 
     async delete(){},
   }};
   await assert.rejects(core.recordNonce(crypto.randomUUID(),Date.now()), error=>
-    error?.code==='service_auth_state_unavailable'&&error?.status===503&&error?.message==='service_auth_state_unavailable');
+    error?.code==='service_auth_nonce_transaction_unavailable'&&error?.status===503&&error?.message==='service_auth_nonce_transaction_unavailable');
+});
+
+test('nonce cleanup listing failure is distinct from reservation failure', async()=>{
+  const core=Object.create(EnrichmentStoreCore.prototype);
+  core.ctx={storage:{
+    async transaction(fn){return fn({async get(){return undefined},async put(){}})},
+    async list(){throw Error('private list implementation detail')},
+    async delete(){},
+  }};
+  await assert.rejects(core.recordNonce(crypto.randomUUID(),Date.now()), error=>
+    error?.code==='service_auth_nonce_list_unavailable'&&error?.status===503);
+});
+
+test('nonce cleanup deletion failure is distinct and occurs only after reservation and listing', async()=>{
+  const core=Object.create(EnrichmentStoreCore.prototype);
+  core.ctx={storage:{
+    async transaction(fn){return fn({async get(){return undefined},async put(){}})},
+    async list(){return new Map([['nonce:old',Date.now()-600000]])},
+    async delete(){throw Error('private delete implementation detail')},
+  }};
+  await assert.rejects(core.recordNonce(crypto.randomUUID(),Date.now()), error=>
+    error?.code==='service_auth_nonce_delete_unavailable'&&error?.status===503);
 });
 
 test('replay remains an authentication failure rather than a storage diagnostic', async()=>{
