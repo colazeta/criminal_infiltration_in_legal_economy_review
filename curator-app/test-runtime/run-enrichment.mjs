@@ -23,12 +23,14 @@ const domain = 'CILE-ENRICH-SERVICE-v1';
 const persist = await mkdtemp(join(tmpdir(), 'cile-native-runtime-'));
 let outbound = 0;
 const options = {
-  name: 'cile-native-runtime', modules: true, script: bundle.outputFiles[0].text,
-  compatibilityDate: config.compatibility_date,
-  durableObjects: {NATIVE_STORE: {className: 'NativeEnrichmentTest', useSQLite: true}},
   durableObjectsPersist: persist,
-  bindings: {SESSION_SECRET: secret, DEPLOY_COMMIT: commit, CURATOR_LOGIN: 'colazeta', PAPER_ENRICHMENT_ENABLED: 'false'},
-  outboundService: () => {outbound++; return new Response('External calls disabled in native tests', {status: 503});},
+  workers: [{
+    name: 'cile-native-runtime', modules: true, script: bundle.outputFiles[0].text,
+    compatibilityDate: config.compatibility_date,
+    durableObjects: {NATIVE_STORE: {className: 'NativeEnrichmentTest', useSQLite: true}},
+    bindings: {SESSION_SECRET: secret, DEPLOY_COMMIT: commit, CURATOR_LOGIN: 'colazeta', PAPER_ENRICHMENT_ENABLED: 'false'},
+    outboundService: () => {outbound++; return new Response('External calls disabled in native tests', {status: 503});},
+  }],
 };
 function signed(operation = 'verify', {key = secret, timestamp = Date.now(), expectedCommit = commit} = {}) {
   const body = JSON.stringify({operation, expected_commit: expectedCommit});
