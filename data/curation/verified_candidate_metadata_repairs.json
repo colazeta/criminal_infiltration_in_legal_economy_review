@@ -131,6 +131,38 @@
       ],
       "checked_at": "2026-09-16",
       "basis": "Persée and the independent African Union Library catalogue agree on Clotilde Champeyrache, the exact title, Économie appliquée, the 2012 manifestation, volume/issue and pages. Persée currently exposes DOI 10.3406/ecoap.2012.3609, but this candidate's governed batch contract explicitly preserves an empty DOI at this stage; Lane A therefore does not change that field. This repair adds the independent bibliographic source and clears only the mechanical F0 metadata-verification gate, without making an eligibility, canonical-identity, framework, completion, rights, validation or publication decision."
+    },
+    {
+      "candidate_id": "CAND-ACADEMIC-2026-09-09-EXTRA-8e1caef4c376-001",
+      "expected": {
+        "title": "Organised crime infiltration in the legitimate private economy - An empirical network analysis approach",
+        "doi": "10.48550/arxiv.1403.5071",
+        "authors": "Stefano Gurciullo",
+        "year": "2014",
+        "venue": "arXiv",
+        "verification_status": "metadata_partial",
+        "metadata_confidence": "",
+        "review_stage": "metadata_fix",
+        "current_status": "pending",
+        "current_decision": "",
+        "possible_duplicate": "",
+        "metadata_conflict": ""
+      },
+      "replacement": {
+        "source_links": "https://arxiv.org/abs/1403.5071; https://dblp.org/rec/journals/corr/Gurciullo14"
+      },
+      "evidence": [
+        {
+          "role": "primary_metadata",
+          "url": "https://arxiv.org/abs/1403.5071"
+        },
+        {
+          "role": "independent_catalogue",
+          "url": "https://dblp.org/rec/journals/corr/Gurciullo14"
+        }
+      ],
+      "checked_at": "2026-09-16",
+      "basis": "The arXiv record and independent DBLP catalogue agree on Stefano Gurciullo, the exact title, the 2014 manifestation and arXiv identifier 1403.5071. The queue already records the corresponding arXiv DOI. This repair adds the independent bibliographic source and clears only the mechanical F0 metadata-verification gate; it makes no eligibility, canonical-identity, framework, completion, rights, validation or publication decision."
     }
   ]
 }
