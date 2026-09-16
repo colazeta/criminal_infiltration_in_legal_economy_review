@@ -32,3 +32,9 @@ jobs:
           python3 -m unittest discover -s tests -p 'test_*.py'
           node --test curator-app/test/*.test.js
           node --check site/enrichment.js
+      - name: Install the pinned production runtime for isolated integration tests
+        run: npm install --prefix "$RUNNER_TEMP/cile-native-runtime" --no-package-lock --no-audit --no-fund wrangler@4.128.0
+      - name: Verify native SQLite persistence and anti-replay without credentials
+        env:
+          NATIVE_RUNTIME_PACKAGE_ROOT: ${{ runner.temp }}/cile-native-runtime
+        run: node curator-app/test-runtime/run-enrichment.mjs
