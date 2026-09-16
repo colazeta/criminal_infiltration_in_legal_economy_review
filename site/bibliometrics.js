@@ -17,6 +17,11 @@
     note.textContent = 'Il grafico geografico non è disponibile in questo momento; nessun paese viene stimato.';
     ui.quality.after(note);
   });
+  import('./categorisation-statistics.js').catch(() => {
+    const note = document.createElement('p');
+    note.textContent = 'Le statistiche di categorizzazione non sono disponibili in questo momento; nessuna classe viene stimata.';
+    ui.quality.after(note);
+  });
 
   const format = new Intl.NumberFormat("it-IT", { maximumFractionDigits: 2 });
   const cell = (tag, value, className = "") => {
