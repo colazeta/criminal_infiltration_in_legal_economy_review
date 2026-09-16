@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "purpose": "Reviewed bibliographic repairs for queue-owned CandidateRecords. Entries bind exact pre-repair queue values and may change only non-scientific bibliographic metadata plus mechanical verification state through the candidate metadata reconciliation workflow.",
+  "repairs": [
+    {
+      "candidate_id": "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-016",
+      "expected": {
+        "title": "Evaluating risks-based communities of Mafia companies: a complex networks perspective",
+        "doi": "10.1007/s11156-021-00984-3",
+        "authors": "Nicola Giuseppe Castellano; Roy Cerqueti; Bruno Maria Franceschetti",
+        "year": "2021",
+        "venue": "",
+        "verification_status": "metadata_partial",
+        "metadata_confidence": "",
+        "review_stage": "metadata_fix",
+        "current_status": "pending",
+        "current_decision": "",
+        "possible_duplicate": "",
+        "metadata_conflict": ""
+      },
+      "replacement": {
+        "venue": "Review of Quantitative Finance and Accounting"
+      },
+      "evidence": [
+        {
+          "role": "primary_metadata",
+          "url": "https://link.springer.com/article/10.1007/s11156-021-00984-3"
+        },
+        {
+          "role": "independent_institutional",
+          "url": "https://iris.uniroma1.it/handle/11573/1542906"
+        }
+      ],
+      "checked_at": "2026-09-15",
+      "basis": "The DOI-bound Springer version of record and the Sapienza institutional record independently agree on the article identity, authors, year and venue. This repair clears mechanical bibliographic verification only; it makes no eligibility, canonical-identity, framework, completion or publication decision."
+    }
+  ]
+}
