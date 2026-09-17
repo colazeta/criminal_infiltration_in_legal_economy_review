@@ -57,6 +57,13 @@ class StatisticsNoticeTests(unittest.TestCase):
         self.assertIn('17/09/2026',body);self.assertIn('16/09/2026 12:00',body)
         self.assertNotIn('18/09/2026',body);self.assertNotIn('failed',body)
         self.assertRegex(text,r'src="\./stats\.js')
+    def test_successful_extra_summary_preserves_recorded_counts_without_json_fetch(self):
+        run={'status':'completed','startedAt':'2026-09-16T10:00:00Z','finishedAt':'2026-09-16T11:00:00Z',
+             'queriesCompleted':7,'queriesPlanned':7,'uniqueResults':12,'intakeCandidates':3}
+        render_statistics_page(self.page,{'daily':[],'extraRuns':[run]})
+        text=self.page.read_text();self.assertIn('Query: 7/7',text)
+        self.assertIn('Risultati unici: 12',text);self.assertIn('Nuovi candidati segnalati: 3',text)
+        self.assertNotIn('Candidati inviati alla coda',text)
     def test_legacy_minimal_fixture_remains_supported(self):
         self.page.write_text('<p id="latest-execution">Old result</p><script src="./stats.js" defer></script>')
         mark_unavailable(self.page,self.stats);self.assertIn(WARNING,self.page.read_text());self.assertNotIn('stats.js',self.page.read_text())

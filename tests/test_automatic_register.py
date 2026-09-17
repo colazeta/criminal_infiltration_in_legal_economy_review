@@ -93,7 +93,8 @@ class AutomaticRegisterTests(unittest.TestCase):
             path=Path(folder)/'stats.html';path.write_text('<p id="latest-execution" class="status-banner">Pending</p>')
             render_statistics_page(path,{'extraRuns':project_extra_runs([run],CYCLE)})
             self.assertIn('Query: 7/7',path.read_text())
-            self.assertIn('Candidati inviati alla coda: 3',path.read_text())
+            self.assertIn('Nuovi candidati segnalati: 3',path.read_text())
+            self.assertNotIn('Candidati inviati alla coda',path.read_text())
 
     def test_v2_comment_cannot_be_newly_authored_after_v3_release(self):
         run=extra()
