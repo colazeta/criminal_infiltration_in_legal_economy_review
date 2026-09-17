@@ -300,6 +300,7 @@
   };
   let records = [];
   let processing = null;
+  let workspace = null;
   let currentPage = 1;
   let pageSize = 25;
   let searchTimer = null;
@@ -377,6 +378,7 @@
     if(event.target===dialog&&(event.clientX<box.left||event.clientX>box.right||event.clientY<box.top||event.clientY>box.bottom)) dialog.close();
   });
   dialog.addEventListener("close", () => {
+    workspace?.sheetClosed();
     const target=opener?.isConnected?opener:[...list.querySelectorAll("button[data-record-id]")].find(button=>button.dataset.recordId===openedRecordId);
     (target || elements.search).focus();
   });
@@ -435,6 +437,7 @@
     if (!dialog.open) dialog.showModal();
     dialog.scrollTop=0;
     close.focus();
+    workspace?.sheetOpened(record);
     const isCurrent = () => dialog.open && sequence === sheetSequence;
     import("./paper-sheet-research.js?v=frontend-20260917")
       .then(() => globalThis.CILEPaperResearch.load(research, record, isCurrent))
@@ -452,7 +455,7 @@
   const sizeLabel=el('label','Per pagina '),sizeSelect=document.createElement('select');sizeSelect.id='register-page-size';
   for(const value of [25,50,100])addOption(sizeSelect,String(value),String(value));sizeLabel.append(sizeSelect);
   pager.append(pageStatus,sizeLabel,previous,next);list.closest('.table-scroll').after(pager);
-  function changePage(delta){currentPage+=delta;render();count.scrollIntoView({block:'nearest'});}
+  function changePage(delta){currentPage=globalThis.CILEPaperProcessing.pageRecords(filteredRecords(),currentPage,pageSize).page+delta;render();count.scrollIntoView({block:'nearest'});}
   previous.addEventListener('click',()=>changePage(-1));next.addEventListener('click',()=>changePage(1));
   sizeSelect.addEventListener('change',()=>{pageSize=Number(sizeSelect.value);currentPage=1;render();});
   controls.addEventListener('change',event=>{if(event.target.tagName==='SELECT'){currentPage=1;render();}});
@@ -460,10 +463,10 @@
   function render() {
     const found = filteredRecords();
     const page=globalThis.CILEPaperProcessing.pageRecords(found,currentPage,pageSize);
-    currentPage=page.page;const {pages,start,rows:visible}=page;
+    const {pages,start,rows:visible}=page;
     count.textContent = `${found.length} record corrispondenti · ${records.length} registrati`;
-    pageStatus.textContent=found.length?`${start+1}–${start+visible.length} di ${found.length} · Pagina ${currentPage} di ${pages}`:'Nessun risultato';
-    previous.disabled=currentPage===1;next.disabled=currentPage===pages;pager.hidden=found.length===0;
+    pageStatus.textContent=found.length?`${start+1}–${start+visible.length} di ${found.length} · Pagina ${page.page} di ${pages}`:'Nessun risultato';
+    previous.disabled=page.page===1;next.disabled=page.page===pages;pager.hidden=found.length===0;
     const active=document.getElementById('register-active-filters');
     if(active){const n=[...controls.querySelectorAll('.register-filter-grid select')].filter(select=>select.value!=='all').length;active.textContent=n?` · ${n} attivi`:'';}
     const fragment=document.createDocumentFragment();
@@ -511,6 +514,38 @@
     });
   });
 
+  function connectWorkspace() {
+    if(!globalThis.CILEWorkspace)return;
+    workspace=globalThis.CILEWorkspace.attach({
+      controls,pager,dialog,getRecords:()=>records,
+      getState:()=>({...state,page:currentPage,size:pageSize,
+        content:document.getElementById('register-processing-filter')?.value||'all',
+        category:document.getElementById('register-framework-filter')?.value||'all'}),
+      applyState:view=>{
+        clearTimeout(searchTimer);
+        const ignored=[];
+        state.query=view.query;elements.search.value=view.query;
+        for(const key of ['year','author','venue','review','access','sort']) {
+          const fallback=key==='sort'?'newest':'all',select=elements[key];
+          const valid=[...select.options].some(option=>option.value===view[key]);
+          state[key]=valid?view[key]:fallback;select.value=state[key];
+          if(!valid)ignored.push(key);
+        }
+        for(const [key,id] of [['content','register-processing-filter'],['category','register-framework-filter']]) {
+          const select=document.getElementById(id);
+          const valid=select && [...select.options].some(option=>option.value===view[key]);
+          if(select)select.value=valid?view[key]:'all';
+          if(!valid && view[key]!=='all')ignored.push(key);
+        }
+        document.getElementById('register-processing-filter')?.dispatchEvent(new Event('change',{bubbles:true}));
+        currentPage=view.page;pageSize=view.size;sizeSelect.value=String(pageSize);
+        if([...controls.querySelectorAll('.register-filter-grid select')].some(select=>select.value!=='all'))document.getElementById('register-filter-panel').open=true;
+        render();return ignored;
+      },
+      openPaper:record=>openSheet(record,null),
+    });
+  }
+
   fetch("./data/paper-register.json", { cache: "no-store" })
     .then((response) => {
       if (!response.ok) throw new Error("register unavailable");
@@ -540,7 +575,7 @@
         })
         .catch(() => {
           count.after(el("p", "Il filtro di elaborazione non è disponibile. Questo non significa che i paper non siano stati analizzati."));
-        });
+        }).finally(connectWorkspace);
     })
     .catch(() => {
       list.replaceChildren();list.setAttribute("aria-busy","false");pager.hidden=true;
