@@ -194,6 +194,12 @@ def validate_pages() -> None:
             "daily-chart",
             "source-table-body",
             "daily-table-body",
+            "statistics-notice",
+            "statistics-notice-title",
+            "statistics-notice-impact",
+            "research-statistics-state",
+            "statistics-retry",
+            "research-kpis",
         }
         - stats_ids
     )
@@ -492,7 +498,8 @@ def validate_assets() -> None:
     statistics_flat = " ".join(statistics.split()).lower()
     for phrase in (
         "Nuovo non significa eleggibile",
-        "Una ricerca non riuscita non vale zero",
+        "L’assenza di conteggi non dimostra che non siano state svolte ricerche o trovati paper",
+        "Non viene mai sostituito con zero",
         "La sorveglianza non misura la saturazione",
         "issues/30",
     ):
@@ -503,15 +510,24 @@ def validate_assets() -> None:
     if re.search(r"\.innerHTML\s*=|insertAdjacentHTML", stats_javascript):
         fail("stats.js must not inject ledger data as HTML")
     for required in (
-        'fetch("./data/research-stats.json", { cache: "no-store" })',
+        'fetch("./data/research-stats.json",',
         "replaceChildren",
         "textContent",
         "completed.length < 8",
         "calendarWindow(rows, 30)",
         "sourceCompletionRate",
+        "Promise.race",
+        "controller.abort()",
     ):
         if required not in stats_javascript:
             fail(f"stats.js missing rendering safeguard: {required}")
+    request = re.search(r'fetch\("\./data/research-stats\.json",\s*\{([^}]+)\}', stats_javascript)
+    if request is None or any(not re.search(pattern, request[1]) for pattern in (
+        r'\bcache\s*:\s*"no-store"',
+        r'\bcredentials\s*:\s*"omit"',
+        r'\bsignal\s*:\s*controller\.signal',
+    )):
+        fail("stats.js must read current statistics without credentials and with an abort signal")
 
 
 def main() -> None:
@@ -528,7 +544,8 @@ def main() -> None:
     validate_assets()
     print(
         "[OK] Static site validation passed: "
-        f"{count} core public record(s), {secondary_count} secondary record(s), "
+        f"{count} core public record(s), "
+        f"{secondary_count} secondary record(s), "
         f"{metric_days} daily metric row(s), "
         f"{curator_stats['open']} open curator item(s), "
         f"{len(curator_options['decisions'])} curator decision option(s)."

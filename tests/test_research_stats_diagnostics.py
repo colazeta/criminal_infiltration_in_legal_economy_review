@@ -18,7 +18,9 @@ class ResearchStatsDiagnosticsTests(unittest.TestCase):
     def test_stale_ledger_is_presented_as_operational_not_scientific(self) -> None:
         javascript = (ROOT / "site/stats.js").read_text(encoding="utf-8")
         self.assertIn("dataAgeDays", javascript)
-        self.assertIn("anomalia operativa, non uno zero scientifico", javascript)
+        self.assertIn("non una misura dell’attività attuale", javascript)
+        self.assertIn("non dimostra che le ricerche siano ferme", javascript)
+        self.assertIn("Non significa che non siano state svolte ricerche o trovati paper", javascript)
         self.assertNotIn("saturation", javascript.lower())
 
 

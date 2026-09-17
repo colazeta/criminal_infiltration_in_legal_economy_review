@@ -1,4 +1,11 @@
 const statsElements = {
+  notice: document.querySelector("#statistics-notice"),
+  title: document.querySelector("#statistics-notice-title"),
+  message: document.querySelector("#latest-execution"),
+  impact: document.querySelector("#statistics-notice-impact"),
+  badge: document.querySelector("#research-statistics-state"),
+  retry: document.querySelector("#statistics-retry"),
+  kpis: document.querySelector("#research-kpis"),
   empty: document.querySelector("#metrics-empty"),
   content: document.querySelector("#metrics-content"),
   error: document.querySelector("#metrics-error"),
@@ -48,7 +55,8 @@ function safeRate(numerator, denominator) {
 
 function displayDate(value) {
   if (!value) return "—";
-  return dateFormat.format(new Date(`${value}T00:00:00Z`));
+  const date = new Date(`${value}T00:00:00Z`);
+  return Number.isFinite(date.getTime()) ? dateFormat.format(date) : "—";
 }
 
 function dataAgeDays(value) {
@@ -88,7 +96,7 @@ function populateKpis(payload) {
   setText("#unique-results-7", displayNumber(payload.summary.last7Days.uniqueResults));
   setText(
     "#source-completion-30",
-    displayPercent(payload.calendar?.sourceCompletionRate30 ?? payload.summary.last30Days.sourceCompletionRate),
+    displayNumber(payload.summary.last30Days.completedRuns),
   );
   setText("#data-through", displayDate(payload.dataThrough));
 }
@@ -117,7 +125,7 @@ function renderSourceTable(rows) {
       makeStatsElement(
         "td",
         null,
-        `${displayNumber(row.completedRuns)} / ${displayNumber(row.expectedRuns)}`,
+        displayNumber(row.completedRuns),
       ),
       makeStatsElement("td", null, displayNumber(row.queriesCompleted)),
       makeStatsElement("td", null, displayNumber(row.occurrencesReturned)),
@@ -139,7 +147,7 @@ function intakeCell(row) {
 }
 
 function renderDailyTable(rows) {
-  const rendered = [...calendarWindow(rows, 30)]
+  const rendered = [...calendarWindow(rows, 30)].filter((row) => row.status === "completed")
     .reverse()
     .map((row) => {
       const tr = makeStatsElement("tr");
@@ -148,9 +156,6 @@ function renderDailyTable(rows) {
       const status = makeStatsElement("span", `status-pill status-${row.status}`, statusLabel(row.status));
       const statusCell = makeStatsElement("td");
       statusCell.append(status);
-      if (row.failureCodes?.length) {
-        statusCell.append(makeStatsElement("small", "daily-failure-code", ` · ${row.failureCodes.join(", ")}`));
-      }
       tr.append(
         date,
         statusCell,
@@ -168,7 +173,7 @@ function renderDailyTable(rows) {
 
 function buildIterationRows(dailyRows, extraRuns = []) {
   const ordinary = dailyRows
-    .filter((row) => !["missing", "planned"].includes(row.status))
+    .filter((row) => row.status === "completed")
     .map((row) => ({
       batchId: `ACADEMIC-${row.date}`,
       date: row.date,
@@ -179,7 +184,7 @@ function buildIterationRows(dailyRows, extraRuns = []) {
       kind: "ordinary",
     }));
 
-  const extraordinary = extraRuns.map((row) => ({
+  const extraordinary = extraRuns.filter((row) => row.status === "completed").map((row) => ({
     batchId: row.batchId,
     date: row.date,
     startedAt: row.startedAt,
@@ -216,13 +221,12 @@ function renderChart(dailyRows, extraRuns = []) {
 
   // Historical validator marker only: the former day-based chart waited for
   // `completed.length < 8`. Iteration-level rendering intentionally replaces
-  // that threshold; incomplete iterations remain visible rather than blocking
-  // the whole chart.
+  // that threshold. Only completed public iterations reach the chart.
 
   const chartCopy = document.querySelector("#daily-chart-title")?.nextElementSibling;
   if (chartCopy) {
     chartCopy.textContent =
-      "Conteggi per iterazione nelle ultime 30 esecuzioni, includendo sia il run ordinario sia le esecuzioni straordinarie.";
+      "Conteggi per le ultime 30 esecuzioni completate e pubblicate, ordinarie e straordinarie.";
   }
 
   if (!windowRows.length) {
@@ -252,7 +256,7 @@ function renderChart(dailyRows, extraRuns = []) {
     makeSvgElement(
       "desc",
       { id: "chart-svg-description" },
-      "Ogni posizione sull'asse orizzontale è un'esecuzione distinta della ricerca. Barre larghe e vuote rappresentano i risultati unici; barre strette e piene i nuovi candidati. Una croce indica un'esecuzione incompleta.",
+      "Ogni posizione sull'asse orizzontale è un'esecuzione distinta della ricerca. Barre larghe e vuote rappresentano i risultati unici; barre strette e piene i nuovi candidati.",
     ),
   );
 
@@ -336,50 +340,56 @@ function renderChart(dailyRows, extraRuns = []) {
     "Asse X: numero progressivo dell’iterazione. Barre larghe: risultati unici. Barre strette: nuovi candidati. Data, ora e tipo di run restano nel tooltip; sono mostrate le ultime 30 iterazioni.";
 }
 
+function timestampLabel(value) {
+  if (!value || !Number.isFinite(Date.parse(value))) return null;
+  return new Date(value).toLocaleString("it-IT", {timeZone: "Europe/Rome"});
+}
+
+function presentNotice(state, title, message, detail = "") {
+  statsElements.notice?.setAttribute?.("data-state", state);
+  if (statsElements.title) statsElements.title.textContent = title;
+  if (statsElements.message) statsElements.message.textContent = message;
+  if (statsElements.badge) statsElements.badge.textContent = "· " + ({
+    idle: "Dati da caricare", loading: "Caricamento…", ready: "Dati disponibili",
+    empty: "Nessuna esecuzione pubblicabile", stale: "Dati non aggiornati",
+    unavailable: "Dati non disponibili", error: "Caricamento non riuscito",
+  }[state] || "Stato non disponibile");
+  if (statsElements.status) {
+    statsElements.status.textContent = detail;
+    statsElements.status.hidden = !detail;
+  }
+  if (statsElements.impact) statsElements.impact.textContent =
+    "Questo stato riguarda soltanto i conteggi delle ricerche bibliografiche. Bibliometria e analisi dei paper hanno controlli separati.";
+}
+
 function renderStatus(payload) {
-  if (payload.calendar) {
-    const calendar = payload.calendar;
-    const ageMs = Date.now() - Date.parse(calendar.asOf);
-    const stale = !Number.isFinite(ageMs) || ageMs > 26 * 60 * 60 * 1000;
-    statsElements.status.className = `status-banner${stale ? " status-banner-partial" : ""}`;
-    statsElements.status.textContent = `Calendario Europe/Rome · avvio previsto 07:00. ${calendar.completedDays} / ${calendar.expectedDays} giorni attesi completi; ${calendar.missingDays} mancanti. Ultimo ledger: ${displayDate(calendar.lastLedgerDate)}. Proiezione: ${new Date(calendar.asOf).toLocaleString("it-IT", { timeZone: "Europe/Rome" })}. Tentativi e retry: non misurati dal ledger esterno. Intake: issue create, non conferma di importazione nella coda.`;
-    if (stale) {
-      statsElements.status.textContent +=
-        " ATTENZIONE: proiezione non aggiornata da oltre 26 ore o data non valida. Le giornate successive non sono verificate; controllare il deploy.";
-    }
+  const iterations = buildIterationRows(payload.daily, payload.extraRuns || []);
+  const asOf = timestampLabel(payload.calendar?.asOf);
+  const ageMs = payload.calendar?.asOf ? Date.now() - Date.parse(payload.calendar.asOf) : null;
+  const lastDate = iterations.length ? iterations[iterations.length - 1].date : null;
+  const age = dataAgeDays(lastDate);
+  const stale = ageMs !== null ? !Number.isFinite(ageMs) || ageMs > 26 * 60 * 60 * 1000 : age !== null && age > 1;
+  const detail = [
+    asOf ? `Versione dei dati: ${asOf} (ora di Roma).` : "Data di aggiornamento della versione non disponibile.",
+    lastDate ? `Ultima esecuzione pubblicata: ${displayDate(lastDate)}.` : "",
+  ].filter(Boolean).join(" ");
+  if (!iterations.length) {
+    presentNotice("empty", "Nessuna esecuzione pubblicabile in questa versione",
+      "Il file è stato caricato, ma non contiene esecuzioni completate da mostrare. Non significa che non siano state svolte ricerche o trovati paper.", detail);
     return;
   }
-  if (payload.daily?.length) {
-    const last = payload.daily[payload.daily.length - 1];
-    const age = dataAgeDays(payload.dataThrough);
-    const stale = age !== null && age > 1;
-    statsElements.status.className = `status-banner status-banner-${stale ? "partial" : last.status}`;
-    const freshness = stale
-      ? ` Il ledger non registra una nuova giornata da ${displayNumber(age)} giorni di calendario: è un'anomalia operativa, non uno zero scientifico.`
-      : "";
-    statsElements.status.textContent =
-      `Ultima esecuzione: ${displayDate(last.date)}, ${statusLabel(last.status)}. ` +
-      `${displayNumber(payload.summary.last30Days.completedRuns)} delle ` +
-      `${displayNumber(payload.summary.last30Days.loggedRuns)} giornate registrate negli ultimi 30 giorni osservati sono complete.` +
-      freshness;
-    return;
-  }
-  if (payload.extraRuns?.length) {
-    const last = payload.extraRuns[payload.extraRuns.length - 1];
-    statsElements.status.className = `status-banner status-banner-${last.status}`;
-    statsElements.status.textContent =
-      `Ultima esecuzione straordinaria: ${new Date(last.startedAt).toLocaleString("it-IT", { timeZone: "Europe/Rome" })}, ${statusLabel(last.status)}. ` +
-      "Le esecuzioni straordinarie sono visibili nel grafico per iterazione ma restano escluse dai totali giornalieri canonici.";
-    return;
-  }
-  statsElements.status.className = "status-banner";
-  statsElements.status.textContent = "Nessuna esecuzione terminale disponibile nel ledger.";
+  presentNotice(stale ? "stale" : "ready", stale ? "Statistiche disponibili, ma non aggiornate" : "Statistiche delle ricerche disponibili",
+    stale
+      ? "Sono mostrati i dati della versione indicata sotto, non una misura dell’attività attuale. L’assenza di un aggiornamento non dimostra che le ricerche siano ferme."
+      : "I conteggi si riferiscono alle esecuzioni completate e pubblicate. Gli indicatori ordinari non includono gli avvii straordinari, riportati separatamente.",
+    detail + (stale && ageMs !== null ? " La versione risale a oltre 26 ore fa." : ""));
 }
 
 function renderExtraRuns(rows = []) {
   const section = document.querySelector("#extra-runs");
   const body = document.querySelector("#extra-runs-body");
   if (!section || !body) return;
+  rows = rows.filter((row) => row.status === "completed");
   section.hidden = rows.length === 0;
   body.replaceChildren();
   for (const row of [...rows].reverse()) {
@@ -397,27 +407,113 @@ function renderExtraRuns(rows = []) {
   }
 }
 
-fetch("./data/research-stats.json", { cache: "no-store" })
-  .then((response) => {
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    return response.json();
-  })
-  .then((payload) => {
-    populateKpis(payload);
-    renderExtraRuns(payload.extraRuns);
-    if (!payload.daily.length && !payload.calendar?.rows.length && !payload.extraRuns?.length) {
-      statsElements.empty.hidden = false;
-      return;
+// Publication, browser loading and scientific progress are different states.
+// A failed release removes this renderer and retains its server-rendered notice.
+function validateStatisticsPayload(payload) {
+  if (!payload || ![1, 2, 3].includes(payload.schemaVersion) ||
+      !Array.isArray(payload.daily) || !Array.isArray(payload.sources) ||
+      (payload.extraRuns !== undefined && !Array.isArray(payload.extraRuns)) ||
+      !payload.summary?.last7Days || !payload.summary?.last30Days || !payload.summary?.allTime) {
+    throw Object.assign(new Error("invalid_statistics"), {kind: "invalid"});
+  }
+  const count = (value) => value === null || Number.isSafeInteger(value) && value >= 0;
+  for (const value of [payload.summary.last7Days.newCandidates,
+    payload.summary.last7Days.uniqueResults, payload.summary.last30Days.completedRuns,
+    payload.summary.allTime.newCandidates]) {
+    if (!count(value)) throw Object.assign(new Error("invalid_count"), {kind: "invalid"});
+  }
+  const rate = payload.summary.last30Days.sourceCompletionRate;
+  if (!(rate === null || typeof rate === "number" && Number.isFinite(rate) && rate >= 0 && rate <= 1)) {
+    throw Object.assign(new Error("invalid_rate"), {kind: "invalid"});
+  }
+  if (payload.calendar?.asOf && !Number.isFinite(Date.parse(payload.calendar.asOf))) {
+    throw Object.assign(new Error("invalid_date"), {kind: "invalid"});
+  }
+  // The publication gate is upstream. A legacy partial row is never a public zero.
+  for (const row of [...payload.daily, ...(payload.extraRuns || [])]) {
+    if (!row || typeof row !== "object" || !["completed", "partial", "failed"].includes(row.status)) {
+      throw Object.assign(new Error("invalid_row"), {kind: "invalid"});
     }
-    statsElements.content.hidden = false;
-    renderStatus(payload);
-    renderSourceTable(payload.sources);
-    const calendarRows = payload.calendar?.rows;
-    const observed = new Map(payload.daily.map((row) => [row.date, row]));
-    const dailyRows = calendarRows ? calendarRows.map((row) => ({ ...observed.get(row.date), ...row })) : payload.daily;
-    renderChart(dailyRows, payload.extraRuns || []);
-    renderDailyTable(dailyRows);
-  })
-  .catch(() => {
-    statsElements.error.hidden = false;
-  });
+    if (row.status !== "completed") continue;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(row.date || "") ||
+        !Number.isFinite(Date.parse(row.date)) ||
+        !Number.isSafeInteger(row.uniqueResults) || row.uniqueResults < 0 ||
+        !Number.isSafeInteger(row.intakeCandidates) || row.intakeCandidates < 0 ||
+        row.intakeCandidates > row.uniqueResults) {
+      throw Object.assign(new Error("invalid_completed_row"), {kind: "invalid"});
+    }
+  }
+  return payload;
+}
+
+function clearResearchDisplay() {
+  for (const element of [statsElements.content, statsElements.empty, statsElements.error, statsElements.kpis,
+    document.querySelector("#extra-runs")]) if (element) element.hidden = true;
+  for (const element of [statsElements.chart, statsElements.sourceBody, statsElements.dailyBody,
+    document.querySelector("#extra-runs-body")]) element?.replaceChildren();
+  for (const id of ["new-candidates-7", "all-time-candidates", "unique-results-7", "source-completion-30", "data-through"]) {
+    const element = document.querySelector("#" + id); if (element) element.textContent = "—";
+  }
+}
+
+let statisticsLoad = null;
+function loadResearchStatistics() {
+  if (statisticsLoad) return statisticsLoad;
+  // A withheld release must not reinterpret the empty fallback as a measured result.
+  if (statsElements.notice?.getAttribute?.("data-state") === "unavailable") return Promise.resolve();
+  clearResearchDisplay();
+  presentNotice("loading", "Caricamento delle statistiche delle ricerche",
+    "Lettura dei risultati già pubblicati. Questa operazione non avvia ricerche né analisi.");
+  if (statsElements.retry) { statsElements.retry.hidden = false; statsElements.retry.disabled = true; }
+  statisticsLoad = (async () => {
+    const controller = new AbortController();
+    let timer;
+    try {
+      const payload = await Promise.race([
+        (async () => {
+          const response = await fetch("./data/research-stats.json", {cache: "no-store", credentials: "omit", signal: controller.signal});
+          if (!response.ok) throw Object.assign(new Error("statistics_http"), {kind: "http"});
+          try { return await response.json(); }
+          catch { throw Object.assign(new Error("statistics_json"), {kind: "invalid"}); }
+        })(),
+        new Promise((_, reject) => { timer = setTimeout(() => {
+          reject(Object.assign(new Error("statistics_timeout"), {kind: "timeout"})); controller.abort();
+        }, 12000); }),
+      ]);
+      validateStatisticsPayload(payload);
+      const daily = payload.daily.filter((row) => row.status === "completed");
+      const extras = (payload.extraRuns || []).filter((row) => row.status === "completed");
+      if (daily.length || extras.length) {
+        populateKpis(payload);
+        if (statsElements.kpis) statsElements.kpis.hidden = daily.length === 0;
+        statsElements.content.hidden = false;
+        renderSourceTable(payload.sources);
+        renderChart(daily, extras);
+        renderDailyTable(daily);
+        renderExtraRuns(extras);
+      }
+      renderStatus(payload);
+      if (statsElements.retry) statsElements.retry.textContent = "Aggiorna i dati pubblicati";
+    } catch (error) {
+      clearResearchDisplay();
+      const message = error.kind === "invalid"
+        ? "Il file ricevuto non è leggibile o non supera i controlli di formato. I conteggi non vengono mostrati."
+        : error.kind === "timeout"
+          ? "Il caricamento ha superato il tempo previsto. Lo stato dei conteggi non è stato determinato."
+          : "Non è stato possibile leggere il file delle statistiche. Non possiamo stabilire quali conteggi siano disponibili.";
+      presentNotice("error", "Statistiche delle ricerche non caricate", message,
+        "Riprova il caricamento. Se il problema persiste, occorre verificare la pubblicazione dei dati; cambiare i filtri non lo risolve.");
+      if (statsElements.retry) statsElements.retry.textContent = "Riprova il caricamento";
+    } finally {
+      clearTimeout(timer);
+      if (statsElements.retry) statsElements.retry.disabled = false;
+      statisticsLoad = null;
+    }
+  })();
+  return statisticsLoad;
+}
+
+if (statsElements.notice?.setAttribute) {
+  statsElements.retry?.addEventListener("click", loadResearchStatistics);
+  loadResearchStatistics();
+}
