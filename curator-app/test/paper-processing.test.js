@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
 import {indexRow,indexPage} from './index-fixture.js';
+import {createDocument} from './frontend-dom-fixture.js';
 
 const source = fs.readFileSync(new URL('../../site/paper-register.js', import.meta.url), 'utf8');
 function api(extra={}) {
@@ -163,20 +164,10 @@ test('the public register composes existing filters with processing and preserve
   assert.match(register,/processing\?\.emptyMessage\(\)/);
   assert.match(register,/CILEPaperProcessing\.mount/);
   assert.match(register,/CILEPaperResearch\.load\(research, record, isCurrent\)/);
-  assert.match(register,/row\.addEventListener\("dblclick"/);
+  assert.match(register,/row\.addEventListener\(["']dblclick["']/);
 });
 
-function fakeDocument() {
-  class Element {
-    constructor(tag) {this.tagName=tag; this.children=[]; this.attributes={}; this.listeners={}; this.value=''; this.textContent='';}
-    append(...children) {for (const child of children) {this.children.push(child); if(this.tagName==='select' && this.children.length===1) this.value=child.value;}}
-    after(node) {this.following=node;}
-    setAttribute(key,value) {this.attributes[key]=value;}
-    addEventListener(event,listener) {this.listeners[event]=listener;}
-    fire(event) {this.listeners[event]?.({target:this});}
-  }
-  return {querySelector:()=>null,createElement:tag=>new Element(tag)};
-}
+function fakeDocument() { return createDocument(); }
 const tick = () => new Promise(resolve => setImmediate(resolve));
 
 test('mounted controls filter real loaded projections, compose classes and reset', async () => {
@@ -190,7 +181,7 @@ test('mounted controls filter real loaded projections, compose classes and reset
   }});
   const filter=mountedAPI.mount({controls,records,onChange:()=>redraws++,selectSupport:dependencies(()=>{}).selectSupport,selectResearch:identity});
   await tick();
-  const [mode,category,button]=[controls.children[0].children[0],controls.children[1].children[0],controls.children[2]];
+  const mode=controls.querySelector('#register-processing-filter'),category=controls.querySelector('#register-framework-filter'),button=controls.following.querySelector('button');
   assert.equal(mode.id,'register-processing-filter'); assert.equal(category.id,'register-framework-filter');
   assert.equal(requestCount,0,'initial view does not issue one request per paper');
   mode.value='summary'; mode.fire('change');
@@ -203,7 +194,7 @@ test('mounted controls filter real loaded projections, compose classes and reset
   assert.equal(requestCount,1,'changing a filter does not start another completed scan');
   controls.fire('reset'); assert.equal(mode.value,'all'); assert.equal(category.value,'all');
   assert.equal(filter.matches(records[1]),true); assert.equal(button.disabled,false); assert.ok(redraws>0);
-  assert.equal(controls.following.children[0].attributes.role,'status');
+  assert.equal(controls.following.querySelector('#register-processing-status').attributes.role,'status');
 });
 
 test('mount keeps unavailable responses distinct from unanalysed papers', async () => {
@@ -211,10 +202,10 @@ test('mount keeps unavailable responses distinct from unanalysed papers', async 
   const mountedAPI=api({document,fetch:async()=>{throw Error('unavailable');}});
   const filter=mountedAPI.mount({controls,records:[candidate],onChange:()=>{},selectSupport:dependencies(()=>{}).selectSupport,selectResearch:identity});
   await tick();
-  const mode=controls.children[0].children[0];mode.value='ai';mode.fire('change');await tick();
+  const mode=controls.querySelector('#register-processing-filter');mode.value='ai';mode.fire('change');await tick();
   assert.equal(filter.matches(candidate),false);
   assert.match(filter.emptyMessage(),/non è completa/);
-  assert.match(controls.following.children[0].textContent,/Verifica incompleta/);
+  assert.match(controls.following.querySelector('#register-processing-status').textContent,/Verifica incompleta/);
 });
 
 test('all six current contribution classes are supported and no topic code substitutes for them', () => {
@@ -229,9 +220,9 @@ test('refresh button reloads analysis without a new candidate or a new page buil
   const document=fakeDocument(),controls=document.createElement('form'); let coverage='abstract_only';
   const mountedAPI=api({document,fetch:async url=>({ok:true,json:async()=>url.startsWith('./')?{records:{[candidate.id]:support()}}:indexPage([indexRow(candidate,projection({source_coverage:coverage}))])})});
   const filter=mountedAPI.mount({controls,records:[candidate],onChange:()=>{},selectSupport:dependencies(()=>{}).selectSupport,selectResearch:identity});
-  await tick();const mode=controls.children[0].children[0];mode.value='ai_full_text';mode.fire('change');await tick();
+  await tick();const mode=controls.querySelector('#register-processing-filter');mode.value='ai_full_text';mode.fire('change');await tick();
   assert.equal(filter.matches(candidate),false);
-  coverage='full_text';controls.children[2].fire('click');await tick();
+  coverage='full_text';controls.following.querySelector('button').fire('click');await tick();
   assert.equal(filter.matches(candidate),true);
 });
 

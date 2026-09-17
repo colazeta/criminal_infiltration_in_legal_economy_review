@@ -2,25 +2,13 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
+import {Element, createDocument} from './frontend-dom-fixture.js';
 
 // Synthetic software fixtures: never registered works or calibration evidence.
 const sheetSource=fs.readFileSync(new URL('../../site/paper-sheet-research.js',import.meta.url),'utf8');
 const registerSource=fs.readFileSync(new URL('../../site/paper-register.js',import.meta.url),'utf8');
-class Element {
-  constructor(tag){this.tag=tag;this.children=[];this.value='';this.attributes={};this.listeners={};}
-  set textContent(value){this.value=String(value??'');this.children=[];}
-  get textContent(){return this.value+this.children.map(n=>n.textContent).join(' ');}
-  set innerHTML(_){throw Error('Unsafe HTML');}
-  append(...nodes){for(const node of nodes){this.children.push(node);if(this.tag==='select'&&this.children.length===1)this.value=node.value;}}
-  replaceChildren(...nodes){this.children=nodes;this.value='';}
-  setAttribute(key,value){this.attributes[key]=value;}
-  addEventListener(event,fn){this.listeners[event]=fn;}
-  fire(event){(this.listeners[event]||this['on'+event])?.({target:this});}
-  after(node){this.following=node;}
-  querySelectorAll(tag){return this.children.flatMap(n=>[...(n.tag===tag?[n]:[]),...n.querySelectorAll(tag)]);}
-}
-const document={createElement:tag=>new Element(tag),querySelector:()=>null};
 function setup(fetcher=async()=>{throw Error('offline');}) {
+  const document=createDocument();
   const context=vm.createContext({document,URL,AbortController,setTimeout,clearTimeout,fetch:fetcher});
   vm.runInContext(sheetSource,context);vm.runInContext(registerSource,context);
   return {sheet:context.CILEPaperResearch,processing:context.CILEPaperProcessing};
@@ -87,7 +75,7 @@ test('Completed control gives no false percentage or positive result and compose
   const {sheet,processing}=setup(async url=>({ok:true,json:async()=>String(url).startsWith('./')?{records:{}}:fixture()}));
   const controls=new Element('form');
   const filter=processing.mount({controls,records:[candidate],onChange:()=>{},selectSupport:()=>({readingAid:null}),selectResearch:sheet.selectRecord});
-  const mode=controls.children[0].children[0];assert.ok(mode.children.some(o=>o.value==='completed'));
+  const mode=controls.querySelector('#register-processing-filter');assert.ok(mode.children.some(o=>o.value==='completed'));
   mode.value='completed';mode.fire('change');await new Promise(resolve=>setImmediate(resolve));
   assert.equal(filter.matches(candidate),false);assert.match(filter.emptyMessage(),/verifica del registro non è completa/);
   assert.match(controls.following.textContent,/Percentuale finale non attestabile/);assert.doesNotMatch(controls.following.textContent,/100%/);

@@ -3,22 +3,15 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
 import {indexRow,indexPage} from './index-fixture.js';
+import {createDocument} from './frontend-dom-fixture.js';
 
 function setup(fetch) {
-  class Element {
-    constructor(tag) { this.tag=tag; this.children=[]; this.listeners={}; this.value=''; }
-    append(...nodes) { for(const node of nodes) { this.children.push(node); if(this.tag==='select' && this.children.length===1) this.value=node.value; } }
-    after(node) { this.following=node; }
-    setAttribute() {}
-    addEventListener(name,fn) { this.listeners[name]=fn; }
-    fire(name) { this.listeners[name]?.({target:this}); }
-  }
-  const document={querySelector:()=>null,createElement:tag=>new Element(tag)};
+  const document=createDocument();
   const context=vm.createContext({document,fetch,AbortController,setTimeout,clearTimeout,URL});
   vm.runInContext(fs.readFileSync(new URL('../../site/paper-register.js',import.meta.url),'utf8'),context);
   const controls=document.createElement('form');
   const filter=context.CILEPaperProcessing.mount({controls,records:[{id:'synthetic',title:'Synthetic',doi:'',sourceLinks:[]}],onChange:()=>{},selectSupport:p=>p,selectResearch:p=>p});
-  return {controls,filter,status:()=>controls.following.children[0].textContent};
+  return {controls,filter,status:()=>controls.following.querySelector('#register-processing-status').textContent};
 }
 const tick=()=>new Promise(resolve=>setImmediate(resolve));
 
@@ -40,7 +33,7 @@ test('complete research responses cannot hide failed synopsis reads in the combi
     return {ok:true,json:async()=>indexPage([indexRow({id:'synthetic',title:'Synthetic',doi:'',sourceLinks:[]})])};
   });
   await tick();
-  const select=view.controls.children[0].children[0];select.value='content';select.fire('change');await tick();
+  const select=view.controls.querySelector('#register-processing-filter');select.value='content';select.fire('change');await tick();
   assert.match(view.status(),/1\/1 stati analitici verificati/);
   assert.match(view.status(),/sintesi non verificabili/);
   assert.doesNotMatch(view.status(),/0 sintesi disponibili/);

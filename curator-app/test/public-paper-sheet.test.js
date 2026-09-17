@@ -113,9 +113,9 @@ test('preparatory text is not presented as an author abstract', () => {
 
 test('the existing double-click and accessible button route both reach enrichment', () => {
   const registerSource = fs.readFileSync(new URL('../../site/paper-register.js', import.meta.url), 'utf8');
-  assert.match(registerSource, /row\.addEventListener\("dblclick"/);
-  assert.match(registerSource, /open\.addEventListener\("click"/);
-  assert.match(registerSource, /import\("\.\/paper-sheet-support\.js"\)/);
+  assert.match(registerSource, /row\.addEventListener\(["']dblclick["']/);
+  assert.match(registerSource, /open\.addEventListener\(["']click["']/);
+  assert.match(registerSource, /import\("\.\/paper-sheet-support\.js\?v=frontend-20260917"\)/);
   assert.match(registerSource, /CILEPaperSheetSupport\.load\(support, record, isCurrent\)/);
   assert.doesNotMatch(registerSource, /non sono ancora collegati a questa scheda/);
 });
