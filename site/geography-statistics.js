@@ -1,6 +1,6 @@
 /* Country statistics share the exact selected bibliometric population.
    Read-only public projections; no private APIs or persistent parallel store. */
-import './paper-sheet-research.js';
+import './paper-sheet-research.js?v=status-20260917';
 (() => {
   'use strict';
   const anchor=document.querySelector('#bibliometric-quality-note');
@@ -12,19 +12,26 @@ import './paper-sheet-research.js';
   const el=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n};
   const note=el('p'),progress=el('p'),chart=el('div'),quality=el('div'),refresh=el('button','Aggiorna dati geografici');
   const format=new Intl.NumberFormat('it-IT',{maximumFractionDigits:1});
-  const labels={pending:'Da verificare',error:'Errore di lettura o identità non verificabile',not_assessed:'Estrazione non ancora disponibile',not_registered:'Scheda analitica non associata',stale:'Estrazione non aggiornata',withheld:'Estrazione non pubblicabile',no_study:'Nessuno studio strutturato disponibile',not_reported:'Non riportato nella fonte consultata',not_verifiable:'Non verificabile dalla fonte consultata',not_applicable:'Non applicabile',ambiguous:'Geografia ambigua',unverified:'Geografia senza evidenza attribuita alla fonte',unresolved:'Territorio presente, paese non normalizzato',supranational:'Ambito sovranazionale senza elenco di paesi',global:'Ambito globale senza elenco di paesi',missing:'Geografia mancante',country:'Almeno un paese identificato'};
+  const labels={pending:'Dati non caricati',error:'Caricamento non riuscito',not_assessed:'Estrazione non ancora disponibile',not_registered:'Scheda analitica non associata',stale:'Estrazione non aggiornata',withheld:'Estrazione non pubblicabile',no_study:'Nessuno studio strutturato disponibile',not_reported:'Non riportato nella fonte consultata',not_verifiable:'Non verificabile dalla fonte consultata',not_applicable:'Non applicabile',ambiguous:'Geografia ambigua',unverified:'Geografia senza evidenza attribuita alla fonte',unresolved:'Territorio presente, paese non normalizzato',supranational:'Ambito sovranazionale senza elenco di paesi',global:'Ambito globale senza elenco di paesi',missing:'Geografia mancante',country:'Almeno un paese identificato'};
   let selected=[],running=false,failures=0;
   const signature=r=>JSON.stringify([r.id,r.title,r.doi||'', [...(r.sourceLinks||[])].sort()]);
   progress.setAttribute('role','status');progress.setAttribute('aria-live','polite');
   note.className='bibliometric-note';refresh.type='button';
   host.append(el('h3','Paesi e territori studiati'),note,refresh,progress,chart,quality);
   function render(){
-    const data=geo.aggregate(selected,entries),checked=selected.filter(r=>entries.has(r.id)).length;
-    note.textContent=`Ambito dell’analisi, non affiliazione degli autori. ${data.known} / ${data.total} record nella vista hanno almeno un paese identificabile dalle schede di ricerca correnti. Geografia estratta preliminare, non validata scientificamente. ${data.partial} di questi record hanno anche studi con copertura geografica non completamente normalizzata.`;
-    progress.textContent=running?`Verifica delle schede: ${checked} / ${selected.length}. Conteggi provvisori durante il caricamento.`:checked<selected.length?`Verifica incompleta: ${checked} / ${selected.length}. I record non letti non valgono zero; usa “Aggiorna dati geografici” per riprovare.`:`Verificate ${checked} / ${selected.length} schede nella vista. La disponibilità della scheda non implica che il paese sia stato estratto.`;
-    refresh.disabled=running||!selected.length;
+    const data=geo.aggregate(selected,entries),checked=selected.filter(r=>entries.has(r.id)&&entries.get(r.id).status!=='error').length;
+    const population=globalThis.CILEBibliometricState||'loading';
+    note.textContent='Paesi studiati nel paper, non affiliazioni degli autori. Le informazioni geografiche sono proposte non revisionate scientificamente.';
+    refresh.disabled=running||!selected.length||population!=='ready';
+    host.setAttribute('aria-busy',String(running||population==='loading'));
     chart.replaceChildren();quality.replaceChildren();
-    if(!data.rows.length){chart.append(el('p','Nessun paese conteggiabile nelle schede finora verificate. Non significa assenza di studi su quei paesi.'))}
+    if(population!=='ready'){progress.textContent=population==='error'?'Impossibile caricare la vista bibliografica. Ricarica la pagina.':'Caricamento dei paper della vista…';return;}
+    if(!selected.length){progress.textContent='Nessun paper nella vista selezionata.';return;}
+    if(running){progress.textContent='Caricamento delle informazioni geografiche…';return;}
+    if(!checked){progress.textContent=selected.some(r=>entries.has(r.id))?'Impossibile caricare le informazioni geografiche. Riprova.':'Le informazioni geografiche non sono ancora state caricate.';return;}
+    progress.textContent=(checked<selected.length?`Dati parziali: ${checked} di ${selected.length} schede caricate. `:'')+
+      `${data.known} paper con almeno un paese identificato nei dati disponibili.`;
+    if(!data.rows.length){chart.append(el('p','Nessun paese identificato nelle schede caricate. L’area studiata può non essere specificata o essere sovranazionale.'))}
     else{
       const table=el('table'),caption=el('caption','Record per paese o territorio — conteggio multiplo, una volta per record e paese'),head=el('thead'),tr=el('tr'),body=el('tbody');
       for(const text of ['Paese / territorio e paper','Record','Quota con paese noto','Volume relativo']){const th=el('th',text);th.scope='col';tr.append(th)}
@@ -81,7 +88,7 @@ import './paper-sheet-research.js';
       ids.add(record.id);selected.push(record);
       const sig=signature(record);if(signatures.get(record.id)!==sig)entries.delete(record.id);signatures.set(record.id,sig);
     }
-    render();void scan();
+    render();if(globalThis.CILEBibliometricState==='ready')void scan();
   }
   refresh.addEventListener('click',()=>{if(running)return;for(const r of selected)entries.delete(r.id);void scan()});
   globalThis.addEventListener('cile:bibliometric-view',()=>update(globalThis.CILEBibliometricView));

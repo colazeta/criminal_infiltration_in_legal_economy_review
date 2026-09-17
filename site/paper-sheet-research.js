@@ -53,40 +53,43 @@
     return result;
   }
   function renderProgress(parent,data,completion=null) {
-    const p=progress(data,completion),box=section(parent,'Stato dell’analisi e verifiche di completamento');box.setAttribute('aria-label','Progresso verso il completamento');
-    box.append(el('h4',p.completed?'Arricchimento completo e validato':'Arricchimento end-to-end: non attestato come completato'));
-    const stages=el('dl');
-    const unavailable=['stale','withheld','unknown'].includes(p.availability);
+    const p=progress(data,completion),box=section(parent,'Stato dell’analisi e completamento');
+    box.setAttribute('aria-label','Stato dell’analisi e completamento');
+    const completionLabels={not_attested:'Completamento non registrato',stale:'Completamento riferito a una versione precedente',withheld:'Dati del completamento non disponibili',not_registered:'Paper non presente nel registro delle analisi'};
+    const completed=p.completed?'Completamento registrato':completionLabels[completion?.status]||'Stato del completamento non disponibile';
+    box.append(el('h4',completed));
+    const stages=el('dl'),r=data?.research;
+    const availability={not_assessed:'Nessuna analisi dettagliata registrata',not_registered:'Paper non presente nel registro delle analisi',stale:'Analisi riferita a una versione precedente',withheld:'Analisi non disponibile per la consultazione pubblica'};
+    const framework=r?.framework?.status;
     const rows=[
-      ['Fonte sufficiente',p.evidence?'Testo completo attestato nella proposta corrente':'Non attestabile da questa proiezione; un link al PDF non basta'],
-      ['Estrazione scientifica',p.extraction?`Proposta presente; ${p.resolved}/${p.fields} campi documentati o esplicitamente mancanti nella proposta, ${p.unresolved} da chiarire. Completezza e correttezza da validare`:(unavailable?'Stato non verificabile':'Nessuna proposta corrente visibile')],
-      ['References e citazioni',completion?'Copertura per fonte e direzione nella sezione Riferimenti':'Copertura non verificabile; non equivale a zero references'],
-      ['Classificazione nelle sei classi',p.classification?'Categoria proposta, non ancora validata':'Nessuna categoria validata attestata'],
-      ['QA e adjudication',completion?(p.completed?'Accettata il '+completion.completed_at:'Stato dell’attestazione: '+completion.status):'Attestazione non verificabile'],
-      ['Completed',p.completed?'Sì: attestazione valida per questa versione':'No: una proposta, una sintesi o il full text non attestano il completamento']
+      ['Testo consultato',p.extraction?COVERAGE[r.source_coverage]:'Dato non disponibile'],
+      ['Analisi dettagliata',p.extraction?'Disponibile come proposta':availability[p.availability]||'Dato non caricato'],
+      ['Riferimenti e citazioni',completion?.reference_coverage?.length?'Copertura disponibile nella sezione Riferimenti':completion?'Copertura non ancora registrata':'Dati non caricati'],
+      ['Classificazione',p.classification?'Categoria proposta':framework==='outside_framework'?'Fuori dalle sei classi: valutazione proposta':framework==='insufficient_evidence'?'Evidenza insufficiente per classificare':'Dato non disponibile'],
+      ['Controllo di completamento',p.completed?'Registrato il '+completion.completed_at:completed],
+      ['Inclusione nel corpus','Decisione scientifica separata: consulta lo stato di revisione del paper']
     ];
     for(const [label,value]of rows)stages.append(el('dt',label),el('dd',value));
-    box.append(stages,el('p','I passaggi possono avanzare separatamente. I campi non riportati o non applicabili rimangono espliciti; non si inventano valori per completare la scheda.'));
-    parent.append(box);
+    const help=el('a','Come leggere questi stati');help.href='./method.html#reading-status';
+    box.append(stages,help);
   }
   function emptySections(parent) {
-    for(const title of ['Domanda, contributo e definizione del fenomeno','Collocazione nel framework delle sei classi','Studi, campione, periodo e geografia','Dataset e fonti dei dati','Disegno, metodi, identificazione e robustezza','Variabili e operazionalizzazione','Risultati, stime, incertezza e limiti','Fonti consultate, versioni e QA']){
-      const box=section(parent,title);box.append(el('p','Contenuto non disponibile nella proiezione corrente. Questo spazio non rappresenta un dato estratto né una validazione.'));
+    for(const title of ['Domanda, contributo e definizione del fenomeno','Collocazione nel framework delle sei classi','Studi, campione, periodo e geografia','Dataset e fonti dei dati','Disegno, metodi, identificazione e robustezza','Variabili e operazionalizzazione','Risultati, stime, incertezza e limiti','Fonti consultate e versioni']){
+      const box=section(parent,title);box.hidden=true;box.append(el('p','Informazioni non ancora disponibili in questa scheda.'));
     }
   }
   function section(parent,title,open=false){const d=el('details');d.open=open;d.append(el('summary',title));parent.append(d);return d}
   function render(parent,data,completion=null){
+    parent.setAttribute('data-research-availability',data.availability);
     parent.replaceChildren(el('h3','Contesto della ricerca'));
-    renderProgress(parent,data,completion);
-    renderReferences(parent,completion);
     const expand=el('button','Mostra tutti i campi'),collapse=el('button','Richiudi le sezioni');
     expand.type=collapse.type='button';
     expand.onclick=()=>parent.querySelectorAll('details').forEach(d=>{d.open=true});
     collapse.onclick=()=>parent.querySelectorAll('details').forEach(d=>{d.open=false});
     const tools=el('div');tools.className='research-tools';tools.append(expand,collapse);parent.append(tools);
     if(data.availability!=='available'){
-      const messages={not_assessed:'Non è ancora disponibile un’estrazione scientifica per questo paper. Nessuna classe è stata attribuita.',not_registered:'Il paper non è ancora presente nell’indice analitico corrente. Questo non significa che sia fuori dal framework.',stale:'Esiste un’analisi riferita a una versione precedente dei metadati. Non viene mostrata come analisi corrente.',withheld:'È presente materiale analitico, ma la sua pubblicazione non ha superato i controlli su fonti, integrità o riservatezza. Nessuna classificazione viene dedotta in sua sostituzione.'};
-      parent.append(el('p',messages[data.availability]));emptySections(parent);return;
+      const messages={not_assessed:'Nessuna analisi dettagliata registrata per questa scheda.',not_registered:'Il paper è nel registro bibliografico, ma non risulta ancora associato a una scheda analitica.',stale:'L’analisi disponibile riguarda una versione precedente dei metadati e deve essere aggiornata.',withheld:'L’analisi è registrata, ma non è disponibile per la consultazione pubblica.'};
+      parent.append(el('p',messages[data.availability]));emptySections(parent);renderProgress(parent,data,completion);renderReferences(parent,completion);return;
     }
     const r=data.research,f=r.framework,sourceMap=new Map(r.sources.map(s=>[s.id,s])),spans=new Map(r.spans.map(s=>[s.id,s]));
     function fact(parent,label,v){
@@ -139,6 +142,7 @@
     const provenance=section(parent,'Fonti consultate e versioni');
     r.sources.forEach(s=>{const p=el('p'),href=safeUrl(s.url);if(href){const a=el('a',href);a.href=href;a.rel='noreferrer noopener';p.append(a)}p.append(el('span',` · ${s.kind} · ${s.version||'Versione non specificata'} · Acquisita: ${s.checked_at}`));provenance.append(p)});
     provenance.append(el('p',`Protocollo ${r.protocol_version} · Codebook ${r.codebook_version}`));
+    renderReferences(parent,completion);renderProgress(parent,data,completion);
   }
   function selectCompletion(data,record,research) {
     if(data?.schema_version!==1||data.projection_version!=='CILE-PUBLIC-COMPLETION-1'||data.candidate_id!==record.id||!Array.isArray(data.reference_coverage)||!Array.isArray(data.outgoing_references?.identifiers))throw Error('invalid_completion_projection');
@@ -148,12 +152,13 @@
   }
   function renderReferences(parent,completion) {
     const box=section(parent,'References e citazioni');
-    if(!completion){box.append(el('p','Bibliografia e citazioni ricevute non sono verificabili in questo momento. Le fonti consultate non sono la bibliografia.'));return}
-    if(!completion.reference_coverage.length)box.append(el('p','Copertura citazionale non ancora documentata: non equivale all’assenza di riferimenti.'));
+    if(!completion){box.append(el('p','Impossibile caricare bibliografia e citazioni ricevute. Riprova riaprendo la scheda.'));return}
+    if(!completion.reference_coverage.length)box.append(el('p','La copertura dei riferimenti non è ancora registrata.'));
     for(const c of completion.reference_coverage)box.append(el('p',`${c.provider} · ${c.direction==='incoming'?'Citazioni ricevute':'Riferimenti in uscita'} · ${c.status} · Osservati nell’unità di copertura: ${c.returned_count}; dichiarati: ${c.provider_count===null?'non disponibili':c.provider_count} · ${c.observed_at}`));
     box.append(el('p','Copertura riferita alla fonte e alla data indicate, non all’intero grafo citazionale. Gli identificativi riconciliati non sostituiscono le voci bibliografiche ancora irrisolte.'));
     const refs=completion.outgoing_references;
-    box.append(el('p',`Identificativi bibliografici osservati: ${refs.total_observed}${refs.truncated?' (lista parziale)':''}.`));
+    if(refs.total_observed>0)box.append(el('p',`Identificativi dei riferimenti disponibili: ${refs.total_observed}${refs.truncated?' (lista parziale)':''}.`));
+    else box.append(el('p','Nessun identificativo bibliografico disponibile nei dati caricati. Questo non descrive necessariamente la bibliografia del paper.'));
     const list=el('ol');
     for(const identifier of refs.identifiers){
       const item=el('li'),doi=identifier.startsWith('doi:')?identifier.slice(4):null;
@@ -175,13 +180,13 @@
     return data;
   }
   async function loadAssets(parent,record,isCurrent=()=>true){
-    const box=section(parent,'PDF conservati e bibliografia dettagliata');box.append(el('p','Verifica del documento e dei riferimenti in corso.'));
+    const box=section(parent,'PDF conservati e bibliografia dettagliata');box.append(el('p','Caricamento di PDF e riferimenti…'));
     let revision=null,next=0;const seen=new Set();
     async function page(){
       const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),12000);
       try{const response=await fetch(ASSETS_ENDPOINT+'?id='+encodeURIComponent(record.id)+'&offset='+next+(revision?'&revision='+revision:''),{cache:'no-store',credentials:'omit',signal:controller.signal});if(!response.ok)throw Error('assets_unavailable');const data=selectAssets(await response.json(),record);if(!isCurrent())return;
         if(next===0){box.replaceChildren(el('summary','PDF conservati e bibliografia dettagliata'));
-          if(!data.documents.length)box.append(el('p','Nessuna copia pubblica attestata. Le eventuali copie riservate si leggono nella console di arricchimento dopo l’accesso; un link esterno non equivale a una copia conservata.'));
+          if(!data.documents.length)box.append(el('p','Nessun PDF conservato disponibile pubblicamente. Le eventuali copie riservate richiedono l’accesso alla console.'));
           const privateReader=el('a','Apri la console riservata per questo paper');privateReader.href='https://criminal-infiltration-curator.colazeta-research.workers.dev/enrichment.html?candidate='+encodeURIComponent(record.id);privateReader.target='_blank';privateReader.rel='noopener noreferrer';box.append(privateReader);
           for(const d of data.documents){const link=el('a','Leggi PDF conservato · '+d.version_label);link.href=ASSETS_ENDPOINT+'?id='+encodeURIComponent(record.id)+'&document='+d.document_id;link.target='_blank';link.rel='noopener noreferrer';box.append(link,el('p',d.attribution+' · '+d.byte_length+' byte · '+d.licence_url));}
         }
@@ -191,11 +196,12 @@
         const list=el('ol');list.start=next+1;
         for(const e of b.entries){if(!Number.isSafeInteger(e.position)||seen.has(e.position)||!Array.isArray(e.authors))throw Error('bibliography_identity');seen.add(e.position);const item=el('li',[e.authors.join('; '),e.year,e.title||'Titolo non riconciliato',e.venue].filter(v=>v!==null&&v!=='').join(' · '));if(e.doi||e.url){const href=safeUrl(e.doi?'https://doi.org/'+encodeURIComponent(e.doi):e.url);if(href){const a=el('a',' Fonte');a.href=href;a.rel='noopener noreferrer';item.append(a)}}if(e.unresolved_identity)item.append(el('span',' · Identità bibliografica da riconciliare'));list.append(item)}box.append(list);
         next=b.next_offset;if(next!==null){if(!Number.isSafeInteger(next)||next<seen.size||next>1000)throw Error('bibliography_cursor');const more=el('button','Altri riferimenti');more.type='button';more.onclick=()=>{more.remove();page()};box.append(more)}
-      }catch{if(isCurrent())box.append(el('p','Stato del documento o della bibliografia non verificabile. Nessun dato mancante viene interpretato come assenza.'))}finally{clearTimeout(timer)}
+      }catch{if(isCurrent())box.append(el('p','Impossibile caricare PDF o bibliografia. Riprova riaprendo la scheda.'))}finally{clearTimeout(timer)}
     }
     await page();
   }
   async function load(parent,record,isCurrent=()=>true){
+    parent.setAttribute('data-research-availability','loading');
     parent.setAttribute('aria-busy','true');
     const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),12000);
     try{
@@ -206,7 +212,7 @@
       let completion=null;
       try{const response=await fetch(ENDPOINT+'?view=completion&id='+encodeURIComponent(record.id),{cache:'no-store',credentials:'omit',signal:controller.signal});if(response.ok)completion=selectCompletion(await response.json(),record,data)}catch{}
       if(isCurrent()){render(parent,data,completion);loadAssets(parent,record,isCurrent);}
-    }catch{if(isCurrent()){parent.replaceChildren(el('h3','Contesto della ricerca'),el('p','Il contesto di ricerca non è verificabile in questo momento. Un errore di caricamento o un disallineamento dei metadati non significa che l’analisi sia assente.'));emptySections(parent);}}
+    }catch{if(isCurrent()){parent.setAttribute('data-research-availability','error');parent.replaceChildren(el('h3','Contesto della ricerca'),el('p','Impossibile caricare l’analisi dettagliata. Riprova riaprendo la scheda: non significa che l’analisi sia assente.'));emptySections(parent);}}
     finally{clearTimeout(timeout);if(isCurrent())parent.setAttribute('aria-busy','false')}
   }
   globalThis.CILEPaperResearch={render,load,selectRecord,safeUrl,progress,renderProgress,selectCompletion,renderReferences,selectAssets,loadAssets};

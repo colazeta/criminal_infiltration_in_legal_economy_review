@@ -33,7 +33,7 @@
     methods: 'Disegno, metodi, identificazione e robustezza',
     variables: 'Variabili e operazionalizzazione',
     findings: 'Risultati, stime, incertezza e limiti',
-    sources: 'Fonti consultate, versioni e QA',
+    sources: 'Fonti consultate e versioni',
   };
   const cache = new Map();
 
@@ -215,6 +215,7 @@
     return map;
   }
   function clearBox(box) {
+    box.hidden=false;
     const summary = box.querySelector('summary');
     for (const child of [...box.children]) if (child !== summary) child.remove();
     return box;
@@ -233,11 +234,12 @@
   }
 
   function hydratePresetFields(parent, annotation) {
+    if(parent.getAttribute?.('data-research-availability')==='available')return false;
     const map = detailsMap(parent);
     const preset = Object.fromEntries(Object.entries(PRESET_TITLES).map(([k,title]) => [k, map.get(title)]));
     if (!preset.overview && !preset.framework && !preset.studies) return false;
     const s = annotation.structured;
-    const note = el('p', 'Campi popolati da annotazione scientifica manuale non revisionata. Non equivale a proposta CILE-ENRICH-1 accettata né a completamento.');
+    const note = el('p', 'Annotazione manuale non revisionata scientificamente. Non certifica il completamento dell’analisi.');
     note.className = 'paper-manual-research-status';
     parent.insertBefore(note, preset.overview || parent.firstChild);
 
@@ -256,7 +258,7 @@
       clearBox(preset.sources);
       if (s.sources.length) list(preset.sources, s.sources);
       if (annotation.updated_at) preset.sources.append(el('p', 'Annotazione aggiornata: ' + annotation.updated_at.slice(0,10)));
-      if (annotation.comment_url) { const a = el('a', 'Apri l’annotazione persistita su GitHub'); a.href = annotation.comment_url; a.target = '_blank'; a.rel = 'noreferrer noopener'; preset.sources.append(a); }
+      if (annotation.comment_url) { const a = el('a', 'Leggi l’annotazione su GitHub'); a.href = annotation.comment_url; a.target = '_blank'; a.rel = 'noreferrer noopener'; preset.sources.append(a); }
     }
     return true;
   }
@@ -267,7 +269,7 @@
       if (annotation && isCurrent()) hydratePresetFields(parent, annotation);
     } catch {
       if (isCurrent()) {
-        const note = el('p', 'Il supporto manuale non è verificabile in questo momento; questo non significa che sia assente.');
+        const note = el('p', 'Impossibile caricare le annotazioni manuali. Riprova riaprendo la scheda.');
         note.className = 'paper-manual-research-status'; parent.append(note);
       }
     }

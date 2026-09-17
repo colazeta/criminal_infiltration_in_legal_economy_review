@@ -15,9 +15,9 @@
     <link rel="stylesheet" href="./bibliometrics.css" />
     <script src="./stats.js?v=oa-030" defer></script>
     <script src="./workspace.js?v=1" defer></script>
-    <script src="./paper-register.js?v=frontend-20260917-nav2" defer></script>
-    <script src="./enrichment-statistics.js?v=delivery-002" defer></script>
-    <script src="./bibliometrics.js?v=002" defer></script>
+    <script src="./paper-register.js?v=frontend-20260917-nav2-status" defer></script>
+    <script src="./enrichment-statistics.js?v=status-20260917" defer></script>
+    <script src="./bibliometrics.js?v=status-20260917" defer></script>
   </head>
   <body class="classic-site classic-stats">
     <a class="skip-link" href="#literature-statistics">Vai alle statistiche</a>
@@ -40,7 +40,7 @@
           <p class="intro-copy">
             Le statistiche bibliometriche descrivono pubblicazioni, journal e autori.
             Per impostazione predefinita usano soltanto il corpus valutato; un’opzione
-            separata permette di osservare anche i record ancora da analizzare senza
+            separata permette di osservare anche i record in attesa di valutazione scientifica senza
             trasformarli in inclusioni scientifiche.
           </p>
         </div>
@@ -67,7 +67,7 @@
         </div>
 
         <div class="bibliometric-controls" role="group" aria-label="Perimetro delle statistiche bibliometriche">
-          <label><input id="include-pending-toggle" type="checkbox" /> Includi record ancora da analizzare</label>
+          <label><input id="include-pending-toggle" type="checkbox" /> Includi record in attesa di valutazione scientifica</label>
           <span id="bibliometric-scope-note" aria-live="polite">Caricamento del perimetro…</span>
         </div>
 
@@ -80,11 +80,11 @@
 
         <div id="bibliometric-empty" class="empty-state" hidden>
           <h3>Il corpus valutato è ancora vuoto</h3>
-          <p>Attiva “Includi record ancora da analizzare” per una vista esplorativa del registro operativo. Questa vista non equivale ad inclusione scientifica.</p>
+          <p>Attiva “Includi record in attesa di valutazione scientifica” per una vista esplorativa del registro operativo. Questa vista non equivale ad inclusione scientifica.</p>
         </div>
         <div id="bibliometric-error" class="empty-state error-state" hidden>
           <h3>Le statistiche bibliometriche non possono essere caricate</h3>
-          <p>Il corpus e il registro restano separati; nessun valore viene stimato quando i dati non sono disponibili.</p>
+          <p>Il corpus e il registro restano separati. Ricarica la pagina per riprovare.</p>
         </div>
 
         <div id="bibliometric-content" hidden>
@@ -132,7 +132,7 @@
         </div>
       </section>
 
-      <section class="definitions-section" id="enrichment-statistics"><h2>Avanzamento dell’arricchimento</h2><p role="status" id="enrichment-statistics-status">Stato delle analisi da verificare.</p><p>I record registrati, le analisi proposte e quelle validate sono popolazioni distinte. I dati non verificabili non sono zeri.</p><button type="button" id="enrichment-statistics-refresh">Aggiorna</button></section>
+      <section class="definitions-section" id="enrichment-statistics"><h2>Avanzamento dell’arricchimento</h2><p role="status" id="enrichment-statistics-status">Caricamento dello stato delle analisi…</p><p>Il completamento dell’arricchimento non equivale all’inclusione nel corpus. <a href="./method.html#reading-status">Come leggere gli stati</a>.</p><button type="button" id="enrichment-statistics-refresh">Aggiorna</button></section>
 
       <details class="operations-disclosure" id="research-statistics">
         <summary>Audit operativo: ricerche, fonti ed esecuzioni</summary>
@@ -206,7 +206,7 @@
 
         <div id="metrics-error" class="empty-state error-state" hidden>
           <h3>Le statistiche operative non possono essere caricate</h3>
-          <p>Il sito conserva il precedente rilascio valido; controlla il workflow GitHub.</p>
+          <p>Ricarica la pagina per riprovare. Il registro dei paper resta consultabile.</p>
         </div>
       </section>
 
@@ -216,7 +216,7 @@
         <div class="section-heading"><div><p class="eyebrow">Come leggere i numeri</p><h2 id="definitions-title">Bibliometria e discovery non sono la stessa misura</h2></div></div>
         <div class="method-grid definitions-grid">
           <article><span class="step">01</span><h3>Corpus valutato</h3><p>Default delle bibliometrie: lavori che hanno superato i gate della raccolta pubblica.</p></article>
-          <article><span class="step">02</span><h3>Pending</h3><p>Record operativi ancora da analizzare. Possono essere aggiunti soltanto mediante il toggle e restano dichiarati provvisori.</p></article>
+          <article><span class="step">02</span><h3>Pending</h3><p>Record in attesa di valutazione scientifica, anche quando contengono già sintesi o analisi. Sono inclusi nella vista solo attivando l’opzione dedicata.</p></article>
           <article><span class="step">03</span><h3>Risultati unici</h3><p>Record della sorveglianza rimasti dopo il confronto previsto dal protocollo di discovery.</p></article>
           <article><span class="step">04</span><h3>Nuovi candidati</h3><p>Lavori non già noti inviati alla valutazione umana; non sono automaticamente eleggibili.</p></article>
         </div>

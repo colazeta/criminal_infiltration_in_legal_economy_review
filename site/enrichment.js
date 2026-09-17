@@ -25,25 +25,27 @@
   }
   async function refresh() {
     clearDocument();const serial=++generation;
+    message('Caricamento dei dati…');
     try {
       const state=await api('status');const data=await api('targets');if(serial!==generation)return;
       targets=data.targets.map(t=>({...t,record:JSON.parse(t.record_json)}));list();
       const requested=new URL(location.href).searchParams.get('candidate');
       if(requested){const selected=targets.find(t=>t.record_id===requested||t.record.id===requested);if(selected){await open(selected.target_id);return}}
       $("enrich-scope").textContent=state.enabled?'Acquisizione meccanica abilitata':'Acquisizione meccanica disabilitata';
-      const pane=$("enrich-detail");pane.replaceChildren(el('h1','Stato dell’arricchimento'),el('p','Estrazione scientifica automatica non attiva: calibrazione del modello ancora necessaria. Le proposte non sono decisioni approvate.'));
-      if(state.scheduling){pane.append(el('h2','Iterazioni orarie alle :40'),el('p','Slot previsti distinti dalle esecuzioni effettive. Le iterazioni in attesa non vengono cancellate.'));
+      const pane=$("enrich-detail");pane.replaceChildren(el('h1','Stato dell’arricchimento'),el('p','Consulta le lavorazioni e le analisi già registrate. Le proposte restano distinte dalle decisioni scientifiche.'));
+      if(state.scheduling){pane.append(el('h2','Iterazioni pianificate'),el('p','Slot previsti distinti dalle esecuzioni effettive. Le iterazioni in attesa non vengono cancellate.'));
         table(pane,state.scheduling.totals,['status','count']);
         table(pane,state.scheduling.iterations.map(r=>({...r,scheduled_at:new Date(r.scheduled_at).toISOString(),materialised_at:new Date(r.materialised_at).toISOString(),started_at:r.started_at?new Date(r.started_at).toISOString():'—',finished_at:r.finished_at?new Date(r.finished_at).toISOString():'—'})),['scheduled_at','materialised_at','started_at','finished_at','status','attempts','error_code']);}
       table(pane,state.jobs,['kind','status','count']);pane.append(el('h2','Ultime esecuzioni'));table(pane,state.runs,['scheduled_slot','status','selected_job_id','error_code']);
-      message(targets.length+' paper privati in coda · Il pianificatore e la qualità scientifica sono verifiche separate.');
+      message(targets.length+' paper nel registro privato. I dati delle lavorazioni non indicano l’inclusione nel corpus.');
     }catch(e){$("enrich-detail").replaceChildren(el('h1','Accesso o configurazione richiesti'),el('p','Accedi dalla console curatoriale. Un archivio privato non disponibile resta un blocco esplicito.'));message(e.message);}
   }
   async function open(id) {
     clearDocument();const serial=++generation;
+    message('Caricamento dei dati…');
     try {
       const data=await api('target?id='+encodeURIComponent(id));if(serial!==generation)return;
-      const pane=$("enrich-detail");pane.replaceChildren(el('h1',JSON.parse(data.target.record_json).title),el('p','Proposte non approvate. Le fonti originali restano private.'));
+      const pane=$("enrich-detail");pane.replaceChildren(el('h1',JSON.parse(data.target.record_json).title),el('p','Analisi proposte da revisionare. Le fonti originali restano private.'));
       pane.append(el('h2','Lavorazioni'));table(pane,data.jobs,['kind','status','error_code','due_at']);
       pane.append(el('h2','Fonti'));
       for(const source of data.sources){const b=el('button',source.evidence_kind+' · '+source.provider);const text=el('pre');b.addEventListener('click',async()=>{try{const s=await api('source?id='+encodeURIComponent(id)+'&source='+encodeURIComponent(source.source_id));if(serial===generation)text.textContent=s.text;}catch(e){message(e.message);}});pane.append(b,text);}
@@ -57,9 +59,9 @@
         }
       }catch(e){documentPane.append(el('p','Stato dei PDF non verificabile: '+e.message))}
       pane.append(el('h2','Proposte di estrazione'));
-      if(!data.proposals.length)pane.append(el('p','Nessuna proposta: non è stata eseguita un’estrazione scientifica.'));
+      if(!data.proposals.length)pane.append(el('p','Nessuna proposta registrata per questa versione del paper.'));
       for(const p of data.proposals){
-        const proposal=JSON.parse(p.payload_json),card=el('section');card.append(el('h3','Scheda proposta · '+p.created_at),el('p','Copertura della fonte: '+proposal.source_coverage+' · Verifica scientifica non approvata'));
+        const proposal=JSON.parse(p.payload_json),card=el('section');card.append(el('h3','Scheda proposta · '+p.created_at),el('p','Copertura della fonte: '+proposal.source_coverage+' · Proposta da revisionare scientificamente'));
         const value=f=>f?.value??'Non verificabile dalla fonte disponibile';
         const facts=['summary','research_question','contribution','infiltration_definition','infiltration_operationalisation','authors_limitations','analyst_limitations'].map(k=>({campo:k,contenuto:value(proposal[k]),stato:proposal[k]?.status,evidenze:(proposal[k]?.evidence_span_ids||[]).join(', ')}));
         table(card,facts,['campo','contenuto','stato','evidenze']);
@@ -68,7 +70,7 @@
           if(!(proposal[key]||[]).length)card.append(el('p','Nessun elemento estratto; non equivale ad assenza nel paper completo.'));
         }
         card.append(el('h4','Posizionamento nel framework'),el('p',(proposal.framework.primary||proposal.framework.status)+' — '+value(proposal.framework.rationale)));
-        const d=el('details'),h=el('summary','Dati strutturati e provenance · '+p.proposal_id),pre=el('pre',JSON.stringify(proposal,null,2));d.append(h,pre);card.append(d);pane.append(card);
+        const d=el('details'),h=el('summary','Dettagli tecnici e provenienza · '+p.proposal_id),pre=el('pre',JSON.stringify(proposal,null,2));d.append(h,pre);card.append(d);pane.append(card);
       }
       pane.append(el('h2','Relazioni di citazione'),el('p','Identificatori restituiti dal provider, non nuove pubblicazioni incluse. Ogni snapshot ha copertura separata; gli stessi collegamenti possono ricomparire in snapshot diversi.'));
       const graph=el('div'),more=el('button','Carica relazioni');let offset=0;
