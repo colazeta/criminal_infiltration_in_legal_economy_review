@@ -13,7 +13,8 @@
     <link rel="stylesheet" href="./classic-site.css" />
     <link rel="stylesheet" href="./application.css" />
     <link rel="stylesheet" href="./bibliometrics.css" />
-    <script src="./stats.js?v=oa-030" defer></script>
+    <link rel="stylesheet" href="./statistics-notice.css?v=20260918" />
+    <script src="./stats.js?v=notices-20260918" defer></script>
     <script src="./workspace.js?v=1" defer></script>
     <script src="./paper-register.js?v=frontend-20260917-nav2-status" defer></script>
     <script src="./enrichment-statistics.js?v=status-20260917" defer></script>
@@ -31,7 +32,7 @@
       </div></header>
 
     <main id="main-content">
-      <div class="page-tools" lang="it"><a href="#literature-statistics">Letteratura</a><a href="#enrichment-statistics">Analisi dei paper</a><a href="#research-statistics">Audit della ricerca</a><a href="#definitions-title">Come leggere i dati</a></div>
+      <div class="page-tools" lang="it"><a href="#literature-statistics">Letteratura</a><a href="#enrichment-statistics">Analisi dei paper</a><a href="#research-statistics">Ricerche bibliografiche</a><a href="#definitions-title">Come leggere i dati</a></div>
 
       <section class="intro" aria-labelledby="stats-page-title">
         <div>
@@ -135,47 +136,55 @@
       <section class="definitions-section" id="enrichment-statistics"><h2>Avanzamento dell’arricchimento</h2><p role="status" id="enrichment-statistics-status">Caricamento dello stato delle analisi…</p><p>Il completamento dell’arricchimento non equivale all’inclusione nel corpus. <a href="./method.html#reading-status">Come leggere gli stati</a>.</p><button type="button" id="enrichment-statistics-refresh">Aggiorna</button></section>
 
       <details class="operations-disclosure" id="research-statistics">
-        <summary>Audit operativo: ricerche, fonti ed esecuzioni</summary>
+        <summary>Ricerche bibliografiche <span id="research-statistics-state">· Dati da caricare</span></summary>
       <section class="statistics-section" aria-labelledby="research-statistics-title">
         <div class="section-heading">
           <div>
             <p class="eyebrow">Audit della living review</p>
-            <h2 id="research-statistics-title">Che cosa trova ogni giorno la ricerca</h2>
+            <h2 id="research-statistics-title">Risultati delle ricerche bibliografiche</h2>
           </div>
           <p>
             Questa sezione non descrive la letteratura inclusa: misura il processo di scoperta.
-            Le fonti e le esecuzioni sono quelle documentate nel registro operativo;
-            sono conservate anche giornate parziali o fallite. Una ricerca non riuscita non vale zero.
+            Sono mostrate soltanto le esecuzioni completate e ammesse alla pubblicazione.
+            Gli avvii ordinari e straordinari restano distinti; i tentativi incompleti rimangono nel registro tecnico.
           </p>
         </div>
 
-        <p id="latest-execution" class="status-banner">I risultati delle esecuzioni vengono pubblicati qui dopo la registrazione.</p>
+        <div id="statistics-notice" class="statistics-notice" data-state="idle" role="status" aria-live="polite" aria-atomic="true">
+          <h3 id="statistics-notice-title">Dati delle ricerche da caricare</h3>
+          <p id="latest-execution">Questa sezione legge i risultati già pubblicati. Non avvia nuove ricerche.</p>
+          <p id="statistics-notice-impact">Lo stato riguarda soltanto i conteggi delle ricerche bibliografiche, non lo stato delle singole analisi.</p>
+          <p id="run-status" hidden></p>
+        </div>
+        <div class="statistics-notice-actions">
+          <button id="statistics-retry" type="button" hidden>Riprova il caricamento</button>
+          <a href="./index.html">Apri l’archivio dei paper</a>
+        </div>
+        <noscript><p>Per visualizzare i conteggi e i grafici è necessario JavaScript.</p></noscript>
 
-        <section class="metrics stats-metrics" aria-label="Indicatori recenti">
-          <article><span id="new-candidates-7">—</span><p>nuovi candidati negli ultimi 7 giorni osservati</p></article>
-          <article><span id="all-time-candidates">—</span><p>candidati complessivi dalla prima giornata registrata</p></article>
-          <article><span id="unique-results-7">—</span><p>risultati unici negli ultimi 7 giorni osservati</p></article>
-          <article><span id="source-completion-30">—</span><p>completezza delle fonti negli ultimi 30 giorni di calendario</p></article>
-          <article><span id="data-through">—</span><p>dati aggiornati fino al</p></article>
+        <section id="research-kpis" class="metrics stats-metrics" aria-label="Indicatori delle ricerche ordinarie" hidden>
+          <article><span id="new-candidates-7">—</span><p>nuovi candidati · ricerche ordinarie, ultimi 7 giorni osservati</p></article>
+          <article><span id="all-time-candidates">—</span><p>candidati · ricerche ordinarie, intera serie</p></article>
+          <article><span id="unique-results-7">—</span><p>risultati unici · ricerche ordinarie, ultimi 7 giorni osservati</p></article>
+          <article><span id="source-completion-30">—</span><p>ricerche ordinarie completate · ultimi 30 giorni osservati</p></article>
+          <article><span id="data-through">—</span><p>ultima giornata della serie ordinaria</p></article>
         </section>
 
         <div id="metrics-empty" class="empty-state" hidden>
-          <h3>La serie giornaliera non è ancora iniziata</h3>
-          <p>Il registro è pronto. La prima esecuzione valida aggiungerà qui i suoi conteggi senza attribuire automaticamente eleggibilità ai candidati.</p>
+          <h3>Nessuna esecuzione pubblicabile in questa versione</h3>
+          <p>L’assenza di conteggi non dimostra che non siano state svolte ricerche o trovati paper.</p>
         </div>
 
-        <p id="run-status" class="status-banner" aria-live="polite"></p>
         <div id="metrics-content" hidden>
           <article class="chart-card" aria-labelledby="daily-chart-title">
             <div class="chart-heading">
               <div>
                 <h3 id="daily-chart-title">Risultati unici e nuovi candidati</h3>
-                <p>Conteggi per giornata completata negli ultimi 30 giorni di calendario, con le date mancanti conservate.</p>
+                <p>Conteggi per le ultime 30 esecuzioni pubblicate, ordinarie e straordinarie.</p>
               </div>
               <div class="chart-legend" aria-label="Legenda del grafico">
                 <span><i class="legend-swatch legend-unique" aria-hidden="true"></i>Risultati unici</span>
                 <span><i class="legend-swatch legend-candidate" aria-hidden="true"></i>Nuovi candidati</span>
-                <span><i class="legend-incomplete" aria-hidden="true">×</i>Esecuzione incompleta</span>
               </div>
             </div>
             <div id="daily-chart" class="chart-host"></div>
@@ -191,7 +200,7 @@
 
           <section class="daily-table-section" aria-labelledby="daily-table-title">
             <div class="compact-heading">
-              <div><p class="eyebrow">Dati esatti</p><h3 id="daily-table-title">Calendario degli ultimi 30 giorni</h3></div>
+              <div><p class="eyebrow">Dati esatti</p><h3 id="daily-table-title">Ricerche ordinarie pubblicate · ultimi 30 giorni osservati</h3></div>
               <p>Il trattino indica un dato non misurabile. Non viene mai sostituito con zero.</p>
             </div>
             <div class="table-scroll"><table><thead><tr><th scope="col">Data</th><th scope="col">Stato</th><th scope="col">Occorrenze</th><th scope="col">Unici</th><th scope="col">Già noti</th><th scope="col">Candidati</th><th scope="col">Tasso di nuovi candidati</th><th scope="col">Issue di intake</th></tr></thead><tbody id="daily-table-body"></tbody></table></div>
@@ -200,7 +209,7 @@
 
         <section id="extra-runs" class="daily-table-section" aria-labelledby="extra-runs-title" hidden>
           <div class="section-heading"><h3 id="extra-runs-title">Esecuzioni straordinarie</h3></div>
-          <p>Avvii aggiuntivi, separati dalla ricerca quotidiana. Non sostituiscono le giornate mancanti. I candidati contati sono nuove segnalazioni da verificare, non pubblicazioni approvate.</p>
+          <p>Avvii aggiuntivi completati, separati dalla serie ordinaria e dai suoi indicatori. I candidati contati sono nuove segnalazioni da verificare, non pubblicazioni approvate.</p>
           <div class="table-scroll"><table class="daily-table"><thead><tr><th>Esecuzione</th><th>Inizio · Roma</th><th>Stato</th><th>Query completate</th><th>Risultati unici</th><th>Nuovi candidati</th></tr></thead><tbody id="extra-runs-body"></tbody></table></div>
         </section>
 

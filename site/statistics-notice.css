@@ -1,0 +1,10 @@
+/* Scoped to research publication status; retains the classic flat interface. */
+body.classic-stats .statistics-notice { border: 1px solid var(--classic-border); border-left: 4px solid var(--classic-blue); padding: 12px; margin: 12px 0 8px; background: var(--classic-panel); overflow-wrap: anywhere; }
+body.classic-stats .statistics-notice h3 { margin: 0 0 8px; font-size: 15px; }
+body.classic-stats .statistics-notice p { margin: 6px 0 0; line-height: 1.5; }
+body.classic-stats .statistics-notice[data-state="unavailable"],
+body.classic-stats .statistics-notice[data-state="error"],
+body.classic-stats .statistics-notice[data-state="stale"] { background: var(--classic-warn); }
+body.classic-stats .statistics-notice-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin: 8px 0 16px; padding: 0 12px; }
+body.classic-stats #research-statistics-state { font-weight: normal; }
+body.classic-stats #run-status { padding: 0; font-size: 12px; color: var(--classic-muted); }
