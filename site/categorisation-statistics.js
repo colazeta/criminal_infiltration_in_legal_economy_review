@@ -64,7 +64,7 @@
   status.className = 'bibliometric-note';
   status.setAttribute('role', 'status');
   status.setAttribute('aria-live', 'polite');
-  const refresh = el('button', 'Aggiorna categorizzazioni');
+  const refresh = el('button', 'Ricarica categorie');
   refresh.type = 'button';
 
   const metrics = el('section');
@@ -81,7 +81,7 @@
   };
   metrics.append(
     metric('classified', 'paper con categoria proposta'),
-    metric('coverage', 'quota classificata nella vista'),
+    metric('coverage', 'quota con categoria tra le schede lette'),
     metric('multi', 'paper con almeno una classe secondaria'),
     metric('represented', 'classi primarie rappresentate su 6'),
   );
@@ -95,7 +95,7 @@
   const errorBox = el('div');
   errorBox.className = 'empty-state error-state';
   errorBox.hidden = true;
-  errorBox.append(el('h4', 'Le categorizzazioni non possono essere caricate'), el('p', 'Nessun valore viene stimato: riprova con “Aggiorna categorizzazioni”.'));
+  errorBox.append(el('h4', 'Le categorizzazioni non possono essere caricate'), el('p', 'Nessun valore viene stimato: riprova con “Ricarica categorie”.'));
 
   const categoryPanel = el('article');
   categoryPanel.className = 'bibliometric-panel';
@@ -390,18 +390,22 @@
     refresh.disabled = running;
     errorBox.hidden = !loadError;
     empty.hidden = selected.length !== 0 || loadError;
-    content.hidden = !loaded || loadError || selected.length === 0;
+    content.hidden = !loaded || running || loadError || selected.length === 0;
+    if(running || loadError || !loaded || !selected.length){
+      Object.values(metricNodes).forEach(node=>{node.textContent='—';});
+      metrics.hidden=true;
+    }
 
     if (running) {
-      status.textContent = `Caricamento dell’indice delle categorizzazioni per ${selected.length} record nella vista…`;
+      status.textContent = `Caricamento delle categorie per ${selected.length} record nella vista…`;
       return;
     }
     if (loadError) {
-      status.textContent = 'Indice delle categorizzazioni non disponibile. Nessun conteggio viene stimato.';
+      status.textContent = 'Non è stato possibile caricare le categorie. Riprova.';
       return;
     }
     if (!loaded) {
-      status.textContent = 'In attesa dell’indice delle categorizzazioni…';
+      status.textContent = 'Categorie non ancora caricate…';
       return;
     }
     if (!selected.length) {
@@ -410,11 +414,24 @@
     }
 
     const data = aggregate(selected, indexRows);
+    const received=selected.filter(record=>{
+      const row=indexRows.get(record.id);
+      return row && !['stale','withheld'].includes(row.availability);
+    }).length;
+    if(!received){
+      metrics.hidden=content.hidden=true;
+      Object.values(metricNodes).forEach(node=>{node.textContent='—';});
+      status.textContent='Le informazioni sulle categorie non sono disponibili per i paper di questa vista. Nessun totale può essere calcolato.';
+      return;
+    }
+    metrics.hidden=false;
     metricNodes.classified.textContent = String(data.classified);
-    metricNodes.coverage.textContent = pct(data.classified, data.total);
+    metricNodes.coverage.textContent = pct(data.classified, received);
     metricNodes.multi.textContent = String(data.multi);
     metricNodes.represented.textContent = `${data.represented}/6`;
-    status.textContent = `${data.classified} / ${data.total} record nella vista hanno una classificazione proposta nelle sei classi. ${data.multi} paper classificati includono almeno una classe secondaria. Le classificazioni pubbliche correnti sono proposte analitiche, non validazioni scientifiche.`;
+    status.textContent = `${data.classified} paper con categorie proposte nelle ${received} schede lette. `+
+      (received===data.total?'Tutte le schede della vista sono state lette.':`Dati parziali: ${data.total-received} paper esclusi dalla distribuzione perché non consultabili.`)+
+      ' Le categorie restano proposte, non validazioni scientifiche.';
     renderCategoryTable(data);
     renderEvolution(data);
     renderCombinations(data);

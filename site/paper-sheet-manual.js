@@ -33,7 +33,7 @@
     methods: 'Disegno, metodi, identificazione e robustezza',
     variables: 'Variabili e operazionalizzazione',
     findings: 'Risultati, stime, incertezza e limiti',
-    sources: 'Fonti consultate, versioni e QA',
+    sources: 'Fonti consultate e informazioni sulla scheda',
   };
   const cache = new Map();
 
@@ -175,7 +175,7 @@
     return response.json();
   }
   async function findCandidateIssue(record) {
-    const query = `repo:${REPOSITORY} is:issue in:body \"${record.id}\"`;
+    const query = `repo:${REPOSITORY} is:issue in:body "${record.id}"`;
     const payload = await readJSON(`${GITHUB_API}/search/issues?q=${encodeURIComponent(query)}&per_page=10`);
     const exact = (payload.items || []).filter(issue => !issue.pull_request && candidateMarker(record.id).test(String(issue.body || '')));
     if (!exact.length) return null;
@@ -237,7 +237,7 @@
     const preset = Object.fromEntries(Object.entries(PRESET_TITLES).map(([k,title]) => [k, map.get(title)]));
     if (!preset.overview && !preset.framework && !preset.studies) return false;
     const s = annotation.structured;
-    const note = el('p', 'Campi popolati da annotazione scientifica manuale non revisionata. Non equivale a proposta CILE-ENRICH-1 accettata né a completamento.');
+    const note = el('p', 'Informazioni da un’annotazione di lettura non revisionata. Da sole non dimostrano né il completamento né la validazione dell’analisi.');
     note.className = 'paper-manual-research-status';
     parent.insertBefore(note, preset.overview || parent.firstChild);
 

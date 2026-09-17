@@ -93,14 +93,14 @@ def render_page(path,payload):
     rows=[]
     for r in payload['records']:
         citation=escape(r['title'])+'<p>'+escape(' · '.join(str(v) for v in (r['authors'],r['year'],r['venue']) if v))+'</p>'
-        review='Da analizzare' if r['reviewStatus']=='pending' else r['reviewStatus']
+        review='In attesa di valutazione scientifica' if r['reviewStatus']=='pending' else r['reviewStatus']
         if r.get('topicCode'): review += ' · '+r['topicCode']
         access='OA verificato all’acquisizione' if r['accessStatus']=='verified_open' else 'Accesso da verificare'
         links=' · '.join(render_source_link(url,i+1) for i,url in enumerate(r['sourceLinks']))
-        rows.append('<tr><td>'+citation+'</td><td>'+escape(review)+'</td><td>'+escape(access)+'</td><td>'+links+' · <a href="./curate.html">Analizza nel curatore</a></td></tr>')
+        rows.append('<tr><td>'+citation+'</td><td>'+escape(review)+'</td><td>'+escape(access)+'</td><td>'+links+' · <a href="./curate.html">Valuta nel curatore</a></td></tr>')
     content=path.read_text()
     for pattern,replacement in [(r'(<tbody id="registered-papers">).*?(</tbody>)',''.join(rows)),
-            (r'(<p id="register-count"[^>]*>).*?(</p>)',str(len(rows))+' record registrati · analisi individuale e accesso verificati separatamente.')]:
+            (r'(<p id="register-count"[^>]*>).*?(</p>)',str(len(rows))+' record nel registro · valutazione scientifica e accesso al testo sono distinti.')]:
         content,n=re.subn(pattern,lambda m:m[1]+replacement+m[2],content,flags=re.S)
         if n!=1:raise ValueError('Register render target missing or duplicated')
     path.write_text(content)

@@ -1,6 +1,6 @@
 /* Country statistics share the exact selected bibliometric population.
    Read-only public projections; no private APIs or persistent parallel store. */
-import './paper-sheet-research.js';
+import './paper-sheet-research.js?v=frontend-20260917-status3';
 (() => {
   'use strict';
   const anchor=document.querySelector('#bibliometric-quality-note');
@@ -10,22 +10,30 @@ import './paper-sheet-research.js';
   const API='https://criminal-infiltration-curator.colazeta-research.workers.dev/api/public-paper-research';
   const geo=globalThis.CILEPaperGeography, entries=new Map(), signatures=new Map();
   const el=(tag,text)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;return n};
-  const note=el('p'),progress=el('p'),chart=el('div'),quality=el('div'),refresh=el('button','Aggiorna dati geografici');
+  const note=el('p'),progress=el('p'),chart=el('div'),quality=el('div'),refresh=el('button','Ricarica dati geografici');
   const format=new Intl.NumberFormat('it-IT',{maximumFractionDigits:1});
-  const labels={pending:'Da verificare',error:'Errore di lettura o identità non verificabile',not_assessed:'Estrazione non ancora disponibile',not_registered:'Scheda analitica non associata',stale:'Estrazione non aggiornata',withheld:'Estrazione non pubblicabile',no_study:'Nessuno studio strutturato disponibile',not_reported:'Non riportato nella fonte consultata',not_verifiable:'Non verificabile dalla fonte consultata',not_applicable:'Non applicabile',ambiguous:'Geografia ambigua',unverified:'Geografia senza evidenza attribuita alla fonte',unresolved:'Territorio presente, paese non normalizzato',supranational:'Ambito sovranazionale senza elenco di paesi',global:'Ambito globale senza elenco di paesi',missing:'Geografia mancante',country:'Almeno un paese identificato'};
+  const labels={pending:'Dati non ancora caricati',error:'Errore di lettura o identità non verificabile',not_assessed:'Estrazione non ancora disponibile',not_registered:'Scheda analitica non associata',stale:'Estrazione non aggiornata',withheld:'Estrazione non pubblicabile',no_study:'Nessuno studio strutturato disponibile',not_reported:'Non riportato nella fonte consultata',not_verifiable:'Non verificabile dalla fonte consultata',not_applicable:'Non applicabile',ambiguous:'Geografia ambigua',unverified:'Geografia senza evidenza attribuita alla fonte',unresolved:'Territorio presente, paese non normalizzato',supranational:'Ambito sovranazionale senza elenco di paesi',global:'Ambito globale senza elenco di paesi',missing:'Geografia mancante',country:'Almeno un paese identificato'};
   let selected=[],running=false,failures=0;
   const signature=r=>JSON.stringify([r.id,r.title,r.doi||'', [...(r.sourceLinks||[])].sort()]);
   progress.setAttribute('role','status');progress.setAttribute('aria-live','polite');
   note.className='bibliometric-note';refresh.type='button';
   host.append(el('h3','Paesi e territori studiati'),note,refresh,progress,chart,quality);
   function render(){
-    const data=geo.aggregate(selected,entries),checked=selected.filter(r=>entries.has(r.id)).length;
-    note.textContent=`Ambito dell’analisi, non affiliazione degli autori. ${data.known} / ${data.total} record nella vista hanno almeno un paese identificabile dalle schede di ricerca correnti. Geografia estratta preliminare, non validata scientificamente. ${data.partial} di questi record hanno anche studi con copertura geografica non completamente normalizzata.`;
-    progress.textContent=running?`Verifica delle schede: ${checked} / ${selected.length}. Conteggi provvisori durante il caricamento.`:checked<selected.length?`Verifica incompleta: ${checked} / ${selected.length}. I record non letti non valgono zero; usa “Aggiorna dati geografici” per riprovare.`:`Verificate ${checked} / ${selected.length} schede nella vista. La disponibilità della scheda non implica che il paese sia stato estratto.`;
+    const data=geo.aggregate(selected,entries);
+    const checked=selected.filter(r=>entries.has(r.id)&&entries.get(r.id).status!=='error').length;
+    const complete=checked===selected.length;
+    note.textContent='Paesi effettivamente studiati, non affiliazioni degli autori. Le informazioni geografiche descrivono le proposte di analisi, non lo stato della loro validazione.';
+    if(!selected.length)progress.textContent='Nessun paper nella vista selezionata.';
+    else if(!checked)progress.textContent=running?'Caricamento delle informazioni geografiche…':'Non è stato possibile caricare le informazioni geografiche. Riprova.';
+    else if(running||!complete)progress.textContent=`Informazioni geografiche caricate per ${checked} di ${selected.length} paper. Risultati parziali: i paper non letti sono esclusi dai conteggi.`;
+    else progress.textContent=`Informazioni geografiche caricate per tutti i ${selected.length} paper della vista.`;
+    if(checked)note.textContent+=` In ${data.known} delle ${checked} schede lette è identificato almeno un paese.`;
     refresh.disabled=running||!selected.length;
     chart.replaceChildren();quality.replaceChildren();
-    if(!data.rows.length){chart.append(el('p','Nessun paese conteggiabile nelle schede finora verificate. Non significa assenza di studi su quei paesi.'))}
+    if(!checked){chart.hidden=true;}
+    else if(!data.rows.length){chart.hidden=false;chart.append(el('p','Le schede lette non riportano paesi conteggiabili. Questo non dimostra l’assenza di studi su un paese.'));}
     else{
+      chart.hidden=false;
       const table=el('table'),caption=el('caption','Record per paese o territorio — conteggio multiplo, una volta per record e paese'),head=el('thead'),tr=el('tr'),body=el('tbody');
       for(const text of ['Paese / territorio e paper','Record','Quota con paese noto','Volume relativo']){const th=el('th',text);th.scope='col';tr.append(th)}
       head.append(tr);table.append(caption,head,body);
@@ -39,6 +47,7 @@ import './paper-sheet-research.js';
       }
       const scroll=el('div');scroll.className='table-scroll';scroll.append(table);chart.append(scroll);
     }
+    quality.hidden=checked===0;
     quality.append(el('p','Ogni record conta una sola volta per ciascun paese, anche se contiene più studi nello stesso paese. La somma delle barre e delle percentuali può superare il totale e il 100%. Denominatore delle quote: record della vista con almeno un paese noto. I candidati restano record provvisori: eventuali duplicati bibliografici non riconciliati non sono fusi automaticamente.'));
     const details=el('details');details.append(el('summary','Copertura geografica e dati mancanti'));
     for(const state of data.states){const label=state.status.split(' / ').map(k=>labels[k]||k).join(' / ');details.append(el('p',`${label}: ${state.count}`))}
