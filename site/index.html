@@ -14,8 +14,8 @@
     <link rel="stylesheet" href="./application.css" />
     <script src="./app.js?v=oa-032" defer></script>
   </head>
-  <body class="classic-site classic-home">
-    <a class="skip-link" href="#archive">Skip to the archive</a>
+  <body class="classic-site classic-home" lang="it">
+    <a class="skip-link" href="#register">Vai al registro dei paper</a>
 
     <header class="site-header"><div class="header-inner">
         <a class="brand" href="./index.html" aria-label="Criminal Infiltration — archivio">
@@ -26,93 +26,50 @@
       </div></header>
 
     <main id="main-content">
-      <div class="page-tools" lang="it"><a href="./data/archive.csv" download>Scarica CSV</a></div>
-      <p class="archive-reset-note" role="status">Archivio azzerato il 8 settembre 2026 · nuovo perimetro solo open access. Registro operativo aperto. Analisi ed etichette vengono attribuite dal curatore.</p>
-
-      <section class="intro" aria-labelledby="page-title">
+      <section class="intro archive-intro" aria-labelledby="page-title">
         <div>
-          <p class="eyebrow">Open-access evidence map</p>
-          <h1 id="page-title">Research on criminal infiltration in the legal economy</h1>
-          <p class="intro-copy">
-            Consulta il registro dei lavori individuati e segui la loro analisi.
-            I paper vengono registrati prima dell’attribuzione delle etichette;
-            metadati, accesso e valutazione scientifica hanno stati distinti.
-          </p>
+          <p class="eyebrow">Archivio della letteratura</p>
+          <h1 id="page-title" lang="en">Criminal infiltration in the legal economy</h1>
+          <p class="intro-copy">Cerca un paper, consulta la scheda di ricerca ed esplora metodi, dati e risultati.</p>
         </div>
-        <aside class="scope-note" aria-label="Coverage notice">
-          <span class="scope-dot" aria-hidden="true"></span>
-          <div>
-            <strong>Open access only</strong>
-            <p>
-              Every included publication has lawful, verified open full text, either from its publisher or an institutional repository. Accepted manuscripts are labelled by version. Il registro operativo comprende anche lavori da verificare: la loro presenza non certifica ancora l’accesso aperto o l’inclusione scientifica.
-              Approved AML-related exclusions appear only in the
-              <a href="./aml.html">separate broader collection</a>.
-            </p>
-          </div>
+        <aside class="scope-note" aria-label="Perimetro del registro">
+          <strong>Registro e corpus non coincidono</strong>
+          <p>I record e le analisi proposte restano distinti dai lavori scientificamente valutati. L’inclusione nel corpus richiede anche accesso aperto verificato. <a href="./method.html">Leggi il metodo</a>.</p>
         </aside>
       </section>
 
-      <section class="metrics" aria-label="Archive status">
-        <article>
-          <span id="included-count">—</span>
-          <p>paper nel corpus valutato</p>
-        </article>
-        <article>
-          <span id="editorial-count">—</span>
-          <p>paper da analizzare</p>
-        </article>
-        <article>
-          <span id="archive-version">—</span>
-          <p>archive version</p>
-        </article>
-        <article>
-          <span id="coverage-date">—</span>
-          <p>search coverage through</p>
-        </article>
+      <section class="metrics archive-metrics" aria-label="Consistenza del registro e del corpus">
+        <article><span id="register-total-count">—</span><p>record nel registro</p></article>
+        <article><span id="register-metadata-count">—</span><p>record con metadati verificati</p></article>
+        <article><span id="register-summary-count">—</span><p>sintesi disponibili nel registro</p></article>
+        <article><span id="included-count">—</span><p>pubblicazioni nel corpus valutato</p></article>
       </section>
 
       <section class="archive" id="register" aria-labelledby="register-title">
         <div class="section-heading"><h2 id="register-title">Registro dei paper</h2></div>
-        <p>I lavori trovati entrano nel registro prima dell’analisi individuale. Etichette, inclusione ed esclusione vengono attribuite dal curatore. L’accesso ancora da verificare è indicato esplicitamente. I filtri usano i metadata correnti e non fondono automaticamente varianti di nomi o sedi editoriali.</p>
-        <form class="controls" id="register-controls" role="search">
-          <label class="search-field">
-            <span>Cerca titolo, autore, journal/sede o DOI</span>
-            <input id="register-search" type="search" autocomplete="off" placeholder="e.g. procurement, Varese, 10.1111…">
-          </label>
-          <label>
-            <span>Anno</span>
-            <select id="register-year-filter"><option value="all">Tutti gli anni</option></select>
-          </label>
-          <label>
-            <span>Autore</span>
-            <select id="register-author-filter"><option value="all">Tutti gli autori</option></select>
-          </label>
-          <label>
-            <span>Journal / sede</span>
-            <select id="register-venue-filter"><option value="all">Tutte le sedi</option></select>
-          </label>
-          <label>
-            <span>Stato review</span>
-            <select id="register-review-filter"><option value="all">Tutti gli stati</option></select>
-          </label>
-          <label>
-            <span>Accesso</span>
-            <select id="register-access-filter"><option value="all">Tutti gli stati</option></select>
-          </label>
-          <label>
-            <span>Ordina</span>
-            <select id="register-sort-order">
-              <option value="newest">Più recenti</option>
-              <option value="oldest">Meno recenti</option>
-              <option value="title">Titolo A–Z</option>
-            </select>
-          </label>
-          <button type="reset">Azzera filtri</button>
+        <form class="controls register-controls" id="register-controls" role="search" aria-label="Cerca nel registro">
+          <div class="register-search-row">
+            <label class="search-field"><span>Cerca titolo, autore, rivista o DOI</span><input id="register-search" type="search" autocomplete="off" placeholder="Ad esempio: procurement, Varese, 10.1111…"></label>
+            <label><span>Ordina</span><select id="register-sort-order"><option value="newest">Più recenti</option><option value="oldest">Meno recenti</option><option value="title">Titolo A–Z</option></select></label>
+            <button type="reset">Azzera filtri</button>
+          </div>
+          <details class="filter-drawer" id="register-filter-panel">
+            <summary>Filtri avanzati <span id="register-active-filters"></span></summary>
+            <div class="register-filter-grid">
+              <label><span>Anno</span><select id="register-year-filter"><option value="all">Tutti gli anni</option></select></label>
+              <label><span>Autore</span><select id="register-author-filter"><option value="all">Tutti gli autori</option></select></label>
+              <label><span>Rivista / sede</span><select id="register-venue-filter"><option value="all">Tutte le sedi</option></select></label>
+              <label><span>Revisione scientifica</span><select id="register-review-filter"><option value="all">Tutti gli stati</option></select></label>
+              <label><span>Accesso all’acquisizione</span><select id="register-access-filter"><option value="all">Tutti gli stati</option></select></label>
+            </div>
+          </details>
         </form>
         <p id="register-count" aria-live="polite">Caricamento del registro…</p>
-        <div class="table-scroll"><table class="daily-table"><thead><tr><th>Pubblicazione</th><th>Revisione</th><th>Accesso</th><th>Consultazione</th></tr></thead><tbody id="registered-papers"></tbody></table></div>
+        <div class="table-scroll register-table-wrap"><table class="daily-table register-table"><caption class="visually-hidden">Record del registro. Apri un titolo per leggere la scheda; revisione, accesso e analisi hanno stati distinti.</caption><thead><tr><th scope="col">Pubblicazione</th><th scope="col">Revisione e analisi</th><th scope="col">Accesso all’acquisizione</th><th scope="col">Fonti</th></tr></thead><tbody id="registered-papers"></tbody></table></div>
       </section>
 
+      <details class="reviewed-disclosure">
+        <summary>Consulta il corpus scientificamente valutato</summary>
       <section class="archive" id="archive" aria-labelledby="archive-title">
         <div class="section-heading">
           <div>
@@ -125,7 +82,7 @@
           </p>
         </div>
 
-        <form class="controls" id="archive-controls" role="search">
+        <form class="controls" id="archive-controls" role="search" aria-label="Ricerca nel corpus valutato">
           <label class="search-field">
             <span>Search title, author, venue or DOI</span>
             <input
@@ -186,24 +143,25 @@
           <p>Please try again or inspect the source registry in the repository.</p>
         </div>
       </section>
+      </details>
     </main>
 
     <footer>
-      <p>
-        Versioned metadata and inclusion provenance are generated from governed
-        registries only. No full texts are redistributed.
-      </p>
-      <p>
-        <a href="./data/archive.json">JSON</a> ·
-        <a href="./data/archive.csv">CSV</a> ·
-        <a href="./aml.html">Broader AML</a> ·
-        <a href="./stats.html">Statistiche</a> ·
-        <a href="./method.html">Metodo</a> ·
-        <a href="./curate.html">Curator desk</a> ·
-        <a href="https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/blob/main/INDEX.md">Project guide</a>
-      </p>
+      <div class="page-tools" aria-label="Dati e documentazione">
+        <a href="./data/paper-register.json">Registro · JSON</a>
+        <a href="./data/archive.csv" download>Corpus valutato · CSV</a>
+        <a href="./data/archive.json">Corpus valutato · JSON</a>
+        <a href="./stats.html">Statistiche</a>
+        <a href="./method.html">Metodo</a>
+        <a href="https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/blob/main/INDEX.md">Guida al progetto</a>
+      </div>
+      <details class="release-details">
+        <summary>Versione e informazioni sull’archivio</summary>
+        <p>Versione: <span id="archive-version">—</span> · Copertura della ricerca registrata: <span id="coverage-date">—</span> · Coda editoriale canonica: <span id="editorial-count">—</span>. Quest’ultima non conta i record ancora da valutare nel registro operativo.</p>
+        <p>Il perimetro è stato reimpostato l’8 settembre 2026. I filtri usano i metadati correnti e non riconciliano automaticamente varianti bibliografiche. Le sintesi non sono il testo originale degli abstract né una revisione scientifica.</p>
+      </details>
     </footer>
     <script src="./paper-sheet-manual.js?v=manual-002" defer></script>
-    <script src="./paper-register.js?v=delivery-002" defer></script>
-</body>
+    <script src="./paper-register.js?v=frontend-20260917" defer></script>
+  </body>
 </html>

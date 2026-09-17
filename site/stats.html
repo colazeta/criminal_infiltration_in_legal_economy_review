@@ -14,7 +14,7 @@
     <link rel="stylesheet" href="./application.css" />
     <link rel="stylesheet" href="./bibliometrics.css" />
     <script src="./stats.js?v=oa-030" defer></script>
-    <script src="./paper-register.js?v=delivery-002" defer></script>
+    <script src="./paper-register.js?v=frontend-20260917" defer></script>
     <script src="./enrichment-statistics.js?v=delivery-002" defer></script>
     <script src="./bibliometrics.js?v=002" defer></script>
   </head>
@@ -26,12 +26,11 @@
           <span class="brand-mark" aria-hidden="true">CI</span>
           <span><strong>Criminal Infiltration</strong><small>Literature review</small></span>
         </a>
-        <nav class="app-nav" aria-label="Navigazione principale" lang="it"><a href="./index.html">Archivio</a><a href="./aml.html">Raccolta AML</a><a href="./stats.html" aria-current="page">Statistiche</a><a href="./model.html">Modello</a><a href="./curate.html">Curatore</a></nav>
+        <nav class="app-nav" aria-label="Navigazione principale" lang="it"><a href="./index.html">Archivio</a><a href="./aml.html">Raccolta AML</a><a href="./stats.html" aria-current="page">Statistiche</a><a href="./method.html">Metodo</a><a href="./model.html">Modello</a><a href="./curate.html">Curatore</a></nav>
       </div></header>
 
     <main id="main-content">
-      <div class="page-tools" lang="it"><a href="#literature-statistics">Letteratura</a><a href="#research-statistics">Audit review</a><a href="#definitions-title">Come leggere i dati</a></div>
-      <p class="archive-reset-note" role="status">Archivio azzerato il 8 settembre 2026 · nuovo perimetro solo open access. Il corpus valutato e il registro operativo restano statisticamente distinguibili.</p>
+      <div class="page-tools" lang="it"><a href="#literature-statistics">Letteratura</a><a href="#enrichment-statistics">Analisi dei paper</a><a href="#research-statistics">Audit della ricerca</a><a href="#definitions-title">Come leggere i dati</a></div>
 
       <section class="intro" aria-labelledby="stats-page-title">
         <div>
@@ -39,8 +38,8 @@
           <h1 id="stats-page-title">Come evolve la letteratura e come cresce l’archivio</h1>
           <p class="intro-copy">
             Le statistiche bibliometriche descrivono pubblicazioni, journal e autori.
-            Per impostazione predefinita usano soltanto il corpus valutato; un toggle
-            separato permette di osservare anche i record ancora da analizzare senza
+            Per impostazione predefinita usano soltanto il corpus valutato; un’opzione
+            separata permette di osservare anche i record ancora da analizzare senza
             trasformarli in inclusioni scientifiche.
           </p>
         </div>
@@ -132,7 +131,11 @@
         </div>
       </section>
 
-      <section class="statistics-section" id="research-statistics" aria-labelledby="research-statistics-title">
+      <section class="definitions-section" id="enrichment-statistics"><h2>Avanzamento dell’arricchimento</h2><p role="status" id="enrichment-statistics-status">Stato delle analisi da verificare.</p><p>I record registrati, le analisi proposte e quelle validate sono popolazioni distinte. I dati non verificabili non sono zeri.</p><button type="button" id="enrichment-statistics-refresh">Aggiorna</button></section>
+
+      <details class="operations-disclosure" id="research-statistics">
+        <summary>Audit operativo: ricerche, fonti ed esecuzioni</summary>
+      <section class="statistics-section" aria-labelledby="research-statistics-title">
         <div class="section-heading">
           <div>
             <p class="eyebrow">Audit della living review</p>
@@ -140,8 +143,8 @@
           </div>
           <p>
             Questa sezione non descrive la letteratura inclusa: misura il processo di scoperta.
-            La ricerca quotidiana usa Exa nelle sette finestre W1–W7 e conserva anche
-            giornate parziali o fallite. Una ricerca non riuscita non vale zero.
+            Le fonti e le esecuzioni sono quelle documentate nel registro operativo;
+            sono conservate anche giornate parziali o fallite. Una ricerca non riuscita non vale zero.
           </p>
         </div>
 
@@ -206,7 +209,8 @@
         </div>
       </section>
 
-      <section class="definitions-section" id="enrichment-statistics"><h2>Avanzamento dell’arricchimento</h2><p role="status" id="enrichment-statistics-status">Stato delle analisi da verificare.</p><p>I record registrati, le analisi proposte e quelle validate sono popolazioni distinte. I dati non verificabili non sono zeri.</p><button type="button" id="enrichment-statistics-refresh">Aggiorna</button></section>
+      </details>
+
       <section class="definitions-section" aria-labelledby="definitions-title">
         <div class="section-heading"><div><p class="eyebrow">Come leggere i numeri</p><h2 id="definitions-title">Bibliometria e discovery non sono la stessa misura</h2></div></div>
         <div class="method-grid definitions-grid">

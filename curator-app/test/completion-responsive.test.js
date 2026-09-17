@@ -2,10 +2,10 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
+import {Element, createDocument} from './frontend-dom-fixture.js';
 
 test('stage breakdown uses the existing mobile definition-list layout, not a wide archive table',()=>{
-  class Element {constructor(tag){this.tag=tag;this.children=[];}append(...nodes){this.children.push(...nodes);}setAttribute(){} }
-  const context=vm.createContext({document:{createElement:tag=>new Element(tag)},URL});
+  const context=vm.createContext({document:createDocument(),URL});
   const source=fs.readFileSync(new URL('../../site/paper-sheet-research.js',import.meta.url),'utf8');
   vm.runInContext(source,context);
   const parent=new Element('section');

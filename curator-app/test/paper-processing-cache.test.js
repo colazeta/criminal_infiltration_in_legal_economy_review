@@ -2,14 +2,20 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
-test('the entry document invalidates earlier register bundle cache keys', () => {
-  const html=fs.readFileSync(new URL('../../site/index.html',import.meta.url),'utf8');
-  assert.match(html,/paper-register\.js\?v=delivery-002/);
-  assert.doesNotMatch(html,/paper-register\.js\?v=(?:(?:research|processing|completion)-001)/);
+const version = 'frontend-20260917';
+test('the entry documents invalidate earlier register bundle cache keys', () => {
+  for (const page of ['index.html', 'stats.html']) {
+    const html=fs.readFileSync(new URL('../../site/'+page,import.meta.url),'utf8');
+    assert.ok(html.includes('paper-register.js?v='+version));
+    assert.doesNotMatch(html,/paper-register\.js\?v=(?:delivery-002|(?:research|processing|completion)-001)/);
+  }
 });
 
-test('both research-sheet imports invalidate the previous unversioned child bundle', () => {
+test('both sheet imports use the current explicit child bundle revision', () => {
   const source=fs.readFileSync(new URL('../../site/paper-register.js',import.meta.url),'utf8');
-  assert.equal((source.match(/import\("\.\/paper-sheet-research\.js\?v=delivery-002"\)/g)||[]).length,2);
-  assert.doesNotMatch(source,/import\("\.\/paper-sheet-research\.js"\)/);
+  for (const child of ['research', 'support']) {
+    const expected='import("./paper-sheet-'+child+'.js?v='+version+'")';
+    assert.equal(source.split(expected).length-1,2);
+    assert.ok(!source.includes('import("./paper-sheet-'+child+'.js")'));
+  }
 });

@@ -53,7 +53,7 @@
     return result;
   }
   function renderProgress(parent,data,completion=null) {
-    const p=progress(data,completion),box=el('section');box.setAttribute('aria-label','Progresso verso il completamento');
+    const p=progress(data,completion),box=section(parent,'Stato dell’analisi e verifiche di completamento');box.setAttribute('aria-label','Progresso verso il completamento');
     box.append(el('h4',p.completed?'Arricchimento completo e validato':'Arricchimento end-to-end: non attestato come completato'));
     const stages=el('dl');
     const unavailable=['stale','withheld','unknown'].includes(p.availability);
@@ -83,7 +83,7 @@
     expand.type=collapse.type='button';
     expand.onclick=()=>parent.querySelectorAll('details').forEach(d=>{d.open=true});
     collapse.onclick=()=>parent.querySelectorAll('details').forEach(d=>{d.open=false});
-    parent.append(expand,collapse);
+    const tools=el('div');tools.className='research-tools';tools.append(expand,collapse);parent.append(tools);
     if(data.availability!=='available'){
       const messages={not_assessed:'Non è ancora disponibile un’estrazione scientifica per questo paper. Nessuna classe è stata attribuita.',not_registered:'Il paper non è ancora presente nell’indice analitico corrente. Questo non significa che sia fuori dal framework.',stale:'Esiste un’analisi riferita a una versione precedente dei metadati. Non viene mostrata come analisi corrente.',withheld:'È presente materiale analitico, ma la sua pubblicazione non ha superato i controlli su fonti, integrità o riservatezza. Nessuna classificazione viene dedotta in sua sostituzione.'};
       parent.append(el('p',messages[data.availability]));emptySections(parent);return;
@@ -91,7 +91,7 @@
     const r=data.research,f=r.framework,sourceMap=new Map(r.sources.map(s=>[s.id,s])),spans=new Map(r.spans.map(s=>[s.id,s]));
     function fact(parent,label,v){
       if(!v||typeof v!=='object'){parent.append(el('p',label+': Informazione non disponibile nella scheda corrente.'));return}
-      const line=el('div');line.append(el('strong',label+': '));
+      const line=el('div');line.className='research-fact';line.append(el('strong',label+': '));
       const value=v.value===null?(MISSING[v.status]||'Non disponibile'):v.value;
       line.append(el('span',value));
       if(v.value!==null&&v.status==='ambiguous')line.append(el('small',' — Interpretazione ambigua'));
@@ -101,7 +101,7 @@
     }
     parent.append(el('p',r.generation_kind==='automated'?'Estrazione automatica preliminare, non validata scientificamente. La classificazione resta una proposta.':'Estrazione preliminare non confermata. La modalità di produzione non è attestata come revisione umana.'));
     parent.append(el('p','Base documentale: '+COVERAGE[r.source_coverage]+' · Analisi aggiornata: '+r.updated_at));
-    const geography=section(parent,'Ambito geografico dell’analisi',true);
+    const geography=section(parent,'Ambito geografico dell’analisi');
     if(!r.studies.length)geography.append(el('p','Nessuno studio strutturato disponibile: il paese non viene dedotto dal titolo o dagli autori.'));
     r.studies.forEach((study,i)=>fact(geography,'Studio '+(i+1)+' · Territorio effettivamente analizzato',study.geography));
     if(globalThis.CILEPaperGeography){
@@ -109,7 +109,7 @@
       geography.append(el('p',g.countries.length?'Paesi / territori identificati nella geografia proposta: '+g.countries.map(globalThis.CILEPaperGeography.name).join(', '):'Nessun paese normalizzabile con sufficiente chiarezza dalla geografia estratta.'));
     }
     geography.append(el('small','La copertura può essere cittadina, regionale, nazionale o multipaese. Un paese presente non implica un campione nazionale. Affiliazioni, nazionalità degli autori e luoghi menzionati soltanto come contesto non definiscono l’area studiata.'));
-    const cls=section(parent,'Collocazione nel framework delle sei classi',true);
+    const cls=section(parent,'Collocazione nel framework delle sei classi');
     if(f.status==='proposed')cls.append(el('p','Classe principale proposta: '+CLASSES[f.primary]));
     else cls.append(el('p',f.status==='insufficient_evidence'?'Evidenza insufficiente per attribuire una classe.':'Contributo valutato come esterno al framework; proposta non confermata.'));
     fact(cls,'Motivazione',f.rationale);
@@ -118,6 +118,7 @@
     cls.append(el('small','Eziologia · Diagnosi · Screening · Terapia · Prognosi · Prevenzione. Le classi descrivono il contributo, non l’ammissibilità del paper nella revisione.'));
     const overview=section(parent,'Domanda, contributo e definizione del fenomeno',true);
     for(const k of ['research_question','contribution','summary','infiltration_definition','infiltration_operationalisation'])fact(overview,LABELS[k],r[k]);
+    parent.insertBefore(overview,geography);
     function item(parent,object,title){const box=section(parent,title);for(const[k,v]of Object.entries(object)){if(v&&typeof v==='object'&&!Array.isArray(v)&&'status'in v)fact(box,LABELS[k]||k,v)}return box}
     const studies=section(parent,`Studi, dati e analisi (${r.studies.length} studi)`);
     if(!r.studies.length)studies.append(el('p','Nessuno studio strutturato estratto dalla fonte consultata; non equivale all’assenza di uno studio nell’articolo.'));
@@ -146,7 +147,7 @@
     return data;
   }
   function renderReferences(parent,completion) {
-    const box=section(parent,'References e citazioni',true);
+    const box=section(parent,'References e citazioni');
     if(!completion){box.append(el('p','Bibliografia e citazioni ricevute non sono verificabili in questo momento. Le fonti consultate non sono la bibliografia.'));return}
     if(!completion.reference_coverage.length)box.append(el('p','Copertura citazionale non ancora documentata: non equivale all’assenza di riferimenti.'));
     for(const c of completion.reference_coverage)box.append(el('p',`${c.provider} · ${c.direction==='incoming'?'Citazioni ricevute':'Riferimenti in uscita'} · ${c.status} · Osservati nell’unità di copertura: ${c.returned_count}; dichiarati: ${c.provider_count===null?'non disponibili':c.provider_count} · ${c.observed_at}`));
@@ -174,7 +175,7 @@
     return data;
   }
   async function loadAssets(parent,record,isCurrent=()=>true){
-    const box=section(parent,'PDF conservati e bibliografia dettagliata',true);box.append(el('p','Verifica del documento e dei riferimenti in corso.'));
+    const box=section(parent,'PDF conservati e bibliografia dettagliata');box.append(el('p','Verifica del documento e dei riferimenti in corso.'));
     let revision=null,next=0;const seen=new Set();
     async function page(){
       const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),12000);
@@ -205,7 +206,7 @@
       let completion=null;
       try{const response=await fetch(ENDPOINT+'?view=completion&id='+encodeURIComponent(record.id),{cache:'no-store',credentials:'omit',signal:controller.signal});if(response.ok)completion=selectCompletion(await response.json(),record,data)}catch{}
       if(isCurrent()){render(parent,data,completion);loadAssets(parent,record,isCurrent);}
-    }catch{if(isCurrent())parent.textContent='Il contesto di ricerca non è verificabile in questo momento. Un errore di caricamento o un disallineamento dei metadati non significa che l’analisi sia assente.'}
+    }catch{if(isCurrent()){parent.replaceChildren(el('h3','Contesto della ricerca'),el('p','Il contesto di ricerca non è verificabile in questo momento. Un errore di caricamento o un disallineamento dei metadati non significa che l’analisi sia assente.'));emptySections(parent);}}
     finally{clearTimeout(timeout);if(isCurrent())parent.setAttribute('aria-busy','false')}
   }
   globalThis.CILEPaperResearch={render,load,selectRecord,safeUrl,progress,renderProgress,selectCompletion,renderReferences,selectAssets,loadAssets};
