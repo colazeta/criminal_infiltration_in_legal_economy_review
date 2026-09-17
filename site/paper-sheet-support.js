@@ -59,23 +59,29 @@
     parent.replaceChildren(el("h3", "Abstract e sintesi"));
     const aid = support.readingAid;
     const abstract = support.abstract;
+    const sources = el("details");
+    sources.append(el("summary", "Fonte della sintesi e disponibilità dell’abstract"));
     if (aid && Object.hasOwn(kindLabels, aid.kind) && aid.synopsis) {
       parent.append(el("h4", kindLabels[aid.kind]), el("p", aid.synopsis));
-      metadata(parent, [["Fonte della sintesi", aid.sourceLabel], ["Sintesi verificata il", aid.checkedAt]]);
-      link(parent, aid.kind === "verified_abstract_source" ? "Consulta la fonte dell’abstract" : "Consulta la fonte della sintesi", aid.sourceUrl);
+      metadata(sources, [["Fonte della sintesi", aid.sourceLabel], ["Sintesi verificata il", aid.checkedAt]]);
+      link(sources, aid.kind === "verified_abstract_source" ? "Consulta la fonte dell’abstract" : "Consulta la fonte della sintesi", aid.sourceUrl);
     } else {
       parent.append(el("p", "Non è ancora disponibile una sintesi pubblicabile per questo record."));
     }
     if (abstract?.status === "available") {
-      parent.append(el("p", "Disponibilità dell’abstract verificata. Il testo originale non è riprodotto in questa scheda; consulta la fonte. La sintesi, quando presente, resta distinta dall’abstract originale."));
-      metadata(parent, [["Fonte dell’abstract", abstract.source], ["Disponibilità verificata il", abstract.checkedAt]]);
-      link(parent, "Apri la fonte dell’abstract", abstract.sourceUrl);
+      sources.append(el("p", "Disponibilità dell’abstract verificata. Il testo originale non è riprodotto in questa scheda; consulta la fonte. La sintesi, quando presente, resta distinta dall’abstract originale."));
+      metadata(sources, [["Fonte dell’abstract", abstract.source], ["Disponibilità verificata il", abstract.checkedAt]]);
+      link(sources, "Apri la fonte dell’abstract", abstract.sourceUrl);
     } else if (aid?.kind !== "verified_abstract_source") {
-      parent.append(el("p", "La disponibilità dell’abstract originale non risulta verificata per questa scheda."));
+      sources.append(el("p", "La disponibilità dell’abstract originale non risulta verificata per questa scheda."));
     }
+    parent.append(sources);
+    const root = parent;
     const retrieval = support.retrieval;
     const access = support.access;
-    parent.append(el("h3", "Metadati arricchiti e reperibilità"));
+    parent = el("details");
+    parent.append(el("summary", "Accesso al testo e metadati di reperibilità"));
+    root.append(parent);
     if (!retrieval && !access) parent.append(el("p", "Nessun ulteriore metadato di reperibilità è ancora disponibile."));
     if (retrieval) {
       metadata(parent, [
@@ -108,7 +114,7 @@
       link(parent, "Fonte della valutazione dell’accesso", access.url);
     }
     parent.append(el("p", "Un collegamento al testo non prova, da solo, l’accesso aperto. Sintesi e metadati arricchiti non costituiscono una valutazione scientifica del paper."));
-    parent.setAttribute("aria-busy", "false");
+    root.setAttribute("aria-busy", "false");
   }
   async function load(parent, record, isCurrent = () => true) {
     if (!isCurrent()) return;

@@ -178,8 +178,8 @@
     MODES.forEach(([value, text]) => addOption(mode, value, text));
     addOption(category, 'all', 'Tutte le classi proposte');
     Object.entries(CLASSES).forEach(([value, text]) => addOption(category, value, text));
-    const first = el('label', 'Elaborazione del contenuto '); first.append(mode);
-    const second = el('label', 'Classe proposta (principale o secondaria) '); second.append(category);
+    const first = el('label'); first.append(el('span', 'Contenuto disponibile'), mode);
+    const second = el('label'); second.append(el('span', 'Classe proposta'), category);
     const refresh = el('button', 'Aggiorna stato delle analisi'); refresh.type='button';
     const status = el('p'); status.id='register-processing-status'; status.setAttribute('role','status'); status.setAttribute('aria-live','polite');
     mode.setAttribute('aria-describedby', status.id); category.setAttribute('aria-describedby', status.id);
@@ -187,8 +187,10 @@
     const breakdown = el('p'); breakdown.id='register-enrichment-breakdown';
     const finalNote = el('p', 'Completato significa attestazione backend valida per la stessa versione dell’analisi, con fonti, riferimenti, valutazione del framework e revisione finale. Una non applicabilità motivata del framework non forza una categoria. Gli stati sconosciuti non sono conteggiati come assenze.');
     const note = el('p', 'Una sintesi non equivale a una lettura completa. “Analizzati dall’AI” richiede un’estrazione strutturata con origine automatica attestata. Le classi restano proposte non validate scientificamente; i soli DOI, link, metadati e abstract reperiti non bastano.');
-    const panel = el('section'); panel.setAttribute('aria-label','Stato dell’elaborazione dei paper'); panel.append(status, completion, breakdown, finalNote, note);
-    controls.append(first, second, refresh); controls.after(panel);
+    const panel = el('details'); panel.className='processing-details'; panel.setAttribute('aria-label','Stato dell’elaborazione dei paper');
+    const summary=el('summary','Copertura delle analisi e stato della verifica');
+    panel.append(summary, refresh, status, completion, breakdown, finalNote, note);
+    (controls.querySelector('.register-filter-grid') || controls).append(first, second); controls.after(panel);
     let index;
     function update() {
       if (!index) return;
@@ -206,6 +208,8 @@
       const supportErrors = [...index.rows.values()].filter(s => s.support === 'error').length;
       const supportChecked = [...index.rows.values()].filter(s => s.support === 'checked').length;
       const supportPending = [...index.rows.values()].filter(s => s.support === 'pending').length;
+      const summaryMetric=document.getElementById('register-summary-count');
+      if(summaryMetric){summaryMetric.textContent=supportChecked===p.total?String(summaries):'—';summaryMetric.title=`Sintesi verificate su ${supportChecked}/${p.total} record. Una sintesi non equivale ad una revisione scientifica.`;}
       const summaryText = supportChecked === p.total ? `${summaries} sintesi disponibili` : supportChecked ? `${summaries} sintesi trovate nei record verificati` : 'Disponibilità delle sintesi da verificare';
       const aiText = p.checked ? `${ai} analisi AI trovate nei record verificati` : 'Analisi AI da verificare';
       const lead = p.running ? 'Verifica in corso: risultati parziali. ' : p.scanned && p.checked < p.total ? 'Verifica incompleta: non interpretare gli stati mancanti come assenza di analisi. ' : '';
@@ -214,6 +218,7 @@
         (supportErrors ? ` ${supportErrors} sintesi non verificabili.` : '') +
         (p.errors ? ` ${p.errors} richieste analitiche non riuscite.` : '') +
         (!p.scanned && !p.running ? ' Seleziona un filtro di analisi o premi Aggiorna per verificare l’intero registro.' : '');
+      summary.textContent=p.running?'Verifica delle analisi in corso…':p.errors?'Copertura delle analisi · verifica incompleta':'Copertura delle analisi e stato della verifica';
       refresh.disabled = p.running;
       panel.setAttribute('aria-busy', String(p.running));
       onChange();
@@ -240,7 +245,15 @@
       },
     };
   }
-  globalThis.CILEPaperProcessing = {researchState, matches, describe, readJSON, createIndex, mount, isCompleted, completionState, indexState};
+  // Pagination is presentation-only: never truncate or mutate the source registry.
+  function pageRecords(records, requestedPage=1, size=25) {
+    if(!Array.isArray(records)||![25,50,100].includes(size))throw Error('invalid_pagination');
+    const pages=Math.max(1,Math.ceil(records.length/size));
+    const page=Math.max(1,Math.min(Number.isSafeInteger(requestedPage)?requestedPage:1,pages));
+    const start=(page-1)*size;
+    return {page,pages,start,rows:records.slice(start,start+size),total:records.length};
+  }
+  globalThis.CILEPaperProcessing = {researchState, matches, describe, readJSON, createIndex, mount, isCompleted, completionState, indexState, pageRecords};
 })();
 
 (() => {
@@ -287,6 +300,10 @@
   };
   let records = [];
   let processing = null;
+  let currentPage = 1;
+  let pageSize = 25;
+  let searchTimer = null;
+  document.querySelectorAll('form[role="search"]').forEach(form => form.addEventListener('submit', event => event.preventDefault()));
 
   const el = (tag, text) => {
     const node = document.createElement(tag);
@@ -353,17 +370,24 @@
   dialog.className = "paper-sheet";
   dialog.setAttribute("aria-labelledby", "paper-sheet-title");
   document.body.append(dialog);
-  let opener = null;
+  let opener = null, openedRecordId = null;
   let sheetSequence = 0;
-  dialog.addEventListener("close", () => { if (opener?.isConnected) opener.focus(); });
+  dialog.addEventListener('click', event => {
+    const box=dialog.getBoundingClientRect();
+    if(event.target===dialog&&(event.clientX<box.left||event.clientX>box.right||event.clientY<box.top||event.clientY>box.bottom)) dialog.close();
+  });
+  dialog.addEventListener("close", () => {
+    const target=opener?.isConnected?opener:[...list.querySelectorAll("button[data-record-id]")].find(button=>button.dataset.recordId===openedRecordId);
+    (target || elements.search).focus();
+  });
 
   function openSheet(record, button) {
-    opener = button;
+    opener = button;openedRecordId=record.id;
     const sequence = ++sheetSequence;
     dialog.replaceChildren();
     const bar = el("div");
     bar.className = "paper-sheet-bar";
-    bar.append(el("span", "Archivio · Scheda bibliografica"));
+    bar.append(el("span", "Archivio · Scheda di ricerca"));
     const close = el("button", "Chiudi ×");
     close.type = "button";
     close.addEventListener("click", () => dialog.close());
@@ -373,6 +397,8 @@
     const title = el("h2", record.title);
     title.id = "paper-sheet-title";
     body.append(title);
+    const citation=el('p',[record.authors,record.year,record.venue].filter(Boolean).join(' · ')); citation.className='sheet-citation'; body.append(citation);
+    const boundary=el('p','Revisione scientifica: '+(reviewLabels[record.reviewStatus]||'Da verificare')+'. Le analisi proposte non equivalgono all’inclusione nel corpus.'); boundary.className='sheet-boundary'; body.append(boundary);
     const metadata = el("dl");
     for (const [label, value] of [
       ["Autori", record.authors], ["Anno", record.year], ["Rivista / sede", record.venue],
@@ -390,8 +416,10 @@
     const research = el("section", "Caricamento del contesto di ricerca…");
     research.setAttribute("aria-live", "polite");
     research.className = "paper-research";
-    body.append(metadata, research, support);
-    body.append(el("h3", "Fonti registrate all’acquisizione"));
+    support.className='paper-support';
+    const provenance=el('details');provenance.className='sheet-provenance';provenance.append(el('summary','Identità bibliografica, stati e fonti del registro'),metadata);
+    body.append(support,research,provenance);
+    provenance.append(el("h3", "Fonti registrate all’acquisizione"));
     for (const [index, url] of (record.sourceLinks || []).entries()) {
       try {
         const parsed = new URL(url);
@@ -399,81 +427,76 @@
         const link = el("a", `Fonte ${index + 1} · ${parsed.hostname}`);
         link.href = parsed.href;
         link.rel = "noreferrer";
-        const line = el("p"); line.append(link); body.append(line);
+        const line = el("p"); line.append(link); provenance.append(line);
       } catch (_) { /* Invalid source URLs are never rendered. */ }
     }
     body.append(el("p", "La registrazione non equivale all’inclusione scientifica. Gli stati di verifica si riferiscono al singolo record."));
     dialog.append(bar, body);
     if (!dialog.open) dialog.showModal();
+    dialog.scrollTop=0;
     close.focus();
     const isCurrent = () => dialog.open && sequence === sheetSequence;
-    import("./paper-sheet-research.js?v=delivery-002")
+    import("./paper-sheet-research.js?v=frontend-20260917")
       .then(() => globalThis.CILEPaperResearch.load(research, record, isCurrent))
       .catch(() => { if (isCurrent()) research.textContent = "Il pannello di ricerca non è disponibile; non è una conferma dell’assenza di analisi."; });
-    import("./paper-sheet-support.js")
+    import("./paper-sheet-support.js?v=frontend-20260917")
       .then(() => globalThis.CILEPaperSheetSupport.load(support, record, isCurrent))
       .catch(() => {
         if (isCurrent()) support.textContent = "Il pannello dei dati arricchiti non è disponibile. Ricarica la pagina; non è una conferma dell’assenza dell’abstract.";
       });
   }
 
+  const pager=document.createElement('div');pager.className='register-pagination';pager.setAttribute('role','group');pager.setAttribute('aria-label','Paginazione del registro');pager.hidden=true;
+  const pageStatus=el('span');pageStatus.id='register-page-status';pageStatus.setAttribute('aria-live','polite');
+  const previous=el('button','← Precedente'),next=el('button','Successiva →');previous.type=next.type='button';
+  const sizeLabel=el('label','Per pagina '),sizeSelect=document.createElement('select');sizeSelect.id='register-page-size';
+  for(const value of [25,50,100])addOption(sizeSelect,String(value),String(value));sizeLabel.append(sizeSelect);
+  pager.append(pageStatus,sizeLabel,previous,next);list.closest('.table-scroll').after(pager);
+  function changePage(delta){currentPage+=delta;render();count.scrollIntoView({block:'nearest'});}
+  previous.addEventListener('click',()=>changePage(-1));next.addEventListener('click',()=>changePage(1));
+  sizeSelect.addEventListener('change',()=>{pageSize=Number(sizeSelect.value);currentPage=1;render();});
+  controls.addEventListener('change',event=>{if(event.target.tagName==='SELECT'){currentPage=1;render();}});
+
   function render() {
     const found = filteredRecords();
-    count.textContent = `${found.length} record visualizzati · ${records.length} registrati. L’analisi AI è distinta dalla revisione e dall’inclusione scientifica.`;
-    list.replaceChildren();
-
-    for (const record of found) {
-      const row = document.createElement("tr");
-      const citation = document.createElement("td");
-      const open = el("button", "Apri scheda");
-      open.type = "button";
-      open.setAttribute("aria-haspopup", "dialog");
-      open.setAttribute("aria-label", "Apri scheda: " + record.title);
-      open.addEventListener("click", () => openSheet(record, open));
-      row.addEventListener("dblclick", (event) => {
-        if (!event.target.closest("a, button")) openSheet(record, open);
-      });
-      citation.append(
-        el("strong", record.title),
-        el("p", [record.authors, record.year, record.venue].filter(Boolean).join(" · ") || "Metadati da completare"),
-      );
-      citation.append(open);
-      const status = el("td", reviewLabels[record.reviewStatus] || "Da verificare");
-      if (record.topicCode) status.append(el("p", `Etichetta: ${record.topicCode}`));
-      status.append(el("p", record.metadataStatus === "metadata_verified" ? "Metadati verificati" : "Metadati da verificare"));
-      const processingLabel = processing?.describe(record);
-      if (processingLabel) status.append(el("p", processingLabel));
-      const access = el("td", accessLabels[record.accessStatus] || "Accesso da verificare");
-      const links = document.createElement("td");
-      for (const [index, url] of (record.sourceLinks || []).entries()) {
-        try {
-          const parsed = new URL(url);
-          if (!["https:", "http:"].includes(parsed.protocol) || parsed.username || parsed.password) continue;
-          const anchor = el("a", `Fonte ${index + 1}`);
-          anchor.href = url;
-          anchor.rel = "noreferrer";
-          links.append(anchor, document.createElement("br"));
-        } catch (_) {
-          continue;
-        }
+    const page=globalThis.CILEPaperProcessing.pageRecords(found,currentPage,pageSize);
+    currentPage=page.page;const {pages,start,rows:visible}=page;
+    count.textContent = `${found.length} record corrispondenti · ${records.length} registrati`;
+    pageStatus.textContent=found.length?`${start+1}–${start+visible.length} di ${found.length} · Pagina ${currentPage} di ${pages}`:'Nessun risultato';
+    previous.disabled=currentPage===1;next.disabled=currentPage===pages;pager.hidden=found.length===0;
+    const active=document.getElementById('register-active-filters');
+    if(active){const n=[...controls.querySelectorAll('.register-filter-grid select')].filter(select=>select.value!=='all').length;active.textContent=n?` · ${n} attivi`:'';}
+    const fragment=document.createDocumentFragment();
+    for (const record of visible) {
+      const row = document.createElement('tr');
+      const citation = document.createElement('td');citation.className='register-citation';
+      const open = el('button',record.title);open.className='paper-title';open.type='button';
+      open.dataset.recordId=record.id;open.setAttribute('aria-haspopup','dialog');open.setAttribute('aria-label','Apri scheda: '+record.title);
+      open.addEventListener('click',()=>openSheet(record,open));
+      row.addEventListener('dblclick',event=>{if(!event.target.closest('a, button'))openSheet(record,open);});
+      citation.append(open,el('p',[record.authors,record.year,record.venue].filter(Boolean).join(' · ')||'Metadati da completare'));
+      const status=el('td');status.dataset.label='Revisione e analisi';
+      const reviewState=el('span',reviewLabels[record.reviewStatus]||'Da verificare');reviewState.className='review-label';status.append(reviewState);
+      if(record.topicCode)status.append(el('p',`Etichetta: ${record.topicCode}`));
+      status.append(el('p',record.metadataStatus==='metadata_verified'?'Metadati verificati':'Metadati da verificare'));
+      const processingLabel=processing?.describe(record);if(processingLabel)status.append(el('p',processingLabel));
+      const access=el('td',accessLabels[record.accessStatus]||'Accesso da verificare');access.dataset.label='Accesso all’acquisizione';
+      const links=document.createElement('td');links.dataset.label='Fonti';
+      for(const [index,url]of(record.sourceLinks||[]).entries()){
+        try{const parsed=new URL(url);if(!['https:','http:'].includes(parsed.protocol)||parsed.username||parsed.password)continue;
+          const anchor=el('a',`Fonte ${index+1}`);anchor.href=url;anchor.rel='noreferrer';anchor.title=parsed.hostname;links.append(anchor,document.createElement('br'));
+        }catch{continue;}
       }
-      const review = el("a", "Analizza nel curatore");
-      review.href = "./curate.html";
-      links.append(review);
-      row.append(citation, status, access, links);
-      list.append(row);
+      row.append(citation,status,access,links);fragment.append(row);
     }
-
-    if (!found.length) {
-      const row = document.createElement("tr");
-      const cell = el("td", processing?.emptyMessage() || (records.length ? "Nessun record corrisponde ai filtri correnti." : "Nessun lavoro ancora registrato."));
-      cell.colSpan = 4;
-      row.append(cell);
-      list.append(row);
+    if(!found.length){
+      const row=document.createElement('tr'),cell=el('td',processing?.emptyMessage()||(records.length?'Nessun record corrisponde ai filtri correnti. Azzera i filtri per tornare al registro.':'Nessun lavoro ancora registrato.'));
+      cell.colSpan=4;cell.className='register-empty';row.append(cell);fragment.append(row);
     }
+    list.replaceChildren(fragment);list.setAttribute('aria-busy','false');
   }
 
-  elements.search.addEventListener("input", (event) => { state.query = event.target.value; render(); });
+  elements.search.addEventListener("input", (event) => { state.query = event.target.value; currentPage=1; clearTimeout(searchTimer); searchTimer=setTimeout(render,120); });
   elements.year.addEventListener("change", (event) => { state.year = event.target.value; render(); });
   elements.author.addEventListener("change", (event) => { state.author = event.target.value; render(); });
   elements.venue.addEventListener("change", (event) => { state.venue = event.target.value; render(); });
@@ -482,6 +505,7 @@
   elements.sort.addEventListener("change", (event) => { state.sort = event.target.value; render(); });
   controls.addEventListener("reset", () => {
     window.setTimeout(() => {
+      clearTimeout(searchTimer);currentPage=1;
       Object.assign(state, { query: "", year: "all", author: "all", venue: "all", review: "all", access: "all", sort: "newest" });
       render();
     });
@@ -493,10 +517,19 @@
       return response.json();
     })
     .then((payload) => {
-      records = Array.isArray(payload.records) ? payload.records : [];
+      if(payload.schemaVersion!==1||!Array.isArray(payload.records))throw Error("invalid_register");
+      const ids=new Set();
+      for(const record of payload.records){
+        if(!record||typeof record.id!=="string"||!record.id||ids.has(record.id)||typeof record.title!=="string"||!Array.isArray(record.sourceLinks))throw Error("invalid_register_identity");
+        ids.add(record.id);
+      }
+      records = payload.records;
+      const total=document.getElementById('register-total-count'),verified=document.getElementById('register-metadata-count');
+      if(total)total.textContent=String(records.length);
+      if(verified)verified.textContent=String(records.filter(record=>record.metadataStatus==='metadata_verified').length);
       populateFilters();
       render();
-      Promise.all([import("./paper-sheet-support.js"), import("./paper-sheet-research.js?v=delivery-002")])
+      Promise.all([import("./paper-sheet-support.js?v=frontend-20260917"), import("./paper-sheet-research.js?v=frontend-20260917")])
         .then(() => {
           processing = globalThis.CILEPaperProcessing.mount({
             controls, records, onChange: render,
@@ -510,6 +543,7 @@
         });
     })
     .catch(() => {
+      list.replaceChildren();list.setAttribute("aria-busy","false");pager.hidden=true;
       count.textContent = "Il registro non è disponibile. Consultare il pannello del curatore o riprovare.";
       Object.values(elements).forEach((element) => { if (element) element.disabled = true; });
     });
