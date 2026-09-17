@@ -419,5 +419,12 @@ fetch("./data/research-stats.json", { cache: "no-store" })
     renderDailyTable(dailyRows);
   })
   .catch(() => {
+    statsElements.content.hidden = true;
+    statsElements.empty.hidden = true;
+    const extra=document.querySelector("#extra-runs");if(extra)extra.hidden=true;
+    document.querySelector("#extra-runs-body")?.replaceChildren();
+    statsElements.status.className="status-banner status-banner-failed";
+    for(const selector of ["#new-candidates-7","#all-time-candidates","#unique-results-7","#source-completion-30","#data-through"])setText(selector,"—");
+    statsElements.status.textContent="Non è stato possibile caricare le statistiche delle ricerche. Ricarica la pagina per riprovare.";
     statsElements.error.hidden = false;
   });

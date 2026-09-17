@@ -15,7 +15,7 @@ class BibliometricArchiveUiTests(unittest.TestCase):
         self.assertIn('id="bibliometric-content"', source)
         self.assertIn('id="journal-evolution"', source)
         self.assertIn('id="author-evolution"', source)
-        self.assertIn('src="./bibliometrics.js?v=002"', source)
+        self.assertIn('src="./bibliometrics.js?v=status3"', source)
 
     def test_pending_bibliometrics_do_not_include_terminal_review_states(self) -> None:
         source = (SITE / "bibliometrics.js").read_text(encoding="utf-8")

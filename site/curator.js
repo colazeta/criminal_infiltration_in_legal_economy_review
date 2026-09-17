@@ -80,26 +80,30 @@ function formatDate(value) {
   }).format(parsed);
 }
 
+function loadedCount(value) {
+  return Number.isSafeInteger(value) && value >= 0 ? value : '—';
+}
+
 function renderQueue(stats) {
   const counts = stats.byStage || {};
   const origins = stats.openByOrigin || {};
   const secondary = stats.bySecondaryCollection || {};
-  setText("queue-total", Number(stats.open || 0));
-  setText("queue-metadata", Number(counts.metadataFix || 0));
-  setText("queue-manual", Number(counts.manualReview || 0));
-  setText("queue-abstract", Number(counts.abstractReview || 0));
-  setText("queue-legacy-rejected", Number(counts.legacyRejectionReview || 0));
-  setText("queue-secondary-aml", Number(secondary.broaderAml || 0));
+  setText("queue-total", loadedCount(stats.open));
+  setText("queue-metadata", loadedCount(counts.metadataFix));
+  setText("queue-manual", loadedCount(counts.manualReview));
+  setText("queue-abstract", loadedCount(counts.abstractReview));
+  setText("queue-legacy-rejected", loadedCount(counts.legacyRejectionReview));
+  setText("queue-secondary-aml", loadedCount(secondary.broaderAml));
   setText(
     "queue-origin-summary",
-    `${Number(origins.legacy || 0)} legacy · ${Number(origins.daily || 0)} da intake · ${Number(stats.completed || 0)} completate`,
+    `${loadedCount(origins.legacy)} legacy · ${loadedCount(origins.daily)} da intake · ${loadedCount(stats.completed)} decisioni editoriali registrate`,
   );
 }
 
 function renderRun(metrics) {
   const status = metrics.summary?.lastRunStatus;
   const labels = { completed: "Completata", partial: "Parziale", failed: "Fallita" };
-  setText("last-run-status", labels[status] || "Non ancora eseguita");
+  setText("last-run-status", labels[status] || "Nessuna esecuzione documentata in questa fonte");
   setText("last-run-date", formatDate(metrics.dataThrough));
   const dot = byId("run-health-dot");
   if (dot) dot.dataset.status = status || "none";
@@ -696,7 +700,8 @@ async function submitDecision(event) {
 async function loadCandidates() {
   setText("candidate-result-count", "Caricamento della coda…");
   const payload = await apiFetch("/api/candidates");
-  state.candidates = Array.isArray(payload.candidates) ? payload.candidates : [];
+  if(!Array.isArray(payload.candidates))throw Error('Elenco dei candidati non disponibile');
+  state.candidates = payload.candidates;
   applyRequestedLane();
   renderCandidateList();
   const requested = new URL(window.location.href).searchParams.get("candidate");

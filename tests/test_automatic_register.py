@@ -69,7 +69,8 @@ class AutomaticRegisterTests(unittest.TestCase):
             render_page(path,{'records':[{'title':'<script>alert(1)</script>','authors':'A','year':2024,'venue':'V','reviewStatus':'pending','accessStatus':'unknown','sourceLinks':['https://example.org/paper']}]})
             self.assertNotIn('<script>',path.read_text())
             self.assertIn('Accesso da verificare',path.read_text())
-            self.assertIn('1 record registrati',path.read_text())
+            self.assertIn('1 record nel registro',path.read_text())
+            self.assertIn('In attesa di valutazione scientifica',path.read_text())
 
     def test_v2_cannot_gain_pending_access_by_relabelling(self):
         run,issue=pending_issue()

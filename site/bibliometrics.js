@@ -12,12 +12,12 @@
     empty: $("#bibliometric-empty"), content: $("#bibliometric-content"), error: $("#bibliometric-error"),
   };
   if (!ui.toggle) return;
-  import('./geography-statistics.js').catch(() => {
+  import('./geography-statistics.js?v=status3').catch(() => {
     const note = document.createElement('p');
     note.textContent = 'Il grafico geografico non è disponibile in questo momento; nessun paese viene stimato.';
     ui.quality.after(note);
   });
-  import('./categorisation-statistics.js').then(() => {
+  import('./categorisation-statistics.js?v=status3').then(() => {
     const categorisation = document.querySelector('#categorisation-statistics');
     if (categorisation && ui.content?.parentNode) ui.content.after(categorisation);
   }).catch(() => {
@@ -197,8 +197,8 @@
     ui.venues.textContent = String(uniqueVenues.size);
     ui.years.textContent = years.length ? `${years[0]}–${years[years.length - 1]}` : "—";
     ui.scope.textContent = state.includePending
-      ? `Vista esplorativa: corpus valutato + ${pendingCount} record ancora da analizzare. I metadata dei pending sono provvisori e la loro presenza non equivale a inclusione scientifica.`
-      : `Vista predefinita: solo corpus valutato (${state.archive.length} record). Attiva il toggle per aggiungere i ${pendingCount} record ancora da analizzare.`;
+      ? `Vista esplorativa: corpus valutato + ${pendingCount} record in attesa di valutazione scientifica. I metadati del registro possono essere provvisori e la loro presenza non equivale a inclusione scientifica.`
+      : `Vista predefinita: solo corpus valutato (${state.archive.length} record). Attiva il toggle per aggiungere i ${pendingCount} record in attesa di valutazione scientifica.`;
 
     ui.empty.hidden = data.length !== 0;
     ui.content.hidden = data.length === 0;
@@ -214,6 +214,7 @@
     renderQuality(data);
   }
 
+  ui.toggle.disabled=true;
   ui.toggle.addEventListener("change", (event) => {
     state.includePending = event.target.checked;
     render();
@@ -223,10 +224,14 @@
     fetch("./data/archive.json", { cache: "no-store" }).then((response) => { if (!response.ok) throw new Error("archive unavailable"); return response.json(); }),
     fetch("./data/paper-register.json", { cache: "no-store" }).then((response) => { if (!response.ok) throw new Error("register unavailable"); return response.json(); }),
   ]).then(([archive, register]) => {
-    state.archive = Array.isArray(archive.records) ? archive.records : [];
-    state.register = Array.isArray(register.records) ? register.records : [];
+    if(!Array.isArray(archive.records)||!Array.isArray(register.records))throw Error('invalid_bibliometric_data');
+    state.archive = archive.records;
+    state.register = register.records;
+    ui.toggle.disabled=false;
     render();
   }).catch(() => {
+    ui.toggle.disabled=true;ui.scope.textContent='Dati bibliografici non disponibili. Ricarica la pagina per riprovare.';
+    for(const node of [ui.total,ui.authors,ui.venues,ui.years])node.textContent='—';
     ui.error.hidden = false;
     ui.content.hidden = true;
     ui.empty.hidden = true;

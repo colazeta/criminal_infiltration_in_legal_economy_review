@@ -31,7 +31,7 @@ class ReleaseRenderingTests(unittest.TestCase):
             render_page(page,payload)
             parser=Links(); parser.feed(page.read_text())
             self.assertFalse(any(url.startswith('http:') for url in parser.hrefs))
-            self.assertIn(str(len(payload['records']))+' record registrati',page.read_text())
+            self.assertIn(str(len(payload['records']))+' record nel registro',page.read_text())
             self.assertEqual(payload,original)
     def test_current_register_satisfies_private_enrichment_contract(self):
         payload=build_payload(ROOT)
