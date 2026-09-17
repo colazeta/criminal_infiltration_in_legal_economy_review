@@ -388,7 +388,12 @@ body.classic-site .paper-sheet-body .sheet-provenance { margin-top: 20px; }
 @media print {
   body.classic-home .register-pagination, body.classic-home #register-controls { display: none; }
   body.classic-site .paper-sheet-bar { position: static; }
-  body.classic-site dialog.paper-sheet[open] { position: absolute; inset: 0; width: 100%; height: auto; max-height: none; overflow: visible; }
+  body.paper-sheet-open > :not(dialog) { display: none !important; }
+  body.paper-sheet-open { background: #fff; }
+  body.paper-sheet-open .sheet-actions, body.paper-sheet-open .sheet-action-feedback, body.paper-sheet-open .paper-sheet-bar button { display: none !important; }
+  body.classic-site dialog.paper-sheet[open] { position: static; width: 100%; height: auto; max-height: none; overflow: visible; border: 0; }
+  body.classic-site .paper-sheet-body details { break-inside: auto; }
+  body.classic-site .paper-sheet-body summary { break-after: avoid; }
 }
 body.classic-home .archive-metrics article:first-child, body.classic-home .archive-metrics article:last-child { padding: 10px 12px; }
 body.classic-site .paper-sheet-body { background: #fff; }
@@ -399,3 +404,11 @@ body.classic-stats #enrichment-statistics { background: #fff; border: 1px solid 
 body.classic-stats #enrichment-statistics h2 { font-size: 14px; margin-bottom: 8px; }
 body.classic-home .register-table td p { margin: 4px 0; }
 body.classic-home .register-table td:first-child > p { color: var(--classic-muted); font-size: 12px; }
+
+/* Sharing controls reuse the existing paper window, without extra style layers. */
+body.classic-site .sheet-actions { align-items: center; }
+body.classic-site .sheet-actions > a { margin-right: auto; }
+body.classic-site .sheet-actions textarea { width: 100%; min-height: 80px; font: 13px/1.5 var(--ui-font); }
+body.classic-site .paper-sheet-body .sheet-action-note { font-size: 11px; color: var(--classic-muted); }
+body.classic-site .paper-sheet-body .sheet-action-feedback:empty { display: none; }
+body.classic-home #workspace-status { margin: 0; padding: 8px 12px; background: #fff4ce; border: 1px solid var(--classic-border); }
