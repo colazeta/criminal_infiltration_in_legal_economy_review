@@ -44,13 +44,16 @@ test('field diagnostics preserve unresolved facts and do not certify empty group
 });
 
 for(const availability of ['not_assessed','not_registered','stale','withheld']) {
-  test(`${availability}: every unavailable scientific section remains inspectable, not filled`,()=>{
+  test(`${availability}: empty scientific sections remain available to the fallback without repetitive visible placeholders`,()=>{
     const {sheet}=setup();const data={...fixture(),availability,research:null};
     const parent=new Element('section');sheet.render(parent,data);
     assert.equal(sheet.progress(data).completed,false);assert.equal(sheet.progress(data).references,null);
-    assert.match(parent.textContent,/non attestato come completato/);
-    assert.match(parent.textContent,/References e citazioni/);assert.match(parent.textContent,/QA/);
+    assert.match(parent.textContent,/Stato del completamento non disponibile/);
+    assert.match(parent.textContent,/References e citazioni/);
+    assert.match(parent.textContent,/Decisione scientifica separata/);
+    assert.doesNotMatch(parent.textContent,/QA e adjudication|end-to-end/);
     assert.ok(parent.querySelectorAll('details').length>=9);
+    assert.equal(parent.querySelectorAll('details').filter(d=>d.hidden).length,8);
     const buttons=parent.querySelectorAll('button');buttons.find(b=>b.textContent==='Mostra tutti i campi').fire('click');
     assert.ok(parent.querySelectorAll('details').every(d=>d.open===true));
     buttons.find(b=>b.textContent==='Richiudi le sezioni').fire('click');assert.ok(parent.querySelectorAll('details').every(d=>d.open===false));
@@ -68,7 +71,7 @@ test('all-field expansion reaches nested datasets, methods, variables, findings 
   parent.querySelectorAll('button').find(b=>b.textContent==='Mostra tutti i campi').fire('click');
   assert.ok(parent.querySelectorAll('details').every(d=>d.open));
   for(const text of ['Italy','50','Synthetic dataset','Panel analysis','Comparison design','Alternative model','Exposure','Recorded risk','Null finding','[-1,1]','References e citazioni','Fonti consultate e versioni'])assert.ok(parent.textContent.includes(text),text);
-  assert.match(parent.textContent,/non sono verificabili/);assert.match(parent.textContent,/non validata scientificamente/);
+  assert.match(parent.textContent,/Impossibile caricare bibliografia/);assert.match(parent.textContent,/non validata scientificamente/);
 });
 
 test('Completed control gives no false percentage or positive result and composes with reset',async()=>{
@@ -77,8 +80,10 @@ test('Completed control gives no false percentage or positive result and compose
   const filter=processing.mount({controls,records:[candidate],onChange:()=>{},selectSupport:()=>({readingAid:null}),selectResearch:sheet.selectRecord});
   const mode=controls.querySelector('#register-processing-filter');assert.ok(mode.children.some(o=>o.value==='completed'));
   mode.value='completed';mode.fire('change');await new Promise(resolve=>setImmediate(resolve));
-  assert.equal(filter.matches(candidate),false);assert.match(filter.emptyMessage(),/verifica del registro non è completa/);
-  assert.match(controls.following.textContent,/Percentuale finale non attestabile/);assert.doesNotMatch(controls.following.textContent,/100%/);
+  assert.equal(filter.matches(candidate),false);assert.match(filter.emptyMessage(),/dati delle analisi non sono stati caricati/);
+  const completion=controls.following.querySelector('#register-completion-status');
+  assert.equal(completion.hidden,true);assert.equal(completion.textContent,'');
+  assert.doesNotMatch(controls.following.textContent,/\d+%|Completamento registrato: 0/);
   controls.fire('reset');assert.equal(filter.matches(candidate),true);
 });
 
