@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
-const version = 'frontend-20260917';
+const version = 'frontend-20260917-status3';
 test('the entry documents invalidate earlier register bundle cache keys', () => {
   for (const page of ['index.html', 'stats.html']) {
     const html=fs.readFileSync(new URL('../../site/'+page,import.meta.url),'utf8');

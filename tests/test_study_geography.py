@@ -58,7 +58,7 @@ console.log('Geography scope, evidence, identity, missingness and counting check
         self.assertIn('signatures.get(record.id)===sig', stats)
         self.assertIn('failures<4', stats)
         self.assertIn('study-geography', stats)
-        self.assertIn("import('./geography-statistics.js')", (ROOT / 'site/bibliometrics.js').read_text())
+        self.assertIn("import('./geography-statistics.js?v=status3')", (ROOT / 'site/bibliometrics.js').read_text())
         self.assertIn("CILEBibliometricView = data", (ROOT / 'site/bibliometrics.js').read_text())
         self.assertIn("Ambito geografico dell’analisi", (ROOT / 'site/paper-sheet-research.js').read_text())
 
