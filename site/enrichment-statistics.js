@@ -1,15 +1,29 @@
-/* Same current-receipt predicate as archive filter and sheet; no private API. */
+/* Counts describe research records; loading describes only this page. */
 (() => {
+  'use strict';
   const status=document.getElementById('enrichment-statistics-status'),button=document.getElementById('enrichment-statistics-refresh');
   if(!status||!button||!globalThis.CILEPaperProcessing)return;
-  const P=globalThis.CILEPaperProcessing;let busy=false;
-  async function refresh(){if(busy)return;busy=true;button.disabled=true;status.textContent='Verifica dell’indice pubblico in corso.';
-    try{const register=await P.readJSON('./data/paper-register.json');if(register.schemaVersion!==1||!Array.isArray(register.records))throw Error('invalid_register');
-      const index=P.createIndex(register.records,{selectSupport:()=>({readingAid:null}),onUpdate:()=>{}});await index.scan();
-      const rows=[...index.rows.values()],p=index.progress,completed=rows.filter(P.isCompleted).length,proposed=rows.filter(r=>r.research==='available').length,full=rows.filter(r=>r.research==='available'&&r.coverage==='full_text').length;
-      const verified=p.checked===p.total&&!p.errors;
-      status.textContent=`${completed} arricchimenti validati / ${p.total} record registrati. ${verified?(p.total?('Percentuale: '+(100*completed/p.total).toFixed(1)+'%.'):'Percentuale non applicabile: registro vuoto.'):'Verifica incompleta: nessuna percentuale finale.'} Proposte disponibili: ${proposed}; proposte sul testo integrale: ${full}. Stati verificati: ${p.checked}/${p.total}. Osservazione: ${new Date().toISOString()}. I conteggi degli stadi sono indipendenti.`;
-    }catch{status.textContent='Avanzamento non verificabile in questo momento. Non equivale a zero analisi.'}finally{busy=false;button.disabled=false}
+  const P=globalThis.CILEPaperProcessing;
+  const counts=document.createElement('p');counts.id='enrichment-statistics-counts';counts.hidden=true;status.after(counts);
+  let busy=false;
+  function display(index){
+    const view=P.analysisSummary(index);status.textContent=view.text;
+    counts.hidden=!view.counts;counts.textContent='';
+    if(view.counts){const c=view.counts;
+      counts.textContent=`Analisi dettagliate: ${c.analyses}. Basate sul testo completo: ${c.fullText}. Completamento registrato: ${c.completed} su ${view.denominator} paper con dati caricati.`;
+      if(view.percentage!==null)counts.textContent+=` Quota con completamento registrato: ${new Intl.NumberFormat('it-IT',{maximumFractionDigits:1}).format(view.percentage)}%.`;
+    }
+  }
+  async function refresh(){
+    if(busy)return;busy=true;button.disabled=true;status.textContent='Caricamento dello stato delle analisi…';
+    counts.hidden=true;counts.textContent='';status.setAttribute('aria-busy','true');
+    try{
+      const register=await P.readJSON('./data/paper-register.json');
+      if(register.schemaVersion!==1||!Array.isArray(register.records))throw Error('invalid_register');
+      let index;index=P.createIndex(register.records,{selectSupport:()=>({readingAid:null}),onUpdate:()=>{if(index)display(index);}});
+      await index.scan();display(index);
+    }catch{status.textContent='Impossibile caricare lo stato delle analisi. Riprova.';counts.hidden=true;counts.textContent='';}
+    finally{busy=false;button.disabled=false;button.textContent='Aggiorna dati delle analisi';status.setAttribute('aria-busy','false');}
   }
   button.addEventListener('click',refresh);refresh();
 })();

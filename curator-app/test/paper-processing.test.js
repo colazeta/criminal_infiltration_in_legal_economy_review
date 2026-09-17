@@ -204,8 +204,10 @@ test('mount keeps unavailable responses distinct from unanalysed papers', async 
   await tick();
   const mode=controls.querySelector('#register-processing-filter');mode.value='ai';mode.fire('change');await tick();
   assert.equal(filter.matches(candidate),false);
-  assert.match(filter.emptyMessage(),/non è completa/);
-  assert.match(controls.following.querySelector('#register-processing-status').textContent,/Verifica incompleta/);
+  assert.match(filter.emptyMessage(),/dati delle analisi non sono stati caricati/);
+  assert.match(controls.following.querySelector('#register-processing-status').textContent,/Impossibile caricare/);
+  assert.equal(filter.filterStatus(),'error');
+  assert.equal(controls.following.querySelector('#register-completion-status').hidden,true);
 });
 
 test('all six current contribution classes are supported and no topic code substitutes for them', () => {

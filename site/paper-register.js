@@ -6,8 +6,8 @@
   const COVERAGE = {abstract_only:'solo abstract', partial_text:'testo parziale', full_text:'testo completo'};
   const SUMMARY_KINDS = new Set(['verified_abstract_source', 'publisher_summary', 'full_text_intro', 'review_synopsis']);
   const MODES = [
-    ['all', 'Tutti i paper'], ['completed', 'Completati e validati (end-to-end)'], ['content', 'Già elaborati: sintesi o analisi'],
-    ['summary', 'Con sintesi disponibile'], ['ai', 'Analizzati dall’AI: analisi strutturata'],
+    ['all', 'Tutti i paper'], ['completed', 'Con completamento registrato'], ['content', 'Con sintesi o analisi'],
+    ['summary', 'Con sintesi disponibile'], ['ai', 'Con analisi automatica'],
     ['ai_full_text', 'AI: testo completo'], ['ai_partial_text', 'AI: testo parziale'],
     ['ai_abstract_only', 'AI: solo abstract'], ['unavailable', 'Stato non verificabile / analisi non aggiornata'],
   ];
@@ -75,7 +75,7 @@
   function describe(entry) {
     if (!entry) return '';
     const parts = [];
-    if (isCompleted(entry)) parts.push('Arricchimento validato');
+    if (isCompleted(entry)) parts.push('Completamento registrato');
     if (entry.summary) parts.push('Sintesi disponibile');
     if (entry.research === 'available') {
       parts.push((entry.automated ? 'Analisi AI: ' : 'Analisi, origine non attestata: ') + COVERAGE[entry.coverage]);
@@ -170,6 +170,28 @@
     return {rows, progress, loadSupport, scan};
   }
 
+  // Presentation only: unloaded values are null, never scientific zeroes.
+  // All counts use identity-checked index rows and the existing receipt predicate.
+  function analysisSummary(index) {
+    const p=index.progress, rows=[...index.rows.values()];
+    const result={phase:'idle',text:'Lo stato delle analisi dettagliate non è ancora stato caricato.',counts:null,denominator:null,percentage:null};
+    if(!p.total)return {...result,phase:'empty',text:'Il registro non contiene paper.'};
+    if(p.running)return {...result,phase:'loading',text:'Caricamento dello stato delle analisi…'};
+    if(!p.scanned)return result;
+    if(!p.checked)return {...result,phase:'error',text:'Impossibile caricare lo stato delle analisi. Riprova.'};
+    const complete=p.checked===p.total&&!p.errors;
+    const known=rows.filter(row=>row.completionVerified && !['pending','error'].includes(row.research));
+    const analyses=known.filter(row=>row.research==='available');
+    const counts={completed:known.filter(isCompleted).length,analyses:analyses.length,
+      fullText:analyses.filter(row=>row.coverage==='full_text').length,
+      classified:analyses.filter(row=>row.classes.length).length,
+      references:known.filter(row=>Array.isArray(row.referenceCoverage)&&row.referenceCoverage.length).length};
+    return {...result,phase:complete?'ready':'partial',counts,denominator:p.checked,
+      percentage:complete?100*counts.completed/p.total:null,
+      text:complete?`Dati delle analisi caricati per tutti i ${p.total} paper.`:
+        `Caricamento incompleto: dati disponibili per ${p.checked} di ${p.total} paper. I conteggi riguardano soltanto questi ${p.checked} paper.`};
+  }
+
   function mount({controls, records, onChange, selectSupport, selectResearch}) {
     const el = (tag, text) => { const node = document.createElement(tag); if (text !== undefined) node.textContent = text; return node; };
     const mode = el('select'), category = el('select');
@@ -180,47 +202,38 @@
     Object.entries(CLASSES).forEach(([value, text]) => addOption(category, value, text));
     const first = el('label'); first.append(el('span', 'Contenuto disponibile'), mode);
     const second = el('label'); second.append(el('span', 'Classe proposta'), category);
-    const refresh = el('button', 'Aggiorna stato delle analisi'); refresh.type='button';
+    const refresh = el('button', 'Carica stato delle analisi'); refresh.type='button';
     const status = el('p'); status.id='register-processing-status'; status.setAttribute('role','status'); status.setAttribute('aria-live','polite');
     mode.setAttribute('aria-describedby', status.id); category.setAttribute('aria-describedby', status.id);
     const completion = el('h3'); completion.id='register-completion-status'; completion.setAttribute('role','status');
     const breakdown = el('p'); breakdown.id='register-enrichment-breakdown';
-    const finalNote = el('p', 'Completato significa attestazione backend valida per la stessa versione dell’analisi, con fonti, riferimenti, valutazione del framework e revisione finale. Una non applicabilità motivata del framework non forza una categoria. Gli stati sconosciuti non sono conteggiati come assenze.');
-    const note = el('p', 'Una sintesi non equivale a una lettura completa. “Analizzati dall’AI” richiede un’estrazione strutturata con origine automatica attestata. Le classi restano proposte non validate scientificamente; i soli DOI, link, metadati e abstract reperiti non bastano.');
+    const note=el('p','Caricare lo stato legge i dati già registrati: non avvia nuove analisi. ');
+    const help=el('a','Come leggere sintesi, analisi e completamento');help.href='./method.html#reading-status';note.append(help);
     const panel = el('details'); panel.className='processing-details'; panel.setAttribute('aria-label','Stato dell’elaborazione dei paper');
-    const summary=el('summary','Copertura delle analisi e stato della verifica');
-    panel.append(summary, refresh, status, completion, breakdown, finalNote, note);
+    const summary=el('summary','Analisi dettagliate · stato non caricato');
+    completion.hidden=breakdown.hidden=true;
+    panel.append(summary, refresh, status, completion, breakdown, note);
     (controls.querySelector('.register-filter-grid') || controls).append(first, second); controls.after(panel);
     let index;
     function update() {
       if (!index) return;
-      const p = index.progress;
-      const summaries = [...index.rows.values()].filter(s => s.summary).length;
-      const ai = [...index.rows.values()].filter(s => matches(s, 'ai')).length;
-      const rows=[...index.rows.values()],completed=rows.filter(isCompleted).length;
-      const proposals=rows.filter(s=>s.research==='available');
-      const fullText=proposals.filter(s=>s.coverage==='full_text').length;
-      const classified=proposals.filter(s=>s.classes.length).length;
-      const complete=p.checked===p.total&&!p.errors&&p.scanned;
-      completion.textContent=complete?`Analisi completate e validate: ${completed} / ${p.total} record registrati. Quota: ${p.total?(100*completed/p.total).toFixed(1)+'%':'n/a'}.`:`Completamenti verificati finora: ${completed}; ${p.checked}/${p.total} stati verificati. Percentuale finale non attestabile finché la verifica è incompleta.`;
-      const references=rows.filter(s=>Array.isArray(s.referenceCoverage)&&s.referenceCoverage.length).length;
-      breakdown.textContent=`Nei ${p.checked}/${p.total} stati verificati: proposte su testo completo ${fullText}; estrazioni proposte ${proposals.length}; categorie proposte ${classified}; copertura citazionale documentata ${references}. Conteggi indipendenti: proposta, fonti, riferimenti e validazione restano distinti.`;
-      const supportErrors = [...index.rows.values()].filter(s => s.support === 'error').length;
-      const supportChecked = [...index.rows.values()].filter(s => s.support === 'checked').length;
-      const supportPending = [...index.rows.values()].filter(s => s.support === 'pending').length;
+      const p=index.progress,rows=[...index.rows.values()],view=analysisSummary(index);
+      const summaries=rows.filter(row=>row.summary).length;
+      const supportChecked=rows.filter(row=>row.support==='checked').length;
       const summaryMetric=document.getElementById('register-summary-count');
-      if(summaryMetric){summaryMetric.textContent=supportChecked===p.total?String(summaries):'—';summaryMetric.title=`Sintesi verificate su ${supportChecked}/${p.total} record. Una sintesi non equivale ad una revisione scientifica.`;}
-      const summaryText = supportChecked === p.total ? `${summaries} sintesi disponibili` : supportChecked ? `${summaries} sintesi trovate nei record verificati` : 'Disponibilità delle sintesi da verificare';
-      const aiText = p.checked ? `${ai} analisi AI trovate nei record verificati` : 'Analisi AI da verificare';
-      const lead = p.running ? 'Verifica in corso: risultati parziali. ' : p.scanned && p.checked < p.total ? 'Verifica incompleta: non interpretare gli stati mancanti come assenza di analisi. ' : '';
-      status.textContent = lead + summaryText + ` · ${supportChecked}/${p.total} stati delle sintesi verificati · ` + aiText + ` · ${p.checked}/${p.total} stati analitici verificati.` +
-        (supportPending ? ' Verifica delle sintesi in corso.' : '') +
-        (supportErrors ? ` ${supportErrors} sintesi non verificabili.` : '') +
-        (p.errors ? ` ${p.errors} richieste analitiche non riuscite.` : '') +
-        (!p.scanned && !p.running ? ' Seleziona un filtro di analisi o premi Aggiorna per verificare l’intero registro.' : '');
-      summary.textContent=p.running?'Verifica delle analisi in corso…':p.errors?'Copertura delle analisi · verifica incompleta':'Copertura delle analisi e stato della verifica';
-      refresh.disabled = p.running;
-      panel.setAttribute('aria-busy', String(p.running));
+      if(summaryMetric){summaryMetric.textContent=supportChecked===p.total?String(summaries):'—';summaryMetric.title='Sintesi disponibili nei dati caricati; non è il totale delle analisi dettagliate.';}
+      const summaryText=supportChecked===p.total?`${summaries} sintesi disponibili.`:
+        supportChecked?`${summaries} sintesi nei ${supportChecked} paper con dati caricati.`:
+        rows.some(row=>row.support==='pending')?'Caricamento delle sintesi…':'Impossibile caricare le sintesi.';
+      status.textContent=summaryText+' '+view.text;
+      completion.hidden=breakdown.hidden=!view.counts;
+      completion.textContent=view.counts?`Completamento registrato: ${view.counts.completed} su ${view.denominator} paper con dati caricati.`:'';
+      breakdown.textContent=view.counts?`Analisi dettagliate: ${view.counts.analyses}; basate sul testo completo: ${view.counts.fullText}; con categorie proposte: ${view.counts.classified}; con copertura dei riferimenti documentata: ${view.counts.references}.`:'';
+      summary.textContent={idle:'Analisi dettagliate · stato non caricato',loading:'Analisi dettagliate · caricamento in corso',
+        error:'Analisi dettagliate · caricamento non riuscito',partial:'Analisi dettagliate · dati parziali',ready:'Analisi dettagliate · dati caricati',empty:'Analisi dettagliate · registro vuoto'}[view.phase];
+      refresh.textContent=view.phase==='idle'?'Carica stato delle analisi':view.phase==='error'||view.phase==='partial'?'Riprova caricamento':'Aggiorna dati delle analisi';
+      refresh.disabled=p.running||!p.total;
+      panel.setAttribute('aria-busy',String(p.running));
       onChange();
     }
     index = createIndex(records, {selectSupport, selectResearch, onUpdate:update});
@@ -233,15 +246,29 @@
     controls.addEventListener('reset', () => { mode.value='all'; category.value='all'; update(); });
     index.loadSupport(); update();
     return {
+      filterStatus:() => {
+        if(mode.value==='all'&&category.value==='all')return 'ready';
+        const rows=[...index.rows.values()];
+        if(mode.value==='summary'&&category.value==='all')return rows.every(row=>row.support==='checked')?'ready':rows.some(row=>row.support==='pending')?'loading':rows.some(row=>row.support==='checked')?'partial':'error';
+        const phase=analysisSummary(index).phase;
+        return phase==='ready'&&mode.value==='content'&&rows.some(row=>row.support!=='checked')?'partial':phase;
+      },
       matches:record => matches(index.rows.get(record.id), mode.value, category.value),
       describe:record => describe(index.rows.get(record.id)),
       emptyMessage:() => {
-        if(mode.value==='completed')return index.progress.checked===records.length&&!index.progress.errors?'Nessuna analisi completata e validata nelle versioni correnti. Le proposte restano consultabili con gli altri filtri.':'Nessun completamento verificato finora: la verifica del registro non è completa.';
-        if (mode.value === 'all' && category.value === 'all') return '';
-        const incomplete = mode.value === 'summary' && category.value === 'all'
-          ? [...index.rows.values()].some(row => row.support !== 'checked')
-          : index.progress.running || index.progress.checked < records.length || (mode.value === 'content' && [...index.rows.values()].some(row => row.support !== 'checked'));
-        return incomplete ? 'Nessuna corrispondenza verificata finora. La verifica dei contenuti non è completa: consulta lo stato sopra i risultati.' : '';
+        if (mode.value==='all' && category.value==='all')return '';
+        const p=index.progress,summaryOnly=mode.value==='summary' && category.value==='all';
+        if(summaryOnly){
+          if([...index.rows.values()].some(row=>row.support==='pending'))return 'Caricamento delle sintesi…';
+          if([...index.rows.values()].some(row=>row.support!=='checked'))return 'Nessuna corrispondenza nei dati disponibili. Il caricamento delle sintesi è incompleto.';
+          return '';
+        }
+        const view=analysisSummary(index);
+        if(view.phase==='loading')return 'Caricamento delle analisi…';
+        if(view.phase==='idle')return 'Carica lo stato delle analisi per usare questo filtro.';
+        if(view.phase==='error')return 'Il filtro non può essere valutato: i dati delle analisi non sono stati caricati. Riprova.';
+        if(view.phase==='partial'||mode.value==='content'&&[...index.rows.values()].some(row=>row.support!=='checked'))return 'Nessuna corrispondenza nei dati caricati. Il risultato è parziale: riprova il caricamento.';
+        return mode.value==='completed'?'Nessun paper con completamento registrato corrisponde ai filtri. Le analisi possono essere consultate con gli altri filtri.':'';
       },
     };
   }
@@ -253,7 +280,7 @@
     const start=(page-1)*size;
     return {page,pages,start,rows:records.slice(start,start+size),total:records.length};
   }
-  globalThis.CILEPaperProcessing = {researchState, matches, describe, readJSON, createIndex, mount, isCompleted, completionState, indexState, pageRecords};
+  globalThis.CILEPaperProcessing = {researchState, matches, describe, readJSON, createIndex, mount, isCompleted, completionState, indexState, pageRecords, analysisSummary};
 })();
 
 (() => {
@@ -439,7 +466,7 @@
     close.focus();
     workspace?.sheetOpened(record);
     const isCurrent = () => dialog.open && sequence === sheetSequence;
-    import("./paper-sheet-research.js?v=frontend-20260917")
+    import("./paper-sheet-research.js?v=status-20260917")
       .then(() => globalThis.CILEPaperResearch.load(research, record, isCurrent))
       .catch(() => { if (isCurrent()) research.textContent = "Il pannello di ricerca non è disponibile; non è una conferma dell’assenza di analisi."; });
     import("./paper-sheet-support.js?v=frontend-20260917")
@@ -464,7 +491,9 @@
     const found = filteredRecords();
     const page=globalThis.CILEPaperProcessing.pageRecords(found,currentPage,pageSize);
     const {pages,start,rows:visible}=page;
-    count.textContent = `${found.length} record corrispondenti · ${records.length} registrati`;
+    const filterStatus=processing?.filterStatus()||'ready';
+    count.textContent=['idle','loading','error'].includes(filterStatus)?(processing?.emptyMessage()||'Caricamento dei dati…'):
+      `${found.length} record corrispondenti${filterStatus==='partial'?' nei dati caricati':''} · ${records.length} registrati`;
     pageStatus.textContent=found.length?`${start+1}–${start+visible.length} di ${found.length} · Pagina ${page.page} di ${pages}`:'Nessun risultato';
     previous.disabled=page.page===1;next.disabled=page.page===pages;pager.hidden=found.length===0;
     const active=document.getElementById('register-active-filters');
@@ -564,7 +593,7 @@
       if(verified)verified.textContent=String(records.filter(record=>record.metadataStatus==='metadata_verified').length);
       populateFilters();
       render();
-      Promise.all([import("./paper-sheet-support.js?v=frontend-20260917"), import("./paper-sheet-research.js?v=frontend-20260917")])
+      Promise.all([import("./paper-sheet-support.js?v=frontend-20260917"), import("./paper-sheet-research.js?v=status-20260917")])
         .then(() => {
           processing = globalThis.CILEPaperProcessing.mount({
             controls, records, onChange: render,

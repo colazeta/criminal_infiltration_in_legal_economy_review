@@ -127,7 +127,7 @@
   combinationPanel.append(combinationHost);
 
   const statePanel = el('details');
-  const stateSummary = el('summary', 'Copertura e stati della categorizzazione');
+  const stateSummary = el('summary', 'Disponibilità delle classificazioni');
   const stateHost = el('div');
   statePanel.append(stateSummary, stateHost);
 
@@ -156,6 +156,7 @@
     }
     return {
       id,
+      candidate: row.candidate,
       availability: row.availability,
       frameworkStatus: row.framework_status,
       primary: row.classes[0] || null,
@@ -217,7 +218,9 @@
 
     for (const record of records) {
       const row = rows.get(record.id);
-      if (!row) {
+      const c=row?.candidate,normal=value=>String(value||'').trim().replace(/^https?:\/\/(?:dx\.)?doi\.org\//i,'').toLowerCase();
+      const mismatched=c&&(c.title!==record.title||normal(c.doi)!==normal(record.doi)||JSON.stringify([...(c.sourceLinks||[])].sort())!==JSON.stringify([...(record.sourceLinks||[])].sort()));
+      if (!row || mismatched) {
         states.set('not_in_index', states.get('not_in_index') + 1);
         continue;
       }
@@ -381,44 +384,38 @@
     scroll.className = 'table-scroll';
     scroll.append(table);
     stateHost.append(
-      el('p', '“Evidenza insufficiente” e “fuori framework” sono astensioni/valutazioni distinte e non vengono trattate come una settima o ottava categoria. Gli stati mancanti o non verificabili non valgono zero.'),
+      el('p', 'Le valutazioni “evidenza insufficiente” e “fuori dalle sei classi” restano separate dalle categorie. I dati non disponibili sono indicati a parte.'),
       scroll,
     );
   }
 
   function render() {
-    refresh.disabled = running;
-    errorBox.hidden = !loadError;
-    empty.hidden = selected.length !== 0 || loadError;
-    content.hidden = !loaded || loadError || selected.length === 0;
-
-    if (running) {
-      status.textContent = `Caricamento dell’indice delle categorizzazioni per ${selected.length} record nella vista…`;
-      return;
+    const population=globalThis.CILEBibliometricState||'loading';
+    refresh.disabled=running||population!=='ready'||!selected.length;
+    errorBox.hidden=!loadError;
+    empty.hidden=population!=='ready'||selected.length!==0||loadError;
+    content.hidden=true;
+    for(const node of Object.values(metricNodes))node.textContent='—';
+    host.setAttribute('aria-busy',String(running||population==='loading'));
+    if(population!=='ready'){
+      status.textContent=population==='error'?'Impossibile caricare la vista bibliografica. Ricarica la pagina.':'Caricamento dei paper della vista…';return;
     }
-    if (loadError) {
-      status.textContent = 'Indice delle categorizzazioni non disponibile. Nessun conteggio viene stimato.';
-      return;
-    }
-    if (!loaded) {
-      status.textContent = 'In attesa dell’indice delle categorizzazioni…';
-      return;
-    }
-    if (!selected.length) {
-      status.textContent = 'La vista bibliometrica corrente non contiene record.';
-      return;
-    }
-
-    const data = aggregate(selected, indexRows);
-    metricNodes.classified.textContent = String(data.classified);
-    metricNodes.coverage.textContent = pct(data.classified, data.total);
-    metricNodes.multi.textContent = String(data.multi);
-    metricNodes.represented.textContent = `${data.represented}/6`;
-    status.textContent = `${data.classified} / ${data.total} record nella vista hanno una classificazione proposta nelle sei classi. ${data.multi} paper classificati includono almeno una classe secondaria. Le classificazioni pubbliche correnti sono proposte analitiche, non validazioni scientifiche.`;
-    renderCategoryTable(data);
-    renderEvolution(data);
-    renderCombinations(data);
-    renderStates(data);
+    if(!selected.length){status.textContent='Nessun paper nella vista selezionata.';return;}
+    if(running){status.textContent='Caricamento delle classificazioni…';return;}
+    if(loadError){status.textContent='Impossibile caricare le classificazioni. Riprova.';return;}
+    if(!loaded){status.textContent='Le classificazioni non sono ancora state caricate.';return;}
+    const data=aggregate(selected,indexRows);
+    const unobserved=data.states.filter(row=>['not_in_index','stale','withheld'].includes(row.state)).reduce((n,row)=>n+row.count,0);
+    const checked=data.total-unobserved;
+    if(!checked){status.textContent='Classificazioni non disponibili per i paper di questa vista.';return;}
+    content.hidden=false;
+    metricNodes.classified.textContent=String(data.classified);
+    metricNodes.coverage.textContent=unobserved?'—':pct(data.classified,data.total);
+    metricNodes.multi.textContent=String(data.multi);
+    metricNodes.represented.textContent=`${data.represented}/6`;
+    status.textContent=(unobserved?`Dati parziali: classificazioni consultabili per ${checked} di ${data.total} paper. `:'')+
+      `${data.classified} paper con categorie proposte${unobserved?' nei dati disponibili':''}. Le categorie non indicano l’inclusione nel corpus.`;
+    renderCategoryTable(data);renderEvolution(data);renderCombinations(data);renderStates(data);
   }
 
   async function load() {
@@ -447,12 +444,12 @@
       selected.push(record);
     }
     render();
+    if(globalThis.CILEBibliometricState==='ready'&&selected.length&&!loaded&&!running&&!loadError)void load();
   }
 
   refresh.addEventListener('click', () => { void load(); });
   globalThis.addEventListener('cile:bibliometric-view', () => update(globalThis.CILEBibliometricView));
   update(globalThis.CILEBibliometricView || []);
-  void load();
 
   globalThis.CILECategorisationStatistics = { aggregate };
 })();
