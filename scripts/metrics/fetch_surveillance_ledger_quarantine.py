@@ -78,6 +78,10 @@ QUARANTINED_LEDGER_COMMENTS = {
     # replacement 5702314461 is the fully contract-conformant terminal.
     5686212375: "ACADEMIC-2026-09-15-EXTRA-29aa300f6e53",
     5702142537: "ACADEMIC-2026-09-15-EXTRA-29aa300f6e53",
+    # 2026-09-18 same-day audited recovery for missing fallback provenance.
+    # The original remains immutable; replacement 5726594101 preserves telemetry
+    # and records the observed Exa HTTP 402 provider-limit recovery probe.
+    5726128694: "ACADEMIC-2026-09-18",
 }
 
 # These batches are not merely superseded malformed terminals: the audited run
