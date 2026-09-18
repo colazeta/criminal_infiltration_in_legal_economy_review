@@ -4749,6 +4749,22 @@
       "accessStatus": "unknown",
       "registeredAt": "2026-09-18",
       "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-18-EXTRA-a969e7a931d6-001",
+      "title": "Mafia beyond the borders. Expansion of Italian mafias in Europe",
+      "authors": "Joselle Dagnes; Davide Donatiello; Rocco Sciarrone; Luca Storti",
+      "year": 2016,
+      "venue": "ECPR General Conference, Prague",
+      "doi": "",
+      "sourceLinks": [
+        "https://ecpr.eu/Events/Event/PaperDetails/31146"
+      ],
+      "metadataStatus": "metadata_verified",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-18",
+      "topicCode": ""
     }
   ]
 }

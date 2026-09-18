@@ -1,18 +1,18 @@
 {
   "schemaVersion": 2,
-  "totalMaterialised": 293,
-  "open": 293,
+  "totalMaterialised": 294,
+  "open": 294,
   "completed": 0,
   "actionCount": 0,
   "byStage": {
     "metadataFix": 159,
     "manualReview": 0,
-    "abstractReview": 134,
+    "abstractReview": 135,
     "legacyRejectionReview": 0
   },
   "openByOrigin": {
     "legacy": 0,
-    "daily": 293
+    "daily": 294
   },
   "bySecondaryCollection": {
     "broaderAml": 0
