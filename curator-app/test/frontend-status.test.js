@@ -89,5 +89,5 @@ test('category refresh clears stale metrics before showing loading or errors',()
 });
 test('shared definition explicitly separates loading, completion and inclusion',()=>{
   const method=fs.readFileSync(new URL('../../site/method.html',import.meta.url),'utf8');
-  assert.match(method,/id="reading-status"/);assert.match(method,/non avviano nuove analisi/i);assert.match(method,/Inclusione nel corpus/);
+  assert.match(method,/id="reading-status"/);assert.match(method,/Il caricamento non avvia nuove analisi/i);assert.match(method,/Inclusione nel corpus/);
 });
