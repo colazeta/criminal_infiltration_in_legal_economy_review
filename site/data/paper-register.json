@@ -4732,6 +4732,23 @@
       "accessStatus": "unknown",
       "registeredAt": "2026-09-14",
       "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-18-001",
+      "title": "The geographical embeddedness of organised crime in China: A rural–urban divide perspective",
+      "authors": "Shuai Wei; Fan Pan",
+      "year": 2025,
+      "venue": "Criminology & Criminal Justice",
+      "doi": "10.1177/17488958241268258",
+      "sourceLinks": [
+        "https://journals.sagepub.com/doi/10.1177/17488958241268258",
+        "https://www.southampton.ac.uk/people/66trlh/doctor-shuai-wei"
+      ],
+      "metadataStatus": "metadata_verified",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-18",
+      "topicCode": ""
     }
   ]
 }
