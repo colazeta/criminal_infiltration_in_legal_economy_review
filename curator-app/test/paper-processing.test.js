@@ -183,7 +183,7 @@ test('mounted controls filter real loaded projections, compose classes and reset
   await tick();
   const mode=controls.querySelector('#register-processing-filter'),category=controls.querySelector('#register-framework-filter'),button=controls.following.querySelector('button');
   assert.equal(mode.id,'register-processing-filter'); assert.equal(category.id,'register-framework-filter');
-  assert.equal(requestCount,0,'initial view does not issue one request per paper');
+  assert.equal(requestCount,1,'initial view loads one bounded index rather than one request per paper');
   mode.value='summary'; mode.fire('change');
   assert.equal(filter.matches(candidate),true); assert.equal(filter.matches(records[1]),false);
   assert.equal(filter.emptyMessage(),'','fully checked summary filter is not an incomplete research scan');
