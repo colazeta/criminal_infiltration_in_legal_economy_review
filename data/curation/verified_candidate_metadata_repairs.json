@@ -466,6 +466,179 @@
       ],
       "checked_at": "2026-09-19",
       "basis": "The University of Essex repository cites Alexandra Neag's work as a 2022 PhD thesis, while the thesis title page records submission in December 2021; the independent Anglia Ruskin University profile confirms that Neag completed this PhD at Essex before joining ARU in 2022. The queue year is set to the repository citation year 2022 and the source distinction is retained in provenance. This declaration changes bibliographic metadata only and makes no eligibility, canonical-identity, framework, completion, rights, validation or publication decision."
+    },
+    {
+      "candidate_id": "CAND-ACADEMIC-2026-09-13-EXTRA-7450b0e2f8a2-004",
+      "expected": {
+        "title": "Wirtschaftsmacht Organisierte Kriminalität",
+        "doi": "10.1007/978-3-662-55269-8",
+        "authors": "",
+        "year": "2018",
+        "venue": "Springer Nature",
+        "verification_status": "metadata_partial",
+        "metadata_confidence": "",
+        "review_stage": "metadata_fix",
+        "current_status": "pending",
+        "current_decision": "",
+        "possible_duplicate": "",
+        "metadata_conflict": ""
+      },
+      "replacement": {
+        "title": "Wirtschaftsmacht Organisierte Kriminalität: Illegale Märkte und illegaler Handel",
+        "authors": "Arndt Sinn",
+        "venue": "Springer Berlin, Heidelberg",
+        "source_links": "https://link.springer.com/book/10.1007/978-3-662-55269-8; https://www.springerprofessional.de/wirtschaftsmacht-organisierte-kriminalitaet/14213636"
+      },
+      "evidence": [
+        {
+          "role": "primary_metadata",
+          "url": "https://link.springer.com/book/10.1007/978-3-662-55269-8"
+        },
+        {
+          "role": "publisher_catalogue",
+          "url": "https://www.springerprofessional.de/wirtschaftsmacht-organisierte-kriminalitaet/14213636"
+        }
+      ],
+      "checked_at": "2026-09-19",
+      "basis": "The DOI-bound Springer book record and Springer Professional catalogue agree on Arndt Sinn, the full title and subtitle, the 2018 book manifestation and Springer Berlin Heidelberg publisher imprint. This declaration repairs bibliographic metadata only and makes no eligibility, canonical-identity, framework, completion, rights, validation or publication decision."
+    },
+    {
+      "candidate_id": "CAND-ACADEMIC-2026-09-10-EXTRA-dbc5cb0d9888-021",
+      "expected": {
+        "title": "The Mafia and Organized Crime in Germany",
+        "doi": "10.1515/transcript.9783839424957.285",
+        "authors": "Jürgen Roth",
+        "year": "",
+        "venue": "Transnational Organized Crime: Analyses of a Global Challenge to Democracy",
+        "verification_status": "metadata_partial",
+        "metadata_confidence": "",
+        "review_stage": "metadata_fix",
+        "current_status": "pending",
+        "current_decision": "",
+        "possible_duplicate": "",
+        "metadata_conflict": ""
+      },
+      "replacement": {
+        "year": "2014",
+        "source_links": "https://www.degruyterbrill.com/document/doi/10.1515/transcript.9783839424957.285/html; https://library.oapen.org/bitstream/handle/20.500.12657/30364/646500.pdf?isAllowed=y&sequence=1"
+      },
+      "evidence": [
+        {
+          "role": "primary_metadata",
+          "url": "https://www.degruyterbrill.com/document/doi/10.1515/transcript.9783839424957.285/html"
+        },
+        {
+          "role": "independent_repository",
+          "url": "https://library.oapen.org/bitstream/handle/20.500.12657/30364/646500.pdf?isAllowed=y&sequence=1"
+        }
+      ],
+      "checked_at": "2026-09-19",
+      "basis": "The De Gruyter/transcript chapter record identifies Jürgen Roth's chapter in Transnational Organized Crime: Analyses of a Global Challenge to Democracy as a 2014 publication on pages 285–294, and the OAPEN copy independently confirms the chapter title and authorship within the same host volume. This declaration repairs bibliographic metadata only and makes no eligibility, canonical-identity, framework, completion, rights, validation or publication decision."
+    },
+    {
+      "candidate_id": "CAND-ACADEMIC-2026-09-13-EXTRA-60872f2c2bf0-002",
+      "expected": {
+        "title": "Sénat Rapport Ces dizaines de milliards qui gangrènent la société",
+        "doi": "",
+        "authors": "",
+        "year": "2026",
+        "venue": "Sénat / Vie publique",
+        "verification_status": "metadata_partial",
+        "metadata_confidence": "",
+        "review_stage": "metadata_fix",
+        "current_status": "pending",
+        "current_decision": "",
+        "possible_duplicate": "",
+        "metadata_conflict": ""
+      },
+      "replacement": {
+        "title": "Ces dizaines de milliards qui gangrènent la société",
+        "authors": "Raphaël Daubet; Nathalie Goulet",
+        "year": "2025",
+        "venue": "Sénat",
+        "source_links": "https://www.senat.fr/rap/r24-757-1/r24-757-1_mono.html; https://www.vie-publique.fr/rapport/299237-senat-rapport-ces-dizaines-de-milliards-qui-gangrenent-la-societe"
+      },
+      "evidence": [
+        {
+          "role": "primary_metadata",
+          "url": "https://www.senat.fr/rap/r24-757-1/r24-757-1_mono.html"
+        },
+        {
+          "role": "independent_official_catalogue",
+          "url": "https://www.vie-publique.fr/rapport/299237-senat-rapport-ces-dizaines-de-milliards-qui-gangrenent-la-societe"
+        }
+      ],
+      "checked_at": "2026-09-19",
+      "basis": "The official Sénat record identifies report no. 757 (2024–2025), tome I, filed on 18 June 2025, with Raphaël Daubet as commission president and Nathalie Goulet as rapporteur; Vie-publique independently catalogues both as authors and the same report under the short title Ces dizaines de milliards qui gangrènent la société. This declaration corrects the bibliographic year and source metadata only and makes no eligibility, canonical-identity, framework, completion, rights, validation or publication decision."
+    },
+    {
+      "candidate_id": "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-006",
+      "expected": {
+        "title": "Anti‐Mafia Police Actions, Criminal Firms, and Peer Firm Tax Avoidance",
+        "doi": "10.1111/1475-679x.12455",
+        "authors": "Justin Chircop; Michele Fabrizi; Patrizia Malaspina; Antonio Parbonetti",
+        "year": "2022",
+        "venue": "",
+        "verification_status": "metadata_partial",
+        "metadata_confidence": "",
+        "review_stage": "metadata_fix",
+        "current_status": "pending",
+        "current_decision": "",
+        "possible_duplicate": "",
+        "metadata_conflict": ""
+      },
+      "replacement": {
+        "year": "2023",
+        "venue": "Journal of Accounting Research",
+        "work_type": "peer_reviewed",
+        "source_links": "https://onlinelibrary.wiley.com/doi/10.1111/1475-679X.12455; https://research.lancaster-university.uk/en/publications/antimafia-police-actions-criminal-firms-and-peer-firm-tax-avoidan"
+      },
+      "evidence": [
+        {
+          "role": "primary_metadata",
+          "url": "https://onlinelibrary.wiley.com/doi/10.1111/1475-679X.12455"
+        },
+        {
+          "role": "independent_institutional",
+          "url": "https://research.lancaster-university.uk/en/publications/antimafia-police-actions-criminal-firms-and-peer-firm-tax-avoidan"
+        }
+      ],
+      "checked_at": "2026-09-19",
+      "basis": "The Wiley version of record and Lancaster University research directory agree on the authors, Journal of Accounting Research, volume 61 issue 1 and pages 243–277. They distinguish early online publication on 4 August 2022 from the 2023 journal issue/publication; the queue year is therefore corrected to 2023 while that online-first distinction remains documented in provenance. This declaration repairs bibliographic metadata only and makes no eligibility, canonical-identity, framework, completion, rights, validation or publication decision."
+    },
+    {
+      "candidate_id": "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-007",
+      "expected": {
+        "title": "The mafia influence in the business context: Infiltration of criminal firms in the public procurement market",
+        "doi": "10.1007/s10997-026-09789-9",
+        "authors": "Andrea Bafundi; Camilla Ciappei; Michele Fabrizi; Antonio Parbonetti",
+        "year": "2026",
+        "venue": "",
+        "verification_status": "metadata_partial",
+        "metadata_confidence": "",
+        "review_stage": "metadata_fix",
+        "current_status": "pending",
+        "current_decision": "",
+        "possible_duplicate": "",
+        "metadata_conflict": ""
+      },
+      "replacement": {
+        "venue": "Journal of Management and Governance",
+        "work_type": "peer_reviewed",
+        "source_links": "https://link.springer.com/article/10.1007/s10997-026-09789-9; https://www.research.unipd.it/handle/11577/3567118"
+      },
+      "evidence": [
+        {
+          "role": "primary_metadata",
+          "url": "https://link.springer.com/article/10.1007/s10997-026-09789-9"
+        },
+        {
+          "role": "independent_institutional",
+          "url": "https://www.research.unipd.it/handle/11577/3567118"
+        }
+      ],
+      "checked_at": "2026-09-19",
+      "basis": "The DOI-bound Springer record and the independent University of Padua repository agree on Andrea Bafundi, Camilla Ciappei, Michele Fabrizi and Antonio Parbonetti, the exact title, 2026 publication, Journal of Management and Governance and DOI 10.1007/s10997-026-09789-9. This declaration fills the journal and manifestation type, adds independent provenance, and makes no eligibility, canonical-identity, framework, completion, rights, validation or publication decision."
     }
   ]
 }
