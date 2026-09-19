@@ -1290,6 +1290,147 @@
       ],
       "checked_at": "2026-09-19",
       "basis": "JSTOR and Crossref agree on the exact title, DOI, University of Pennsylvania Law Review volume 124 issue 1, November 1975 and pages 192-222. Neither record names an author, so the blank authorship is preserved rather than manufactured. The evidence supports a journal-article manifestation but does not explicitly attest peer review; this declaration therefore corrects work_type from peer_reviewed to journal_article and adds authoritative provenance only, without making an eligibility, canonical-identity, framework, completion, validation, rights or publication decision."
+    },
+    {
+      "candidate_id": "CAND-ACADEMIC-2026-09-09-EXTRA-24b7a783a9a3-004",
+      "expected": {
+        "title": "Understanding criminal mobility: The case of the Neapolitan Camorra",
+        "doi": "10.1080/1354571x.2014.962257",
+        "authors": "Felia Allum",
+        "year": "2014",
+        "venue": "Journal of Modern Italian Studies",
+        "verification_status": "metadata_partial",
+        "metadata_confidence": "",
+        "review_stage": "metadata_fix",
+        "current_status": "pending",
+        "current_decision": "",
+        "possible_duplicate": "",
+        "metadata_conflict": ""
+      },
+      "replacement": {
+        "source_links": "https://www.tandfonline.com/doi/full/10.1080/1354571X.2014.962257; https://researchportal.bath.ac.uk/en/publications/understanding-criminal-mobility-the-case-of-the-neapolitan-camorr"
+      },
+      "evidence": [
+        {
+          "role": "primary_metadata",
+          "url": "https://www.tandfonline.com/doi/full/10.1080/1354571X.2014.962257"
+        },
+        {
+          "role": "independent_institutional",
+          "url": "https://researchportal.bath.ac.uk/en/publications/understanding-criminal-mobility-the-case-of-the-neapolitan-camorr"
+        }
+      ],
+      "checked_at": "2026-09-19",
+      "basis": "The Taylor & Francis version of record and the University of Bath research portal agree on Felia Allum, the exact title, DOI, Journal of Modern Italian Studies volume 19 issue 5, 2014 and pages 583-602. Bath explicitly classifies the item as a peer-reviewed journal article and records 4 November 2014 as the online-publication date. The existing bibliography and type are therefore preserved while authoritative record-level provenance replaces a direct retained-file link. This declaration makes no eligibility, canonical-identity, framework, completion, validation, rights or publication decision."
+    },
+    {
+      "candidate_id": "CAND-ACADEMIC-2026-09-09-EXTRA-6b5b5e038ac4-005",
+      "expected": {
+        "title": "Racketeering in Legitimate Industries - Two Case Studies - Executive Summary",
+        "doi": "",
+        "authors": "",
+        "year": "1982",
+        "venue": "RAND / Office of Justice Programs",
+        "verification_status": "metadata_partial",
+        "metadata_confidence": "",
+        "review_stage": "metadata_fix",
+        "current_status": "pending",
+        "current_decision": "",
+        "possible_duplicate": "",
+        "metadata_conflict": ""
+      },
+      "replacement": {
+        "title": "Racketeering in Legitimate Industries: Two Case Studies — Executive Summary",
+        "authors": "Peter Reuter; Jonathan Rubinstein; Simon Wynn",
+        "venue": "National Institute of Justice",
+        "work_type": "report",
+        "source_links": "https://www.ojp.gov/ncjrs/virtual-library/abstracts/racketeering-legitimate-industries-two-case-studies-executive; https://www.ojp.gov/pdffiles1/Digitization/87678NCJRS.pdf"
+      },
+      "evidence": [
+        {
+          "role": "primary_metadata",
+          "url": "https://www.ojp.gov/pdffiles1/Digitization/87678NCJRS.pdf"
+        },
+        {
+          "role": "official_catalogue",
+          "url": "https://www.ojp.gov/ncjrs/virtual-library/abstracts/racketeering-legitimate-industries-two-case-studies-executive"
+        }
+      ],
+      "checked_at": "2026-09-19",
+      "basis": "The OJP/NCJRS catalogue identifies NCJ 87678, Peter Reuter, Jonathan Rubinstein and Simon Wynn, 44 pages and catalogue year 1982. The digitised National Institute of Justice executive-summary title page names the same authors and manifestation but is dated January 1983. The queue retains 1982 as the catalogue/citation year while this declared provenance preserves the competing title-page date rather than silently replacing it. This declaration repairs authorship, venue, document type, title punctuation and source provenance only; it makes no identity reconciliation, eligibility, framework, completion, validation, rights or publication decision."
+    },
+    {
+      "candidate_id": "CAND-ACADEMIC-2026-09-09-EXTRA-6b5b5e038ac4-007",
+      "expected": {
+        "title": "Corruption and Racketeering in the New York City Construction Industry",
+        "doi": "",
+        "authors": "",
+        "year": "",
+        "venue": "NYU Press / New York State Organized Crime Task Force",
+        "verification_status": "metadata_partial",
+        "metadata_confidence": "",
+        "review_stage": "metadata_fix",
+        "current_status": "pending",
+        "current_decision": "",
+        "possible_duplicate": "",
+        "metadata_conflict": ""
+      },
+      "replacement": {
+        "title": "Corruption and Racketeering in the New York City Construction Industry: The Final Report of the New York State Organized Crime Taskforce",
+        "authors": "Ronald Goldstock",
+        "year": "1991",
+        "venue": "NYU Press",
+        "work_type": "book",
+        "source_links": "https://nyupress.org/9780814730348/corruption-and-racketeering-in-the-new-york-city-construction-industry; https://digitalcommons.nyls.edu/cgi/viewcontent.cgi?article=2019&context=nyls_law_review"
+      },
+      "evidence": [
+        {
+          "role": "primary_metadata",
+          "url": "https://nyupress.org/9780814730348/corruption-and-racketeering-in-the-new-york-city-construction-industry"
+        },
+        {
+          "role": "independent_contemporary_source",
+          "url": "https://digitalcommons.nyls.edu/cgi/viewcontent.cgi?article=2019&context=nyls_law_review"
+        }
+      ],
+      "checked_at": "2026-09-19",
+      "basis": "NYU Press identifies Ronald Goldstock, the full title and subtitle, its January 1991 book manifestation, NYU Press, 316 pages and ISBN 9780814730348. The New York Law School Law Review independently documents the New York State Organized Crime Task Force report released in December 1989 and its relationship to the later published volume. The queue is bound to the NYU Press manifestation and therefore receives 1991, while the earlier government-report date is retained in provenance rather than treated as the same publication date. This declaration makes no canonical-identity, eligibility, framework, completion, validation, rights or publication decision."
+    },
+    {
+      "candidate_id": "CAND-ACADEMIC-2026-09-09-EXTRA-6b5b5e038ac4-009",
+      "expected": {
+        "title": "Study of Organized Crime Business-Type Activities and Their Implications For Law Enforcement",
+        "doi": "",
+        "authors": "",
+        "year": "1990",
+        "venue": "Office of Justice Programs",
+        "verification_status": "metadata_partial",
+        "metadata_confidence": "",
+        "review_stage": "metadata_fix",
+        "current_status": "pending",
+        "current_decision": "",
+        "possible_duplicate": "",
+        "metadata_conflict": ""
+      },
+      "replacement": {
+        "title": "A Study of Organized Crime Business-Type Activities and Their Implications for Law Enforcement",
+        "authors": "Herbert Edelhertz; Thomas D. Overcast",
+        "venue": "National Institute of Justice / Northwest Policy Studies Center",
+        "work_type": "report",
+        "source_links": "https://www.ojp.gov/ncjrs/virtual-library/abstracts/study-organized-crime-business-type-activities-and-their; https://www.ojp.gov/pdffiles1/Digitization/124019NCJRS.pdf"
+      },
+      "evidence": [
+        {
+          "role": "primary_metadata",
+          "url": "https://www.ojp.gov/pdffiles1/Digitization/124019NCJRS.pdf"
+        },
+        {
+          "role": "official_catalogue",
+          "url": "https://www.ojp.gov/ncjrs/virtual-library/abstracts/study-organized-crime-business-type-activities-and-their"
+        }
+      ],
+      "checked_at": "2026-09-19",
+      "basis": "The January 1990 digitised report title page identifies Herbert Edelhertz and Thomas D. Overcast, the National Institute of Justice as commissioning body and the Northwest Policy Studies Center as preparing institution. The OJP/NCJRS catalogue independently confirms NCJ 124019, both authors, 1990 and the 128-page report. This declaration repairs the title, authorship, institutional venue, report type and durable source provenance only; it makes no identity reconciliation, eligibility, framework, completion, validation, rights or publication decision."
     }
   ]
 }
