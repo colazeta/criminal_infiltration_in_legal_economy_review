@@ -513,10 +513,10 @@
       "venue": "Il diritto dell'economia",
       "doi": "",
       "sourceLinks": [
-        "https://igier.unibocconi.eu/sites/default/files/media/attach/Appalti-Corruzione.pdf",
+        "https://www.ildirittodelleconomia.it/2021/12/01/francesco-decarolis-paolo-pinotti-appalti-e-corruzione-alcune-evidenze-sulla-penetrazione-criminale-negli-appalti-di-lavori/",
         "https://iris.unibocconi.it/handle/11565/4042583"
       ],
-      "metadataStatus": "metadata_partial",
+      "metadataStatus": "metadata_verified",
       "reviewStatus": "pending",
       "accessStatus": "unknown",
       "registeredAt": "2026-09-09",
@@ -524,16 +524,16 @@
     },
     {
       "id": "CAND-ACADEMIC-2026-09-09-012",
-      "title": "APPALTI PUBBLICI E CRIMINALITÀ ORGANIZZATA",
-      "authors": "S. Spartà",
+      "title": "Appalti pubblici e criminalità organizzata",
+      "authors": "Sara Spartà",
       "year": 2016,
-      "venue": "Cross",
+      "venue": "Rivista di Studi e Ricerche sulla criminalità organizzata",
       "doi": "10.13130/cross-7791",
       "sourceLinks": [
-        "https://riviste.unimi.it/index.php/cross/article/download/7791/7463",
-        "https://doi.org/10.13130/cross-7791"
+        "https://riviste.unimi.it/index.php/cross/article/view/7791",
+        "https://api.datacite.org/dois/10.13130/cross-7791"
       ],
-      "metadataStatus": "metadata_partial",
+      "metadataStatus": "metadata_verified",
       "reviewStatus": "pending",
       "accessStatus": "unknown",
       "registeredAt": "2026-09-09",
@@ -542,14 +542,15 @@
     {
       "id": "CAND-ACADEMIC-2026-09-09-013",
       "title": "Exploring the Impact of Soft Preventive Judicial Measures on Business Resilience and Performance under Organised Crime Infiltration: Evidence from a Multi Case Analysis",
-      "authors": "Giovanni Scire'; E. Bivona",
+      "authors": "Giovanni Scire'; Enzo Bivona",
       "year": 2026,
-      "venue": "",
+      "venue": "Cultural, Social, and Political Participation in the Internet Era: Measuring and Fostering Engagement, Lawfulness and Inclusion in the Networked Society",
       "doi": "",
       "sourceLinks": [
-        "https://iris.unipa.it/handle/10447/710250"
+        "https://iris.unipa.it/handle/10447/710250",
+        "https://www.unipa.it/persone/docenti/s/giovanni.scire01/en?idPubblicazione=1063042&pagina=pubblicazione"
       ],
-      "metadataStatus": "metadata_partial",
+      "metadataStatus": "metadata_verified",
       "reviewStatus": "pending",
       "accessStatus": "unknown",
       "registeredAt": "2026-09-09",
@@ -590,15 +591,16 @@
     },
     {
       "id": "CAND-ACADEMIC-2026-09-09-EXTRA-24b7a783a9a3-002",
-      "title": "IDENTIFYING PATTERNS OF MAFIA MOBILITY: THE PRESENCE OF THE ITALIAN MAFIAS IN EUROPE",
+      "title": "Identifying Patterns of Mafia Mobility: The Presence of the Italian Mafias in Europe",
       "authors": "Federica Sarno",
       "year": 2015,
-      "venue": "",
+      "venue": "Università Cattolica del Sacro Cuore",
       "doi": "",
       "sourceLinks": [
-        "https://publicatt.unicatt.it/handle/10280/6118"
+        "https://publicatt.unicatt.it/handle/10280/6118",
+        "https://hdl.handle.net/10280/6118"
       ],
-      "metadataStatus": "metadata_partial",
+      "metadataStatus": "metadata_verified",
       "reviewStatus": "pending",
       "accessStatus": "unknown",
       "registeredAt": "2026-09-09",
@@ -661,9 +663,10 @@
       "venue": "University of Pennsylvania Law Review",
       "doi": "10.2307/3311463",
       "sourceLinks": [
-        "https://www.jstor.org/stable/3311463"
+        "https://www.jstor.org/stable/3311463",
+        "https://api.crossref.org/works/10.2307%2F3311463"
       ],
-      "metadataStatus": "metadata_partial",
+      "metadataStatus": "metadata_verified",
       "reviewStatus": "pending",
       "accessStatus": "unknown",
       "registeredAt": "2026-09-09",
