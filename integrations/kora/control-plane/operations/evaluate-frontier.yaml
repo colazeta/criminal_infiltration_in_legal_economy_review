@@ -1,0 +1,11 @@
+apiVersion: kora/v1
+kind: Operation
+metadata:
+  name: evaluate-frontier
+spec:
+  description: Derive the current F0-F7 assessment frontier from persisted-state predicates.
+  script:
+    command: node
+    args:
+      - scripts/evaluate-frontier.mjs
+    parseStdoutAsJson: true
