@@ -11,9 +11,11 @@ import cycle from '../../config/archive-cycle.json' with {type:'json'};
 import logical from '../../ontology/modules/review-v2.json' with {type:'json'};
 import relations from './extraction-relations-migration.json' with {type:'json'};
 import {readNormalizedExtraction} from './extraction-relations.js';
+import annotationMigration from './annotation-archive-migration.json' with {type:'json'};
+import {auditAnnotations,readPublicAnnotations} from './annotation-archive.js';
 
 const LIMIT=100000;
-export const ARCHIVE_TABLES=[base,schedule,adjudication,delivery,relations].flatMap(m=>[...m.sql.matchAll(/CREATE TABLE(?: IF NOT EXISTS)? (\w+)/g)].map(x=>x[1])).sort();
+export const ARCHIVE_TABLES=[base,schedule,adjudication,delivery,relations,annotationMigration].flatMap(m=>[...m.sql.matchAll(/CREATE TABLE(?: IF NOT EXISTS)? (\w+)/g)].map(x=>x[1])).sort();
 const EXPECTED=ARCHIVE_TABLES;
 const CHILDREN={studies:['study_id'],datasets:['dataset_id','study_id'],analyses:['analysis_id','study_id'],variable_uses:['variable_use_id','analysis_id'],findings:['finding_id','analysis_id']};
 const S=(db,sql,...values)=>db.prepare(sql).bind(...values);
@@ -138,11 +140,13 @@ export async function auditArchitecture(env){
     if(!source||source.target_id!==b.target_id||source.input_sha256!==b.input_sha256)flag('bibliography_source_scope_mismatch');
     try{if(await sha256(canonicalJson(JSON.parse(b.payload_json)))!==b.payload_sha256)flag('bibliography_hash_mismatch')}catch{flag('bibliography_record_invalid')}
   }
+  try{await auditAnnotations(env)}catch{flag('annotation_archive_integrity')}
   const publicStates={},completionStates={};let checked=0;
   for(const target of targets.values()){
     if(!target.active||target.cycle_id!==cycle.review_id)continue;
     try{
       const research=await readPublicResearch(env,target.record_id),completion=await readPublicCompletion(env,target.record_id,research);
+      await readPublicAnnotations(env,target.record_id);
       publicStates[research.availability]=(publicStates[research.availability]||0)+1;
       completionStates[completion.status]=(completionStates[completion.status]||0)+1;
       checked++;

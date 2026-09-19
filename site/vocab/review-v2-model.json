@@ -1,5 +1,5 @@
 {
-  "version": "0.4.2",
+  "version": "0.4.3",
   "entities": [
     {
       "table": "access_assessments_v2",
@@ -1213,6 +1213,323 @@
       ]
     },
     {
+      "table": "enrichment_annotation_classes",
+      "label": "enrichment_annotation_classes",
+      "class": "ClinicalContributionProposal",
+      "description": "Proposed role in the six-category medical framework, separate from review screening.",
+      "group": "review",
+      "fields": [
+        {
+          "name": "assertion_id",
+          "description": "Persistent internal identity of one proposal-scoped analytical assertion.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:annotationId"
+        },
+        {
+          "name": "annotation_id",
+          "description": "Persistent internal identity of one proposal-scoped analytical assertion.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:annotationId"
+        },
+        {
+          "name": "field_id",
+          "description": "Persistent internal identity of one proposal-scoped analytical assertion.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:annotationId"
+        },
+        {
+          "name": "category",
+          "description": "Private scientific extraction field category; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:extractionCategory"
+        },
+        {
+          "name": "role",
+          "description": "Autore, curatore editoriale, traduttore, collaboratore o finanziatore.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:proposedClassRole"
+        }
+      ],
+      "implementationStatus": "configured_enrichment_sqlite",
+      "appendOnly": true,
+      "constraints": [
+        "field_id → enrichment_annotation_fields.field_id",
+        "annotation_id → enrichment_manual_annotations.annotation_id"
+      ]
+    },
+    {
+      "table": "enrichment_annotation_events",
+      "label": "enrichment_annotation_events",
+      "class": "ReviewEvent",
+      "description": "ReviewEvent",
+      "group": "review",
+      "fields": [
+        {
+          "name": "event_id",
+          "description": "event_id",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:eventId"
+        },
+        {
+          "name": "external_id",
+          "description": "Source-system identifier retained separately from internal snapshot identity.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "dcterms:identifier"
+        },
+        {
+          "name": "annotation_id",
+          "description": "Persistent internal identity of one proposal-scoped analytical assertion.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:annotationId"
+        },
+        {
+          "name": "previous_annotation_id",
+          "description": "Immutable field assertion preserving conflicting source values. Field: supersedes id.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "prov:wasRevisionOf"
+        },
+        {
+          "name": "event_kind",
+          "description": "Immutable ingress revision, conflict or withdrawal event; source chronology is not fact precedence.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:annotationEventKind"
+        },
+        {
+          "name": "observed_at",
+          "description": "Momento in cui la fonte è stata osservata.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:observedAt"
+        }
+      ],
+      "implementationStatus": "configured_enrichment_sqlite",
+      "appendOnly": true,
+      "constraints": [
+        "previous_annotation_id → enrichment_manual_annotations.annotation_id",
+        "annotation_id → enrichment_manual_annotations.annotation_id"
+      ]
+    },
+    {
+      "table": "enrichment_annotation_fields",
+      "label": "enrichment_annotation_fields",
+      "class": "AnalyticalAnnotation",
+      "description": "A scoped analytical assertion within a validated extraction or an unreviewed source annotation. Its explicit owner/section, epistemic status and provenance do not establish a complete analysis or scientific acceptance.",
+      "group": "review",
+      "fields": [
+        {
+          "name": "field_id",
+          "description": "Persistent internal identity of one proposal-scoped analytical assertion.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:annotationId"
+        },
+        {
+          "name": "section_id",
+          "description": "Ordered, located parts of a scientific publication; no section is assumed to exist. Field: section id.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:sectionId"
+        },
+        {
+          "name": "field_name",
+          "description": "Named governed extraction-schema property asserted for its explicit owner.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:annotationField"
+        },
+        {
+          "name": "value",
+          "description": "Valore dell’identificatore; la sua uguaglianza non implica automaticamente identità fra opere.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:extractionValue"
+        },
+        {
+          "name": "position",
+          "description": "Ordine dichiarato nella pubblicazione; l’ordine degli autori viene conservato.",
+          "type": "INTEGER",
+          "nullable": false,
+          "semantic": "cile:position"
+        }
+      ],
+      "implementationStatus": "configured_enrichment_sqlite",
+      "appendOnly": true,
+      "constraints": [
+        "section_id → enrichment_annotation_sections.section_id"
+      ]
+    },
+    {
+      "table": "enrichment_annotation_heads",
+      "label": "enrichment_annotation_heads",
+      "class": "PublicationState",
+      "description": "PublicationState",
+      "group": "review",
+      "fields": [
+        {
+          "name": "external_id",
+          "description": "Source-system identifier retained separately from internal snapshot identity.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "dcterms:identifier"
+        },
+        {
+          "name": "annotation_id",
+          "description": "Persistent internal identity of one proposal-scoped analytical assertion.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:annotationId"
+        },
+        {
+          "name": "state",
+          "description": "Current, withdrawn or conflicting observed annotation revision; independent of scientific acceptance.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:annotationVisibilityState"
+        },
+        {
+          "name": "record_version",
+          "description": "Versione usata per rifiutare modifiche o approvazioni su dati superati.",
+          "type": "INTEGER",
+          "nullable": false,
+          "semantic": "cile:recordVersion"
+        },
+        {
+          "name": "updated_at",
+          "description": "Reported external revision time; never scientific approval time.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "dcterms:modified"
+        }
+      ],
+      "implementationStatus": "configured_enrichment_sqlite",
+      "appendOnly": false,
+      "constraints": [
+        "annotation_id → enrichment_manual_annotations.annotation_id"
+      ]
+    },
+    {
+      "table": "enrichment_annotation_receipts",
+      "label": "enrichment_annotation_receipts",
+      "class": "ReviewEvent",
+      "description": "ReviewEvent",
+      "group": "review",
+      "fields": [
+        {
+          "name": "receipt_id",
+          "description": "Verified human GitHub review of the exact proposal and head commit. Field: receipt id.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:receiptId"
+        },
+        {
+          "name": "annotation_id",
+          "description": "Persistent internal identity of one proposal-scoped analytical assertion.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:annotationId"
+        },
+        {
+          "name": "transformation_version",
+          "description": "Review identity, versioned protocol and explicit activation boundary. Field: protocol version.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:protocolVersion"
+        },
+        {
+          "name": "source_sha256",
+          "description": "Enrichment content sha256; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:contentSha256"
+        },
+        {
+          "name": "parsed_sha256",
+          "description": "Enrichment content sha256; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:contentSha256"
+        },
+        {
+          "name": "rebuilt_sha256",
+          "description": "Enrichment content sha256; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:contentSha256"
+        },
+        {
+          "name": "verified_at",
+          "description": "Enrichment observed at; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:observedAt"
+        }
+      ],
+      "implementationStatus": "configured_enrichment_sqlite",
+      "appendOnly": true,
+      "constraints": [
+        "annotation_id → enrichment_manual_annotations.annotation_id"
+      ]
+    },
+    {
+      "table": "enrichment_annotation_sections",
+      "label": "enrichment_annotation_sections",
+      "class": "AnalyticalAnnotation",
+      "description": "A scoped analytical assertion within a validated extraction or an unreviewed source annotation. Its explicit owner/section, epistemic status and provenance do not establish a complete analysis or scientific acceptance.",
+      "group": "review",
+      "fields": [
+        {
+          "name": "section_id",
+          "description": "Ordered, located parts of a scientific publication; no section is assumed to exist. Field: section id.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:sectionId"
+        },
+        {
+          "name": "annotation_id",
+          "description": "Persistent internal identity of one proposal-scoped analytical assertion.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:annotationId"
+        },
+        {
+          "name": "scope",
+          "description": "Closed extraction owner scope, independent of scientific approval.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:annotationScope"
+        },
+        {
+          "name": "group_label",
+          "description": "Ordered, located parts of a scientific publication; no section is assumed to exist. Field: heading.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:heading"
+        },
+        {
+          "name": "position",
+          "description": "Ordine dichiarato nella pubblicazione; l’ordine degli autori viene conservato.",
+          "type": "INTEGER",
+          "nullable": false,
+          "semantic": "cile:position"
+        }
+      ],
+      "implementationStatus": "configured_enrichment_sqlite",
+      "appendOnly": true,
+      "constraints": [
+        "annotation_id → enrichment_manual_annotations.annotation_id"
+      ]
+    },
+    {
       "table": "enrichment_attempts",
       "label": "enrichment_attempts",
       "class": "EnrichmentAttempt",
@@ -1914,7 +2231,7 @@
       "table": "enrichment_fact_evidence",
       "label": "enrichment_fact_evidence",
       "class": "AnalyticalAnnotation",
-      "description": "A proposal-scoped analytical assertion about an explicitly identified study, dataset, analysis, variable, finding or extraction field. Its epistemic status and source/analyst origin do not constitute scientific acceptance.",
+      "description": "A scoped analytical assertion within a validated extraction or an unreviewed source annotation. Its explicit owner/section, epistemic status and provenance do not establish a complete analysis or scientific acceptance.",
       "group": "review",
       "fields": [
         {
@@ -1959,7 +2276,7 @@
       "table": "enrichment_facts",
       "label": "enrichment_facts",
       "class": "AnalyticalAnnotation",
-      "description": "A proposal-scoped analytical assertion about an explicitly identified study, dataset, analysis, variable, finding or extraction field. Its epistemic status and source/analyst origin do not constitute scientific acceptance.",
+      "description": "A scoped analytical assertion within a validated extraction or an unreviewed source annotation. Its explicit owner/section, epistemic status and provenance do not establish a complete analysis or scientific acceptance.",
       "group": "review",
       "fields": [
         {
@@ -2264,6 +2581,83 @@
       "appendOnly": true,
       "constraints": [
         "proposal_id → enrichment_proposals.proposal_id"
+      ]
+    },
+    {
+      "table": "enrichment_ingress_snapshots",
+      "label": "enrichment_ingress_snapshots",
+      "class": "LegacySnapshot",
+      "description": "Byte-hashed preservation of an explicitly scoped observed input or archive manifest. Completeness and restore evidence are scope-specific; one comment capture is not a complete archive backup.",
+      "group": "review",
+      "fields": [
+        {
+          "name": "snapshot_id",
+          "description": "Historical cross-reference only, excluded from V2 deduplication and eligibility. Field: snapshot id.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:snapshotId"
+        },
+        {
+          "name": "source_kind",
+          "description": "Observed repository issue or comment snapshot; not scientific evidence.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:sourceKind"
+        },
+        {
+          "name": "external_id",
+          "description": "Source-system identifier retained separately from internal snapshot identity.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "dcterms:identifier"
+        },
+        {
+          "name": "source_url",
+          "description": "Indirizzo della fonte da cui deriva l’informazione; non prova da solo l’acquisizione del testo.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "dcterms:source"
+        },
+        {
+          "name": "source_created_at",
+          "description": "Review identity, versioned protocol and explicit activation boundary. Field: created at.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "prov:generatedAtTime"
+        },
+        {
+          "name": "source_updated_at",
+          "description": "Reported external revision time; never scientific approval time.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "dcterms:modified"
+        },
+        {
+          "name": "content_sha256",
+          "description": "Impronta dei byte conservati per riconoscere cambiamenti e verificare il ripristino.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:contentSha256"
+        },
+        {
+          "name": "storage_key",
+          "description": "Riferimento interno al documento privato; non è un URL pubblico.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:storageKey"
+        },
+        {
+          "name": "observed_at",
+          "description": "Momento in cui la fonte è stata osservata.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:observedAt"
+        }
+      ],
+      "implementationStatus": "configured_enrichment_sqlite",
+      "appendOnly": true,
+      "constraints": [
+        "Vincoli di dominio e integrità definiti dallo schema SQL versionato."
       ]
     },
     {
@@ -2601,6 +2995,92 @@
       "appendOnly": false,
       "constraints": [
         "target_id → enrichment_targets.target_id"
+      ]
+    },
+    {
+      "table": "enrichment_manual_annotations",
+      "label": "enrichment_manual_annotations",
+      "class": "AssistantRecommendation",
+      "description": "Model observation with input hash and prompt/model version; never a decision.",
+      "group": "review",
+      "fields": [
+        {
+          "name": "annotation_id",
+          "description": "Persistent internal identity of one proposal-scoped analytical assertion.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:annotationId"
+        },
+        {
+          "name": "snapshot_id",
+          "description": "Historical cross-reference only, excluded from V2 deduplication and eligibility. Field: snapshot id.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:snapshotId"
+        },
+        {
+          "name": "issue_snapshot_id",
+          "description": "Historical cross-reference only, excluded from V2 deduplication and eligibility. Field: snapshot id.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:snapshotId"
+        },
+        {
+          "name": "target_id",
+          "description": "Enrichment target id; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "cile:targetId"
+        },
+        {
+          "name": "candidate_marker",
+          "description": "candidate_marker",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "cile:candidateId"
+        },
+        {
+          "name": "binding_state",
+          "description": "Candidate marker association: candidate_bound, unresolved, conflict or unregistered; no work reconciliation.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:annotationBindingState"
+        },
+        {
+          "name": "review_state",
+          "description": "Actual review state; imported manual support is unreviewed_manual_support.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:annotationReviewState"
+        },
+        {
+          "name": "authorised_display",
+          "description": "The captured author is the configured curator under the owner-authorised unreviewed reading-support display boundary. This is not scientific approval.",
+          "type": "INTEGER",
+          "nullable": false,
+          "semantic": "cile:annotationDisplayAuthorised"
+        },
+        {
+          "name": "unparsed_lines",
+          "description": "Count of non-empty source lines not interpreted by the bounded allowlist parser; originals retained privately.",
+          "type": "INTEGER",
+          "nullable": false,
+          "semantic": "cile:unparsedLines"
+        },
+        {
+          "name": "imported_at",
+          "description": "Verified human GitHub review of the exact proposal and head commit. Field: imported at.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:importedAt"
+        }
+      ],
+      "implementationStatus": "configured_enrichment_sqlite",
+      "appendOnly": true,
+      "constraints": [
+        "target_id → enrichment_targets.target_id",
+        "issue_snapshot_id → enrichment_ingress_snapshots.snapshot_id",
+        "snapshot_id → enrichment_ingress_snapshots.snapshot_id"
       ]
     },
     {
@@ -3776,7 +4256,7 @@
       "table": "legacy_snapshots",
       "label": "Conservazione e ripristino",
       "class": "LegacySnapshot",
-      "description": "Byte-hashed preservation manifest, external-state completeness and restore receipt.",
+      "description": "Byte-hashed preservation of an explicitly scoped observed input or archive manifest. Completeness and restore evidence are scope-specific; one comment capture is not a complete archive backup.",
       "group": "review",
       "fields": [
         {

@@ -1,5 +1,5 @@
 {
-  "profile_version": "0.4.2",
+  "profile_version": "0.4.3",
   "schema": "schema/daily-calendar.schema.json",
   "class": "SearchDay",
   "fields": {

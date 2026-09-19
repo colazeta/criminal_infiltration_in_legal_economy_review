@@ -1,0 +1,151 @@
+{
+  "profile_version": "0.4.3",
+  "contract": "CILE-ANNOTATION-ARCHIVE-1",
+  "tables": {
+    "enrichment_ingress_snapshots": {
+      "class": "LegacySnapshot",
+      "fields": {
+        "snapshot_id": "v2_snapshot_id",
+        "source_kind": "ingress_source_kind",
+        "external_id": "ingress_external_id",
+        "source_url": "source_url",
+        "source_created_at": "v2_created_at",
+        "source_updated_at": "ingress_updated_at",
+        "content_sha256": "enrichment_content_sha256",
+        "storage_key": "enrichment_storage_key",
+        "observed_at": "enrichment_observed_at"
+      }
+    },
+    "enrichment_manual_annotations": {
+      "class": "AssistantRecommendation",
+      "fields": {
+        "annotation_id": "annotation_id",
+        "snapshot_id": "v2_snapshot_id",
+        "issue_snapshot_id": "v2_snapshot_id",
+        "target_id": "enrichment_target_id",
+        "candidate_marker": "candidate_id",
+        "binding_state": "annotation_binding_state",
+        "review_state": "annotation_review_state",
+        "authorised_display": "annotation_display_authorised",
+        "unparsed_lines": "annotation_unparsed_lines",
+        "imported_at": "v2_imported_at"
+      }
+    },
+    "enrichment_annotation_sections": {
+      "class": "AnalyticalAnnotation",
+      "fields": {
+        "section_id": "v2_section_id",
+        "annotation_id": "annotation_id",
+        "scope": "annotation_scope",
+        "group_label": "v2_heading",
+        "position": "v2_position"
+      }
+    },
+    "enrichment_annotation_fields": {
+      "class": "AnalyticalAnnotation",
+      "fields": {
+        "field_id": "annotation_id",
+        "section_id": "v2_section_id",
+        "field_name": "annotation_field",
+        "value": "extraction_value",
+        "position": "v2_position"
+      }
+    },
+    "enrichment_annotation_classes": {
+      "class": "ClinicalContributionProposal",
+      "fields": {
+        "assertion_id": "annotation_id",
+        "annotation_id": "annotation_id",
+        "field_id": "annotation_id",
+        "category": "extraction_category",
+        "role": "annotation_class_role"
+      }
+    },
+    "enrichment_annotation_heads": {
+      "class": "PublicationState",
+      "fields": {
+        "external_id": "ingress_external_id",
+        "annotation_id": "annotation_id",
+        "state": "annotation_visibility_state",
+        "record_version": "v2_record_version",
+        "updated_at": "ingress_updated_at"
+      }
+    },
+    "enrichment_annotation_events": {
+      "class": "ReviewEvent",
+      "fields": {
+        "event_id": "event_id",
+        "external_id": "ingress_external_id",
+        "annotation_id": "annotation_id",
+        "previous_annotation_id": "v2_supersedes_id",
+        "event_kind": "annotation_event_kind",
+        "observed_at": "enrichment_observed_at"
+      }
+    },
+    "enrichment_annotation_receipts": {
+      "class": "ReviewEvent",
+      "fields": {
+        "receipt_id": "v2_receipt_id",
+        "annotation_id": "annotation_id",
+        "transformation_version": "v2_protocol_version",
+        "source_sha256": "enrichment_content_sha256",
+        "parsed_sha256": "enrichment_content_sha256",
+        "rebuilt_sha256": "enrichment_content_sha256",
+        "verified_at": "enrichment_observed_at"
+      }
+    }
+  },
+  "field_names": {
+    "overview": [
+      "summary",
+      "contribution",
+      "research_question",
+      "infiltration_definition",
+      "infiltration_operationalisation",
+      "authors_limitations"
+    ],
+    "framework": [
+      "status",
+      "primary",
+      "secondary",
+      "alternative",
+      "rationale",
+      "secondary_rationale",
+      "alternative_rationale"
+    ],
+    "studies": [
+      "study_type",
+      "research_question",
+      "population",
+      "sampling",
+      "sample_size",
+      "observation_unit",
+      "analysis_unit",
+      "geography",
+      "period"
+    ],
+    "methods": [
+      "design",
+      "method",
+      "comparison",
+      "identification",
+      "validation",
+      "robustness",
+      "findings"
+    ],
+    "datasets": [
+      "annotation_text"
+    ],
+    "variables": [
+      "annotation_text"
+    ],
+    "findings": [
+      "annotation_text"
+    ],
+    "sources": [
+      "source_url"
+    ]
+  },
+  "privacy_boundary": "Private immutable GitHub snapshots; public projection includes only named reading fields and safe source URLs. No reviewer, analyst notes, original source text or complete-analysis attestation.",
+  "identity_boundary": "Exact consistent issue and annotation markers bind an existing candidate target; absent or conflicting markers are retained exceptions. No canonical work or source-content version is inferred."
+}

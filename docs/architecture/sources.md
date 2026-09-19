@@ -44,7 +44,7 @@ active families; the generated SQL dictionary lists every physical table/column.
   The later owner-authorised provisional register and public support projections
   supersede that statement for their closed allowlists. Notes/evidence stay private.
 - `review-v2-model.md` historically cites profile 0.2.0. The machine normative
-  current profile is 0.4.2; historical text does not select the active storage engine.
+  current profile is 0.4.3; historical text does not select the active storage engine.
 - Source documents have Exa-first historical clauses, while the later two-lane
   owner amendment selects Parallel Search. Preserve the clauses as history and
   apply the later explicit owner amendment; do not infer source rights from a name.

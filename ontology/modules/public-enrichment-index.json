@@ -1,5 +1,5 @@
 {
-  "profile_version": "0.4.2",
+  "profile_version": "0.4.3",
   "projection_version": "CILE-PUBLIC-INDEX-1",
   "schema": "schema/public-enrichment-index.schema.json",
   "schema_class": "PublicationState",

@@ -25,6 +25,7 @@ _SAFE_CODES = {'service_authentication_required', 'service_auth_state_unavailabl
                'architecture_schema_set_mismatch', 'architecture_population_limit',
                'architecture_state_changed', 'architecture_audit_failed',
                'architecture_normalization_failed',
+               'annotation_ingest_failed', 'annotation_audit_failed',
                'service_auth_nonce_transaction_unavailable', 'service_auth_nonce_get_unavailable',
                'service_auth_nonce_put_unavailable', 'service_auth_nonce_commit_unavailable',
                'service_auth_nonce_list_unavailable', 'service_auth_nonce_delete_unavailable',
@@ -72,7 +73,7 @@ def classify_private_error(value):
 
 
 def call(operation, *, expected_commit, target_id=None, proposal=None, run_key=None, source=None, document=None,
-         bibliography=None, document_id=None, checkpoint=None):
+         bibliography=None, document_id=None, checkpoint=None, ingress=None):
     secret = os.environ.get('CURATOR_SESSION_SECRET', '')
     if len(secret) < 32:
         raise RuntimeError('service_credential_unavailable')
@@ -80,7 +81,7 @@ def call(operation, *, expected_commit, target_id=None, proposal=None, run_key=N
     if target_id is not None: payload['target_id'] = target_id
     if proposal is not None: payload['proposal'] = proposal
     for name, value in [('source', source), ('document', document), ('bibliography', bibliography),
-                        ('document_id', document_id), ('checkpoint', checkpoint)]:
+                        ('document_id', document_id), ('checkpoint', checkpoint), ('ingress', ingress)]:
         if value is not None: payload[name] = value
     if operation == 'run': payload['run_key'] = run_key or 'manual:' + str(uuid.uuid4())
     body = json.dumps(payload, ensure_ascii=False, separators=(',', ':')).encode()

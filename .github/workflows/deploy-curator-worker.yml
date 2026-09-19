@@ -40,6 +40,8 @@ on:
 
 permissions:
   contents: read
+  issues: read
+  pull-requests: read
 
 concurrency:
   group: curator-worker-production
@@ -353,6 +355,13 @@ jobs:
         env:
           CURATOR_SESSION_SECRET: ${{ secrets.CURATOR_SESSION_SECRET }}
         run: python3 -m scripts.architecture.normalize_extractions
+
+      - name: Acquire every current repository annotation and verify durable replay
+        working-directory: .
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CURATOR_SESSION_SECRET: ${{ secrets.CURATOR_SESSION_SECRET }}
+        run: python3 -m scripts.architecture.ingest_annotations
 
       - name: Verify and activate independent private mechanical enrichment
         working-directory: .

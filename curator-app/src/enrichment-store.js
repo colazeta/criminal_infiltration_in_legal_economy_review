@@ -15,6 +15,8 @@ import {claimF1Retention,assertF1RetentionClaim,releaseF1RetentionClaim,abortF1R
 import {auditArchitecture,architectureSchema} from './architecture-audit.js';
 import {archiveBackupPage} from './archive-preservation.js';
 import relationsMigration from './extraction-relations-migration.json' with {type:'json'};
+import annotationMigration from './annotation-archive-migration.json' with {type:'json'};
+import {ingestAnnotation,auditAnnotations,readPublicAnnotations,reconcileAnnotationCensus} from './annotation-archive.js';
 
 const DOMAIN = 'CILE-ENRICH-SERVICE-v1';
 const encoder = new TextEncoder();
@@ -27,8 +29,9 @@ const SAFE_READINESS_ERRORS=new Set([
   'adjudication_migration_integrity','additive_adjudication_migration_required',
   'delivery_migration_integrity','additive_delivery_migration_required','storage_readback_failed',
   'relations_migration_integrity','additive_relations_migration_required',
+  'annotation_migration_integrity','additive_annotation_migration_required',
 ]);
-const READINESS_PHASES=new Set(['sqlite','base_migration','schedule_migration','adjudication_migration','delivery_migration','relations_migration','adapters','scheduler']);
+const READINESS_PHASES=new Set(['sqlite','base_migration','schedule_migration','adjudication_migration','delivery_migration','relations_migration','annotation_migration','adapters','scheduler']);
 export function readinessErrorCode(error,phase){
   const code=typeof error?.message==='string'?error.message:'';
   if(SAFE_READINESS_ERRORS.has(code))return code;
@@ -124,6 +127,12 @@ export class EnrichmentStoreCore {
         const relationsApplied=await ctx.storage.get('schema:extraction-relations');
         if(relationsApplied&&relationsApplied!==relationsHash)throw Error('additive_relations_migration_required');
         if(!relationsApplied)await ctx.storage.transaction(async tx=>{ctx.storage.sql.exec(relationsMigration.sql);await tx.put('schema:extraction-relations',relationsHash)});
+        phase='annotation_migration';
+        const annotationHash=await sha256(annotationMigration.sql);
+        if(annotationHash!==annotationMigration.sha256)throw Error('annotation_migration_integrity');
+        const annotationApplied=await ctx.storage.get('schema:annotation-archive');
+        if(annotationApplied&&annotationApplied!==annotationHash)throw Error('additive_annotation_migration_required');
+        if(!annotationApplied)await ctx.storage.transaction(async tx=>{ctx.storage.sql.exec(annotationMigration.sql);await tx.put('schema:annotation-archive',annotationHash)});
         phase='adapters';
         this.db=sqliteAdapter(ctx.storage); this.evidence=privateTextStore(ctx.storage);this.documents=privateBinaryStore(ctx.storage);
         phase='scheduler';
@@ -220,15 +229,35 @@ export class EnrichmentStoreCore {
     }
     try{
       const data=JSON.parse(body);
-      const allowedFields=['operation','expected_commit','target_id','proposal','run_key','calibration_id','pr_number','source','document','bibliography','document_id','checkpoint','backup'];
+      const allowedFields=['operation','expected_commit','target_id','proposal','run_key','calibration_id','pr_number','source','document','bibliography','document_id','checkpoint','backup','ingress'];
       if(!data||typeof data!=='object'||Array.isArray(data)||Object.keys(data).some(k=>!allowedFields.includes(k)))return json({error_code:'invalid_service_envelope'},422);
       const operations=['verify','activate','deactivate','status','run','packet','proposal','public-research-audit','architecture-audit','completion-packet','calibration-approval','completion-approval','source','document','documents','document-check','bibliography','provider-bibliography','development-checkpoint-get','development-checkpoint-put','document-retention-claim','source-claimed','document-claimed','document-retention-release','document-retention-abort'];
-      if(!operations.includes(data.operation)&&!['architecture-schema','architecture-backup','architecture-normalize'].includes(data.operation))return json({error_code:'unknown_service_operation'},422);
+      if(!operations.includes(data.operation)&&!['architecture-schema','architecture-backup','architecture-normalize','archive-annotation','archive-annotation-batch','annotation-audit','annotation-census'].includes(data.operation))return json({error_code:'unknown_service_operation'},422);
       if(data.expected_commit!==this.env.DEPLOY_COMMIT)return json({error_code:'stale_deployment'},409);
       if(data.operation==='verify')return json(await this.verify());
       if(data.operation==='activate'){await this.verify();await this.ctx.storage.put('activation:enrichment',{commit:this.env.DEPLOY_COMMIT,at:new Date(now).toISOString()});await this.schedule.start();return json(await this.aggregate())}
       if(data.operation==='deactivate'){await this.ctx.storage.delete('activation:enrichment');return json(await this.aggregate())}
       if(data.operation==='status')return json(await this.aggregate());
+      if(data.operation==='archive-annotation'){
+        if(Object.keys(data).sort().join(',')!=='expected_commit,ingress,operation')return json({error_code:'invalid_service_envelope'},422);
+        try{return json(await ingestAnnotation(await this.environment(),data.ingress))}
+        catch{return json({error_code:'annotation_ingest_failed'},503)}
+      }
+      if(data.operation==='annotation-audit'){
+        if(Object.keys(data).sort().join(',')!=='expected_commit,operation')return json({error_code:'invalid_service_envelope'},422);
+        try{return json(await auditAnnotations(await this.environment()))}
+        catch{return json({error_code:'annotation_audit_failed'},503)}
+      }
+      if(data.operation==='archive-annotation-batch'){
+        if(Object.keys(data).sort().join(',')!=='expected_commit,ingress,operation'||!Array.isArray(data.ingress)||data.ingress.length<1||data.ingress.length>25)return json({error_code:'invalid_service_envelope'},422);
+        try{const env=await this.environment(),receipts=[];for(const item of data.ingress)receipts.push(await ingestAnnotation(env,item));return json({contract:'CILE-ANNOTATION-ARCHIVE-1',receipts})}
+        catch{return json({error_code:'annotation_ingest_failed'},503)}
+      }
+      if(data.operation==='annotation-census'){
+        if(Object.keys(data).sort().join(',')!=='expected_commit,ingress,operation')return json({error_code:'invalid_service_envelope'},422);
+        try{return json(await reconcileAnnotationCensus(await this.environment(),data.ingress))}
+        catch{return json({error_code:'annotation_census_failed'},503)}
+      }
       if(data.operation==='architecture-normalize'){
         if(Object.keys(data).sort().join(',')!=='expected_commit,operation')return json({error_code:'invalid_service_envelope'},422);
         try{return json(await normalizeExistingExtractions(await this.environment()))}
@@ -302,6 +331,7 @@ export class EnrichmentStoreCore {
     if(url.pathname==='/api/paper-enrichment/documents'&&request.method==='GET'){try{return json({documents:await listDocuments(env,url.searchParams.get('id'))})}catch(e){return json({error:e.code||'documents_unavailable'},e.status||503)}}
     if(url.pathname==='/api/paper-enrichment/document'&&['GET','HEAD'].includes(request.method)){try{return await documentResponse(env,url.searchParams.get('id'),url.searchParams.get('document'),request)}catch(e){return json({error:e.code||'document_unavailable'},e.status||503)}}
     if(url.pathname==='/public-research'&&request.method==='GET')return json(await readPublicResearch(env,url.searchParams.get('id')));
+    if(url.pathname==='/public-annotations'&&request.method==='GET')return json(await readPublicAnnotations(env,url.searchParams.get('id')));
     if(url.pathname==='/public-completion'&&request.method==='GET')return json(await readPublicCompletion(env,url.searchParams.get('id')));
     if(url.pathname==='/tick')return json(await this.schedule.tick());
     if(url.pathname==='/api/paper-enrichment/status'&&request.method==='GET')return json(await this.aggregate());

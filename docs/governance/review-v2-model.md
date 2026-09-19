@@ -6,7 +6,7 @@ any scientific outcome. The existing corpus remains in its legacy namespace
 until the operational readiness conditions are satisfied.
 
 The original V2 specification used profile **0.2.0**. The current normative profile
-is `ontology/cile-review-profile.yaml` **0.4.1**. Its private
+is `ontology/cile-review-profile.yaml` **0.4.3**. Its private
 storage mapping is `ontology/modules/review-v2.json`; every SQL table and column
 must map to a declared class and slot. `scripts/ontology/validate_ontology.py`
 creates an isolated database, checks the mapping, append-only guards and empty
