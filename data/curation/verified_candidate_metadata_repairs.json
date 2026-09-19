@@ -808,6 +808,76 @@
       ],
       "checked_at": "2026-09-19",
       "basis": "The digitised December 1981 report names the Pennsylvania Crime Commission on its title material, while the OJP/NCJRS catalogue independently confirms the exact title, 1981 date, 52-page manifestation and NCJ 82661. This declaration records institutional authorship and authoritative source provenance only; it makes no eligibility, canonical-identity, framework, completion, rights, validation or publication decision."
+    },
+    {
+      "candidate_id": "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-010",
+      "expected": {
+        "title": "Threshold of shadows: Unveiling organised crime in Italian municipal public procurement",
+        "doi": "10.1016/j.ejpoleco.2025.102752",
+        "authors": "Stefania Fontana; Giorgio d’Agostino",
+        "year": "2025",
+        "venue": "",
+        "verification_status": "metadata_partial",
+        "metadata_confidence": "",
+        "review_stage": "metadata_fix",
+        "current_status": "pending",
+        "current_decision": "",
+        "possible_duplicate": "",
+        "metadata_conflict": ""
+      },
+      "replacement": {
+        "venue": "European Journal of Political Economy",
+        "work_type": "peer_reviewed",
+        "source_links": "https://www.sciencedirect.com/science/article/pii/S0176268025001120; https://ideas.repec.org/a/eee/poleco/v90y2025ipbs0176268025001120.html"
+      },
+      "evidence": [
+        {
+          "role": "primary_metadata",
+          "url": "https://www.sciencedirect.com/science/article/pii/S0176268025001120"
+        },
+        {
+          "role": "independent_catalogue",
+          "url": "https://ideas.repec.org/a/eee/poleco/v90y2025ipbs0176268025001120.html"
+        }
+      ],
+      "checked_at": "2026-09-19",
+      "basis": "The ScienceDirect version of record identifies Stefania Fontana and Giorgio d’Agostino, European Journal of Political Economy volume 90 part B, December 2025, article 102752 and DOI 10.1016/j.ejpoleco.2025.102752; the independent RePEc record corroborates the same journal manifestation. This declaration fills the venue and peer-reviewed manifestation type and adds authoritative provenance only; it makes no eligibility, canonical-identity, framework, completion, rights, validation or publication decision."
+    },
+    {
+      "candidate_id": "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-011",
+      "expected": {
+        "title": "Mafia and bricks: unfair competition in local markets and policy interventions",
+        "doi": "10.1007/s11187-019-00250-w",
+        "authors": "",
+        "year": "2019",
+        "venue": "",
+        "verification_status": "metadata_partial",
+        "metadata_confidence": "",
+        "review_stage": "metadata_fix",
+        "current_status": "pending",
+        "current_decision": "",
+        "possible_duplicate": "",
+        "metadata_conflict": ""
+      },
+      "replacement": {
+        "authors": "Livio Ferrante; Stefania Fontana; Francesco Reito",
+        "year": "2021",
+        "venue": "Small Business Economics",
+        "work_type": "peer_reviewed",
+        "source_links": "https://link.springer.com/article/10.1007/s11187-019-00250-w; https://ideas.repec.org/a/kap/sbusec/v56y2021i4d10.1007_s11187-019-00250-w.html"
+      },
+      "evidence": [
+        {
+          "role": "primary_metadata",
+          "url": "https://link.springer.com/article/10.1007/s11187-019-00250-w"
+        },
+        {
+          "role": "independent_catalogue",
+          "url": "https://ideas.repec.org/a/kap/sbusec/v56y2021i4d10.1007_s11187-019-00250-w.html"
+        }
+      ],
+      "checked_at": "2026-09-19",
+      "basis": "The Springer version of record identifies Livio Ferrante, Stefania Fontana and Francesco Reito in Small Business Economics volume 56, pages 1461–1484, with online publication on 27 November 2019; the independent RePEc record confirms volume 56 issue 4, pages 1461–1484 and the 2021 bibliographic issue year. The queue year is therefore corrected to 2021 while the online-first 2019 date remains documented in provenance. This declaration repairs bibliographic metadata only and makes no eligibility, canonical-identity, framework, completion, rights, validation or publication decision."
     }
   ]
 }
