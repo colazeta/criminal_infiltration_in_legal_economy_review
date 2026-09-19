@@ -187,3 +187,22 @@ successful source/audit receipts and subsequent failures are preserved in
 until preservation, complete reconciliation, activation and public verification
 succeed. This release does not claim that candidate bibliography/coverage/support
 have already moved from their remaining independent CSV/JSON authorities.
+
+## Complete captured-population rehearsal, 19 September 2026, 14:03 UTC
+
+A second preserved capture includes all 797 repository issues/PRs and all 1,304
+issue-comments, with every comment parent present. The reproducible command
+`node scripts/architecture/preflight_annotations.mjs <private-github-capture.json> <new-private-ledger.json>`
+imports and replays every input in isolated SQLite, validates every original and
+relation, projects all 294 current candidates, and compares the actual browser
+filter and statistics consumers against those same API rows. It makes no remote
+write and stores any requested per-input ledger with mode 0600.
+
+The report `annotation-preflight-2026-09-19.json` records the input digest, 2,012
+source snapshots and 317 annotations (291 candidate-bound, 8 unresolved, 18
+unregistered). All 294 candidate sheets and index rows agree; 291 have published
+unreviewed annotations in the isolated projection and 275 have explicit primary
+or secondary proposals. Zero completion decisions are created. Category totals
+are candidate/category/role occurrences, not distinct scientific works. The
+rehearsal covers current captured GitHub inputs; it is not a restored production
+archive and does not include the two separate private extraction proposals.
