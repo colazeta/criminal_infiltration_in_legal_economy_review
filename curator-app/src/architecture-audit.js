@@ -17,7 +17,10 @@ const rows=async(db,sql,...values)=>(await S(db,sql,...values).all()).results;
 const stableRows=values=>[...values].sort((a,b)=>canonicalJson(a).localeCompare(canonicalJson(b),'en'));
 
 async function databaseSnapshot(db){
-  const schema=await rows(db,"SELECT type,name,tbl_name,sql FROM sqlite_master WHERE name NOT GLOB 'sqlite_*' AND name <> '__cf_kv' ORDER BY type,name");
+  // Cloudflare's documented __cf_kv and workerd's _cf_KV/_cf_EXTERNALS are
+  // platform tables. Their bodies must be read through the KV API, never SQL.
+  // No wildcard excludes application tables from the completeness check.
+  const schema=await rows(db,"SELECT type,name,tbl_name,sql FROM sqlite_master WHERE name NOT GLOB 'sqlite_*' AND name NOT IN ('__cf_kv','_cf_KV','_cf_EXTERNALS') ORDER BY type,name");
   const tables=schema.filter(r=>r.type==='table').map(r=>r.name).sort();
   if(canonicalJson(tables)!==canonicalJson(EXPECTED))throw Error('architecture_schema_set_mismatch');
   const data={},counts={},digests={};let bytes=0;

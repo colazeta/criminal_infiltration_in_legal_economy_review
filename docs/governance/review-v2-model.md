@@ -5,12 +5,21 @@ is a versioned technical/semantic contract, not approval of any proposed seed or
 any scientific outcome. The existing corpus remains in its legacy namespace
 until the operational readiness conditions are satisfied.
 
-The normative profile is `ontology/cile-review-profile.yaml` **0.2.0**. Its private
+The original V2 specification used profile **0.2.0**. The current normative profile
+is `ontology/cile-review-profile.yaml` **0.4.1**. Its private
 storage mapping is `ontology/modules/review-v2.json`; every SQL table and column
 must map to a declared class and slot. `scripts/ontology/validate_ontology.py`
 creates an isolated database, checks the mapping, append-only guards and empty
 start state. `scripts/ontology/build_model_browser.py` generates the public
 [model browser](../../site/model.html) from the contract; no corpus data enter it.
+
+Storage clarification, 19 September 2026: this document's D1/R2 activation route
+is a prepared implementation, not proof that those resources are active. Existing
+enrichment uses the isolated SQLite/KV Durable Object specified in
+`docs/operations/enrichment-storage-decision.md`. The generated
+[architecture dictionary](../architecture/README.md) distinguishes the 33 prepared
+V2 tables from the 22 configured enrichment tables and records the unresolved
+candidate/work cardinality mismatch. No scientific cutover is implied.
 
 ## Bibliographic model
 

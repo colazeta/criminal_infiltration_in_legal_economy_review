@@ -22,6 +22,8 @@ class NoRedirect(HTTPRedirectHandler):
 _PRIVATE_HTTP = build_opener(NoRedirect())
 
 _SAFE_CODES = {'service_authentication_required', 'service_auth_state_unavailable',
+               'architecture_schema_set_mismatch', 'architecture_population_limit',
+               'architecture_state_changed', 'architecture_audit_failed',
                'service_auth_nonce_transaction_unavailable', 'service_auth_nonce_get_unavailable',
                'service_auth_nonce_put_unavailable', 'service_auth_nonce_commit_unavailable',
                'service_auth_nonce_list_unavailable', 'service_auth_nonce_delete_unavailable',

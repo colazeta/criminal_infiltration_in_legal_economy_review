@@ -1,11 +1,19 @@
 # Archive data model and publication contract
 
+Current architecture clarification, 19 September 2026: the closed provisional
+register/support authorisations below supersede the original blanket prohibition
+on candidate publication. The configured enrichment store is SQLite in the existing
+Durable Object, not evidence that the optional D1 V2 model has been activated.
+See [the authority map](../architecture/sources.md) and the
+[physical dictionary and transition gates](../architecture/README.md). The current
+sources remain authoritative until a verified cutover; no migration is declared here.
+
 ## Layers
 
 | Layer | Purpose | Read by public builder |
 |---|---|---|
 | `data/registry/` | Governed source of truth | Yes, fixed allowlist only |
-| `data/curation/` | Materialised candidate queue and append-only curator actions | Never |
+| `data/curation/` | Materialised candidate queue and append-only curator actions | Closed provisional bibliography/support only; no private action/evidence fields |
 | `data/legacy/` | Retired pilot evidence | Never |
 | GitHub intake issues | Candidate staging and search logs | Never |
 | GitHub metrics ledger | Aggregate daily surveillance telemetry | Safe aggregates only, after validation |
@@ -60,9 +68,12 @@ locator, date and transition in queue status.
 An action may supersede the queue's current projection, but earlier action rows
 are never rewritten.
 
-The curation layer is never read by `scripts/build_archive.py` or copied to
-`site/data/`. Its candidate metadata and review evidence therefore cannot enter
-the public archive export. GitHub candidate issues remain the authenticated
+The assessed-corpus builder `scripts/build_archive.py` does not read the curation
+layer. The later owner-authorised provisional-register builder publishes its
+closed bibliographic allowlist to `site/data/paper-register.json`, separately
+from the assessed corpus. Private review evidence remains excluded. The historical
+pre-registration prohibition on all candidate publication is superseded only for
+the specified allowlists. GitHub candidate issues remain the authenticated
 source for the working surface. After GitHub App authentication, the isolated
 Worker copy of `curate.html` loads their bounded fields at runtime; it does not
 write them into the static artifact or persistent browser storage. The

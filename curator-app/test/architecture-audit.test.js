@@ -33,6 +33,12 @@ test('schema drift blocks certification instead of ignoring an unexpected table'
  await assert.rejects(auditArchitecture(x.runtime),/architecture_schema_set_mismatch/);
  const r=await x.core.machine(await request({operation:'architecture-audit'}));assert.equal(r.status,503);assert.deepEqual(await r.json(),{error_code:'architecture_schema_set_mismatch'});
 });
+test('known Cloudflare KV tables are accessed through adapters and do not masquerade as application schema',async()=>{
+ const x=await fixture();x.db.exec('CREATE TABLE _cf_KV(key TEXT,value BLOB); CREATE TABLE _cf_EXTERNALS(id INTEGER); CREATE TABLE __cf_kv(key TEXT)');
+ const r=await auditArchitecture(x.runtime);assert.equal(r.integrity_verified,true);assert.equal(Object.keys(r.counts).length,22);
+ x.db.exec('CREATE TABLE _cf_unknown_application(id TEXT)');
+ await assert.rejects(auditArchitecture(x.runtime),/architecture_schema_set_mismatch/);
+});
 test('disabled foreign keys are a failed integrity gate',async()=>{
  const x=await fixture();x.db.exec('PRAGMA foreign_keys=OFF');
  const r=await auditArchitecture(x.runtime);assert.equal(r.integrity_verified,false);assert.equal(r.issues.foreign_keys_disabled,1);
