@@ -62,6 +62,14 @@ decision flag. The caller supplies these observations for the same preflight:
 - `evidence_ref`: nonempty opaque reference to the evidence supporting these
   observations and activity classification. Never embed private content or secrets.
 
+Numeric evidence declarations use a scalar `type` (`integer` for count,
+`number` for age), `nullable: true`, and `minimum: 0` in both input schemas.
+The fields remain optional. This replaces the previous array-valued `type`
+fragments implicated in the reported Kora __setup__ failure on commit 63106891.
+The CLI registry requires scalar fragment types; local AJV checks establish
+nullable semantic equivalence. These checks do not establish server compiler
+or runtime support for nullable: that remains a native verification requirement.
+
 `required` means new research and age >=86400 seconds OR count >=20.
 Either positively established threshold suffices; the other may be unknown.
 `not_required` means evidenced in-progress/non-research activity, or new research

@@ -61,6 +61,3 @@ I controlli generali del repository restano distinti: rieseguiti sulla copia iso
 Policy di rete ancora aperta: deny nel manifest locale/PR, allow + inheritManaged=true nell'export acquisito della release rel_4wbyk58gsiuzfh8f. Origine server e runtime/IR effettivo non verificati; nessun ampliamento permessi o aggiramento del diniego browser. La release esistente non incorpora questa correzione; le sue vecchie validazioni non convalidano il nuovo codice.
 
 Nessun dato della review, registro, decisione scientifica o servizio privato modificato. Nessuna nuova release, merge, deploy, scheduler o esecuzione live.
-
-
-La relazione precedente, inclusa la separazione archivio/suite corrente, e' conservata in [history/REPORT-at-63106891.md](history/REPORT-at-63106891.md).

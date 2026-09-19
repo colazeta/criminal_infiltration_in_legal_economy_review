@@ -1,1 +1,1 @@
-{"passed":true,"count":154,"checks":["Kora Test JSON schema","Target node input JSON schema","YAML 1.1 scheduled_at remains string"],"boundary":"Offline schema checks, not native Kora execution"}
+{"passed":true,"count":154,"checks":["Process resource schema and explicit scalar type fragments (narrow offline check)","Nullable semantic equivalence","Kora Test JSON schema","Target node input JSON schema","YAML 1.1 scheduled_at remains string"],"boundary":"Offline schema checks, not native Kora compilation or execution"}
