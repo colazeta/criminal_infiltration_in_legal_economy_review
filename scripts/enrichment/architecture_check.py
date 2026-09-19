@@ -32,4 +32,14 @@ if __name__ == '__main__':
         if result['integrity_verified'] is not True:
             raise SystemExit('architecture_integrity_gate_failed')
     except RuntimeError as error:
+        if str(error).endswith(':architecture_schema_set_mismatch'):
+            diagnostic = call('architecture-schema', expected_commit=current_commit())
+            # The server returns only public mapped names and hashes; never raw DDL.
+            expected_keys = {'contract', 'commit', 'expected_present', 'expected_missing',
+                             'other_mapped_present', 'platform_present', 'unknown_table_sha256',
+                             'schema_sha256', 'private_content_exported'}
+            if (set(diagnostic) == expected_keys
+                    and diagnostic['contract'] == 'CILE-ARCHITECTURE-SCHEMA-1'
+                    and diagnostic['private_content_exported'] is False):
+                print(json.dumps(diagnostic, indent=2))
         raise SystemExit(str(error)) from None
