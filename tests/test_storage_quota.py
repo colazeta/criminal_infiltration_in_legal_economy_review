@@ -23,3 +23,11 @@ class StorageQuotaTest(unittest.TestCase):
     def test_unknown_schema_names_cannot_become_queries(self):
         with self.assertRaisesRegex(RuntimeError, 'quota_schema_invalid'):
             quota.fields('private { archive }')
+
+    def test_nested_non_null_list_wrappers_resolve_without_assuming_a_type_name(self):
+        ref = {'name': 'account', 'kind': 'OBJECT'}
+        for kind in ['NON_NULL','LIST','NON_NULL']:
+            ref = {'kind': kind, 'name': None, 'ofType': ref}
+        self.assertEqual(quota.named({'type': ref}), 'account')
+        with self.assertRaisesRegex(RuntimeError, 'quota_type_wrapper_unavailable'):
+            quota.named({'type': {'kind': 'NON_NULL', 'name': None}})
