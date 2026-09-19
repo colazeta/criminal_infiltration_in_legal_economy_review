@@ -19,7 +19,7 @@ for(const c of baseline){
  if(JSON.stringify(c.expected)!==JSON.stringify(current.expected))throw Error(`Changed expected: ${c.id}`);
  if(c.id.endsWith('-starvation-over-complete')&&JSON.stringify(c.input)!==JSON.stringify(current.input))throw Error(`Changed historical input: ${c.id}`);
 }
-const results=cases.filter(c=>c.id.includes('-starvation-')&&!c.historical_case_id).map(c=>{
+const results=cases.filter(c=>c.kind==='pipeline'&&c.id.includes('-starvation-')&&!c.historical_case_id).map(c=>{
  const actual=oldRoute({...c.input,...evaluateFrontier(c.input)});
  return {id:c.id,expectedRoute:c.expected.route,baselineRoute:actual.route,routeMismatch:actual.route!==c.expected.route};
 });

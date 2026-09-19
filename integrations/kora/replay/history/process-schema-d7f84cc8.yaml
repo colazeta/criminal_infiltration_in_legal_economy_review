@@ -57,8 +57,8 @@ types:
         type: object
         additionalProperties: false
         properties:
-          pending_observation_count: {type: integer, minimum: 0}
-          oldest_pending_age_seconds: {type: number, minimum: 0}
+          pending_observation_count: {type: integer, nullable: true, minimum: 0}
+          oldest_pending_age_seconds: {type: number, nullable: true, minimum: 0}
           activity_kind: {type: string, enum: [new_research, in_progress, non_research, unknown]}
           evidence_ref: {type: string, minLength: 1}
       identity_debt_due:
@@ -170,8 +170,8 @@ types:
         type: object
         additionalProperties: false
         properties:
-          pending_observation_count: {type: integer, minimum: 0}
-          oldest_pending_age_seconds: {type: number, minimum: 0}
+          pending_observation_count: {type: integer, nullable: true, minimum: 0}
+          oldest_pending_age_seconds: {type: number, nullable: true, minimum: 0}
           activity_kind: {type: string, enum: [new_research, in_progress, non_research, unknown]}
           evidence_ref: {type: string, minLength: 1}
       identity_debt_due: {type: boolean}

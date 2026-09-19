@@ -77,6 +77,16 @@ for(const lane of ['A','B']) {
  }
 }
 fs.writeFileSync(path.join(root,'cases.json'),JSON.stringify(cases,null,2)+'\n');
+// Null changed contract: preserve the former native probes verbatim in history;
+// current null inputs are schema-rejection tests, not runnable node fixtures.
+for(const lane of ['A','B'])for(const field of ['age','count']) {
+ const name=`replay-${lane}-starvation-null-${field}.yaml`;
+ const stale=path.join(pilot,'tests',name);
+ if(fs.existsSync(stale)) {
+  if(!fs.readFileSync(stale).equals(fs.readFileSync(path.join(root,'history/null-native-d7f84cc8',name))))throw Error(`Null fixture changed: ${name}`);
+  fs.unlinkSync(stale);
+ }
+}
 // Native router inputs use the independently authored frontier table, never evaluateFrontier output.
 for(const c of cases.filter(c=>c.kind!=='schema-rejection')){
  const node=c.kind==='frontier'?'evaluate-frontier':'route-activation';

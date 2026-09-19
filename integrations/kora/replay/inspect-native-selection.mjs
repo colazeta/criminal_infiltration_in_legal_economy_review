@@ -16,14 +16,17 @@ for(const e of selected) {
 if(selected.length!==154)throw Error(`Expected 154 bundled tests, found ${selected.length}`);
 if(entries.some(e=>e.path.startsWith('history/')))throw Error('History leaked into selected bundle');
 const required=['replay-A-starvation-insufficient-evidence.yaml','replay-B-starvation-insufficient-evidence.yaml',
+ 'replay-A-starvation-missing-both.yaml',
  'replay-A-starvation-exact-24h.yaml','replay-B-starvation-exact-24h.yaml',
  'replay-A-starvation-exact-20.yaml','replay-B-starvation-exact-20.yaml'];
 for(const file of required)if(!selected.some(e=>e.path===`tests/${file}`))throw Error('Missing test: '+file);
 if(selected.some(e=>e.path.endsWith('-starvation-over-complete.yaml')))throw Error('Historical original selected');
+if(selected.some(e=>/-starvation-null-(age|count)\.yaml$/.test(e.path)))throw Error('Obsolete null-positive native fixture selected');
 const packageInfo=JSON.parse(fs.readFileSync(path.join(cliDist,'../package.json'),'utf8'));
 const report={scope:'Offline packaging inspection, not native/server execution',cliVersion:packageInfo.version,
  workspace,suiteDirectory:path.join(workspace,'tests'),nameFilter:null,releaseSelector:null,
  packagedFiles:entries.length,selectedTestCount:selected.length,
+ nativeExecutionPlan:{firstNameFilter:'replay-A-starvation-missing-both',firstExpectedCount:1,fullSuiteRequires:'exit=0, status=passed, testCount=1, gatePassed=true, gateable=gatePassing=1',fullExpectedCount:154},
  interpretation:'All 154 Test YAML files under this source bundle tests/. Sibling replay/history is not sent. Actual native execution count remains unverified.',
  loaderSha256:sha(fs.readFileSync(path.join(cliDist,'files.js'))),
  suiteCommandSha256:sha(fs.readFileSync(path.join(cliDist,'workflow-commands.js'))),

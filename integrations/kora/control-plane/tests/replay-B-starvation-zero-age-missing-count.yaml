@@ -1,0 +1,62 @@
+"apiVersion": "kora/v1"
+"kind": "Test"
+"metadata":
+  "name": "replay-B-starvation-zero-age-missing-count"
+"spec":
+  "target":
+    "workflow": "cile-hourly-control-plane"
+    "node": "route-activation"
+  "input":
+    "inline":
+      "activation_id": "synthetic-B-starvation-zero-age-missing-count"
+      "lane": "B"
+      "scheduled_at": "2026-09-19T21:40:00+02:00"
+      "scouting_due": false
+      "unfinished_safe_write": false
+      "active_wip_count": 3
+      "candidate_present": true
+      "metadata_source_ready": true
+      "fulltext_ready": true
+      "proposal_persisted": true
+      "mandatory_fields_accounted": false
+      "framework_assessed": false
+      "independent_comparison_ready": false
+      "references_ready": false
+      "limitations_caveats_ready": false
+      "version_guards_match": false
+      "validation_ready": false
+      "validated": false
+      "writer_ready": true
+      "calibration_case_ready": false
+      "identity_debt_due": true
+      "engineering_blocker": false
+      "repeat_without_changed_prerequisite": false
+      "identity_preflight_evidence":
+        "oldest_pending_age_seconds": 0
+        "activity_kind": "new_research"
+        "evidence_ref": "synthetic:threshold-matrix"
+      "frontier_gate": "F2_PROPOSAL_PERSISTED"
+      "next_gate": "F3_INDEPENDENT_COMPARISON"
+      "frontier_consistent": true
+      "assessment_completed": false
+      "validation_accepted": false
+      "assessment_distance_to_f5": 3
+  "checks":
+    - "type": "schema"
+      "gate": true
+    - "type": "exact"
+      "gate": true
+      "path": "$.route"
+      "expected": "BLOCKED"
+    - "type": "exact"
+      "gate": true
+      "path": "$.identity_starvation_status"
+      "expected": "undetermined"
+    - "type": "exact"
+      "gate": true
+      "path": "$.side_effect_authorized"
+      "expected": false
+    - "type": "exact"
+      "gate": true
+      "path": "$.pilot_mode"
+      "expected": "observe_only"

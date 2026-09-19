@@ -53,22 +53,30 @@ The router's pure preflight computes `identity_starvation_status` from optional
 `identity_preflight_evidence`, never from `identity_debt_due` or a caller-supplied
 decision flag. The caller supplies these observations for the same preflight:
 
-- `pending_observation_count`: nonnegative integer; absent/null means unknown;
+- `pending_observation_count`: optional nonnegative integer; omission means unknown,
+  zero means a known empty queue, and explicit null is invalid workflow input;
 - `oldest_pending_age_seconds`: nonnegative age of the oldest still-pending
-  observation at preflight time; absent/null means unknown or not applicable for
+  observation at preflight time; omission means unknown or not applicable for
   an explicitly empty queue;
 - `activity_kind`: `new_research`, `in_progress`, `non_research`, or `unknown`,
   describing the work that COMPLETE would actually start, independently of its gate;
 - `evidence_ref`: nonempty opaque reference to the evidence supporting these
   observations and activity classification. Never embed private content or secrets.
 
-Numeric evidence declarations use a scalar `type` (`integer` for count,
-`number` for age), `nullable: true`, and `minimum: 0` in both input schemas.
-The fields remain optional. This replaces the previous array-valued `type`
-fragments implicated in the reported Kora __setup__ failure on commit 63106891.
-The CLI registry requires scalar fragment types; local AJV checks establish
-nullable semantic equivalence. These checks do not establish server compiler
-or runtime support for nullable: that remains a native verification requirement.
+Numeric evidence uses only scalar `type` (`integer` for count, `number` for age)
+and `minimum: 0`, without inclusion in `required`, in both input schemas.
+Age zero is known age zero; explicit null is invalid for either numeric field.
+This is an explicit input-contract change after native setup rejected both
+array-valued type (63106891) and nullable (d7f84cc8). No union syntax is assumed.
+The CLI Process schema documents scalar types and object required lists; the
+pilot already uses those constructs for its numeric fields and optional outputs.
+
+There is **no null-to-omission normalization** in the producer, script or Kora
+boundary. A producer must emit omitted fields for unavailable observations; a
+payload containing null must be rejected before routing. The helper also fails
+closed on null if called directly, but it is not a pre-validation adapter.
+Any future normalizer needs a concrete pre-Kora-validation boundary and separate
+authorization/tests; none is claimed or connected here.
 
 `required` means new research and age >=86400 seconds OR count >=20.
 Either positively established threshold suffices; the other may be unknown.

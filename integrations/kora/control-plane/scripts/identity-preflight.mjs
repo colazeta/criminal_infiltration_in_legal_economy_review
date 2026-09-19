@@ -8,6 +8,11 @@ export function evaluateIdentityStarvation(input) {
   const e = input.identity_preflight_evidence;
   const unknown = reason => result('undetermined', reason);
   if (!e || typeof e !== 'object' || Array.isArray(e)) return unknown('missing_preflight_evidence');
+  // Native schema rejects explicit null. Keep direct helper calls fail-closed too;
+  // no null-to-omission adapter exists at this boundary.
+  if (e.pending_observation_count === null || e.oldest_pending_age_seconds === null) {
+    return unknown('invalid_queue_evidence');
+  }
   if (typeof e.evidence_ref !== 'string' || !e.evidence_ref.trim()) return unknown('missing_evidence_reference');
   if (!['new_research', 'in_progress', 'non_research'].includes(e.activity_kind)) {
     return unknown('activity_nature_not_established');
@@ -19,7 +24,7 @@ export function evaluateIdentityStarvation(input) {
   const age = e.oldest_pending_age_seconds;
   const hasCount = Number.isInteger(count) && count >= 0;
   const hasAge = typeof age === 'number' && Number.isFinite(age) && age >= 0;
-  if ((count != null && !hasCount) || (age != null && !hasAge)) return unknown('invalid_queue_evidence');
+  if ((count !== undefined && !hasCount) || (age !== undefined && !hasAge)) return unknown('invalid_queue_evidence');
   if (count === 0 && hasAge) return unknown('empty_queue_with_pending_observation_age');
   if (count === 0) return result('not_required', 'observed_empty_pending_queue');
   if (hasAge && age >= 86400) return result('required', 'oldest_pending_at_least_24_hours');

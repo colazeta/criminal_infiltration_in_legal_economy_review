@@ -33,6 +33,19 @@ Push-Location $workspace
 try {
     kora auth whoami --json
     if ($LASTEXITCODE -ne 0) { throw 'Authentication failed; no tests executed.' }
+    # Minimal native compatibility probe on the SAME process bundle: both numeric
+    # observations omitted. Expected BLOCKED/undetermined. No full suite on failure.
+    $probeName = 'replay-A-starvation-missing-both'
+    $probeRaw = @(& kora test suite --workspace $workspace --name $probeName --environment production --org oltre --json)
+    $probeExit = $LASTEXITCODE
+    $probeRaw | Write-Output
+    if ($probeExit -ne 0) { throw "Schema compatibility probe failed (exit $probeExit); full suite NOT started." }
+    $probe = ($probeRaw -join "`n") | ConvertFrom-Json
+    $suite = $probe.data.suite
+    if ($suite.status -ne 'passed' -or $suite.testCount -ne 1 -or $suite.gatePassed -ne $true -or $suite.gateable -ne 1 -or $suite.gatePassing -ne 1) {
+        throw 'Compatibility probe did not report one executed, passed, gateable test; full suite NOT started.'
+    }
+    Write-Host 'Minimal native probe passed (1/1). Starting full 154-fixture suite.'
     kora test suite --workspace $workspace --environment production --org oltre --json
     $nativeExit = $LASTEXITCODE
     Write-Host "Native suite exit code: $nativeExit; source commit: $ExpectedCommit"

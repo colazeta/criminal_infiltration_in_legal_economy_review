@@ -19,6 +19,8 @@ export function addStarvationCases(cases) {
   const rows = [
     ['below-both', {}, 'COMPLETE', 'not_required'],
     ['fraction-below-24h', {oldest_pending_age_seconds:86399.999}, 'COMPLETE', 'not_required'],
+    ['known-zero-age', {oldest_pending_age_seconds:0}, 'COMPLETE', 'not_required'],
+    ['zero-age-missing-count', {oldest_pending_age_seconds:0,pending_observation_count:undefined}, 'BLOCKED', 'undetermined'],
     ['exact-24h', {oldest_pending_age_seconds:86400}, 'RESOLVE', 'required'],
     ['exact-20', {pending_observation_count:20}, 'RESOLVE', 'required'],
     ['above-both', {pending_observation_count:21,oldest_pending_age_seconds:86401}, 'RESOLVE', 'required'],
@@ -31,8 +33,6 @@ export function addStarvationCases(cases) {
     ['missing-activity', {activity_kind:undefined}, 'BLOCKED', 'undetermined'],
     ['unknown-activity', {activity_kind:'unknown'}, 'BLOCKED', 'undetermined'],
     ['missing-reference', {evidence_ref:undefined}, 'BLOCKED', 'undetermined'],
-    ['null-age', {oldest_pending_age_seconds:null}, 'BLOCKED', 'undetermined'],
-    ['null-count', {pending_observation_count:null}, 'BLOCKED', 'undetermined'],
     ['count-sufficient-without-age', {pending_observation_count:20,oldest_pending_age_seconds:undefined}, 'RESOLVE', 'required'],
     ['age-sufficient-without-count', {pending_observation_count:undefined,oldest_pending_age_seconds:86400}, 'RESOLVE', 'required'],
     ['empty-queue-no-age', {pending_observation_count:0,oldest_pending_age_seconds:undefined}, 'COMPLETE', 'not_required'],
@@ -67,6 +67,17 @@ export function addStarvationCases(cases) {
     }
   }
   const template=cases.find(c=>c.id==='A-starvation-over-complete');
+  // Contract revision after Kora rejected nullable: null is now invalid input,
+  // not an unknown numeric observation. Omission cases above retain BLOCKED.
+  for(const lane of ['A','B'])for(const [label,field]of [['age','oldest_pending_age_seconds'],['count','pending_observation_count']]) {
+    const prior=cases.find(c=>c.id===`${lane}-starvation-over-complete`);
+    const id=`${lane}-starvation-null-${label}`;
+    cases.push({id,origin:'synthetic',kind:'schema-rejection',classification:'contract_assertion',
+      input:{...prior.input,activation_id:`synthetic-${id}`,identity_preflight_evidence:{...evidence,[field]:null}},
+      expected:{valid:false},
+      contract:'Optional-number contract after native nullable rejection on d7f84cc8: omit unknown metrics; explicit null is invalid before routing',
+      note:'Same null input as archived d7f84cc8 pipeline fixture. Expected workflow schema rejection replaces routing expectation under the explicitly revised contract; no null-to-omission conversion is implemented.'});
+  }
   for (const [id, patch] of [
     ['negative-age',{identity_preflight_evidence:{...evidence,oldest_pending_age_seconds:-1}}],
     ['negative-count',{identity_preflight_evidence:{...evidence,pending_observation_count:-1}}],
