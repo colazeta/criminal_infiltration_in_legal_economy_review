@@ -23,7 +23,11 @@ test('candidate SQL bundle matches its migration; observation replay creates one
  assert.equal(x.db.prepare('SELECT count(*) n FROM enrichment_candidate_revisions').get().n,1);
  assert.equal(x.db.prepare('SELECT count(*) n FROM enrichment_candidate_values').get().n,2);
  assert.equal((await readCandidateObservation(x.env,first.revision_id)).row.title,a.row.title);
- assert.equal(x.db.prepare('PRAGMA foreign_key_check').all().length,0);
+  assert.equal(x.db.prepare('PRAGMA foreign_key_check').all().length,0);
+  assert.throws(()=>x.db.prepare('INSERT INTO enrichment_candidate_values VALUES (?,?,?,?)').run(first.revision_id,'providers_tried',0,'Provider'),/candidate_repeated_field_scope/);
+  const plan=x.db.prepare("EXPLAIN QUERY PLAN SELECT DISTINCT r.revision_id FROM enrichment_candidate_receipts r WHERE r.candidate_id=? AND r.cycle_id=? AND r.domain=? AND r.action='observe' AND NOT EXISTS(SELECT 1 FROM enrichment_candidate_receipts s WHERE s.revision_id=r.revision_id AND s.action IN ('initialise','supersede')) ORDER BY r.revision_id").all(a.row.candidate_id,'cycle','bibliography').map(r=>r.detail).join('\n');
+  assert.match(plan,/SEARCH r USING COVERING INDEX candidate_receipt_scope/);
+  assert.match(plan,/SEARCH s USING COVERING INDEX candidate_receipt_revision/);
  }finally{x.db.close()}
 });
 test('source disagreements remain separate assertions; only explicit CAS supersession changes the head',async()=>{

@@ -35,7 +35,8 @@ CREATE TABLE enrichment_candidate_receipts (
  expected_version INTEGER NOT NULL CHECK(expected_version>=0), persisted_at TEXT NOT NULL,
  FOREIGN KEY(revision_id,candidate_id,cycle_id,domain)
  REFERENCES enrichment_candidate_revisions(revision_id,candidate_id,cycle_id,domain),
- FOREIGN KEY(previous_revision_id) REFERENCES enrichment_candidate_revisions(revision_id)
+ FOREIGN KEY(previous_revision_id,candidate_id,cycle_id,domain)
+ REFERENCES enrichment_candidate_revisions(revision_id,candidate_id,cycle_id,domain)
 );
 
 CREATE TABLE enrichment_candidate_values (
@@ -136,9 +137,17 @@ CREATE TRIGGER candidate_access_scope BEFORE INSERT ON enrichment_candidate_acce
 
 CREATE INDEX candidate_revision_identity ON enrichment_candidate_revisions(candidate_id,cycle_id,domain);
 
+CREATE INDEX candidate_receipt_scope ON enrichment_candidate_receipts(candidate_id,cycle_id,domain,action,revision_id);
+
+CREATE INDEX candidate_receipt_revision ON enrichment_candidate_receipts(revision_id,action);
+
+CREATE INDEX candidate_receipt_export ON enrichment_candidate_receipts(cycle_id,domain,receipt_id);
+
 CREATE TRIGGER candidate_head_cas BEFORE UPDATE ON enrichment_candidate_heads WHEN NEW.candidate_id<>OLD.candidate_id OR NEW.cycle_id<>OLD.cycle_id OR NEW.domain<>OLD.domain OR NEW.record_version<>OLD.record_version+1 BEGIN SELECT RAISE(ABORT,'candidate_head_concurrency'); END;
 
 CREATE TRIGGER candidate_no_republication BEFORE UPDATE ON enrichment_candidate_heads WHEN OLD.state='withdrawn' BEGIN SELECT RAISE(ABORT,'candidate_restore_requires_reviewed_procedure'); END;
+
+CREATE TRIGGER candidate_values_scope BEFORE INSERT ON enrichment_candidate_values WHEN NOT EXISTS(SELECT 1 FROM enrichment_candidate_revisions r WHERE r.revision_id=NEW.revision_id AND ((r.domain='bibliography' AND NEW.field IN ('source_links','source_query_id')) OR (r.domain='abstract' AND NEW.field IN ('providers_tried')) OR (r.domain='retrieval' AND NEW.field IN ('source_urls','resolution_sources')))) BEGIN SELECT RAISE(ABORT,'candidate_repeated_field_scope'); END;
 
 CREATE TRIGGER enrichment_candidate_records_no_update BEFORE UPDATE ON enrichment_candidate_records BEGIN SELECT RAISE(ABORT,'append_only'); END;
 

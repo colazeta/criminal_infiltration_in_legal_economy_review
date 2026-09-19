@@ -2393,6 +2393,9 @@
       "appendOnly": true,
       "constraints": [
         "previous_revision_id → enrichment_candidate_revisions.revision_id",
+        "candidate_id → enrichment_candidate_revisions.candidate_id",
+        "cycle_id → enrichment_candidate_revisions.cycle_id",
+        "domain → enrichment_candidate_revisions.domain",
         "revision_id → enrichment_candidate_revisions.revision_id",
         "candidate_id → enrichment_candidate_revisions.candidate_id",
         "cycle_id → enrichment_candidate_revisions.cycle_id",

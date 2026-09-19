@@ -36,7 +36,7 @@
     },
     {
       "path": "curator-app/migrations/0009_candidate_archive.sql",
-      "sha256": "149665cd8d7a4e8bf3ec6c9a33cf970b60583cbd1a6e2ea0c6ba85495444646f"
+      "sha256": "d27304430393d223cbdb6833a323d578a55fff1852dc3e6eaf75cf74c31ae7aa"
     }
   ],
   "tables": [
@@ -4364,6 +4364,36 @@
           "match": "NONE"
         },
         {
+          "id": 0,
+          "seq": 1,
+          "table": "enrichment_candidate_revisions",
+          "from": "candidate_id",
+          "to": "candidate_id",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        },
+        {
+          "id": 0,
+          "seq": 2,
+          "table": "enrichment_candidate_revisions",
+          "from": "cycle_id",
+          "to": "cycle_id",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        },
+        {
+          "id": 0,
+          "seq": 3,
+          "table": "enrichment_candidate_revisions",
+          "from": "domain",
+          "to": "domain",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        },
+        {
           "id": 1,
           "seq": 0,
           "table": "enrichment_candidate_revisions",
@@ -4407,6 +4437,86 @@
       "indexes": [
         {
           "seq": 0,
+          "name": "candidate_receipt_export",
+          "unique": 0,
+          "origin": "c",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 2,
+              "name": "cycle_id"
+            },
+            {
+              "seqno": 1,
+              "cid": 3,
+              "name": "domain"
+            },
+            {
+              "seqno": 2,
+              "cid": 0,
+              "name": "receipt_id"
+            }
+          ],
+          "sql": "CREATE INDEX candidate_receipt_export ON enrichment_candidate_receipts(cycle_id,domain,receipt_id)"
+        },
+        {
+          "seq": 1,
+          "name": "candidate_receipt_revision",
+          "unique": 0,
+          "origin": "c",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 4,
+              "name": "revision_id"
+            },
+            {
+              "seqno": 1,
+              "cid": 6,
+              "name": "action"
+            }
+          ],
+          "sql": "CREATE INDEX candidate_receipt_revision ON enrichment_candidate_receipts(revision_id,action)"
+        },
+        {
+          "seq": 2,
+          "name": "candidate_receipt_scope",
+          "unique": 0,
+          "origin": "c",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 1,
+              "name": "candidate_id"
+            },
+            {
+              "seqno": 1,
+              "cid": 2,
+              "name": "cycle_id"
+            },
+            {
+              "seqno": 2,
+              "cid": 3,
+              "name": "domain"
+            },
+            {
+              "seqno": 3,
+              "cid": 6,
+              "name": "action"
+            },
+            {
+              "seqno": 4,
+              "cid": 4,
+              "name": "revision_id"
+            }
+          ],
+          "sql": "CREATE INDEX candidate_receipt_scope ON enrichment_candidate_receipts(candidate_id,cycle_id,domain,action,revision_id)"
+        },
+        {
+          "seq": 3,
           "name": "sqlite_autoindex_enrichment_candidate_receipts_1",
           "unique": 1,
           "origin": "pk",
@@ -4421,7 +4531,7 @@
           "sql": null
         }
       ],
-      "sql": "CREATE TABLE enrichment_candidate_receipts (\n \n receipt_id TEXT NOT NULL PRIMARY KEY, candidate_id TEXT NOT NULL, cycle_id TEXT NOT NULL,\n domain TEXT NOT NULL, revision_id TEXT NOT NULL, previous_revision_id TEXT,\n action TEXT NOT NULL CHECK(action IN ('initialise','observe','supersede','withdraw')),\n expected_version INTEGER NOT NULL CHECK(expected_version>=0), persisted_at TEXT NOT NULL,\n FOREIGN KEY(revision_id,candidate_id,cycle_id,domain)\n REFERENCES enrichment_candidate_revisions(revision_id,candidate_id,cycle_id,domain),\n FOREIGN KEY(previous_revision_id) REFERENCES enrichment_candidate_revisions(revision_id)\n)",
+      "sql": "CREATE TABLE enrichment_candidate_receipts (\n \n receipt_id TEXT NOT NULL PRIMARY KEY, candidate_id TEXT NOT NULL, cycle_id TEXT NOT NULL,\n domain TEXT NOT NULL, revision_id TEXT NOT NULL, previous_revision_id TEXT,\n action TEXT NOT NULL CHECK(action IN ('initialise','observe','supersede','withdraw')),\n expected_version INTEGER NOT NULL CHECK(expected_version>=0), persisted_at TEXT NOT NULL,\n FOREIGN KEY(revision_id,candidate_id,cycle_id,domain)\n REFERENCES enrichment_candidate_revisions(revision_id,candidate_id,cycle_id,domain),\n FOREIGN KEY(previous_revision_id,candidate_id,cycle_id,domain)\n REFERENCES enrichment_candidate_revisions(revision_id,candidate_id,cycle_id,domain)\n)",
       "triggers": [
         {
           "name": "enrichment_candidate_receipts_no_delete",
@@ -4943,6 +5053,10 @@
       ],
       "sql": "CREATE TABLE enrichment_candidate_values (\n \n revision_id TEXT NOT NULL REFERENCES enrichment_candidate_revisions(revision_id),\n field TEXT NOT NULL CHECK(field IN ('providers_tried','resolution_sources','source_links','source_query_id','source_urls')), position INTEGER NOT NULL CHECK(position>=0),\n value TEXT NOT NULL CHECK(length(value)>0), PRIMARY KEY(revision_id,field,position)\n)",
       "triggers": [
+        {
+          "name": "candidate_values_scope",
+          "sql": "CREATE TRIGGER candidate_values_scope BEFORE INSERT ON enrichment_candidate_values WHEN NOT EXISTS(SELECT 1 FROM enrichment_candidate_revisions r WHERE r.revision_id=NEW.revision_id AND ((r.domain='bibliography' AND NEW.field IN ('source_links','source_query_id')) OR (r.domain='abstract' AND NEW.field IN ('providers_tried')) OR (r.domain='retrieval' AND NEW.field IN ('source_urls','resolution_sources')))) BEGIN SELECT RAISE(ABORT,'candidate_repeated_field_scope'); END"
+        },
         {
           "name": "enrichment_candidate_values_no_delete",
           "sql": "CREATE TRIGGER enrichment_candidate_values_no_delete BEFORE DELETE ON enrichment_candidate_values BEGIN SELECT RAISE(ABORT,'append_only'); END"

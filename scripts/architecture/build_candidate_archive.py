@@ -56,7 +56,8 @@ def build():
  expected_version INTEGER NOT NULL CHECK(expected_version>=0), persisted_at TEXT NOT NULL,
  FOREIGN KEY(revision_id,candidate_id,cycle_id,domain)
  REFERENCES enrichment_candidate_revisions(revision_id,candidate_id,cycle_id,domain),
- FOREIGN KEY(previous_revision_id) REFERENCES enrichment_candidate_revisions(revision_id)''',
+ FOREIGN KEY(previous_revision_id,candidate_id,cycle_id,domain)
+ REFERENCES enrichment_candidate_revisions(revision_id,candidate_id,cycle_id,domain)''',
           {'receipt_id': 'event_id', 'candidate_id': 'candidate_id', 'cycle_id': 'review_id',
            'domain': 'dcterms:type', 'revision_id': 'v2_assertion_id', 'previous_revision_id': 'supersedes',
            'action': 'dcterms:type', 'expected_version': 'v2_record_version', 'persisted_at': 'v2_imported_at'})
@@ -88,9 +89,16 @@ def build():
         sql.append(f"CREATE TRIGGER candidate_{domain}_scope BEFORE INSERT ON enrichment_candidate_{domain} WHEN NOT EXISTS(SELECT 1 FROM enrichment_candidate_revisions WHERE revision_id=NEW.revision_id AND domain='{domain}') BEGIN SELECT RAISE(ABORT,'candidate_domain_mismatch'); END;")
     sql.extend([
         'CREATE INDEX candidate_revision_identity ON enrichment_candidate_revisions(candidate_id,cycle_id,domain);',
+        'CREATE INDEX candidate_receipt_scope ON enrichment_candidate_receipts(candidate_id,cycle_id,domain,action,revision_id);',
+        'CREATE INDEX candidate_receipt_revision ON enrichment_candidate_receipts(revision_id,action);',
+        'CREATE INDEX candidate_receipt_export ON enrichment_candidate_receipts(cycle_id,domain,receipt_id);',
         "CREATE TRIGGER candidate_head_cas BEFORE UPDATE ON enrichment_candidate_heads WHEN NEW.candidate_id<>OLD.candidate_id OR NEW.cycle_id<>OLD.cycle_id OR NEW.domain<>OLD.domain OR NEW.record_version<>OLD.record_version+1 BEGIN SELECT RAISE(ABORT,'candidate_head_concurrency'); END;",
         "CREATE TRIGGER candidate_no_republication BEFORE UPDATE ON enrichment_candidate_heads WHEN OLD.state='withdrawn' BEGIN SELECT RAISE(ABORT,'candidate_restore_requires_reviewed_procedure'); END;",
     ])
+    allowed = ' OR '.join("(r.domain='" + domain + "' AND NEW.field IN (" +
+                          ','.join(repr(f) for f in spec['repeated']) + '))'
+                          for domain, spec in domains.items() if spec['repeated'])
+    sql.append(f"CREATE TRIGGER candidate_values_scope BEFORE INSERT ON enrichment_candidate_values WHEN NOT EXISTS(SELECT 1 FROM enrichment_candidate_revisions r WHERE r.revision_id=NEW.revision_id AND ({allowed})) BEGIN SELECT RAISE(ABORT,'candidate_repeated_field_scope'); END;")
     for name in tables:
         for action in ['UPDATE', 'DELETE']:
             if name == 'enrichment_candidate_heads' and action == 'UPDATE':
