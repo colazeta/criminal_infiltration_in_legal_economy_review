@@ -10,7 +10,7 @@ spec:
     inline:
       activation_id: test-engineer
       lane: B
-      scheduled_at: 2026-09-19T08:40:00+02:00
+      scheduled_at: "2026-09-19T08:40:00+02:00"
       scouting_due: false
       unfinished_safe_write: false
       active_wip_count: 2
