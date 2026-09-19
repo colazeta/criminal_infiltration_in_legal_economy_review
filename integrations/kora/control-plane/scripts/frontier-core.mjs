@@ -111,7 +111,10 @@ export function evaluateFrontier(input) {
     next_gate: nextGate,
     frontier_consistent: !inconsistency,
     assessment_completed: assessmentCompleted,
-    validation_accepted: Boolean(input.validated),
+    // A reported receipt is not current acceptance when its prerequisites conflict.
+    validation_accepted: Boolean(
+      input.validated && input.validation_ready && assessmentCompleted && !inconsistency
+    ),
     assessment_distance_to_f5: distance,
   };
   if (inconsistency) out.inconsistency_code = inconsistency;

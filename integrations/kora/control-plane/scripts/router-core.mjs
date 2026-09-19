@@ -20,10 +20,24 @@ function decision(route, reason) {
 }
 
 export function routeActivation(input) {
-  if (input.scouting_due) return decision("SCOUT", "owned_scouting_window_due");
-  if (input.unfinished_safe_write) return decision("PERSIST", "unfinished_safe_write_requires_readback");
-  if (!input.frontier_consistent) return decision("BLOCKED", input.inconsistency_code || "frontier_inconsistent");
-  if (input.active_wip_count > 6) return decision("BLOCKED", "ordinary_wip_limit_exceeded");
+  const blocker = !input.frontier_consistent
+    ? input.inconsistency_code || "frontier_inconsistent"
+    : input.active_wip_count > 6 ? "ordinary_wip_limit_exceeded" : null;
+  // The caller must positively attest independence for the selected activity.
+  // Missing attestations fail closed; neither exception authorizes side effects.
+  if (input.scouting_due) {
+    if (blocker && input.scout_independent_of_frontier_and_wip !== true) {
+      return decision("BLOCKED", blocker);
+    }
+    return decision("SCOUT", "owned_scouting_window_due");
+  }
+  if (input.unfinished_safe_write) {
+    if (blocker && input.persist_independent_of_frontier_and_wip !== true) {
+      return decision("BLOCKED", blocker);
+    }
+    return decision("PERSIST", "unfinished_safe_write_requires_readback");
+  }
+  if (blocker) return decision("BLOCKED", blocker);
 
   const incomplete = new Set([
     "F0_METADATA_SOURCE",

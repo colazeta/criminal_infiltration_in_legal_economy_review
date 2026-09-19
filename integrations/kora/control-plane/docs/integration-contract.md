@@ -32,6 +32,23 @@ It also surfaces two explicit safeguards:
 - ordinary assessment WIP above six → `BLOCKED`;
 - inconsistent F0–F7 predicates → `BLOCKED`.
 
+Owner clarification, 19 September 2026: a due `SCOUT` or unfinished safe
+`PERSIST` may precede these blockers only when that selected activity is
+independent of both the inconsistent frontier and ordinary assessment WIP.
+The observing caller must positively attest this with, respectively,
+`scout_independent_of_frontier_and_wip: true` or
+`persist_independent_of_frontier_and_wip: true`. The optional fields have no
+implicit true default: absence or false preserves `BLOCKED` in a collision.
+An attestation for one route cannot authorize the other. Without a blocker,
+the existing SCOUT/PERSIST order is unchanged. These are operational input
+attestations, not scientific decisions, claim receipts, or write permissions.
+
+The existing `identity_debt_due` field still does not distinguish ordinary
+identity debt from the mandatory age/count starvation guard, or new research
+from an in-flight assessment gate. The corresponding replay probes remain
+unresolved pending an explicit contract decision; no precedence change is
+silently inferred from this boolean.
+
 The anti-repeat flag suppresses an unchanged `COMPLETE` attempt but does not prevent a different safe route.
 
 ## Frontier contract
@@ -42,7 +59,14 @@ The anti-repeat flag suppresses an unchanged `COMPLETE` attempt but does not pre
 
 ## Side-effect boundary
 
-Every v0.1 route decision emits `side_effect_authorized=false`. No network access is allowed by the project sandbox default. This is deliberate: the first comparison should establish whether Kora reproduces the existing router and frontier consistently before any connector is granted write access.
+Every v0.1 route decision emits `side_effect_authorized=false`. The authored
+project manifest keeps `network.defaultAction: deny`; these changes do not
+broaden it. The saved source export of existing release `rel_4wbyk58gsiuzfh8f`
+instead contains `allow` and `inheritManaged: true`. That discrepancy must not
+be treated as proof of deny in the immutable release; its server-side origin
+and compiled execution policy still require verification. The release does not
+include the subsequent source fixes. This pilot must establish routing
+consistency before any connector is granted write access.
 
 ## Phase 2 gate
 

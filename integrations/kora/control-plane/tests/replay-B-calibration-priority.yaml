@@ -1,0 +1,54 @@
+"apiVersion": "kora/v1"
+"kind": "Test"
+"metadata":
+  "name": "replay-B-calibration-priority"
+"spec":
+  "target":
+    "workflow": "cile-hourly-control-plane"
+    "node": "route-activation"
+  "input":
+    "inline":
+      "activation_id": "synthetic-B-calibration-priority"
+      "lane": "B"
+      "scheduled_at": "2026-09-19T21:40:00+02:00"
+      "scouting_due": false
+      "unfinished_safe_write": false
+      "active_wip_count": 3
+      "candidate_present": true
+      "metadata_source_ready": true
+      "fulltext_ready": true
+      "proposal_persisted": true
+      "mandatory_fields_accounted": true
+      "framework_assessed": true
+      "independent_comparison_ready": true
+      "references_ready": true
+      "limitations_caveats_ready": true
+      "version_guards_match": true
+      "validation_ready": false
+      "validated": false
+      "writer_ready": false
+      "calibration_case_ready": true
+      "identity_debt_due": false
+      "engineering_blocker": true
+      "repeat_without_changed_prerequisite": false
+      "frontier_gate": "F5_ASSESSMENT_COMPLETE"
+      "next_gate": "F6_VALIDATION_READY"
+      "frontier_consistent": true
+      "assessment_completed": true
+      "validation_accepted": false
+      "assessment_distance_to_f5": 0
+  "checks":
+    - "type": "schema"
+      "gate": true
+    - "type": "exact"
+      "gate": true
+      "path": "$.route"
+      "expected": "CALIBRATION_CASE"
+    - "type": "exact"
+      "gate": true
+      "path": "$.side_effect_authorized"
+      "expected": false
+    - "type": "exact"
+      "gate": true
+      "path": "$.pilot_mode"
+      "expected": "observe_only"

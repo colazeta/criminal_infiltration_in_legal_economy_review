@@ -59,6 +59,10 @@ types:
         type: boolean
       repeat_without_changed_prerequisite:
         type: boolean
+      scout_independent_of_frontier_and_wip:
+        type: boolean
+      persist_independent_of_frontier_and_wip:
+        type: boolean
     required:
       - activation_id
       - lane
@@ -157,6 +161,8 @@ types:
       identity_debt_due: {type: boolean}
       engineering_blocker: {type: boolean}
       repeat_without_changed_prerequisite: {type: boolean}
+      scout_independent_of_frontier_and_wip: {type: boolean}
+      persist_independent_of_frontier_and_wip: {type: boolean}
       frontier_gate:
         type: string
         enum: [NONE, F0_METADATA_SOURCE, F1_FULLTEXT_READY, F2_PROPOSAL_PERSISTED, F3_INDEPENDENT_COMPARISON, F4_REFERENCES_READY, F5_ASSESSMENT_COMPLETE, F6_VALIDATION_READY, F7_VALIDATED]
