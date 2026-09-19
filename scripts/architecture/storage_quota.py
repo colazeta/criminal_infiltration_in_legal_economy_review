@@ -83,38 +83,46 @@ def observe():
     account_type = child(child(root, 'viewer'), 'accounts')
     _stage = 'dataset_selection'
     available = fields(account_type)
-    # Runtime introspection supplies case-sensitive names; do not guess Account.
-    # SQL storage and legacy KV metrics are separate datasets when both exist.
-    dataset = next((f for name in ['durableObjectsSqlStorageGroups', 'durableObjectsStorageGroups']
-                    for f in available if f['name'] == name), None)
-    if not dataset:
+    # Storage datasets expose max(storedBytes); request datasets may expose row
+    # counters. Inspect the bounded provider schema instead of guessing a sum.
+    datasets = [f for f in available if re.fullmatch(r'durableObjects[A-Za-z0-9_]*Groups', f['name'])]
+    if not datasets or len(datasets) > 30:
         raise RuntimeError('quota_dataset_unavailable')
-    dataset_name = dataset['name']
-    _schema['dataset'] = dataset_name
-    _stage = 'metric_selection'
-    groups = fields(named(dataset))
-    _schema['group_fields'] = schema_names(groups)
-    aggregate = next((f for f in groups if f['name'] == 'sum'), None)
-    if not aggregate:
-        raise RuntimeError('quota_metrics_unavailable')
-    metrics = fields(named(aggregate))
-    _schema['sum_fields'] = schema_names(metrics)
-    allowed = {'rowsRead', 'rowsWritten', 'sqlRowsRead', 'sqlRowsWritten', 'readUnits', 'writeUnits', 'deleteUnits'}
-    selected = sorted(f['name'] for f in metrics if f['name'] in allowed)
-    if not selected:
-        raise RuntimeError('quota_metrics_unavailable')
+    _schema['datasets'] = schema_names(datasets)
+    _schema['aggregates'] = {}
     day = dt.datetime.now(dt.timezone.utc).date().isoformat()
-    _stage = 'aggregate_read'
-    data = query('{viewer{accounts(filter:{accountTag:' + json.dumps(account) + '}){' + dataset_name + '(limit:1,filter:{datetime_geq:' + json.dumps(day + 'T00:00:00Z') + '}){sum{' + ' '.join(selected) + '}}}}}')
-    _stage = 'aggregate_validation'
-    totals = data['viewer']['accounts'][0][dataset_name]
-    if not totals:
-        raise RuntimeError('quota_measurement_unavailable')
-    values = totals[0]['sum']
-    if set(values) != set(selected) or any(type(v) not in (int, float) or v < 0 for v in values.values()):
-        raise RuntimeError('quota_measurement_invalid')
-    return {'contract': 'CILE-STORAGE-USAGE-1', 'scope': 'account_aggregate', 'utc_day': day, 'dataset': dataset_name,
-            'metrics': values, 'object_data_exported': False, 'billing_changed': False}
+    allowed = {'rowsRead', 'rowsWritten', 'sqlRowsRead', 'sqlRowsWritten', 'readUnits', 'writeUnits', 'deleteUnits',
+               'rowsReadCount', 'rowsWrittenCount', 'sqlRowsReadCount', 'sqlRowsWrittenCount', 'storedBytes'}
+    measurements = []
+    for dataset in datasets:
+        dataset_name = dataset['name']
+        _stage = 'metric_selection'
+        groups = fields(named(dataset))
+        _schema['aggregates'][dataset_name] = {}
+        for aggregate in [f for f in groups if f['name'] in {'sum', 'max'}]:
+            metrics = fields(named(aggregate))
+            metric_names = schema_names(metrics)
+            _schema['aggregates'][dataset_name][aggregate['name']] = metric_names
+            selected = sorted(set(metric_names) & allowed)
+            if not selected:
+                continue
+            _stage = 'aggregate_read'
+            try:
+                data = query('{viewer{accounts(filter:{accountTag:' + json.dumps(account) + '}){' + dataset_name + '(limit:1,filter:{datetime_geq:' + json.dumps(day + 'T00:00:00Z') + '}){' + aggregate['name'] + '{' + ' '.join(selected) + '}}}}}')
+            except RuntimeError:
+                measurements.append({'dataset': dataset_name, 'aggregate': aggregate['name'], 'status': 'unavailable'})
+                continue
+            _stage = 'aggregate_validation'
+            totals = data['viewer']['accounts'][0][dataset_name]
+            if not totals:
+                measurements.append({'dataset': dataset_name, 'aggregate': aggregate['name'], 'status': 'no_measurement'})
+                continue
+            values = totals[0][aggregate['name']]
+            if set(values) != set(selected) or any(type(v) not in (int, float) or v < 0 for v in values.values()):
+                raise RuntimeError('quota_measurement_invalid')
+            measurements.append({'dataset': dataset_name, 'aggregate': aggregate['name'], 'status': 'measured', 'metrics': values})
+    return {'contract': 'CILE-STORAGE-USAGE-2', 'scope': 'account_aggregate', 'utc_day': day, 'schema': _schema,
+            'measurements': measurements, 'quota_exhaustion_confirmed': False, 'object_data_exported': False, 'billing_changed': False}
 
 
 if __name__ == '__main__':
