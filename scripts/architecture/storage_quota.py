@@ -34,6 +34,15 @@ def query(text):
 
 
 _stage = 'initialise'
+_schema = {}
+
+
+def schema_names(values):
+    """Only fixed introspection field names; never a value from storage or errors."""
+    names = [value.get('name') for value in values]
+    if len(names) > 100 or any(not isinstance(name, str) or not re.fullmatch(r'[A-Za-z][A-Za-z0-9_]{0,150}', name) for name in names):
+        raise RuntimeError('quota_schema_invalid')
+    return sorted(names)
 
 def fields(name):
     if not re.fullmatch(r'[A-Za-z][A-Za-z0-9_]{0,150}', name):
@@ -58,6 +67,7 @@ def named(field):
 
 def observe():
     global _stage
+    _schema.clear()
     _stage = 'account_resolution'
     account = resolve_account()
     if not re.fullmatch(r'[a-f0-9]{32}', account):
@@ -80,12 +90,15 @@ def observe():
     if not dataset:
         raise RuntimeError('quota_dataset_unavailable')
     dataset_name = dataset['name']
+    _schema['dataset'] = dataset_name
     _stage = 'metric_selection'
     groups = fields(named(dataset))
+    _schema['group_fields'] = schema_names(groups)
     aggregate = next((f for f in groups if f['name'] == 'sum'), None)
     if not aggregate:
         raise RuntimeError('quota_metrics_unavailable')
     metrics = fields(named(aggregate))
+    _schema['sum_fields'] = schema_names(metrics)
     allowed = {'rowsRead', 'rowsWritten', 'sqlRowsRead', 'sqlRowsWritten', 'readUnits', 'writeUnits', 'deleteUnits'}
     selected = sorted(f['name'] for f in metrics if f['name'] in allowed)
     if not selected:
@@ -112,5 +125,5 @@ if __name__ == '__main__':
                 'quota_query_not_authorised_or_supported', 'quota_metrics_unavailable', 'quota_measurement_unavailable',
                 'quota_schema_unavailable', 'quota_dataset_unavailable'}
         category = str(error) if str(error) in safe else 'quota_diagnostic_unavailable'
-        print(json.dumps({'diagnostic': category, 'stage': _stage, 'exception_type': type(error).__name__ if type(error).__name__ in {'RuntimeError','KeyError','IndexError','TypeError','StopIteration'} else 'other'}))
+        print(json.dumps({'diagnostic': category, 'stage': _stage, 'schema': _schema, 'exception_type': type(error).__name__ if type(error).__name__ in {'RuntimeError','KeyError','IndexError','TypeError','StopIteration'} else 'other'}))
         raise SystemExit(1) from None
