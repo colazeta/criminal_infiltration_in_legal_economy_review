@@ -5,9 +5,11 @@
   if(!status||!button||!globalThis.CILEPaperProcessing)return;
   const P=globalThis.CILEPaperProcessing;
   const counts=document.createElement('p');counts.id='enrichment-statistics-counts';counts.hidden=true;status.after(counts);
+  button.hidden=true;
   let busy=false;
   function display(index){
     const view=P.analysisSummary(index);status.textContent=view.text;
+    button.hidden=!['error','partial'].includes(view.phase);
     counts.hidden=!view.counts;counts.textContent='';
     if(view.counts){const c=view.counts;
       counts.textContent=`Analisi dettagliate: ${c.analyses}. Basate sul testo completo: ${c.fullText}. Completamento registrato: ${c.completed} su ${view.denominator} paper con dati caricati.`;
@@ -15,15 +17,15 @@
     }
   }
   async function refresh(){
-    if(busy)return;busy=true;button.disabled=true;status.textContent='Caricamento dello stato delle analisi…';
+    if(busy)return;busy=true;button.disabled=true;button.hidden=true;status.textContent='Caricamento dello stato delle analisi…';
     counts.hidden=true;counts.textContent='';status.setAttribute('aria-busy','true');
     try{
       const register=await P.readJSON('./data/paper-register.json');
       if(register.schemaVersion!==1||!Array.isArray(register.records))throw Error('invalid_register');
-      let index;index=P.createIndex(register.records,{selectSupport:()=>({readingAid:null}),onUpdate:()=>{if(index)display(index);}});
+      let index;index=P.createIndex(register.records,{loadSummaries:false,onUpdate:()=>{if(index)display(index);}});
       await index.scan();display(index);
-    }catch{status.textContent='Impossibile caricare lo stato delle analisi. Riprova.';counts.hidden=true;counts.textContent='';}
-    finally{busy=false;button.disabled=false;button.textContent='Aggiorna dati delle analisi';status.setAttribute('aria-busy','false');}
+    }catch{status.textContent='Impossibile caricare lo stato delle analisi. Riprova.';counts.hidden=true;counts.textContent='';button.hidden=false;}
+    finally{busy=false;button.disabled=false;button.textContent='Riprova caricamento';status.setAttribute('aria-busy','false');}
   }
   button.addEventListener('click',refresh);refresh();
 })();

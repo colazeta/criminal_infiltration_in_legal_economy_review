@@ -1,0 +1,87 @@
+{
+  "observed_at": "2026-09-19T12:07:32Z",
+  "audit_workflow": "https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/actions/runs/35441949713",
+  "backup_workflow": "https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/actions/runs/35441949710",
+  "ciphertext_artifact": "https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/actions/runs/35441949710/artifacts/10584162755",
+  "artifact_zip_sha256": "35602b238d44dfdd2224a9f3c92551bc6a13f7cd5647b3023938921a3f474049",
+  "audit": {
+    "contract": "CILE-ARCHITECTURE-AUDIT-1",
+    "commit": "aeeee7245ca5b20d5fc5b9afde06aab7be23fedd",
+    "backend": "durable_object_sqlite",
+    "scope": "entire_enrichment_store",
+    "complete": true,
+    "counts": {
+      "enrichment_adjudication_receipts": 0,
+      "enrichment_analyses": 1,
+      "enrichment_attempts": 193,
+      "enrichment_bibliography_snapshots": 2,
+      "enrichment_calibration_receipts": 0,
+      "enrichment_citation_coverage": 71,
+      "enrichment_citation_observations": 1819,
+      "enrichment_datasets": 0,
+      "enrichment_documents": 1,
+      "enrichment_findings": 3,
+      "enrichment_framework_proposals": 2,
+      "enrichment_inputs": 322,
+      "enrichment_iteration_attempts": 188,
+      "enrichment_iterations": 188,
+      "enrichment_jobs": 1288,
+      "enrichment_proposals": 2,
+      "enrichment_runs": 198,
+      "enrichment_schedules": 1,
+      "enrichment_sources": 110,
+      "enrichment_studies": 2,
+      "enrichment_targets": 294,
+      "enrichment_variable_uses": 0
+    },
+    "schema_sha256": "cd19f771743839524cc78e164c967efe676c17013b9e11893b945206d5afd63c",
+    "state_sha256": "99008d65fe516126070b8118c213e8bd855704da436885bb43912dbbdb3eb903",
+    "checked_public_targets": 294,
+    "public_states": {
+      "not_assessed": 292,
+      "withheld": 2
+    },
+    "completion_states": {
+      "not_attested": 294
+    },
+    "issues": {},
+    "integrity_verified": true,
+    "private_content_exported": false,
+    "scientific_decisions_changed": false,
+    "cutover_ready": false
+  },
+  "backup": {
+    "contract": "CILE-PRIVATE-ARCHIVE-BACKUP-1",
+    "commit": "aeeee7245ca5b20d5fc5b9afde06aab7be23fedd",
+    "scope": "entire_enrichment_store",
+    "snapshot_id": "26762e49-6249-415a-86bb-e478fe962d80",
+    "sql_tables": 22,
+    "sql_rows": 4685,
+    "kv_entries": 418,
+    "state_sha256": "99008d65fe516126070b8118c213e8bd855704da436885bb43912dbbdb3eb903",
+    "kv_sha256": "2afe8efc0ae6404c947956ce2ec945ad22c7ee75da010008a3b22fd7631d26b8",
+    "isolated_restore_verified": true,
+    "integrity_verified": true,
+    "issues": {},
+    "checked_public_targets": 294,
+    "public_states": {
+      "not_assessed": 292,
+      "withheld": 2
+    },
+    "completion_states": {
+      "not_attested": 294
+    },
+    "excluded_transient_prefixes": [
+      "nonce:",
+      "probe:"
+    ],
+    "other_stores_included": false,
+    "plaintext_persisted": false,
+    "production_restored": false,
+    "cutover_ready": false,
+    "concurrent_change_checked": true,
+    "ciphertext_sha256": "807c68c27264e086788e66877a10bf68f4e3ca43639dd1b2d218ee8779cfbcc9",
+    "file_sha256": "011ea4d14a437c2eb458c98d453023baccf003a24b284cafb2a900b23e0ec2aa"
+  },
+  "complete_architecture_cutover": false
+}
