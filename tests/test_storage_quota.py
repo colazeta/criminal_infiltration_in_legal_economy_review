@@ -10,16 +10,48 @@ class StorageQuotaTest(unittest.TestCase):
             return {'name': name, 'type': {'name': kind}}
         with patch.dict(os.environ, {'CLOUDFLARE_ACCOUNT_ID': 'a' * 32}), patch.object(
                 quota, 'fields', side_effect=[
-                    [field('durableObjectsStorageGroups', 'Groups')], [field('sum', 'Sum')],
+                    [field('viewer','viewer')], [field('accounts','account')], [field('durableObjectsSqlStorageGroups', 'Groups')], [field('sum', 'Sum')],
                     [field('sqlRowsRead', 'UInt64'), field('sqlRowsWritten', 'UInt64'), field('privateNote', 'String')]
-                ]), patch.object(quota, 'query', return_value={'viewer': {'accounts': [{'durableObjectsStorageGroups': [
-                    {'sum': {'sqlRowsRead': 5000000, 'sqlRowsWritten': 42000}}]}]}}) as call:
+                ]), patch.object(quota, 'query', side_effect=[{'__schema':{'queryType':{'name':'query'}}}, {'viewer': {'accounts': [{'durableObjectsSqlStorageGroups': [
+                    {'sum': {'sqlRowsRead': 5000000, 'sqlRowsWritten': 42000}}]}]}}]) as call:
             out = quota.observe()
-            self.assertEqual(out['metrics']['sqlRowsRead'], 5000000)
+            self.assertEqual(out['measurements'][0]['metrics']['sqlRowsRead'], 5000000)
             self.assertFalse(out['billing_changed'])
             self.assertNotIn('a' * 32, str(out))
             self.assertNotIn('privateNote', call.call_args.args[0])
 
+    def test_storage_max_does_not_prevent_discovery_of_invocation_row_counts(self):
+        def field(name, kind):
+            return {'name': name, 'type': {'name': kind}}
+        data = [
+            {'__schema': {'queryType': {'name': 'query'}}},
+            {'viewer': {'accounts': [{'durableObjectsSqlStorageGroups': [{'max': {'storedBytes': 1048576}}]}]}},
+            {'viewer': {'accounts': [{'durableObjectsInvocationsAdaptiveGroups': [{'sum': {'sqlRowsRead': 6100000}}]}]}}
+        ]
+        schema = [[field('viewer', 'viewer')], [field('accounts', 'account')],
+                  [field('durableObjectsSqlStorageGroups', 'Storage'), field('durableObjectsInvocationsAdaptiveGroups', 'Invocation')],
+                  [field('max', 'Maximum')], [field('storedBytes', 'UInt64')],
+                  [field('sum', 'Sum')], [field('sqlRowsRead', 'UInt64')]]
+        with patch.object(quota, 'resolve_account', return_value='a'*32), patch.object(quota, 'fields', side_effect=schema), patch.object(quota, 'query', side_effect=data):
+            out = quota.observe()
+        self.assertEqual([x['aggregate'] for x in out['measurements']], ['max', 'sum'])
+        self.assertEqual(out['measurements'][1]['metrics']['sqlRowsRead'], 6100000)
+        self.assertFalse(out['quota_exhaustion_confirmed'])
+
     def test_unknown_schema_names_cannot_become_queries(self):
         with self.assertRaisesRegex(RuntimeError, 'quota_schema_invalid'):
             quota.fields('private { archive }')
+
+    def test_schema_diagnostic_retains_names_without_values_or_descriptions(self):
+        self.assertEqual(quota.schema_names([{'name': 'rowsReadCount', 'description': 'private', 'value': 'secret'}]), ['rowsReadCount'])
+        for unsafe in [[{'name': 'unsafe field'}], [{'name': None}], [{'name': 'x'}] * 101]:
+            with self.assertRaisesRegex(RuntimeError, 'quota_schema_invalid'):
+                quota.schema_names(unsafe)
+
+    def test_nested_non_null_list_wrappers_resolve_without_assuming_a_type_name(self):
+        ref = {'name': 'account', 'kind': 'OBJECT'}
+        for kind in ['NON_NULL','LIST','NON_NULL']:
+            ref = {'kind': kind, 'name': None, 'ofType': ref}
+        self.assertEqual(quota.named({'type': ref}), 'account')
+        with self.assertRaisesRegex(RuntimeError, 'quota_type_wrapper_unavailable'):
+            quota.named({'type': {'kind': 'NON_NULL', 'name': None}})

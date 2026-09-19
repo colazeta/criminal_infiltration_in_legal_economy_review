@@ -3,13 +3,14 @@
 import {readFileSync,writeFileSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
 import vm from 'node:vm';
-import {isolatedStore} from './private-backup.mjs';
+import {isolatedStore,captureBackup} from './private-backup.mjs';
+import {archiveBackupPage} from '../../curator-app/src/archive-preservation.js';
 import {syncTargets} from '../../curator-app/src/paper-enrichment.js';
 import {ingestAnnotation,auditAnnotations,readPublicAnnotations} from '../../curator-app/src/annotation-archive.js';
 import {readPublicIndex} from '../../curator-app/src/public-paper-research.js';
 import {sha256} from '../../curator-app/src/review-v2.js';
 
-export async function preflight(data,register){
+export async function preflight(data,register,{restore=false}={}){
  const assert=value=>{if(!value)throw Error('annotation_preflight_failed')};
  assert(data.repository==='colazeta/criminal_infiltration_in_legal_economy_review'&&Array.isArray(data.issues)&&Array.isArray(data.comments));
  const issues=new Map(data.issues.map(i=>[i.number,i]));assert(issues.size===data.issues.length&&new Set(data.comments.map(c=>c.id)).size===data.comments.length);
@@ -39,18 +40,20 @@ export async function preflight(data,register){
   const summary=P.analysisSummary({rows:states,progress:{total:rows.length,checked:rows.length,scanned:true,running:false,errors:0}}),stats=C.aggregate(register.records,classification);
   assert(summary.counts.classified===stats.classified);
   for(const category of stats.categories)assert(category.any===register.records.filter(r=>P.matches(states.get(r.id),'all',category.key)).length);
+  const backup=restore?(await captureBackup(request=>archiveBackupPage(env,x.storage,request),'synthetic-local-preflight-key-not-production','f'.repeat(40))).receipt:null;
   return {report:{contract:'CILE-ANNOTATION-PREFLIGHT-1',scope:'isolated_captured_inputs',source_captured_at:data.captured_at,
    source_issues:issues.size,source_comments:data.comments.length,candidates_checked:rows.length,audit,
-   public_counts:summary.counts,class_counts:stats.categories,filter_statistics_agree:true,idempotency_verified:true,production_migrated:false,scientific_decisions_changed:false},ledger};
+   public_counts:summary.counts,class_counts:stats.categories,filter_statistics_agree:true,idempotency_verified:true,isolated_restore:backup,production_migrated:false,scientific_decisions_changed:false},ledger};
  }finally{x.db.close()}
 }
 
 if(process.argv[1]===fileURLToPath(import.meta.url)){
  try{
-  if(process.argv.length<3||process.argv.length>4)throw Error('usage');
-  const bytes=readFileSync(process.argv[2],'utf8'),data=JSON.parse(bytes),register=JSON.parse(readFileSync(new URL('../../site/data/paper-register.json',import.meta.url)));
-  const {report,ledger}=await preflight(data,register);report.source_sha256=await sha256(bytes);
-  if(process.argv[3])writeFileSync(process.argv[3],JSON.stringify({contract:'CILE-ANNOTATION-MIGRATION-LEDGER-1',scope:report.scope,source_sha256:report.source_sha256,entries:ledger}),{mode:0o600,flag:'wx'});
+  const args=process.argv.slice(2),restore=args.at(-1)==='--restore-check';if(restore)args.pop();
+  if(args.length<1||args.length>2)throw Error('usage');
+  const bytes=readFileSync(args[0],'utf8'),data=JSON.parse(bytes),register=JSON.parse(readFileSync(new URL('../../site/data/paper-register.json',import.meta.url)));
+  const {report,ledger}=await preflight(data,register,{restore});report.source_sha256=await sha256(bytes);
+  if(args[1])writeFileSync(args[1],JSON.stringify({contract:'CILE-ANNOTATION-MIGRATION-LEDGER-1',scope:report.scope,source_sha256:report.source_sha256,entries:ledger}),{mode:0o600,flag:'wx'});
   process.stdout.write(JSON.stringify(report,null,2)+'\n');
  }catch{process.stderr.write('annotation_preflight_failed\n');process.exitCode=1}
 }

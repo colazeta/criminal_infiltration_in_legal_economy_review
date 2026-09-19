@@ -72,6 +72,37 @@
   ],
   "filter_statistics_agree": true,
   "idempotency_verified": true,
+  "isolated_restore": {
+    "contract": "CILE-PRIVATE-ARCHIVE-BACKUP-2",
+    "commit": "ffffffffffffffffffffffffffffffffffffffff",
+    "scope": "entire_enrichment_store",
+    "snapshot_id": "22962bd6-aab3-48c0-ab3b-4c6fc297388d",
+    "sql_tables": 46,
+    "sql_rows": 20343,
+    "kv_entries": 4033,
+    "state_sha256": "e008cd59f76bbf8b671aec997464655d7c68a188cdf85aa3a639f5c98651b096",
+    "kv_sha256": "f58f8cf6bc09dce4c31e3c12dbc47af39bbe6cd9878ef4e373388c5c177de064",
+    "isolated_restore_verified": true,
+    "integrity_verified": true,
+    "issues": {},
+    "checked_public_targets": 294,
+    "public_states": {
+      "not_assessed": 294
+    },
+    "completion_states": {
+      "not_attested": 294
+    },
+    "excluded_transient_prefixes": [
+      "nonce:",
+      "probe:"
+    ],
+    "other_stores_included": false,
+    "plaintext_persisted": false,
+    "production_restored": false,
+    "cutover_ready": false,
+    "concurrent_change_checked": true,
+    "ciphertext_sha256": "80e5c6650ebcb1f45aec2c27f85413a2e4a0cc8d77cf234c2a95ea1df11d296f"
+  },
   "production_migrated": false,
   "scientific_decisions_changed": false,
   "source_sha256": "fc4369ca691e99ced0d8769560e334fde346e5097f1c7319a1ff0c94d937e605"

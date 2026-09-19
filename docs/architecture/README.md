@@ -6,6 +6,10 @@ implemented code, configured storage, observed runtime and the required target.
 The normative concepts remain in `ontology/cile-review-profile.yaml`; this document
 does not create alternative scientific entities or supply missing decisions.
 
+The dated [implementation status](consolidation-status-2026-09-19.md) records
+executed migrations, protected receipts, the blocked deployment, preserved input
+identities and the remaining authority changes. Read it before claiming cutover.
+
 ## Conceptual relationships
 
 ```mermaid

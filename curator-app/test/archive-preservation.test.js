@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {isolatedStore,captureBackup,restoreBackup} from '../../scripts/architecture/private-backup.mjs';
-import {archiveBackupPage,encodeStored,decodeStored} from '../src/archive-preservation.js';
+import {archiveBackupPage,encodeStored,decodeStored,openBackupPage,sealBackupPage,BACKUP_CONTRACT,LEGACY_BACKUP_CONTRACT} from '../src/archive-preservation.js';
 import {syncTargets,saveSource} from '../src/paper-enrichment.js';
 import {serviceSignature} from '../src/enrichment-store.js';
 
@@ -54,4 +54,28 @@ test('backup operation requires a signed exact deployment and a closed fixed rea
  const ts=String(Date.now()),nonce=crypto.randomUUID();const request=new Request('https://enrichment.internal/machine',{method:'POST',body,headers:{'Content-Type':'application/json','X-Enrichment-Timestamp':ts,'X-Enrichment-Nonce':nonce,'X-Enrichment-Signature':await serviceSignature(secret,ts,nonce,body)}});
  const response=await x.core.machine(request);assert.equal(response.status,200);assert.ok((await response.json()).ciphertext);
  await assert.rejects(x.call({part:'sql',table:'sqlite_master',offset:0,snapshot_id:crypto.randomUUID()}));x.db.close();
+});
+test('backup advances by indexed row identity across gaps and nonpositive rowids',async()=>{
+ const x=await fixture();x.db.exec('UPDATE enrichment_targets SET rowid=-5 WHERE rowid=1; UPDATE enrichment_targets SET rowid=0 WHERE rowid=2; UPDATE enrichment_targets SET rowid=10000 WHERE rowid=3');
+ const seen=[];const {bundle,receipt}=await captureBackup(async request=>{if(request.part==='sql')seen.push(request);return x.call(request)},secret,commit);
+ assert.equal(bundle.contract,BACKUP_CONTRACT);assert.equal(receipt.checked_public_targets,294);
+ assert.ok(seen.every(p=>!Object.hasOwn(p,'offset')));
+ const pages=seen.filter(p=>p.table==='enrichment_targets');assert.equal(pages.length,3);assert.equal(pages[0].after,null);assert.ok(pages[2].after>pages[1].after);
+ const plan=x.db.prepare('EXPLAIN QUERY PLAN SELECT rowid AS __backup_rowid,* FROM enrichment_targets WHERE rowid>? ORDER BY rowid LIMIT 100').all(100);
+ assert.ok(plan.some(p=>/SEARCH.*INTEGER PRIMARY KEY/.test(p.detail)));assert.ok(!plan.some(p=>/SCAN/.test(p.detail)));
+ x.db.close();
+});
+test('restore retains v1 transport compatibility but refuses pages with repeated cursors or mixed contracts',async()=>{
+ const x=await fixture();const {bundle}=await captureBackup(x.call,secret,commit);const pages=[],offsets=new Map();
+ for(const envelope of bundle.pages){
+  const page=await openBackupPage(envelope,secret,commit,bundle.snapshot_id);
+  if(page.part==='catalogue')delete page.sql_pagination;
+  if(page.part==='sql'){page.offset=offsets.get(page.table)||0;offsets.set(page.table,page.offset+page.rows.length);delete page.after;delete page.rowids}
+  pages.push(await sealBackupPage(page,secret,commit,bundle.snapshot_id,LEGACY_BACKUP_CONTRACT));
+ }
+ const legacy={...bundle,contract:LEGACY_BACKUP_CONTRACT,pages};const receipt=await restoreBackup(legacy,secret);assert.equal(receipt.checked_public_targets,294);assert.equal(receipt.contract,LEGACY_BACKUP_CONTRACT);
+ const bad=structuredClone(bundle);const page=await openBackupPage(bad.pages[1],secret,commit,bundle.snapshot_id);page.rowids[1]=page.rowids[0];
+ bad.pages[1]=await sealBackupPage(page,secret,commit,bundle.snapshot_id);await assert.rejects(restoreBackup(bad,secret));
+ const mixed={...bundle,pages:[pages[0],...bundle.pages.slice(1)]};await assert.rejects(restoreBackup(mixed,secret));
+ x.db.close();
 });

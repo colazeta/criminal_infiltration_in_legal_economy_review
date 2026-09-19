@@ -878,6 +878,109 @@
       ],
       "checked_at": "2026-09-19",
       "basis": "The Springer version of record identifies Livio Ferrante, Stefania Fontana and Francesco Reito in Small Business Economics volume 56, pages 1461–1484, with online publication on 27 November 2019; the independent RePEc record confirms volume 56 issue 4, pages 1461–1484 and the 2021 bibliographic issue year. The queue year is therefore corrected to 2021 while the online-first 2019 date remains documented in provenance. This declaration repairs bibliographic metadata only and makes no eligibility, canonical-identity, framework, completion, rights, validation or publication decision."
+    },
+    {
+      "candidate_id": "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-008",
+      "expected": {
+        "title": "Organized Crime, Public Procurement and Firms",
+        "doi": "",
+        "authors": "",
+        "year": "",
+        "venue": "",
+        "verification_status": "metadata_partial",
+        "metadata_confidence": "",
+        "review_stage": "metadata_fix",
+        "current_status": "pending",
+        "current_decision": "",
+        "possible_duplicate": "",
+        "metadata_conflict": ""
+      },
+      "replacement": {
+        "authors": "Elena Stella",
+        "year": "2026",
+        "work_type": "working_paper",
+        "source_links": "https://elena-stella.com/papers/stella_jmp.pdf; https://www.kellogg.northwestern.edu/academics-research/events/2025/04/15/elena-stella"
+      },
+      "evidence": [
+        {
+          "role": "primary_metadata",
+          "url": "https://elena-stella.com/papers/stella_jmp.pdf"
+        },
+        {
+          "role": "independent_institutional",
+          "url": "https://www.kellogg.northwestern.edu/academics-research/events/2025/04/15/elena-stella"
+        }
+      ],
+      "checked_at": "2026-09-19",
+      "basis": "The current author-hosted working-paper version identifies Elena Stella and is dated 6 January 2026; Northwestern Kellogg independently records Elena Stella presenting the same work in April 2025. The 2026 year therefore denotes the current version, while the institutional record preserves the earlier presentation. No DOI or formal series venue is asserted. This declaration clears only mechanical bibliographic verification and makes no eligibility, canonical-identity, framework, completion, validation, rights or publication decision."
+    },
+    {
+      "candidate_id": "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-013",
+      "expected": {
+        "title": "Bricks or cooks? Geographical and social determinants of the investment choices of mafia-type organized crime",
+        "doi": "10.1177/17488958241293927",
+        "authors": "Michele Riccardi; Mario A. Maggioni",
+        "year": "2024",
+        "venue": "",
+        "verification_status": "metadata_partial",
+        "metadata_confidence": "",
+        "review_stage": "metadata_fix",
+        "current_status": "pending",
+        "current_decision": "",
+        "possible_duplicate": "",
+        "metadata_conflict": ""
+      },
+      "replacement": {
+        "year": "2025",
+        "venue": "Criminology & Criminal Justice",
+        "work_type": "peer_reviewed",
+        "source_links": "https://journals.sagepub.com/doi/10.1177/17488958241293927; https://api.crossref.org/works/10.1177%2F17488958241293927"
+      },
+      "evidence": [
+        {
+          "role": "primary_metadata",
+          "url": "https://journals.sagepub.com/doi/10.1177/17488958241293927"
+        },
+        {
+          "role": "independent_index",
+          "url": "https://api.crossref.org/works/10.1177%2F17488958241293927"
+        }
+      ],
+      "checked_at": "2026-09-19",
+      "basis": "The DOI-bound SAGE version of record and Crossref agree on the exact article identity and Criminology & Criminal Justice manifestation. SAGE records first online publication on 13 November 2024, while Crossref records the print issue in February 2025; the queue year is therefore corrected to the 2025 bibliographic issue year while the 2024 online-first date remains documented in provenance. This declaration repairs bibliographic metadata only and makes no eligibility, canonical-identity, framework, completion, validation, rights or publication decision."
+    },
+    {
+      "candidate_id": "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-019",
+      "expected": {
+        "title": "Regulatory certification, informal governance, and productivity under weak state capacity",
+        "doi": "10.1007/s10101-026-00388-w",
+        "authors": "Claudia Cantabene; Alessandro De Iudicibus; Iacopo Grassi",
+        "year": "2026",
+        "venue": "Economics of Governance",
+        "verification_status": "metadata_partial",
+        "metadata_confidence": "",
+        "review_stage": "metadata_fix",
+        "current_status": "pending",
+        "current_decision": "",
+        "possible_duplicate": "",
+        "metadata_conflict": ""
+      },
+      "replacement": {
+        "work_type": "peer_reviewed",
+        "source_links": "https://link.springer.com/article/10.1007/s10101-026-00388-w; https://api.crossref.org/works/10.1007%2Fs10101-026-00388-w"
+      },
+      "evidence": [
+        {
+          "role": "primary_metadata",
+          "url": "https://link.springer.com/article/10.1007/s10101-026-00388-w"
+        },
+        {
+          "role": "independent_index",
+          "url": "https://api.crossref.org/works/10.1007%2Fs10101-026-00388-w"
+        }
+      ],
+      "checked_at": "2026-09-19",
+      "basis": "The DOI-bound Springer version of record and Crossref agree on Claudia Cantabene, Alessandro De Iudicibus and Iacopo Grassi, the exact title, 2026 publication, Economics of Governance and journal-article manifestation. This declaration fills only the manifestation type and authoritative source provenance and makes no eligibility, canonical-identity, framework, completion, validation, rights or publication decision."
     }
   ]
 }

@@ -192,11 +192,13 @@ have already moved from their remaining independent CSV/JSON authorities.
 
 A second preserved capture includes all 797 repository issues/PRs and all 1,304
 issue-comments, with every comment parent present. The reproducible command
-`node scripts/architecture/preflight_annotations.mjs <private-github-capture.json> <new-private-ledger.json>`
+`node scripts/architecture/preflight_annotations.mjs <private-github-capture.json> <new-private-ledger.json> --restore-check`
 imports and replays every input in isolated SQLite, validates every original and
 relation, projects all 294 current candidates, and compares the actual browser
 filter and statistics consumers against those same API rows. It makes no remote
-write and stores any requested per-input ledger with mode 0600.
+write and stores any requested per-input ledger with mode 0600. The optional
+`--restore-check` additionally encrypts and restores this complete isolated
+population, restarts the store and runs its whole architecture audit.
 
 The report `annotation-preflight-2026-09-19.json` records the input digest, 2,012
 source snapshots and 317 annotations (291 candidate-bound, 8 unresolved, 18
@@ -206,3 +208,5 @@ or secondary proposals. Zero completion decisions are created. Category totals
 are candidate/category/role occurrences, not distinct scientific works. The
 rehearsal covers current captured GitHub inputs; it is not a restored production
 archive and does not include the two separate private extraction proposals.
+The isolated restoration verified 46 tables, 20,343 rows, 4,033 KV entries and
+all 294 candidates. These numbers describe the rehearsal, not production counts.
