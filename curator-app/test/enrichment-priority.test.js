@@ -9,7 +9,7 @@ function fixture(t) {
   const db=new DatabaseSync(':memory:');
   t.after(()=>db.close());
   db.exec('PRAGMA foreign_keys=ON');
-  db.exec(readFileSync(new URL('../migrations/0003_paper_enrichment.sql',import.meta.url),'utf8'));
+  db.exec(readFileSync(new URL('../migrations/0003_paper_enrichment.sql',import.meta.url),'utf8'));db.exec(readFileSync(new URL('../migrations/0007_extraction_relations.sql',import.meta.url),'utf8'));
   const kv=new Map();
   const storage={
     sql:{exec(sql,...values){return {toArray:()=>db.prepare(sql).all(...values)};}},

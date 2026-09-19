@@ -1,0 +1,225 @@
+{
+  "profile_version": "0.4.2",
+  "contract": "CILE-EXTRACTION-RELATIONS-1",
+  "migration": "curator-app/migrations/0007_extraction_relations.sql",
+  "scope": "immutable proposal-scoped assertions; no automatic scientific acceptance",
+  "fact_fields": {
+    "overview": [
+      "summary",
+      "contribution",
+      "research_question",
+      "infiltration_definition",
+      "infiltration_operationalisation",
+      "authors_limitations",
+      "analyst_limitations"
+    ],
+    "studies": [
+      "study_type",
+      "research_question",
+      "population",
+      "sampling",
+      "sample_size",
+      "observation_unit",
+      "analysis_unit",
+      "geography",
+      "period"
+    ],
+    "datasets": [
+      "name",
+      "provider",
+      "accessibility",
+      "selection",
+      "coverage",
+      "limitations"
+    ],
+    "analyses": [
+      "design",
+      "method",
+      "comparison",
+      "identification",
+      "validation",
+      "robustness"
+    ],
+    "variable_uses": [
+      "original_name",
+      "concept",
+      "operationalisation",
+      "unit",
+      "period",
+      "transformation",
+      "role"
+    ],
+    "findings": [
+      "statement",
+      "finding_type",
+      "direction",
+      "estimate",
+      "unit",
+      "uncertainty",
+      "reference_comparison",
+      "population_scope",
+      "temporal_scope",
+      "caveat"
+    ],
+    "framework": [
+      "rationale"
+    ],
+    "secondary": [
+      "rationale"
+    ]
+  },
+  "tables": {
+    "enrichment_proposal_details": {
+      "class": "ScientificExtractionProposal",
+      "fields": {
+        "proposal_id": "enrichment_proposal_id",
+        "source_coverage": "extraction_source_coverage",
+        "agent": "extraction_agent",
+        "model": "extraction_model",
+        "prompt_sha256": "extraction_prompt_sha256"
+      }
+    },
+    "enrichment_proposal_sources": {
+      "class": "ScientificExtractionProposal",
+      "fields": {
+        "proposal_id": "enrichment_proposal_id",
+        "source_id": "enrichment_source_id",
+        "position": "v2_position"
+      }
+    },
+    "enrichment_spans": {
+      "class": "EvidenceSpan",
+      "fields": {
+        "proposal_id": "enrichment_proposal_id",
+        "span_id": "extraction_id",
+        "source_id": "extraction_source_id",
+        "position": "v2_position",
+        "start_offset": "extraction_start_offset",
+        "end_offset": "extraction_end_offset",
+        "locator": "extraction_locator"
+      }
+    },
+    "enrichment_studies_order": {
+      "class": "ReportedStudy",
+      "fields": {
+        "proposal_id": "enrichment_proposal_id",
+        "study_id": "enrichment_study_id",
+        "position": "v2_position"
+      }
+    },
+    "enrichment_datasets_order": {
+      "class": "StudyDatasetUse",
+      "fields": {
+        "proposal_id": "enrichment_proposal_id",
+        "dataset_id": "enrichment_dataset_id",
+        "position": "v2_position"
+      }
+    },
+    "enrichment_analyses_order": {
+      "class": "ReportedAnalysis",
+      "fields": {
+        "proposal_id": "enrichment_proposal_id",
+        "analysis_id": "enrichment_analysis_id",
+        "position": "v2_position"
+      }
+    },
+    "enrichment_variable_uses_order": {
+      "class": "AnalysisVariableUse",
+      "fields": {
+        "proposal_id": "enrichment_proposal_id",
+        "variable_use_id": "enrichment_variable_use_id",
+        "position": "v2_position"
+      }
+    },
+    "enrichment_findings_order": {
+      "class": "ReportedFinding",
+      "fields": {
+        "proposal_id": "enrichment_proposal_id",
+        "finding_id": "enrichment_finding_id",
+        "position": "v2_position"
+      }
+    },
+    "enrichment_analysis_datasets": {
+      "class": "ReportedAnalysis",
+      "fields": {
+        "proposal_id": "enrichment_proposal_id",
+        "analysis_id": "enrichment_analysis_id",
+        "dataset_id": "enrichment_dataset_id",
+        "position": "v2_position"
+      }
+    },
+    "enrichment_variable_datasets": {
+      "class": "AnalysisVariableUse",
+      "fields": {
+        "proposal_id": "enrichment_proposal_id",
+        "variable_use_id": "enrichment_variable_use_id",
+        "dataset_id": "enrichment_dataset_id",
+        "position": "v2_position"
+      }
+    },
+    "enrichment_finding_variables": {
+      "class": "ReportedFinding",
+      "fields": {
+        "proposal_id": "enrichment_proposal_id",
+        "finding_id": "enrichment_finding_id",
+        "variable_use_id": "enrichment_variable_use_id",
+        "position": "v2_position"
+      }
+    },
+    "enrichment_secondary_classes": {
+      "class": "ClinicalContributionProposal",
+      "fields": {
+        "proposal_id": "enrichment_proposal_id",
+        "category": "extraction_category",
+        "position": "v2_position"
+      }
+    },
+    "enrichment_framework_alternatives": {
+      "class": "ClinicalContributionProposal",
+      "fields": {
+        "proposal_id": "enrichment_proposal_id",
+        "category": "extraction_alternative"
+      }
+    },
+    "enrichment_facts": {
+      "class": "AnalyticalAnnotation",
+      "fields": {
+        "fact_id": "annotation_id",
+        "proposal_id": "enrichment_proposal_id",
+        "scope": "annotation_scope",
+        "field_name": "annotation_field",
+        "study_id": "enrichment_study_id",
+        "dataset_id": "enrichment_dataset_id",
+        "analysis_id": "enrichment_analysis_id",
+        "variable_use_id": "enrichment_variable_use_id",
+        "finding_id": "enrichment_finding_id",
+        "secondary_category": "extraction_category",
+        "status": "extraction_status",
+        "value": "extraction_value",
+        "origin": "extraction_origin"
+      }
+    },
+    "enrichment_fact_evidence": {
+      "class": "AnalyticalAnnotation",
+      "fields": {
+        "fact_id": "annotation_id",
+        "proposal_id": "enrichment_proposal_id",
+        "span_id": "extraction_evidence_span_ids",
+        "position": "v2_position"
+      }
+    },
+    "enrichment_normalization_receipts": {
+      "class": "ReviewEvent",
+      "fields": {
+        "receipt_id": "event_id",
+        "proposal_id": "enrichment_proposal_id",
+        "transformation_version": "version",
+        "source_sha256": "enrichment_payload_sha256",
+        "rebuilt_sha256": "enrichment_payload_sha256",
+        "write_kind": "annotation_write_kind",
+        "verified_at": "generated_at_time"
+      }
+    }
+  },
+  "semantics": "Original proposal and child payload JSON are immutable submission history. All current extraction reads rebuild from the typed relations and assertions and check the original payload digest. No latest-string conflict resolution, identity reconciliation or human approval is implied."
+}

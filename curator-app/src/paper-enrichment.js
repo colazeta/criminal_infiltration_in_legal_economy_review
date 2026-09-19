@@ -5,6 +5,7 @@ import { canonicalJson, sha256 } from './review-v2.js';
 import { fetchWithTimeout } from './network.js';
 import { retainedCrossrefReferences } from './crossref-references.js';
 import { iterationKey, dueSlot } from './enrichment-schedule.js';
+import {persistNormalized,readNormalizedExtraction} from './extraction-relations.js';
 
 export const ENRICHMENT_PROTOCOL = 'CILE-ENRICH-1';
 const HOUR = 3600000, WEEK = 7 * 24 * HOUR;
@@ -292,9 +293,11 @@ async function sourceContents(env,target,ids) {
 }
 export async function storeExtraction(env,target,input,now=Date.now()) {
   validateShape(input);
+  if(input.target_id!==target.target_id||input.input_sha256!==target.input_sha256)err('stale_input',409);
   validateExtraction(input,target,await sourceContents(env,target,input.source_ids));
   const encoded=canonicalJson(input),hash=await sha256(encoded),id=await sha256(target.target_id+target.input_sha256+hash),db=env.REVIEW_DB;
-  if(await S(db,'SELECT proposal_id FROM enrichment_proposals WHERE proposal_id=?',id).first())return{proposal_id:id,replayed:true};
+  const prior=await S(db,'SELECT * FROM enrichment_proposals WHERE proposal_id=?',id).first();
+  if(prior){await readNormalizedExtraction(db,prior);return{proposal_id:id,replayed:true}}
   const list=[S(db,`INSERT INTO enrichment_proposals SELECT ?,target_id,input_sha256,?,?,?,?,?,? FROM enrichment_targets WHERE target_id=? AND input_sha256=? AND active=1`,id,ENRICHMENT_PROTOCOL,'1.0.0',hash,encoded,canonicalJson(input.generated_by),iso(now),target.target_id,target.input_sha256)];
   for(const s of input.studies)list.push(S(db,'INSERT INTO enrichment_studies VALUES (?,?,?)',id,s.id,canonicalJson(s)));
   for(const d of input.datasets)list.push(S(db,'INSERT INTO enrichment_datasets VALUES (?,?,?,?)',id,d.study_id,d.id,canonicalJson(d)));
@@ -302,11 +305,32 @@ export async function storeExtraction(env,target,input,now=Date.now()) {
   for(const v of input.variable_uses)list.push(S(db,'INSERT INTO enrichment_variable_uses VALUES (?,?,?,?)',id,v.analysis_id,v.id,canonicalJson(v)));
   for(const f of input.findings)list.push(S(db,'INSERT INTO enrichment_findings VALUES (?,?,?,?)',id,f.analysis_id,f.id,canonicalJson(f)));
   list.push(S(db,'INSERT INTO enrichment_framework_proposals VALUES (?,?,?,?)',id,input.framework.primary,input.framework.status,canonicalJson(input.framework)));
-  // A single atomic D1 transaction. Never split a scientific proposal across batches.
-  if(list.length>90)err('proposal_transaction_limit');
-  await db.batch(list);
+  // One transaction includes original submission, normalized graph and verified receipt.
+  const normalized=await persistNormalized(db,{proposal_id:id,target_id:target.target_id,input_sha256:target.input_sha256,
+    protocol_version:ENRICHMENT_PROTOCOL,codebook_version:'1.0.0',payload_sha256:hash},input,list,{now});
   const receipt=await S(db,'SELECT payload_sha256 FROM enrichment_proposals WHERE proposal_id=?',id).first();if(receipt?.payload_sha256!==hash)err('proposal_readback_failed',503);
-  return{proposal_id:id,replayed:false,scientific_status:'proposed'};
+  return{proposal_id:id,replayed:normalized.replayed,scientific_status:'proposed'};
+}
+export async function normalizeExistingExtractions(env,now=Date.now()){
+  const db=env.REVIEW_DB,proposals=await rows(db,'SELECT * FROM enrichment_proposals ORDER BY proposal_id');
+  if(proposals.length>10000)err('migration_population_limit');
+  let migrated=0,verified=0;
+  for(const proposal of proposals){
+    const input=JSON.parse(proposal.payload_json);
+    if(await sha256(canonicalJson(input))!==proposal.payload_sha256)err('proposal_integrity');
+    const target=await S(db,'SELECT * FROM enrichment_targets WHERE target_id=?',proposal.target_id).first();
+    const history=await S(db,'SELECT record_json FROM enrichment_inputs WHERE target_id=? AND input_sha256=?',proposal.target_id,proposal.input_sha256).first();
+    if(!target||!history)err('migration_input_missing');
+    const scoped={...target,input_sha256:proposal.input_sha256,record_json:history.record_json};
+    validateExtraction(input,scoped,await sourceContents(env,scoped,input.source_ids));
+    if(await S(db,'SELECT receipt_id FROM enrichment_normalization_receipts WHERE proposal_id=?',proposal.proposal_id).first()){
+      await readNormalizedExtraction(db,proposal);verified++;
+    }else{
+      const result=await persistNormalized(db,proposal,input,[],{kind:'backfill',now});if(result.replayed)verified++;else migrated++;
+    }
+  }
+  return{contract:'CILE-EXTRACTION-RELATIONS-1',commit:env.DEPLOY_COMMIT,proposals:proposals.length,migrated,verified,
+    complete:true,scientific_decisions_changed:false,private_content_exported:false,cutover_ready:false};
 }
 const json=(value,status=200)=>Response.json(value,{status,headers:{'Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Referrer-Policy':'no-referrer'}});
 export async function handlePaperEnrichment(request,env,session) {
@@ -317,7 +341,13 @@ export async function handlePaperEnrichment(request,env,session) {
     if(url.pathname.endsWith('/status')&&request.method==='GET')return json({enabled:env.PAPER_ENRICHMENT_ENABLED==='true',protocol:ENRICHMENT_PROTOCOL,scientific_extraction:'blocked_pending_calibration',jobs:await rows(db,'SELECT kind,status,COUNT(*) count FROM enrichment_jobs GROUP BY kind,status'),runs:await rows(db,'SELECT * FROM enrichment_runs ORDER BY started_at DESC LIMIT 24')});
     if(url.pathname.endsWith('/targets')&&request.method==='GET')return json({targets:await rows(db,'SELECT target_id,record_id,record_json,input_sha256 FROM enrichment_targets WHERE cycle_id=? AND active=1 ORDER BY first_seen_at,target_id LIMIT 500',cycle.review_id)});
     const target=await S(db,'SELECT * FROM enrichment_targets WHERE target_id=? AND cycle_id=? AND active=1',url.searchParams.get('id'),cycle.review_id).first();if(!target)err('target_not_found',404);
-    if(url.pathname.endsWith('/target')&&request.method==='GET')return json({target,jobs:await rows(db,'SELECT * FROM enrichment_jobs WHERE target_id=? ORDER BY updated_at DESC',target.target_id),sources:await rows(db,'SELECT source_id,provider,source_url,evidence_kind,content_sha256,version_label,observed_at FROM enrichment_sources WHERE target_id=? AND input_sha256=?',target.target_id,target.input_sha256),proposals:await rows(db,'SELECT proposal_id,created_at,payload_json FROM enrichment_proposals WHERE target_id=? ORDER BY created_at DESC LIMIT 20',target.target_id)});
+    if(url.pathname.endsWith('/target')&&request.method==='GET'){
+      const proposals=[];
+      for(const proposal of await rows(db,'SELECT * FROM enrichment_proposals WHERE target_id=? ORDER BY created_at DESC LIMIT 20',target.target_id)){
+        proposals.push({proposal_id:proposal.proposal_id,created_at:proposal.created_at,payload_json:canonicalJson(await readNormalizedExtraction(db,proposal))});
+      }
+      return json({target,jobs:await rows(db,'SELECT * FROM enrichment_jobs WHERE target_id=? ORDER BY updated_at DESC',target.target_id),sources:await rows(db,'SELECT source_id,provider,source_url,evidence_kind,content_sha256,version_label,observed_at FROM enrichment_sources WHERE target_id=? AND input_sha256=?',target.target_id,target.input_sha256),proposals});
+    }
     if(url.pathname.endsWith('/source')&&request.method==='GET')return json((await sourceContents(env,target,[url.searchParams.get('source')]))[0]);
     if(url.pathname.endsWith('/citations')&&request.method==='GET'){
       const offset=Number(url.searchParams.get('offset')||0);if(!Number.isInteger(offset)||offset<0)err('invalid_offset');

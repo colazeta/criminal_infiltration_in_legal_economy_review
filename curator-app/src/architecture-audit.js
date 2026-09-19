@@ -9,9 +9,11 @@ import adjudication from './enrichment-adjudication-migration.json' with {type:'
 import delivery from './enrichment-delivery-migration.json' with {type:'json'};
 import cycle from '../../config/archive-cycle.json' with {type:'json'};
 import logical from '../../ontology/modules/review-v2.json' with {type:'json'};
+import relations from './extraction-relations-migration.json' with {type:'json'};
+import {readNormalizedExtraction} from './extraction-relations.js';
 
 const LIMIT=100000;
-export const ARCHIVE_TABLES=[base,schedule,adjudication,delivery].flatMap(m=>[...m.sql.matchAll(/CREATE TABLE(?: IF NOT EXISTS)? (\w+)/g)].map(x=>x[1])).sort();
+export const ARCHIVE_TABLES=[base,schedule,adjudication,delivery,relations].flatMap(m=>[...m.sql.matchAll(/CREATE TABLE(?: IF NOT EXISTS)? (\w+)/g)].map(x=>x[1])).sort();
 const EXPECTED=ARCHIVE_TABLES;
 const CHILDREN={studies:['study_id'],datasets:['dataset_id','study_id'],analyses:['analysis_id','study_id'],variable_uses:['variable_use_id','analysis_id'],findings:['finding_id','analysis_id']};
 const S=(db,sql,...values)=>db.prepare(sql).bind(...values);
@@ -92,6 +94,7 @@ export async function auditArchitecture(env){
     try{
       const payload=JSON.parse(p.payload_json);
       if(await sha256(canonicalJson(payload))!==p.payload_sha256)flag('proposal_hash_mismatch');
+      try{await readNormalizedExtraction(db,p)}catch{flag('normalized_extraction_invalid')}
       const target=targets.get(p.target_id),input=inputs.get(p.target_id+':'+p.input_sha256);
       if(!target||!input){flag('proposal_input_missing');continue}
       const scoped={...target,input_sha256:p.input_sha256,record_json:input.record_json};

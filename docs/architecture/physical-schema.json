@@ -1,5 +1,5 @@
 {
-  "profile_version": "0.4.1",
+  "profile_version": "0.4.2",
   "runtime_verified": false,
   "migrations": [
     {
@@ -25,6 +25,10 @@
     {
       "path": "curator-app/migrations/0006_enrichment_delivery_assets.sql",
       "sha256": "2c35d7fe3c7251c590da87fa6d7a756c5ec04b2ec1a7c8063b38c808c03ce508"
+    },
+    {
+      "path": "curator-app/migrations/0007_extraction_relations.sql",
+      "sha256": "2f1a8dc4cd0df828d0a3b15d73b2e6b2fa02c03198c84d282fe3dc7a028fd56d"
     }
   ],
   "tables": [
@@ -2132,6 +2136,262 @@
       ]
     },
     {
+      "table": "enrichment_analyses_order",
+      "concept": "ReportedAnalysis",
+      "migration": "curator-app/migrations/0007_extraction_relations.sql",
+      "implementation_status": "configured_enrichment_sqlite",
+      "columns": [
+        {
+          "cid": 0,
+          "name": "proposal_id",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "analysis_id",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 2
+        },
+        {
+          "cid": 2,
+          "name": "position",
+          "type": "INTEGER",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [
+        {
+          "id": 0,
+          "seq": 0,
+          "table": "enrichment_analyses",
+          "from": "proposal_id",
+          "to": "proposal_id",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        },
+        {
+          "id": 0,
+          "seq": 1,
+          "table": "enrichment_analyses",
+          "from": "analysis_id",
+          "to": "analysis_id",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        }
+      ],
+      "indexes": [
+        {
+          "seq": 0,
+          "name": "sqlite_autoindex_enrichment_analyses_order_2",
+          "unique": 1,
+          "origin": "u",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 0,
+              "name": "proposal_id"
+            },
+            {
+              "seqno": 1,
+              "cid": 2,
+              "name": "position"
+            }
+          ],
+          "sql": null
+        },
+        {
+          "seq": 1,
+          "name": "sqlite_autoindex_enrichment_analyses_order_1",
+          "unique": 1,
+          "origin": "pk",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 0,
+              "name": "proposal_id"
+            },
+            {
+              "seqno": 1,
+              "cid": 1,
+              "name": "analysis_id"
+            }
+          ],
+          "sql": null
+        }
+      ],
+      "sql": "CREATE TABLE enrichment_analyses_order (\n proposal_id TEXT NOT NULL, analysis_id TEXT NOT NULL, position INTEGER NOT NULL CHECK(typeof(position)='integer' AND position>0),\n PRIMARY KEY(proposal_id,analysis_id), UNIQUE(proposal_id,position),\n FOREIGN KEY(proposal_id,analysis_id) REFERENCES enrichment_analyses(proposal_id,analysis_id)\n)",
+      "triggers": [
+        {
+          "name": "enrichment_analyses_order_no_delete",
+          "sql": "CREATE TRIGGER enrichment_analyses_order_no_delete BEFORE DELETE ON enrichment_analyses_order BEGIN SELECT RAISE(ABORT,'append_only'); END"
+        },
+        {
+          "name": "enrichment_analyses_order_no_update",
+          "sql": "CREATE TRIGGER enrichment_analyses_order_no_update BEFORE UPDATE ON enrichment_analyses_order BEGIN SELECT RAISE(ABORT,'append_only'); END"
+        }
+      ]
+    },
+    {
+      "table": "enrichment_analysis_datasets",
+      "concept": "ReportedAnalysis",
+      "migration": "curator-app/migrations/0007_extraction_relations.sql",
+      "implementation_status": "configured_enrichment_sqlite",
+      "columns": [
+        {
+          "cid": 0,
+          "name": "proposal_id",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "analysis_id",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 2
+        },
+        {
+          "cid": 2,
+          "name": "dataset_id",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 3
+        },
+        {
+          "cid": 3,
+          "name": "position",
+          "type": "INTEGER",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [
+        {
+          "id": 0,
+          "seq": 0,
+          "table": "enrichment_datasets",
+          "from": "proposal_id",
+          "to": "proposal_id",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        },
+        {
+          "id": 0,
+          "seq": 1,
+          "table": "enrichment_datasets",
+          "from": "dataset_id",
+          "to": "dataset_id",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        },
+        {
+          "id": 1,
+          "seq": 0,
+          "table": "enrichment_analyses",
+          "from": "proposal_id",
+          "to": "proposal_id",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        },
+        {
+          "id": 1,
+          "seq": 1,
+          "table": "enrichment_analyses",
+          "from": "analysis_id",
+          "to": "analysis_id",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        }
+      ],
+      "indexes": [
+        {
+          "seq": 0,
+          "name": "sqlite_autoindex_enrichment_analysis_datasets_2",
+          "unique": 1,
+          "origin": "u",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 0,
+              "name": "proposal_id"
+            },
+            {
+              "seqno": 1,
+              "cid": 1,
+              "name": "analysis_id"
+            },
+            {
+              "seqno": 2,
+              "cid": 3,
+              "name": "position"
+            }
+          ],
+          "sql": null
+        },
+        {
+          "seq": 1,
+          "name": "sqlite_autoindex_enrichment_analysis_datasets_1",
+          "unique": 1,
+          "origin": "pk",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 0,
+              "name": "proposal_id"
+            },
+            {
+              "seqno": 1,
+              "cid": 1,
+              "name": "analysis_id"
+            },
+            {
+              "seqno": 2,
+              "cid": 2,
+              "name": "dataset_id"
+            }
+          ],
+          "sql": null
+        }
+      ],
+      "sql": "CREATE TABLE enrichment_analysis_datasets (\n proposal_id TEXT NOT NULL, analysis_id TEXT NOT NULL, dataset_id TEXT NOT NULL, position INTEGER NOT NULL CHECK(typeof(position)='integer' AND position>0),\n PRIMARY KEY(proposal_id,analysis_id,dataset_id), UNIQUE(proposal_id,analysis_id,position),\n FOREIGN KEY(proposal_id,analysis_id) REFERENCES enrichment_analyses(proposal_id,analysis_id),\n FOREIGN KEY(proposal_id,dataset_id) REFERENCES enrichment_datasets(proposal_id,dataset_id)\n)",
+      "triggers": [
+        {
+          "name": "enrichment_analysis_datasets_no_delete",
+          "sql": "CREATE TRIGGER enrichment_analysis_datasets_no_delete BEFORE DELETE ON enrichment_analysis_datasets BEGIN SELECT RAISE(ABORT,'append_only'); END"
+        },
+        {
+          "name": "enrichment_analysis_datasets_no_update",
+          "sql": "CREATE TRIGGER enrichment_analysis_datasets_no_update BEFORE UPDATE ON enrichment_analysis_datasets BEGIN SELECT RAISE(ABORT,'append_only'); END"
+        },
+        {
+          "name": "enrichment_analysis_datasets_scope",
+          "sql": "CREATE TRIGGER enrichment_analysis_datasets_scope BEFORE INSERT ON enrichment_analysis_datasets\n WHEN NOT EXISTS(SELECT 1 FROM enrichment_analyses a JOIN enrichment_datasets d ON d.proposal_id=a.proposal_id AND d.study_id=a.study_id WHERE a.proposal_id=NEW.proposal_id AND a.analysis_id=NEW.analysis_id AND d.dataset_id=NEW.dataset_id)\n BEGIN SELECT RAISE(ABORT,'cross_study_dataset'); END"
+        }
+      ]
+    },
+    {
       "table": "enrichment_attempts",
       "concept": "EnrichmentAttempt",
       "migration": "curator-app/migrations/0003_paper_enrichment.sql",
@@ -3013,6 +3273,113 @@
       ]
     },
     {
+      "table": "enrichment_datasets_order",
+      "concept": "StudyDatasetUse",
+      "migration": "curator-app/migrations/0007_extraction_relations.sql",
+      "implementation_status": "configured_enrichment_sqlite",
+      "columns": [
+        {
+          "cid": 0,
+          "name": "proposal_id",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "dataset_id",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 2
+        },
+        {
+          "cid": 2,
+          "name": "position",
+          "type": "INTEGER",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [
+        {
+          "id": 0,
+          "seq": 0,
+          "table": "enrichment_datasets",
+          "from": "proposal_id",
+          "to": "proposal_id",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        },
+        {
+          "id": 0,
+          "seq": 1,
+          "table": "enrichment_datasets",
+          "from": "dataset_id",
+          "to": "dataset_id",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        }
+      ],
+      "indexes": [
+        {
+          "seq": 0,
+          "name": "sqlite_autoindex_enrichment_datasets_order_2",
+          "unique": 1,
+          "origin": "u",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 0,
+              "name": "proposal_id"
+            },
+            {
+              "seqno": 1,
+              "cid": 2,
+              "name": "position"
+            }
+          ],
+          "sql": null
+        },
+        {
+          "seq": 1,
+          "name": "sqlite_autoindex_enrichment_datasets_order_1",
+          "unique": 1,
+          "origin": "pk",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 0,
+              "name": "proposal_id"
+            },
+            {
+              "seqno": 1,
+              "cid": 1,
+              "name": "dataset_id"
+            }
+          ],
+          "sql": null
+        }
+      ],
+      "sql": "CREATE TABLE enrichment_datasets_order (\n proposal_id TEXT NOT NULL, dataset_id TEXT NOT NULL, position INTEGER NOT NULL CHECK(typeof(position)='integer' AND position>0),\n PRIMARY KEY(proposal_id,dataset_id), UNIQUE(proposal_id,position),\n FOREIGN KEY(proposal_id,dataset_id) REFERENCES enrichment_datasets(proposal_id,dataset_id)\n)",
+      "triggers": [
+        {
+          "name": "enrichment_datasets_order_no_delete",
+          "sql": "CREATE TRIGGER enrichment_datasets_order_no_delete BEFORE DELETE ON enrichment_datasets_order BEGIN SELECT RAISE(ABORT,'append_only'); END"
+        },
+        {
+          "name": "enrichment_datasets_order_no_update",
+          "sql": "CREATE TRIGGER enrichment_datasets_order_no_update BEFORE UPDATE ON enrichment_datasets_order BEGIN SELECT RAISE(ABORT,'append_only'); END"
+        }
+      ]
+    },
+    {
       "table": "enrichment_documents",
       "concept": "Manifestation",
       "migration": "curator-app/migrations/0006_enrichment_delivery_assets.sql",
@@ -3232,6 +3599,772 @@
       ]
     },
     {
+      "table": "enrichment_fact_evidence",
+      "concept": "AnalyticalAnnotation",
+      "migration": "curator-app/migrations/0007_extraction_relations.sql",
+      "implementation_status": "configured_enrichment_sqlite",
+      "columns": [
+        {
+          "cid": 0,
+          "name": "fact_id",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "proposal_id",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "span_id",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 2
+        },
+        {
+          "cid": 3,
+          "name": "position",
+          "type": "INTEGER",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [
+        {
+          "id": 0,
+          "seq": 0,
+          "table": "enrichment_spans",
+          "from": "proposal_id",
+          "to": "proposal_id",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        },
+        {
+          "id": 0,
+          "seq": 1,
+          "table": "enrichment_spans",
+          "from": "span_id",
+          "to": "span_id",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        },
+        {
+          "id": 1,
+          "seq": 0,
+          "table": "enrichment_facts",
+          "from": "fact_id",
+          "to": "fact_id",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        },
+        {
+          "id": 1,
+          "seq": 1,
+          "table": "enrichment_facts",
+          "from": "proposal_id",
+          "to": "proposal_id",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        }
+      ],
+      "indexes": [
+        {
+          "seq": 0,
+          "name": "sqlite_autoindex_enrichment_fact_evidence_2",
+          "unique": 1,
+          "origin": "u",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 0,
+              "name": "fact_id"
+            },
+            {
+              "seqno": 1,
+              "cid": 3,
+              "name": "position"
+            }
+          ],
+          "sql": null
+        },
+        {
+          "seq": 1,
+          "name": "sqlite_autoindex_enrichment_fact_evidence_1",
+          "unique": 1,
+          "origin": "pk",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 0,
+              "name": "fact_id"
+            },
+            {
+              "seqno": 1,
+              "cid": 2,
+              "name": "span_id"
+            }
+          ],
+          "sql": null
+        }
+      ],
+      "sql": "CREATE TABLE enrichment_fact_evidence (\n fact_id TEXT NOT NULL, proposal_id TEXT NOT NULL, span_id TEXT NOT NULL, position INTEGER NOT NULL CHECK(typeof(position)='integer' AND position>0),\n PRIMARY KEY(fact_id,span_id), UNIQUE(fact_id,position),\n FOREIGN KEY(fact_id,proposal_id) REFERENCES enrichment_facts(fact_id,proposal_id),\n FOREIGN KEY(proposal_id,span_id) REFERENCES enrichment_spans(proposal_id,span_id)\n)",
+      "triggers": [
+        {
+          "name": "enrichment_fact_evidence_no_delete",
+          "sql": "CREATE TRIGGER enrichment_fact_evidence_no_delete BEFORE DELETE ON enrichment_fact_evidence BEGIN SELECT RAISE(ABORT,'append_only'); END"
+        },
+        {
+          "name": "enrichment_fact_evidence_no_update",
+          "sql": "CREATE TRIGGER enrichment_fact_evidence_no_update BEFORE UPDATE ON enrichment_fact_evidence BEGIN SELECT RAISE(ABORT,'append_only'); END"
+        }
+      ]
+    },
+    {
+      "table": "enrichment_facts",
+      "concept": "AnalyticalAnnotation",
+      "migration": "curator-app/migrations/0007_extraction_relations.sql",
+      "implementation_status": "configured_enrichment_sqlite",
+      "columns": [
+        {
+          "cid": 0,
+          "name": "fact_id",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "proposal_id",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "scope",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "field_name",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "study_id",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "dataset_id",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "analysis_id",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 7,
+          "name": "variable_use_id",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 8,
+          "name": "finding_id",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 9,
+          "name": "secondary_category",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 10,
+          "name": "status",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 11,
+          "name": "value",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 12,
+          "name": "origin",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [
+        {
+          "id": 0,
+          "seq": 0,
+          "table": "enrichment_secondary_classes",
+          "from": "proposal_id",
+          "to": "proposal_id",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        },
+        {
+          "id": 0,
+          "seq": 1,
+          "table": "enrichment_secondary_classes",
+          "from": "secondary_category",
+          "to": "category",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        },
+        {
+          "id": 1,
+          "seq": 0,
+          "table": "enrichment_findings",
+          "from": "proposal_id",
+          "to": "proposal_id",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        },
+        {
+          "id": 1,
+          "seq": 1,
+          "table": "enrichment_findings",
+          "from": "finding_id",
+          "to": "finding_id",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        },
+        {
+          "id": 2,
+          "seq": 0,
+          "table": "enrichment_variable_uses",
+          "from": "proposal_id",
+          "to": "proposal_id",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        },
+        {
+          "id": 2,
+          "seq": 1,
+          "table": "enrichment_variable_uses",
+          "from": "variable_use_id",
+          "to": "variable_use_id",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        },
+        {
+          "id": 3,
+          "seq": 0,
+          "table": "enrichment_analyses",
+          "from": "proposal_id",
+          "to": "proposal_id",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        },
+        {
+          "id": 3,
+          "seq": 1,
+          "table": "enrichment_analyses",
+          "from": "analysis_id",
+          "to": "analysis_id",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        },
+        {
+          "id": 4,
+          "seq": 0,
+          "table": "enrichment_datasets",
+          "from": "proposal_id",
+          "to": "proposal_id",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        },
+        {
+          "id": 4,
+          "seq": 1,
+          "table": "enrichment_datasets",
+          "from": "dataset_id",
+          "to": "dataset_id",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        },
+        {
+          "id": 5,
+          "seq": 0,
+          "table": "enrichment_studies",
+          "from": "proposal_id",
+          "to": "proposal_id",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        },
+        {
+          "id": 5,
+          "seq": 1,
+          "table": "enrichment_studies",
+          "from": "study_id",
+          "to": "study_id",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        },
+        {
+          "id": 6,
+          "seq": 0,
+          "table": "enrichment_proposals",
+          "from": "proposal_id",
+          "to": "proposal_id",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        }
+      ],
+      "indexes": [
+        {
+          "seq": 0,
+          "name": "enrichment_fact_secondary",
+          "unique": 1,
+          "origin": "c",
+          "partial": 1,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 1,
+              "name": "proposal_id"
+            },
+            {
+              "seqno": 1,
+              "cid": 9,
+              "name": "secondary_category"
+            },
+            {
+              "seqno": 2,
+              "cid": 3,
+              "name": "field_name"
+            }
+          ],
+          "sql": "CREATE UNIQUE INDEX enrichment_fact_secondary ON enrichment_facts(proposal_id,secondary_category,field_name) WHERE scope='secondary'"
+        },
+        {
+          "seq": 1,
+          "name": "enrichment_fact_framework",
+          "unique": 1,
+          "origin": "c",
+          "partial": 1,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 1,
+              "name": "proposal_id"
+            },
+            {
+              "seqno": 1,
+              "cid": 3,
+              "name": "field_name"
+            }
+          ],
+          "sql": "CREATE UNIQUE INDEX enrichment_fact_framework ON enrichment_facts(proposal_id,field_name) WHERE scope='framework'"
+        },
+        {
+          "seq": 2,
+          "name": "enrichment_fact_findings",
+          "unique": 1,
+          "origin": "c",
+          "partial": 1,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 1,
+              "name": "proposal_id"
+            },
+            {
+              "seqno": 1,
+              "cid": 8,
+              "name": "finding_id"
+            },
+            {
+              "seqno": 2,
+              "cid": 3,
+              "name": "field_name"
+            }
+          ],
+          "sql": "CREATE UNIQUE INDEX enrichment_fact_findings ON enrichment_facts(proposal_id,finding_id,field_name) WHERE scope='findings'"
+        },
+        {
+          "seq": 3,
+          "name": "enrichment_fact_variable_uses",
+          "unique": 1,
+          "origin": "c",
+          "partial": 1,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 1,
+              "name": "proposal_id"
+            },
+            {
+              "seqno": 1,
+              "cid": 7,
+              "name": "variable_use_id"
+            },
+            {
+              "seqno": 2,
+              "cid": 3,
+              "name": "field_name"
+            }
+          ],
+          "sql": "CREATE UNIQUE INDEX enrichment_fact_variable_uses ON enrichment_facts(proposal_id,variable_use_id,field_name) WHERE scope='variable_uses'"
+        },
+        {
+          "seq": 4,
+          "name": "enrichment_fact_analyses",
+          "unique": 1,
+          "origin": "c",
+          "partial": 1,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 1,
+              "name": "proposal_id"
+            },
+            {
+              "seqno": 1,
+              "cid": 6,
+              "name": "analysis_id"
+            },
+            {
+              "seqno": 2,
+              "cid": 3,
+              "name": "field_name"
+            }
+          ],
+          "sql": "CREATE UNIQUE INDEX enrichment_fact_analyses ON enrichment_facts(proposal_id,analysis_id,field_name) WHERE scope='analyses'"
+        },
+        {
+          "seq": 5,
+          "name": "enrichment_fact_datasets",
+          "unique": 1,
+          "origin": "c",
+          "partial": 1,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 1,
+              "name": "proposal_id"
+            },
+            {
+              "seqno": 1,
+              "cid": 5,
+              "name": "dataset_id"
+            },
+            {
+              "seqno": 2,
+              "cid": 3,
+              "name": "field_name"
+            }
+          ],
+          "sql": "CREATE UNIQUE INDEX enrichment_fact_datasets ON enrichment_facts(proposal_id,dataset_id,field_name) WHERE scope='datasets'"
+        },
+        {
+          "seq": 6,
+          "name": "enrichment_fact_studies",
+          "unique": 1,
+          "origin": "c",
+          "partial": 1,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 1,
+              "name": "proposal_id"
+            },
+            {
+              "seqno": 1,
+              "cid": 4,
+              "name": "study_id"
+            },
+            {
+              "seqno": 2,
+              "cid": 3,
+              "name": "field_name"
+            }
+          ],
+          "sql": "CREATE UNIQUE INDEX enrichment_fact_studies ON enrichment_facts(proposal_id,study_id,field_name) WHERE scope='studies'"
+        },
+        {
+          "seq": 7,
+          "name": "enrichment_fact_overview",
+          "unique": 1,
+          "origin": "c",
+          "partial": 1,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 1,
+              "name": "proposal_id"
+            },
+            {
+              "seqno": 1,
+              "cid": 3,
+              "name": "field_name"
+            }
+          ],
+          "sql": "CREATE UNIQUE INDEX enrichment_fact_overview ON enrichment_facts(proposal_id,field_name) WHERE scope='overview'"
+        },
+        {
+          "seq": 8,
+          "name": "sqlite_autoindex_enrichment_facts_2",
+          "unique": 1,
+          "origin": "u",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 0,
+              "name": "fact_id"
+            },
+            {
+              "seqno": 1,
+              "cid": 1,
+              "name": "proposal_id"
+            }
+          ],
+          "sql": null
+        },
+        {
+          "seq": 9,
+          "name": "sqlite_autoindex_enrichment_facts_1",
+          "unique": 1,
+          "origin": "pk",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 0,
+              "name": "fact_id"
+            }
+          ],
+          "sql": null
+        }
+      ],
+      "sql": "CREATE TABLE enrichment_facts (\n fact_id TEXT NOT NULL PRIMARY KEY, proposal_id TEXT NOT NULL REFERENCES enrichment_proposals(proposal_id),\n scope TEXT NOT NULL, field_name TEXT NOT NULL, study_id TEXT, dataset_id TEXT, analysis_id TEXT, variable_use_id TEXT, finding_id TEXT, secondary_category TEXT,\n status TEXT NOT NULL CHECK(status IN ('reported','not_reported','not_verifiable','not_applicable','ambiguous')),\n value TEXT, origin TEXT NOT NULL CHECK(origin IN ('source','analyst')),\n UNIQUE(fact_id,proposal_id), CHECK(value IS NULL OR length(value)<=6000),\n CHECK(status NOT IN ('reported','ambiguous') OR (value IS NOT NULL AND length(value)>0)), CHECK(status NOT IN ('not_reported','not_verifiable','not_applicable') OR value IS NULL),\n CHECK((scope='overview' AND field_name IN ('summary','contribution','research_question','infiltration_definition','infiltration_operationalisation','authors_limitations','analyst_limitations') AND study_id IS NULL AND dataset_id IS NULL AND analysis_id IS NULL AND variable_use_id IS NULL AND finding_id IS NULL AND secondary_category IS NULL) OR (scope='studies' AND field_name IN ('study_type','research_question','population','sampling','sample_size','observation_unit','analysis_unit','geography','period') AND study_id IS NOT NULL AND dataset_id IS NULL AND analysis_id IS NULL AND variable_use_id IS NULL AND finding_id IS NULL AND secondary_category IS NULL) OR (scope='datasets' AND field_name IN ('name','provider','accessibility','selection','coverage','limitations') AND study_id IS NULL AND dataset_id IS NOT NULL AND analysis_id IS NULL AND variable_use_id IS NULL AND finding_id IS NULL AND secondary_category IS NULL) OR (scope='analyses' AND field_name IN ('design','method','comparison','identification','validation','robustness') AND study_id IS NULL AND dataset_id IS NULL AND analysis_id IS NOT NULL AND variable_use_id IS NULL AND finding_id IS NULL AND secondary_category IS NULL) OR (scope='variable_uses' AND field_name IN ('original_name','concept','operationalisation','unit','period','transformation','role') AND study_id IS NULL AND dataset_id IS NULL AND analysis_id IS NULL AND variable_use_id IS NOT NULL AND finding_id IS NULL AND secondary_category IS NULL) OR (scope='findings' AND field_name IN ('statement','finding_type','direction','estimate','unit','uncertainty','reference_comparison','population_scope','temporal_scope','caveat') AND study_id IS NULL AND dataset_id IS NULL AND analysis_id IS NULL AND variable_use_id IS NULL AND finding_id IS NOT NULL AND secondary_category IS NULL) OR (scope='framework' AND field_name IN ('rationale') AND study_id IS NULL AND dataset_id IS NULL AND analysis_id IS NULL AND variable_use_id IS NULL AND finding_id IS NULL AND secondary_category IS NULL) OR (scope='secondary' AND field_name IN ('rationale') AND study_id IS NULL AND dataset_id IS NULL AND analysis_id IS NULL AND variable_use_id IS NULL AND finding_id IS NULL AND secondary_category IS NOT NULL)),\n FOREIGN KEY(proposal_id,study_id) REFERENCES enrichment_studies(proposal_id,study_id),\n FOREIGN KEY(proposal_id,dataset_id) REFERENCES enrichment_datasets(proposal_id,dataset_id),\n FOREIGN KEY(proposal_id,analysis_id) REFERENCES enrichment_analyses(proposal_id,analysis_id),\n FOREIGN KEY(proposal_id,variable_use_id) REFERENCES enrichment_variable_uses(proposal_id,variable_use_id),\n FOREIGN KEY(proposal_id,finding_id) REFERENCES enrichment_findings(proposal_id,finding_id),\n FOREIGN KEY(proposal_id,secondary_category) REFERENCES enrichment_secondary_classes(proposal_id,category)\n)",
+      "triggers": [
+        {
+          "name": "enrichment_facts_no_delete",
+          "sql": "CREATE TRIGGER enrichment_facts_no_delete BEFORE DELETE ON enrichment_facts BEGIN SELECT RAISE(ABORT,'append_only'); END"
+        },
+        {
+          "name": "enrichment_facts_no_update",
+          "sql": "CREATE TRIGGER enrichment_facts_no_update BEFORE UPDATE ON enrichment_facts BEGIN SELECT RAISE(ABORT,'append_only'); END"
+        }
+      ]
+    },
+    {
+      "table": "enrichment_finding_variables",
+      "concept": "ReportedFinding",
+      "migration": "curator-app/migrations/0007_extraction_relations.sql",
+      "implementation_status": "configured_enrichment_sqlite",
+      "columns": [
+        {
+          "cid": 0,
+          "name": "proposal_id",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "finding_id",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 2
+        },
+        {
+          "cid": 2,
+          "name": "variable_use_id",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 3
+        },
+        {
+          "cid": 3,
+          "name": "position",
+          "type": "INTEGER",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [
+        {
+          "id": 0,
+          "seq": 0,
+          "table": "enrichment_variable_uses",
+          "from": "proposal_id",
+          "to": "proposal_id",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        },
+        {
+          "id": 0,
+          "seq": 1,
+          "table": "enrichment_variable_uses",
+          "from": "variable_use_id",
+          "to": "variable_use_id",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        },
+        {
+          "id": 1,
+          "seq": 0,
+          "table": "enrichment_findings",
+          "from": "proposal_id",
+          "to": "proposal_id",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        },
+        {
+          "id": 1,
+          "seq": 1,
+          "table": "enrichment_findings",
+          "from": "finding_id",
+          "to": "finding_id",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        }
+      ],
+      "indexes": [
+        {
+          "seq": 0,
+          "name": "sqlite_autoindex_enrichment_finding_variables_2",
+          "unique": 1,
+          "origin": "u",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 0,
+              "name": "proposal_id"
+            },
+            {
+              "seqno": 1,
+              "cid": 1,
+              "name": "finding_id"
+            },
+            {
+              "seqno": 2,
+              "cid": 3,
+              "name": "position"
+            }
+          ],
+          "sql": null
+        },
+        {
+          "seq": 1,
+          "name": "sqlite_autoindex_enrichment_finding_variables_1",
+          "unique": 1,
+          "origin": "pk",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 0,
+              "name": "proposal_id"
+            },
+            {
+              "seqno": 1,
+              "cid": 1,
+              "name": "finding_id"
+            },
+            {
+              "seqno": 2,
+              "cid": 2,
+              "name": "variable_use_id"
+            }
+          ],
+          "sql": null
+        }
+      ],
+      "sql": "CREATE TABLE enrichment_finding_variables (\n proposal_id TEXT NOT NULL, finding_id TEXT NOT NULL, variable_use_id TEXT NOT NULL, position INTEGER NOT NULL CHECK(typeof(position)='integer' AND position>0),\n PRIMARY KEY(proposal_id,finding_id,variable_use_id), UNIQUE(proposal_id,finding_id,position),\n FOREIGN KEY(proposal_id,finding_id) REFERENCES enrichment_findings(proposal_id,finding_id),\n FOREIGN KEY(proposal_id,variable_use_id) REFERENCES enrichment_variable_uses(proposal_id,variable_use_id)\n)",
+      "triggers": [
+        {
+          "name": "enrichment_finding_variables_no_delete",
+          "sql": "CREATE TRIGGER enrichment_finding_variables_no_delete BEFORE DELETE ON enrichment_finding_variables BEGIN SELECT RAISE(ABORT,'append_only'); END"
+        },
+        {
+          "name": "enrichment_finding_variables_no_update",
+          "sql": "CREATE TRIGGER enrichment_finding_variables_no_update BEFORE UPDATE ON enrichment_finding_variables BEGIN SELECT RAISE(ABORT,'append_only'); END"
+        },
+        {
+          "name": "enrichment_finding_variables_scope",
+          "sql": "CREATE TRIGGER enrichment_finding_variables_scope BEFORE INSERT ON enrichment_finding_variables\n WHEN NOT EXISTS(SELECT 1 FROM enrichment_findings f JOIN enrichment_variable_uses v ON v.proposal_id=f.proposal_id AND v.analysis_id=f.analysis_id WHERE f.proposal_id=NEW.proposal_id AND f.finding_id=NEW.finding_id AND v.variable_use_id=NEW.variable_use_id)\n BEGIN SELECT RAISE(ABORT,'finding_variable_scope'); END"
+        }
+      ]
+    },
+    {
       "table": "enrichment_findings",
       "concept": "ReportedFinding",
       "migration": "curator-app/migrations/0003_paper_enrichment.sql",
@@ -3323,6 +4456,177 @@
         {
           "name": "enrichment_findings_no_update",
           "sql": "CREATE TRIGGER enrichment_findings_no_update BEFORE UPDATE ON enrichment_findings BEGIN SELECT RAISE(ABORT,'append_only'); END"
+        }
+      ]
+    },
+    {
+      "table": "enrichment_findings_order",
+      "concept": "ReportedFinding",
+      "migration": "curator-app/migrations/0007_extraction_relations.sql",
+      "implementation_status": "configured_enrichment_sqlite",
+      "columns": [
+        {
+          "cid": 0,
+          "name": "proposal_id",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "finding_id",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 2
+        },
+        {
+          "cid": 2,
+          "name": "position",
+          "type": "INTEGER",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [
+        {
+          "id": 0,
+          "seq": 0,
+          "table": "enrichment_findings",
+          "from": "proposal_id",
+          "to": "proposal_id",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        },
+        {
+          "id": 0,
+          "seq": 1,
+          "table": "enrichment_findings",
+          "from": "finding_id",
+          "to": "finding_id",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        }
+      ],
+      "indexes": [
+        {
+          "seq": 0,
+          "name": "sqlite_autoindex_enrichment_findings_order_2",
+          "unique": 1,
+          "origin": "u",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 0,
+              "name": "proposal_id"
+            },
+            {
+              "seqno": 1,
+              "cid": 2,
+              "name": "position"
+            }
+          ],
+          "sql": null
+        },
+        {
+          "seq": 1,
+          "name": "sqlite_autoindex_enrichment_findings_order_1",
+          "unique": 1,
+          "origin": "pk",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 0,
+              "name": "proposal_id"
+            },
+            {
+              "seqno": 1,
+              "cid": 1,
+              "name": "finding_id"
+            }
+          ],
+          "sql": null
+        }
+      ],
+      "sql": "CREATE TABLE enrichment_findings_order (\n proposal_id TEXT NOT NULL, finding_id TEXT NOT NULL, position INTEGER NOT NULL CHECK(typeof(position)='integer' AND position>0),\n PRIMARY KEY(proposal_id,finding_id), UNIQUE(proposal_id,position),\n FOREIGN KEY(proposal_id,finding_id) REFERENCES enrichment_findings(proposal_id,finding_id)\n)",
+      "triggers": [
+        {
+          "name": "enrichment_findings_order_no_delete",
+          "sql": "CREATE TRIGGER enrichment_findings_order_no_delete BEFORE DELETE ON enrichment_findings_order BEGIN SELECT RAISE(ABORT,'append_only'); END"
+        },
+        {
+          "name": "enrichment_findings_order_no_update",
+          "sql": "CREATE TRIGGER enrichment_findings_order_no_update BEFORE UPDATE ON enrichment_findings_order BEGIN SELECT RAISE(ABORT,'append_only'); END"
+        }
+      ]
+    },
+    {
+      "table": "enrichment_framework_alternatives",
+      "concept": "ClinicalContributionProposal",
+      "migration": "curator-app/migrations/0007_extraction_relations.sql",
+      "implementation_status": "configured_enrichment_sqlite",
+      "columns": [
+        {
+          "cid": 0,
+          "name": "proposal_id",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "category",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [
+        {
+          "id": 0,
+          "seq": 0,
+          "table": "enrichment_proposals",
+          "from": "proposal_id",
+          "to": "proposal_id",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        }
+      ],
+      "indexes": [
+        {
+          "seq": 0,
+          "name": "sqlite_autoindex_enrichment_framework_alternatives_1",
+          "unique": 1,
+          "origin": "pk",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 0,
+              "name": "proposal_id"
+            }
+          ],
+          "sql": null
+        }
+      ],
+      "sql": "CREATE TABLE enrichment_framework_alternatives (\n proposal_id TEXT NOT NULL PRIMARY KEY REFERENCES enrichment_proposals(proposal_id), category TEXT CHECK(category IS NULL OR category IN ('aetiology','diagnosis','screening','therapy','prognosis','prevention'))\n)",
+      "triggers": [
+        {
+          "name": "enrichment_framework_alternatives_no_delete",
+          "sql": "CREATE TRIGGER enrichment_framework_alternatives_no_delete BEFORE DELETE ON enrichment_framework_alternatives BEGIN SELECT RAISE(ABORT,'append_only'); END"
+        },
+        {
+          "name": "enrichment_framework_alternatives_no_update",
+          "sql": "CREATE TRIGGER enrichment_framework_alternatives_no_update BEFORE UPDATE ON enrichment_framework_alternatives BEGIN SELECT RAISE(ABORT,'append_only'); END"
         }
       ]
     },
@@ -4016,6 +5320,328 @@
       "triggers": []
     },
     {
+      "table": "enrichment_normalization_receipts",
+      "concept": "ReviewEvent",
+      "migration": "curator-app/migrations/0007_extraction_relations.sql",
+      "implementation_status": "configured_enrichment_sqlite",
+      "columns": [
+        {
+          "cid": 0,
+          "name": "receipt_id",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "proposal_id",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "transformation_version",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "source_sha256",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "rebuilt_sha256",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "write_kind",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "verified_at",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [
+        {
+          "id": 0,
+          "seq": 0,
+          "table": "enrichment_proposals",
+          "from": "proposal_id",
+          "to": "proposal_id",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        }
+      ],
+      "indexes": [
+        {
+          "seq": 0,
+          "name": "sqlite_autoindex_enrichment_normalization_receipts_2",
+          "unique": 1,
+          "origin": "u",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 1,
+              "name": "proposal_id"
+            }
+          ],
+          "sql": null
+        },
+        {
+          "seq": 1,
+          "name": "sqlite_autoindex_enrichment_normalization_receipts_1",
+          "unique": 1,
+          "origin": "pk",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 0,
+              "name": "receipt_id"
+            }
+          ],
+          "sql": null
+        }
+      ],
+      "sql": "CREATE TABLE enrichment_normalization_receipts (\n receipt_id TEXT NOT NULL PRIMARY KEY, proposal_id TEXT NOT NULL UNIQUE REFERENCES enrichment_proposals(proposal_id),\n transformation_version TEXT NOT NULL CHECK(transformation_version='CILE-EXTRACTION-RELATIONS-1'),\n source_sha256 TEXT NOT NULL CHECK(length(source_sha256)=64), rebuilt_sha256 TEXT NOT NULL CHECK(rebuilt_sha256=source_sha256),\n write_kind TEXT NOT NULL CHECK(write_kind IN ('native','backfill')), verified_at TEXT NOT NULL\n)",
+      "triggers": [
+        {
+          "name": "enrichment_normalization_evidence_required",
+          "sql": "CREATE TRIGGER enrichment_normalization_evidence_required BEFORE INSERT ON enrichment_normalization_receipts\n WHEN EXISTS(SELECT 1 FROM enrichment_facts f WHERE f.proposal_id=NEW.proposal_id AND f.status='reported' AND NOT EXISTS(SELECT 1 FROM enrichment_fact_evidence e WHERE e.fact_id=f.fact_id))\n BEGIN SELECT RAISE(ABORT,'reported_fact_requires_evidence'); END"
+        },
+        {
+          "name": "enrichment_normalization_receipts_no_delete",
+          "sql": "CREATE TRIGGER enrichment_normalization_receipts_no_delete BEFORE DELETE ON enrichment_normalization_receipts BEGIN SELECT RAISE(ABORT,'append_only'); END"
+        },
+        {
+          "name": "enrichment_normalization_receipts_no_update",
+          "sql": "CREATE TRIGGER enrichment_normalization_receipts_no_update BEFORE UPDATE ON enrichment_normalization_receipts BEGIN SELECT RAISE(ABORT,'append_only'); END"
+        }
+      ]
+    },
+    {
+      "table": "enrichment_proposal_details",
+      "concept": "ScientificExtractionProposal",
+      "migration": "curator-app/migrations/0007_extraction_relations.sql",
+      "implementation_status": "configured_enrichment_sqlite",
+      "columns": [
+        {
+          "cid": 0,
+          "name": "proposal_id",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "source_coverage",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "agent",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "model",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "prompt_sha256",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [
+        {
+          "id": 0,
+          "seq": 0,
+          "table": "enrichment_proposals",
+          "from": "proposal_id",
+          "to": "proposal_id",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        }
+      ],
+      "indexes": [
+        {
+          "seq": 0,
+          "name": "sqlite_autoindex_enrichment_proposal_details_1",
+          "unique": 1,
+          "origin": "pk",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 0,
+              "name": "proposal_id"
+            }
+          ],
+          "sql": null
+        }
+      ],
+      "sql": "CREATE TABLE enrichment_proposal_details (\n proposal_id TEXT NOT NULL PRIMARY KEY REFERENCES enrichment_proposals(proposal_id),\n source_coverage TEXT NOT NULL CHECK(source_coverage IN ('abstract_only','partial_text','full_text')),\n agent TEXT NOT NULL, model TEXT, prompt_sha256 TEXT CHECK(prompt_sha256 IS NULL OR length(prompt_sha256)=64)\n)",
+      "triggers": [
+        {
+          "name": "enrichment_proposal_details_no_delete",
+          "sql": "CREATE TRIGGER enrichment_proposal_details_no_delete BEFORE DELETE ON enrichment_proposal_details BEGIN SELECT RAISE(ABORT,'append_only'); END"
+        },
+        {
+          "name": "enrichment_proposal_details_no_update",
+          "sql": "CREATE TRIGGER enrichment_proposal_details_no_update BEFORE UPDATE ON enrichment_proposal_details BEGIN SELECT RAISE(ABORT,'append_only'); END"
+        }
+      ]
+    },
+    {
+      "table": "enrichment_proposal_sources",
+      "concept": "ScientificExtractionProposal",
+      "migration": "curator-app/migrations/0007_extraction_relations.sql",
+      "implementation_status": "configured_enrichment_sqlite",
+      "columns": [
+        {
+          "cid": 0,
+          "name": "proposal_id",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "source_id",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 2
+        },
+        {
+          "cid": 2,
+          "name": "position",
+          "type": "INTEGER",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [
+        {
+          "id": 0,
+          "seq": 0,
+          "table": "enrichment_sources",
+          "from": "source_id",
+          "to": "source_id",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        },
+        {
+          "id": 1,
+          "seq": 0,
+          "table": "enrichment_proposals",
+          "from": "proposal_id",
+          "to": "proposal_id",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        }
+      ],
+      "indexes": [
+        {
+          "seq": 0,
+          "name": "sqlite_autoindex_enrichment_proposal_sources_2",
+          "unique": 1,
+          "origin": "u",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 0,
+              "name": "proposal_id"
+            },
+            {
+              "seqno": 1,
+              "cid": 2,
+              "name": "position"
+            }
+          ],
+          "sql": null
+        },
+        {
+          "seq": 1,
+          "name": "sqlite_autoindex_enrichment_proposal_sources_1",
+          "unique": 1,
+          "origin": "pk",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 0,
+              "name": "proposal_id"
+            },
+            {
+              "seqno": 1,
+              "cid": 1,
+              "name": "source_id"
+            }
+          ],
+          "sql": null
+        }
+      ],
+      "sql": "CREATE TABLE enrichment_proposal_sources (\n proposal_id TEXT NOT NULL REFERENCES enrichment_proposals(proposal_id), source_id TEXT NOT NULL REFERENCES enrichment_sources(source_id),\n position INTEGER NOT NULL CHECK(typeof(position)='integer' AND position>0), PRIMARY KEY(proposal_id,source_id), UNIQUE(proposal_id,position)\n)",
+      "triggers": [
+        {
+          "name": "enrichment_proposal_sources_no_delete",
+          "sql": "CREATE TRIGGER enrichment_proposal_sources_no_delete BEFORE DELETE ON enrichment_proposal_sources BEGIN SELECT RAISE(ABORT,'append_only'); END"
+        },
+        {
+          "name": "enrichment_proposal_sources_no_update",
+          "sql": "CREATE TRIGGER enrichment_proposal_sources_no_update BEFORE UPDATE ON enrichment_proposal_sources BEGIN SELECT RAISE(ABORT,'append_only'); END"
+        },
+        {
+          "name": "enrichment_proposal_sources_scope",
+          "sql": "CREATE TRIGGER enrichment_proposal_sources_scope BEFORE INSERT ON enrichment_proposal_sources\n WHEN NOT EXISTS(SELECT 1 FROM enrichment_proposals p JOIN enrichment_sources s ON s.target_id=p.target_id AND s.input_sha256=p.input_sha256 WHERE p.proposal_id=NEW.proposal_id AND s.source_id=NEW.source_id AND s.evidence_kind<>'metadata')\n BEGIN SELECT RAISE(ABORT,'source_scope_mismatch'); END"
+        }
+      ]
+    },
+    {
       "table": "enrichment_proposals",
       "concept": "ScientificExtractionProposal",
       "migration": "curator-app/migrations/0003_paper_enrichment.sql",
@@ -4364,6 +5990,103 @@
       "triggers": []
     },
     {
+      "table": "enrichment_secondary_classes",
+      "concept": "ClinicalContributionProposal",
+      "migration": "curator-app/migrations/0007_extraction_relations.sql",
+      "implementation_status": "configured_enrichment_sqlite",
+      "columns": [
+        {
+          "cid": 0,
+          "name": "proposal_id",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "category",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 2
+        },
+        {
+          "cid": 2,
+          "name": "position",
+          "type": "INTEGER",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [
+        {
+          "id": 0,
+          "seq": 0,
+          "table": "enrichment_proposals",
+          "from": "proposal_id",
+          "to": "proposal_id",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        }
+      ],
+      "indexes": [
+        {
+          "seq": 0,
+          "name": "sqlite_autoindex_enrichment_secondary_classes_2",
+          "unique": 1,
+          "origin": "u",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 0,
+              "name": "proposal_id"
+            },
+            {
+              "seqno": 1,
+              "cid": 2,
+              "name": "position"
+            }
+          ],
+          "sql": null
+        },
+        {
+          "seq": 1,
+          "name": "sqlite_autoindex_enrichment_secondary_classes_1",
+          "unique": 1,
+          "origin": "pk",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 0,
+              "name": "proposal_id"
+            },
+            {
+              "seqno": 1,
+              "cid": 1,
+              "name": "category"
+            }
+          ],
+          "sql": null
+        }
+      ],
+      "sql": "CREATE TABLE enrichment_secondary_classes (\n proposal_id TEXT NOT NULL REFERENCES enrichment_proposals(proposal_id), category TEXT NOT NULL CHECK(category IN ('aetiology','diagnosis','screening','therapy','prognosis','prevention')),\n position INTEGER NOT NULL CHECK(typeof(position)='integer' AND position>0), PRIMARY KEY(proposal_id,category), UNIQUE(proposal_id,position)\n)",
+      "triggers": [
+        {
+          "name": "enrichment_secondary_classes_no_delete",
+          "sql": "CREATE TRIGGER enrichment_secondary_classes_no_delete BEFORE DELETE ON enrichment_secondary_classes BEGIN SELECT RAISE(ABORT,'append_only'); END"
+        },
+        {
+          "name": "enrichment_secondary_classes_no_update",
+          "sql": "CREATE TRIGGER enrichment_secondary_classes_no_update BEFORE UPDATE ON enrichment_secondary_classes BEGIN SELECT RAISE(ABORT,'append_only'); END"
+        }
+      ]
+    },
+    {
       "table": "enrichment_sources",
       "concept": "EnrichmentSource",
       "migration": "curator-app/migrations/0003_paper_enrichment.sql",
@@ -4556,6 +6279,145 @@
       ]
     },
     {
+      "table": "enrichment_spans",
+      "concept": "EvidenceSpan",
+      "migration": "curator-app/migrations/0007_extraction_relations.sql",
+      "implementation_status": "configured_enrichment_sqlite",
+      "columns": [
+        {
+          "cid": 0,
+          "name": "proposal_id",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "span_id",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 2
+        },
+        {
+          "cid": 2,
+          "name": "source_id",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "position",
+          "type": "INTEGER",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "start_offset",
+          "type": "INTEGER",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "end_offset",
+          "type": "INTEGER",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "locator",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [
+        {
+          "id": 0,
+          "seq": 0,
+          "table": "enrichment_proposal_sources",
+          "from": "proposal_id",
+          "to": "proposal_id",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        },
+        {
+          "id": 0,
+          "seq": 1,
+          "table": "enrichment_proposal_sources",
+          "from": "source_id",
+          "to": "source_id",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        }
+      ],
+      "indexes": [
+        {
+          "seq": 0,
+          "name": "sqlite_autoindex_enrichment_spans_2",
+          "unique": 1,
+          "origin": "u",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 0,
+              "name": "proposal_id"
+            },
+            {
+              "seqno": 1,
+              "cid": 3,
+              "name": "position"
+            }
+          ],
+          "sql": null
+        },
+        {
+          "seq": 1,
+          "name": "sqlite_autoindex_enrichment_spans_1",
+          "unique": 1,
+          "origin": "pk",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 0,
+              "name": "proposal_id"
+            },
+            {
+              "seqno": 1,
+              "cid": 1,
+              "name": "span_id"
+            }
+          ],
+          "sql": null
+        }
+      ],
+      "sql": "CREATE TABLE enrichment_spans (\n proposal_id TEXT NOT NULL, span_id TEXT NOT NULL, source_id TEXT NOT NULL,\n position INTEGER NOT NULL CHECK(typeof(position)='integer' AND position>0), start_offset INTEGER NOT NULL CHECK(typeof(start_offset)='integer' AND start_offset>=0),\n end_offset INTEGER NOT NULL CHECK(typeof(end_offset)='integer' AND end_offset>start_offset), locator TEXT NOT NULL,\n PRIMARY KEY(proposal_id,span_id), UNIQUE(proposal_id,position),\n FOREIGN KEY(proposal_id,source_id) REFERENCES enrichment_proposal_sources(proposal_id,source_id)\n)",
+      "triggers": [
+        {
+          "name": "enrichment_spans_no_delete",
+          "sql": "CREATE TRIGGER enrichment_spans_no_delete BEFORE DELETE ON enrichment_spans BEGIN SELECT RAISE(ABORT,'append_only'); END"
+        },
+        {
+          "name": "enrichment_spans_no_update",
+          "sql": "CREATE TRIGGER enrichment_spans_no_update BEFORE UPDATE ON enrichment_spans BEGIN SELECT RAISE(ABORT,'append_only'); END"
+        }
+      ]
+    },
+    {
       "table": "enrichment_studies",
       "concept": "ReportedStudy",
       "migration": "curator-app/migrations/0003_paper_enrichment.sql",
@@ -4629,6 +6491,113 @@
         {
           "name": "enrichment_studies_no_update",
           "sql": "CREATE TRIGGER enrichment_studies_no_update BEFORE UPDATE ON enrichment_studies BEGIN SELECT RAISE(ABORT,'append_only'); END"
+        }
+      ]
+    },
+    {
+      "table": "enrichment_studies_order",
+      "concept": "ReportedStudy",
+      "migration": "curator-app/migrations/0007_extraction_relations.sql",
+      "implementation_status": "configured_enrichment_sqlite",
+      "columns": [
+        {
+          "cid": 0,
+          "name": "proposal_id",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "study_id",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 2
+        },
+        {
+          "cid": 2,
+          "name": "position",
+          "type": "INTEGER",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [
+        {
+          "id": 0,
+          "seq": 0,
+          "table": "enrichment_studies",
+          "from": "proposal_id",
+          "to": "proposal_id",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        },
+        {
+          "id": 0,
+          "seq": 1,
+          "table": "enrichment_studies",
+          "from": "study_id",
+          "to": "study_id",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        }
+      ],
+      "indexes": [
+        {
+          "seq": 0,
+          "name": "sqlite_autoindex_enrichment_studies_order_2",
+          "unique": 1,
+          "origin": "u",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 0,
+              "name": "proposal_id"
+            },
+            {
+              "seqno": 1,
+              "cid": 2,
+              "name": "position"
+            }
+          ],
+          "sql": null
+        },
+        {
+          "seq": 1,
+          "name": "sqlite_autoindex_enrichment_studies_order_1",
+          "unique": 1,
+          "origin": "pk",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 0,
+              "name": "proposal_id"
+            },
+            {
+              "seqno": 1,
+              "cid": 1,
+              "name": "study_id"
+            }
+          ],
+          "sql": null
+        }
+      ],
+      "sql": "CREATE TABLE enrichment_studies_order (\n proposal_id TEXT NOT NULL, study_id TEXT NOT NULL, position INTEGER NOT NULL CHECK(typeof(position)='integer' AND position>0),\n PRIMARY KEY(proposal_id,study_id), UNIQUE(proposal_id,position),\n FOREIGN KEY(proposal_id,study_id) REFERENCES enrichment_studies(proposal_id,study_id)\n)",
+      "triggers": [
+        {
+          "name": "enrichment_studies_order_no_delete",
+          "sql": "CREATE TRIGGER enrichment_studies_order_no_delete BEFORE DELETE ON enrichment_studies_order BEGIN SELECT RAISE(ABORT,'append_only'); END"
+        },
+        {
+          "name": "enrichment_studies_order_no_update",
+          "sql": "CREATE TRIGGER enrichment_studies_order_no_update BEFORE UPDATE ON enrichment_studies_order BEGIN SELECT RAISE(ABORT,'append_only'); END"
         }
       ]
     },
@@ -4758,6 +6727,155 @@
       "triggers": []
     },
     {
+      "table": "enrichment_variable_datasets",
+      "concept": "AnalysisVariableUse",
+      "migration": "curator-app/migrations/0007_extraction_relations.sql",
+      "implementation_status": "configured_enrichment_sqlite",
+      "columns": [
+        {
+          "cid": 0,
+          "name": "proposal_id",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "variable_use_id",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 2
+        },
+        {
+          "cid": 2,
+          "name": "dataset_id",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 3
+        },
+        {
+          "cid": 3,
+          "name": "position",
+          "type": "INTEGER",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [
+        {
+          "id": 0,
+          "seq": 0,
+          "table": "enrichment_datasets",
+          "from": "proposal_id",
+          "to": "proposal_id",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        },
+        {
+          "id": 0,
+          "seq": 1,
+          "table": "enrichment_datasets",
+          "from": "dataset_id",
+          "to": "dataset_id",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        },
+        {
+          "id": 1,
+          "seq": 0,
+          "table": "enrichment_variable_uses",
+          "from": "proposal_id",
+          "to": "proposal_id",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        },
+        {
+          "id": 1,
+          "seq": 1,
+          "table": "enrichment_variable_uses",
+          "from": "variable_use_id",
+          "to": "variable_use_id",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        }
+      ],
+      "indexes": [
+        {
+          "seq": 0,
+          "name": "sqlite_autoindex_enrichment_variable_datasets_2",
+          "unique": 1,
+          "origin": "u",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 0,
+              "name": "proposal_id"
+            },
+            {
+              "seqno": 1,
+              "cid": 1,
+              "name": "variable_use_id"
+            },
+            {
+              "seqno": 2,
+              "cid": 3,
+              "name": "position"
+            }
+          ],
+          "sql": null
+        },
+        {
+          "seq": 1,
+          "name": "sqlite_autoindex_enrichment_variable_datasets_1",
+          "unique": 1,
+          "origin": "pk",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 0,
+              "name": "proposal_id"
+            },
+            {
+              "seqno": 1,
+              "cid": 1,
+              "name": "variable_use_id"
+            },
+            {
+              "seqno": 2,
+              "cid": 2,
+              "name": "dataset_id"
+            }
+          ],
+          "sql": null
+        }
+      ],
+      "sql": "CREATE TABLE enrichment_variable_datasets (\n proposal_id TEXT NOT NULL, variable_use_id TEXT NOT NULL, dataset_id TEXT NOT NULL, position INTEGER NOT NULL CHECK(typeof(position)='integer' AND position>0),\n PRIMARY KEY(proposal_id,variable_use_id,dataset_id), UNIQUE(proposal_id,variable_use_id,position),\n FOREIGN KEY(proposal_id,variable_use_id) REFERENCES enrichment_variable_uses(proposal_id,variable_use_id),\n FOREIGN KEY(proposal_id,dataset_id) REFERENCES enrichment_datasets(proposal_id,dataset_id)\n)",
+      "triggers": [
+        {
+          "name": "enrichment_variable_datasets_no_delete",
+          "sql": "CREATE TRIGGER enrichment_variable_datasets_no_delete BEFORE DELETE ON enrichment_variable_datasets BEGIN SELECT RAISE(ABORT,'append_only'); END"
+        },
+        {
+          "name": "enrichment_variable_datasets_no_update",
+          "sql": "CREATE TRIGGER enrichment_variable_datasets_no_update BEFORE UPDATE ON enrichment_variable_datasets BEGIN SELECT RAISE(ABORT,'append_only'); END"
+        },
+        {
+          "name": "enrichment_variable_datasets_scope",
+          "sql": "CREATE TRIGGER enrichment_variable_datasets_scope BEFORE INSERT ON enrichment_variable_datasets\n WHEN NOT EXISTS(SELECT 1 FROM enrichment_variable_uses v JOIN enrichment_analysis_datasets a ON a.proposal_id=v.proposal_id AND a.analysis_id=v.analysis_id WHERE v.proposal_id=NEW.proposal_id AND v.variable_use_id=NEW.variable_use_id AND a.dataset_id=NEW.dataset_id)\n BEGIN SELECT RAISE(ABORT,'variable_dataset_scope'); END"
+        }
+      ]
+    },
+    {
       "table": "enrichment_variable_uses",
       "concept": "AnalysisVariableUse",
       "migration": "curator-app/migrations/0003_paper_enrichment.sql",
@@ -4849,6 +6967,113 @@
         {
           "name": "enrichment_variable_uses_no_update",
           "sql": "CREATE TRIGGER enrichment_variable_uses_no_update BEFORE UPDATE ON enrichment_variable_uses BEGIN SELECT RAISE(ABORT,'append_only'); END"
+        }
+      ]
+    },
+    {
+      "table": "enrichment_variable_uses_order",
+      "concept": "AnalysisVariableUse",
+      "migration": "curator-app/migrations/0007_extraction_relations.sql",
+      "implementation_status": "configured_enrichment_sqlite",
+      "columns": [
+        {
+          "cid": 0,
+          "name": "proposal_id",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "variable_use_id",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 2
+        },
+        {
+          "cid": 2,
+          "name": "position",
+          "type": "INTEGER",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [
+        {
+          "id": 0,
+          "seq": 0,
+          "table": "enrichment_variable_uses",
+          "from": "proposal_id",
+          "to": "proposal_id",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        },
+        {
+          "id": 0,
+          "seq": 1,
+          "table": "enrichment_variable_uses",
+          "from": "variable_use_id",
+          "to": "variable_use_id",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        }
+      ],
+      "indexes": [
+        {
+          "seq": 0,
+          "name": "sqlite_autoindex_enrichment_variable_uses_order_2",
+          "unique": 1,
+          "origin": "u",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 0,
+              "name": "proposal_id"
+            },
+            {
+              "seqno": 1,
+              "cid": 2,
+              "name": "position"
+            }
+          ],
+          "sql": null
+        },
+        {
+          "seq": 1,
+          "name": "sqlite_autoindex_enrichment_variable_uses_order_1",
+          "unique": 1,
+          "origin": "pk",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 0,
+              "name": "proposal_id"
+            },
+            {
+              "seqno": 1,
+              "cid": 1,
+              "name": "variable_use_id"
+            }
+          ],
+          "sql": null
+        }
+      ],
+      "sql": "CREATE TABLE enrichment_variable_uses_order (\n proposal_id TEXT NOT NULL, variable_use_id TEXT NOT NULL, position INTEGER NOT NULL CHECK(typeof(position)='integer' AND position>0),\n PRIMARY KEY(proposal_id,variable_use_id), UNIQUE(proposal_id,position),\n FOREIGN KEY(proposal_id,variable_use_id) REFERENCES enrichment_variable_uses(proposal_id,variable_use_id)\n)",
+      "triggers": [
+        {
+          "name": "enrichment_variable_uses_order_no_delete",
+          "sql": "CREATE TRIGGER enrichment_variable_uses_order_no_delete BEFORE DELETE ON enrichment_variable_uses_order BEGIN SELECT RAISE(ABORT,'append_only'); END"
+        },
+        {
+          "name": "enrichment_variable_uses_order_no_update",
+          "sql": "CREATE TRIGGER enrichment_variable_uses_order_no_update BEFORE UPDATE ON enrichment_variable_uses_order BEGIN SELECT RAISE(ABORT,'append_only'); END"
         }
       ]
     },

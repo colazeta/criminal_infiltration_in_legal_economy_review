@@ -16,6 +16,25 @@ const same=(a,b)=>canonicalJson(a)===canonicalJson(b);
 const digest=value=>sha256(canonicalJson(value));
 const kvDigest=entries=>digest([...entries].sort(([a],[b])=>a<b?-1:a>b?1:0));
 
+function restoreTableOrder(db){
+  // Keep every physical guard enabled; trigger dependencies supplement the FKs.
+  const triggerDependencies={
+    enrichment_variable_datasets:['enrichment_analysis_datasets'],
+    enrichment_normalization_receipts:['enrichment_facts','enrichment_fact_evidence'],
+  };
+  const remaining=new Map(ARCHIVE_TABLES.map(table=>[table,new Set([
+    ...db.prepare(`PRAGMA foreign_key_list(${table})`).all().map(f=>f.table),
+    ...(triggerDependencies[table]||[]),
+  ].filter(parent=>parent!==table))]));
+  const order=[];
+  while(remaining.size){
+    const ready=[...remaining].filter(([,parents])=>[...parents].every(p=>order.includes(p))).map(([name])=>name);
+    assert(ready.length>0);
+    for(const table of ready){order.push(table);remaining.delete(table)}
+  }
+  return order;
+}
+
 export function isolatedStore(secret,commit){
   const db=new DatabaseSync(':memory:');db.exec('PRAGMA foreign_keys=ON');
   const kv=new Map();let alarm=null;
@@ -85,7 +104,7 @@ export async function restoreBackup(bundle,secret){
   const x=isolatedStore(secret,bundle.commit);await x.core.requireReady();
   try{
     x.db.exec('BEGIN');x.db.exec('PRAGMA defer_foreign_keys=ON');
-    for(const table of ARCHIVE_TABLES){
+    for(const table of restoreTableOrder(x.db)){
       const columns=x.db.prepare(`PRAGMA table_info(${table})`).all().map(r=>r.name);
       const insert=x.db.prepare(`INSERT INTO ${table} (${columns.join(',')}) VALUES (${columns.map(()=>'?').join(',')})`);
       for(const row of tables[table]){assert(same(Object.keys(row).sort(),[...columns].sort()));insert.run(...columns.map(k=>row[k]))}

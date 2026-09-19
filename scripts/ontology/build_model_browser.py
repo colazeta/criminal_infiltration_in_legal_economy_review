@@ -87,17 +87,29 @@ DESCRIPTIONS = {
 
 def build():
     profile = json.loads((ROOT / "ontology/cile-review-profile.yaml").read_text())
-    module = json.loads((ROOT / "ontology/modules/review-v2.json").read_text())
-    sql = "\n".join((ROOT / path).read_text() for path in module["migrations"])
-    connection = sqlite3.connect(":memory:"); connection.executescript(sql)
+    import sys
+    sys.path.insert(0, str(ROOT))
+    from scripts.architecture.catalogue import catalogue
+    physical, trace = catalogue(ROOT)
+    slots = {(row['table'], row['column']): row['slot'] for row in trace}
     entities = []
-    for table, contract in module["tables"].items():
+    for item in physical['tables']:
+        table = item['table']
         fields = []
-        for row in connection.execute(f'PRAGMA table_info("{table}")'):
-            spec = contract["fields"][row[1]]; slot = profile["slots"][spec["slot"]]
-            fields.append({"name": row[1], "description": DESCRIPTIONS.get(row[1], slot["description"]), "type": row[2], "nullable": not bool(row[3] or row[5]), "semantic": slot["slot_uri"]})
-        constraints = [f"{row[3]} → {row[2]}.{row[4]}" for row in connection.execute(f'PRAGMA foreign_key_list("{table}")')]
-        entities.append({"table": table, "label": LABELS.get(table, table), "class": contract["class"], "description": contract["description"], "group": "bibliography" if table in BIBLIOGRAPHY else "review", "fields": fields, "appendOnly": table in module["append_only_tables"], "constraints": constraints or ["Vincoli di dominio e integrità definiti dallo schema SQL versionato."]})
+        for row in item['columns']:
+            name = slots[(table, row['name'])]
+            slot = profile['slots'].get(name, {'description': row['name'], 'slot_uri': name})
+            nullable = not row['notnull'] and not (row['type'] == 'INTEGER' and row['pk'])
+            fields.append({'name': row['name'], 'description': DESCRIPTIONS.get(row['name'], slot.get('description', row['name'])),
+                           'type': row['type'], 'nullable': nullable, 'semantic': slot['slot_uri']})
+        constraints = [f"{r['from']} → {r['table']}.{r['to']}" for r in item['foreign_keys']]
+        triggers = {r['name'] for r in item['triggers']}
+        entities.append({'table': table, 'label': LABELS.get(table, table), 'class': item['concept'],
+                         'description': profile['classes'][item['concept']].get('description', item['concept']),
+                         'group': 'bibliography' if table in BIBLIOGRAPHY else 'review', 'fields': fields,
+                         'implementationStatus': item['implementation_status'],
+                         'appendOnly': all(f'{table}_no_{a}' in triggers for a in ['update', 'delete']),
+                         'constraints': constraints or ['Vincoli di dominio e integrità definiti dallo schema SQL versionato.']})
     return {"version": profile["version"], "entities": entities}
 
 

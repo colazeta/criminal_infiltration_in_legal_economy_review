@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "profile_version": "0.4.1",
+  "profile_version": "0.4.2",
   "protocol_version": "CILE-ENRICH-1",
   "migrations": [
     "curator-app/migrations/0003_paper_enrichment.sql",

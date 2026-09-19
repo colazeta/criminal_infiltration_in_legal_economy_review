@@ -406,7 +406,7 @@ export default {
   async queue(batch, env) { return consumeDays(batch, env); },
   async fetch(request, env) {
     const url = new URL(request.url);
-    if (url.pathname === "/version" && request.method === "GET") return Response.json({ commit: env.DEPLOY_COMMIT || null, ontology: "0.4.1" }, { headers: { "Cache-Control": "no-store" } });
+    if (url.pathname === "/version" && request.method === "GET") return Response.json({ commit: env.DEPLOY_COMMIT || null, ontology: "0.4.2" }, { headers: { "Cache-Control": "no-store" } });
     if (url.pathname === "/api/public-paper-assets") return servePublicAssets(request,enrichmentStore(env));
     if (url.pathname === PUBLIC_RESEARCH_PATH) return servePublicResearch(request,enrichmentStore(env));
     if (url.pathname === "/api/paper-enrichment-machine") {

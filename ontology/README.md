@@ -1,6 +1,6 @@
 # CILE Review Ontology Profile
 
-**Current profile:** `0.4.1`
+**Current profile:** `0.4.2`
 
 This directory is the semantic contract for the living systematic review on **Criminal Infiltration in the Legal Economy (CILE)**. The contract is normative: physical CSV/JSON structures may evolve, but every governed artifact must remain mapped to this ontology and must pass `scripts/ontology/validate_ontology.py`.
 
@@ -148,3 +148,11 @@ existing decisions or source snapshots are recoded.
 recurring plan, persistent iteration ticket and actual attempt. All new temporal
 fields distinguish planned and observed instants. The scientific envelope and
 clinical codebook are unchanged. See [the delivery contract](../docs/operations/hour40-enrichment.md).
+
+## Normalised extraction relations — profile 0.4.2
+
+`modules/extraction-relations.json` and migration 0007 turn the existing closed
+extraction facts into proposal-scoped `oa:Annotation` assertions with explicit
+source, evidence, study, analysis, dataset and variable relations. Original JSON
+submissions remain immutable history. Current reads reconstruct and verify the
+relational graph. The scientific envelope, codebook and decisions are unchanged.

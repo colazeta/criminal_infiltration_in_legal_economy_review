@@ -7,13 +7,14 @@ import scheduleMigration from './enrichment-schedule-migration.json' with { type
 import adjudicationMigration from './enrichment-adjudication-migration.json' with { type: 'json' };
 import {Hour40Schedule, iterationKey} from './enrichment-schedule.js';
 import { sha256 } from './review-v2.js';
-import { runEnrichment, handlePaperEnrichment, storeExtraction } from './paper-enrichment.js';
+import { runEnrichment, handlePaperEnrichment, storeExtraction, normalizeExistingExtractions } from './paper-enrichment.js';
 import {completionPacket, importCalibrationApproval, importCompletionApproval} from './enrichment-adjudication.js';
 import {readPublicResearch, readPublicCompletion, publicResearchAudit, readPublicIndex} from './public-paper-research.js';
 import {readDevelopmentCheckpoint,writeDevelopmentCheckpoint} from './calibration-development-checkpoint.js';
 import {claimF1Retention,assertF1RetentionClaim,releaseF1RetentionClaim,abortF1RetentionClaim} from './frontier-retention-claim.js';
 import {auditArchitecture,architectureSchema} from './architecture-audit.js';
 import {archiveBackupPage} from './archive-preservation.js';
+import relationsMigration from './extraction-relations-migration.json' with {type:'json'};
 
 const DOMAIN = 'CILE-ENRICH-SERVICE-v1';
 const encoder = new TextEncoder();
@@ -25,8 +26,9 @@ const SAFE_READINESS_ERRORS=new Set([
   'schedule_migration_integrity','additive_schedule_migration_required',
   'adjudication_migration_integrity','additive_adjudication_migration_required',
   'delivery_migration_integrity','additive_delivery_migration_required','storage_readback_failed',
+  'relations_migration_integrity','additive_relations_migration_required',
 ]);
-const READINESS_PHASES=new Set(['sqlite','base_migration','schedule_migration','adjudication_migration','delivery_migration','adapters','scheduler']);
+const READINESS_PHASES=new Set(['sqlite','base_migration','schedule_migration','adjudication_migration','delivery_migration','relations_migration','adapters','scheduler']);
 export function readinessErrorCode(error,phase){
   const code=typeof error?.message==='string'?error.message:'';
   if(SAFE_READINESS_ERRORS.has(code))return code;
@@ -51,7 +53,12 @@ export function sqliteAdapter(storage) {
     }
     return {sql,values,bind(...args){return statement(sql,args)},async all(){return execute()},async first(){return execute().results[0]||null},async run(){return execute()},execute};
   }
-  return {prepare:sql=>statement(sql),async batch(statements){return storage.transactionSync(()=>statements.map(s=>s.execute()))}};
+  return {prepare:sql=>statement(sql),async batch(statements){return storage.transactionSync(()=>statements.map(s=>s.execute()))},
+    async batchValidated(statements,readback,verify,receipt){return storage.transactionSync(()=>{
+      const results=statements.map(s=>s.execute());
+      if(verify(readback.map(s=>s.execute()))!==true)throw Error('normalized_extraction_integrity');
+      receipt.execute();return results;
+    })}};
 }
 
 export function privateTextStore(storage) {
@@ -111,6 +118,12 @@ export class EnrichmentStoreCore {
         const deliveryApplied=await ctx.storage.get('schema:enrichment-delivery');
         if(deliveryApplied&&deliveryApplied!==deliveryHash)throw Error('additive_delivery_migration_required');
         if(!deliveryApplied)await ctx.storage.transaction(async tx=>{ctx.storage.sql.exec(deliveryMigration.sql);await tx.put('schema:enrichment-delivery',deliveryHash)});
+        phase='relations_migration';
+        const relationsHash=await sha256(relationsMigration.sql);
+        if(relationsHash!==relationsMigration.sha256)throw Error('relations_migration_integrity');
+        const relationsApplied=await ctx.storage.get('schema:extraction-relations');
+        if(relationsApplied&&relationsApplied!==relationsHash)throw Error('additive_relations_migration_required');
+        if(!relationsApplied)await ctx.storage.transaction(async tx=>{ctx.storage.sql.exec(relationsMigration.sql);await tx.put('schema:extraction-relations',relationsHash)});
         phase='adapters';
         this.db=sqliteAdapter(ctx.storage); this.evidence=privateTextStore(ctx.storage);this.documents=privateBinaryStore(ctx.storage);
         phase='scheduler';
@@ -210,12 +223,17 @@ export class EnrichmentStoreCore {
       const allowedFields=['operation','expected_commit','target_id','proposal','run_key','calibration_id','pr_number','source','document','bibliography','document_id','checkpoint','backup'];
       if(!data||typeof data!=='object'||Array.isArray(data)||Object.keys(data).some(k=>!allowedFields.includes(k)))return json({error_code:'invalid_service_envelope'},422);
       const operations=['verify','activate','deactivate','status','run','packet','proposal','public-research-audit','architecture-audit','completion-packet','calibration-approval','completion-approval','source','document','documents','document-check','bibliography','provider-bibliography','development-checkpoint-get','development-checkpoint-put','document-retention-claim','source-claimed','document-claimed','document-retention-release','document-retention-abort'];
-      if(!operations.includes(data.operation)&&!['architecture-schema','architecture-backup'].includes(data.operation))return json({error_code:'unknown_service_operation'},422);
+      if(!operations.includes(data.operation)&&!['architecture-schema','architecture-backup','architecture-normalize'].includes(data.operation))return json({error_code:'unknown_service_operation'},422);
       if(data.expected_commit!==this.env.DEPLOY_COMMIT)return json({error_code:'stale_deployment'},409);
       if(data.operation==='verify')return json(await this.verify());
       if(data.operation==='activate'){await this.verify();await this.ctx.storage.put('activation:enrichment',{commit:this.env.DEPLOY_COMMIT,at:new Date(now).toISOString()});await this.schedule.start();return json(await this.aggregate())}
       if(data.operation==='deactivate'){await this.ctx.storage.delete('activation:enrichment');return json(await this.aggregate())}
       if(data.operation==='status')return json(await this.aggregate());
+      if(data.operation==='architecture-normalize'){
+        if(Object.keys(data).sort().join(',')!=='expected_commit,operation')return json({error_code:'invalid_service_envelope'},422);
+        try{return json(await normalizeExistingExtractions(await this.environment()))}
+        catch{return json({error_code:'architecture_normalization_failed'},503)}
+      }
       if(data.operation==='architecture-backup'){
         if(Object.keys(data).sort().join(',')!=='backup,expected_commit,operation')return json({error_code:'invalid_service_envelope'},422);
         try{return json(await archiveBackupPage(await this.environment(),this.ctx.storage,data.backup))}

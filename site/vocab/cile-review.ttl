@@ -17,7 +17,7 @@
     a owl:Ontology ;
     dcterms:title "CILE Review Ontology Profile" ;
     dcterms:description "Application ontology for the Criminal Infiltration in the Legal Economy living systematic review." ;
-    owl:versionInfo "0.4.1" ;
+    owl:versionInfo "0.4.2" ;
     dcterms:source <https://github.com/sensein/synthscholar> ,
                    <https://github.com/RIPE-Observatory/RIPE-O> .
 
@@ -306,3 +306,8 @@ cile:ScientificExtractionEnvelope a owl:Class ; rdfs:label "Private scientific e
 cile:EnrichmentSchedule a owl:Class ; rdfs:label "EnrichmentSchedule" . 
 cile:EnrichmentIteration a owl:Class ; rdfs:label "EnrichmentIteration" . 
 cile:EnrichmentIterationAttempt a owl:Class ; rdfs:label "EnrichmentIterationAttempt" . 
+
+oa:Annotation a owl:Class ;
+    rdfs:subClassOf prov:Entity ;
+    rdfs:label "Proposal-scoped analytical annotation" ;
+    skos:definition "An explicitly scoped assertion with epistemic status, source or analyst origin, and evidence links; never a scientific decision." .

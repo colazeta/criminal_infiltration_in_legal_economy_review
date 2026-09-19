@@ -1,3 +1,4 @@
+import {readNormalizedExtraction} from './extraction-relations.js';
 /* Independent scientific acceptance for candidate-bound enrichment.
    Engineering can prepare packets; only an exact-head human approval can create a receipt. */
 import cycle from '../../config/archive-cycle.json' with {type:'json'};
@@ -54,7 +55,7 @@ async function proposalState(env,target,proposalId=null){
     ?await S(env.REVIEW_DB,'SELECT * FROM enrichment_proposals WHERE proposal_id=? AND target_id=? AND input_sha256=?',proposalId,target.target_id,target.input_sha256).first()
     :await S(env.REVIEW_DB,'SELECT * FROM enrichment_proposals WHERE target_id=? AND input_sha256=? ORDER BY created_at DESC,proposal_id DESC LIMIT 1',target.target_id,target.input_sha256).first();
   if(!proposal)return null;
-  let input;try{input=JSON.parse(proposal.payload_json)}catch{throw Error('proposal_integrity_failure')}
+  let input;try{input=await readNormalizedExtraction(env.REVIEW_DB,proposal)}catch{throw Error('proposal_integrity_failure')}
   if(await sha256(canonicalJson(input))!==proposal.payload_sha256||input.target_id!==target.target_id||input.input_sha256!==target.input_sha256)throw Error('proposal_integrity_failure');
   if(input.protocol_version!==PROTOCOL||input.codebook_version!==CODEBOOK)throw Error('proposal_contract_mismatch');
   if(input.source_coverage!=='full_text')throw Error('full_text_required');

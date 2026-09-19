@@ -1,5 +1,5 @@
 {
-  "profile_version": "0.4.1",
+  "profile_version": "0.4.2",
   "migrations": [
     "curator-app/migrations/0006_enrichment_delivery_assets.sql"
   ],
