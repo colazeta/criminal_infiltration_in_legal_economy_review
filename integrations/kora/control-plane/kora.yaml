@@ -1,0 +1,11 @@
+apiVersion: kora/v1
+kind: Project
+metadata:
+  name: cile-review-control-plane
+  description: Observe-only Kora control plane for the Criminal Infiltration Literature Archive.
+spec:
+  machineExecution:
+    defaults:
+      sandbox:
+        network:
+          defaultAction: deny
