@@ -27,7 +27,8 @@ def preserve(output):
         if not runner.is_file():
             raise RuntimeError('predeploy_backup_not_supported')
         env = {**os.environ, 'GITHUB_SHA': commit}
-        subprocess.run(['node', str(runner), 'capture', str(output)], cwd=directory,
+        diagnostics = Path(__file__).with_name('backup-diagnostics.mjs').resolve()
+        subprocess.run(['node', '--import', str(diagnostics), str(runner), 'capture', str(output)], cwd=directory,
                        env=env, check=True)
 
 
