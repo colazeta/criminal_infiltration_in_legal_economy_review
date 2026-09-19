@@ -65,7 +65,9 @@ jobs:
           PYCODE
 
       - name: Audit the entire private store without exporting source bodies
-        if: always()
+        # Full-population certification is mandatory after deployments and on
+        # explicit audits. Repeating it hourly can exhaust storage read quotas.
+        if: always() && github.event_name != 'schedule'
         env:
           CURATOR_SESSION_SECRET: ${{ secrets.CURATOR_SESSION_SECRET }}
         run: python3 -m scripts.enrichment.architecture_check
