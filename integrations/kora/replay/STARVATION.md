@@ -1,53 +1,67 @@
-# Kora replay — guardia starvation basata su evidenze
+# Kora replay — suite corrente e archivio storico separati
 
-Implementata la decisione del proprietario del 19 settembre 2026: RESOLVE precede COMPLETE soltanto se l'attivita' proposta aprirebbe nuova ricerca e la soglia contrattuale e' dimostrata. Non interrompe lavoro gia' in corso. F3 non implica nuova ricerca. Nessuna modifica alle precedenze SCOUT/PERSIST, ai blocchi applicabili, al writer o al controllo anti-repeat.
+Decisione esplicita del proprietario: conservare integralmente i due casi originali e gli attesi RESOLVE nell'archivio, e creare versioni correnti conformi al contratto dei dati insufficienti. Nessuna modifica al router, al preflight, al manifest o alla logica degli exit code in questa revisione.
 
-## Risultati di questa sessione
+## Risultati verificati ora
 
-| Verifica | Risultato | Limite |
+| Controllo | Esito |
+|---|---|
+| Suite locale corrente | 164/164, exit 0 |
+| Starvation, due lane | 64/64: 62 casi espliciti gia' presenti + 2 versioni correnti |
+| Precedenze/frontier mirati | 35/35 |
+| Validazione fixture YAML native | 154/154, offline |
+| Funzioni pure sui medesimi input/check YAML | 154/154, offline, exit 0 |
+| Conservazione originali e identita' input | 2/2 verificati |
+| Confronto regressioni con vecchio router | 32/62 errori dimostrati sulla matrice esplicita, corretti nella sessione precedente |
+| Test nativi Kora | 0 eseguiti qui; runtime/SDK/gatePassed non verificati |
+
+164 e' il numero di casi correnti, non comprende i due record originali archiviati. Comprende 130 pipeline, 21 frontier, 13 rifiuti schema. Le fixture native sono 151 casi eseguibili piu' le 3 fixture originarie: 154. I 13 rifiuti schema locali non sono 13 ulteriori esecuzioni native.
+
+I runner mantengono la stessa regola process.exitCode = report.failed ? 1 : 0. Nessun fallimento e' convertito globalmente in successo, nessun gate disabilitato. L'exit 0 corrente deriva dall'esito delle asserzioni contrattuali revisionate esplicitamente dal proprietario.
+
+## I due casi, senza riscrivere la storia
+
+| Archivio, atteso invariato | Versione corrente | Atteso corrente |
 |---|---|---|
-| Suite locale completa | 164 casi: 162 asserzioni determinate passate; 2 divergenze storiche sottospecificate | exit 1 conservato, non suite interamente verde |
-| Matrice starvation nelle due lane | 62/62 nuovi casi di routing passati, oltre a 2 storici divergenti | sintetici |
-| Nuovi controlli schema | 6/6 rifiuti corretti | inclusi nei 162 |
-| Precedenze/frontier mirati | 35/35 | locali |
-| Schema fixture native | 154/154 | non esecuzione Kora |
-| Funzioni pure sugli input YAML nativi | 152/154; 2 divergenze storiche | non SDK/sandbox Kora; exit 1 |
-| Confronto col vecchio router | 32/62 nuove asserzioni di rotta fallivano prima | attesi scritti senza importare il SUT |
-| Repository, comandi AGENTS.md | 20/22 comandi passati | stessi gruppi Python/Node gia' falliti nella baseline |
-| Test nativi aggiornati | 0 eseguiti qui | script manuale da fissare al nuovo commit, non ee553480 |
+| A-starvation-over-complete: RESOLVE | A-starvation-insufficient-evidence | BLOCKED; identity_starvation_status=undetermined |
+| B-starvation-over-complete: RESOLVE | B-starvation-insufficient-evidence | BLOCKED; identity_starvation_status=undetermined |
 
-Python: 757 test, 1 failure e 4 errori. Node: 336 test, 330 passati e 6 falliti. Verifiche su copia isolata del repository con il pilota aggiornato, non un checkout completo del nuovo commit. Problemi locali di byte/line-ending e contesto Git gia' documentati dalla baseline precedente; nessuna dichiarazione di CI verde.
+Le versioni correnti conservano gli input completi identici, incluso activation_id. Esplicitano inoltre reason=new_research_safety_not_established e identity_starvation_reason=missing_preflight_evidence. historical_case_id collega ogni nuova versione all'originale. L'assenza di evidenze non dimostra che una soglia sia raggiunta e non puo' autorizzare nuova ricerca: da questo contratto deriva l'atteso BLOCKED, non dal risultato del SUT.
 
-## Evidenze, calcolo e dati mancanti
+Originali completi: history/starvation-original-cases.json e history/cases-before-starvation.json. Fixture YAML originali, inclusi tutti i gate e l'atteso RESOLVE: history/native-original/replay-A-starvation-over-complete.yaml e corrispondente B. Risultati precedenti: history/local-results-before-starvation.json e history/local-results-at-182ce657.json. Quest'ultimo conserva i due esiti BLOCKED contro attesi RESOLVE e la suite non verde. Relazione precedente in history/REPORT-at-182ce657.md. Questi file sono evidenza storica, non test correnti saltati a runtime.
 
-Il nuovo identity-preflight.mjs riceve identity_preflight_evidence: pending_observation_count, oldest_pending_age_seconds, activity_kind ed evidence_ref. Produce required / not_required / undetermined e una motivazione. Nessun flag di risultato e' accettato come input. Nessun servizio viene interrogato.
+Il generatore crea le due nuove fixture e ritira soltanto le vecchie copie nel tests/ attivo dopo aver verificato identita' byte-per-byte con l'archivio. La verifica check-history-preservation.mjs confronta integralmente gli oggetti originali e gli input correnti. I 94 altri attesi della baseline da 96 restano invariati. I test espliciti RESOLVE a 24h esatte o 20 osservazioni restano attivi e invariati in entrambe le lane, cosi' come quelli immediatamente inferiori e sul lavoro gia' in corso.
 
-Per nuova ricerca: eta' >=86400 secondi oppure coda >=20 => required; basta una soglia dimostrata. Per escluderle servono entrambe sotto soglia oppure una coda esplicitamente vuota. Un'eta' associata a coda vuota e' contraddittoria. Natura mancante/sconosciuta, riferimento mancante o prove insufficienti => undetermined. Prima di COMPLETE, required porta a RESOLVE e undetermined a BLOCKED. Lavoro attestato in_progress/non_research => not_required anche senza metriche di coda, che non sono necessarie per quell'attivita'. Il nome del gate non viene usato nella classificazione.
+## Quale suite seleziona lo script nativo
 
-evidence_ref e' un riferimento opaco fornito dall'osservatore: il pilota ne richiede la presenza ma non verifica il contenuto o la freschezza di registri privati. Un eventuale adattatore futuro deve raccogliere e attestare misure coerenti dello stesso preflight e natura dell'attivita'; non e' stato collegato a servizi privati in questo lavoro. Tutti gli output restano observe_only, side_effect_authorized=false.
+Verificato offline con la CLI installata 0.13.0, richiamando la sua vera funzione readWorkspaceTestEntries. Il comando test suite passa i file del --workspace indicato; --name sarebbe un filtro, ma lo script non lo usa. Non usa --release.
 
-Test: 24h esatte, 86399 secondi e 86399.999 secondi; 20 osservazioni e 19; entrambe sopra soglia; ongoing/non-research sullo stesso F2->F3; campi assenti/null; natura unknown; prova sufficiente di una sola soglia; coda vuota e contraddizioni; priorita' e blocchi; tipi invalidi e tentativo di fornire il risultato del preflight.
+Bundle locale ispezionato: outputs/kora-replay/pilot. Contiene 167 file impacchettati, di cui tutte le 154 fixture Test YAML in pilot/tests. Non invia la cartella sorella replay/history. Inventario completo e hash in native-suite-selection.json; codice riproducibile in inspect-native-selection.mjs.
 
-## Conservazione e classificazione dei casi
+Sul checkout fissato al nuovo commit, il percorso selezionato e':
 
-Tutti i 96 attesi precedenti restano identici. I due input storici starvation restano identici. Gli scenari sintetici preesistenti che attendevano COMPLETE sono stati arricchiti esplicitamente con coda=1, eta'=3600 secondi e attivita'=new_research; sono scelte dichiarate di fixture, non dati reali e non inferenze da F3. Lo stesso chiarimento riguarda la fixture nativa originale router-complete. I confronti sono riproducibili con compare-starvation-baseline.mjs.
+    <checkout>/integrations/kora/control-plane/tests/
 
-I due storici continuano ad attendere RESOLVE: prima ottenevano COMPLETE, ora BLOCKED/undetermined. Non sono contati come difetti dimostrati del nuovo codice. Rimangono nel runner e nelle fixture native con gate attivo: non sono saltati, rimossi o convertiti a pass. Per questo la suite completa mantiene exit 1. Le 32 regressioni dimostrate sono invece basate su nuovi input espliciti e risolte. La policy non e' piu' ambigua; gli input storici restano insufficienti.
+Quindi il comando seleziona **solo i test presenti nel bundle indicato, che nel nuovo commit sono proprio tutte le 154 fixture correnti**. Non seleziona le sole 3 fixture della release vecchia, ne' i 164 casi JSON locali, ne' l'archivio storico. Il conteggio di esecuzioni effettivamente svolte dal server resta non verificato finche' non si esegue manualmente il comando e si legge il risultato nativo.
 
-Zero replay completi ricostruiti da dati reali. Restano soltanto due checkpoint pubblici parziali, con 17 campi obbligatori mancanti ciascuno e senza nuove prove di coda/attivita'. Nessun dato mancante inventato.
+run-native.ps1 accetta obbligatoriamente lo SHA completo, usa un checkout separato, verifica HEAD e stato pulito e poi esegue l'ispettore sul bundle effettivo prima dell'autenticazione. Se non trova esattamente 154 fixture, i due casi correnti e i quattro test delle soglie esatte, si ferma. Lo script consegnato negli outputs fissa il parametro al nuovo commit; gli script precedenti restano riferiti a versioni precedenti.
 
-## Release, rete e test nativi
+Comando finale interno: kora test suite --workspace <checkout>/integrations/kora/control-plane --environment production --org oltre --json. Non avvia un workflow live e non crea una release. Script preparato e analizzato sintatticamente, non eseguito qui. Nessun tentativo di aggirare il precedente EPERM sul refresh lock o il diniego browser.
 
-La release esistente rel_4wbyk58gsiuzfh8f non incorpora queste correzioni. La precedente validazione releaseReady=true/diagnostics=[] e la precedente lista production deployments=[] non sono state rieseguite ora e non validano il nuovo codice. I precedenti 3/3 nativi riguardavano la vecchia sorgente.
+## Fallimenti generali separati, non nuovi risultati verdi
 
-La discrepanza rete resta APERTA: manifest PR/locale deny; export precedentemente acquisito della release allow + inheritManaged=true. L'analisi offline precedente prova che allow era gia' nella risposta server, non che fosse inserito dalla CLI. Origine server (creazione o ricostruzione export) e policy runtime/IR effettiva restano non verificate. Nessuna variazione al manifest o ampliamento permessi.
+La precedente sessione ha eseguito i 22 comandi AGENTS.md sulla copia isolata: 20 passati; Python 757 test con 1 failure e 4 errori; Node 336 test con 330 passati e 6 falliti. Gli stessi gruppi erano gia' riprodotti nella baseline, con problemi locali di byte/line-ending e contesto Git. Non sono stati cancellati ne' riclassificati come successi. Non sono stati rieseguiti in questa revisione di fixture/documentazione, che non modifica codice di produzione. Le evidenze rimangono repository-checks.json e repository-baseline-checks.json; non costituiscono un risultato CI sul nuovo commit.
 
-Il blocco precedente EPERM sulla creazione del refresh lock di sessione e il diniego browser non sono stati aggirati; nessuna cancellazione lock, copia sessione, iniezione credenziali o percorso alternativo. Non si ripetono tentativi equivalenti. Lo script PowerShell manuale consegnato separatamente verifica SHA completo nuovo, directory separata e stato Git pulito; esegue soltanto kora test suite --workspace ... --environment production --org oltre --json. La suite include i due casi storici: non promettiamo gatePassed=true.
+## Policy di rete ancora aperta e release distinta
 
-## Riproduzione
+Manifest locale/PR: deny, invariato. Export della release rel_4wbyk58gsiuzfh8f acquisito in precedenza: allow + inheritManaged=true. La precedente analisi offline indica allow gia' nella risposta server; restano non verificate l'origine sul server e la policy effettiva runtime/IR. Nessun ampliamento permessi, nuova ispezione browser o percorso alternativo al diniego.
 
-npm ci --ignore-scripts; npm run generate; node compare-starvation-baseline.mjs; node check-fixtures.mjs; node replay.mjs --starvation; node replay.mjs --targeted; npm run replay; node check-native-offline.mjs. I tre comandi che includono i due storici restituiscono exit 1, non mascherato. Non e' un motivo per ampliare permessi o creare release.
+La release non incorpora le correzioni. I precedenti 3/3 nativi, releaseReady=true/diagnostics=[] e production deployments=[] sono evidenze storiche, non verifiche della nuova sorgente e non sono stati ripetuti ora.
 
-File principali: scripts/identity-preflight.mjs, scripts/router-core.mjs, schema del processo, contratto, fixture native; replay/starvation-cases.mjs contiene l'oracle separato dal SUT. Risultati in local-results.json, starvation-results.json, starvation-baseline.json e native-offline-results.json.
+## Riproduzione e limiti
 
-Nessuna modifica a dati della review, decisioni scientifiche o registri (0 record); nessun cambiamento ontologico. Solo letture del repository pubblico e test locali. Nessuna nuova release, merge, deploy, scheduler o esecuzione live.
+npm ci --ignore-scripts prepara le dipendenze (gia' disponibili, non reinstallate in questa sessione). Eseguire poi npm run generate; node check-history-preservation.mjs; node compare-starvation-baseline.mjs; node check-fixtures.mjs; node replay.mjs --starvation; node replay.mjs --targeted; npm run replay; node check-native-offline.mjs. Questi generatori e controlli locali sono stati eseguiti e sono passati nella sessione corrente.
+
+La regola sostanziale resta quella di hourly-hybrid-v4.md:37, conservata da v5 e precisata dal proprietario: soglia eta' >=86400 secondi OR coda >=20, prima di aprire nuova ricerca; non prevarica attivita' gia' in corso. L'identificazione di F3 non prova nuova ricerca. Il preflight calcola required/not_required/undetermined dalle osservazioni fornite, senza raccogliere dati privati o verificare le fonti referenziate. Dati necessari mancanti restano undetermined. Le precedenze SCOUT/PERSIST, blocchi applicabili, writer e anti-repeat sono invariate.
+
+Tutti i casi correnti sono sintetici. Zero replay reali completi: i due checkpoint pubblici parziali mantengono 17 input obbligatori mancanti ciascuno; nessuna misura di coda o dato mancante inventato. Pilota observe_only, side_effect_authorized=false. Nessun record della review, decisione scientifica, registro o dato privato modificato. Nessuna nuova release, merge, deploy, scheduler o esecuzione live.

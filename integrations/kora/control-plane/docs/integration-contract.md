@@ -77,10 +77,16 @@ retains only the existing lower-priority ordinary-debt routing role.
 This observe-only pilot computes over supplied evidence; it does not collect
 queue data, verify referenced records, or call the private review service.
 The observing adapter must establish those facts before any future live use.
-Synthetic fixtures are not real queue measurements. The two historical
-underspecified fixtures retain their original RESOLVE expectations and still
-fail visibly (now BLOCKED); they are separately counted, never treated as
-demonstrated current-code defects or silently converted to passing tests.
+Synthetic fixtures are not real queue measurements. The two original
+underspecified fixtures are preserved in full in replay/history, including
+their RESOLVE expectations and earlier mismatch results. Owner-authorized
+current versions keep identical inputs but explicitly expect BLOCKED with
+identity_starvation_status=undetermined and missing_preflight_evidence.
+This revision follows the insufficient-evidence contract above, not the SUT's
+output. The versions have distinct case IDs and links to their historical IDs.
+The historical cases are outside the selected tests/ bundle; the current
+versions retain active schema/exact gates. Explicit-evidence threshold cases
+continue to require RESOLVE. Test failure exit-code rules are unchanged.
 
 The anti-repeat flag suppresses an unchanged `COMPLETE` attempt but does not prevent a different safe route.
 

@@ -76,4 +76,19 @@ export function addStarvationCases(cases) {
     ['caller-forged-status',{identity_starvation_status:'not_required'}],
   ]) cases.push({id:`starvation-schema-${id}`,origin:'synthetic',kind:'schema-rejection',
     input:{...template.input,...patch},expected:{valid:false},contract:'ActivationInput schema: typed raw evidence only; no caller-supplied guard result'});
+  // Owner-authorized revision of the two *current* scenarios. The original
+  // complete records and RESOLVE expectations remain immutable in history/.
+  for (let index=0; index<cases.length; index++) {
+    const original=cases[index];
+    if (!original.id.endsWith('-starvation-over-complete')) continue;
+    cases[index]={...original,
+      id:`${original.input.lane}-starvation-insufficient-evidence`,
+      classification:'contract_assertion',
+      historical_case_id:original.id,
+      expected:{route:'BLOCKED',reason:'new_research_safety_not_established',
+        identity_starvation_status:'undetermined',identity_starvation_reason:'missing_preflight_evidence',
+        side_effect_authorized:false,pilot_mode:'observe_only'},
+      contract:'Owner clarification 2026-09-19; integration-contract.md: insufficient evidence is undetermined and cannot authorize new research',
+      note:'Same complete input as the archived original, including activation_id. New case identity and explicit revised oracle; original RESOLVE expectation preserved in history/cases-before-starvation.json and history/native-original/.'};
+  }
 }

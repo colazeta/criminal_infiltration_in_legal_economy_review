@@ -66,6 +66,16 @@ add('validated-stale-versions','frontier',{...f7,version_guards_match:false},{fr
 const invalid=[['negative-wip',{active_wip_count:-1}],['fractional-wip',{active_wip_count:6.5}],['invalid-lane',{lane:'C'}],['timestamp-object',{scheduled_at:{date:'2026-09-19'}}],['string-boolean',{writer_ready:'true'}],['unknown-property',{extra:true}],['missing-writer',{}]];
 for(const [id,patch]of invalid){const input={...base,...patch};if(id==='missing-writer')delete input.writer_ready;cases.push({id,origin:'synthetic',kind:'schema-rejection',input,expected:{valid:false},contract:'Release Process: ActivationInput JSON schema'});}
 addStarvationCases(cases);
+// Retire only the two byte-identical archived native fixtures, never arbitrary tests.
+for(const lane of ['A','B']) {
+ const name=`replay-${lane}-starvation-over-complete.yaml`;
+ const stale=path.join(pilot,'tests',name);
+ if(fs.existsSync(stale)) {
+  const archived=path.join(root,'history/native-original',name);
+  if(!fs.readFileSync(stale).equals(fs.readFileSync(archived)))throw Error(`Historical fixture changed: ${name}`);
+  fs.unlinkSync(stale);
+ }
+}
 fs.writeFileSync(path.join(root,'cases.json'),JSON.stringify(cases,null,2)+'\n');
 // Native router inputs use the independently authored frontier table, never evaluateFrontier output.
 for(const c of cases.filter(c=>c.kind!=='schema-rejection')){
