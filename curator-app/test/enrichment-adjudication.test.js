@@ -1,3 +1,5 @@
+import {importDocument} from '../src/enrichment-assets.js';
+import {indexDocument,digestBytes} from '../src/document-repository.js';
 import {nativeAdapter} from './sqlite-adapter-fixture.js';
 import {importBibliography} from '../src/enrichment-assets.js';
 import test from 'node:test';
@@ -14,8 +16,12 @@ function setup(){
   const sqlite=new DatabaseSync(':memory:');sqlite.exec('PRAGMA foreign_keys=ON');
   sqlite.exec(readFileSync(new URL('../migrations/0003_paper_enrichment.sql',import.meta.url),'utf8'));sqlite.exec(readFileSync(new URL('../migrations/0007_extraction_relations.sql',import.meta.url),'utf8'));
   sqlite.exec(readFileSync(new URL('../migrations/0005_enrichment_adjudication.sql',import.meta.url),'utf8'));sqlite.exec(readFileSync(new URL('../migrations/0006_enrichment_delivery_assets.sql',import.meta.url),'utf8'));
+ sqlite.exec(readFileSync(new URL('../migrations/0009_document_repository.sql',import.meta.url),'utf8'));
+ sqlite.exec(readFileSync(new URL('../migrations/0004_enrichment_schedule.sql',import.meta.url),'utf8'));
+ sqlite.exec(readFileSync(new URL('../migrations/0008_annotation_archive.sql',import.meta.url),'utf8'));
  const db=nativeAdapter(sqlite);
   const evidence=new Map(),env={REVIEW_DB:db,REVIEW_EVIDENCE:{async put(k,v){evidence.set(k,v)},async get(k){return evidence.has(k)?{async text(){return evidence.get(k)}}:null}},GITHUB_REPOSITORY:'colazeta/test',GITHUB_TOKEN:'token',CURATOR_LOGIN:'owner'};
+  const documents=new Map();env.REVIEW_DOCUMENTS={async put(k,v){documents.set(k,v)},async get(k){return documents.get(k)||null}};
   return{sqlite,db,evidence,env};
 }
 const record={id:'CAND-COMPLETE-001',title:'Synthetic complete paper',doi:'10.1234/complete',sourceLinks:['https://example.org/paper']};
@@ -24,8 +30,12 @@ const reported=(value,origin='source')=>({status:'reported',value,evidence_span_
 async function prepared(){
   const x=setup();await syncTargets(x.env,{schemaVersion:1,records:[record]},now);
   const target=x.sqlite.prepare('SELECT * FROM enrichment_targets').get();
-  const text='Full text evidence for completion and grounded framework rationale.';
+  const text='Full text evidence for completion and grounded framework rationale. '.repeat(3)+'\f';
   const sourceId=await saveSource(x.env,target,{provider:'Fixture',source_url:'https://example.org/full',evidence_kind:'full_text',text,version_label:'author manuscript',licence_status:'verified_for_private_research'},now);
+  const bytes=new TextEncoder().encode('%PDF-1.7\nSynthetic adjudication transport fixture only.\n%%EOF');
+  const pdfHash=await digestBytes(bytes),textHash=await sha256(text);
+  const doc=await importDocument(x.env,target.target_id,{input_sha256:target.input_sha256,source_id:sourceId,pdf_sha256:pdfHash,source_text_sha256:textHash,bytes_base64:Buffer.from(bytes).toString('base64'),retention_basis:'Synthetic private fixture',licence_status:'private research only',licence_url:null,attribution:'Synthetic test',visibility:'private',rights_verified:false},now);
+  await indexDocument(x.env,target.target_id,doc.document_id,{protocol_version:'CILE-DOCUMENT-TEXT-1',method:'native',extractor_version:'synthetic-test-only 1',page_count:1,text_sha256:textHash,pdf_sha256:pdfHash,parser_validated:true},now);
   const proposal={schema_version:1,protocol_version:'CILE-ENRICH-1',codebook_version:'1.0.0',target_id:target.target_id,input_sha256:target.input_sha256,
     generated_by:{agent:'fixture',model:'model-1',prompt_sha256:'b'.repeat(64)},source_ids:[sourceId],source_coverage:'full_text',
     spans:[{id:'span-1',source_id:sourceId,start_offset:0,end_offset:9,locator:'p. 1'}],

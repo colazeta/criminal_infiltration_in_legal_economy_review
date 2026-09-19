@@ -1,5 +1,5 @@
 {
-  "version": "0.4.3",
+  "version": "0.4.4",
   "entities": [
     {
       "table": "access_assessments_v2",
@@ -1833,6 +1833,76 @@
       ]
     },
     {
+      "table": "enrichment_catalogue_index",
+      "label": "enrichment_catalogue_index",
+      "class": "RetrievalIndexEntry",
+      "description": "Disposable lexical or bibliographic index, derived from authoritative retained entities.",
+      "group": "review",
+      "fields": [
+        {
+          "name": "target_id",
+          "description": "Enrichment target id; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:targetId"
+        },
+        {
+          "name": "input_sha256",
+          "description": "Enrichment input sha256; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:inputSha256"
+        },
+        {
+          "name": "authors",
+          "description": "authors",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "dcterms:creator"
+        },
+        {
+          "name": "publication_year",
+          "description": "publication_year",
+          "type": "INTEGER",
+          "nullable": true,
+          "semantic": "fabio:hasPublicationYear"
+        },
+        {
+          "name": "venue",
+          "description": "venue",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "dcterms:isPartOf"
+        },
+        {
+          "name": "review_status",
+          "description": "review_status",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "cile:candidateStatus"
+        },
+        {
+          "name": "projection_sha256",
+          "description": "Document repository: projection sha256. Index fields do not create scientific assertions.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:projectionSha256"
+        },
+        {
+          "name": "observed_at",
+          "description": "Momento in cui la fonte è stata osservata.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:observedAt"
+        }
+      ],
+      "implementationStatus": "configured_enrichment_sqlite",
+      "appendOnly": false,
+      "constraints": [
+        "target_id → enrichment_targets.target_id"
+      ]
+    },
+    {
       "table": "enrichment_citation_coverage",
       "label": "enrichment_citation_coverage",
       "class": "CitationCoverage",
@@ -2094,10 +2164,265 @@
       ]
     },
     {
+      "table": "enrichment_document_bindings",
+      "label": "enrichment_document_bindings",
+      "class": "SourceDocument",
+      "description": "Retained source bytes and acquisition receipt, distinct from the manifestation and scholarly work.",
+      "group": "review",
+      "fields": [
+        {
+          "name": "document_id",
+          "description": "Document repository: document id. Index fields do not create scientific assertions.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:documentId"
+        },
+        {
+          "name": "manifestation_id",
+          "description": "Copia o rappresentazione digitale di una versione del contenuto.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:manifestationId"
+        }
+      ],
+      "implementationStatus": "configured_enrichment_sqlite",
+      "appendOnly": true,
+      "constraints": [
+        "manifestation_id → enrichment_manifestations.manifestation_id",
+        "document_id → enrichment_documents.document_id"
+      ]
+    },
+    {
+      "table": "enrichment_document_chunks",
+      "label": "enrichment_document_chunks",
+      "class": "DocumentChunk",
+      "description": "Deterministic bounded page segment, a retrieval aid rather than scientific evidence.",
+      "group": "review",
+      "fields": [
+        {
+          "name": "chunk_id",
+          "description": "Document repository: chunk id. Index fields do not create scientific assertions.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:chunkId"
+        },
+        {
+          "name": "extraction_id",
+          "description": "Document repository: extraction id. Index fields do not create scientific assertions.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:extractionId"
+        },
+        {
+          "name": "page_number",
+          "description": "Document repository: page number. Index fields do not create scientific assertions.",
+          "type": "INTEGER",
+          "nullable": false,
+          "semantic": "cile:pageNumber"
+        },
+        {
+          "name": "start_offset",
+          "description": "Private scientific extraction field start_offset; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion.",
+          "type": "INTEGER",
+          "nullable": false,
+          "semantic": "cile:extractionStartOffset"
+        },
+        {
+          "name": "end_offset",
+          "description": "Private scientific extraction field end_offset; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion.",
+          "type": "INTEGER",
+          "nullable": false,
+          "semantic": "cile:extractionEndOffset"
+        },
+        {
+          "name": "text_sha256",
+          "description": "Enrichment content sha256; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:contentSha256"
+        }
+      ],
+      "implementationStatus": "configured_enrichment_sqlite",
+      "appendOnly": true,
+      "constraints": [
+        "extraction_id → enrichment_document_pages.extraction_id",
+        "page_number → enrichment_document_pages.page_number"
+      ]
+    },
+    {
+      "table": "enrichment_document_extractions",
+      "label": "enrichment_document_extractions",
+      "class": "ExtractedDocument",
+      "description": "Versioned exact text extraction bound to retained source bytes and a parser receipt.",
+      "group": "review",
+      "fields": [
+        {
+          "name": "extraction_id",
+          "description": "Document repository: extraction id. Index fields do not create scientific assertions.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:extractionId"
+        },
+        {
+          "name": "document_id",
+          "description": "Document repository: document id. Index fields do not create scientific assertions.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:documentId"
+        },
+        {
+          "name": "source_id",
+          "description": "Enrichment source id; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:sourceId"
+        },
+        {
+          "name": "text_sha256",
+          "description": "Enrichment content sha256; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:contentSha256"
+        },
+        {
+          "name": "text_length",
+          "description": "Document repository: text length. Index fields do not create scientific assertions.",
+          "type": "INTEGER",
+          "nullable": false,
+          "semantic": "cile:textLength"
+        },
+        {
+          "name": "page_count",
+          "description": "Document repository: page count. Index fields do not create scientific assertions.",
+          "type": "INTEGER",
+          "nullable": false,
+          "semantic": "cile:pageCount"
+        },
+        {
+          "name": "method",
+          "description": "Document repository: method. Index fields do not create scientific assertions.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:method"
+        },
+        {
+          "name": "extractor_version",
+          "description": "Document repository: extractor version. Index fields do not create scientific assertions.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:extractorVersion"
+        },
+        {
+          "name": "offset_unit",
+          "description": "Document repository: offset unit. Index fields do not create scientific assertions.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:offsetUnit"
+        },
+        {
+          "name": "protocol_version",
+          "description": "Enrichment protocol version; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:protocolVersion"
+        },
+        {
+          "name": "observed_at",
+          "description": "Momento in cui la fonte è stata osservata.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:observedAt"
+        }
+      ],
+      "implementationStatus": "configured_enrichment_sqlite",
+      "appendOnly": true,
+      "constraints": [
+        "source_id → enrichment_sources.source_id",
+        "document_id → enrichment_documents.document_id"
+      ]
+    },
+    {
+      "table": "enrichment_document_pages",
+      "label": "enrichment_document_pages",
+      "class": "DocumentPage",
+      "description": "Page partition of an extracted document with source UTF-16 character offsets.",
+      "group": "review",
+      "fields": [
+        {
+          "name": "extraction_id",
+          "description": "Document repository: extraction id. Index fields do not create scientific assertions.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:extractionId"
+        },
+        {
+          "name": "page_number",
+          "description": "Document repository: page number. Index fields do not create scientific assertions.",
+          "type": "INTEGER",
+          "nullable": false,
+          "semantic": "cile:pageNumber"
+        },
+        {
+          "name": "start_offset",
+          "description": "Private scientific extraction field start_offset; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion.",
+          "type": "INTEGER",
+          "nullable": false,
+          "semantic": "cile:extractionStartOffset"
+        },
+        {
+          "name": "end_offset",
+          "description": "Private scientific extraction field end_offset; structure, role and evidence requirements are defined by the closed paper-enrichment schema. Not an approved scientific assertion.",
+          "type": "INTEGER",
+          "nullable": false,
+          "semantic": "cile:extractionEndOffset"
+        }
+      ],
+      "implementationStatus": "configured_enrichment_sqlite",
+      "appendOnly": true,
+      "constraints": [
+        "extraction_id → enrichment_document_extractions.extraction_id"
+      ]
+    },
+    {
+      "table": "enrichment_document_terms",
+      "label": "enrichment_document_terms",
+      "class": "RetrievalIndexEntry",
+      "description": "Disposable lexical or bibliographic index, derived from authoritative retained entities.",
+      "group": "review",
+      "fields": [
+        {
+          "name": "term",
+          "description": "Document repository: term. Index fields do not create scientific assertions.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:term"
+        },
+        {
+          "name": "chunk_id",
+          "description": "Document repository: chunk id. Index fields do not create scientific assertions.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:chunkId"
+        },
+        {
+          "name": "occurrences",
+          "description": "Document repository: occurrences. Index fields do not create scientific assertions.",
+          "type": "INTEGER",
+          "nullable": false,
+          "semantic": "cile:occurrences"
+        }
+      ],
+      "implementationStatus": "configured_enrichment_sqlite",
+      "appendOnly": true,
+      "constraints": [
+        "chunk_id → enrichment_document_chunks.chunk_id"
+      ]
+    },
+    {
       "table": "enrichment_documents",
       "label": "enrichment_documents",
-      "class": "Manifestation",
-      "description": "A concrete digital embodiment of a specific Expression, not the intellectual version itself.",
+      "class": "SourceDocument",
+      "description": "Retained source bytes and acquisition receipt, distinct from the manifestation and scholarly work.",
       "group": "review",
       "fields": [
         {
@@ -2993,6 +3318,55 @@
       ],
       "implementationStatus": "configured_enrichment_sqlite",
       "appendOnly": false,
+      "constraints": [
+        "target_id → enrichment_targets.target_id"
+      ]
+    },
+    {
+      "table": "enrichment_manifestations",
+      "label": "enrichment_manifestations",
+      "class": "Manifestation",
+      "description": "A concrete digital embodiment of a specific Expression, not the intellectual version itself.",
+      "group": "review",
+      "fields": [
+        {
+          "name": "manifestation_id",
+          "description": "Copia o rappresentazione digitale di una versione del contenuto.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:manifestationId"
+        },
+        {
+          "name": "target_id",
+          "description": "Enrichment target id; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:targetId"
+        },
+        {
+          "name": "input_sha256",
+          "description": "Enrichment input sha256; governed by CILE-ENRICH-1.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:inputSha256"
+        },
+        {
+          "name": "source_url",
+          "description": "Indirizzo della fonte da cui deriva l’informazione; non prova da solo l’acquisizione del testo.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "dcterms:source"
+        },
+        {
+          "name": "version_label",
+          "description": "Denominazione della versione riportata dalla fonte.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:versionLabel"
+        }
+      ],
+      "implementationStatus": "configured_enrichment_sqlite",
+      "appendOnly": true,
       "constraints": [
         "target_id → enrichment_targets.target_id"
       ]

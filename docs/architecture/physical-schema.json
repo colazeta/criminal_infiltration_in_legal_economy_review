@@ -1,5 +1,5 @@
 {
-  "profile_version": "0.4.3",
+  "profile_version": "0.4.4",
   "runtime_verified": false,
   "migrations": [
     {
@@ -33,6 +33,10 @@
     {
       "path": "curator-app/migrations/0008_annotation_archive.sql",
       "sha256": "e0f389a82c0eb87406b3a9057b85e5be42f6686d524c38177506097c25017d48"
+    },
+    {
+      "path": "curator-app/migrations/0009_document_repository.sql",
+      "sha256": "dfc3cf545228f16dfc54b3c1b6d1cc9088901521cf273234c5a8b26006a02645"
     }
   ],
   "tables": [
@@ -3534,6 +3538,139 @@
       ]
     },
     {
+      "table": "enrichment_catalogue_index",
+      "concept": "RetrievalIndexEntry",
+      "migration": "curator-app/migrations/0009_document_repository.sql",
+      "implementation_status": "configured_enrichment_sqlite",
+      "columns": [
+        {
+          "cid": 0,
+          "name": "target_id",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "input_sha256",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "authors",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "publication_year",
+          "type": "INTEGER",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "venue",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "review_status",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "projection_sha256",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 7,
+          "name": "observed_at",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [
+        {
+          "id": 0,
+          "seq": 0,
+          "table": "enrichment_targets",
+          "from": "target_id",
+          "to": "target_id",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        }
+      ],
+      "indexes": [
+        {
+          "seq": 0,
+          "name": "enrichment_catalogue_year",
+          "unique": 0,
+          "origin": "c",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 3,
+              "name": "publication_year"
+            }
+          ],
+          "sql": "CREATE INDEX enrichment_catalogue_year ON enrichment_catalogue_index(publication_year)"
+        },
+        {
+          "seq": 1,
+          "name": "enrichment_catalogue_authors",
+          "unique": 0,
+          "origin": "c",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 2,
+              "name": "authors"
+            }
+          ],
+          "sql": "CREATE INDEX enrichment_catalogue_authors ON enrichment_catalogue_index(authors)"
+        },
+        {
+          "seq": 2,
+          "name": "sqlite_autoindex_enrichment_catalogue_index_1",
+          "unique": 1,
+          "origin": "pk",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 0,
+              "name": "target_id"
+            }
+          ],
+          "sql": null
+        }
+      ],
+      "sql": "CREATE TABLE enrichment_catalogue_index (\n target_id TEXT NOT NULL PRIMARY KEY REFERENCES enrichment_targets(target_id),\n input_sha256 TEXT NOT NULL,\n authors TEXT,\n publication_year INTEGER,\n venue TEXT,\n review_status TEXT,\n projection_sha256 TEXT NOT NULL,\n observed_at TEXT NOT NULL\n)",
+      "triggers": []
+    },
+    {
       "table": "enrichment_citation_coverage",
       "concept": "CitationCoverage",
       "migration": "curator-app/migrations/0003_paper_enrichment.sql",
@@ -4048,8 +4185,598 @@
       ]
     },
     {
+      "table": "enrichment_document_bindings",
+      "concept": "SourceDocument",
+      "migration": "curator-app/migrations/0009_document_repository.sql",
+      "implementation_status": "configured_enrichment_sqlite",
+      "columns": [
+        {
+          "cid": 0,
+          "name": "document_id",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "manifestation_id",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [
+        {
+          "id": 0,
+          "seq": 0,
+          "table": "enrichment_manifestations",
+          "from": "manifestation_id",
+          "to": "manifestation_id",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        },
+        {
+          "id": 1,
+          "seq": 0,
+          "table": "enrichment_documents",
+          "from": "document_id",
+          "to": "document_id",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        }
+      ],
+      "indexes": [
+        {
+          "seq": 0,
+          "name": "enrichment_document_bindings_manifestation",
+          "unique": 0,
+          "origin": "c",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 1,
+              "name": "manifestation_id"
+            }
+          ],
+          "sql": "CREATE INDEX enrichment_document_bindings_manifestation ON enrichment_document_bindings(manifestation_id)"
+        },
+        {
+          "seq": 1,
+          "name": "sqlite_autoindex_enrichment_document_bindings_1",
+          "unique": 1,
+          "origin": "pk",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 0,
+              "name": "document_id"
+            }
+          ],
+          "sql": null
+        }
+      ],
+      "sql": "CREATE TABLE enrichment_document_bindings (\n document_id TEXT NOT NULL PRIMARY KEY REFERENCES enrichment_documents(document_id),\n manifestation_id TEXT NOT NULL REFERENCES enrichment_manifestations(manifestation_id)\n)",
+      "triggers": [
+        {
+          "name": "enrichment_document_binding_scope",
+          "sql": "CREATE TRIGGER enrichment_document_binding_scope BEFORE INSERT ON enrichment_document_bindings\nWHEN NOT EXISTS (\n SELECT 1 FROM enrichment_documents d JOIN enrichment_manifestations m\n ON d.target_id=m.target_id AND d.input_sha256=m.input_sha256\n AND d.source_url=m.source_url AND d.version_label=m.version_label\n WHERE d.document_id=NEW.document_id AND m.manifestation_id=NEW.manifestation_id\n) BEGIN SELECT RAISE(ABORT,'document manifestation scope'); END"
+        },
+        {
+          "name": "enrichment_document_bindings_no_delete",
+          "sql": "CREATE TRIGGER enrichment_document_bindings_no_delete BEFORE DELETE ON enrichment_document_bindings BEGIN SELECT RAISE(ABORT,'immutable document provenance'); END"
+        },
+        {
+          "name": "enrichment_document_bindings_no_update",
+          "sql": "CREATE TRIGGER enrichment_document_bindings_no_update BEFORE UPDATE ON enrichment_document_bindings BEGIN SELECT RAISE(ABORT,'immutable document provenance'); END"
+        }
+      ]
+    },
+    {
+      "table": "enrichment_document_chunks",
+      "concept": "DocumentChunk",
+      "migration": "curator-app/migrations/0009_document_repository.sql",
+      "implementation_status": "configured_enrichment_sqlite",
+      "columns": [
+        {
+          "cid": 0,
+          "name": "chunk_id",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "extraction_id",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "page_number",
+          "type": "INTEGER",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "start_offset",
+          "type": "INTEGER",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "end_offset",
+          "type": "INTEGER",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "text_sha256",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [
+        {
+          "id": 0,
+          "seq": 0,
+          "table": "enrichment_document_pages",
+          "from": "extraction_id",
+          "to": "extraction_id",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        },
+        {
+          "id": 0,
+          "seq": 1,
+          "table": "enrichment_document_pages",
+          "from": "page_number",
+          "to": "page_number",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        }
+      ],
+      "indexes": [
+        {
+          "seq": 0,
+          "name": "sqlite_autoindex_enrichment_document_chunks_2",
+          "unique": 1,
+          "origin": "u",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 1,
+              "name": "extraction_id"
+            },
+            {
+              "seqno": 1,
+              "cid": 2,
+              "name": "page_number"
+            },
+            {
+              "seqno": 2,
+              "cid": 3,
+              "name": "start_offset"
+            }
+          ],
+          "sql": null
+        },
+        {
+          "seq": 1,
+          "name": "sqlite_autoindex_enrichment_document_chunks_1",
+          "unique": 1,
+          "origin": "pk",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 0,
+              "name": "chunk_id"
+            }
+          ],
+          "sql": null
+        }
+      ],
+      "sql": "CREATE TABLE enrichment_document_chunks (\n chunk_id TEXT NOT NULL PRIMARY KEY,\n extraction_id TEXT NOT NULL,\n page_number INTEGER NOT NULL,\n start_offset INTEGER NOT NULL CHECK(start_offset>=0),\n end_offset INTEGER NOT NULL CHECK(end_offset>start_offset AND end_offset-start_offset<=1800),\n text_sha256 TEXT NOT NULL CHECK(length(text_sha256)=64),\n FOREIGN KEY(extraction_id,page_number) REFERENCES enrichment_document_pages(extraction_id,page_number),\n UNIQUE(extraction_id,page_number,start_offset)\n)",
+      "triggers": [
+        {
+          "name": "enrichment_document_chunk_scope",
+          "sql": "CREATE TRIGGER enrichment_document_chunk_scope BEFORE INSERT ON enrichment_document_chunks\nWHEN NOT EXISTS (SELECT 1 FROM enrichment_document_pages p WHERE p.extraction_id=NEW.extraction_id\n AND p.page_number=NEW.page_number AND NEW.start_offset>=p.start_offset AND NEW.end_offset<=p.end_offset)\nBEGIN SELECT RAISE(ABORT,'chunk outside page'); END"
+        },
+        {
+          "name": "enrichment_document_chunks_no_delete",
+          "sql": "CREATE TRIGGER enrichment_document_chunks_no_delete BEFORE DELETE ON enrichment_document_chunks BEGIN SELECT RAISE(ABORT,'immutable document provenance'); END"
+        },
+        {
+          "name": "enrichment_document_chunks_no_update",
+          "sql": "CREATE TRIGGER enrichment_document_chunks_no_update BEFORE UPDATE ON enrichment_document_chunks BEGIN SELECT RAISE(ABORT,'immutable document provenance'); END"
+        }
+      ]
+    },
+    {
+      "table": "enrichment_document_extractions",
+      "concept": "ExtractedDocument",
+      "migration": "curator-app/migrations/0009_document_repository.sql",
+      "implementation_status": "configured_enrichment_sqlite",
+      "columns": [
+        {
+          "cid": 0,
+          "name": "extraction_id",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "document_id",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "source_id",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "text_sha256",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "text_length",
+          "type": "INTEGER",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "page_count",
+          "type": "INTEGER",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "method",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 7,
+          "name": "extractor_version",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 8,
+          "name": "offset_unit",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 9,
+          "name": "protocol_version",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 10,
+          "name": "observed_at",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [
+        {
+          "id": 0,
+          "seq": 0,
+          "table": "enrichment_sources",
+          "from": "source_id",
+          "to": "source_id",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        },
+        {
+          "id": 1,
+          "seq": 0,
+          "table": "enrichment_documents",
+          "from": "document_id",
+          "to": "document_id",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        }
+      ],
+      "indexes": [
+        {
+          "seq": 0,
+          "name": "enrichment_document_extractions_source",
+          "unique": 0,
+          "origin": "c",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 2,
+              "name": "source_id"
+            }
+          ],
+          "sql": "CREATE INDEX enrichment_document_extractions_source ON enrichment_document_extractions(source_id)"
+        },
+        {
+          "seq": 1,
+          "name": "sqlite_autoindex_enrichment_document_extractions_2",
+          "unique": 1,
+          "origin": "u",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 1,
+              "name": "document_id"
+            },
+            {
+              "seqno": 1,
+              "cid": 9,
+              "name": "protocol_version"
+            }
+          ],
+          "sql": null
+        },
+        {
+          "seq": 2,
+          "name": "sqlite_autoindex_enrichment_document_extractions_1",
+          "unique": 1,
+          "origin": "pk",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 0,
+              "name": "extraction_id"
+            }
+          ],
+          "sql": null
+        }
+      ],
+      "sql": "CREATE TABLE enrichment_document_extractions (\n extraction_id TEXT NOT NULL PRIMARY KEY,\n document_id TEXT NOT NULL REFERENCES enrichment_documents(document_id),\n source_id TEXT NOT NULL REFERENCES enrichment_sources(source_id),\n text_sha256 TEXT NOT NULL CHECK(length(text_sha256)=64),\n text_length INTEGER NOT NULL CHECK(text_length>0 AND text_length<=4000000),\n page_count INTEGER NOT NULL CHECK(page_count BETWEEN 1 AND 500),\n method TEXT NOT NULL CHECK(method IN ('native','ocr')),\n extractor_version TEXT NOT NULL,\n offset_unit TEXT NOT NULL CHECK(offset_unit='utf16'),\n protocol_version TEXT NOT NULL CHECK(protocol_version='CILE-DOCUMENT-TEXT-1'),\n observed_at TEXT NOT NULL,\n UNIQUE(document_id,protocol_version)\n)",
+      "triggers": [
+        {
+          "name": "enrichment_document_extraction_scope",
+          "sql": "CREATE TRIGGER enrichment_document_extraction_scope BEFORE INSERT ON enrichment_document_extractions\nWHEN NOT EXISTS (\n SELECT 1 FROM enrichment_documents d JOIN enrichment_sources s ON s.source_id=d.source_id\n WHERE d.document_id=NEW.document_id AND s.source_id=NEW.source_id\n AND s.content_sha256=NEW.text_sha256 AND d.source_text_sha256=NEW.text_sha256\n AND s.target_id=d.target_id AND s.input_sha256=d.input_sha256 AND s.evidence_kind='full_text'\n) BEGIN SELECT RAISE(ABORT,'document extraction scope'); END"
+        },
+        {
+          "name": "enrichment_document_extractions_no_delete",
+          "sql": "CREATE TRIGGER enrichment_document_extractions_no_delete BEFORE DELETE ON enrichment_document_extractions BEGIN SELECT RAISE(ABORT,'immutable document provenance'); END"
+        },
+        {
+          "name": "enrichment_document_extractions_no_update",
+          "sql": "CREATE TRIGGER enrichment_document_extractions_no_update BEFORE UPDATE ON enrichment_document_extractions BEGIN SELECT RAISE(ABORT,'immutable document provenance'); END"
+        }
+      ]
+    },
+    {
+      "table": "enrichment_document_pages",
+      "concept": "DocumentPage",
+      "migration": "curator-app/migrations/0009_document_repository.sql",
+      "implementation_status": "configured_enrichment_sqlite",
+      "columns": [
+        {
+          "cid": 0,
+          "name": "extraction_id",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "page_number",
+          "type": "INTEGER",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 2
+        },
+        {
+          "cid": 2,
+          "name": "start_offset",
+          "type": "INTEGER",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "end_offset",
+          "type": "INTEGER",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [
+        {
+          "id": 0,
+          "seq": 0,
+          "table": "enrichment_document_extractions",
+          "from": "extraction_id",
+          "to": "extraction_id",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        }
+      ],
+      "indexes": [
+        {
+          "seq": 0,
+          "name": "sqlite_autoindex_enrichment_document_pages_1",
+          "unique": 1,
+          "origin": "pk",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 0,
+              "name": "extraction_id"
+            },
+            {
+              "seqno": 1,
+              "cid": 1,
+              "name": "page_number"
+            }
+          ],
+          "sql": null
+        }
+      ],
+      "sql": "CREATE TABLE enrichment_document_pages (\n extraction_id TEXT NOT NULL REFERENCES enrichment_document_extractions(extraction_id),\n page_number INTEGER NOT NULL CHECK(page_number>0),\n start_offset INTEGER NOT NULL CHECK(start_offset>=0),\n end_offset INTEGER NOT NULL CHECK(end_offset>=start_offset),\n PRIMARY KEY(extraction_id,page_number)\n)",
+      "triggers": [
+        {
+          "name": "enrichment_document_pages_no_delete",
+          "sql": "CREATE TRIGGER enrichment_document_pages_no_delete BEFORE DELETE ON enrichment_document_pages BEGIN SELECT RAISE(ABORT,'immutable document provenance'); END"
+        },
+        {
+          "name": "enrichment_document_pages_no_update",
+          "sql": "CREATE TRIGGER enrichment_document_pages_no_update BEFORE UPDATE ON enrichment_document_pages BEGIN SELECT RAISE(ABORT,'immutable document provenance'); END"
+        }
+      ]
+    },
+    {
+      "table": "enrichment_document_terms",
+      "concept": "RetrievalIndexEntry",
+      "migration": "curator-app/migrations/0009_document_repository.sql",
+      "implementation_status": "configured_enrichment_sqlite",
+      "columns": [
+        {
+          "cid": 0,
+          "name": "term",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "chunk_id",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 2
+        },
+        {
+          "cid": 2,
+          "name": "occurrences",
+          "type": "INTEGER",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [
+        {
+          "id": 0,
+          "seq": 0,
+          "table": "enrichment_document_chunks",
+          "from": "chunk_id",
+          "to": "chunk_id",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        }
+      ],
+      "indexes": [
+        {
+          "seq": 0,
+          "name": "enrichment_document_terms_chunk",
+          "unique": 0,
+          "origin": "c",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 1,
+              "name": "chunk_id"
+            }
+          ],
+          "sql": "CREATE INDEX enrichment_document_terms_chunk ON enrichment_document_terms(chunk_id)"
+        },
+        {
+          "seq": 1,
+          "name": "sqlite_autoindex_enrichment_document_terms_1",
+          "unique": 1,
+          "origin": "pk",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 0,
+              "name": "term"
+            },
+            {
+              "seqno": 1,
+              "cid": 1,
+              "name": "chunk_id"
+            }
+          ],
+          "sql": null
+        }
+      ],
+      "sql": "CREATE TABLE enrichment_document_terms (\n term TEXT NOT NULL CHECK(length(term) BETWEEN 2 AND 64),\n chunk_id TEXT NOT NULL REFERENCES enrichment_document_chunks(chunk_id),\n occurrences INTEGER NOT NULL CHECK(occurrences>0),\n PRIMARY KEY(term,chunk_id)\n)",
+      "triggers": [
+        {
+          "name": "enrichment_document_terms_no_delete",
+          "sql": "CREATE TRIGGER enrichment_document_terms_no_delete BEFORE DELETE ON enrichment_document_terms BEGIN SELECT RAISE(ABORT,'immutable document provenance'); END"
+        },
+        {
+          "name": "enrichment_document_terms_no_update",
+          "sql": "CREATE TRIGGER enrichment_document_terms_no_update BEFORE UPDATE ON enrichment_document_terms BEGIN SELECT RAISE(ABORT,'immutable document provenance'); END"
+        }
+      ]
+    },
+    {
       "table": "enrichment_documents",
-      "concept": "Manifestation",
+      "concept": "SourceDocument",
       "migration": "curator-app/migrations/0006_enrichment_delivery_assets.sql",
       "implementation_status": "configured_enrichment_sqlite",
       "columns": [
@@ -4215,6 +4942,36 @@
       "indexes": [
         {
           "seq": 0,
+          "name": "enrichment_documents_content",
+          "unique": 0,
+          "origin": "c",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 5,
+              "name": "pdf_sha256"
+            },
+            {
+              "seqno": 1,
+              "cid": 1,
+              "name": "target_id"
+            },
+            {
+              "seqno": 2,
+              "cid": 2,
+              "name": "input_sha256"
+            },
+            {
+              "seqno": 3,
+              "cid": 16,
+              "name": "observed_at"
+            }
+          ],
+          "sql": "CREATE INDEX enrichment_documents_content ON enrichment_documents(pdf_sha256,target_id,input_sha256,observed_at)"
+        },
+        {
+          "seq": 1,
           "name": "enrichment_documents_target",
           "unique": 0,
           "origin": "c",
@@ -4239,7 +4996,7 @@
           "sql": "CREATE INDEX enrichment_documents_target ON enrichment_documents(target_id,input_sha256,observed_at)"
         },
         {
-          "seq": 1,
+          "seq": 2,
           "name": "sqlite_autoindex_enrichment_documents_1",
           "unique": 1,
           "origin": "pk",
@@ -4647,6 +5404,36 @@
       "indexes": [
         {
           "seq": 0,
+          "name": "enrichment_facts_filter",
+          "unique": 0,
+          "origin": "c",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 2,
+              "name": "scope"
+            },
+            {
+              "seqno": 1,
+              "cid": 3,
+              "name": "field_name"
+            },
+            {
+              "seqno": 2,
+              "cid": 10,
+              "name": "status"
+            },
+            {
+              "seqno": 3,
+              "cid": 1,
+              "name": "proposal_id"
+            }
+          ],
+          "sql": "CREATE INDEX enrichment_facts_filter ON enrichment_facts(scope,field_name,status,proposal_id)"
+        },
+        {
+          "seq": 1,
           "name": "enrichment_fact_secondary",
           "unique": 1,
           "origin": "c",
@@ -4671,7 +5458,7 @@
           "sql": "CREATE UNIQUE INDEX enrichment_fact_secondary ON enrichment_facts(proposal_id,secondary_category,field_name) WHERE scope='secondary'"
         },
         {
-          "seq": 1,
+          "seq": 2,
           "name": "enrichment_fact_framework",
           "unique": 1,
           "origin": "c",
@@ -4691,7 +5478,7 @@
           "sql": "CREATE UNIQUE INDEX enrichment_fact_framework ON enrichment_facts(proposal_id,field_name) WHERE scope='framework'"
         },
         {
-          "seq": 2,
+          "seq": 3,
           "name": "enrichment_fact_findings",
           "unique": 1,
           "origin": "c",
@@ -4716,7 +5503,7 @@
           "sql": "CREATE UNIQUE INDEX enrichment_fact_findings ON enrichment_facts(proposal_id,finding_id,field_name) WHERE scope='findings'"
         },
         {
-          "seq": 3,
+          "seq": 4,
           "name": "enrichment_fact_variable_uses",
           "unique": 1,
           "origin": "c",
@@ -4741,7 +5528,7 @@
           "sql": "CREATE UNIQUE INDEX enrichment_fact_variable_uses ON enrichment_facts(proposal_id,variable_use_id,field_name) WHERE scope='variable_uses'"
         },
         {
-          "seq": 4,
+          "seq": 5,
           "name": "enrichment_fact_analyses",
           "unique": 1,
           "origin": "c",
@@ -4766,7 +5553,7 @@
           "sql": "CREATE UNIQUE INDEX enrichment_fact_analyses ON enrichment_facts(proposal_id,analysis_id,field_name) WHERE scope='analyses'"
         },
         {
-          "seq": 5,
+          "seq": 6,
           "name": "enrichment_fact_datasets",
           "unique": 1,
           "origin": "c",
@@ -4791,7 +5578,7 @@
           "sql": "CREATE UNIQUE INDEX enrichment_fact_datasets ON enrichment_facts(proposal_id,dataset_id,field_name) WHERE scope='datasets'"
         },
         {
-          "seq": 6,
+          "seq": 7,
           "name": "enrichment_fact_studies",
           "unique": 1,
           "origin": "c",
@@ -4816,7 +5603,7 @@
           "sql": "CREATE UNIQUE INDEX enrichment_fact_studies ON enrichment_facts(proposal_id,study_id,field_name) WHERE scope='studies'"
         },
         {
-          "seq": 7,
+          "seq": 8,
           "name": "enrichment_fact_overview",
           "unique": 1,
           "origin": "c",
@@ -4836,7 +5623,7 @@
           "sql": "CREATE UNIQUE INDEX enrichment_fact_overview ON enrichment_facts(proposal_id,field_name) WHERE scope='overview'"
         },
         {
-          "seq": 8,
+          "seq": 9,
           "name": "sqlite_autoindex_enrichment_facts_2",
           "unique": 1,
           "origin": "u",
@@ -4856,7 +5643,7 @@
           "sql": null
         },
         {
-          "seq": 9,
+          "seq": 10,
           "name": "sqlite_autoindex_enrichment_facts_1",
           "unique": 1,
           "origin": "pk",
@@ -6135,6 +6922,124 @@
       ],
       "sql": "CREATE TABLE enrichment_jobs (\n job_id TEXT PRIMARY KEY, target_id TEXT NOT NULL REFERENCES enrichment_targets(target_id),\n input_sha256 TEXT NOT NULL CHECK(length(input_sha256)=64), kind TEXT NOT NULL CHECK(kind IN ('metadata','citations','extraction','classification')),\n protocol_version TEXT NOT NULL, status TEXT NOT NULL CHECK(status IN ('pending','running','completed','blocked','exhausted','superseded')),\n failure_streak INTEGER NOT NULL DEFAULT 0 CHECK(failure_streak BETWEEN 0 AND 3), attempts_total INTEGER NOT NULL DEFAULT 0,\n due_at TEXT, lease_until TEXT, lease_token TEXT, checkpoint_json TEXT NOT NULL DEFAULT '{}', error_code TEXT, updated_at TEXT NOT NULL,\n UNIQUE(target_id,input_sha256,kind,protocol_version)\n)",
       "triggers": []
+    },
+    {
+      "table": "enrichment_manifestations",
+      "concept": "Manifestation",
+      "migration": "curator-app/migrations/0009_document_repository.sql",
+      "implementation_status": "configured_enrichment_sqlite",
+      "columns": [
+        {
+          "cid": 0,
+          "name": "manifestation_id",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "target_id",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "input_sha256",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "source_url",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "version_label",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [
+        {
+          "id": 0,
+          "seq": 0,
+          "table": "enrichment_targets",
+          "from": "target_id",
+          "to": "target_id",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        }
+      ],
+      "indexes": [
+        {
+          "seq": 0,
+          "name": "sqlite_autoindex_enrichment_manifestations_2",
+          "unique": 1,
+          "origin": "u",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 1,
+              "name": "target_id"
+            },
+            {
+              "seqno": 1,
+              "cid": 2,
+              "name": "input_sha256"
+            },
+            {
+              "seqno": 2,
+              "cid": 3,
+              "name": "source_url"
+            },
+            {
+              "seqno": 3,
+              "cid": 4,
+              "name": "version_label"
+            }
+          ],
+          "sql": null
+        },
+        {
+          "seq": 1,
+          "name": "sqlite_autoindex_enrichment_manifestations_1",
+          "unique": 1,
+          "origin": "pk",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 0,
+              "name": "manifestation_id"
+            }
+          ],
+          "sql": null
+        }
+      ],
+      "sql": "CREATE TABLE enrichment_manifestations (\n manifestation_id TEXT NOT NULL PRIMARY KEY,\n target_id TEXT NOT NULL REFERENCES enrichment_targets(target_id),\n input_sha256 TEXT NOT NULL,\n source_url TEXT NOT NULL,\n version_label TEXT NOT NULL,\n UNIQUE(target_id,input_sha256,source_url,version_label)\n)",
+      "triggers": [
+        {
+          "name": "enrichment_manifestations_no_delete",
+          "sql": "CREATE TRIGGER enrichment_manifestations_no_delete BEFORE DELETE ON enrichment_manifestations BEGIN SELECT RAISE(ABORT,'immutable document provenance'); END"
+        },
+        {
+          "name": "enrichment_manifestations_no_update",
+          "sql": "CREATE TRIGGER enrichment_manifestations_no_update BEFORE UPDATE ON enrichment_manifestations BEGIN SELECT RAISE(ABORT,'immutable document provenance'); END"
+        }
+      ]
     },
     {
       "table": "enrichment_manual_annotations",
@@ -7679,6 +8584,21 @@
       "indexes": [
         {
           "seq": 0,
+          "name": "enrichment_targets_doi",
+          "unique": 0,
+          "origin": "c",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": -2,
+              "name": null
+            }
+          ],
+          "sql": "CREATE INDEX enrichment_targets_doi ON enrichment_targets(json_extract(record_json,'$.doi'))"
+        },
+        {
+          "seq": 1,
           "name": "sqlite_autoindex_enrichment_targets_2",
           "unique": 1,
           "origin": "u",
@@ -7703,7 +8623,7 @@
           "sql": null
         },
         {
-          "seq": 1,
+          "seq": 2,
           "name": "sqlite_autoindex_enrichment_targets_1",
           "unique": 1,
           "origin": "pk",

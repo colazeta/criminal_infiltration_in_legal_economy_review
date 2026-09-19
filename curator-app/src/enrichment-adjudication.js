@@ -1,3 +1,4 @@
+import {sourceDocumentsVerified} from './document-repository.js';
 import {readNormalizedExtraction} from './extraction-relations.js';
 /* Independent scientific acceptance for candidate-bound enrichment.
    Engineering can prepare packets; only an exact-head human approval can create a receipt. */
@@ -67,6 +68,7 @@ async function proposalState(env,target,proposalId=null){
   return {proposal,input,facts};
 }
 async function sourceSnapshot(env,target,input){
+  await sourceDocumentsVerified(env,target,input);
   const list=[];
   for(const id of input.source_ids){
     const source=await S(env.REVIEW_DB,'SELECT source_id,provider,source_url,evidence_kind,content_sha256,storage_key,version_label,language,retention_basis,licence_status,observed_at FROM enrichment_sources WHERE source_id=? AND target_id=? AND input_sha256=?',id,target.target_id,target.input_sha256).first();

@@ -1,3 +1,5 @@
+import {serveMcp} from "./mcp.js";
+import {serveDocumentRead} from "./document-http.js";
 import {servePublicAssets} from "./enrichment-assets.js";
 import { PUBLIC_RESEARCH_PATH, servePublicResearch } from "./public-paper-research.js";
 "use strict";
@@ -406,7 +408,9 @@ export default {
   async queue(batch, env) { return consumeDays(batch, env); },
   async fetch(request, env) {
     const url = new URL(request.url);
-    if (url.pathname === "/version" && request.method === "GET") return Response.json({ commit: env.DEPLOY_COMMIT || null, ontology: "0.4.3" }, { headers: { "Cache-Control": "no-store" } });
+    if (url.pathname === "/mcp") return serveMcp(request,enrichmentStore(env));
+    if (url.pathname === "/version" && request.method === "GET") return Response.json({ commit: env.DEPLOY_COMMIT || null, ontology: "0.4.4" }, { headers: { "Cache-Control": "no-store" } });
+    if (url.pathname === "/api/public-document-library") return serveDocumentRead(request,enrichmentStore(env));
     if (url.pathname === "/api/public-paper-assets") return servePublicAssets(request,enrichmentStore(env));
     if (url.pathname === PUBLIC_RESEARCH_PATH) return servePublicResearch(request,enrichmentStore(env));
     if (url.pathname === "/api/paper-enrichment-machine") {
@@ -426,9 +430,9 @@ export default {
       try { return await handleV2(request, env, await authenticateCuratorRequest(request, env)); }
       catch (error) { return Response.json({ error: { code: error.code || "authentication_required" } }, { status: error.status || 401, headers: { "Cache-Control": "no-store" } }); }
     }
-    if (["/index.html", "/aml.html", "/stats.html", "/model.html"].includes(url.pathname)) {
+    if (["/index.html", "/aml.html", "/stats.html", "/model.html", "/document-library.html"].includes(url.pathname)) {
       const base = "https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/";
-      return Response.redirect(new URL(url.pathname.slice(1), base).href, 302);
+      return Response.redirect(new URL(url.pathname.slice(1)+url.search, base).href, 302);
     }
     if (request.method === "GET" && CURATOR_COMPONENT_ASSETS.has(url.pathname)) {
       return serveCuratorComponentAsset(request, env);

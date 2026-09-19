@@ -35,6 +35,8 @@ test("new private V2 routes reject unauthenticated requests; public links reach 
   const response = await worker.fetch(new Request("https://test.workers.dev/stats.html"), env);
   assert.equal(response.status, 302);
   assert.equal(response.headers.get("Location"), "https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/stats.html");
+  const reader = await worker.fetch(new Request("https://test.workers.dev/document-library.html?candidate=CAND-TEST&page=2"), env);
+  assert.equal(reader.headers.get("Location"), "https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/document-library.html?candidate=CAND-TEST&page=2");
 });
 test("public research route is distinct from private source and proposal routes", async () => {
   const publicResponse = await worker.fetch(new Request("https://test.workers.dev/api/public-paper-research?id=CAND-UNKNOWN"), env);
@@ -46,7 +48,7 @@ test("public research route is distinct from private source and proposal routes"
 });
 
 test("private document URLs require curator authentication and only the enrichment shell permits blob frames",async()=>{
-  for(const path of ["/api/paper-enrichment/documents?id=private","/api/paper-enrichment/document?id=private&document=x"])
+  for(const path of ["/api/paper-enrichment/documents?id=private","/api/paper-enrichment/document?id=private&document=x","/api/paper-enrichment/document-library?id=CAND-TEST","/api/paper-enrichment/mcp"])
     assert.equal((await worker.fetch(new Request("https://test.workers.dev"+path),env)).status,401);
   const page=await worker.fetch(new Request("https://test.workers.dev/enrichment.html"),env);
   assert.match(page.headers.get("Content-Security-Policy"),/frame-src blob:/);

@@ -29,6 +29,7 @@ paper rilevante; un paper rilevante non è automaticamente pubblico.
 - [Leggi che cosa conta come infiltrazione criminale](docs/methodology/eligibility.md)
 - [Proponi un paper](https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/issues/new?template=candidate_intake.yml)
 - [Consulta tutta la documentazione](docs/README.md)
+- [Repository dei documenti e MCP: uso, limiti e stato del rilascio](docs/operations/document-repository-mcp.md)
 
 ## Che cosa vuoi fare?
 
