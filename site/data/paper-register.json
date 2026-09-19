@@ -390,14 +390,14 @@
       "id": "CAND-ACADEMIC-2026-09-09-004",
       "title": "Organized Crime and Firms' Financial Statements: Evidence from Criminal Investigations in Italy",
       "authors": "Pietro A. Bianchi; Antonio Marra; Donato Masciandaro; Nicola Pecchiari",
-      "year": 2021,
+      "year": 2022,
       "venue": "The Accounting Review",
       "doi": "10.2308/tar-2019-0079",
       "sourceLinks": [
-        "https://papers.ssrn.com/sol3/papers.cfm?abstract_id=3031747",
-        "https://doi.org/10.2308/tar-2019-0079"
+        "https://publications.aaahq.org/accounting-review/article/97/3/77/4414/Organized-Crime-and-Firms-Financial-Statements",
+        "https://iris.unibocconi.it/handle/11565/4040973"
       ],
-      "metadataStatus": "metadata_partial",
+      "metadataStatus": "metadata_verified",
       "reviewStatus": "pending",
       "accessStatus": "unknown",
       "registeredAt": "2026-09-09",
@@ -441,14 +441,14 @@
       "id": "CAND-ACADEMIC-2026-09-09-007",
       "title": "Organized crime behavior of shell-company networks in procurement: prevention insights for policy and reform",
       "authors": "J. R. Nicolás-Carlock; Issa Luna-Pla",
-      "year": 2023,
+      "year": 2024,
       "venue": "Trends in Organized Crime",
       "doi": "10.1007/s12117-023-09499-w",
       "sourceLinks": [
-        "https://doi.org/10.1007/s12117-023-09499-w",
+        "https://link.springer.com/article/10.1007/s12117-023-09499-w",
         "https://arxiv.org/abs/2307.10028"
       ],
-      "metadataStatus": "metadata_partial",
+      "metadataStatus": "metadata_verified",
       "reviewStatus": "pending",
       "accessStatus": "unknown",
       "registeredAt": "2026-09-09",
@@ -475,14 +475,14 @@
       "id": "CAND-ACADEMIC-2026-09-09-009",
       "title": "Migrating mafias",
       "authors": "Paolo Buonanno; Matteo Pazzona",
-      "year": null,
+      "year": 2014,
       "venue": "Regional Science and Urban Economics",
       "doi": "10.1016/j.regsciurbeco.2013.11.005",
       "sourceLinks": [
         "https://www.sciencedirect.com/science/article/abs/pii/S0166046213001099",
-        "https://doi.org/10.1016/j.regsciurbeco.2013.11.005"
+        "https://ideas.repec.org/a/eee/regeco/v44y2014icp75-81.html"
       ],
-      "metadataStatus": "metadata_partial",
+      "metadataStatus": "metadata_verified",
       "reviewStatus": "pending",
       "accessStatus": "unknown",
       "registeredAt": "2026-09-09",
@@ -491,14 +491,15 @@
     {
       "id": "CAND-ACADEMIC-2026-09-09-010",
       "title": "Characteristics of Italian firms in the judicial administration: Can financial ratios be red flags of criminal infiltrations?",
-      "authors": "Angela M. Greco; Mariastella Messina",
+      "authors": "Angela Maria Greco; Mariastella Messina",
       "year": 2024,
-      "venue": "",
+      "venue": "Corporate Ownership & Control",
       "doi": "10.22495/cocv21i3siart10",
       "sourceLinks": [
-        "https://doi.org/10.22495/cocv21i3siart10"
+        "https://doi.org/10.22495/cocv21i3siart10",
+        "https://www.iris.unict.it/retrieve/c9ea4af0-b05c-4682-ad5d-5445af1ace5b/Greco%2C%20Messina%202024%20COC.pdf"
       ],
-      "metadataStatus": "metadata_partial",
+      "metadataStatus": "metadata_verified",
       "reviewStatus": "pending",
       "accessStatus": "unknown",
       "registeredAt": "2026-09-09",
