@@ -156,12 +156,13 @@
       "title": "Threshold of shadows: Unveiling organised crime in Italian municipal public procurement",
       "authors": "Stefania Fontana; Giorgio d’Agostino",
       "year": 2025,
-      "venue": "",
+      "venue": "European Journal of Political Economy",
       "doi": "10.1016/j.ejpoleco.2025.102752",
       "sourceLinks": [
-        "https://doi.org/10.1016/j.ejpoleco.2025.102752"
+        "https://www.sciencedirect.com/science/article/pii/S0176268025001120",
+        "https://ideas.repec.org/a/eee/poleco/v90y2025ipbs0176268025001120.html"
       ],
-      "metadataStatus": "metadata_partial",
+      "metadataStatus": "metadata_verified",
       "reviewStatus": "pending",
       "accessStatus": "unknown",
       "registeredAt": "2026-09-08",
@@ -170,14 +171,15 @@
     {
       "id": "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-011",
       "title": "Mafia and bricks: unfair competition in local markets and policy interventions",
-      "authors": "",
-      "year": 2019,
-      "venue": "",
+      "authors": "Livio Ferrante; Stefania Fontana; Francesco Reito",
+      "year": 2021,
+      "venue": "Small Business Economics",
       "doi": "10.1007/s11187-019-00250-w",
       "sourceLinks": [
-        "https://link.springer.com/article/10.1007/s11187-019-00250-w"
+        "https://link.springer.com/article/10.1007/s11187-019-00250-w",
+        "https://ideas.repec.org/a/kap/sbusec/v56y2021i4d10.1007_s11187-019-00250-w.html"
       ],
-      "metadataStatus": "metadata_partial",
+      "metadataStatus": "metadata_verified",
       "reviewStatus": "pending",
       "accessStatus": "unknown",
       "registeredAt": "2026-09-08",
