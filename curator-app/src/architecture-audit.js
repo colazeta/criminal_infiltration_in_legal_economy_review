@@ -11,7 +11,8 @@ import cycle from '../../config/archive-cycle.json' with {type:'json'};
 import logical from '../../ontology/modules/review-v2.json' with {type:'json'};
 
 const LIMIT=100000;
-const EXPECTED=[base,schedule,adjudication,delivery].flatMap(m=>[...m.sql.matchAll(/CREATE TABLE(?: IF NOT EXISTS)? (\w+)/g)].map(x=>x[1])).sort();
+export const ARCHIVE_TABLES=[base,schedule,adjudication,delivery].flatMap(m=>[...m.sql.matchAll(/CREATE TABLE(?: IF NOT EXISTS)? (\w+)/g)].map(x=>x[1])).sort();
+const EXPECTED=ARCHIVE_TABLES;
 const CHILDREN={studies:['study_id'],datasets:['dataset_id','study_id'],analyses:['analysis_id','study_id'],variable_uses:['variable_use_id','analysis_id'],findings:['finding_id','analysis_id']};
 const S=(db,sql,...values)=>db.prepare(sql).bind(...values);
 const rows=async(db,sql,...values)=>(await S(db,sql,...values).all()).results;
@@ -22,7 +23,7 @@ const stableRows=values=>[...values].sort((a,b)=>canonicalJson(a).localeCompare(
 export async function architectureSchema(env){
   const schema=await rows(env.REVIEW_DB,"SELECT type,name,tbl_name,sql FROM sqlite_master WHERE name NOT GLOB 'sqlite_*' ORDER BY type,name");
   const names=schema.filter(r=>r.type==='table').map(r=>r.name).sort();
-  const platform=['__cf_kv','_cf_KV','_cf_EXTERNALS'];
+  const platform=['__cf_kv','_cf_KV','_cf_EXTERNALS','_cf_METADATA'];
   const known=new Set([...Object.keys(logical.tables),...EXPECTED,...platform]);
   return {contract:'CILE-ARCHITECTURE-SCHEMA-1',commit:env.DEPLOY_COMMIT,
     expected_present:EXPECTED.filter(n=>names.includes(n)),expected_missing:EXPECTED.filter(n=>!names.includes(n)),
@@ -32,11 +33,11 @@ export async function architectureSchema(env){
     schema_sha256:await sha256(canonicalJson(schema)),private_content_exported:false};
 }
 
-async function databaseSnapshot(db){
-  // Cloudflare's documented __cf_kv and workerd's _cf_KV/_cf_EXTERNALS are
+export async function databaseSnapshot(db){
+  // Cloudflare's documented __cf_kv and workerd's _cf_KV/_cf_EXTERNALS/_cf_METADATA are
   // platform tables. Their bodies must be read through the KV API, never SQL.
   // No wildcard excludes application tables from the completeness check.
-  const schema=await rows(db,"SELECT type,name,tbl_name,sql FROM sqlite_master WHERE name NOT GLOB 'sqlite_*' AND name NOT IN ('__cf_kv','_cf_KV','_cf_EXTERNALS') ORDER BY type,name");
+  const schema=await rows(db,"SELECT type,name,tbl_name,sql FROM sqlite_master WHERE name NOT GLOB 'sqlite_*' AND name NOT IN ('__cf_kv','_cf_KV','_cf_EXTERNALS','_cf_METADATA') ORDER BY type,name");
   const tables=schema.filter(r=>r.type==='table').map(r=>r.name).sort();
   if(canonicalJson(tables)!==canonicalJson(EXPECTED))throw Error('architecture_schema_set_mismatch');
   const data={},counts={},digests={};let bytes=0;
@@ -48,7 +49,7 @@ async function databaseSnapshot(db){
     data[table]=values;counts[table]=values.length;
     digests[table]=await sha256(encoded);
   }
-  return {data,counts,schema_sha256:await sha256(canonicalJson(schema)),state_sha256:await sha256(canonicalJson(digests))};
+  return {data,counts,schema,digests,schema_sha256:await sha256(canonicalJson(schema)),state_sha256:await sha256(canonicalJson(digests))};
 }
 
 export async function auditArchitecture(env){

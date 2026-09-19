@@ -13,6 +13,7 @@ import {readPublicResearch, readPublicCompletion, publicResearchAudit, readPubli
 import {readDevelopmentCheckpoint,writeDevelopmentCheckpoint} from './calibration-development-checkpoint.js';
 import {claimF1Retention,assertF1RetentionClaim,releaseF1RetentionClaim,abortF1RetentionClaim} from './frontier-retention-claim.js';
 import {auditArchitecture,architectureSchema} from './architecture-audit.js';
+import {archiveBackupPage} from './archive-preservation.js';
 
 const DOMAIN = 'CILE-ENRICH-SERVICE-v1';
 const encoder = new TextEncoder();
@@ -206,15 +207,20 @@ export class EnrichmentStoreCore {
     }
     try{
       const data=JSON.parse(body);
-      const allowedFields=['operation','expected_commit','target_id','proposal','run_key','calibration_id','pr_number','source','document','bibliography','document_id','checkpoint'];
+      const allowedFields=['operation','expected_commit','target_id','proposal','run_key','calibration_id','pr_number','source','document','bibliography','document_id','checkpoint','backup'];
       if(!data||typeof data!=='object'||Array.isArray(data)||Object.keys(data).some(k=>!allowedFields.includes(k)))return json({error_code:'invalid_service_envelope'},422);
       const operations=['verify','activate','deactivate','status','run','packet','proposal','public-research-audit','architecture-audit','completion-packet','calibration-approval','completion-approval','source','document','documents','document-check','bibliography','provider-bibliography','development-checkpoint-get','development-checkpoint-put','document-retention-claim','source-claimed','document-claimed','document-retention-release','document-retention-abort'];
-      if(!operations.includes(data.operation)&&data.operation!=='architecture-schema')return json({error_code:'unknown_service_operation'},422);
+      if(!operations.includes(data.operation)&&!['architecture-schema','architecture-backup'].includes(data.operation))return json({error_code:'unknown_service_operation'},422);
       if(data.expected_commit!==this.env.DEPLOY_COMMIT)return json({error_code:'stale_deployment'},409);
       if(data.operation==='verify')return json(await this.verify());
       if(data.operation==='activate'){await this.verify();await this.ctx.storage.put('activation:enrichment',{commit:this.env.DEPLOY_COMMIT,at:new Date(now).toISOString()});await this.schedule.start();return json(await this.aggregate())}
       if(data.operation==='deactivate'){await this.ctx.storage.delete('activation:enrichment');return json(await this.aggregate())}
       if(data.operation==='status')return json(await this.aggregate());
+      if(data.operation==='architecture-backup'){
+        if(Object.keys(data).sort().join(',')!=='backup,expected_commit,operation')return json({error_code:'invalid_service_envelope'},422);
+        try{return json(await archiveBackupPage(await this.environment(),this.ctx.storage,data.backup))}
+        catch{return json({error_code:'architecture_backup_failed'},503)}
+      }
       if(data.operation==='architecture-schema'){
         try{return json(await architectureSchema(await this.environment()))}
         catch{return json({error_code:'architecture_audit_failed'},503)}

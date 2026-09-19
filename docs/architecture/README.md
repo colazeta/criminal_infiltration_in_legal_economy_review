@@ -168,3 +168,7 @@ restrictions. Never restore an old public snapshot in isolation from its current
 publication/rights decisions. The completed Git restore is recorded in the
 [implementation record](../operations/architecture-consolidation-2026-09-19.md);
 private-state restoration and authority cutover remain open gates.
+
+The implemented bounded encrypted backup and isolated restore procedure is in
+[preservation.md](preservation.md). Its runtime receipt is required before a
+content migration; repository tests alone do not certify a production backup.
