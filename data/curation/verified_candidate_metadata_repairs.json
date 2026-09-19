@@ -1530,6 +1530,104 @@
       ],
       "checked_at": "2026-09-19",
       "basis": "The journal article record identifies Valérie Duplat, Philippe Very and Bertrand Monnet, publication on 1 September 2012, M@n@gement volume 15 issue 3 and pages 273–282. The published PDF independently carries the same title, authors, year, volume, issue and pagination and states that M@n@gement is a double-blind refereed journal. The existing queue spelling Philippe Véry is retained rather than silently normalised. This declaration repairs durable article-record and content-version provenance only; it makes no identity reconciliation, eligibility, framework, completion, validation, rights or publication decision."
+    },
+    {
+      "candidate_id": "CAND-ACADEMIC-2026-09-09-EXTRA-8e1caef4c376-006",
+      "expected": {
+        "title": "Exploring infiltration behaviour by organised crime groups",
+        "doi": "10.1108/jmlc-10-2021-0117",
+        "authors": "Mariska Fourie; Philip Steenkamp; Jacqui-Lyn McIntyre-Louw; Clinton Oellermann",
+        "year": "2023",
+        "venue": "Journal of Money Laundering Control",
+        "verification_status": "metadata_partial",
+        "metadata_confidence": "",
+        "review_stage": "metadata_fix",
+        "current_status": "pending",
+        "current_decision": "",
+        "possible_duplicate": "",
+        "metadata_conflict": ""
+      },
+      "replacement": {
+        "source_links": "https://www.emerald.com/jmlc/article-abstract/26/1/159/239604/Exploring-infiltration-behaviour-by-organised; https://ideas.repec.org/a/eme/jmlcpp/jmlc-10-2021-0117.html"
+      },
+      "evidence": [
+        {
+          "role": "primary_metadata",
+          "url": "https://www.emerald.com/jmlc/article-abstract/26/1/159/239604/Exploring-infiltration-behaviour-by-organised"
+        },
+        {
+          "role": "independent_bibliographic_index",
+          "url": "https://ideas.repec.org/a/eme/jmlcpp/jmlc-10-2021-0117.html"
+        }
+      ],
+      "checked_at": "2026-09-19",
+      "basis": "Emerald and RePEc agree on the exact title, Mariska Fourie, Philip Steenkamp, Jacqui-Lyn McIntyre-Louw and Clinton Oellermann, DOI, Journal of Money Laundering Control volume 26 issue 1 and pages 159–171. Crossref distinguishes online publication on 23 November 2021 from the print issue dated 2 January 2023; the queue therefore retains 2023 as its issue year while preserving the earlier online-first date in this reviewed provenance. This declaration adds authoritative record-level provenance only; it makes no identity reconciliation, eligibility, framework, completion, validation, rights or publication decision."
+    },
+    {
+      "candidate_id": "CAND-ACADEMIC-2026-09-10-EXTRA-65282d1dbeff-002",
+      "expected": {
+        "title": "Other People’s Dirty Money: Professional Intermediaries, Market Dynamics and the Finances of White-collar, Corporate and Organized Crimes",
+        "doi": "10.1093/bjc/azz004",
+        "authors": "",
+        "year": "2019",
+        "venue": "The British Journal of Criminology",
+        "verification_status": "metadata_partial",
+        "metadata_confidence": "",
+        "review_stage": "metadata_fix",
+        "current_status": "pending",
+        "current_decision": "",
+        "possible_duplicate": "",
+        "metadata_conflict": ""
+      },
+      "replacement": {
+        "authors": "Nicholas J Lord; Liz J Campbell; Karin Van Wingerde",
+        "source_links": "https://academic.oup.com/bjc/article/59/5/1217/5348024; https://api.crossref.org/works/10.1093%2Fbjc%2Fazz004"
+      },
+      "evidence": [
+        {
+          "role": "primary_metadata",
+          "url": "https://academic.oup.com/bjc/article/59/5/1217/5348024"
+        },
+        {
+          "role": "identifier_registry",
+          "url": "https://api.crossref.org/works/10.1093%2Fbjc%2Fazz004"
+        }
+      ],
+      "checked_at": "2026-09-19",
+      "basis": "Oxford University Press and Crossref agree on Nicholas J Lord, Liz J Campbell and Karin Van Wingerde, the exact title, DOI, 2019 publication, The British Journal of Criminology volume 59 issue 5 and pages 1217–1236. The article was first published online on 20 February 2019 and assigned to the September 2019 issue, so no cross-year collapse is required. This declaration repairs authorship and durable source provenance only; it makes no identity reconciliation, eligibility, framework, completion, validation, rights or publication decision."
+    },
+    {
+      "candidate_id": "CAND-ACADEMIC-2026-09-10-EXTRA-dbc5cb0d9888-015",
+      "expected": {
+        "title": "The Secret Nexus. A Case Study of Deviant Masons, Mafia and Corruption in Italy",
+        "doi": "10.1093/bjc/azac096",
+        "authors": "",
+        "year": "2023",
+        "venue": "The British Journal of Criminology",
+        "verification_status": "metadata_partial",
+        "metadata_confidence": "",
+        "review_stage": "metadata_fix",
+        "current_status": "pending",
+        "current_decision": "",
+        "possible_duplicate": "",
+        "metadata_conflict": ""
+      },
+      "replacement": {
+        "authors": "Anna Sergi; Alberto Vannucci",
+        "source_links": "https://academic.oup.com/bjc/article/63/5/1165/6965895; https://repository.essex.ac.uk/view/person/asergi.html"
+      },
+      "evidence": [
+        {
+          "role": "primary_metadata",
+          "url": "https://academic.oup.com/bjc/article/63/5/1165/6965895"
+        },
+        {
+          "role": "independent_institutional",
+          "url": "https://repository.essex.ac.uk/view/person/asergi.html"
+        }
+      ],
+      "checked_at": "2026-09-19",
+      "basis": "Oxford University Press, Crossref and the University of Essex repository agree on Anna Sergi and Alberto Vannucci, the exact title, DOI, journal placement, volume 63 issue 5 and pages 1165–1183. The article was first published online on 30 December 2022 and assigned to the 2023 issue; the queue retains the 2023 issue year while this declaration preserves the 2022 online-first distinction. This declaration repairs authorship and durable source provenance only; it makes no identity reconciliation, eligibility, framework, completion, validation, rights or publication decision."
     }
   ]
 }
