@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: curator-production
     steps:
-      # This workflow diagnoses only; it cannot activate, migrate or publish.
+      # Resolve the same unique account as deployment; never activate, migrate or publish.
       - name: Checkout repository
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
