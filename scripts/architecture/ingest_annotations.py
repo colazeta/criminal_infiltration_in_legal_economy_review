@@ -10,6 +10,7 @@ import os
 from pathlib import Path
 import re
 from urllib.request import Request, build_opener, HTTPRedirectHandler
+from urllib.error import HTTPError, URLError
 
 from scripts.enrichment.service_client import call, current_commit
 
@@ -31,8 +32,13 @@ def request(path):
         raise RuntimeError('github_ingress_credential_missing')
     req = Request(API + path, headers={'Accept': 'application/vnd.github+json',
                   'Authorization': 'Bearer ' + token, 'User-Agent': 'cile-archive-ingress/1'})
-    with build_opener(NoRedirect()).open(req, timeout=30) as response:
-        data = response.read(12000001)
+    try:
+        with build_opener(NoRedirect()).open(req, timeout=30) as response:
+            data = response.read(12000001)
+    except HTTPError as error:
+        raise RuntimeError('github_ingress_http_' + str(error.code)) from None
+    except (URLError, TimeoutError):
+        raise RuntimeError('github_ingress_transport_failure') from None
     if len(data) > 12000000:
         raise RuntimeError('github_ingress_response_limit')
     return json.loads(data)
@@ -122,20 +128,16 @@ def run():
         action = 'withdraw' if event['action'] == 'deleted' else 'observe'
         items = [{'action': action, 'issue': entity(event['issue'], True), 'comment': entity(event['comment'])}]
     else:
-        observed_before = datetime.now(timezone.utc).isoformat()
-        items = population()
-        # A mutable paginated response is not a consistent full-population capture.
-        if fingerprint(items) != fingerprint(population()):
-            raise RuntimeError('github_ingress_population_changed')
-    first = ingest(items, commit)
-    replay = ingest(items, commit)
+        items, first, replay, observed_before, rounds = stable_import(commit)
+    if os.environ.get('GITHUB_EVENT_NAME') == 'issue_comment':
+        first = ingest(items, commit)
+        replay = ingest(items, commit)
+        rounds = 1
     if replay['new_annotations']:
         raise RuntimeError('annotation_ingress_replay_failed')
     census = None
     if os.environ.get('GITHUB_EVENT_NAME') != 'issue_comment':
-        # Recheck the upstream set immediately before retiring an absent comment.
-        if fingerprint(items) != fingerprint(population()):
-            raise RuntimeError('github_ingress_population_changed')
+        # stable_import's final repeated population is the census proof.
         value = dict(comment_ids=[item['comment']['id'] for item in items], source_sha256=fingerprint(items), observed_before=observed_before)
         census = call('annotation-census', expected_commit=commit, ingress=value)
         repeated = call('annotation-census', expected_commit=commit, ingress=value)
@@ -156,13 +158,58 @@ def run():
             or any(type(v) is not int or v < 0 for v in audit['binding_states'].values())):
         raise RuntimeError('annotation_ingress_audit_invalid')
     return dict(contract=VERSION, commit=commit, input_sha256=fingerprint(items),
-                source_population=len(items), migration=first, replay=replay, census=census, audit=audit,
+                source_population=len(items), reconciliation_rounds=rounds, migration=first, replay=replay, census=census, audit=audit,
                 idempotency_verified=True, scientific_decisions_changed=False,
                 private_content_exported=False, full_architecture_cutover_complete=False)
+
+
+def stable_import(commit):
+    """Catch up bounded upstream changes; certify only a repeated complete population.
+
+    Each input is an independently verified original snapshot. The final corpus
+    census cannot run until every latest captured input has a durable receipt.
+    """
+    items = population()
+    first, replay = ingest([], commit), ingest([], commit)
+    seen = set()
+    for round_number in range(1, 5):
+        pending = [item for item in items if fingerprint(item) not in seen]
+        print(json.dumps({'stage': 'annotation_reconciliation', 'round': round_number,
+                          'observed_inputs': len(items), 'inputs_to_acquire': len(pending)}), flush=True)
+        for totals, result in [(first, ingest(pending, commit)), (replay, ingest(pending, commit))]:
+            for key, value in result.items():
+                totals[key] += value
+        if replay['new_annotations']:
+            raise RuntimeError('annotation_ingress_replay_failed')
+        seen.update(fingerprint(item) for item in pending)
+        observed_before = datetime.now(timezone.utc).isoformat()
+        latest = population()
+        if fingerprint(items) == fingerprint(latest):
+            return items, first, replay, observed_before, round_number
+        items = latest
+    raise RuntimeError('github_ingress_population_changed')
+
+
+def safe_error(error):
+    value = str(error)
+    allowed = {'annotation_ingress_gate_failed', 'github_ingress_redirect_refused',
+               'github_ingress_route_refused', 'github_ingress_credential_missing',
+               'github_ingress_response_limit', 'github_ingress_page_invalid',
+               'github_ingress_population_changed', 'github_ingress_population_limit',
+               'github_ingress_parent_missing', 'github_ingress_transport_failure',
+               'annotation_ingest_receipt_invalid', 'annotation_batch_receipt_invalid',
+               'annotation_ingress_invalid_deployment', 'annotation_ingress_wrong_repository',
+               'annotation_ingress_replay_failed', 'annotation_census_receipt_invalid',
+               'annotation_census_replay_failed', 'annotation_ingress_audit_invalid'}
+    if value in allowed or re.fullmatch(r'github_ingress_http_[45]\d{2}', value):
+        return value
+    if re.fullmatch(r'enrichment_service_http_[45]\d{2}:(?:annotation_ingest_failed|annotation_audit_failed|annotation_census_failed|stale_deployment|service_authentication_required)', value):
+        return value
+    return 'annotation_ingress_gate_failed'
 
 
 if __name__ == '__main__':
     try:
         print(json.dumps(run(), indent=2))
-    except Exception:
-        raise SystemExit('annotation_ingress_gate_failed') from None
+    except Exception as error:
+        raise SystemExit(safe_error(error)) from None

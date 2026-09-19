@@ -37,5 +37,29 @@ class AnnotationIngressTests(unittest.TestCase):
             with self.assertRaisesRegex(RuntimeError,'population_changed'):
                 ingress.pages('/issues/comments')
 
+    def test_bounded_catchup_imports_only_changed_observations_then_requires_stability(self):
+        a=[{'comment':{'id':1},'body':'first private observation'}]
+        b=a+[{'comment':{'id':2},'body':'second private observation'}]
+        writes=[]
+        def write(items, commit):
+            writes.append(items)
+            return {'inputs':len(items),'new_annotations':0}
+        with patch.object(ingress,'population',side_effect=[a,b,b]), patch.object(ingress,'ingest',side_effect=write):
+            items,first,replay,observed,rounds=ingress.stable_import('c'*40)
+        self.assertEqual(items,b);self.assertEqual(rounds,2)
+        self.assertEqual(first['inputs'],2);self.assertEqual(replay['new_annotations'],0)
+        self.assertEqual([len(x) for x in writes],[0,0,1,1,1,1])
+
+    def test_unstable_population_is_not_certified_after_the_bounded_rounds(self):
+        values=[[{'comment':{'id':i}}] for i in range(5)]
+        with patch.object(ingress,'population',side_effect=values), patch.object(ingress,'ingest',return_value={'inputs':0,'new_annotations':0}):
+            with self.assertRaisesRegex(RuntimeError,'population_changed'):
+                ingress.stable_import('c'*40)
+
+    def test_closed_diagnostics_do_not_echo_an_exception_or_source_body(self):
+        self.assertEqual(ingress.safe_error(RuntimeError('github_ingress_population_changed')),'github_ingress_population_changed')
+        self.assertEqual(ingress.safe_error(RuntimeError('github_ingress_http_403')),'github_ingress_http_403')
+        self.assertEqual(ingress.safe_error(RuntimeError('PRIVATE BODY token=abc')),'annotation_ingress_gate_failed')
+
 
 if __name__=='__main__':unittest.main()
