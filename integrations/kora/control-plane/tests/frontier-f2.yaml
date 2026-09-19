@@ -1,0 +1,50 @@
+apiVersion: kora/v1
+kind: Test
+metadata:
+  name: cile-frontier-f2
+spec:
+  target:
+    workflow: cile-hourly-control-plane
+    node: evaluate-frontier
+  input:
+    inline:
+      activation_id: test-f2
+      lane: A
+      scheduled_at: 2026-09-19T08:10:00+02:00
+      scouting_due: false
+      unfinished_safe_write: false
+      active_wip_count: 3
+      candidate_present: true
+      metadata_source_ready: true
+      fulltext_ready: true
+      proposal_persisted: true
+      mandatory_fields_accounted: true
+      framework_assessed: true
+      independent_comparison_ready: false
+      references_ready: false
+      limitations_caveats_ready: true
+      version_guards_match: true
+      validation_ready: false
+      validated: false
+      writer_ready: true
+      calibration_case_ready: false
+      identity_debt_due: false
+      engineering_blocker: false
+      repeat_without_changed_prerequisite: false
+  expected:
+    inline:
+      frontier_gate: F2_PROPOSAL_PERSISTED
+      next_gate: F3_INDEPENDENT_COMPARISON
+      frontier_consistent: true
+      assessment_completed: false
+      validation_accepted: false
+      assessment_distance_to_f5: 3
+  checks:
+    - type: schema
+      gate: true
+    - path: $.frontier_gate
+      type: exact
+      gate: true
+    - path: $.next_gate
+      type: exact
+      gate: true
