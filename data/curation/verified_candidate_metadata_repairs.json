@@ -639,6 +639,175 @@
       ],
       "checked_at": "2026-09-19",
       "basis": "The DOI-bound Springer record and the independent University of Padua repository agree on Andrea Bafundi, Camilla Ciappei, Michele Fabrizi and Antonio Parbonetti, the exact title, 2026 publication, Journal of Management and Governance and DOI 10.1007/s10997-026-09789-9. This declaration fills the journal and manifestation type, adds independent provenance, and makes no eligibility, canonical-identity, framework, completion, rights, validation or publication decision."
+    },
+    {
+      "candidate_id": "CAND-ACADEMIC-2026-09-14-EXTRA-a6b4145d08dd-003",
+      "expected": {
+        "title": "From Cocaine to Avocados: Criminal Market Expansion and Violence",
+        "doi": "",
+        "authors": "",
+        "year": "",
+        "venue": "International Organization",
+        "verification_status": "metadata_partial",
+        "metadata_confidence": "",
+        "review_stage": "metadata_fix",
+        "current_status": "pending",
+        "current_decision": "",
+        "possible_duplicate": "",
+        "metadata_conflict": ""
+      },
+      "replacement": {
+        "doi": "10.1017/S0020818325100763",
+        "authors": "Chelsea Estancona; Lucía Tiscornia",
+        "year": "2025",
+        "source_links": "https://www.cambridge.org/core/journals/international-organization/article/from-cocaine-to-avocados-criminal-market-expansion-and-violence/C1D0FE109096FBEF7F3AB1E230899848; https://scholarcommons.sc.edu/poli_facpub/127"
+      },
+      "evidence": [
+        {
+          "role": "primary_metadata",
+          "url": "https://www.cambridge.org/core/journals/international-organization/article/from-cocaine-to-avocados-criminal-market-expansion-and-violence/C1D0FE109096FBEF7F3AB1E230899848"
+        },
+        {
+          "role": "independent_institutional",
+          "url": "https://scholarcommons.sc.edu/poli_facpub/127"
+        }
+      ],
+      "checked_at": "2026-09-19",
+      "basis": "The Cambridge version of record identifies Chelsea Estancona and Lucía Tiscornia, DOI 10.1017/S0020818325100763, International Organization volume 79 (Summer 2025), pages 417–455; the University of South Carolina institutional repository independently records the same title, authors and DOI. This declaration repairs bibliographic metadata only and makes no eligibility, canonical-identity, framework, completion, rights, validation or publication decision."
+    },
+    {
+      "candidate_id": "CAND-ACADEMIC-2026-09-14-EXTRA-a6b4145d08dd-004",
+      "expected": {
+        "title": "Cash in the Trash",
+        "doi": "",
+        "authors": "",
+        "year": "2024",
+        "venue": "United Nations Office on Drugs and Crime",
+        "verification_status": "metadata_partial",
+        "metadata_confidence": "",
+        "review_stage": "metadata_fix",
+        "current_status": "pending",
+        "current_decision": "",
+        "possible_duplicate": "",
+        "metadata_conflict": ""
+      },
+      "replacement": {
+        "title": "Cash in the trash: the role of corruption, organized crime and money laundering in waste trafficking",
+        "authors": "United Nations Office on Drugs and Crime",
+        "source_links": "https://digitallibrary.un.org/record/4091843?ln=en; https://track.unodc.org/track/en/track/resourcehub/2024/cash_in_the_trash.html"
+      },
+      "evidence": [
+        {
+          "role": "primary_metadata",
+          "url": "https://digitallibrary.un.org/record/4091843?ln=en"
+        },
+        {
+          "role": "official_resource_catalogue",
+          "url": "https://track.unodc.org/track/en/track/resourcehub/2024/cash_in_the_trash.html"
+        }
+      ],
+      "checked_at": "2026-09-19",
+      "basis": "The United Nations Digital Library and UNODC TRACK resource hub agree on the full 2024 report title and United Nations Office on Drugs and Crime institutional authorship. This declaration expands the truncated queue title and adds authoritative bibliographic provenance only; it makes no eligibility, canonical-identity, framework, completion, rights, validation or publication decision."
+    },
+    {
+      "candidate_id": "CAND-ACADEMIC-2026-09-14-EXTRA-a6b4145d08dd-006",
+      "expected": {
+        "title": "Prevention of Organized Crime in Denmark and Sweden",
+        "doi": "",
+        "authors": "",
+        "year": "2025",
+        "venue": "TemaNord 2025:530 / Nordic Council of Ministers",
+        "verification_status": "metadata_partial",
+        "metadata_confidence": "",
+        "review_stage": "metadata_fix",
+        "current_status": "pending",
+        "current_decision": "",
+        "possible_duplicate": "",
+        "metadata_conflict": ""
+      },
+      "replacement": {
+        "doi": "10.6027/temanord2025-530",
+        "authors": "Vesa Muttilainen; Pirjo Jukarainen; Anni Limnell; Emma Villman; Markus Kaakinen",
+        "source_links": "https://pub.norden.org/temanord2025-530/temanord2025-530.pdf; https://www.norden.org/en/publication/prevention-organized-crime-denmark-and-sweden"
+      },
+      "evidence": [
+        {
+          "role": "primary_metadata",
+          "url": "https://pub.norden.org/temanord2025-530/temanord2025-530.pdf"
+        },
+        {
+          "role": "publisher_catalogue",
+          "url": "https://www.norden.org/en/publication/prevention-organized-crime-denmark-and-sweden"
+        }
+      ],
+      "checked_at": "2026-09-19",
+      "basis": "The official TemaNord PDF identifies Vesa Muttilainen, Pirjo Jukarainen, Anni Limnell, Emma Villman and Markus Kaakinen, TemaNord 2025:530, DOI 10.6027/temanord2025-530 and publication in March 2025; the Nordic Council of Ministers catalogue independently confirms the title, subtitle and publication number. This declaration repairs bibliographic metadata only and makes no eligibility, canonical-identity, framework, completion, rights, validation or publication decision."
+    },
+    {
+      "candidate_id": "CAND-ACADEMIC-2026-09-14-EXTRA-bc96956790e3-001",
+      "expected": {
+        "title": "Casinos, Money Laundering, Underground Banking, and Transnational Organized Crime in East and Southeast Asia: A Hidden and Accelerating Threat",
+        "doi": "",
+        "authors": "",
+        "year": "2024",
+        "venue": "United Nations Office on Drugs and Crime",
+        "verification_status": "metadata_partial",
+        "metadata_confidence": "",
+        "review_stage": "metadata_fix",
+        "current_status": "pending",
+        "current_decision": "",
+        "possible_duplicate": "",
+        "metadata_conflict": ""
+      },
+      "replacement": {
+        "authors": "United Nations Office on Drugs and Crime",
+        "source_links": "https://www.unodc.org/roseap/uploads/documents/Publications/2024/Casino_Underground_Banking_Report_2024.pdf; https://track.unodc.org/track/en/track/resourcehub/2024/casinos_money_laundering_underground_banking_and_transnational_organised_crime_in_east_and_southeast_asia_a_hidden_and_accelerating_threat.html"
+      },
+      "evidence": [
+        {
+          "role": "primary_metadata",
+          "url": "https://www.unodc.org/roseap/uploads/documents/Publications/2024/Casino_Underground_Banking_Report_2024.pdf"
+        },
+        {
+          "role": "official_resource_catalogue",
+          "url": "https://track.unodc.org/track/en/track/resourcehub/2024/casinos_money_laundering_underground_banking_and_transnational_organised_crime_in_east_and_southeast_asia_a_hidden_and_accelerating_threat.html"
+        }
+      ],
+      "checked_at": "2026-09-19",
+      "basis": "The January 2024 UNODC technical policy brief and the UNODC TRACK resource hub agree on the exact report identity, 2024 publication and UNODC institutional authorship. This declaration repairs institutional authorship and source provenance only; it makes no eligibility, canonical-identity, framework, completion, rights, validation or publication decision."
+    },
+    {
+      "candidate_id": "CAND-ACADEMIC-2026-09-14-EXTRA-eafcc7998720-001",
+      "expected": {
+        "title": "Health Care Fraud - A Rising Threat",
+        "doi": "",
+        "authors": "",
+        "year": "1981",
+        "venue": "Pennsylvania Crime Commission",
+        "verification_status": "metadata_partial",
+        "metadata_confidence": "",
+        "review_stage": "metadata_fix",
+        "current_status": "pending",
+        "current_decision": "",
+        "possible_duplicate": "",
+        "metadata_conflict": ""
+      },
+      "replacement": {
+        "authors": "Pennsylvania Crime Commission",
+        "source_links": "https://www.ojp.gov/ncjrs/virtual-library/abstracts/health-care-fraud-rising-threat; https://www.ojp.gov/pdffiles1/Digitization/82661NCJRS.pdf"
+      },
+      "evidence": [
+        {
+          "role": "primary_metadata",
+          "url": "https://www.ojp.gov/pdffiles1/Digitization/82661NCJRS.pdf"
+        },
+        {
+          "role": "official_catalogue",
+          "url": "https://www.ojp.gov/ncjrs/virtual-library/abstracts/health-care-fraud-rising-threat"
+        }
+      ],
+      "checked_at": "2026-09-19",
+      "basis": "The digitised December 1981 report names the Pennsylvania Crime Commission on its title material, while the OJP/NCJRS catalogue independently confirms the exact title, 1981 date, 52-page manifestation and NCJ 82661. This declaration records institutional authorship and authoritative source provenance only; it makes no eligibility, canonical-identity, framework, completion, rights, validation or publication decision."
     }
   ]
 }
