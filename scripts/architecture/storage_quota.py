@@ -4,6 +4,7 @@ import json
 import os
 import re
 from urllib.request import Request, build_opener, HTTPRedirectHandler
+from scripts.review_v2.prepare_cloudflare import resolve_account
 
 
 class NoRedirect(HTTPRedirectHandler):
@@ -46,7 +47,7 @@ def named(field):
 
 
 def observe():
-    account = os.environ.get('CLOUDFLARE_ACCOUNT_ID', '')
+    account = resolve_account()
     if not re.fullmatch(r'[a-f0-9]{32}', account):
         raise RuntimeError('quota_account_unavailable')
     dataset = next(f for f in fields('Account') if f['name'] == 'durableObjectsStorageGroups')
