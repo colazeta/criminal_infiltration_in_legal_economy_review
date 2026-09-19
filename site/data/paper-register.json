@@ -121,14 +121,15 @@
     {
       "id": "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-008",
       "title": "Organized Crime, Public Procurement and Firms",
-      "authors": "",
-      "year": null,
+      "authors": "Elena Stella",
+      "year": 2026,
       "venue": "",
       "doi": "",
       "sourceLinks": [
-        "https://elena-stella.com/papers/stella_jmp.pdf"
+        "https://elena-stella.com/papers/stella_jmp.pdf",
+        "https://www.kellogg.northwestern.edu/academics-research/events/2025/04/15/elena-stella"
       ],
-      "metadataStatus": "metadata_partial",
+      "metadataStatus": "metadata_verified",
       "reviewStatus": "pending",
       "accessStatus": "unknown",
       "registeredAt": "2026-09-08",
@@ -206,13 +207,14 @@
       "id": "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-013",
       "title": "Bricks or cooks? Geographical and social determinants of the investment choices of mafia-type organized crime",
       "authors": "Michele Riccardi; Mario A. Maggioni",
-      "year": 2024,
-      "venue": "",
+      "year": 2025,
+      "venue": "Criminology & Criminal Justice",
       "doi": "10.1177/17488958241293927",
       "sourceLinks": [
-        "https://doi.org/10.1177/17488958241293927"
+        "https://journals.sagepub.com/doi/10.1177/17488958241293927",
+        "https://api.crossref.org/works/10.1177%2F17488958241293927"
       ],
-      "metadataStatus": "metadata_partial",
+      "metadataStatus": "metadata_verified",
       "reviewStatus": "pending",
       "accessStatus": "unknown",
       "registeredAt": "2026-09-08",
@@ -308,9 +310,10 @@
       "venue": "Economics of Governance",
       "doi": "10.1007/s10101-026-00388-w",
       "sourceLinks": [
-        "https://link.springer.com/article/10.1007/s10101-026-00388-w"
+        "https://link.springer.com/article/10.1007/s10101-026-00388-w",
+        "https://api.crossref.org/works/10.1007%2Fs10101-026-00388-w"
       ],
-      "metadataStatus": "metadata_partial",
+      "metadataStatus": "metadata_verified",
       "reviewStatus": "pending",
       "accessStatus": "unknown",
       "registeredAt": "2026-09-08",
