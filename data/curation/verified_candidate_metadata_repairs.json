@@ -359,6 +359,113 @@
       ],
       "checked_at": "2026-09-16",
       "basis": "The DOI-bound Springer record and the independent Oxford University Research Archive agree on Niles Breuer, the exact title, 2025 publication, Social Network Analysis and Mining volume 15/article 78 and DOI. This repair clears only the mechanical F0 metadata-verification gate and makes no eligibility, framework, completion, rights, validation or publication decision."
+    },
+    {
+      "candidate_id": "CAND-ACADEMIC-2026-09-13-EXTRA-a6766e6649ed-002",
+      "expected": {
+        "title": "Mafianomics: How Did Mob Entrepreneurs Infiltrate",
+        "doi": "",
+        "authors": "M Tomass",
+        "year": "1998",
+        "venue": "",
+        "verification_status": "metadata_partial",
+        "metadata_confidence": "",
+        "review_stage": "metadata_fix",
+        "current_status": "pending",
+        "current_decision": "",
+        "possible_duplicate": "",
+        "metadata_conflict": ""
+      },
+      "replacement": {
+        "title": "Mafianomics: How Did Mob Entrepreneurs Infiltrate and Dominate the Russian Economy?",
+        "doi": "10.1080/00213624.1998.11506065",
+        "authors": "Mark Tomass",
+        "venue": "Journal of Economic Issues",
+        "source_links": "https://doi.org/10.1080/00213624.1998.11506065; https://www.jstor.org/stable/4227335"
+      },
+      "evidence": [
+        {
+          "role": "primary_metadata",
+          "url": "https://doi.org/10.1080/00213624.1998.11506065"
+        },
+        {
+          "role": "independent_catalogue",
+          "url": "https://www.jstor.org/stable/4227335"
+        }
+      ],
+      "checked_at": "2026-09-19",
+      "basis": "The DOI-bound Taylor & Francis record and the independent JSTOR record identify Mark Tomass's 1998 Journal of Economic Issues article and resolve the truncated queue title to the complete title. The verified citation is volume 32, issue 2, pages 565–574. This declaration changes bibliographic metadata only and makes no eligibility, canonical-identity, framework, completion, rights, validation or publication decision."
+    },
+    {
+      "candidate_id": "CAND-ACADEMIC-2026-09-13-EXTRA-a6766e6649ed-005",
+      "expected": {
+        "title": "Transnational Organized Crime and Foreign Direct Investment in Spain",
+        "doi": "",
+        "authors": "",
+        "year": "",
+        "venue": "",
+        "verification_status": "metadata_partial",
+        "metadata_confidence": "",
+        "review_stage": "metadata_fix",
+        "current_status": "pending",
+        "current_decision": "",
+        "possible_duplicate": "",
+        "metadata_conflict": ""
+      },
+      "replacement": {
+        "title": "Transnational Organized Crime and Foreign Direct Investment in Spain: What Could the Government-Supported Chinese FDI Learn from the Russian Precedent?",
+        "doi": "10.1163/9789004469846_008",
+        "authors": "Rubén Ruiz-Ramas",
+        "year": "2021",
+        "venue": "European Perceptions of China and Perspectives on the Belt and Road Initiative",
+        "work_type": "other",
+        "source_links": "https://doi.org/10.1163/9789004469846_008; https://e-spacio.uned.es/bitstreams/cf596fa3-7927-4d7f-8f27-1a0c788378b3/download"
+      },
+      "evidence": [
+        {
+          "role": "primary_metadata",
+          "url": "https://doi.org/10.1163/9789004469846_008"
+        },
+        {
+          "role": "independent_institutional",
+          "url": "https://e-spacio.uned.es/bitstreams/cf596fa3-7927-4d7f-8f27-1a0c788378b3/download"
+        }
+      ],
+      "checked_at": "2026-09-19",
+      "basis": "The DOI-bound Brill chapter and the UNED-hosted exact manuscript identify Rubén Ruiz-Ramas, the complete chapter title, 2021 publication, and the host volume European Perceptions of China and Perspectives on the Belt and Road Initiative; the chapter spans pages 120–149. This declaration resolves bibliography and manifestation type only and makes no eligibility, canonical-identity, framework, completion, rights, validation or publication decision."
+    },
+    {
+      "candidate_id": "CAND-ACADEMIC-2026-09-14-EXTRA-7f70be396631-001",
+      "expected": {
+        "title": "The Socio-Legal Construction of Organised Crime in Romania",
+        "doi": "",
+        "authors": "Alexandra Neag",
+        "year": "",
+        "venue": "University of Essex",
+        "verification_status": "metadata_partial",
+        "metadata_confidence": "",
+        "review_stage": "metadata_fix",
+        "current_status": "pending",
+        "current_decision": "",
+        "possible_duplicate": "",
+        "metadata_conflict": ""
+      },
+      "replacement": {
+        "year": "2022",
+        "source_links": "https://repository.essex.ac.uk/33069; https://www.aru.ac.uk/people/alexandra-neag"
+      },
+      "evidence": [
+        {
+          "role": "primary_metadata",
+          "url": "https://repository.essex.ac.uk/33069"
+        },
+        {
+          "role": "independent_institutional",
+          "url": "https://www.aru.ac.uk/people/alexandra-neag"
+        }
+      ],
+      "checked_at": "2026-09-19",
+      "basis": "The University of Essex repository cites Alexandra Neag's work as a 2022 PhD thesis, while the thesis title page records submission in December 2021; the independent Anglia Ruskin University profile confirms that Neag completed this PhD at Essex before joining ARU in 2022. The queue year is set to the repository citation year 2022 and the source distinction is retained in provenance. This declaration changes bibliographic metadata only and makes no eligibility, canonical-identity, framework, completion, rights, validation or publication decision."
     }
   ]
 }
