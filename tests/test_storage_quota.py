@@ -24,6 +24,12 @@ class StorageQuotaTest(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, 'quota_schema_invalid'):
             quota.fields('private { archive }')
 
+    def test_schema_diagnostic_retains_names_without_values_or_descriptions(self):
+        self.assertEqual(quota.schema_names([{'name': 'rowsReadCount', 'description': 'private', 'value': 'secret'}]), ['rowsReadCount'])
+        for unsafe in [[{'name': 'unsafe field'}], [{'name': None}], [{'name': 'x'}] * 101]:
+            with self.assertRaisesRegex(RuntimeError, 'quota_schema_invalid'):
+                quota.schema_names(unsafe)
+
     def test_nested_non_null_list_wrappers_resolve_without_assuming_a_type_name(self):
         ref = {'name': 'account', 'kind': 'OBJECT'}
         for kind in ['NON_NULL','LIST','NON_NULL']:
