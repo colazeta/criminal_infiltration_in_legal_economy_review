@@ -1,5 +1,5 @@
 {
-  "profile_version": "0.4.3",
+  "profile_version": "0.4.5",
   "storage": "private D1; bodies in private R2",
   "tables": {
     "reviews": {

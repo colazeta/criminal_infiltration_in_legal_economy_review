@@ -2,49 +2,24 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import test from 'node:test';
 import vm from 'node:vm';
-
-const source = fs.readFileSync(new URL('../../site/paper-sheet-manual.js', import.meta.url), 'utf8');
-
-function setup() {
-  const context = vm.createContext({
-    document: { createElement() { return { append() {}, setAttribute() {} }; } },
-    URL,
-    fetch: async () => { throw new Error('offline'); },
-    Map, Object, RegExp, String, Number, Array, Error,
-  });
-  vm.runInContext(source, context);
-  return context.CILEManualResearch;
+const source=fs.readFileSync(new URL('../../site/paper-sheet-manual.js',import.meta.url),'utf8');
+class Element {
+ constructor(tag){this.tag=tag;this.children=[];this.dataset={};this.textContent='';}
+ append(...nodes){this.children.push(...nodes);}
 }
-
-test('manual annotation parser exposes source-derived content but not analyst working sections', () => {
-  const api = setup();
-  const id = 'CAND-ACADEMIC-2026-09-01-001';
-  const body = `<!-- manual-scientific-enrichment:2026-09-15:${id} -->\n## Scientific reading-support annotation\nSource: [Publisher](https://example.org/paper)\n### Source-derived fields\n- **Study:** Italy, 2010–2019.\n- **Findings:** Result reported.\n### Analyst assessment\nThis sentence is an internal interpretation.\n### Clinical-contribution framework — analyst proposal only\n- **primary:** \`diagnosis\`\n- **secondary:** \`screening\`\n### Remaining work\nExtract more tables.`;
-  const parsed = api.parseComment({body, html_url:'https://github.com/o/r/issues/1#issuecomment-2', created_at:'2026-09-15T10:00:00Z', _issue_number:1}, id);
-  assert.equal(parsed.assessment_state, 'unreviewed_manual_support');
-  assert.deepEqual(Array.from(parsed.classes), ['diagnosis','screening']);
-  const visible = parsed.sections.flatMap(section => section.items).join(' ');
-  assert.match(visible, /Italy, 2010–2019/);
-  assert.doesNotMatch(visible, /internal interpretation/);
-  assert.doesNotMatch(visible, /Extract more tables/);
+const candidate='CAND-ANNOTATION-TEST';
+const annotation=(id)=>({annotation_id:id.repeat(64),assessment_state:'unreviewed_manual_support',source_url:'https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/issues/1#issuecomment-2',updated_at:'2026-09-19T00:00:00Z',sections:[{scope:'studies',group_label:'S1',fields:[{field_name:'population',value:'Declared population'}]}],classes:[],unparsed_lines:0});
+const payload=()=>({schema_version:1,projection_version:'CILE-PUBLIC-ANNOTATIONS-1',candidate_id:candidate,annotations:[annotation('a'),annotation('b')],conflicts:0,revision:'c'.repeat(64)});
+function setup(fetcher){const c=vm.createContext({document:{createElement:tag=>new Element(tag)},URL,AbortController,setTimeout,clearTimeout,fetch:fetcher});vm.runInContext(source,c);return c.CILEManualResearch;}
+test('ordinary reading loads one identity-bound archive projection, without GitHub search or comments',async()=>{
+ const calls=[];const api=setup(async(url,options)=>{calls.push({url,options});return {ok:true,json:async()=>payload()};});
+ assert.equal((await api.fetchAnnotation({id:candidate})).annotations.length,2);
+ assert.equal(calls.length,1);assert.ok(calls[0].url.endsWith('?view=annotations&id='+candidate));assert.equal(calls[0].options.credentials,'omit');assert.equal(calls[0].options.cache,'no-store');assert.doesNotMatch(source,/api\.github\.com|parseComment|deriveStructured/);
 });
-
-test('schema-aligned manual packet maps into the existing paper-sheet field groups', () => {
-  const api = setup();
-  const id = 'CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-001';
-  const body = `<!-- manual-scientific-enrichment:2026-09-15:${id} -->\n### Manual scientific enrichment packet — schema-aligned, non-decisional\n#### Top-level scientific fields\n- **summary — reported:** Firm-level consequences of infiltration.\n- **contribution — reported:** Estimates changes after entry.\n- **research_question — reported:** What happens after infiltration?\n- **infiltration_definition — reported:** Statistical proxy.\n- **infiltration_operationalisation — reported:** Time-varying treatment.\n- **authors_limitations — reported:** Proxy can misclassify.\n#### Study S1\n- **study_type:** longitudinal quasi-experimental study.\n- **population:** Italian corporations.\n- **period:** 2006–2016.\n- **sample size:** about 9,200 firms.\n- **geography:** Centre and North of Italy.\n#### Datasets\n- **D1 CADS:** balance-sheet information.\n- **D2 Infocamere:** ownership/governance.\n#### Analysis A2 — causal effect\n- **design:** staggered Difference-in-Differences.\n- **method:** firm and time fixed effects.\n- **identification:** within-firm change around entry.\n- **robustness:** PSM and SCM.\n#### Key variable uses\n- **V1 NDR_it — role:** treatment indicator.\n- **V2 log revenues — role:** primary outcome.\n#### Findings to encode\n- **F1:** revenues increase after infiltration.\n#### Clinical-contribution framework — analyst proposal only\n- **status:** \`proposed\`\n- **primary:** \`prognosis\`\n- **secondary:** \`aetiology\`\n- **alternative:** \`aetiology\``;
-  const parsed = api.parseComment({body, html_url:'https://github.com/o/r/issues/1#issuecomment-2', created_at:'2026-09-15T10:00:00Z', _issue_number:1}, id);
-  const structured = parsed.structured;
-  assert.equal(structured.overview.find(([key]) => key === 'research_question')[1], 'What happens after infiltration?');
-  assert.equal(structured.studies[0].rows.find(([key]) => key === 'period')[1], '2006–2016.');
-  assert.match(structured.datasets.join(' '), /CADS/);
-  assert.equal(structured.methods[0].rows.find(([key]) => key === 'design')[1], 'staggered Difference-in-Differences.');
-  assert.match(structured.variables.join(' '), /NDR_it/);
-  assert.match(structured.findings.map(row => row[1] || row).join(' '), /revenues increase/);
-  assert.deepEqual(Array.from(parsed.classes), ['prognosis','aetiology']);
+test('separate annotations retain their declared study groups without overwriting structured research',()=>{
+ const api=setup(),parent=new Element('section'),existing=new Element('article');parent.append(existing);api.render(parent,api.validate(payload(),{id:candidate}));
+ assert.equal(parent.children[0],existing);const papers=parent.children[1].children.filter(n=>n.tag==='article');assert.equal(papers.length,2);assert.deepEqual(papers.map(p=>p.dataset.annotationId),['a'.repeat(64),'b'.repeat(64)]);for(const p of papers)assert.ok(p.children.find(n=>n.tag==='details').children[0].textContent.endsWith(' · S1'));
 });
-
-test('manual annotation parser rejects another candidate identity', () => {
-  const api = setup();
-  assert.throws(() => api.parseComment({body:'<!-- manual-scientific-enrichment:2026-09-15:CAND-OTHER -->'}, 'CAND-X'));
+test('foreign identities, duplicated annotations and invented review states cannot render',()=>{
+ const api=setup();assert.throws(()=>api.validate(payload(),{id:'CAND-OTHER'}));const duplicate=payload();duplicate.annotations[1]=duplicate.annotations[0];assert.throws(()=>api.validate(duplicate,{id:candidate}));const approved=payload();approved.annotations[0].assessment_state='accepted';assert.throws(()=>api.validate(approved,{id:candidate}));
 });

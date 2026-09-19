@@ -48,7 +48,7 @@ test('empty register has no undefined 0/0 percentage',()=>{
   const s=P.analysisSummary(index([],{total:0,scanned:true}));assert.equal(s.phase,'empty');assert.equal(s.percentage,null);assert.equal(s.counts,null);
 });
 class Element {
-  constructor(tag){this.tag=tag;this.children=[];this.attributes={};this._text='';}
+  constructor(tag){this.tag=tag;this.children=[];this.attributes={};this.dataset={};this._text='';}
   set textContent(v){this._text=String(v??'');this.children=[];}
   get textContent(){return this._text+this.children.map(n=>n.textContent).join(' ');}
   append(...n){this.children.push(...n);}
@@ -71,7 +71,7 @@ test('an observed negative completion receipt differs from an unavailable respon
 test('manual annotations never overwrite a current structured public analysis',()=>{
   vm.runInContext(fs.readFileSync(new URL('../../site/paper-sheet-manual.js',import.meta.url),'utf8'),sheetContext);
   const parent=new Element('section');parent.setAttribute('data-research-availability','available');parent.textContent='Existing current research';
-  assert.equal(sheetContext.CILEManualResearch.hydratePresetFields(parent,{}),false);assert.equal(parent.textContent,'Existing current research');
+  sheetContext.CILEManualResearch.render(parent,{revision:'a'.repeat(64),annotations:[],conflicts:0});assert.match(parent.textContent,/Existing current research/);assert.match(parent.textContent,/Annotazioni di lettura/);
 });
 test('register and enrichment statistics share their display-state calculation',()=>{
   const stats=fs.readFileSync(new URL('../../site/enrichment-statistics.js',import.meta.url),'utf8');

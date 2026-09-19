@@ -138,3 +138,75 @@ or migration receipt. The live workflow must acquire all current parents/comment
 Tests cover concurrent replay, explicit group preservation, private redaction,
 untrusted commenter markers, marker conflicts, competing annotations, source edits,
 equal-time conflicts, rollback/retry, withdrawal and encrypted isolated restoration.
+
+## Archive projection release (profile 0.4.4)
+
+`GET /api/public-paper-research?view=annotations&id=<candidate>` reconstructs
+only the authorised current annotations from SQL, with source-byte and relation
+integrity checks. `schema/public-annotations.schema.json` is closed and mapped
+in `ontology/modules/public-annotations.json`. The browser renders separate
+annotation identities and their declared groups; it no longer searches GitHub,
+parses comments, selects a last comment or converts text into a scientific study.
+Existing structured analysis and manual annotations coexist without overwriting.
+
+`CILE-PUBLIC-INDEX-2` includes an annotation count/revision and three distinct
+classification role sets per candidate. Primary and secondary proposals contribute
+to filters. Alternatives do not. Repeated identical claims count once per
+candidate/category/role. Multiple primary proposals, overlapping primary/secondary
+roles, outside-framework disagreement and source-revision conflicts are flagged;
+no precedence choice supplies a scientific decision. A candidate may contribute
+to several categories, but only once to each category's combined count. Annotation
+coverage, structured extraction, attested completion and corpus inclusion remain
+independent measures. Counts always state the selected candidate perimeter.
+
+Index revisions include every mutable annotation head/version as well as current
+candidate inputs, proposal/receipt state and deployed projection contracts. Updating
+or withdrawing a source invalidates earlier index cursors. Public responses and
+browser reads use no-store; the view neither writes scientific state nor maintains
+an independent annotation archive. Source-head joins use the external-ID primary
+key; class reads start from indexed annotation sections and field references to
+avoid a full assertion scan for every paper.
+
+Deployment verifies all candidate sheets and index entries with
+`python3 -m scripts.architecture.check_annotation_projection`: a protected source
+audit, public paginated index, every public annotation sheet, and a repeated source
+audit must agree. No sampling is certified as complete. Pages checks API contract
+compatibility before releasing its consumers and retries through the existing
+successful Worker-deployment trigger. Test fixtures additionally check all 294
+candidate-sized records for filter/statistics equality, alternative exclusion,
+updates, replay, conflict and withdrawal without creating research corpus data.
+
+**Observed rollout limit, 19 September 2026:** migration 0008 persisted 317
+annotations; the private audit verified all stored relations and source bytes.
+The final ingestion stability gate failed and execution remained inactive. Later
+pre-deployment backup requests were rejected with HTTP 503; the observer reports
+`service_auth_nonce_get_unavailable`. This is storage unavailability, not evidence
+that the data have disappeared. A quota cause is not yet confirmed. The last
+successful source/audit receipts and subsequent failures are preserved in
+`annotation-migration-evidence-2026-09-19.json`. Public cutover must remain pending
+until preservation, complete reconciliation, activation and public verification
+succeed. This release does not claim that candidate bibliography/coverage/support
+have already moved from their remaining independent CSV/JSON authorities.
+
+## Complete captured-population rehearsal, 19 September 2026, 14:03 UTC
+
+A second preserved capture includes all 797 repository issues/PRs and all 1,304
+issue-comments, with every comment parent present. The reproducible command
+`node scripts/architecture/preflight_annotations.mjs <private-github-capture.json> <new-private-ledger.json> --restore-check`
+imports and replays every input in isolated SQLite, validates every original and
+relation, projects all 294 current candidates, and compares the actual browser
+filter and statistics consumers against those same API rows. It makes no remote
+write and stores any requested per-input ledger with mode 0600. The optional
+`--restore-check` additionally encrypts and restores this complete isolated
+population, restarts the store and runs its whole architecture audit.
+
+The report `annotation-preflight-2026-09-19.json` records the input digest, 2,012
+source snapshots and 317 annotations (291 candidate-bound, 8 unresolved, 18
+unregistered). All 294 candidate sheets and index rows agree; 291 have published
+unreviewed annotations in the isolated projection and 275 have explicit primary
+or secondary proposals. Zero completion decisions are created. Category totals
+are candidate/category/role occurrences, not distinct scientific works. The
+rehearsal covers current captured GitHub inputs; it is not a restored production
+archive and does not include the two separate private extraction proposals.
+The isolated restoration verified 46 tables, 20,343 rows, 4,033 KV entries and
+all 294 candidates. These numbers describe the rehearsal, not production counts.

@@ -11,7 +11,7 @@ export const record={id:'CAND-SYNTHETIC-RESEARCH',title:'Synthetic research fixt
 const missing=()=>({status:'not_verifiable',value:null,origin:'source',evidence_span_ids:[]});
 const reported=(value,origin='source')=>({status:'reported',value,origin,evidence_span_ids:['private-span']});
 async function setup(){
- const db=new DatabaseSync(':memory:');db.exec('PRAGMA foreign_keys=ON');db.exec(readFileSync(new URL('../migrations/0003_paper_enrichment.sql',import.meta.url),'utf8'));db.exec(readFileSync(new URL('../migrations/0007_extraction_relations.sql',import.meta.url),'utf8'));db.exec(readFileSync(new URL('../migrations/0005_enrichment_adjudication.sql',import.meta.url),'utf8'));db.exec(readFileSync(new URL('../migrations/0006_enrichment_delivery_assets.sql',import.meta.url),'utf8'));
+ const db=new DatabaseSync(':memory:');db.exec('PRAGMA foreign_keys=ON');db.exec(readFileSync(new URL('../migrations/0003_paper_enrichment.sql',import.meta.url),'utf8'));db.exec(readFileSync(new URL('../migrations/0007_extraction_relations.sql',import.meta.url),'utf8'));db.exec(readFileSync(new URL('../migrations/0008_annotation_archive.sql',import.meta.url),'utf8'));db.exec(readFileSync(new URL('../migrations/0005_enrichment_adjudication.sql',import.meta.url),'utf8'));db.exec(readFileSync(new URL('../migrations/0006_enrichment_delivery_assets.sql',import.meta.url),'utf8'));
  const adapter=nativeAdapter(db);
  const kv=new Map(),env={REVIEW_DB:adapter,REVIEW_EVIDENCE:{async put(k,v){kv.set(k,v)},async get(k){return kv.has(k)?{async text(){return kv.get(k)}}:null}}};
  await syncTargets(env,{schemaVersion:1,records:[record]},now);

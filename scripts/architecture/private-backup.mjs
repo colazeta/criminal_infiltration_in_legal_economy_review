@@ -5,7 +5,7 @@ import {DatabaseSync} from 'node:sqlite';
 import {readFileSync,writeFileSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
-import {BACKUP_CONTRACT,openBackupPage,decodeStored,digestRows} from '../../curator-app/src/archive-preservation.js';
+import {BACKUP_CONTRACT,LEGACY_BACKUP_CONTRACT,openBackupPage,decodeStored,digestRows} from '../../curator-app/src/archive-preservation.js';
 import {EnrichmentStoreCore,serviceSignature} from '../../curator-app/src/enrichment-store.js';
 import {ARCHIVE_TABLES,auditArchitecture} from '../../curator-app/src/architecture-audit.js';
 import {canonicalJson,sha256} from '../../curator-app/src/review-v2.js';
@@ -15,6 +15,13 @@ const assert=(condition)=>{if(!condition)throw Error('archive_preservation_gate_
 const same=(a,b)=>canonicalJson(a)===canonicalJson(b);
 const digest=value=>sha256(canonicalJson(value));
 const kvDigest=entries=>digest([...entries].sort(([a],[b])=>a<b?-1:a>b?1:0));
+
+function nextSqlPage(page,table,after,expected){
+  assert(page.part==='sql'&&page.table===table&&page.after===after&&Array.isArray(page.rows)&&page.rows.length===expected);
+  assert(Array.isArray(page.rowids)&&page.rowids.length===expected&&expected>0);
+  assert(page.rowids.every((id,index)=>Number.isSafeInteger(id)&&(index?id>page.rowids[index-1]:after===null||id>after)));
+  return page.rowids.at(-1);
+}
 
 function restoreTableOrder(db){
   // Keep every physical guard enabled; trigger dependencies supplement the FKs.
@@ -66,15 +73,15 @@ async function readKv(getPage,accept=()=>{}){
 export async function captureBackup(call,secret,commit,snapshot_id=crypto.randomUUID()){
   const pages=[];let total=0;
   const accept=envelope=>{total+=JSON.stringify(envelope).length;assert(total<=300000000);pages.push(envelope)};
-  const getPage=async request=>{const envelope=await call({...request,snapshot_id});return{envelope,page:await openBackupPage(envelope,secret,commit,snapshot_id)}};
+  const getPage=async request=>{const envelope=await call({...request,snapshot_id});assert(envelope.contract===BACKUP_CONTRACT);return{envelope,page:await openBackupPage(envelope,secret,commit,snapshot_id)}};
   const first=await getPage({part:'catalogue'}),catalogue=first.page;
-  assert(catalogue.part==='catalogue'&&same(Object.keys(catalogue.counts).sort(),ARCHIVE_TABLES));accept(first.envelope);
+  assert(catalogue.part==='catalogue'&&catalogue.sql_pagination==='rowid_keyset'&&same(Object.keys(catalogue.counts).sort(),ARCHIVE_TABLES));accept(first.envelope);
   for(const table of ARCHIVE_TABLES){
     const count=catalogue.counts[table];assert(Number.isSafeInteger(count)&&count>=0&&count<=100000);
-    const all=[];
+    const all=[];let after=null;
     for(let offset=0;offset<count;offset+=100){
-      const {page,envelope}=await getPage({part:'sql',table,offset});
-      assert(page.part==='sql'&&page.table===table&&page.offset===offset&&page.rows.length===Math.min(100,count-offset));
+      const {page,envelope}=await getPage({part:'sql',table,after});
+      after=nextSqlPage(page,table,after,Math.min(100,count-offset));
       all.push(...page.rows);accept(envelope);
     }
     assert(await digestRows(all)===catalogue.digests[table]);
@@ -90,13 +97,20 @@ export async function captureBackup(call,secret,commit,snapshot_id=crypto.random
 }
 
 export async function restoreBackup(bundle,secret){
-  assert(bundle?.contract===BACKUP_CONTRACT&&typeof bundle.commit==='string'&&Array.isArray(bundle.pages)&&bundle.pages.length>=3);
+  assert([BACKUP_CONTRACT,LEGACY_BACKUP_CONTRACT].includes(bundle?.contract)&&typeof bundle.commit==='string'&&Array.isArray(bundle.pages)&&bundle.pages.length>=3);
+  const legacy=bundle.contract===LEGACY_BACKUP_CONTRACT;
   let cursor=0;
-  const next=async()=>{assert(cursor<bundle.pages.length);return openBackupPage(bundle.pages[cursor++],secret,bundle.commit,bundle.snapshot_id)};
-  const catalogue=await next();assert(catalogue.part==='catalogue'&&same(Object.keys(catalogue.counts).sort(),ARCHIVE_TABLES));
+  const next=async()=>{assert(cursor<bundle.pages.length&&bundle.pages[cursor].contract===bundle.contract);return openBackupPage(bundle.pages[cursor++],secret,bundle.commit,bundle.snapshot_id)};
+  const catalogue=await next();assert(catalogue.part==='catalogue'&&(legacy||catalogue.sql_pagination==='rowid_keyset')&&same(Object.keys(catalogue.counts).sort(),ARCHIVE_TABLES));
   const tables={};
   for(const table of ARCHIVE_TABLES){
-    const all=[];for(let offset=0;offset<catalogue.counts[table];offset+=100){const page=await next();assert(page.part==='sql'&&page.table===table&&page.offset===offset&&page.rows.length===Math.min(100,catalogue.counts[table]-offset));all.push(...page.rows)}
+    const all=[];let after=null;
+    assert(Number.isSafeInteger(catalogue.counts[table])&&catalogue.counts[table]>=0&&catalogue.counts[table]<=100000);
+    for(let offset=0;offset<catalogue.counts[table];offset+=100){const page=await next(),expected=Math.min(100,catalogue.counts[table]-offset);
+      if(legacy)assert(page.part==='sql'&&page.table===table&&page.offset===offset&&page.rows.length===expected);
+      else after=nextSqlPage(page,table,after,expected);
+      all.push(...page.rows);
+    }
     assert(all.length===catalogue.counts[table]&&await digestRows(all)===catalogue.digests[table]);tables[table]=all;
   }
   const kv=await readKv(async()=>({page:await next()}));
@@ -115,7 +129,7 @@ export async function restoreBackup(bundle,secret){
     await restarted.requireReady();const audit=await auditArchitecture(await restarted.environment());
     assert(audit.state_sha256===catalogue.state_sha256&&same(audit.counts,catalogue.counts));
     assert(audit.schema_sha256===catalogue.schema_sha256);
-    return {contract:BACKUP_CONTRACT,commit:bundle.commit,scope:'entire_enrichment_store',snapshot_id:bundle.snapshot_id,
+    return {contract:bundle.contract,commit:bundle.commit,scope:'entire_enrichment_store',snapshot_id:bundle.snapshot_id,
       sql_tables:ARCHIVE_TABLES.length,sql_rows:Object.values(catalogue.counts).reduce((a,b)=>a+b,0),kv_entries:kv.size,
       state_sha256:catalogue.state_sha256,kv_sha256:await kvDigest(kv),isolated_restore_verified:true,
       integrity_verified:audit.integrity_verified,issues:audit.issues,checked_public_targets:audit.checked_public_targets,

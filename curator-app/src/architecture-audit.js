@@ -1,3 +1,5 @@
+import {auditCandidateArchive} from './candidate-archive.js';
+import candidateMigration from './candidate-archive-migration.json' with {type:'json'};
 /* Read-only full-population preflight. Counts and closed diagnostics only leave
    the private store; evidence, identities, payloads and raw errors never do. */
 import {canonicalJson,sha256} from './review-v2.js';
@@ -15,7 +17,7 @@ import annotationMigration from './annotation-archive-migration.json' with {type
 import {auditAnnotations,readPublicAnnotations} from './annotation-archive.js';
 
 const LIMIT=100000;
-export const ARCHIVE_TABLES=[base,schedule,adjudication,delivery,relations,annotationMigration].flatMap(m=>[...m.sql.matchAll(/CREATE TABLE(?: IF NOT EXISTS)? (\w+)/g)].map(x=>x[1])).sort();
+export const ARCHIVE_TABLES=[base,schedule,adjudication,delivery,relations,annotationMigration,candidateMigration].flatMap(m=>[...m.sql.matchAll(/CREATE TABLE(?: IF NOT EXISTS)? (\w+)/g)].map(x=>x[1])).sort();
 const EXPECTED=ARCHIVE_TABLES;
 const CHILDREN={studies:['study_id'],datasets:['dataset_id','study_id'],analyses:['analysis_id','study_id'],variable_uses:['variable_use_id','analysis_id'],findings:['finding_id','analysis_id']};
 const S=(db,sql,...values)=>db.prepare(sql).bind(...values);
@@ -141,6 +143,7 @@ export async function auditArchitecture(env){
     try{if(await sha256(canonicalJson(JSON.parse(b.payload_json)))!==b.payload_sha256)flag('bibliography_hash_mismatch')}catch{flag('bibliography_record_invalid')}
   }
   try{await auditAnnotations(env)}catch{flag('annotation_archive_integrity')}
+  try{await auditCandidateArchive(env)}catch{flag('candidate_archive_integrity')}
   const publicStates={},completionStates={};let checked=0;
   for(const target of targets.values()){
     if(!target.active||target.cycle_id!==cycle.review_id)continue;

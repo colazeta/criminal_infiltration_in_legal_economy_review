@@ -120,3 +120,16 @@ test('machine ingress requires the signed deployed version and bounds each batch
  assert.equal((await send({...data,ingress:Array(26).fill(input())})).status,422);
  const response=await send(data);assert.equal(response.status,200);const receipts=(await response.json()).receipts;assert.equal(receipts.length,2);assert.equal(receipts[0].annotation_id,receipts[1].annotation_id);assert.equal(receipts[1].replayed,true);x.db.close();
 });
+
+test('one stored annotation drives the public sheet and index, and retirement invalidates old cursors',async()=>{
+ const {readPublicIndex,servePublicResearch}=await import('../src/public-paper-research.js');
+ const x=await fixture(),a=input();await ingestAnnotation(x.env,a,now);await ingestAnnotation(x.env,a,now+1);
+ const request=()=>new Request('https://public.example/api/public-paper-research?view=annotations&id='+candidate);
+ let response=await servePublicResearch(request(),x.core),sheet=await response.json();assert.equal(response.status,200);assert.equal(sheet.annotations.length,1);
+ const first=await readPublicIndex(x.env);assert.equal(first.records[0].annotation_summary.revision,sheet.revision);assert.equal(first.records[0].completion.completed,false);assert.equal(first.records[0].availability,'not_assessed');assert.deepEqual(first.records[0].classification.primary,['diagnosis']);
+ const revised=structuredClone(a);revised.comment.updated_at='2026-09-05T00:00:00Z';revised.comment.body=revised.comment.body.replace('primary: diagnosis','primary: therapy');await ingestAnnotation(x.env,revised,now+2);
+ const second=await readPublicIndex(x.env);assert.notEqual(second.index_revision,first.index_revision);assert.deepEqual(second.records[0].classification.primary,['therapy']);
+ await assert.rejects(readPublicIndex(x.env,0,first.index_revision),/index_changed/);
+ await ingestAnnotation(x.env,{...revised,action:'withdraw'},now+3);const third=await readPublicIndex(x.env);assert.notEqual(third.index_revision,second.index_revision);assert.equal(third.records[0].annotation_summary.count,0);assert.deepEqual(third.records[0].classification.primary,[]);
+ await ingestAnnotation(x.env,revised,now+4);response=await servePublicResearch(request(),x.core);assert.equal((await response.json()).annotations.length,0);assert.equal(x.db.prepare('SELECT COUNT(*) n FROM enrichment_manual_annotations').get().n,2);x.db.close();
+});

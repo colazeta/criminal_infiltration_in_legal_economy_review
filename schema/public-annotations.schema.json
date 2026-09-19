@@ -1,0 +1,185 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "projection_version",
+    "candidate_id",
+    "annotations",
+    "conflicts",
+    "revision"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "projection_version": {
+      "const": "CILE-PUBLIC-ANNOTATIONS-1"
+    },
+    "candidate_id": {
+      "type": "string",
+      "pattern": "^CAND-[A-Za-z0-9-]{1,100}$"
+    },
+    "annotations": {
+      "type": "array",
+      "maxItems": 100,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "annotation_id",
+          "assessment_state",
+          "source_url",
+          "updated_at",
+          "sections",
+          "classes",
+          "unparsed_lines"
+        ],
+        "properties": {
+          "annotation_id": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "assessment_state": {
+            "const": "unreviewed_manual_support"
+          },
+          "source_url": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "updated_at": {
+            "type": "string",
+            "maxLength": 64
+          },
+          "sections": {
+            "type": "array",
+            "maxItems": 100,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "scope",
+                "group_label",
+                "fields"
+              ],
+              "properties": {
+                "scope": {
+                  "enum": [
+                    "overview",
+                    "framework",
+                    "studies",
+                    "methods",
+                    "datasets",
+                    "variables",
+                    "findings",
+                    "sources"
+                  ]
+                },
+                "group_label": {
+                  "type": "string",
+                  "maxLength": 100
+                },
+                "fields": {
+                  "type": "array",
+                  "maxItems": 2000,
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "field_name",
+                      "value"
+                    ],
+                    "properties": {
+                      "field_name": {
+                        "enum": [
+                          "alternative",
+                          "alternative_rationale",
+                          "analysis_unit",
+                          "annotation_text",
+                          "authors_limitations",
+                          "comparison",
+                          "contribution",
+                          "design",
+                          "findings",
+                          "geography",
+                          "identification",
+                          "infiltration_definition",
+                          "infiltration_operationalisation",
+                          "method",
+                          "observation_unit",
+                          "period",
+                          "population",
+                          "primary",
+                          "rationale",
+                          "research_question",
+                          "robustness",
+                          "sample_size",
+                          "sampling",
+                          "secondary",
+                          "secondary_rationale",
+                          "source_url",
+                          "status",
+                          "study_type",
+                          "summary",
+                          "validation"
+                        ]
+                      },
+                      "value": {
+                        "type": "string",
+                        "maxLength": 12000
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "classes": {
+            "type": "array",
+            "maxItems": 1000,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "category",
+                "role"
+              ],
+              "properties": {
+                "category": {
+                  "enum": [
+                    "aetiology",
+                    "diagnosis",
+                    "screening",
+                    "therapy",
+                    "prognosis",
+                    "prevention"
+                  ]
+                },
+                "role": {
+                  "enum": [
+                    "primary",
+                    "secondary",
+                    "alternative"
+                  ]
+                }
+              }
+            }
+          },
+          "unparsed_lines": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "conflicts": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "revision": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    }
+  }
+}

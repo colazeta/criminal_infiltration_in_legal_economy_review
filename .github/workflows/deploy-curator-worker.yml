@@ -376,6 +376,12 @@ jobs:
           CURATOR_SESSION_SECRET: ${{ secrets.CURATOR_SESSION_SECRET }}
         run: python3 -m scripts.enrichment.public_research_check
 
+      - name: Verify every candidate annotation sheet and shared classification index
+        working-directory: .
+        env:
+          CURATOR_SESSION_SECRET: ${{ secrets.CURATOR_SESSION_SECRET }}
+        run: python3 -m scripts.architecture.check_annotation_projection
+
       - name: Retain and read back the reviewed private PDF seed
         working-directory: .
         env:

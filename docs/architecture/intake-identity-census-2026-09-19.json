@@ -1,0 +1,33 @@
+{
+  "contract": "CILE-INTAKE-IDENTITY-CENSUS-1",
+  "scope": "captured_inputs_local_git_ancestry",
+  "source_captured_at": "2026-09-19T14:03:40.585Z",
+  "ancestry_main_commit": "a1107f7ff1177f5381dae4c61038b0a039763052",
+  "intake_issues": 67,
+  "batch_states": {
+    "unparsed_input_retained": 2,
+    "governed_input": 62,
+    "terminal_absent": 1,
+    "terminal_or_context_invalid": 2
+  },
+  "registered_candidates": 294,
+  "source_candidate_ids": 343,
+  "registered_ids_with_parseable_intake": 294,
+  "registered_ids_without_parseable_intake": 0,
+  "unregistered_source_ids": 49,
+  "unregistered_occurrences": 49,
+  "unregistered_occurrence_states": {
+    "terminal_absent": 14,
+    "terminal_or_context_invalid": 21,
+    "governed_input": 14
+  },
+  "unregistered_representation": {
+    "unregistered_possible_operational_match": 33,
+    "unregistered_no_current_match": 16
+  },
+  "candidate_rows_written": 0,
+  "canonical_identity_decisions_written": 0,
+  "live_terminal_validation": false,
+  "authority_cutover_ready": false,
+  "source_sha256": "fc4369ca691e99ced0d8769560e334fde346e5097f1c7319a1ff0c94d937e605"
+}

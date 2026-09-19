@@ -12,7 +12,7 @@
     button.hidden=!['error','partial'].includes(view.phase);
     counts.hidden=!view.counts;counts.textContent='';
     if(view.counts){const c=view.counts;
-      counts.textContent=`Analisi dettagliate: ${c.analyses}. Basate sul testo completo: ${c.fullText}. Completamento registrato: ${c.completed} su ${view.denominator} paper con dati caricati.`;
+      counts.textContent=`Annotazioni di lettura: ${c.annotations} in ${c.annotated} paper. Analisi dettagliate: ${c.analyses}. Basate sul testo completo: ${c.fullText}. Completamento registrato: ${c.completed} su ${view.denominator} paper con dati caricati.`;
       if(view.percentage!==null)counts.textContent+=` Quota con completamento registrato: ${new Intl.NumberFormat('it-IT',{maximumFractionDigits:1}).format(view.percentage)}%.`;
     }
   }

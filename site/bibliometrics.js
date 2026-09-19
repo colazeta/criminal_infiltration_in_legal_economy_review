@@ -18,7 +18,7 @@
     note.textContent = 'Il grafico geografico non è disponibile in questo momento; nessun paese viene stimato.';
     ui.quality.after(note);
   });
-  import('./categorisation-statistics.js?v=status-20260917').then(() => {
+  import('./categorisation-statistics.js?v=archive-20260919-v2').then(() => {
     const categorisation = document.querySelector('#categorisation-statistics');
     if (categorisation && ui.content?.parentNode) ui.content.after(categorisation);
   }).catch(() => {

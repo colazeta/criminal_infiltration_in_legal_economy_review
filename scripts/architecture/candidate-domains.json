@@ -1,0 +1,230 @@
+{
+  "bibliography": {
+    "path": "data/curation/review_queue.csv",
+    "class": "CandidateRecord",
+    "fields": [
+      "candidate_id",
+      "title",
+      "doi",
+      "authors",
+      "year",
+      "venue",
+      "work_type",
+      "source",
+      "source_links",
+      "other_identifiers",
+      "source_query_id",
+      "verification_status",
+      "metadata_confidence",
+      "intake_assessment",
+      "intake_reason",
+      "possible_duplicate",
+      "metadata_conflict",
+      "required_human_action",
+      "origin",
+      "legacy_scope_fit",
+      "legacy_recommendation",
+      "legacy_reason",
+      "legacy_priority",
+      "review_stage",
+      "current_status",
+      "current_decision",
+      "exclusion_reason_code",
+      "topic_code",
+      "duplicate_target_id",
+      "secondary_collection_code",
+      "secondary_collection_rationale",
+      "last_action_id",
+      "materialised_at",
+      "updated_at",
+      "provenance"
+    ],
+    "slots": {
+      "candidate_id": "candidate_id",
+      "title": "title",
+      "doi": "doi",
+      "authors": "authors_text",
+      "year": "publication_year",
+      "venue": "venue",
+      "work_type": "work_type",
+      "source": "source_name",
+      "source_links": "was_derived_from",
+      "other_identifiers": "identifier_value",
+      "source_query_id": "v2_query_id",
+      "verification_status": "v2_verification_status",
+      "metadata_confidence": "cile:metadataConfidence",
+      "intake_assessment": "cile:intakeAssessment",
+      "intake_reason": "cile:intakeReason",
+      "possible_duplicate": "cile:possibleDuplicate",
+      "metadata_conflict": "cile:metadataConflict",
+      "required_human_action": "cile:requiredHumanAction",
+      "origin": "cile:origin",
+      "legacy_scope_fit": "cile:legacyScopeFit",
+      "legacy_recommendation": "cile:legacyRecommendation",
+      "legacy_reason": "cile:legacyReason",
+      "legacy_priority": "cile:legacyPriority",
+      "review_stage": "review_stage",
+      "current_status": "candidate_status",
+      "current_decision": "screening_decision",
+      "exclusion_reason_code": "exclusion_reason",
+      "topic_code": "topic_code",
+      "duplicate_target_id": "cile:duplicateTargetId",
+      "secondary_collection_code": "secondary_collection_code",
+      "secondary_collection_rationale": "cile:secondaryCollectionRationale",
+      "last_action_id": "cile:lastActionId",
+      "materialised_at": "generated_at_time",
+      "updated_at": "ingress_updated_at",
+      "provenance": "was_derived_from"
+    },
+    "controlled_fields": {
+      "review_stage": "ReviewStageEnum",
+      "current_status": "CandidateStatusEnum"
+    },
+    "required_fields": [
+      "candidate_id",
+      "title",
+      "review_stage",
+      "current_status",
+      "origin",
+      "provenance"
+    ],
+    "repeated": [
+      "source_links",
+      "source_query_id"
+    ]
+  },
+  "abstract": {
+    "path": "data/curation/abstract_coverage.csv",
+    "class": "AbstractCoverageAssessment",
+    "fields": [
+      "candidate_id",
+      "title",
+      "doi",
+      "coverage_status",
+      "abstract_source",
+      "article_url",
+      "providers_tried",
+      "match_type",
+      "match_score",
+      "provider_errors",
+      "checked_at",
+      "notes"
+    ],
+    "slots": {
+      "candidate_id": "candidate_id",
+      "title": "title",
+      "doi": "doi",
+      "coverage_status": "abstract_status",
+      "abstract_source": "source_name",
+      "article_url": "source_url",
+      "providers_tried": "enrichment_provider",
+      "match_type": "v2_match_basis",
+      "match_score": "cile:matchScore",
+      "provider_errors": "cile:providerErrors",
+      "checked_at": "generated_at_time",
+      "notes": "rationale"
+    },
+    "controlled_fields": {
+      "coverage_status": "AbstractStatusEnum"
+    },
+    "required_fields": [
+      "candidate_id",
+      "coverage_status",
+      "checked_at"
+    ],
+    "repeated": [
+      "providers_tried"
+    ]
+  },
+  "retrieval": {
+    "path": "data/curation/retrieval_coverage.csv",
+    "class": "RetrievalActivity",
+    "fields": [
+      "candidate_id",
+      "title",
+      "doi",
+      "resolution_status",
+      "best_url",
+      "best_url_kind",
+      "full_text_url",
+      "open_access_url",
+      "landing_url",
+      "doi_url",
+      "source_urls",
+      "resolved_doi",
+      "resolution_sources",
+      "match_method",
+      "match_confidence",
+      "checked_at",
+      "notes"
+    ],
+    "slots": {
+      "candidate_id": "candidate_id",
+      "title": "title",
+      "doi": "doi",
+      "resolution_status": "cile:resolutionStatus",
+      "best_url": "source_url",
+      "best_url_kind": "access_kind",
+      "full_text_url": "source_url",
+      "open_access_url": "access_url",
+      "landing_url": "source_url",
+      "doi_url": "source_url",
+      "source_urls": "source_url",
+      "resolved_doi": "doi",
+      "resolution_sources": "source_name",
+      "match_method": "v2_match_basis",
+      "match_confidence": "cile:matchConfidence",
+      "checked_at": "generated_at_time",
+      "notes": "rationale"
+    },
+    "controlled_fields": {},
+    "required_fields": [
+      "candidate_id",
+      "resolution_status",
+      "best_url_kind",
+      "checked_at"
+    ],
+    "repeated": [
+      "source_urls",
+      "resolution_sources"
+    ]
+  },
+  "access": {
+    "path": "data/curation/access_coverage.csv",
+    "class": "AccessAssessment",
+    "fields": [
+      "candidate_id",
+      "title",
+      "doi",
+      "access_status",
+      "access_kind",
+      "access_url",
+      "evidence_source",
+      "evidence_detail",
+      "checked_at",
+      "notes"
+    ],
+    "slots": {
+      "candidate_id": "candidate_id",
+      "title": "title",
+      "doi": "doi",
+      "access_status": "access_status",
+      "access_kind": "access_kind",
+      "access_url": "access_url",
+      "evidence_source": "source_name",
+      "evidence_detail": "evidence_locator",
+      "checked_at": "generated_at_time",
+      "notes": "rationale"
+    },
+    "controlled_fields": {
+      "access_status": "AccessStatusEnum"
+    },
+    "required_fields": [
+      "candidate_id",
+      "access_status",
+      "access_kind",
+      "checked_at"
+    ],
+    "repeated": []
+  }
+}
