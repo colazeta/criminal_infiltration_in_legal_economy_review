@@ -1,3 +1,4 @@
+import {nativeAdapter} from './sqlite-adapter-fixture.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {DatabaseSync} from 'node:sqlite';
@@ -10,8 +11,8 @@ export const record={id:'CAND-SYNTHETIC-RESEARCH',title:'Synthetic research fixt
 const missing=()=>({status:'not_verifiable',value:null,origin:'source',evidence_span_ids:[]});
 const reported=(value,origin='source')=>({status:'reported',value,origin,evidence_span_ids:['private-span']});
 async function setup(){
- const db=new DatabaseSync(':memory:');db.exec('PRAGMA foreign_keys=ON');db.exec(readFileSync(new URL('../migrations/0003_paper_enrichment.sql',import.meta.url),'utf8'));db.exec(readFileSync(new URL('../migrations/0005_enrichment_adjudication.sql',import.meta.url),'utf8'));db.exec(readFileSync(new URL('../migrations/0006_enrichment_delivery_assets.sql',import.meta.url),'utf8'));
- const adapter={prepare(sql){let v=[];return{bind(...args){v=args;return this},async first(){return db.prepare(sql).get(...v)||null},async all(){return{results:db.prepare(sql).all(...v)}},async run(){return{meta:{changes:db.prepare(sql).run(...v).changes}}}}},async batch(statements){db.exec('BEGIN');try{const r=[];for(const s of statements)r.push(await s.run());db.exec('COMMIT');return r}catch(e){db.exec('ROLLBACK');throw e}}};
+ const db=new DatabaseSync(':memory:');db.exec('PRAGMA foreign_keys=ON');db.exec(readFileSync(new URL('../migrations/0003_paper_enrichment.sql',import.meta.url),'utf8'));db.exec(readFileSync(new URL('../migrations/0007_extraction_relations.sql',import.meta.url),'utf8'));db.exec(readFileSync(new URL('../migrations/0005_enrichment_adjudication.sql',import.meta.url),'utf8'));db.exec(readFileSync(new URL('../migrations/0006_enrichment_delivery_assets.sql',import.meta.url),'utf8'));
+ const adapter=nativeAdapter(db);
  const kv=new Map(),env={REVIEW_DB:adapter,REVIEW_EVIDENCE:{async put(k,v){kv.set(k,v)},async get(k){return kv.has(k)?{async text(){return kv.get(k)}}:null}}};
  await syncTargets(env,{schemaVersion:1,records:[record]},now);
  const target=db.prepare('SELECT * FROM enrichment_targets').get();

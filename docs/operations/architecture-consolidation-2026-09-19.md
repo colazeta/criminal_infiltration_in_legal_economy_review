@@ -91,3 +91,39 @@ cannot satisfy this instruction.
 The [Cloudflare storage contract](https://developers.cloudflare.com/durable-objects/api/sqlite-storage-api/)
 describes private SQL/KV and 30-day point-in-time recovery. A PITR capability or
 bookmark is not itself a completed restore rehearsal.
+
+## Subsequent controlled implementation — 2026-09-19
+
+The initial findings above remain historical evidence. PRs #784–#787 added the
+closed runtime audit and schema census, complete SQL dictionary, encrypted private
+archive preservation and isolated restoration. The dated successful live receipt
+is in `docs/architecture/runtime-evidence-2026-09-19.json`: 22 SQL tables,
+4,685 rows, 418 retained KV entries, 294 targets, two private extraction proposals;
+all source/document integrity checks and the isolated restoration passed. This
+does not include every other external store and does not authorise full cutover.
+
+PR #788 separately integrated bounded automatic loading and removal of the AML
+menu links. Its Pages deployment and served 294 candidate identities passed;
+the later workflow step still reported pre-existing operational statistics debt.
+The browser's GitHub annotation dependency was not disguised as migrated data.
+
+The next implementation is extraction migration 0007, detailed in
+`docs/architecture/extraction-relations.md`. It adds 16 governed tables in the same
+SQLite store and changes actual submission, private, adjudication and public read
+paths to the normalized graph. Old JSON submissions remain immutable provenance.
+The physical inventory becomes 71 repository tables / 569 columns, of which 38
+are configured for the enrichment store and 33 remain prepared V2 structures.
+Profile 0.4.2 reuses `oa:Annotation` for controlled, scoped assertions.
+
+All mandatory local validation passed: 763 Python tests, 383 Node tests,
+repository/ontology/archive/site validation, generated model/export checks,
+JavaScript syntax checks and saturation reporting. The populated encrypted restore
+test exposed an insertion-order failure; restoration now follows FK and trigger
+dependencies while retaining all guards. This is local evidence only. The protected
+deployment must first back up/restore-check its current code revision, migrate the
+whole proposal population, verify a zero-write replay and publish runtime receipts.
+
+Still open: candidate and canonical authority consolidation, import and review
+states of historical GitHub annotations, complete external-store preservation,
+conflict-preserving bibliographic assertions, withdrawal/supersession across all
+domains, replacement of legacy consumer paths and retirement of competing writers.

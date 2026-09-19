@@ -1,3 +1,4 @@
+import {nativeAdapter} from './sqlite-adapter-fixture.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
@@ -7,8 +8,8 @@ import { sha256 } from '../src/review-v2.js';
 const now=Date.parse('2026-09-11T10:00:00Z');
 function setup(){
  const sqlite=new DatabaseSync(':memory:');sqlite.exec('PRAGMA foreign_keys=ON');
- sqlite.exec(readFileSync(new URL('../migrations/0003_paper_enrichment.sql',import.meta.url),'utf8'));
- const db={sqlite,prepare(sql){let v=[];return{bind(...a){v=a;return this},async first(){return sqlite.prepare(sql).get(...v)||null},async all(){return{results:sqlite.prepare(sql).all(...v)}},async run(){return{meta:{changes:Number(sqlite.prepare(sql).run(...v).changes)}}}}},async batch(ss){sqlite.exec('BEGIN');try{const r=[];for(const s of ss)r.push(await s.run());sqlite.exec('COMMIT');return r}catch(e){sqlite.exec('ROLLBACK');throw e}}};
+ sqlite.exec(readFileSync(new URL('../migrations/0003_paper_enrichment.sql',import.meta.url),'utf8'));sqlite.exec(readFileSync(new URL('../migrations/0007_extraction_relations.sql',import.meta.url),'utf8'));
+ const db=nativeAdapter(sqlite);
  const store=new Map(),env={CURATOR_LOGIN:'owner',PAPER_ENRICHMENT_ENABLED:'true',REVIEW_DB:db,REVIEW_EVIDENCE:{async put(k,v){store.set(k,v)},async get(k){return store.has(k)?{async text(){return store.get(k)}}:null}}};
  return{env,db,store};
 }

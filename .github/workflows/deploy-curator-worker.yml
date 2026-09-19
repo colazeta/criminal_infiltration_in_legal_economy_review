@@ -22,6 +22,7 @@ on:
       - "site/model*"
       - "scripts/review_v2/**"
       - "scripts/enrichment/**"
+      - "scripts/architecture/**"
       - "site/classic-site.css"
       - "site/curator-consensus.js"
       - "site/curator-reading.js"
@@ -59,7 +60,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
         with:
-          node-version: 22
+          node-version: 24
 
       - name: Validate the exact checkout before production changes
         working-directory: .
@@ -77,6 +78,21 @@ jobs:
           python3 scripts/validation/validate_site.py
           node --test curator-app/test/*.test.js
           node --check site/curator-guided.js
+
+      - name: Preserve and restore-check the currently deployed archive before schema changes
+        working-directory: .
+        env:
+          CURATOR_SESSION_SECRET: ${{ secrets.CURATOR_SESSION_SECRET }}
+        run: python3 -m scripts.architecture.predeploy_backup
+
+      - name: Retain the verified pre-deployment ciphertext
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: private-archive-before-deploy-${{ github.sha }}
+          path: ${{ runner.temp }}/cile-before-deploy.encrypted.json
+          if-no-files-found: error
+          retention-days: 90
+          compression-level: 9
 
       - name: Prepare empty private Review V2 resources
         if: vars.REVIEW_V2_STORAGE_ENABLED == 'true'
@@ -331,6 +347,12 @@ jobs:
           free_web_query = urllib.parse.urlencode({"candidate": "CAND-SMOKE-001", "issue": "1", "title": "Authentication smoke test"})
           retry_unauthenticated_401(f"{origin}/api/free-web-search?{free_web_query}", "Curator free web-search endpoint")
           PY
+
+      - name: Normalize all existing extraction proposals and verify replay before activation
+        working-directory: .
+        env:
+          CURATOR_SESSION_SECRET: ${{ secrets.CURATOR_SESSION_SECRET }}
+        run: python3 -m scripts.architecture.normalize_extractions
 
       - name: Verify and activate independent private mechanical enrichment
         working-directory: .

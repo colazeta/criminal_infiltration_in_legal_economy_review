@@ -1,3 +1,4 @@
+import {readNormalizedExtraction} from './extraction-relations.js';
 /* Owner-authorised display projection, NOT scientific approval or a private API.
    No new persistence: revalidate immutable evidence and derive a closed response. */
 import cycle from '../../config/archive-cycle.json' with {type:'json'};
@@ -128,11 +129,12 @@ export async function readPublicResearch(env,id){
   const db=env.REVIEW_DB;
   const target=await query(db,'SELECT * FROM enrichment_targets WHERE record_id=? AND cycle_id=? AND active=1',id,cycle.review_id).first();
   if(!target)return seal(null,'not_registered');
-  const proposal=await query(db,'SELECT * FROM enrichment_proposals WHERE target_id=? ORDER BY CASE WHEN input_sha256=? THEN 0 ELSE 1 END,created_at DESC,proposal_id DESC LIMIT 1',target.target_id,target.input_sha256).first();
+  let proposal=await query(db,'SELECT * FROM enrichment_proposals WHERE target_id=? ORDER BY CASE WHEN input_sha256=? THEN 0 ELSE 1 END,created_at DESC,proposal_id DESC LIMIT 1',target.target_id,target.input_sha256).first();
   const sources=[];
   if(proposal&&proposal.input_sha256===target.input_sha256){
     try{
-      const input=JSON.parse(proposal.payload_json);
+      const input=await readNormalizedExtraction(db,proposal);
+      proposal={...proposal,payload_json:canonicalJson(input)};
       if(!Array.isArray(input.source_ids)||input.source_ids.length>20)throw Error('source_limit');
       let total=0;
       for(const id of input.source_ids){
@@ -181,7 +183,7 @@ export async function publicIndexSnapshot(env) {
   if(targets.length>10000)throw indexError('index_limit',503);
   const stamps=[];
   // These tables are append-only. The full target/input mapping also detects removals or changed identities.
-  for(const [table,id] of [['enrichment_sources','source_id'],['enrichment_proposals','proposal_id'],['enrichment_adjudication_receipts','receipt_id'],['enrichment_calibration_receipts','calibration_id'],['enrichment_citation_coverage','coverage_id'],['enrichment_citation_observations','observation_id'],['enrichment_documents','document_id'],['enrichment_bibliography_snapshots','bibliography_id']])
+  for(const [table,id] of [['enrichment_normalization_receipts','receipt_id'],['enrichment_sources','source_id'],['enrichment_proposals','proposal_id'],['enrichment_adjudication_receipts','receipt_id'],['enrichment_calibration_receipts','calibration_id'],['enrichment_citation_coverage','coverage_id'],['enrichment_citation_observations','observation_id'],['enrichment_documents','document_id'],['enrichment_bibliography_snapshots','bibliography_id']])
     stamps.push(await query(env.REVIEW_DB,`SELECT COUNT(*) n,MAX(${id}) last FROM ${table}`).first());
   const projection_contract=await sha256(canonicalJson({research:schema,completion:completionSchema,index:indexSchema,policy:completionPolicy}));
   return {targets,revision:await sha256(canonicalJson({deployment:env.DEPLOY_COMMIT||'local-unversioned',projection_contract,targets,stamps}))};

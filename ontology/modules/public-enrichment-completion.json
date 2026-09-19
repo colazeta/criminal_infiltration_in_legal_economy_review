@@ -1,5 +1,5 @@
 {
-  "profile_version": "0.4.1",
+  "profile_version": "0.4.2",
   "projection_version": "CILE-PUBLIC-COMPLETION-1",
   "schema": "schema/public-enrichment-completion.schema.json",
   "schema_class": "PublicationState",

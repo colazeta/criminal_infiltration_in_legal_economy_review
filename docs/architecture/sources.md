@@ -20,7 +20,8 @@ active families; the generated SQL dictionary lists every physical table/column.
 | `discovery_events.csv`, `execution_metrics.csv` under `data/registry/` | Canonical provenance and historical E1–E3 metrics | Governed review operations | Archive/saturation builder | Separate work-level history; current baseline empty |
 | `taxonomy.csv`, `exclusion_reasons.csv`, `secondary_collections.csv` | Controlled codes / definitions | Reviewed contract changes | Validators/curator/builders | Controlled-domain authority |
 | `archive_versions.csv`, `editorial_summary.csv` | Version manifest / aggregate editorial state | Release/curation maintainer | Public builds | Release/aggregate metadata; not candidate or study identity |
-| `PaperEnrichmentStore` SQL (`cile-enrichment-1`) | 22 tables: targets, immutable inputs, sources, jobs/attempts, proposals, studies/analyses, receipts, documents/bibliography | Signed domain operations, private console, Worker schedule; atomic SQLite batches | Private enrichment APIs and closed public projections | Active private enrichment authority; target bibliography is copied from Pages |
+| `PaperEnrichmentStore` SQL (`cile-enrichment-1`) | 38 configured tables; the dated initial census proved 22. Targets, immutable inputs, sources, jobs/attempts, proposals, scoped facts and joins, receipts, documents/bibliography | Signed domain operations, private console, Worker schedule; validated atomic SQLite transactions | Private enrichment APIs and closed public projections use normalized extractions after migration 0007 | Active private enrichment authority; target bibliography is still copied from Pages |
+| Immutable extraction `payload_json` columns | Original closed-schema submissions and child snapshots; proposal ID and content digest | Written atomically once with the normalized graph; old proposals backfilled with a verified receipt | Migration and integrity audit only; ordinary private/public readers reconstruct the graph | Retained input/audit history, no independent mutable current extraction source |
 | Same object's `evidence:*`, `document:*` KV | Chunked private source strings and original PDF bytes; storage key/content digest | Private adapters, readback before SQL reference | Extraction validation, public redacted projection, rights-gated document delivery | Private content authority; document bytes are not in Pages/Git |
 | Same object's schema/activation/nonce/checkpoint keys | Migration digests, exact-deployment activation, one-use nonces, private calibration checkpoints | Store service and schedule | Readiness/authentication/resumption | Operational state; not scientific records |
 | `SubmissionCoordinator` Durable Objects | Submission coordination, idempotency and provider budget usage | Existing curator Worker/coordinator | Curator submission and provider guards | Active operational state; separate from research facts |
@@ -43,7 +44,7 @@ active families; the generated SQL dictionary lists every physical table/column.
   The later owner-authorised provisional register and public support projections
   supersede that statement for their closed allowlists. Notes/evidence stay private.
 - `review-v2-model.md` historically cites profile 0.2.0. The machine normative
-  current profile is 0.4.1; historical text does not select the active storage engine.
+  current profile is 0.4.2; historical text does not select the active storage engine.
 - Source documents have Exa-first historical clauses, while the later two-lane
   owner amendment selects Parallel Search. Preserve the clauses as history and
   apply the later explicit owner amendment; do not infer source rights from a name.

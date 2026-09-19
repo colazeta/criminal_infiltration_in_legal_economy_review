@@ -46,7 +46,8 @@ different analyses do not share an identity by default.
 ```mermaid
 erDiagram
     EnrichmentSource ||--o{ EvidenceSpan : "locates support"
-    ScientificExtractionProposal }o--o{ EvidenceSpan : "is grounded in"
+    ScientificExtractionProposal ||--|{ AnalyticalAnnotation : "scoped assertions"
+    AnalyticalAnnotation }o--o{ EvidenceSpan : "is grounded in"
     ScientificExtractionProposal ||--o| ClinicalContributionProposal : "proposes classes"
     DecisionProposal ||--o| ApprovalReceipt : "exact human approval"
     ApprovalReceipt ||--o| ScreeningDecision : "authorises import"
@@ -70,24 +71,26 @@ does not establish assessment completion, acceptance or corpus membership.
 
 Run `python3 scripts/architecture/catalogue.py` to regenerate:
 
-- `physical-schema.json`: all 55 implemented SQL table definitions, columns,
+- `physical-schema.json`: all 71 implemented SQL table definitions, columns,
   foreign keys, unique/partial indexes, checks in original DDL, append-only
   triggers and source migrations;
-- `traceability.csv`: all 498 columns mapped to existing ontology classes/slots,
+- `traceability.csv`: all 569 columns mapped to existing ontology classes/slots,
   SQL types, primary-key positions, effective nullability and implementation status.
 
 These are schema inventories built in an isolated SQLite database, not claims
-that 55 tables are deployed. The configured enrichment Durable Object uses 22;
+that 71 tables are deployed. The configured enrichment Durable Object uses 38;
 the other 33 belong to prepared V2 storage. Actual counts and schema integrity
 require the authenticated, commit-bound runtime receipt.
 
 The dictionary deliberately exposes ordinary SQLite `TEXT PRIMARY KEY` columns
 that remain nullable without `NOT NULL`, and reference fields without a physical
 foreign key. Code validation is not described as a database constraint. Original
-payload JSON is closed-schema submission evidence, but current repeated facts and
-some dataset/variable/evidence links still live only in that JSON. Normalised,
-queryable relations must become the read/write path; retaining old payloads as
-immutable audit material is compatible with that transition.
+payload JSON is closed-schema submission evidence. Migration 0007 makes repeated
+facts and dataset/variable/evidence links queryable relations. The current writer,
+private reader, adjudication input and public reader use the verified relational
+graph. See [extraction-relations.md](extraction-relations.md) for cardinalities,
+identity, transaction and backfill rules. Dated runtime receipts distinguish
+this configured implementation from migrations actually executed in production.
 
 ## Authority and version rules for the transition
 
@@ -167,7 +170,8 @@ compatible verified release, retain all new events, and apply current withdrawal
 restrictions. Never restore an old public snapshot in isolation from its current
 publication/rights decisions. The completed Git restore is recorded in the
 [implementation record](../operations/architecture-consolidation-2026-09-19.md);
-private-state restoration and authority cutover remain open gates.
+the isolated private-state restoration is now evidenced separately. Production
+replacement recovery and the full authority cutover remain open gates.
 
 The implemented bounded encrypted backup and isolated restore procedure is in
 [preservation.md](preservation.md). Its runtime receipt is required before a

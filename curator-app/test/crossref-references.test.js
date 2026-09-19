@@ -9,7 +9,7 @@ const record = {id:'CAND-REFERENCE-FIXTURE',title:'Synthetic citation fixture',d
 const registry = {schemaVersion:1,records:[record]};
 async function fixture(t, reference, count) {
   const sqlite = new DatabaseSync(':memory:'); t.after(() => sqlite.close()); sqlite.exec('PRAGMA foreign_keys=ON');
-  sqlite.exec(readFileSync(new URL('../migrations/0003_paper_enrichment.sql',import.meta.url),'utf8'));
+  sqlite.exec(readFileSync(new URL('../migrations/0003_paper_enrichment.sql',import.meta.url),'utf8'));sqlite.exec(readFileSync(new URL('../migrations/0007_extraction_relations.sql',import.meta.url),'utf8'));
   const db={prepare(sql){let args=[];return{bind(...values){args=values;return this;},async first(){return sqlite.prepare(sql).get(...args)||null;},async all(){return{results:sqlite.prepare(sql).all(...args)};},async run(){return{meta:{changes:Number(sqlite.prepare(sql).run(...args).changes)}};}};},
     async batch(list){sqlite.exec('BEGIN');try{const out=[];for(const item of list)out.push(await item.run());sqlite.exec('COMMIT');return out;}catch(error){sqlite.exec('ROLLBACK');throw error;}}};
   const objects=new Map(),env={PAPER_ENRICHMENT_ENABLED:'true',CURATOR_LOGIN:'owner',REVIEW_DB:db,

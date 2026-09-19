@@ -1,7 +1,7 @@
 {
   "id": "https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/vocab/cile-review.ttl",
   "name": "cile-review-profile",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "title": "CILE Review Ontology Profile",
   "description": "Application ontology for the Criminal Infiltration in the Legal Economy living systematic review. It profiles SLR Ontology, PROV-O, FaBiO/BIBO, Web Annotation, SKOS and RIPE-O while defining only the domain and governance concepts that are specific to this review.",
   "prefixes": {
@@ -1763,6 +1763,26 @@
       "range": "string",
       "slot_uri": "cile:scheduleOutcome",
       "description": "Attempt lifecycle: running, completed, failed, interrupted or deferred. Terminal attempts are immutable."
+    },
+    "annotation_id": {
+      "slot_uri": "cile:annotationId",
+      "range": "string",
+      "description": "Persistent internal identity of one proposal-scoped analytical assertion."
+    },
+    "annotation_scope": {
+      "slot_uri": "cile:annotationScope",
+      "range": "string",
+      "description": "Closed extraction owner scope, independent of scientific approval."
+    },
+    "annotation_field": {
+      "slot_uri": "cile:annotationField",
+      "range": "string",
+      "description": "Named governed extraction-schema property asserted for its explicit owner."
+    },
+    "annotation_write_kind": {
+      "slot_uri": "cile:annotationWriteKind",
+      "range": "string",
+      "description": "Native validated write or mechanical backfill; never a scientific decision."
     }
   },
   "enums": {
@@ -2624,6 +2644,21 @@
         "schedule_outcome",
         "enrichment_run_id",
         "enrichment_error_code"
+      ]
+    },
+    "AnalyticalAnnotation": {
+      "is_a": "Entity",
+      "class_uri": "oa:Annotation",
+      "description": "A proposal-scoped analytical assertion about an explicitly identified study, dataset, analysis, variable, finding or extraction field. Its epistemic status and source/analyst origin do not constitute scientific acceptance.",
+      "slots": [
+        "annotation_id",
+        "annotation_scope",
+        "annotation_field",
+        "enrichment_proposal_id",
+        "extraction_status",
+        "extraction_value",
+        "extraction_origin",
+        "extraction_evidence_span_ids"
       ]
     }
   },

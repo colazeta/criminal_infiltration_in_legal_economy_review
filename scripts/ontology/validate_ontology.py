@@ -106,7 +106,7 @@ def enum_values(profile: dict[str, Any], enum_name: str) -> set[str]:
 
 
 def check_profile(profile: dict[str, Any], external: dict[str, Any]) -> None:
-    if profile.get("version") != "0.4.1":
+    if profile.get("version") != "0.4.2":
         fail(f"unexpected_profile_version:{profile.get('version')}")
     prefixes = profile.get("prefixes")
     classes = profile.get("classes")
@@ -270,7 +270,7 @@ def check_serialisations(profile: dict[str, Any]) -> None:
     if source != PUBLIC_TTL_PATH.read_text(encoding="utf-8"):
         fail("public_ontology_turtle_drift")
     for marker in (
-        'owl:versionInfo "0.4.1"', "cile:ScholarlyWork a owl:Class",
+        'owl:versionInfo "0.4.2"', "cile:ScholarlyWork a owl:Class",
         "cile:Manifestation a owl:Class", "cile:ScreeningDecision a owl:Class",
         "cile:AccessAssessment a owl:Class", "skos:relatedMatch fabio:Work",
         "skos:relatedMatch ripe:Answer",
@@ -403,6 +403,32 @@ def check_private_v2_contract(profile: dict[str, Any]) -> None:
                 fail(f"missing_append_only_guard:{table}:{action}")
     if "slr:IncludedSource" in profile["classes"]["ScholarlyWork"].get("exact_mappings", []):
         fail("work_is_not_an_inclusion")
+    connection.close()
+
+
+def check_extraction_relations(profile: dict[str, Any]) -> None:
+    module = load_json(ROOT / 'ontology/modules/extraction-relations.json')
+    if module['profile_version'] != profile['version']:
+        fail('extraction_relations_profile_mismatch')
+    connection = sqlite3.connect(':memory:')
+    for path in sorted((ROOT / 'curator-app/migrations').glob('*.sql')):
+        connection.executescript(path.read_text())
+    for table, mapping in module['tables'].items():
+        if mapping['class'] not in profile['classes']:
+            fail('extraction_relation_class_unmapped')
+        fields = {row[1] for row in connection.execute(f'PRAGMA table_info({table})')}
+        if fields != set(mapping['fields']) or set(mapping['fields'].values()) - set(profile['slots']):
+            fail('extraction_relation_field_unmapped:' + table)
+        for action in ['update', 'delete']:
+            if not connection.execute("SELECT 1 FROM sqlite_master WHERE type='trigger' AND name=?", (f'{table}_no_{action}',)).fetchone():
+                fail('extraction_relation_history_unprotected:' + table)
+    schema = load_json(ROOT / 'schema/paper-enrichment.schema.json')
+    definitions = {'overview': schema['properties'], 'studies': schema['$defs']['study']['properties'],
+                   'datasets': schema['$defs']['dataset']['properties'], 'analyses': schema['$defs']['analysis']['properties'],
+                   'variable_uses': schema['$defs']['variable_use']['properties'], 'findings': schema['$defs']['finding']['properties']}
+    for scope, props in definitions.items():
+        if set(module['fact_fields'][scope]) != {k for k, v in props.items() if v.get('$ref') == '#/$defs/fact'}:
+            fail('extraction_fact_coverage_mismatch:' + scope)
     connection.close()
 
 
@@ -586,6 +612,7 @@ def validate_all(*, quiet: bool = False) -> dict[str, int | str]:
     check_profile(profile, external)
     check_private_v2_contract(profile)
     check_enrichment_contract(profile)
+    check_extraction_relations(profile)
     check_public_research_contract(profile)
     check_delivery_contract(profile)
     check_surveillance_source_policy(profile)

@@ -11,7 +11,7 @@ ROOT = Path(__file__).resolve().parents[2]
 def catalogue(root=ROOT):
     profile = json.loads((root / 'ontology/cile-review-profile.yaml').read_text())
     contracts = {}
-    for module in ['review-v2', 'enrichment-adjudication', 'enrichment-delivery-assets']:
+    for module in ['review-v2', 'enrichment-adjudication', 'enrichment-delivery-assets', 'extraction-relations']:
         contracts.update(json.loads((root / f'ontology/modules/{module}.json').read_text())['tables'])
     db = sqlite3.connect(':memory:')
     db.row_factory = sqlite3.Row
@@ -68,7 +68,7 @@ def write(root=ROOT):
     physical, trace = catalogue(root)
     (output / 'physical-schema.json').write_text(json.dumps(physical, indent=2) + '\n')
     with (output / 'traceability.csv').open('w', newline='') as handle:
-        writer = csv.DictWriter(handle, fieldnames=list(trace[0]))
+        writer = csv.DictWriter(handle, fieldnames=list(trace[0]), lineterminator='\n')
         writer.writeheader()
         writer.writerows(trace)
     print(json.dumps({'tables': len(physical['tables']), 'columns': len(trace),

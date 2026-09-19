@@ -64,7 +64,8 @@ SQL rows, reviewer identities, notes, raw errors or credentials.
 
 The workflow restores the captured file into a new in-memory SQLite database with
 the same repository migrations and a new isolated KV adapter. It inserts all rows
-in one deferred-foreign-key transaction, reopens the existing storage core with
+in dependency order inside one deferred-foreign-key transaction, preserving all
+SQL triggers and constraints, and reopens the existing storage core with
 all research execution disabled, and runs the complete architecture audit.
 It checks every historical source/document hash, target identity/input link,
 proposal relation, current public projection, and SQL state/schema digest. It

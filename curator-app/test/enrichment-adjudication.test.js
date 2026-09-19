@@ -1,3 +1,4 @@
+import {nativeAdapter} from './sqlite-adapter-fixture.js';
 import {importBibliography} from '../src/enrichment-assets.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
@@ -11,9 +12,9 @@ const now=Date.parse('2026-09-14T09:00:00Z');
 const head='a'.repeat(40);
 function setup(){
   const sqlite=new DatabaseSync(':memory:');sqlite.exec('PRAGMA foreign_keys=ON');
-  sqlite.exec(readFileSync(new URL('../migrations/0003_paper_enrichment.sql',import.meta.url),'utf8'));
+  sqlite.exec(readFileSync(new URL('../migrations/0003_paper_enrichment.sql',import.meta.url),'utf8'));sqlite.exec(readFileSync(new URL('../migrations/0007_extraction_relations.sql',import.meta.url),'utf8'));
   sqlite.exec(readFileSync(new URL('../migrations/0005_enrichment_adjudication.sql',import.meta.url),'utf8'));sqlite.exec(readFileSync(new URL('../migrations/0006_enrichment_delivery_assets.sql',import.meta.url),'utf8'));
-  const db={sqlite,prepare(sql){let v=[];return{bind(...a){v=a;return this},async first(){return sqlite.prepare(sql).get(...v)||null},async all(){return{results:sqlite.prepare(sql).all(...v)}},async run(){return{meta:{changes:Number(sqlite.prepare(sql).run(...v).changes)}}}}},async batch(ss){sqlite.exec('BEGIN');try{const r=[];for(const s of ss)r.push(await s.run());sqlite.exec('COMMIT');return r}catch(e){sqlite.exec('ROLLBACK');throw e}}};
+ const db=nativeAdapter(sqlite);
   const evidence=new Map(),env={REVIEW_DB:db,REVIEW_EVIDENCE:{async put(k,v){evidence.set(k,v)},async get(k){return evidence.has(k)?{async text(){return evidence.get(k)}}:null}},GITHUB_REPOSITORY:'colazeta/test',GITHUB_TOKEN:'token',CURATOR_LOGIN:'owner'};
   return{sqlite,db,evidence,env};
 }

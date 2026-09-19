@@ -1,5 +1,5 @@
 {
-  "profile_version": "0.4.1",
+  "profile_version": "0.4.2",
   "review_scope": "v2_only",
   "assignment_policy": "multi_label_human_evidence_required",
   "legacy_recoding": false,
