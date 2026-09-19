@@ -22,7 +22,7 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Read aggregate storage usage without accessing archive contents
+      - name: Read schema-discovered aggregate storage usage without archive contents
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}

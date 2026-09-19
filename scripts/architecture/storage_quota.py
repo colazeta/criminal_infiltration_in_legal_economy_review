@@ -33,10 +33,15 @@ def query(text):
     return value['data']
 
 
+_stage = 'initialise'
+
 def fields(name):
     if not re.fullmatch(r'[A-Za-z][A-Za-z0-9_]{0,150}', name):
         raise RuntimeError('quota_schema_invalid')
-    value = query('{__type(name:' + json.dumps(name) + '){fields{name type{kind name ofType{kind name ofType{kind name}}}}}}').get('__type')
+    type_ref = 'kind name'
+    for _ in range(7):
+        type_ref = 'kind name ofType{' + type_ref + '}'
+    value = query('{__type(name:' + json.dumps(name) + '){fields{name type{' + type_ref + '}}}}').get('__type')
     if not isinstance(value, dict) or not isinstance(value.get('fields'), list):
         raise RuntimeError('quota_schema_unavailable')
     return value['fields']
@@ -44,22 +49,29 @@ def fields(name):
 
 def named(field):
     value = field['type']
-    while not value.get('name'):
-        value = value['ofType']
-    return value['name']
+    for _ in range(8):
+        if isinstance(value, dict) and value.get('name'):
+            return value['name']
+        value = value.get('ofType') if isinstance(value, dict) else None
+    raise RuntimeError('quota_type_wrapper_unavailable')
 
 
 def observe():
+    global _stage
+    _stage = 'account_resolution'
     account = resolve_account()
     if not re.fullmatch(r'[a-f0-9]{32}', account):
         raise RuntimeError('quota_account_unavailable')
+    _stage = 'query_root'
     root = query('{__schema{queryType{name}}}')['__schema']['queryType']['name']
     def child(parent, name):
         found = next((f for f in fields(parent) if f['name'] == name), None)
         if not found:
             raise RuntimeError('quota_schema_unavailable')
         return named(found)
+    _stage = 'account_type'
     account_type = child(child(root, 'viewer'), 'accounts')
+    _stage = 'dataset_selection'
     available = fields(account_type)
     # Runtime introspection supplies case-sensitive names; do not guess Account.
     # SQL storage and legacy KV metrics are separate datasets when both exist.
@@ -68,6 +80,7 @@ def observe():
     if not dataset:
         raise RuntimeError('quota_dataset_unavailable')
     dataset_name = dataset['name']
+    _stage = 'metric_selection'
     groups = fields(named(dataset))
     aggregate = next((f for f in groups if f['name'] == 'sum'), None)
     if not aggregate:
@@ -78,7 +91,9 @@ def observe():
     if not selected:
         raise RuntimeError('quota_metrics_unavailable')
     day = dt.datetime.now(dt.timezone.utc).date().isoformat()
+    _stage = 'aggregate_read'
     data = query('{viewer{accounts(filter:{accountTag:' + json.dumps(account) + '}){' + dataset_name + '(limit:1,filter:{datetime_geq:' + json.dumps(day + 'T00:00:00Z') + '}){sum{' + ' '.join(selected) + '}}}}}')
+    _stage = 'aggregate_validation'
     totals = data['viewer']['accounts'][0][dataset_name]
     if not totals:
         raise RuntimeError('quota_measurement_unavailable')
@@ -96,4 +111,6 @@ if __name__ == '__main__':
         safe = {'quota_credential_unavailable', 'quota_account_unavailable', 'quota_transport_unavailable',
                 'quota_query_not_authorised_or_supported', 'quota_metrics_unavailable', 'quota_measurement_unavailable',
                 'quota_schema_unavailable', 'quota_dataset_unavailable'}
-        raise SystemExit(str(error) if str(error) in safe else 'quota_diagnostic_unavailable') from None
+        category = str(error) if str(error) in safe else 'quota_diagnostic_unavailable'
+        print(json.dumps({'diagnostic': category, 'stage': _stage, 'exception_type': type(error).__name__ if type(error).__name__ in {'RuntimeError','KeyError','IndexError','TypeError','StopIteration'} else 'other'}))
+        raise SystemExit(1) from None
