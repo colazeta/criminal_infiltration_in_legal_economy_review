@@ -1118,14 +1118,15 @@
     {
       "id": "CAND-ACADEMIC-2026-09-09-EXTRA-6b5b5e038ac4-017",
       "title": "Transition management strategies of confiscated mafia-type firms: the role of public administrations and nonprofit organizations",
-      "authors": "",
+      "authors": "Marco Bisogno",
       "year": 2023,
       "venue": "Journal of Public Budgeting, Accounting & Financial Management 35(6):121–139",
       "doi": "10.1108/jpbafm-03-2023-0041",
       "sourceLinks": [
-        "https://www.emerald.com/jpbafm/article/35/6/121/234108/Transition-management-strategies-of-confiscated"
+        "https://www.emerald.com/jpbafm/article/35/6/121/234108/Transition-management-strategies-of-confiscated",
+        "https://api.crossref.org/works/10.1108%2FJPBAFM-03-2023-0041"
       ],
-      "metadataStatus": "metadata_partial",
+      "metadataStatus": "metadata_verified",
       "reviewStatus": "pending",
       "accessStatus": "unknown",
       "registeredAt": "2026-09-11",
@@ -1182,14 +1183,15 @@
     {
       "id": "CAND-ACADEMIC-2026-09-09-EXTRA-6b5b5e038ac4-021",
       "title": "Mapping Organized Crime as a Stakeholder: A Risk-Based and Responsive Governance Perspective",
-      "authors": "",
-      "year": null,
+      "authors": "Giovanni Scirè; Enzo Bivona",
+      "year": 2026,
       "venue": "Regulation & Governance",
       "doi": "10.1111/rego.70194",
       "sourceLinks": [
-        "https://onlinelibrary.wiley.com/doi/full/10.1111/rego.70194"
+        "https://onlinelibrary.wiley.com/doi/full/10.1111/rego.70194",
+        "https://api.crossref.org/works/10.1111%2Frego.70194"
       ],
-      "metadataStatus": "metadata_partial",
+      "metadataStatus": "metadata_verified",
       "reviewStatus": "pending",
       "accessStatus": "unknown",
       "registeredAt": "2026-09-11",
@@ -1573,9 +1575,10 @@
       "venue": "M@n@gement",
       "doi": "",
       "sourceLinks": [
-        "https://management-aims.com/index.php/mgmt/article/view/3955"
+        "https://management-aims.com/index.php/mgmt/article/view/3955",
+        "https://management-aims.com/index.php/mgmt/article/download/3955/9677"
       ],
-      "metadataStatus": "metadata_partial",
+      "metadataStatus": "metadata_verified",
       "reviewStatus": "pending",
       "accessStatus": "unknown",
       "registeredAt": "2026-09-09",
