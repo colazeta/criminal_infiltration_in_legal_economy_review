@@ -391,3 +391,12 @@ jobs:
             sudo apt-get install -y --no-install-recommends poppler-utils
           fi
           python3 -m scripts.enrichment.retain_document
+
+
+      - name: Reindex retained documents and audit verified coverage
+        working-directory: .
+        env:
+          CURATOR_SESSION_SECRET: ${{ secrets.CURATOR_SESSION_SECRET }}
+        run: |
+          python3 -m scripts.enrichment.document_coverage --expected-commit "$GITHUB_SHA" --pages 20 --reindex --output "$RUNNER_TEMP/cile-document-backfill.json"
+          python3 -m scripts.enrichment.document_coverage --expected-commit "$GITHUB_SHA" --pages 20 --output "$RUNNER_TEMP/cile-document-coverage-after.json"

@@ -146,7 +146,7 @@ not waive it or claim that 294 full texts fit it. A measured, reviewed extension
 of the backup protocol is needed if `document_preservation_capacity` occurs.
 Local synthetic tests do not establish production latency or capacity.
 
-Use the existing signed-service environment and an exact deployed commit.
+The existing deployment workflow runs a bounded legacy reindex and final coverage audit after its preservation, migration, activation and retention steps. Detailed inventories remain in private temporary files; only aggregate counts and blocker totals are logged. For a manual/resumed audit, use the existing signed-service environment and an exact deployed commit.
 Write the private inventory outside the public checkout:
 
 ```sh

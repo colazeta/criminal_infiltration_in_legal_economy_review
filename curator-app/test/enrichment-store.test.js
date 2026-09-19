@@ -56,4 +56,7 @@ test('public research audit is authenticated, read-only and independent of activ
  assert.equal((await publicResponse.json()).availability,'not_registered');
  const completion=await core.fetch(new Request('https://enrichment.internal/public-completion?id=CAND-UNKNOWN'));
  const projected=await completion.json();assert.equal(projected.completed,false);assert.equal(projected.status,'not_registered');
+ const inventory=await core.machine(await request({operation:'document-coverage',checkpoint:{limit:25}}));
+ assert.equal(inventory.status,200,'Signed read-only document audit remains available while inactive');
+ assert.equal((await inventory.json()).private_inventory_observed,true);
 });

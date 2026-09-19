@@ -74,9 +74,11 @@ def run(expected_commit, *, offset=0, pages=1, reindex=False, revision=None, ser
                             document_id=row['document_id'], document=attestation)
                     row = {**row, 'backfill_status': 'indexed_and_verified'}
                 except Exception as error:
-                    code = str(error)
+                    code = str(error).rsplit(':', 1)[-1]
                     allowed = {'document_legacy_extraction_differs', 'document_ocr_required',
-                               'document_parser_failed', 'document_extraction_quality_failed'}
+                               'document_parser_failed', 'document_extraction_quality_failed',
+                               'document_preservation_capacity', 'document_inventory_changed',
+                               'document_integrity_failure', 'document_source_integrity'}
                     row = {**row, 'backfill_status': 'blocked',
                            'backfill_blocker': code if code in allowed else 'document_backfill_failed'}
             results.append(row)
@@ -110,7 +112,9 @@ def main():
     with os.fdopen(fd, 'w') as out:
         json.dump(report, out, ensure_ascii=False)
     print(json.dumps({'private_report_written': True, 'records': len(report['records']),
-                      'next_offset': report['next_offset'], 'complete_inventory': report['complete_inventory']}))
+                      'next_offset': report['next_offset'], 'complete_inventory': report['complete_inventory'],
+                      'counts': report['counts'],
+                      'blocked_reindex_records': sum(r.get('backfill_status') == 'blocked' for r in report['records'])}))
 
 
 if __name__ == '__main__':

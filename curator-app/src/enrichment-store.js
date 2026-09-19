@@ -292,6 +292,14 @@ export class EnrichmentStoreCore {
       if(data.operation==='completion-packet')return json(await completionPacket(env,data.target_id));
       if(data.operation==='calibration-approval')return json(await importCalibrationApproval(env,{calibration_id:data.calibration_id,pr_number:data.pr_number},undefined,now),201);
       if(data.operation==='completion-approval')return json(await importCompletionApproval(env,{target_id:data.target_id,pr_number:data.pr_number},undefined,now),201);
+      if(data.operation==='document-coverage')return json(await coveragePage(env,data.checkpoint||{}));
+      if(data.operation==='document-packet'){
+        const target=await this.db.prepare('SELECT * FROM enrichment_targets WHERE target_id=? AND active=1').bind(data.target_id).first();
+        if(!target)return json({error_code:'target_not_found'},404);
+        const v=await checkedDocument(env,target,data.document_id);
+        let encoded='';for(let i=0;i<v.bytes.length;i+=8192)encoded+=String.fromCharCode(...v.bytes.subarray(i,i+8192));
+        return json({document:v.document,text:v.text,bytes_base64:btoa(encoded)});
+      }
       if(env.PAPER_ENRICHMENT_ENABLED!=='true')return json({error_code:'enrichment_inactive'},409);
       if(data.operation==='development-checkpoint-get')return json(await readDevelopmentCheckpoint(this.evidence,data.checkpoint));
       if(data.operation==='development-checkpoint-put')return json(await writeDevelopmentCheckpoint(this.evidence,data.checkpoint),201);
@@ -316,14 +324,6 @@ export class EnrichmentStoreCore {
       if(data.operation==='source')return handlePaperEnrichment(new Request('https://enrichment.internal/api/paper-enrichment/source?id='+encodeURIComponent(data.target_id),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data.source)}),env,{login:env.CURATOR_LOGIN});
       if(data.operation==='document')return json(await retainAndIndex(env,data.target_id,data.document,now),201);
       if(data.operation==='document-index')return json(await indexDocument(env,data.target_id,data.document_id,data.document,now));
-      if(data.operation==='document-coverage')return json(await coveragePage(env,data.checkpoint||{}));
-      if(data.operation==='document-packet'){
-        const target=await this.db.prepare('SELECT * FROM enrichment_targets WHERE target_id=? AND active=1').bind(data.target_id).first();
-        if(!target)return json({error_code:'target_not_found'},404);
-        const v=await checkedDocument(env,target,data.document_id);
-        let encoded='';for(let i=0;i<v.bytes.length;i+=8192)encoded+=String.fromCharCode(...v.bytes.subarray(i,i+8192));
-        return json({document:v.document,text:v.text,bytes_base64:btoa(encoded)});
-      }
       if(data.operation==='documents')return json({documents:await listDocuments(env,data.target_id)});
       if(data.operation==='document-check'){const r=await documentResponse(env,data.target_id,data.document_id,new Request('https://enrichment.internal/document',{method:'HEAD'}));return json({readable:r.ok,byte_length:Number(r.headers.get('Content-Length')),etag:r.headers.get('ETag'),content_type:r.headers.get('Content-Type'),scope:'authenticated_reader_route_bytes_checked'})}
       if(data.operation==='provider-bibliography')return json(await retainProviderBibliography(env,data.target_id,now));
