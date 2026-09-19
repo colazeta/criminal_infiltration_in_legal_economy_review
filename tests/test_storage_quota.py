@@ -10,10 +10,10 @@ class StorageQuotaTest(unittest.TestCase):
             return {'name': name, 'type': {'name': kind}}
         with patch.dict(os.environ, {'CLOUDFLARE_ACCOUNT_ID': 'a' * 32}), patch.object(
                 quota, 'fields', side_effect=[
-                    [field('durableObjectsStorageGroups', 'Groups')], [field('sum', 'Sum')],
+                    [field('viewer','viewer')], [field('accounts','account')], [field('durableObjectsSqlStorageGroups', 'Groups')], [field('sum', 'Sum')],
                     [field('sqlRowsRead', 'UInt64'), field('sqlRowsWritten', 'UInt64'), field('privateNote', 'String')]
-                ]), patch.object(quota, 'query', return_value={'viewer': {'accounts': [{'durableObjectsStorageGroups': [
-                    {'sum': {'sqlRowsRead': 5000000, 'sqlRowsWritten': 42000}}]}]}}) as call:
+                ]), patch.object(quota, 'query', side_effect=[{'__schema':{'queryType':{'name':'query'}}}, {'viewer': {'accounts': [{'durableObjectsSqlStorageGroups': [
+                    {'sum': {'sqlRowsRead': 5000000, 'sqlRowsWritten': 42000}}]}]}}]) as call:
             out = quota.observe()
             self.assertEqual(out['metrics']['sqlRowsRead'], 5000000)
             self.assertFalse(out['billing_changed'])
