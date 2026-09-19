@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {setup,request} from './enrichment-store.test.js';
 import {syncTargets,saveSource} from '../src/paper-enrichment.js';
 import {auditArchitecture} from '../src/architecture-audit.js';
+import {sha256} from '../src/review-v2.js';
 
 const record={id:'CAND-AUDIT-001',title:'Synthetic architecture fixture',doi:'',sourceLinks:['https://example.org/audit']};
 async function fixture(){const x=setup();await x.core.ready;x.runtime=await x.core.environment();await syncTargets(x.runtime,{schemaVersion:1,records:[record]},Date.now());x.target=x.db.prepare('SELECT * FROM enrichment_targets').get();return x}
@@ -42,6 +43,15 @@ test('known Cloudflare KV tables are accessed through adapters and do not masque
 test('disabled foreign keys are a failed integrity gate',async()=>{
  const x=await fixture();x.db.exec('PRAGMA foreign_keys=OFF');
  const r=await auditArchitecture(x.runtime);assert.equal(r.integrity_verified,false);assert.equal(r.issues.foreign_keys_disabled,1);
+});
+test('schema census reveals only public names and hashes unknown private names',async()=>{
+ const x=await fixture();x.db.exec('CREATE TABLE private_unmapped_name(secret TEXT); CREATE TABLE scholarly_works(work_id TEXT)');
+ const response=await x.core.machine(await request({operation:'architecture-schema'}));assert.equal(response.status,200);
+ const census=await response.json();assert.equal(census.expected_present.length,22);
+ assert.deepEqual(census.expected_missing,[]);assert.deepEqual(census.other_mapped_present,['scholarly_works']);
+ assert.deepEqual(census.unknown_table_sha256,[await sha256('private_unmapped_name')]);
+ assert.ok(!JSON.stringify(census).includes('private_unmapped_name'));
+ assert.equal((await x.core.machine(new Request('https://enrichment.internal/machine',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({operation:'architecture-schema'})}))).status,401);
 });
 test('concurrent data change cannot be certified as a single archive revision',async()=>{
  const x=await fixture();await saveSource(x.runtime,x.target,{provider:'Fixture',source_url:'https://example.org/audit',evidence_kind:'metadata',text:'Fixture'},Date.now());

@@ -8,6 +8,7 @@ import schedule from './enrichment-schedule-migration.json' with {type:'json'};
 import adjudication from './enrichment-adjudication-migration.json' with {type:'json'};
 import delivery from './enrichment-delivery-migration.json' with {type:'json'};
 import cycle from '../../config/archive-cycle.json' with {type:'json'};
+import logical from '../../ontology/modules/review-v2.json' with {type:'json'};
 
 const LIMIT=100000;
 const EXPECTED=[base,schedule,adjudication,delivery].flatMap(m=>[...m.sql.matchAll(/CREATE TABLE(?: IF NOT EXISTS)? (\w+)/g)].map(x=>x[1])).sort();
@@ -15,6 +16,21 @@ const CHILDREN={studies:['study_id'],datasets:['dataset_id','study_id'],analyses
 const S=(db,sql,...values)=>db.prepare(sql).bind(...values);
 const rows=async(db,sql,...values)=>(await S(db,sql,...values).all()).results;
 const stableRows=values=>[...values].sort((a,b)=>canonicalJson(a).localeCompare(canonicalJson(b),'en'));
+
+// Diagnostic names come only from the public ontology/migration allowlist.
+// An unexpected private table name is represented by a digest, never returned.
+export async function architectureSchema(env){
+  const schema=await rows(env.REVIEW_DB,"SELECT type,name,tbl_name,sql FROM sqlite_master WHERE name NOT GLOB 'sqlite_*' ORDER BY type,name");
+  const names=schema.filter(r=>r.type==='table').map(r=>r.name).sort();
+  const platform=['__cf_kv','_cf_KV','_cf_EXTERNALS'];
+  const known=new Set([...Object.keys(logical.tables),...EXPECTED,...platform]);
+  return {contract:'CILE-ARCHITECTURE-SCHEMA-1',commit:env.DEPLOY_COMMIT,
+    expected_present:EXPECTED.filter(n=>names.includes(n)),expected_missing:EXPECTED.filter(n=>!names.includes(n)),
+    other_mapped_present:names.filter(n=>known.has(n)&&!EXPECTED.includes(n)&&!platform.includes(n)),
+    platform_present:platform.filter(n=>names.includes(n)),
+    unknown_table_sha256:await Promise.all(names.filter(n=>!known.has(n)).map(n=>sha256(n))),
+    schema_sha256:await sha256(canonicalJson(schema)),private_content_exported:false};
+}
 
 async function databaseSnapshot(db){
   // Cloudflare's documented __cf_kv and workerd's _cf_KV/_cf_EXTERNALS are
