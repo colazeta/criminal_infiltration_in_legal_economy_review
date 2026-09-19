@@ -1431,6 +1431,105 @@
       ],
       "checked_at": "2026-09-19",
       "basis": "The January 1990 digitised report title page identifies Herbert Edelhertz and Thomas D. Overcast, the National Institute of Justice as commissioning body and the Northwest Policy Studies Center as preparing institution. The OJP/NCJRS catalogue independently confirms NCJ 124019, both authors, 1990 and the 128-page report. This declaration repairs the title, authorship, institutional venue, report type and durable source provenance only; it makes no identity reconciliation, eligibility, framework, completion, validation, rights or publication decision."
+    },
+    {
+      "candidate_id": "CAND-ACADEMIC-2026-09-09-EXTRA-6b5b5e038ac4-017",
+      "expected": {
+        "title": "Transition management strategies of confiscated mafia-type firms: the role of public administrations and nonprofit organizations",
+        "doi": "10.1108/jpbafm-03-2023-0041",
+        "authors": "",
+        "year": "2023",
+        "venue": "Journal of Public Budgeting, Accounting & Financial Management 35(6):121–139",
+        "verification_status": "metadata_partial",
+        "metadata_confidence": "",
+        "review_stage": "metadata_fix",
+        "current_status": "pending",
+        "current_decision": "",
+        "possible_duplicate": "",
+        "metadata_conflict": ""
+      },
+      "replacement": {
+        "authors": "Marco Bisogno",
+        "source_links": "https://www.emerald.com/jpbafm/article/35/6/121/234108/Transition-management-strategies-of-confiscated; https://api.crossref.org/works/10.1108%2FJPBAFM-03-2023-0041"
+      },
+      "evidence": [
+        {
+          "role": "primary_metadata",
+          "url": "https://www.emerald.com/jpbafm/article/35/6/121/234108/Transition-management-strategies-of-confiscated"
+        },
+        {
+          "role": "identifier_registry",
+          "url": "https://api.crossref.org/works/10.1108%2FJPBAFM-03-2023-0041"
+        }
+      ],
+      "checked_at": "2026-09-19",
+      "basis": "Emerald identifies Marco Bisogno as the author of the exact article manifestation in Journal of Public Budgeting, Accounting & Financial Management, volume 35 issue 6, pages 121–139. Crossref independently confirms the author, DOI, journal placement and 2023 dates, distinguishing online publication on 3 July 2023 from the print issue dated 18 December 2023. This declaration repairs authorship and durable source provenance only; it makes no identity reconciliation, eligibility, framework, completion, validation, rights or publication decision."
+    },
+    {
+      "candidate_id": "CAND-ACADEMIC-2026-09-09-EXTRA-6b5b5e038ac4-021",
+      "expected": {
+        "title": "Mapping Organized Crime as a Stakeholder: A Risk-Based and Responsive Governance Perspective",
+        "doi": "10.1111/rego.70194",
+        "authors": "",
+        "year": "",
+        "venue": "Regulation & Governance",
+        "verification_status": "metadata_partial",
+        "metadata_confidence": "",
+        "review_stage": "metadata_fix",
+        "current_status": "pending",
+        "current_decision": "",
+        "possible_duplicate": "",
+        "metadata_conflict": ""
+      },
+      "replacement": {
+        "authors": "Giovanni Scirè; Enzo Bivona",
+        "year": "2026",
+        "source_links": "https://onlinelibrary.wiley.com/doi/full/10.1111/rego.70194; https://api.crossref.org/works/10.1111%2Frego.70194"
+      },
+      "evidence": [
+        {
+          "role": "primary_metadata",
+          "url": "https://onlinelibrary.wiley.com/doi/full/10.1111/rego.70194"
+        },
+        {
+          "role": "identifier_registry",
+          "url": "https://api.crossref.org/works/10.1111%2Frego.70194"
+        }
+      ],
+      "checked_at": "2026-09-19",
+      "basis": "Wiley identifies Giovanni Scirè and Enzo Bivona as authors of the exact Regulation & Governance article and records first publication on 24 July 2026. Crossref independently confirms both authors, the DOI, journal, online-publication date and article number rego.70194. This declaration repairs authorship, publication year and durable source provenance only; it makes no identity reconciliation, eligibility, framework, completion, validation, rights or publication decision."
+    },
+    {
+      "candidate_id": "CAND-ACADEMIC-2026-09-09-EXTRA-8e1caef4c376-002",
+      "expected": {
+        "title": "Identification and Economic Analysis of Governance Mechanisms in Legally Registered Mafia Firms",
+        "doi": "",
+        "authors": "Valérie Duplat; Philippe Véry; Bertrand Monnet",
+        "year": "2012",
+        "venue": "M@n@gement",
+        "verification_status": "metadata_partial",
+        "metadata_confidence": "",
+        "review_stage": "metadata_fix",
+        "current_status": "pending",
+        "current_decision": "",
+        "possible_duplicate": "",
+        "metadata_conflict": ""
+      },
+      "replacement": {
+        "source_links": "https://management-aims.com/index.php/mgmt/article/view/3955; https://management-aims.com/index.php/mgmt/article/download/3955/9677"
+      },
+      "evidence": [
+        {
+          "role": "primary_metadata",
+          "url": "https://management-aims.com/index.php/mgmt/article/view/3955"
+        },
+        {
+          "role": "published_content_version",
+          "url": "https://management-aims.com/index.php/mgmt/article/download/3955/9677"
+        }
+      ],
+      "checked_at": "2026-09-19",
+      "basis": "The journal article record identifies Valérie Duplat, Philippe Very and Bertrand Monnet, publication on 1 September 2012, M@n@gement volume 15 issue 3 and pages 273–282. The published PDF independently carries the same title, authors, year, volume, issue and pagination and states that M@n@gement is a double-blind refereed journal. The existing queue spelling Philippe Véry is retained rather than silently normalised. This declaration repairs durable article-record and content-version provenance only; it makes no identity reconciliation, eligibility, framework, completion, validation, rights or publication decision."
     }
   ]
 }
