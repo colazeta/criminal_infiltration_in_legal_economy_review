@@ -31,6 +31,11 @@
       "identity_debt_due": false
       "engineering_blocker": false
       "repeat_without_changed_prerequisite": false
+      "identity_preflight_evidence":
+        "pending_observation_count": 1
+        "oldest_pending_age_seconds": 3600
+        "activity_kind": "new_research"
+        "evidence_ref": "synthetic:B-complete"
       "frontier_gate": "F2_PROPOSAL_PERSISTED"
       "next_gate": "F3_INDEPENDENT_COMPARISON"
       "frontier_consistent": true

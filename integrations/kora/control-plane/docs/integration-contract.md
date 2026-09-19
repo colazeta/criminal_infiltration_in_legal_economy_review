@@ -43,11 +43,44 @@ An attestation for one route cannot authorize the other. Without a blocker,
 the existing SCOUT/PERSIST order is unchanged. These are operational input
 attestations, not scientific decisions, claim receipts, or write permissions.
 
-The existing `identity_debt_due` field still does not distinguish ordinary
-identity debt from the mandatory age/count starvation guard, or new research
-from an in-flight assessment gate. The corresponding replay probes remain
-unresolved pending an explicit contract decision; no precedence change is
-silently inferred from this boolean.
+Owner clarification, 19 September 2026: the mandatory identity starvation guard
+pre-empts executable COMPLETE only when it would **open new research**. It does
+not interrupt work already in progress or non-research work. SCOUT, PERSIST,
+applicable frontier/WIP blockers, writer availability and anti-repeat checks
+retain precedence. F3 does not imply new research.
+
+The router's pure preflight computes `identity_starvation_status` from optional
+`identity_preflight_evidence`, never from `identity_debt_due` or a caller-supplied
+decision flag. The caller supplies these observations for the same preflight:
+
+- `pending_observation_count`: nonnegative integer; absent/null means unknown;
+- `oldest_pending_age_seconds`: nonnegative age of the oldest still-pending
+  observation at preflight time; absent/null means unknown or not applicable for
+  an explicitly empty queue;
+- `activity_kind`: `new_research`, `in_progress`, `non_research`, or `unknown`,
+  describing the work that COMPLETE would actually start, independently of its gate;
+- `evidence_ref`: nonempty opaque reference to the evidence supporting these
+  observations and activity classification. Never embed private content or secrets.
+
+`required` means new research and age >=86400 seconds OR count >=20.
+Either positively established threshold suffices; the other may be unknown.
+`not_required` means evidenced in-progress/non-research activity, or new research
+with both thresholds observed below limit, or an explicitly empty queue.
+An empty queue with a supplied pending observation age is contradictory.
+Missing provenance, unknown activity, insufficient or contradictory queue
+evidence produces `undetermined`, not false. Before an otherwise executable
+COMPLETE, `required` selects RESOLVE and `undetermined` selects BLOCKED.
+The decision includes the tri-state and its reason even when a prior route wins.
+No new-research permission follows from missing evidence. `identity_debt_due`
+retains only the existing lower-priority ordinary-debt routing role.
+
+This observe-only pilot computes over supplied evidence; it does not collect
+queue data, verify referenced records, or call the private review service.
+The observing adapter must establish those facts before any future live use.
+Synthetic fixtures are not real queue measurements. The two historical
+underspecified fixtures retain their original RESOLVE expectations and still
+fail visibly (now BLOCKED); they are separately counted, never treated as
+demonstrated current-code defects or silently converted to passing tests.
 
 The anti-repeat flag suppresses an unchanged `COMPLETE` attempt but does not prevent a different safe route.
 

@@ -1,3 +1,5 @@
+import { evaluateIdentityStarvation } from './identity-preflight.mjs';
+
 const PRIORITY = {
   SCOUT: 1,
   PERSIST: 1,
@@ -9,7 +11,7 @@ const PRIORITY = {
   NOOP: 7,
 };
 
-function decision(route, reason) {
+function buildDecision(route, reason) {
   return {
     route,
     reason,
@@ -20,6 +22,8 @@ function decision(route, reason) {
 }
 
 export function routeActivation(input) {
+  const preflight = evaluateIdentityStarvation(input);
+  const decision = (route, reason) => ({...buildDecision(route, reason), ...preflight});
   const blocker = !input.frontier_consistent
     ? input.inconsistency_code || "frontier_inconsistent"
     : input.active_wip_count > 6 ? "ordinary_wip_limit_exceeded" : null;
@@ -53,6 +57,12 @@ export function routeActivation(input) {
     input.writer_ready &&
     !input.repeat_without_changed_prerequisite
   ) {
+    if (preflight.identity_starvation_status === 'required') {
+      return decision('RESOLVE', 'identity_starvation_before_new_research');
+    }
+    if (preflight.identity_starvation_status === 'undetermined') {
+      return decision('BLOCKED', 'new_research_safety_not_established');
+    }
     return decision("COMPLETE", "deepest_owned_paper_has_executable_f0_f5_gate");
   }
 

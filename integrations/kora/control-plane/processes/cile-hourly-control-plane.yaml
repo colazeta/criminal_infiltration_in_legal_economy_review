@@ -53,6 +53,14 @@ types:
         type: boolean
       calibration_case_ready:
         type: boolean
+      identity_preflight_evidence:
+        type: object
+        additionalProperties: false
+        properties:
+          pending_observation_count: {type: [integer, 'null'], minimum: 0}
+          oldest_pending_age_seconds: {type: [number, 'null'], minimum: 0}
+          activity_kind: {type: string, enum: [new_research, in_progress, non_research, unknown]}
+          evidence_ref: {type: string, minLength: 1}
       identity_debt_due:
         type: boolean
       engineering_blocker:
@@ -158,6 +166,14 @@ types:
       validated: {type: boolean}
       writer_ready: {type: boolean}
       calibration_case_ready: {type: boolean}
+      identity_preflight_evidence:
+        type: object
+        additionalProperties: false
+        properties:
+          pending_observation_count: {type: [integer, 'null'], minimum: 0}
+          oldest_pending_age_seconds: {type: [number, 'null'], minimum: 0}
+          activity_kind: {type: string, enum: [new_research, in_progress, non_research, unknown]}
+          evidence_ref: {type: string, minLength: 1}
       identity_debt_due: {type: boolean}
       engineering_blocker: {type: boolean}
       repeat_without_changed_prerequisite: {type: boolean}
@@ -207,6 +223,12 @@ types:
     type: object
     additionalProperties: false
     properties:
+      identity_starvation_status:
+        type: string
+        enum: [required, not_required, undetermined]
+      identity_starvation_reason:
+        type: string
+        minLength: 1
       route:
         type: string
         enum: [SCOUT, PERSIST, COMPLETE, CALIBRATION_CASE, RESOLVE, ENGINEER, NOOP, BLOCKED]
@@ -222,7 +244,7 @@ types:
       pilot_mode:
         type: string
         enum: [observe_only]
-    required: [route, reason, priority, side_effect_authorized, pilot_mode]
+    required: [route, reason, priority, side_effect_authorized, pilot_mode, identity_starvation_status, identity_starvation_reason]
 start:
   - type: message
     name: cile-activation-observed

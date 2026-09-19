@@ -28,6 +28,11 @@ spec:
       validated: false
       writer_ready: true
       calibration_case_ready: false
+      identity_preflight_evidence:
+        pending_observation_count: 1
+        oldest_pending_age_seconds: 3600
+        activity_kind: new_research
+        evidence_ref: synthetic:original-router-complete
       identity_debt_due: false
       engineering_blocker: false
       repeat_without_changed_prerequisite: false
