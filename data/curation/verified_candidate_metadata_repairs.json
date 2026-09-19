@@ -1117,6 +1117,179 @@
       ],
       "checked_at": "2026-09-19",
       "basis": "The DOI resolves to the publisher record for the 2024 article in Corporate Ownership & Control 21(3), pages 116-132. The University of Catania repository copy independently confirms the exact title, DOI, full author names, volume, issue, pages and 2024 year. The queue is repaired with Angela Maria Greco's full name, the journal venue and authoritative provenance; no peer-review status is inferred beyond the observed article metadata. This declaration makes no eligibility, canonical-identity, framework, completion, validation, rights or publication decision."
+    },
+    {
+      "candidate_id": "CAND-ACADEMIC-2026-09-09-011",
+      "expected": {
+        "title": "Appalti e corruzione: alcune evidenze sulla penetrazione criminale negli appalti di lavori",
+        "doi": "",
+        "authors": "Francesco Decarolis; Paolo Pinotti",
+        "year": "2021",
+        "venue": "Il diritto dell'economia",
+        "verification_status": "metadata_partial",
+        "metadata_confidence": "",
+        "review_stage": "metadata_fix",
+        "current_status": "pending",
+        "current_decision": "",
+        "possible_duplicate": "",
+        "metadata_conflict": ""
+      },
+      "replacement": {
+        "venue": "Il diritto dell'economia",
+        "work_type": "journal_article",
+        "source_links": "https://www.ildirittodelleconomia.it/2021/12/01/francesco-decarolis-paolo-pinotti-appalti-e-corruzione-alcune-evidenze-sulla-penetrazione-criminale-negli-appalti-di-lavori/; https://iris.unibocconi.it/handle/11565/4042583"
+      },
+      "evidence": [
+        {
+          "role": "primary_metadata",
+          "url": "https://www.ildirittodelleconomia.it/2021/12/01/francesco-decarolis-paolo-pinotti-appalti-e-corruzione-alcune-evidenze-sulla-penetrazione-criminale-negli-appalti-di-lavori/"
+        },
+        {
+          "role": "independent_institutional",
+          "url": "https://iris.unibocconi.it/handle/11565/4042583"
+        }
+      ],
+      "checked_at": "2026-09-19",
+      "basis": "The publisher page and Bocconi's institutional record agree on Francesco Decarolis and Paolo Pinotti, the exact title, the 2021 publication and Il diritto dell'economia. Bocconi classifies the item as an article in an academic journal and identifies the publisher-layout manifestation. This declaration records the journal-article type and authoritative provenance only; it does not infer peer-review status or make any eligibility, canonical-identity, framework, completion, validation, rights or publication decision."
+    },
+    {
+      "candidate_id": "CAND-ACADEMIC-2026-09-09-012",
+      "expected": {
+        "title": "APPALTI PUBBLICI E CRIMINALITÀ ORGANIZZATA",
+        "doi": "10.13130/cross-7791",
+        "authors": "S. Spartà",
+        "year": "2016",
+        "venue": "Cross",
+        "verification_status": "metadata_partial",
+        "metadata_confidence": "",
+        "review_stage": "metadata_fix",
+        "current_status": "pending",
+        "current_decision": "",
+        "possible_duplicate": "",
+        "metadata_conflict": ""
+      },
+      "replacement": {
+        "title": "Appalti pubblici e criminalità organizzata",
+        "authors": "Sara Spartà",
+        "venue": "Rivista di Studi e Ricerche sulla criminalità organizzata",
+        "work_type": "journal_article",
+        "source_links": "https://riviste.unimi.it/index.php/cross/article/view/7791; https://api.datacite.org/dois/10.13130/cross-7791"
+      },
+      "evidence": [
+        {
+          "role": "primary_metadata",
+          "url": "https://riviste.unimi.it/index.php/cross/article/view/7791"
+        },
+        {
+          "role": "independent_identifier_registry",
+          "url": "https://api.datacite.org/dois/10.13130/cross-7791"
+        }
+      ],
+      "checked_at": "2026-09-19",
+      "basis": "The University of Milan journal page and DataCite agree on Sara Spartà, the exact title, DOI, 25 November 2016 publication, journal title, volume 2 issue 3 and pages 24-45. This declaration expands the author and venue, normalises title case, records the journal-article manifestation and adds authoritative provenance only; it makes no eligibility, canonical-identity, framework, completion, validation, rights or publication decision."
+    },
+    {
+      "candidate_id": "CAND-ACADEMIC-2026-09-09-013",
+      "expected": {
+        "title": "Exploring the Impact of Soft Preventive Judicial Measures on Business Resilience and Performance under Organised Crime Infiltration: Evidence from a Multi Case Analysis",
+        "doi": "",
+        "authors": "Giovanni Scire'; E. Bivona",
+        "year": "2026",
+        "venue": "",
+        "verification_status": "metadata_partial",
+        "metadata_confidence": "",
+        "review_stage": "metadata_fix",
+        "current_status": "pending",
+        "current_decision": "",
+        "possible_duplicate": "",
+        "metadata_conflict": ""
+      },
+      "replacement": {
+        "authors": "Giovanni Scire'; Enzo Bivona",
+        "venue": "Cultural, Social, and Political Participation in the Internet Era: Measuring and Fostering Engagement, Lawfulness and Inclusion in the Networked Society",
+        "work_type": "book_chapter",
+        "source_links": "https://iris.unipa.it/handle/10447/710250; https://www.unipa.it/persone/docenti/s/giovanni.scire01/en?idPubblicazione=1063042&pagina=pubblicazione"
+      },
+      "evidence": [
+        {
+          "role": "primary_metadata",
+          "url": "https://iris.unipa.it/handle/10447/710250"
+        },
+        {
+          "role": "independent_institutional_profile",
+          "url": "https://www.unipa.it/persone/docenti/s/giovanni.scire01/en?idPubblicazione=1063042&pagina=pubblicazione"
+        }
+      ],
+      "checked_at": "2026-09-19",
+      "basis": "The University of Palermo repository record and the university author profile agree on Giovanni Scire' and Enzo Bivona, the exact chapter title, 2026 year and chapter manifestation. The repository supplies the Springer host-volume title and records 19 December 2026, a future date at verification time; this declaration therefore preserves the record as a 2026 chapter without asserting that publication has already occurred. It repairs authorship, venue, document type and source provenance only and makes no eligibility, canonical-identity, framework, completion, validation, rights or publication decision."
+    },
+    {
+      "candidate_id": "CAND-ACADEMIC-2026-09-09-EXTRA-24b7a783a9a3-002",
+      "expected": {
+        "title": "IDENTIFYING PATTERNS OF MAFIA MOBILITY: THE PRESENCE OF THE ITALIAN MAFIAS IN EUROPE",
+        "doi": "",
+        "authors": "Federica Sarno",
+        "year": "2015",
+        "venue": "",
+        "verification_status": "metadata_partial",
+        "metadata_confidence": "",
+        "review_stage": "metadata_fix",
+        "current_status": "pending",
+        "current_decision": "",
+        "possible_duplicate": "",
+        "metadata_conflict": ""
+      },
+      "replacement": {
+        "title": "Identifying Patterns of Mafia Mobility: The Presence of the Italian Mafias in Europe",
+        "venue": "Università Cattolica del Sacro Cuore",
+        "work_type": "thesis",
+        "source_links": "https://publicatt.unicatt.it/handle/10280/6118; https://hdl.handle.net/10280/6118"
+      },
+      "evidence": [
+        {
+          "role": "primary_metadata",
+          "url": "https://publicatt.unicatt.it/handle/10280/6118"
+        },
+        {
+          "role": "stable_institutional_identifier",
+          "url": "https://hdl.handle.net/10280/6118"
+        }
+      ],
+      "checked_at": "2026-09-19",
+      "basis": "The Università Cattolica institutional record and its persistent Handle identify Federica Sarno's work as a doctoral thesis, defended on 2 March 2015 in the Criminology doctoral programme. This declaration normalises title case, records the institution and thesis type, and preserves the repository record and stable identifier; it makes no eligibility, canonical-identity, framework, completion, validation, rights or publication decision."
+    },
+    {
+      "candidate_id": "CAND-ACADEMIC-2026-09-09-EXTRA-5e31cc756b0e-002",
+      "expected": {
+        "title": "Organized Crime and the Infiltration of Legitimate Business: Civil Remedies for \"Criminal Activity\"",
+        "doi": "10.2307/3311463",
+        "authors": "",
+        "year": "1975",
+        "venue": "University of Pennsylvania Law Review",
+        "verification_status": "metadata_partial",
+        "metadata_confidence": "",
+        "review_stage": "metadata_fix",
+        "current_status": "pending",
+        "current_decision": "",
+        "possible_duplicate": "",
+        "metadata_conflict": ""
+      },
+      "replacement": {
+        "work_type": "journal_article",
+        "source_links": "https://www.jstor.org/stable/3311463; https://api.crossref.org/works/10.2307%2F3311463"
+      },
+      "evidence": [
+        {
+          "role": "primary_metadata",
+          "url": "https://www.jstor.org/stable/3311463"
+        },
+        {
+          "role": "independent_identifier_registry",
+          "url": "https://api.crossref.org/works/10.2307%2F3311463"
+        }
+      ],
+      "checked_at": "2026-09-19",
+      "basis": "JSTOR and Crossref agree on the exact title, DOI, University of Pennsylvania Law Review volume 124 issue 1, November 1975 and pages 192-222. Neither record names an author, so the blank authorship is preserved rather than manufactured. The evidence supports a journal-article manifestation but does not explicitly attest peer review; this declaration therefore corrects work_type from peer_reviewed to journal_article and adds authoritative provenance only, without making an eligibility, canonical-identity, framework, completion, validation, rights or publication decision."
     }
   ]
 }
