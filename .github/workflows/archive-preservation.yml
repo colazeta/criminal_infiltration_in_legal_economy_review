@@ -1,0 +1,45 @@
+name: Preserve private archive and rehearse restore
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: [Deploy curator Worker]
+    types: [completed]
+    branches: [main]
+permissions:
+  contents: read
+concurrency:
+  group: private-archive-preservation
+  cancel-in-progress: false
+jobs:
+  preserve:
+    if: >-
+      github.repository == 'colazeta/criminal_infiltration_in_legal_economy_review' &&
+      github.ref == 'refs/heads/main' &&
+      (github.event_name != 'workflow_run' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_branch == 'main' &&
+      github.event.workflow_run.head_repository.full_name == github.repository))
+    runs-on: ubuntu-latest
+    environment: curator-production
+    timeout-minutes: 15
+    steps:
+      - name: Checkout reviewed code without retained credentials
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Use native SQLite for an isolated restore
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
+        with:
+          node-version: '24'
+      - name: Capture encrypted pages, verify all hashes and restore in isolation
+        env:
+          CURATOR_SESSION_SECRET: ${{ secrets.CURATOR_SESSION_SECRET }}
+        run: node scripts/architecture/private-backup.mjs capture "$RUNNER_TEMP/cile-private-archive.encrypted.json"
+      - name: Retain ciphertext only
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: private-archive-ciphertext-${{ github.sha }}
+          path: ${{ runner.temp }}/cile-private-archive.encrypted.json
+          if-no-files-found: error
+          retention-days: 90
+          compression-level: 9
