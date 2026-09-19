@@ -99,7 +99,7 @@
     } finally { clearTimeout(timer); }
   }
 
-  function createIndex(records, {read=readJSON, selectSupport, selectResearch, onUpdate=()=>{}}) {
+  function createIndex(records, {read=readJSON, selectSupport, selectResearch, onUpdate=()=>{}, loadSummaries=true}) {
     const rows = new Map();
     for (const record of records) {
       if (!record || typeof record.id !== 'string' || !record.id || rows.has(record.id)) throw Error('invalid_register_identity');
@@ -129,6 +129,7 @@
     }
     function scan() {
       if(scanPromise)return scanPromise;
+      if(!records.length){progress.scanned=true;onUpdate();return Promise.resolve();}
       function reset(){
         Object.assign(progress,{running:true,scanned:false,attempted:0,checked:0,errors:0,pages:0,indexRevision:null,indexTotal:null});
         for(const row of rows.values())Object.assign(row,{research:'pending',automated:false,coverage:null,classes:[],updatedAt:null,researchRevision:null,completion:null,completionVerified:false});
@@ -136,7 +137,8 @@
       reset();
       scanPromise=(async()=>{
         try {
-          await loadSupport();
+          // Independent public reads: a slow synopsis file must not delay analysis.
+          if(loadSummaries)void loadSupport();
           for(let restart=0;restart<2;restart++) {
             let cursor=0,revision=null;const seen=new Set();
             try {
@@ -202,15 +204,15 @@
     Object.entries(CLASSES).forEach(([value, text]) => addOption(category, value, text));
     const first = el('label'); first.append(el('span', 'Contenuto disponibile'), mode);
     const second = el('label'); second.append(el('span', 'Classe proposta'), category);
-    const refresh = el('button', 'Carica stato delle analisi'); refresh.type='button';
+    const refresh = el('button', 'Riprova caricamento'); refresh.type='button'; refresh.hidden=true;
     const status = el('p'); status.id='register-processing-status'; status.setAttribute('role','status'); status.setAttribute('aria-live','polite');
     mode.setAttribute('aria-describedby', status.id); category.setAttribute('aria-describedby', status.id);
     const completion = el('h3'); completion.id='register-completion-status'; completion.setAttribute('role','status');
     const breakdown = el('p'); breakdown.id='register-enrichment-breakdown';
-    const note=el('p','Caricare lo stato legge i dati già registrati: non avvia nuove analisi. ');
+    const note=el('p','I dati si caricano automaticamente all’apertura. Non vengono avviate nuove analisi. ');
     const help=el('a','Come leggere sintesi, analisi e completamento');help.href='./method.html#reading-status';note.append(help);
     const panel = el('details'); panel.className='processing-details'; panel.setAttribute('aria-label','Stato dell’elaborazione dei paper');
-    const summary=el('summary','Analisi dettagliate · stato non caricato');
+    const summary=el('summary','Analisi dettagliate · caricamento in corso');
     completion.hidden=breakdown.hidden=true;
     panel.append(summary, refresh, status, completion, breakdown, note);
     (controls.querySelector('.register-filter-grid') || controls).append(first, second); controls.after(panel);
@@ -231,20 +233,21 @@
       breakdown.textContent=view.counts?`Analisi dettagliate: ${view.counts.analyses}; basate sul testo completo: ${view.counts.fullText}; con categorie proposte: ${view.counts.classified}; con copertura dei riferimenti documentata: ${view.counts.references}.`:'';
       summary.textContent={idle:'Analisi dettagliate · stato non caricato',loading:'Analisi dettagliate · caricamento in corso',
         error:'Analisi dettagliate · caricamento non riuscito',partial:'Analisi dettagliate · dati parziali',ready:'Analisi dettagliate · dati caricati',empty:'Analisi dettagliate · registro vuoto'}[view.phase];
-      refresh.textContent=view.phase==='idle'?'Carica stato delle analisi':view.phase==='error'||view.phase==='partial'?'Riprova caricamento':'Aggiorna dati delle analisi';
+      // No initial-load gate or redundant update button. Retry only after a failure.
+      refresh.hidden=!['error','partial'].includes(view.phase)&&!rows.some(row=>row.support==='error');
+      if(!refresh.hidden)panel.open=true;
       refresh.disabled=p.running||!p.total;
       panel.setAttribute('aria-busy',String(p.running));
       onChange();
     }
     index = createIndex(records, {selectSupport, selectResearch, onUpdate:update});
     function changed() {
-      if ((category.value !== 'all' || !['all','summary'].includes(mode.value)) && !index.progress.scanned) index.scan();
       update();
     }
     mode.addEventListener('change', changed); category.addEventListener('change', changed);
     refresh.addEventListener('click', () => index.scan());
     controls.addEventListener('reset', () => { mode.value='all'; category.value='all'; update(); });
-    index.loadSupport(); update();
+    void index.scan(); update();
     return {
       filterStatus:() => {
         if(mode.value==='all'&&category.value==='all')return 'ready';
@@ -265,7 +268,7 @@
         }
         const view=analysisSummary(index);
         if(view.phase==='loading')return 'Caricamento delle analisi…';
-        if(view.phase==='idle')return 'Carica lo stato delle analisi per usare questo filtro.';
+        if(view.phase==='idle')return 'Caricamento automatico delle analisi…';
         if(view.phase==='error')return 'Il filtro non può essere valutato: i dati delle analisi non sono stati caricati. Riprova.';
         if(view.phase==='partial'||mode.value==='content'&&[...index.rows.values()].some(row=>row.support!=='checked'))return 'Nessuna corrispondenza nei dati caricati. Il risultato è parziale: riprova il caricamento.';
         return mode.value==='completed'?'Nessun paper con completamento registrato corrisponde ai filtri. Le analisi possono essere consultate con gli altri filtri.':'';

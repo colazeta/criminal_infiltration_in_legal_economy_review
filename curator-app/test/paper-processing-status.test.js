@@ -20,7 +20,7 @@ test('pending summary and research states do not assert zero processed papers',a
   const pending=new Promise(resolve=>{finish=resolve;});
   const view=setup(async()=>{await pending;return {ok:true,json:async()=>({readingAid:{kind:'review_synopsis',synopsis:'Synthetic summary'}})};});
   assert.match(view.status(),/Caricamento delle sintesi/);
-  assert.match(view.status(),/analisi dettagliate non è ancora stato caricato/);
+  assert.match(view.status(),/Caricamento dello stato delle analisi/);
   assert.doesNotMatch(view.status(),/0 sintesi disponibili|0 analisi AI/);
   for(const id of ['register-completion-status','register-enrichment-breakdown'])assert.equal(view.controls.following.querySelector('#'+id).hidden,true);
   finish();await tick();
