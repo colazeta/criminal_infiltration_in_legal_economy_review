@@ -24,6 +24,15 @@ Le ricevute dei primi tre passaggi sono in `runtime-evidence-2026-09-19.json`,
 `annotation-migration-evidence-2026-09-19.json`. Distinguono copie verificate,
 migrazioni eseguite, ripetizioni, stato pubblico e controlli falliti.
 
+La nuova verifica del sito delle **14:55 UTC** ha riletto tutti i 294 candidati
+e i relativi supporti serviti, con zero identificativi mancanti o record diversi
+dall'esportazione attesa. `published-site-evidence-2026-09-19.json` conserva
+digest, versione e ricevuta. Il rilascio delle statistiche giornaliere è invece
+fallito per debito di validazione; questo risultato non è nascosto dietro la
+pubblicazione riuscita del registro. La PR #797 supera entrambi i controlli CI
+sul commit `e9684d681d3bef99f3a4eaf16d368ed89478a37b`, oltre a 780 test Python e
+401 test Node locali. Rimane in bozza per il blocco della persistenza attiva.
+
 ## Blocco tecnico osservato
 
 La richiesta firmata al servizio restituisce HTTP 503,
