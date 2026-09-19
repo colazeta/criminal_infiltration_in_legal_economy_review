@@ -630,10 +630,10 @@
       "venue": "Journal of Modern Italian Studies",
       "doi": "10.1080/1354571x.2014.962257",
       "sourceLinks": [
-        "https://purehost.bath.ac.uk/ws/portalfiles/portal/122463450/Functionalmobility.pdf",
-        "https://doi.org/10.1080/1354571X.2014.962257"
+        "https://www.tandfonline.com/doi/full/10.1080/1354571X.2014.962257",
+        "https://researchportal.bath.ac.uk/en/publications/understanding-criminal-mobility-the-case-of-the-neapolitan-camorr"
       ],
-      "metadataStatus": "metadata_partial",
+      "metadataStatus": "metadata_verified",
       "reviewStatus": "pending",
       "accessStatus": "unknown",
       "registeredAt": "2026-09-09",
@@ -921,15 +921,16 @@
     },
     {
       "id": "CAND-ACADEMIC-2026-09-09-EXTRA-6b5b5e038ac4-005",
-      "title": "Racketeering in Legitimate Industries - Two Case Studies - Executive Summary",
-      "authors": "",
+      "title": "Racketeering in Legitimate Industries: Two Case Studies — Executive Summary",
+      "authors": "Peter Reuter; Jonathan Rubinstein; Simon Wynn",
       "year": 1982,
-      "venue": "RAND / Office of Justice Programs",
+      "venue": "National Institute of Justice",
       "doi": "",
       "sourceLinks": [
-        "https://www.ojp.gov/library/publications/racketeering-legitimate-industries-two-case-studies-executive-summary"
+        "https://www.ojp.gov/ncjrs/virtual-library/abstracts/racketeering-legitimate-industries-two-case-studies-executive",
+        "https://www.ojp.gov/pdffiles1/Digitization/87678NCJRS.pdf"
       ],
-      "metadataStatus": "metadata_partial",
+      "metadataStatus": "metadata_verified",
       "reviewStatus": "pending",
       "accessStatus": "unknown",
       "registeredAt": "2026-09-11",
@@ -953,15 +954,16 @@
     },
     {
       "id": "CAND-ACADEMIC-2026-09-09-EXTRA-6b5b5e038ac4-007",
-      "title": "Corruption and Racketeering in the New York City Construction Industry",
-      "authors": "",
-      "year": null,
-      "venue": "NYU Press / New York State Organized Crime Task Force",
+      "title": "Corruption and Racketeering in the New York City Construction Industry: The Final Report of the New York State Organized Crime Taskforce",
+      "authors": "Ronald Goldstock",
+      "year": 1991,
+      "venue": "NYU Press",
       "doi": "",
       "sourceLinks": [
-        "https://nyupress.org/9780814730348/corruption-and-racketeering-in-the-new-york-city-construction-industry"
+        "https://nyupress.org/9780814730348/corruption-and-racketeering-in-the-new-york-city-construction-industry",
+        "https://digitalcommons.nyls.edu/cgi/viewcontent.cgi?article=2019&context=nyls_law_review"
       ],
-      "metadataStatus": "metadata_partial",
+      "metadataStatus": "metadata_verified",
       "reviewStatus": "pending",
       "accessStatus": "unknown",
       "registeredAt": "2026-09-11",
@@ -986,15 +988,16 @@
     },
     {
       "id": "CAND-ACADEMIC-2026-09-09-EXTRA-6b5b5e038ac4-009",
-      "title": "Study of Organized Crime Business-Type Activities and Their Implications For Law Enforcement",
-      "authors": "",
+      "title": "A Study of Organized Crime Business-Type Activities and Their Implications for Law Enforcement",
+      "authors": "Herbert Edelhertz; Thomas D. Overcast",
       "year": 1990,
-      "venue": "Office of Justice Programs",
+      "venue": "National Institute of Justice / Northwest Policy Studies Center",
       "doi": "",
       "sourceLinks": [
-        "https://uat.ojp.gov/library/publications/study-organized-crime-business-type-activities-and-their-implications-law"
+        "https://www.ojp.gov/ncjrs/virtual-library/abstracts/study-organized-crime-business-type-activities-and-their",
+        "https://www.ojp.gov/pdffiles1/Digitization/124019NCJRS.pdf"
       ],
-      "metadataStatus": "metadata_partial",
+      "metadataStatus": "metadata_verified",
       "reviewStatus": "pending",
       "accessStatus": "unknown",
       "registeredAt": "2026-09-11",
