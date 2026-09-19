@@ -63,3 +63,9 @@ jobs:
           if not result['verified']:
               raise SystemExit('public_research_verification_failed')
           PYCODE
+
+      - name: Audit the entire private store without exporting source bodies
+        if: always()
+        env:
+          CURATOR_SESSION_SECRET: ${{ secrets.CURATOR_SESSION_SECRET }}
+        run: python3 -m scripts.enrichment.architecture_check
