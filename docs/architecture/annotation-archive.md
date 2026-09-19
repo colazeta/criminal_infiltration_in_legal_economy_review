@@ -86,8 +86,12 @@ arbitrary command, approval or free publication parameter in the envelope.
 `scripts/architecture/ingest_annotations.py` runs from trusted main code with a
 read-only repository token and the existing protected service credential. It reads
 all paginated issue/comment inputs, refuses missing parents and repeated IDs,
-compares two complete source captures, imports every input and verifies replay.
-Before a census withdrawal it rechecks the complete upstream population. Repository
+imports every observed input and verifies replay. It then compares another complete
+source capture, acquiring only changed observations in at most four reconciliation
+rounds. Only a repeated complete population can certify the final census; continuing
+changes fail explicitly with retained partial progress. A census cannot precede that
+check. Its observation cutoff follows the writes and precedes the final source read,
+so concurrent later head updates remain protected. Repository
 PR issue-comments are retained as source snapshots but cannot become candidate
 annotations through this path. Full PR review/audit preservation remains a separate
 scope in the system preservation manifest.
@@ -100,6 +104,14 @@ is incomplete; a later full reconciliation resumes existing receipts. Source bod
 attribution and raw errors are never printed or uploaded in plaintext artifacts.
 The existing protected pre-deployment backup and post-deployment preservation cover
 all eight new tables and retained private input bytes.
+
+Operational errors expose only a closed diagnostic class, never a raw exception,
+source body, actor or credential. A generic failure without a diagnostic cannot
+establish that storage failed: inspect the complete private audit and per-item
+receipts before recovery. The first 0008 deployment retained 317 annotations and
+passed the full-store integrity audit while its final acquisition gate failed;
+execution correctly remained inactive. Bounded catch-up handles mutable upstream
+inputs without discarding earlier versions or relaxing the final stability check.
 
 The internal `readPublicAnnotations` projection reconstructs stored relations and
 checks original source integrity. It emits only authorised, current, candidate-bound
