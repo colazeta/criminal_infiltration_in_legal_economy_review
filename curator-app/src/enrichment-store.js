@@ -1,3 +1,7 @@
+import {handleMcp} from './mcp.js';
+import {handleDocumentRead} from './document-http.js';
+import documentMigration from './document-repository-migration.json' with {type:'json'};
+import {retainAndIndex,indexDocument,coveragePage,documentLibrary,readDocumentPage,checkedDocument} from './document-repository.js';
 /* SQLite/KV adapter for an isolated private Durable Object, not a D1 permission bypass.
    Both backends implement the same versioned enrichment contract; canonical tables are absent. */
 import deliveryMigration from './enrichment-delivery-migration.json' with {type:'json'};
@@ -29,9 +33,10 @@ const SAFE_READINESS_ERRORS=new Set([
   'adjudication_migration_integrity','additive_adjudication_migration_required',
   'delivery_migration_integrity','additive_delivery_migration_required','storage_readback_failed',
   'relations_migration_integrity','additive_relations_migration_required',
+  'document_migration_integrity','additive_document_migration_required',
   'annotation_migration_integrity','additive_annotation_migration_required',
 ]);
-const READINESS_PHASES=new Set(['sqlite','base_migration','schedule_migration','adjudication_migration','delivery_migration','relations_migration','annotation_migration','adapters','scheduler']);
+const READINESS_PHASES=new Set(['sqlite','base_migration','schedule_migration','adjudication_migration','delivery_migration','relations_migration','annotation_migration','document_migration','adapters','scheduler']);
 export function readinessErrorCode(error,phase){
   const code=typeof error?.message==='string'?error.message:'';
   if(SAFE_READINESS_ERRORS.has(code))return code;
@@ -60,7 +65,7 @@ export function sqliteAdapter(storage) {
     async batchValidated(statements,readback,verify,receipt){return storage.transactionSync(()=>{
       const results=statements.map(s=>s.execute());
       if(verify(readback.map(s=>s.execute()))!==true)throw Error('normalized_extraction_integrity');
-      receipt.execute();return results;
+      receipt?.execute();return results;
     })}};
 }
 
@@ -133,6 +138,12 @@ export class EnrichmentStoreCore {
         const annotationApplied=await ctx.storage.get('schema:annotation-archive');
         if(annotationApplied&&annotationApplied!==annotationHash)throw Error('additive_annotation_migration_required');
         if(!annotationApplied)await ctx.storage.transaction(async tx=>{ctx.storage.sql.exec(annotationMigration.sql);await tx.put('schema:annotation-archive',annotationHash)});
+        phase='document_migration';
+        const documentHash=await sha256(documentMigration.sql);
+        if(documentHash!==documentMigration.sha256)throw Error('document_migration_integrity');
+        const documentApplied=await ctx.storage.get('schema:document-repository');
+        if(documentApplied&&documentApplied!==documentHash)throw Error('additive_document_migration_required');
+        if(!documentApplied)await ctx.storage.transaction(async tx=>{ctx.storage.sql.exec(documentMigration.sql);await tx.put('schema:document-repository',documentHash)});
         phase='adapters';
         this.db=sqliteAdapter(ctx.storage); this.evidence=privateTextStore(ctx.storage);this.documents=privateBinaryStore(ctx.storage);
         phase='scheduler';
@@ -231,7 +242,7 @@ export class EnrichmentStoreCore {
       const data=JSON.parse(body);
       const allowedFields=['operation','expected_commit','target_id','proposal','run_key','calibration_id','pr_number','source','document','bibliography','document_id','checkpoint','backup','ingress'];
       if(!data||typeof data!=='object'||Array.isArray(data)||Object.keys(data).some(k=>!allowedFields.includes(k)))return json({error_code:'invalid_service_envelope'},422);
-      const operations=['verify','activate','deactivate','status','run','packet','proposal','public-research-audit','architecture-audit','completion-packet','calibration-approval','completion-approval','source','document','documents','document-check','bibliography','provider-bibliography','development-checkpoint-get','development-checkpoint-put','document-retention-claim','source-claimed','document-claimed','document-retention-release','document-retention-abort'];
+      const operations=['verify','activate','deactivate','status','run','packet','proposal','public-research-audit','architecture-audit','completion-packet','calibration-approval','completion-approval','source','document','documents','document-check','bibliography','provider-bibliography','development-checkpoint-get','development-checkpoint-put','document-retention-claim','source-claimed','document-claimed','document-retention-release','document-retention-abort','document-index','document-coverage','document-packet'];
       if(!operations.includes(data.operation)&&!['architecture-schema','architecture-backup','architecture-normalize','archive-annotation','archive-annotation-batch','annotation-audit','annotation-census'].includes(data.operation))return json({error_code:'unknown_service_operation'},422);
       if(data.expected_commit!==this.env.DEPLOY_COMMIT)return json({error_code:'stale_deployment'},409);
       if(data.operation==='verify')return json(await this.verify());
@@ -300,10 +311,19 @@ export class EnrichmentStoreCore {
       }
       if(data.operation==='document-claimed'){
         await assertF1RetentionClaim(env,data.target_id,data.checkpoint,now);
-        return json(await importDocument(env,data.target_id,data.document,now),201);
+        return json(await retainAndIndex(env,data.target_id,data.document,now),201);
       }
       if(data.operation==='source')return handlePaperEnrichment(new Request('https://enrichment.internal/api/paper-enrichment/source?id='+encodeURIComponent(data.target_id),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data.source)}),env,{login:env.CURATOR_LOGIN});
-      if(data.operation==='document')return json(await importDocument(env,data.target_id,data.document,now),201);
+      if(data.operation==='document')return json(await retainAndIndex(env,data.target_id,data.document,now),201);
+      if(data.operation==='document-index')return json(await indexDocument(env,data.target_id,data.document_id,data.document,now));
+      if(data.operation==='document-coverage')return json(await coveragePage(env,data.checkpoint||{}));
+      if(data.operation==='document-packet'){
+        const target=await this.db.prepare('SELECT * FROM enrichment_targets WHERE target_id=? AND active=1').bind(data.target_id).first();
+        if(!target)return json({error_code:'target_not_found'},404);
+        const v=await checkedDocument(env,target,data.document_id);
+        let encoded='';for(let i=0;i<v.bytes.length;i+=8192)encoded+=String.fromCharCode(...v.bytes.subarray(i,i+8192));
+        return json({document:v.document,text:v.text,bytes_base64:btoa(encoded)});
+      }
       if(data.operation==='documents')return json({documents:await listDocuments(env,data.target_id)});
       if(data.operation==='document-check'){const r=await documentResponse(env,data.target_id,data.document_id,new Request('https://enrichment.internal/document',{method:'HEAD'}));return json({readable:r.ok,byte_length:Number(r.headers.get('Content-Length')),etag:r.headers.get('ETag'),content_type:r.headers.get('Content-Type'),scope:'authenticated_reader_route_bytes_checked'})}
       if(data.operation==='provider-bibliography')return json(await retainProviderBibliography(env,data.target_id,now));
@@ -324,6 +344,10 @@ export class EnrichmentStoreCore {
     if(url.pathname==='/machine')return this.machine(request);
     await this.requireReady();
     const env=await this.environment();
+    if(url.pathname==='/mcp-public')return handleMcp(request,env,{publicOnly:true});
+    if(url.pathname==='/api/paper-enrichment/mcp')return handleMcp(request,env,{publicOnly:false});
+    if(url.pathname==='/document-library')return handleDocumentRead(request,env);
+    if(url.pathname==='/api/paper-enrichment/document-library')return handleDocumentRead(request,env,{publicOnly:false});
     if(url.pathname==='/public-index'&&request.method==='GET'){try{return json(await readPublicIndex(env,Number(url.searchParams.get('cursor')||0),url.searchParams.get('revision')))}catch(error){return json({error_code:error.message},error.status||503)}}
     if(url.pathname==='/public-assets'&&['GET','HEAD'].includes(request.method)){
       try{const candidate=url.searchParams.get('id'),doc=url.searchParams.get('document');if(doc){const t=await this.db.prepare('SELECT target_id FROM enrichment_targets WHERE record_id=? AND active=1').bind(candidate).first();if(!t)return json({error:'not_found'},404);return await documentResponse(env,t.target_id,doc,request,{publicOnly:true})}return json(await publicAssets(env,candidate,Number(url.searchParams.get('offset')||0),url.searchParams.get('revision')))}catch(e){return json({error:e.code||'assets_unavailable'},e.status||503)}

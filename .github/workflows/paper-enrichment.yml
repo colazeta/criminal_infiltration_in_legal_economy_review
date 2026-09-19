@@ -1,10 +1,10 @@
 name: Validate paper enrichment
 on:
   pull_request:
-    paths: ["curator-app/**", "schema/paper-enrichment.schema.json", "ontology/**", "site/enrichment*", "scripts/enrichment/**", ".github/workflows/paper-enrichment.yml"]
+    paths: ["curator-app/**", "schema/paper-enrichment.schema.json", "ontology/**", "site/enrichment*", "site/document-library*", "site/paper-sheet-research.js", "tests/test_document*.py", "scripts/enrichment/**", ".github/workflows/paper-enrichment.yml"]
   push:
     branches: [main]
-    paths: ["curator-app/**", "schema/paper-enrichment.schema.json", "ontology/**", "site/enrichment*", "scripts/enrichment/**", ".github/workflows/paper-enrichment.yml"]
+    paths: ["curator-app/**", "schema/paper-enrichment.schema.json", "ontology/**", "site/enrichment*", "site/document-library*", "site/paper-sheet-research.js", "tests/test_document*.py", "scripts/enrichment/**", ".github/workflows/paper-enrichment.yml"]
   workflow_dispatch:
 permissions:
   contents: read
@@ -23,6 +23,11 @@ jobs:
         uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
         with:
           node-version: '22'
+      - name: Install document parser and OCR integration dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends poppler-utils tesseract-ocr
+
       - name: Validate contracts and regression tests without provider calls
         run: |
           python3 scripts/validation/validate_repository.py
@@ -32,3 +37,5 @@ jobs:
           python3 -m unittest discover -s tests -p 'test_*.py'
           node --test curator-app/test/*.test.js
           node --check site/enrichment.js
+          node --check site/document-library.js
+          node --check site/paper-sheet-research.js

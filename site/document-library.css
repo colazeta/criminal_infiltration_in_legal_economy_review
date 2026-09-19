@@ -1,0 +1,12 @@
+.document-library{max-width:1500px;margin:0 auto;padding:28px}
+.document-library form,.document-library #document-navigation{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:20px 0}
+.document-library input[type=search]{min-width:260px;flex:1;padding:10px}
+.document-library input[type=number]{width:72px;padding:6px}
+.document-library button,.document-library .document-action{cursor:pointer;padding:8px 12px}
+.document-columns{display:grid;grid-template-columns:minmax(0,3fr) minmax(320px,2fr);gap:24px;margin-top:24px}
+#document-viewer iframe{width:100%;height:76vh;min-height:460px;border:1px solid #777;background:#e5e5e5}
+#document-results article,#document-versions article{border-bottom:1px solid #aaa;padding:14px 0}
+#document-research{max-height:88vh;overflow:auto;padding:12px;border:1px solid #bbb}
+#document-text{white-space:pre-wrap;overflow-wrap:anywhere;font:14px/1.6 ui-monospace,monospace;padding:16px;background:#f5f3ed}
+#document-research details{margin:12px 0}#document-research .research-fact{margin:12px 0}
+@media(max-width:900px){.document-columns{grid-template-columns:1fr}.document-library{padding:16px}#document-research{max-height:none}}

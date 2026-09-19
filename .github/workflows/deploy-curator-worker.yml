@@ -64,6 +64,11 @@ jobs:
         with:
           node-version: 24
 
+      - name: Install document parser and OCR integration dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends poppler-utils tesseract-ocr
+
       - name: Validate the exact checkout before production changes
         working-directory: .
         run: |

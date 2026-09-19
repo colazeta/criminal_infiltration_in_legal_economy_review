@@ -1,11 +1,11 @@
 {
-  "profile_version": "0.4.3",
+  "profile_version": "0.4.4",
   "migrations": [
     "curator-app/migrations/0006_enrichment_delivery_assets.sql"
   ],
   "tables": {
     "enrichment_documents": {
-      "class": "Manifestation",
+      "class": "SourceDocument",
       "fields": {
         "document_id": "cile:document_id",
         "target_id": "cile:target_id",

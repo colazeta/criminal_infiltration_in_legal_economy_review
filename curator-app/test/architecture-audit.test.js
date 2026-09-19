@@ -36,7 +36,7 @@ test('schema drift blocks certification instead of ignoring an unexpected table'
 });
 test('known Cloudflare KV tables are accessed through adapters and do not masquerade as application schema',async()=>{
  const x=await fixture();x.db.exec('CREATE TABLE _cf_KV(key TEXT,value BLOB); CREATE TABLE _cf_EXTERNALS(id INTEGER); CREATE TABLE __cf_kv(key TEXT); CREATE TABLE _cf_METADATA(key INTEGER,value BLOB)');
- const r=await auditArchitecture(x.runtime);assert.equal(r.integrity_verified,true);assert.equal(Object.keys(r.counts).length,46);
+ const r=await auditArchitecture(x.runtime);assert.equal(r.integrity_verified,true);assert.equal(Object.keys(r.counts).length,53);
  x.db.exec('CREATE TABLE _cf_unknown_application(id TEXT)');
  await assert.rejects(auditArchitecture(x.runtime),/architecture_schema_set_mismatch/);
 });
@@ -47,7 +47,7 @@ test('disabled foreign keys are a failed integrity gate',async()=>{
 test('schema census reveals only public names and hashes unknown private names',async()=>{
  const x=await fixture();x.db.exec('CREATE TABLE private_unmapped_name(secret TEXT); CREATE TABLE scholarly_works(work_id TEXT)');
  const response=await x.core.machine(await request({operation:'architecture-schema'}));assert.equal(response.status,200);
- const census=await response.json();assert.equal(census.expected_present.length,46);
+ const census=await response.json();assert.equal(census.expected_present.length,53);
  assert.deepEqual(census.expected_missing,[]);assert.deepEqual(census.other_mapped_present,['scholarly_works']);
  assert.deepEqual(census.unknown_table_sha256,[await sha256('private_unmapped_name')]);
  assert.ok(!JSON.stringify(census).includes('private_unmapped_name'));

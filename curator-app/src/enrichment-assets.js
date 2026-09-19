@@ -10,8 +10,10 @@ const rows=async(db,sql,...v)=>(await S(db,sql,...v).all()).results;
 const fail=(message,status=422)=>{throw Object.assign(Error(message),{code:message,status})};
 const digest=bytes=>crypto.subtle.digest('SHA-256',bytes).then(b=>Array.from(new Uint8Array(b),x=>x.toString(16).padStart(2,'0')).join(''));
 const MAX=4194304;
+export const redistributionAllowed=doc=>Boolean(doc.rights_verified)&&/^https:\/\/creativecommons\.org\/(?:licenses\/(?:by|by-sa)\/4\.0|publicdomain\/zero\/1\.0)\/$/.test(doc.licence_url||'');
 const safeUrl=value=>{try{if(typeof value!=='string'||value.length>2000||/[\u0000-\u0020\u007f]/.test(value))return false;const u=new URL(value);return !/(token|secret|signature|session|authorization)=/i.test(u.hash)&&u.protocol==='https:'&&!u.username&&!u.password&&!/(^|\.)(localhost|internal|workers\.dev|r2\.dev)$/i.test(u.hostname)&&!/^\d+(\.\d+){3}$/.test(u.hostname)&&!u.hostname.includes(':')&&![...u.searchParams.keys()].some(k=>/token|secret|signature|session|api.?key|authorization|^sig$|^key$|x-amz|x-goog/i.test(k))}catch{return false}};
 function safeMetadata(value){if(value===null)return;if(typeof value==='string'&&(/[\u0000-\u001f\u007f]/.test(value)||/\b(?:Bearer\s+|gh[pousr]_|sk-proj-)|-----BEGIN .*PRIVATE KEY/i.test(value)))fail('unsafe_bibliographic_metadata');if(value&&typeof value==='object')for(const v of Object.values(value))safeMetadata(v)}
+export const publicRightsAllowed=doc=>doc.visibility==='public'&&redistributionAllowed(doc);
 export function privateBinaryStore(storage){
  return{
   async put(key,bytes){
@@ -59,7 +61,7 @@ export async function importDocument(env,targetId,data,now=Date.now()){
 export async function listDocuments(env,targetId){const target=await current(env,targetId);return rows(env.REVIEW_DB,'SELECT document_id,source_url,pdf_sha256,byte_length,version_label,licence_status,licence_url,attribution,visibility,observed_at FROM enrichment_documents WHERE target_id=? AND input_sha256=? ORDER BY observed_at DESC,document_id DESC',targetId,target.input_sha256)}
 export async function documentResponse(env,targetId,documentId,request,{publicOnly=false}={}){
  const target=await current(env,targetId);const doc=await S(env.REVIEW_DB,'SELECT * FROM enrichment_documents WHERE target_id=? AND input_sha256=? AND document_id=?',targetId,target.input_sha256,documentId).first();if(!doc)fail('document_not_found',404);
- if(publicOnly){const latest=await S(env.REVIEW_DB,'SELECT * FROM enrichment_documents WHERE target_id=? AND input_sha256=? AND pdf_sha256=? ORDER BY observed_at DESC,document_id DESC LIMIT 1',targetId,target.input_sha256,doc.pdf_sha256).first();if(doc.visibility!=='public'||!doc.rights_verified||latest.document_id!==doc.document_id)fail('document_not_public',404)}
+ if(publicOnly){const latest=await S(env.REVIEW_DB,'SELECT * FROM enrichment_documents WHERE target_id=? AND input_sha256=? AND pdf_sha256=? ORDER BY observed_at DESC,document_id DESC LIMIT 1',targetId,target.input_sha256,doc.pdf_sha256).first();if(!publicRightsAllowed(doc)||latest.document_id!==doc.document_id)fail('document_not_public',404)}
  const bytes=await env.REVIEW_DOCUMENTS.get(doc.storage_key);if(!bytes||bytes.length!==doc.byte_length||await digest(bytes)!==doc.pdf_sha256)fail('document_integrity_failure',409);
  const h={'Content-Type':'application/pdf','Content-Disposition':'inline; filename="paper.pdf"','Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff','Referrer-Policy':'no-referrer','Accept-Ranges':'bytes','Content-Security-Policy':"sandbox; default-src 'none'",ETag:'"'+doc.pdf_sha256+'"'};
  const range=request.headers.get('Range');let start=0,end=bytes.length-1;

@@ -99,7 +99,7 @@
       line.append(el('span',value));
       if(v.value!==null&&v.status==='ambiguous')line.append(el('small',' — Interpretazione ambigua'));
       if(v.value!==null)line.append(el('small',v.origin==='analyst'?' — Valutazione analitica proposta':' — Sintesi attribuita alla fonte'));
-      if(v.evidence_span_ids?.length){const evidence=section(line,'Fonti e localizzazione');for(const id of v.evidence_span_ids){const span=spans.get(id),source=sourceMap.get(span?.source_id);if(!source)continue;const p=el('p');const href=safeUrl(source.url);if(href){const a=el('a',new URL(href).hostname);a.href=href;a.rel='noreferrer noopener';p.append(a)}p.append(el('span',' · '+span.locator));evidence.append(p)}}
+      if(v.evidence_span_ids?.length){const evidence=section(line,'Fonti e localizzazione');for(const id of v.evidence_span_ids){const span=spans.get(id),source=sourceMap.get(span?.source_id);if(!source)continue;const p=el('p');const href=safeUrl(source.url);if(href){const a=el('a',new URL(href).hostname);a.href=href;a.rel='noreferrer noopener';p.append(a)}p.append(el('span',' · '+span.locator));if(href&&data.candidate?.id&&data.revision){const a=el('a',' · Vedi il passaggio nel documento');a.href='./document-library.html?candidate='+encodeURIComponent(data.candidate.id)+'&evidence='+encodeURIComponent(id)+'&revision='+encodeURIComponent(data.revision);a.target='_blank';a.rel='noopener noreferrer';p.append(a)}evidence.append(p)}}
       parent.append(line);
     }
     parent.append(el('p',r.generation_kind==='automated'?'Estrazione automatica preliminare, non validata scientificamente. La classificazione resta una proposta.':'Estrazione preliminare non confermata. La modalità di produzione non è attestata come revisione umana.'));
@@ -185,7 +185,7 @@
     async function page(){
       const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),12000);
       try{const response=await fetch(ASSETS_ENDPOINT+'?id='+encodeURIComponent(record.id)+'&offset='+next+(revision?'&revision='+revision:''),{cache:'no-store',credentials:'omit',signal:controller.signal});if(!response.ok)throw Error('assets_unavailable');const data=selectAssets(await response.json(),record);if(!isCurrent())return;
-        if(next===0){box.replaceChildren(el('summary','PDF conservati e bibliografia dettagliata'));
+        if(next===0){box.replaceChildren(el('summary','PDF conservati e bibliografia dettagliata'));const library=el('a','Apri nella biblioteca dei documenti');library.href='./document-library.html?candidate='+encodeURIComponent(record.id);box.append(library);
           if(!data.documents.length)box.append(el('p','Nessun PDF conservato disponibile pubblicamente. Le eventuali copie riservate richiedono l’accesso alla console.'));
           const privateReader=el('a','Apri la console riservata per questo paper');privateReader.href='https://criminal-infiltration-curator.colazeta-research.workers.dev/enrichment.html?candidate='+encodeURIComponent(record.id);privateReader.target='_blank';privateReader.rel='noopener noreferrer';box.append(privateReader);
           for(const d of data.documents){const link=el('a','Leggi PDF conservato · '+d.version_label);link.href=ASSETS_ENDPOINT+'?id='+encodeURIComponent(record.id)+'&document='+d.document_id;link.target='_blank';link.rel='noopener noreferrer';box.append(link,el('p',d.attribution+' · '+d.byte_length+' byte · '+d.licence_url));}

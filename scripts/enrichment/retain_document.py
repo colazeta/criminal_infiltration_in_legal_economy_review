@@ -14,7 +14,8 @@ import json
 import os
 import re
 from pathlib import Path
-from scripts.calibration.full_text_source_case import candidate, extract_text, norm
+from scripts.calibration.full_text_source_case import candidate, norm
+from scripts.enrichment.document_text import extract_document
 from scripts.oa_acquisition import acquire_pdf
 from scripts.enrichment.service_client import call
 from scripts.enrichment.retain_frontier_documents import run_frontier
@@ -40,7 +41,7 @@ def validate_manifest(data):
     return data
 
 
-def retain(manifest, expected_commit, service=call, acquire=acquire_pdf, extract=extract_text):
+def retain(manifest, expected_commit, service=call, acquire=acquire_pdf, extract=extract_document):
     data=validate_manifest(manifest)
     record=candidate(data['candidate_id'],data['source_url'])
     cycle=json.loads((ROOT/'config/archive-cycle.json').read_text())['review_id']
@@ -63,7 +64,7 @@ def retain(manifest, expected_commit, service=call, acquire=acquire_pdf, extract
     pdf, observation=acquire(data['source_url'])
     if len(pdf)>4194304 or hashlib.sha256(pdf).hexdigest()!=data['pdf_sha256'] or observation['full_text_sha256']!=data['pdf_sha256']:
         raise RuntimeError('document_pdf_changed')
-    text=extract(pdf)
+    text, extraction=extract(pdf)
     if hashlib.sha256(text.encode()).hexdigest()!=data['text_sha256']:
         raise RuntimeError('document_text_changed')
     # The hash pins independently inspected bytes; the title adds a visible-identity check.
@@ -78,6 +79,7 @@ def retain(manifest, expected_commit, service=call, acquire=acquire_pdf, extract
         'input_sha256':target['input_sha256'],'source_id':source['source_id'],
         'pdf_sha256':data['pdf_sha256'],'source_text_sha256':data['text_sha256'],
         'bytes_base64':base64.b64encode(pdf).decode(),
+        'extraction':extraction,
         **{k:data[k] for k in ('retention_basis','licence_status','licence_url','attribution','visibility','rights_verified')}})
     checked=service('document-check',expected_commit=expected_commit,target_id=target_id,document_id=result['document_id'])
     if checked.get('readable') is not True or checked.get('byte_length')!=len(pdf):

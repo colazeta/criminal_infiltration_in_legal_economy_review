@@ -18,7 +18,7 @@ import re
 import unicodedata
 from pathlib import Path
 
-from scripts.calibration.full_text_source_case import extract_text
+from scripts.enrichment.document_text import extract_document
 from scripts.enrichment.service_client import call
 from scripts.oa_acquisition import acquire_pdf, authorised_host
 
@@ -91,7 +91,7 @@ def frontier(limit: int) -> list[tuple[dict, dict]]:
     return selected[:limit]
 
 
-def retain_one(record: dict, row: dict, expected_commit: str, service=call, acquire=acquire_pdf, extract=extract_text) -> dict:
+def retain_one(record: dict, row: dict, expected_commit: str, service=call, acquire=acquire_pdf, extract=extract_document) -> dict:
     candidate_id = record['id']
     tid = target_id(candidate_id)
     existing = service('documents', expected_commit=expected_commit, target_id=tid).get('documents', [])
@@ -110,7 +110,7 @@ def retain_one(record: dict, row: dict, expected_commit: str, service=call, acqu
         if observation.get('full_text_sha256') != pdf_hash or len(pdf) > 4194304:
             raise RuntimeError('frontier_pdf_integrity_failed')
         stage = 'extract'
-        text = extract(pdf)
+        text, extraction = extract(pdf)
         if not title_matches(record['title'], text):
             raise RuntimeError('frontier_title_identity_failed')
         text_hash = hashlib.sha256(text.encode()).hexdigest()
@@ -135,6 +135,7 @@ def retain_one(record: dict, row: dict, expected_commit: str, service=call, acqu
             'pdf_sha256': pdf_hash,
             'source_text_sha256': text_hash,
             'bytes_base64': base64.b64encode(pdf).decode(),
+            'extraction': extraction,
             'retention_basis': RETENTION_BASIS,
             'licence_status': 'not_verified',
             'licence_url': None,

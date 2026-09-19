@@ -1,7 +1,7 @@
 {
   "id": "https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/vocab/cile-review.ttl",
   "name": "cile-review-profile",
-  "version": "0.4.3",
+  "version": "0.4.4",
   "title": "CILE Review Ontology Profile",
   "description": "Application ontology for the Criminal Infiltration in the Legal Economy living systematic review. It profiles SLR Ontology, PROV-O, FaBiO/BIBO, Web Annotation, SKOS and RIPE-O while defining only the domain and governance concepts that are specific to this review.",
   "prefixes": {
@@ -1833,6 +1833,66 @@
       "range": "boolean",
       "slot_uri": "cile:annotationDisplayAuthorised",
       "description": "The captured author is the configured curator under the owner-authorised unreviewed reading-support display boundary. This is not scientific approval."
+    },
+    "document_text_length": {
+      "range": "integer",
+      "slot_uri": "cile:textLength",
+      "description": "Document repository: text length. Index fields do not create scientific assertions."
+    },
+    "document_page_count": {
+      "range": "integer",
+      "slot_uri": "cile:pageCount",
+      "description": "Document repository: page count. Index fields do not create scientific assertions."
+    },
+    "document_extraction_method": {
+      "range": "string",
+      "slot_uri": "cile:method",
+      "description": "Document repository: method. Index fields do not create scientific assertions."
+    },
+    "document_extractor_version": {
+      "range": "string",
+      "slot_uri": "cile:extractorVersion",
+      "description": "Document repository: extractor version. Index fields do not create scientific assertions."
+    },
+    "document_offset_unit": {
+      "range": "string",
+      "slot_uri": "cile:offsetUnit",
+      "description": "Document repository: offset unit. Index fields do not create scientific assertions."
+    },
+    "document_document_id": {
+      "range": "string",
+      "slot_uri": "cile:documentId",
+      "description": "Document repository: document id. Index fields do not create scientific assertions."
+    },
+    "document_extraction_id": {
+      "range": "string",
+      "slot_uri": "cile:extractionId",
+      "description": "Document repository: extraction id. Index fields do not create scientific assertions."
+    },
+    "document_page_number": {
+      "range": "integer",
+      "slot_uri": "cile:pageNumber",
+      "description": "Document repository: page number. Index fields do not create scientific assertions."
+    },
+    "document_chunk_id": {
+      "range": "string",
+      "slot_uri": "cile:chunkId",
+      "description": "Document repository: chunk id. Index fields do not create scientific assertions."
+    },
+    "document_term": {
+      "range": "string",
+      "slot_uri": "cile:term",
+      "description": "Document repository: term. Index fields do not create scientific assertions."
+    },
+    "document_term_occurrences": {
+      "range": "integer",
+      "slot_uri": "cile:occurrences",
+      "description": "Document repository: occurrences. Index fields do not create scientific assertions."
+    },
+    "document_projection_sha256": {
+      "range": "string",
+      "slot_uri": "cile:projectionSha256",
+      "description": "Document repository: projection sha256. Index fields do not create scientific assertions."
     }
   },
   "enums": {
@@ -2003,6 +2063,14 @@
         "prevention": {
           "meaning": "cile:prevention"
         }
+      }
+    },
+    "DocumentRedistributionEnum": {
+      "permissible_values": {
+        "public_rehost_allowed": {},
+        "private_analysis_only": {},
+        "rights_unresolved": {},
+        "acquisition_not_permitted": {}
       }
     }
   },
@@ -2710,6 +2778,31 @@
         "extraction_origin",
         "extraction_evidence_span_ids"
       ]
+    },
+    "SourceDocument": {
+      "is_a": "Entity",
+      "class_uri": "fabio:Item",
+      "description": "Retained source bytes and acquisition receipt, distinct from the manifestation and scholarly work."
+    },
+    "ExtractedDocument": {
+      "is_a": "Entity",
+      "class_uri": "prov:Entity",
+      "description": "Versioned exact text extraction bound to retained source bytes and a parser receipt."
+    },
+    "DocumentPage": {
+      "is_a": "Entity",
+      "class_uri": "oa:SpecificResource",
+      "description": "Page partition of an extracted document with source UTF-16 character offsets."
+    },
+    "DocumentChunk": {
+      "is_a": "Entity",
+      "class_uri": "oa:SpecificResource",
+      "description": "Deterministic bounded page segment, a retrieval aid rather than scientific evidence."
+    },
+    "RetrievalIndexEntry": {
+      "is_a": "Entity",
+      "class_uri": "prov:Entity",
+      "description": "Disposable lexical or bibliographic index, derived from authoritative retained entities."
     }
   },
   "see_also": [

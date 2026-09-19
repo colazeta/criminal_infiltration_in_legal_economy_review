@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Biblioteca dei documenti · Criminal Infiltration</title>
+  <link rel="stylesheet" href="./styles.css"><link rel="stylesheet" href="./classic-site.css">
+  <link rel="stylesheet" href="./application.css"><link rel="stylesheet" href="./document-library.css">
+  <script src="./paper-sheet-research.js" defer></script><script src="./document-library.js" defer></script>
+</head>
+<body class="classic-site">
+  <header class="site-header"><div class="header-inner"><a class="brand" href="./index.html">Criminal Infiltration</a>
+    <nav class="app-nav" aria-label="Navigazione"><a href="./index.html">Archivio</a><a href="./document-library.html" aria-current="page">Documenti</a><a href="./method.html">Metodo</a><a href="./curate.html">Curatore</a></nav>
+  </div></header>
+  <main class="document-library">
+    <h1>Biblioteca dei documenti</h1>
+    <p>Consulta le versioni conservate e confrontale con la scheda di ricerca. Le copie consultabili pubblicamente dipendono dai diritti documentati.</p>
+    <form id="document-search" role="search"><label for="document-query">Titolo o DOI</label><input id="document-query" type="search" maxlength="300"><button type="submit">Cerca</button></form>
+    <p id="document-status" role="status" aria-live="polite"></p>
+    <section id="document-results" aria-label="Risultati della ricerca"></section><button id="document-more" type="button" hidden>Altri paper</button>
+    <section id="document-detail" hidden aria-label="Documento e scheda di ricerca">
+      <h2 id="document-title"></h2><p id="document-bibliography"></p><div id="document-versions"></div>
+      <div class="document-columns">
+        <section aria-label="Lettore del documento"><div id="document-navigation" hidden><button id="document-prev" type="button">Pagina precedente</button><label for="document-page">Pagina</label><input id="document-page" type="number" min="1" max="500" value="1"><span id="document-page-count"></span><button id="document-next" type="button">Pagina successiva</button></div>
+          <div id="document-viewer"></div><details><summary>Testo estratto della pagina</summary><p id="document-text-status"></p><pre id="document-text"></pre></details>
+        </section>
+        <section id="document-research" aria-label="Scheda di ricerca"></section>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
