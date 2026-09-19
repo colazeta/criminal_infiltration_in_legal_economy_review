@@ -1640,9 +1640,10 @@
       "venue": "Journal of Money Laundering Control",
       "doi": "10.1108/jmlc-10-2021-0117",
       "sourceLinks": [
+        "https://www.emerald.com/jmlc/article-abstract/26/1/159/239604/Exploring-infiltration-behaviour-by-organised",
         "https://ideas.repec.org/a/eme/jmlcpp/jmlc-10-2021-0117.html"
       ],
-      "metadataStatus": "metadata_partial",
+      "metadataStatus": "metadata_verified",
       "reviewStatus": "pending",
       "accessStatus": "unknown",
       "registeredAt": "2026-09-09",
@@ -1812,14 +1813,15 @@
     {
       "id": "CAND-ACADEMIC-2026-09-10-EXTRA-65282d1dbeff-002",
       "title": "Other People’s Dirty Money: Professional Intermediaries, Market Dynamics and the Finances of White-collar, Corporate and Organized Crimes",
-      "authors": "",
+      "authors": "Nicholas J Lord; Liz J Campbell; Karin Van Wingerde",
       "year": 2019,
       "venue": "The British Journal of Criminology",
       "doi": "10.1093/bjc/azz004",
       "sourceLinks": [
-        "https://academic.oup.com/bjc/article/59/5/1217/5348024"
+        "https://academic.oup.com/bjc/article/59/5/1217/5348024",
+        "https://api.crossref.org/works/10.1093%2Fbjc%2Fazz004"
       ],
-      "metadataStatus": "metadata_partial",
+      "metadataStatus": "metadata_verified",
       "reviewStatus": "pending",
       "accessStatus": "unknown",
       "registeredAt": "2026-09-10",
@@ -2406,14 +2408,15 @@
     {
       "id": "CAND-ACADEMIC-2026-09-10-EXTRA-dbc5cb0d9888-015",
       "title": "The Secret Nexus. A Case Study of Deviant Masons, Mafia and Corruption in Italy",
-      "authors": "",
+      "authors": "Anna Sergi; Alberto Vannucci",
       "year": 2023,
       "venue": "The British Journal of Criminology",
       "doi": "10.1093/bjc/azac096",
       "sourceLinks": [
-        "https://academic.oup.com/bjc/article/63/5/1165/6965895"
+        "https://academic.oup.com/bjc/article/63/5/1165/6965895",
+        "https://repository.essex.ac.uk/view/person/asergi.html"
       ],
-      "metadataStatus": "metadata_partial",
+      "metadataStatus": "metadata_verified",
       "reviewStatus": "pending",
       "accessStatus": "unknown",
       "registeredAt": "2026-09-10",
