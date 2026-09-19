@@ -3958,15 +3958,16 @@
     },
     {
       "id": "CAND-ACADEMIC-2026-09-13-EXTRA-a6766e6649ed-002",
-      "title": "Mafianomics: How Did Mob Entrepreneurs Infiltrate",
-      "authors": "M Tomass",
+      "title": "Mafianomics: How Did Mob Entrepreneurs Infiltrate and Dominate the Russian Economy?",
+      "authors": "Mark Tomass",
       "year": 1998,
-      "venue": "",
-      "doi": "",
+      "venue": "Journal of Economic Issues",
+      "doi": "10.1080/00213624.1998.11506065",
       "sourceLinks": [
+        "https://doi.org/10.1080/00213624.1998.11506065",
         "https://www.jstor.org/stable/4227335"
       ],
-      "metadataStatus": "metadata_partial",
+      "metadataStatus": "metadata_verified",
       "reviewStatus": "pending",
       "accessStatus": "unknown",
       "registeredAt": "2026-09-13",
@@ -4006,15 +4007,16 @@
     },
     {
       "id": "CAND-ACADEMIC-2026-09-13-EXTRA-a6766e6649ed-005",
-      "title": "Transnational Organized Crime and Foreign Direct Investment in Spain",
-      "authors": "",
-      "year": null,
-      "venue": "",
-      "doi": "",
+      "title": "Transnational Organized Crime and Foreign Direct Investment in Spain: What Could the Government-Supported Chinese FDI Learn from the Russian Precedent?",
+      "authors": "Rubén Ruiz-Ramas",
+      "year": 2021,
+      "venue": "European Perceptions of China and Perspectives on the Belt and Road Initiative",
+      "doi": "10.1163/9789004469846_008",
       "sourceLinks": [
+        "https://doi.org/10.1163/9789004469846_008",
         "https://e-spacio.uned.es/bitstreams/cf596fa3-7927-4d7f-8f27-1a0c788378b3/download"
       ],
-      "metadataStatus": "metadata_partial",
+      "metadataStatus": "metadata_verified",
       "reviewStatus": "pending",
       "accessStatus": "unknown",
       "registeredAt": "2026-09-13",
@@ -4448,13 +4450,14 @@
       "id": "CAND-ACADEMIC-2026-09-14-EXTRA-7f70be396631-001",
       "title": "The Socio-Legal Construction of Organised Crime in Romania",
       "authors": "Alexandra Neag",
-      "year": null,
+      "year": 2022,
       "venue": "University of Essex",
       "doi": "",
       "sourceLinks": [
-        "https://repository.essex.ac.uk/33069/1/The%20Socio-Legal%20Construction%20of%20Organised%20Crime%20in%20Romania.pdf"
+        "https://repository.essex.ac.uk/33069",
+        "https://www.aru.ac.uk/people/alexandra-neag"
       ],
-      "metadataStatus": "metadata_partial",
+      "metadataStatus": "metadata_verified",
       "reviewStatus": "pending",
       "accessStatus": "unknown",
       "registeredAt": "2026-09-14",
