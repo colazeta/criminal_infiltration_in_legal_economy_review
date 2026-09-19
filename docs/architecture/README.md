@@ -71,14 +71,14 @@ does not establish assessment completion, acceptance or corpus membership.
 
 Run `python3 scripts/architecture/catalogue.py` to regenerate:
 
-- `physical-schema.json`: all 71 implemented SQL table definitions, columns,
+- `physical-schema.json`: all 79 implemented SQL table definitions, columns,
   foreign keys, unique/partial indexes, checks in original DDL, append-only
   triggers and source migrations;
-- `traceability.csv`: all 569 columns mapped to existing ontology classes/slots,
+- `traceability.csv`: all 621 columns mapped to existing ontology classes/slots,
   SQL types, primary-key positions, effective nullability and implementation status.
 
 These are schema inventories built in an isolated SQLite database, not claims
-that 71 tables are deployed. The configured enrichment Durable Object uses 38;
+that 79 tables are deployed. The configured enrichment Durable Object uses 46;
 the other 33 belong to prepared V2 storage. Actual counts and schema integrity
 require the authenticated, commit-bound runtime receipt.
 
@@ -91,6 +91,12 @@ private reader, adjudication input and public reader use the verified relational
 graph. See [extraction-relations.md](extraction-relations.md) for cardinalities,
 identity, transaction and backfill rules. Dated runtime receipts distinguish
 this configured implementation from migrations actually executed in production.
+
+Migration 0008 adds governed repository ingress and annotation relations in the
+same store. Its source preservation, identity exceptions, source revision,
+withdrawal and transaction rules are in [annotation-archive.md](annotation-archive.md).
+The executed extraction migration and subsequent 38-table restore are recorded in
+`extraction-migration-evidence-2026-09-19.json`; they do not prove execution of 0008.
 
 ## Authority and version rules for the transition
 

@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "profile_version": "0.4.2",
+  "profile_version": "0.4.3",
   "authority": "Owner instruction and issue #597, 13 September 2026: publish recorded research context as explicitly unreviewed proposals, not scientific approval.",
   "schema": "schema/public-paper-research.schema.json",
   "schema_class": "ScientificExtractionEnvelope",

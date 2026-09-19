@@ -1,0 +1,163 @@
+{
+  "phase": "extraction_relations",
+  "date": "2026-09-19",
+  "pull_request": 789,
+  "commit": "ceec17e784a324204303c5d01c551648ff0308f4",
+  "deployment_run": 35443935413,
+  "audit_run": 35443991491,
+  "backup_run": 35443991509,
+  "predeployment_backup": {
+    "contract": "CILE-PRIVATE-ARCHIVE-BACKUP-1",
+    "commit": "a20b6c2e95402a422c5a6aa22e2bb2c55fe0760a",
+    "scope": "entire_enrichment_store",
+    "snapshot_id": "fdbf2c7f-5fa5-4d51-a7fc-e98d7673385a",
+    "sql_tables": 22,
+    "sql_rows": 4693,
+    "kv_entries": 418,
+    "state_sha256": "3ad7f293e06475e56ee9faa5384431c0f798657f6ad30083bd38da6070bca345",
+    "kv_sha256": "bdc89ce60ce6599120914081ebffa228b8e1efdbf119e92194ba755b6c01e412",
+    "isolated_restore_verified": true,
+    "integrity_verified": true,
+    "issues": {},
+    "checked_public_targets": 294,
+    "public_states": {
+      "not_assessed": 292,
+      "withheld": 2
+    },
+    "completion_states": {
+      "not_attested": 294
+    },
+    "excluded_transient_prefixes": [
+      "nonce:",
+      "probe:"
+    ],
+    "other_stores_included": false,
+    "plaintext_persisted": false,
+    "production_restored": false,
+    "cutover_ready": false,
+    "concurrent_change_checked": true,
+    "ciphertext_sha256": "f7ec7b8bdd047614440095272642197e51aeda545dafb0192324c99b2a6e419b",
+    "file_sha256": "f41e87c7db4363b360283225d8b61be3f564386c73915c264f49b4b0ee513e22"
+  },
+  "migration": {
+    "migration": {
+      "contract": "CILE-EXTRACTION-RELATIONS-1",
+      "commit": "ceec17e784a324204303c5d01c551648ff0308f4",
+      "proposals": 2,
+      "migrated": 2,
+      "verified": 0,
+      "complete": true,
+      "scientific_decisions_changed": false,
+      "private_content_exported": false,
+      "cutover_ready": false
+    },
+    "replay": {
+      "contract": "CILE-EXTRACTION-RELATIONS-1",
+      "commit": "ceec17e784a324204303c5d01c551648ff0308f4",
+      "proposals": 2,
+      "migrated": 0,
+      "verified": 2,
+      "complete": true,
+      "scientific_decisions_changed": false,
+      "private_content_exported": false,
+      "cutover_ready": false
+    },
+    "idempotency_verified": true
+  },
+  "audit": {
+    "contract": "CILE-ARCHITECTURE-AUDIT-1",
+    "commit": "ceec17e784a324204303c5d01c551648ff0308f4",
+    "backend": "durable_object_sqlite",
+    "scope": "entire_enrichment_store",
+    "complete": true,
+    "counts": {
+      "enrichment_adjudication_receipts": 0,
+      "enrichment_analyses": 1,
+      "enrichment_analyses_order": 1,
+      "enrichment_analysis_datasets": 0,
+      "enrichment_attempts": 194,
+      "enrichment_bibliography_snapshots": 2,
+      "enrichment_calibration_receipts": 0,
+      "enrichment_citation_coverage": 72,
+      "enrichment_citation_observations": 1822,
+      "enrichment_datasets": 0,
+      "enrichment_datasets_order": 0,
+      "enrichment_documents": 1,
+      "enrichment_fact_evidence": 13,
+      "enrichment_facts": 70,
+      "enrichment_finding_variables": 0,
+      "enrichment_findings": 3,
+      "enrichment_findings_order": 3,
+      "enrichment_framework_alternatives": 2,
+      "enrichment_framework_proposals": 2,
+      "enrichment_inputs": 322,
+      "enrichment_iteration_attempts": 189,
+      "enrichment_iterations": 189,
+      "enrichment_jobs": 1288,
+      "enrichment_normalization_receipts": 2,
+      "enrichment_proposal_details": 2,
+      "enrichment_proposal_sources": 2,
+      "enrichment_proposals": 2,
+      "enrichment_runs": 199,
+      "enrichment_schedules": 1,
+      "enrichment_secondary_classes": 0,
+      "enrichment_sources": 110,
+      "enrichment_spans": 6,
+      "enrichment_studies": 2,
+      "enrichment_studies_order": 2,
+      "enrichment_targets": 294,
+      "enrichment_variable_datasets": 0,
+      "enrichment_variable_uses": 0,
+      "enrichment_variable_uses_order": 0
+    },
+    "schema_sha256": "8683b825d8e6bad0f0930ea79df0150c4720f39eda0c1985197a7fe2e640cb53",
+    "state_sha256": "c31cb8487b3c0c055a8c8f2e5c894d6c0e1cce28f2ddb1bdcad1bd48b917eb57",
+    "checked_public_targets": 294,
+    "public_states": {
+      "not_assessed": 292,
+      "withheld": 2
+    },
+    "completion_states": {
+      "not_attested": 294
+    },
+    "issues": {},
+    "integrity_verified": true,
+    "private_content_exported": false,
+    "scientific_decisions_changed": false,
+    "cutover_ready": false
+  },
+  "postdeployment_backup": {
+    "contract": "CILE-PRIVATE-ARCHIVE-BACKUP-1",
+    "commit": "ceec17e784a324204303c5d01c551648ff0308f4",
+    "scope": "entire_enrichment_store",
+    "snapshot_id": "81374ace-a45d-4630-bf69-e11e74ea5eec",
+    "sql_tables": 38,
+    "sql_rows": 4796,
+    "kv_entries": 419,
+    "state_sha256": "c31cb8487b3c0c055a8c8f2e5c894d6c0e1cce28f2ddb1bdcad1bd48b917eb57",
+    "kv_sha256": "e9881ff3fbcd8485de23aea8e15bda01671438670bfb9cdb30abf644b3adfc21",
+    "isolated_restore_verified": true,
+    "integrity_verified": true,
+    "issues": {},
+    "checked_public_targets": 294,
+    "public_states": {
+      "not_assessed": 292,
+      "withheld": 2
+    },
+    "completion_states": {
+      "not_attested": 294
+    },
+    "excluded_transient_prefixes": [
+      "nonce:",
+      "probe:"
+    ],
+    "other_stores_included": false,
+    "plaintext_persisted": false,
+    "production_restored": false,
+    "cutover_ready": false,
+    "concurrent_change_checked": true,
+    "ciphertext_sha256": "b59300289039449b635ccc308dd46e1f03521defb206f85b7cab495fdd98863b",
+    "file_sha256": "65e1f922eeb3e740ae4bf66cbe8348470d45f4fb98c0e7c1a04cb2b5426a1e5c"
+  },
+  "full_architecture_cutover_complete": false
+}

@@ -127,3 +127,23 @@ Still open: candidate and canonical authority consolidation, import and review
 states of historical GitHub annotations, complete external-store preservation,
 conflict-preserving bibliographic assertions, withdrawal/supersession across all
 domains, replacement of legacy consumer paths and retirement of competing writers.
+
+### Executed extraction migration and subsequent annotation phase
+
+PR #789 deployed commit `ceec17e784a324204303c5d01c551648ff0308f4`.
+Its pre-deployment 22-table backup/restore gate passed. Both stored proposals were
+then migrated; replay wrote zero new proposals and verified both receipts. The
+38-table audit and encrypted restore verified 4,796 SQL rows, 419 KV entries,
+70 scoped assertions, 13 evidence links and all 294 current public targets.
+The two proposals remained withheld; completion remained unattested for all 294.
+Exact receipts/hashes are in
+`docs/architecture/extraction-migration-evidence-2026-09-19.json`.
+
+The next additive implementation, 0008 / profile 0.4.3, acquires original repository
+inputs and represents unreviewed annotations in eight relational tables. It retains
+marker exceptions, concurrent assertions, original source revisions and irreversible
+ordinary-import withdrawal. The scoped local capture preflight and boundaries are
+documented in `docs/architecture/annotation-archive.md`. Its deployment performs
+complete live acquisition and replay before execution activation. Browser/API
+cutover follows that receipt; the old browser parser is still identified as an
+active competing reader until its replacement is released.

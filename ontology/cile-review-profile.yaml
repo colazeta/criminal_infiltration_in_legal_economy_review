@@ -1,7 +1,7 @@
 {
   "id": "https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/vocab/cile-review.ttl",
   "name": "cile-review-profile",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "title": "CILE Review Ontology Profile",
   "description": "Application ontology for the Criminal Infiltration in the Legal Economy living systematic review. It profiles SLR Ontology, PROV-O, FaBiO/BIBO, Web Annotation, SKOS and RIPE-O while defining only the domain and governance concepts that are specific to this review.",
   "prefixes": {
@@ -1783,6 +1783,56 @@
       "slot_uri": "cile:annotationWriteKind",
       "range": "string",
       "description": "Native validated write or mechanical backfill; never a scientific decision."
+    },
+    "ingress_source_kind": {
+      "range": "string",
+      "slot_uri": "cile:sourceKind",
+      "description": "Observed repository issue or comment snapshot; not scientific evidence."
+    },
+    "ingress_external_id": {
+      "range": "string",
+      "slot_uri": "dcterms:identifier",
+      "description": "Source-system identifier retained separately from internal snapshot identity."
+    },
+    "ingress_updated_at": {
+      "range": "string",
+      "slot_uri": "dcterms:modified",
+      "description": "Reported external revision time; never scientific approval time."
+    },
+    "annotation_binding_state": {
+      "range": "string",
+      "slot_uri": "cile:annotationBindingState",
+      "description": "Candidate marker association: candidate_bound, unresolved, conflict or unregistered; no work reconciliation."
+    },
+    "annotation_review_state": {
+      "range": "string",
+      "slot_uri": "cile:annotationReviewState",
+      "description": "Actual review state; imported manual support is unreviewed_manual_support."
+    },
+    "annotation_unparsed_lines": {
+      "range": "integer",
+      "slot_uri": "cile:unparsedLines",
+      "description": "Count of non-empty source lines not interpreted by the bounded allowlist parser; originals retained privately."
+    },
+    "annotation_class_role": {
+      "range": "string",
+      "slot_uri": "cile:proposedClassRole",
+      "description": "Explicit primary, secondary or alternative class role in the source annotation; never a decision."
+    },
+    "annotation_visibility_state": {
+      "range": "string",
+      "slot_uri": "cile:annotationVisibilityState",
+      "description": "Current, withdrawn or conflicting observed annotation revision; independent of scientific acceptance."
+    },
+    "annotation_event_kind": {
+      "range": "string",
+      "slot_uri": "cile:annotationEventKind",
+      "description": "Immutable ingress revision, conflict or withdrawal event; source chronology is not fact precedence."
+    },
+    "annotation_display_authorised": {
+      "range": "boolean",
+      "slot_uri": "cile:annotationDisplayAuthorised",
+      "description": "The captured author is the configured curator under the owner-authorised unreviewed reading-support display boundary. This is not scientific approval."
     }
   },
   "enums": {
@@ -2314,7 +2364,7 @@
     "LegacySnapshot": {
       "is_a": "Entity",
       "class_uri": "cile:LegacySnapshot",
-      "description": "Byte-hashed preservation manifest, external-state completeness and restore receipt."
+      "description": "Byte-hashed preservation of an explicitly scoped observed input or archive manifest. Completeness and restore evidence are scope-specific; one comment capture is not a complete archive backup."
     },
     "EnrichmentTarget": {
       "class_uri": "cile:EnrichmentTarget",
@@ -2649,7 +2699,7 @@
     "AnalyticalAnnotation": {
       "is_a": "Entity",
       "class_uri": "oa:Annotation",
-      "description": "A proposal-scoped analytical assertion about an explicitly identified study, dataset, analysis, variable, finding or extraction field. Its epistemic status and source/analyst origin do not constitute scientific acceptance.",
+      "description": "A scoped analytical assertion within a validated extraction or an unreviewed source annotation. Its explicit owner/section, epistemic status and provenance do not establish a complete analysis or scientific acceptance.",
       "slots": [
         "annotation_id",
         "annotation_scope",

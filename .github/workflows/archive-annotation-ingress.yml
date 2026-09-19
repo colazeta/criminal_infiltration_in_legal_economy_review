@@ -1,0 +1,29 @@
+name: Acquire governed repository annotations
+on:
+  workflow_dispatch:
+  issue_comment:
+    types: [created, edited, deleted]
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+concurrency:
+  group: archive-annotation-ingress
+  cancel-in-progress: false
+jobs:
+  acquire:
+    if: github.repository == 'colazeta/criminal_infiltration_in_legal_economy_review'
+    runs-on: ubuntu-latest
+    environment: curator-production
+    timeout-minutes: 25
+    steps:
+      - name: Checkout trusted main code without retained credentials
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          ref: main
+          persist-credentials: false
+      - name: Persist source versions and verify every annotation and replay
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CURATOR_SESSION_SECRET: ${{ secrets.CURATOR_SESSION_SECRET }}
+        run: python3 -m scripts.architecture.ingest_annotations

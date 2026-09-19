@@ -1,10 +1,18 @@
 # CILE Review Ontology Profile
 
-**Current profile:** `0.4.2`
+**Current profile:** `0.4.3`
 
 This directory is the semantic contract for the living systematic review on **Criminal Infiltration in the Legal Economy (CILE)**. The contract is normative: physical CSV/JSON structures may evolve, but every governed artifact must remain mapped to this ontology and must pass `scripts/ontology/validate_ontology.py`.
 
 ## Design rule
+
+Profile 0.4.3 governs observed GitHub source snapshots and unreviewed reading
+annotations through `modules/annotation-archive.json`. It reuses LegacySnapshot,
+AssistantRecommendation, Web Annotation, ClinicalContributionProposal,
+PublicationState and ReviewEvent. Source revisions, marker association, display
+authority and scientific review state are separate. Missing/conflicting markers
+remain retained exceptions; no study, work identity or scientific approval is
+created by parsing an annotation. See `docs/architecture/annotation-archive.md`.
 
 Do not invent a local concept when a maintained standard already models it.
 
