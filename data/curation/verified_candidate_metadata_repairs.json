@@ -981,6 +981,142 @@
       ],
       "checked_at": "2026-09-19",
       "basis": "The DOI-bound Springer version of record and Crossref agree on Claudia Cantabene, Alessandro De Iudicibus and Iacopo Grassi, the exact title, 2026 publication, Economics of Governance and journal-article manifestation. This declaration fills only the manifestation type and authoritative source provenance and makes no eligibility, canonical-identity, framework, completion, validation, rights or publication decision."
+    },
+    {
+      "candidate_id": "CAND-ACADEMIC-2026-09-09-004",
+      "expected": {
+        "title": "Organized Crime and Firms' Financial Statements: Evidence from Criminal Investigations in Italy",
+        "doi": "10.2308/tar-2019-0079",
+        "authors": "Pietro A. Bianchi; Antonio Marra; Donato Masciandaro; Nicola Pecchiari",
+        "year": "2021",
+        "venue": "The Accounting Review",
+        "verification_status": "metadata_partial",
+        "metadata_confidence": "",
+        "review_stage": "metadata_fix",
+        "current_status": "pending",
+        "current_decision": "",
+        "possible_duplicate": "",
+        "metadata_conflict": ""
+      },
+      "replacement": {
+        "year": "2022",
+        "work_type": "peer_reviewed",
+        "source_links": "https://publications.aaahq.org/accounting-review/article/97/3/77/4414/Organized-Crime-and-Firms-Financial-Statements; https://iris.unibocconi.it/handle/11565/4040973"
+      },
+      "evidence": [
+        {
+          "role": "primary_metadata",
+          "url": "https://publications.aaahq.org/accounting-review/article/97/3/77/4414/Organized-Crime-and-Firms-Financial-Statements"
+        },
+        {
+          "role": "independent_institutional",
+          "url": "https://iris.unibocconi.it/handle/11565/4040973"
+        }
+      ],
+      "checked_at": "2026-09-19",
+      "basis": "The American Accounting Association version of record identifies the article in The Accounting Review 97(3), pages 77-106, dated 1 May 2022. Bocconi's institutional record independently confirms the exact DOI, authors, journal and 2022 issue year while preserving 2021 as the first-online year. The queue year is therefore corrected to 2022, with peer-reviewed article type and authoritative provenance. This declaration repairs bibliographic metadata only and makes no eligibility, canonical-identity, framework, completion, validation, rights or publication decision."
+    },
+    {
+      "candidate_id": "CAND-ACADEMIC-2026-09-09-007",
+      "expected": {
+        "title": "Organized crime behavior of shell-company networks in procurement: prevention insights for policy and reform",
+        "doi": "10.1007/s12117-023-09499-w",
+        "authors": "J. R. Nicolás-Carlock; Issa Luna-Pla",
+        "year": "2023",
+        "venue": "Trends in Organized Crime",
+        "verification_status": "metadata_partial",
+        "metadata_confidence": "",
+        "review_stage": "metadata_fix",
+        "current_status": "pending",
+        "current_decision": "",
+        "possible_duplicate": "",
+        "metadata_conflict": ""
+      },
+      "replacement": {
+        "year": "2024",
+        "work_type": "peer_reviewed",
+        "source_links": "https://link.springer.com/article/10.1007/s12117-023-09499-w; https://arxiv.org/abs/2307.10028"
+      },
+      "evidence": [
+        {
+          "role": "primary_metadata",
+          "url": "https://link.springer.com/article/10.1007/s12117-023-09499-w"
+        },
+        {
+          "role": "independent_repository",
+          "url": "https://arxiv.org/abs/2307.10028"
+        }
+      ],
+      "checked_at": "2026-09-19",
+      "basis": "The DOI-bound Springer record identifies the version of record in Trends in Organized Crime volume 27, pages 412-428, with a December 2024 issue date and 22 July 2023 online publication. The arXiv record independently confirms the exact authors, title and related journal DOI, and preserves the July 2023 preprint manifestation. The queue year is therefore corrected to the 2024 issue year while the 2023 online/preprint distinction remains in provenance. This declaration repairs bibliographic metadata only and makes no eligibility, canonical-identity, framework, completion, validation, rights or publication decision."
+    },
+    {
+      "candidate_id": "CAND-ACADEMIC-2026-09-09-009",
+      "expected": {
+        "title": "Migrating mafias",
+        "doi": "10.1016/j.regsciurbeco.2013.11.005",
+        "authors": "Paolo Buonanno; Matteo Pazzona",
+        "year": "",
+        "venue": "Regional Science and Urban Economics",
+        "verification_status": "metadata_partial",
+        "metadata_confidence": "",
+        "review_stage": "metadata_fix",
+        "current_status": "pending",
+        "current_decision": "",
+        "possible_duplicate": "",
+        "metadata_conflict": ""
+      },
+      "replacement": {
+        "year": "2014",
+        "work_type": "peer_reviewed",
+        "source_links": "https://www.sciencedirect.com/science/article/abs/pii/S0166046213001099; https://ideas.repec.org/a/eee/regeco/v44y2014icp75-81.html"
+      },
+      "evidence": [
+        {
+          "role": "primary_metadata",
+          "url": "https://www.sciencedirect.com/science/article/abs/pii/S0166046213001099"
+        },
+        {
+          "role": "independent_index",
+          "url": "https://ideas.repec.org/a/eee/regeco/v44y2014icp75-81.html"
+        }
+      ],
+      "checked_at": "2026-09-19",
+      "basis": "The Elsevier version of record identifies Migrating mafias as a research article in Regional Science and Urban Economics volume 44, January 2014, pages 75-81. RePEc independently confirms the same authors, title, DOI, 2014 year, volume and pages. The queue's blank year is therefore repaired to 2014 and the article manifestation is recorded as peer reviewed. This declaration repairs bibliographic metadata only and makes no eligibility, canonical-identity, framework, completion, validation, rights or publication decision."
+    },
+    {
+      "candidate_id": "CAND-ACADEMIC-2026-09-09-010",
+      "expected": {
+        "title": "Characteristics of Italian firms in the judicial administration: Can financial ratios be red flags of criminal infiltrations?",
+        "doi": "10.22495/cocv21i3siart10",
+        "authors": "Angela M. Greco; Mariastella Messina",
+        "year": "2024",
+        "venue": "",
+        "verification_status": "metadata_partial",
+        "metadata_confidence": "",
+        "review_stage": "metadata_fix",
+        "current_status": "pending",
+        "current_decision": "",
+        "possible_duplicate": "",
+        "metadata_conflict": ""
+      },
+      "replacement": {
+        "authors": "Angela Maria Greco; Mariastella Messina",
+        "venue": "Corporate Ownership & Control",
+        "source_links": "https://doi.org/10.22495/cocv21i3siart10; https://www.iris.unict.it/retrieve/c9ea4af0-b05c-4682-ad5d-5445af1ace5b/Greco%2C%20Messina%202024%20COC.pdf"
+      },
+      "evidence": [
+        {
+          "role": "primary_metadata",
+          "url": "https://doi.org/10.22495/cocv21i3siart10"
+        },
+        {
+          "role": "independent_institutional",
+          "url": "https://www.iris.unict.it/retrieve/c9ea4af0-b05c-4682-ad5d-5445af1ace5b/Greco%2C%20Messina%202024%20COC.pdf"
+        }
+      ],
+      "checked_at": "2026-09-19",
+      "basis": "The DOI resolves to the publisher record for the 2024 article in Corporate Ownership & Control 21(3), pages 116-132. The University of Catania repository copy independently confirms the exact title, DOI, full author names, volume, issue, pages and 2024 year. The queue is repaired with Angela Maria Greco's full name, the journal venue and authoritative provenance; no peer-review status is inferred beyond the observed article metadata. This declaration makes no eligibility, canonical-identity, framework, completion, validation, rights or publication decision."
     }
   ]
 }
