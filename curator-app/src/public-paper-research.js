@@ -1,4 +1,5 @@
 import {readNormalizedExtraction} from './extraction-relations.js';
+import {readPublicAnnotations,validatePublicAnnotations} from './annotation-archive.js';
 /* Owner-authorised display projection, NOT scientific approval or a private API.
    No new persistence: revalidate immutable evidence and derive a closed response. */
 import cycle from '../../config/archive-cycle.json' with {type:'json'};
@@ -175,6 +176,19 @@ export async function publicResearchAudit(env){
   return{schema_version:1,projection_version:'CILE-PUBLIC-RESEARCH-1',counts,records};
 }
 
+export async function publicAnnotationAudit(env){
+  const before=await publicIndexSnapshot(env);
+  const ids=(await query(env.REVIEW_DB,'SELECT record_id FROM enrichment_targets WHERE active=1 AND cycle_id=? ORDER BY record_id',cycle.review_id).all()).results;
+  if(ids.length>10000)throw Error('audit_limit');
+  const records=[];
+  for(const row of ids){
+    const a=await readPublicAnnotations(env,row.record_id),r=await readPublicResearch(env,row.record_id);
+    records.push({candidate_id:row.record_id,revision:a.revision,annotations:a.annotations.length,conflicts:a.conflicts,classification:summarizeContributions(r.research,a)});
+  }
+  if((await publicIndexSnapshot(env)).revision!==before.revision)throw Error('index_changed');
+  return {contract:'CILE-ANNOTATION-PROJECTION-AUDIT-1',commit:env.DEPLOY_COMMIT,index_revision:before.revision,records,private_content_exported:false};
+}
+
 const INDEX_PAGE_SIZE=50;
 const INDEX_CONCURRENCY=6;
 const indexError=(message,status=409)=>Object.assign(Error(message),{status});
@@ -186,7 +200,18 @@ export async function publicIndexSnapshot(env) {
   for(const [table,id] of [['enrichment_normalization_receipts','receipt_id'],['enrichment_sources','source_id'],['enrichment_proposals','proposal_id'],['enrichment_adjudication_receipts','receipt_id'],['enrichment_calibration_receipts','calibration_id'],['enrichment_citation_coverage','coverage_id'],['enrichment_citation_observations','observation_id'],['enrichment_documents','document_id'],['enrichment_bibliography_snapshots','bibliography_id']])
     stamps.push(await query(env.REVIEW_DB,`SELECT COUNT(*) n,MAX(${id}) last FROM ${table}`).first());
   const projection_contract=await sha256(canonicalJson({research:schema,completion:completionSchema,index:indexSchema,policy:completionPolicy}));
-  return {targets,revision:await sha256(canonicalJson({deployment:env.DEPLOY_COMMIT||'local-unversioned',projection_contract,targets,stamps}))};
+  const annotations=(await query(env.REVIEW_DB,'SELECT external_id,annotation_id,state,record_version FROM enrichment_annotation_heads ORDER BY external_id').all()).results;
+  return {targets,revision:await sha256(canonicalJson({deployment:env.DEPLOY_COMMIT||'local-unversioned',projection_contract,targets,stamps,annotations}))};
+}
+export function summarizeContributions(research,annotations){
+  const primary=new Set(),secondary=new Set(),alternative=new Set();
+  if(research?.framework.status==='proposed'){
+    primary.add(research.framework.primary);research.framework.secondary.forEach(c=>secondary.add(c.category));
+    if(research.framework.alternative)alternative.add(research.framework.alternative);
+  }
+  for(const annotation of annotations.annotations)for(const c of annotation.classes)({primary,secondary,alternative}[c.role]).add(c.category);
+  return {primary:[...primary].sort(),secondary:[...secondary].sort(),alternative:[...alternative].sort(),
+    has_conflict:primary.size>1||[...primary].some(c=>secondary.has(c))||research?.framework.status==='outside_framework'&&(primary.size+secondary.size>0)||annotations.conflicts>0};
 }
 export function validatePublicIndex(payload) {
   validateShape(payload,indexSchema,'$',indexSchema);
@@ -202,6 +227,7 @@ export function validatePublicIndex(payload) {
     if(row.framework_status!=='proposed'&&row.classes.length)throw Error('invalid_index_classes');
     if(s.completed!==(s.status==='accepted')||s.completed&&(!available||s.research_revision!==row.research_revision||!s.completed_at||s.protocol_version!=='CILE-ENRICH-1'||s.codebook_version!=='1.0.0'))throw Error('invalid_index_completion');
     if(!s.completed&&(s.completed_at!==null||s.protocol_version!==null||s.codebook_version!==null))throw Error('invalid_index_attestation');
+    for(const role of ['primary','secondary','alternative'])if(new Set(row.classification[role]).size!==row.classification[role].length)throw Error('duplicate_classification_role');
   }
   return payload;
 }
@@ -224,14 +250,15 @@ export async function readPublicIndex(env,cursor=0,revision=null) {
   if(cursor>snapshot.targets.length)throw indexError('index_changed');
   const pageTargets=snapshot.targets.slice(cursor,cursor+INDEX_PAGE_SIZE);
   const records=await mapBounded(pageTargets,INDEX_CONCURRENCY,async target=>{
-    const out=await readPublicResearch(env,target.record_id),done=await readPublicCompletion(env,target.record_id,out),r=out.research;
+    const out=await readPublicResearch(env,target.record_id),done=await readPublicCompletion(env,target.record_id,out),r=out.research,annotations=await readPublicAnnotations(env,target.record_id);
     return {candidate:out.candidate,availability:out.availability,
       source_coverage:r?.source_coverage||null,generation_kind:r?.generation_kind||null,framework_status:r?.framework.status||null,
       classes:r?.framework.status==='proposed'?[r.framework.primary,...r.framework.secondary.map(s=>s.category)]:[],
-      research_revision:out.revision,completion:Object.fromEntries(['status','completed','completed_at','protocol_version','codebook_version','research_revision','revision'].map(k=>[k,done[k]])),reference_coverage:done.reference_coverage};
+      research_revision:out.revision,completion:Object.fromEntries(['status','completed','completed_at','protocol_version','codebook_version','research_revision','revision'].map(k=>[k,done[k]])),reference_coverage:done.reference_coverage,
+      annotation_summary:{count:annotations.annotations.length,conflicts:annotations.conflicts,revision:annotations.revision},classification:summarizeContributions(r,annotations)};
   });
   if((await publicIndexSnapshot(env)).revision!==snapshot.revision)throw indexError('index_changed');
-  return validatePublicIndex({schema_version:1,projection_version:'CILE-PUBLIC-INDEX-1',index_revision:snapshot.revision,total:snapshot.targets.length,records,
+  return validatePublicIndex({schema_version:1,projection_version:'CILE-PUBLIC-INDEX-2',index_revision:snapshot.revision,total:snapshot.targets.length,records,
     next_cursor:cursor+records.length<snapshot.targets.length?cursor+records.length:null});
 }
 
@@ -254,14 +281,14 @@ export async function servePublicResearch(request,store){
   }
   if([...u.searchParams.keys()].some(k=>!['id','view'].includes(k))||u.searchParams.getAll('id').length!==1||u.searchParams.getAll('view').length>1||!validCandidate(u.searchParams.get('id')))return response({error:'invalid_candidate'},400);
   const view=u.searchParams.get('view');
-  if(view!==null&&view!=='completion')return response({error:'invalid_view'},400);
+  if(view!==null&&!['completion','annotations'].includes(view))return response({error:'invalid_view'},400);
   if(!store)return response({error:'research_temporarily_unavailable'},503);
   try{
-    const path=view==='completion'?'public-completion':'public-research';
+    const path=view==='completion'?'public-completion':view==='annotations'?'public-annotations':'public-research';
     const internal=await store.fetch(new Request(`https://enrichment.internal/${path}?id=`+encodeURIComponent(u.searchParams.get('id'))));
     if(!internal.ok)return response({error:'research_temporarily_unavailable'},503);
     const data=await internal.json();
-    if(view==='completion')validatePublicCompletion(data);else validatePublicResearch(data);
+    if(view==='completion')validatePublicCompletion(data);else if(view==='annotations')validatePublicAnnotations(data);else validatePublicResearch(data);
     return response(data,200);
   }catch{return response({error:'research_temporarily_unavailable'},503)}
 }

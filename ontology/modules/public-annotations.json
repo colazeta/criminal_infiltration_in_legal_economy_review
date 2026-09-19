@@ -1,0 +1,30 @@
+{
+  "profile_version": "0.4.4",
+  "projection_version": "CILE-PUBLIC-ANNOTATIONS-1",
+  "schema": "schema/public-annotations.schema.json",
+  "schema_class": "AssistantRecommendation",
+  "schema_field_slots": {
+    "/properties/schema_version": "extraction_schema_version",
+    "/properties/projection_version": "schema:version",
+    "/properties/candidate_id": "candidate_id",
+    "/properties/annotations": "schema:hasPart",
+    "/properties/annotations/items/properties/annotation_id": "annotation_id",
+    "/properties/annotations/items/properties/assessment_state": "annotation_review_state",
+    "/properties/annotations/items/properties/source_url": "source_url",
+    "/properties/annotations/items/properties/updated_at": "ingress_updated_at",
+    "/properties/annotations/items/properties/sections": "schema:hasPart",
+    "/properties/annotations/items/properties/sections/items/properties/scope": "annotation_scope",
+    "/properties/annotations/items/properties/sections/items/properties/group_label": "v2_heading",
+    "/properties/annotations/items/properties/sections/items/properties/fields": "schema:hasPart",
+    "/properties/annotations/items/properties/sections/items/properties/fields/items/properties/field_name": "annotation_field",
+    "/properties/annotations/items/properties/sections/items/properties/fields/items/properties/value": "extraction_value",
+    "/properties/annotations/items/properties/classes": "extraction_framework",
+    "/properties/annotations/items/properties/classes/items/properties/category": "extraction_category",
+    "/properties/annotations/items/properties/classes/items/properties/role": "annotation_class_role",
+    "/properties/annotations/items/properties/unparsed_lines": "annotation_unparsed_lines",
+    "/properties/conflicts": "public_annotation_conflicts",
+    "/properties/revision": "schema:version"
+  },
+  "privacy_boundary": "Only curator-authorised unreviewed reading fields reconstructed from the archive; no browser parsing of GitHub, private source snapshots, attribution, reviewer identities or working notes.",
+  "review_boundary": "Annotation groups are not ReportedStudy/ReportedAnalysis records. Multiple current annotations coexist; original alternatives and conflicts never become scientific decisions."
+}

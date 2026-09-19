@@ -7,18 +7,18 @@
   const SUMMARY_KINDS = new Set(['verified_abstract_source', 'publisher_summary', 'full_text_intro', 'review_synopsis']);
   const MODES = [
     ['all', 'Tutti i paper'], ['completed', 'Con completamento registrato'], ['content', 'Con sintesi o analisi'],
-    ['summary', 'Con sintesi disponibile'], ['ai', 'Con analisi automatica'],
+    ['annotations','Con annotazioni di lettura'], ['summary', 'Con sintesi disponibile'], ['ai', 'Con analisi automatica'],
     ['ai_full_text', 'AI: testo completo'], ['ai_partial_text', 'AI: testo parziale'],
     ['ai_abstract_only', 'AI: solo abstract'], ['unavailable', 'Stato non verificabile / analisi non aggiornata'],
   ];
-  const empty = () => ({support:'pending', summary:false, research:'pending', automated:false, coverage:null, classes:[], updatedAt:null, researchRevision:null, completion:null, completionVerified:false});
+  const empty = () => ({support:'pending', summary:false, research:'pending', automated:false, coverage:null, classes:[], annotationCount:0, classificationConflict:false, updatedAt:null, researchRevision:null, completion:null, completionVerified:false});
 
   function researchState(data) {
     if (!data || !['available', 'not_assessed', 'not_registered', 'stale', 'withheld'].includes(data.availability)) throw Error('invalid_availability');
     const r = data.research;
     if (data.availability !== 'available') {
       if (r !== null) throw Error('invalid_research');
-      return {research:data.availability, automated:false, coverage:null, classes:[], updatedAt:null};
+      return {research:data.availability, automated:false, coverage:null, classes:[], annotationCount:0, classificationConflict:false, updatedAt:null};
     }
     if (!r || r.assessment_state !== 'unreviewed_proposal' || !Object.hasOwn(COVERAGE, r.source_coverage)) throw Error('invalid_research');
     const f = r.framework;
@@ -54,9 +54,17 @@
     const available=row.availability==='available';
     if(available&&(!Object.hasOwn(COVERAGE,row.source_coverage)||!['automated','unspecified'].includes(row.generation_kind)||!['proposed','outside_framework','insufficient_evidence'].includes(row.framework_status)))throw Error('invalid_index_research');
     if(!available&&(row.source_coverage!==null||row.generation_kind!==null||row.framework_status!==null||row.classes.length)||row.framework_status!=='proposed'&&row.classes.length)throw Error('invalid_index_missingness');
+    const classification=classificationState(row);
     const completion=completionState(row.completion,row.research_revision,available);
-    return {research:row.availability,automated:available&&row.generation_kind==='automated',coverage:row.source_coverage,classes:row.classes,updatedAt:null,
+    return {research:row.availability,automated:available&&row.generation_kind==='automated',coverage:row.source_coverage,classes:[...new Set([...classification.primary,...classification.secondary])],annotationCount:row.annotation_summary.count,classificationConflict:classification.has_conflict,updatedAt:null,
       researchRevision:row.research_revision,completion,completionVerified:true,referenceCoverage:row.reference_coverage};
+  }
+
+  function classificationState(row){
+    const c=row?.classification,a=row?.annotation_summary;
+    if(!c||typeof c.has_conflict!=='boolean'||!a||!Number.isSafeInteger(a.count)||a.count<0||!Number.isSafeInteger(a.conflicts)||a.conflicts<0||!/^[a-f0-9]{64}$/.test(a.revision||''))throw Error('invalid_annotation_summary');
+    for(const role of ['primary','secondary','alternative'])if(!Array.isArray(c[role])||c[role].some(k=>!Object.hasOwn(CLASSES,k))||new Set(c[role]).size!==c[role].length)throw Error('invalid_classification');
+    return c;
   }
 
   function matches(entry, mode='all', category='all') {
@@ -64,12 +72,12 @@
     const available = s.research === 'available';
     const ai = available && s.automated;
     const modes = {
-      all:true, completed:isCompleted(s), content:s.summary || available, summary:s.summary, ai,
+      all:true, completed:isCompleted(s), content:s.summary || available || s.annotationCount>0, annotations:s.annotationCount>0, summary:s.summary, ai,
       ai_full_text:ai && s.coverage === 'full_text', ai_partial_text:ai && s.coverage === 'partial_text',
       ai_abstract_only:ai && s.coverage === 'abstract_only',
       unavailable:s.support === 'error' || ['error','stale','withheld'].includes(s.research),
     };
-    return Boolean(Object.hasOwn(modes, mode) && modes[mode] && (category === 'all' || (available && s.classes.includes(category))));
+    return Boolean(Object.hasOwn(modes, mode) && modes[mode] && (category === 'all' || s.classes.includes(category)));
   }
 
   function describe(entry) {
@@ -79,12 +87,14 @@
     if (entry.summary) parts.push('Sintesi disponibile');
     if (entry.research === 'available') {
       parts.push((entry.automated ? 'Analisi AI: ' : 'Analisi, origine non attestata: ') + COVERAGE[entry.coverage]);
-      if (entry.classes.length) parts.push('Classi proposte: ' + entry.classes.map(k => CLASSES[k]).join(', '));
     } else if (entry.research === 'stale') parts.push('Analisi da aggiornare');
     else if (entry.research === 'withheld') parts.push('Analisi non pubblicabile dopo i controlli');
     else if (entry.research === 'error') parts.push('Stato dell’analisi non verificabile');
     else if (entry.research === 'not_assessed') parts.push('Nessuna analisi strutturata disponibile');
     else if (entry.research === 'not_registered') parts.push('Non presente nell’indice analitico');
+    if(entry.annotationCount)parts.push(`${entry.annotationCount} annotazioni di lettura non revisionate`);
+    if(entry.classes.length)parts.push('Classi proposte: '+entry.classes.map(k=>CLASSES[k]).join(', '));
+    if(entry.classificationConflict)parts.push('Proposte di classificazione discordanti');
     if (entry.support === 'error') parts.push('Stato della sintesi non verificabile');
     return parts.join(' · ');
   }
@@ -132,7 +142,7 @@
       if(!records.length){progress.scanned=true;onUpdate();return Promise.resolve();}
       function reset(){
         Object.assign(progress,{running:true,scanned:false,attempted:0,checked:0,errors:0,pages:0,indexRevision:null,indexTotal:null});
-        for(const row of rows.values())Object.assign(row,{research:'pending',automated:false,coverage:null,classes:[],updatedAt:null,researchRevision:null,completion:null,completionVerified:false});
+        for(const row of rows.values())Object.assign(row,{research:'pending',automated:false,coverage:null,classes:[],annotationCount:0,classificationConflict:false,updatedAt:null,researchRevision:null,completion:null,completionVerified:false});
       }
       reset();
       scanPromise=(async()=>{
@@ -144,7 +154,7 @@
             try {
               do {
                 const page=await read(ENDPOINT+'?view=index&cursor='+cursor+(revision?'&revision='+revision:''));
-                if(page?.schema_version!==1||page.projection_version!=='CILE-PUBLIC-INDEX-1'||!/^[a-f0-9]{64}$/.test(page.index_revision||'')||!Number.isSafeInteger(page.total)||page.total<0||page.total>10000||!Array.isArray(page.records)||page.records.length>50)throw Error('invalid_index_page');
+                if(page?.schema_version!==1||page.projection_version!=='CILE-PUBLIC-INDEX-2'||!/^[a-f0-9]{64}$/.test(page.index_revision||'')||!Number.isSafeInteger(page.total)||page.total<0||page.total>10000||!Array.isArray(page.records)||page.records.length>50)throw Error('invalid_index_page');
                 if(revision&&revision!==page.index_revision)throw Object.assign(Error('index_changed'),{status:409});
                 if(page.next_cursor!==null&&(!Number.isSafeInteger(page.next_cursor)||page.next_cursor!==cursor+page.records.length||page.next_cursor<=cursor||page.next_cursor>page.total))throw Error('invalid_index_cursor');
                 if(page.next_cursor===null&&cursor+page.records.length!==page.total)throw Error('incomplete_index_page');
@@ -186,7 +196,9 @@
     const analyses=known.filter(row=>row.research==='available');
     const counts={completed:known.filter(isCompleted).length,analyses:analyses.length,
       fullText:analyses.filter(row=>row.coverage==='full_text').length,
-      classified:analyses.filter(row=>row.classes.length).length,
+      classified:known.filter(row=>row.classes.length).length,
+      annotated:known.filter(row=>row.annotationCount>0).length,annotations:known.reduce((n,row)=>n+(row.annotationCount||0),0),
+      classificationConflicts:known.filter(row=>row.classificationConflict).length,
       references:known.filter(row=>Array.isArray(row.referenceCoverage)&&row.referenceCoverage.length).length};
     return {...result,phase:complete?'ready':'partial',counts,denominator:p.checked,
       percentage:complete?100*counts.completed/p.total:null,
@@ -230,7 +242,7 @@
       status.textContent=summaryText+' '+view.text;
       completion.hidden=breakdown.hidden=!view.counts;
       completion.textContent=view.counts?`Completamento registrato: ${view.counts.completed} su ${view.denominator} paper con dati caricati.`:'';
-      breakdown.textContent=view.counts?`Analisi dettagliate: ${view.counts.analyses}; basate sul testo completo: ${view.counts.fullText}; con categorie proposte: ${view.counts.classified}; con copertura dei riferimenti documentata: ${view.counts.references}.`:'';
+      breakdown.textContent=view.counts?`Annotazioni: ${view.counts.annotations} in ${view.counts.annotated} paper; classificazioni discordanti: ${view.counts.classificationConflicts}; analisi dettagliate: ${view.counts.analyses}; basate sul testo completo: ${view.counts.fullText}; con categorie proposte: ${view.counts.classified}; con copertura dei riferimenti documentata: ${view.counts.references}.`:'';
       summary.textContent={idle:'Analisi dettagliate · stato non caricato',loading:'Analisi dettagliate · caricamento in corso',
         error:'Analisi dettagliate · caricamento non riuscito',partial:'Analisi dettagliate · dati parziali',ready:'Analisi dettagliate · dati caricati',empty:'Analisi dettagliate · registro vuoto'}[view.phase];
       // No initial-load gate or redundant update button. Retry only after a failure.
@@ -283,7 +295,7 @@
     const start=(page-1)*size;
     return {page,pages,start,rows:records.slice(start,start+size),total:records.length};
   }
-  globalThis.CILEPaperProcessing = {researchState, matches, describe, readJSON, createIndex, mount, isCompleted, completionState, indexState, pageRecords, analysisSummary};
+  globalThis.CILEPaperProcessing = {researchState, matches, describe, readJSON, createIndex, mount, isCompleted, completionState, indexState, classificationState, pageRecords, analysisSummary};
 })();
 
 (() => {

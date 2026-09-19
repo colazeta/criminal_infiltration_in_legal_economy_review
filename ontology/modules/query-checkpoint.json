@@ -1,5 +1,5 @@
 {
-  "profile_version": "0.4.3",
+  "profile_version": "0.4.4",
   "protocol": "CILE-QUERY-CHECKPOINT-1",
   "class": "QueryExecution",
   "checkpoint_issue": 696,

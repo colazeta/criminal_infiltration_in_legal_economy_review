@@ -106,7 +106,7 @@ def enum_values(profile: dict[str, Any], enum_name: str) -> set[str]:
 
 
 def check_profile(profile: dict[str, Any], external: dict[str, Any]) -> None:
-    if profile.get("version") != "0.4.3":
+    if profile.get("version") != "0.4.4":
         fail(f"unexpected_profile_version:{profile.get('version')}")
     prefixes = profile.get("prefixes")
     classes = profile.get("classes")
@@ -270,7 +270,7 @@ def check_serialisations(profile: dict[str, Any]) -> None:
     if source != PUBLIC_TTL_PATH.read_text(encoding="utf-8"):
         fail("public_ontology_turtle_drift")
     for marker in (
-        'owl:versionInfo "0.4.3"', "cile:ScholarlyWork a owl:Class",
+        'owl:versionInfo "0.4.4"', "cile:ScholarlyWork a owl:Class",
         "cile:Manifestation a owl:Class", "cile:ScreeningDecision a owl:Class",
         "cile:AccessAssessment a owl:Class", "skos:relatedMatch fabio:Work",
         "skos:relatedMatch ripe:Answer",
@@ -595,6 +595,7 @@ def check_delivery_contract(profile: dict[str, Any]) -> None:
         return result
     assets = load_json(ROOT / "ontology/modules/enrichment-delivery-assets.json")
     index = load_json(ROOT / "ontology/modules/public-enrichment-index.json")
+    annotations = load_json(ROOT / "ontology/modules/public-annotations.json")
     with sqlite3.connect(":memory:") as db:
         for migration in assets["migrations"]:
             db.executescript((ROOT / migration).read_text())
@@ -607,7 +608,7 @@ def check_delivery_contract(profile: dict[str, Any]) -> None:
             for action in ("update", "delete"):
                 if not db.execute("SELECT 1 FROM sqlite_master WHERE type='trigger' AND name=?", (f"{table}_no_{action}",)).fetchone():
                     fail("delivery_mutable_history:" + table)
-    mappings = {**assets["schemas"], index["schema"]: index}
+    mappings = {**assets["schemas"], index["schema"]: index, annotations["schema"]: annotations}
     for path, contract in mappings.items():
         fields = schema_fields(load_json(ROOT / path))
         if fields != set(contract["schema_field_slots"]) or not all(valid_slot(v) for v in contract["schema_field_slots"].values()):
@@ -625,7 +626,7 @@ def check_delivery_contract(profile: dict[str, Any]) -> None:
     from scripts.query_checkpoint import FIELDS, ROW, ISSUE
     if checkpoint["class"] not in profile["classes"] or checkpoint["checkpoint_issue"] != ISSUE or not (FIELDS | ROW) <= set(checkpoint["fields"]):
         fail("delivery_checkpoint_mapping")
-    if any(module["profile_version"] != profile["version"] for module in [assets, index, policy, checkpoint]):
+    if any(module["profile_version"] != profile["version"] for module in [assets, index, annotations, policy, checkpoint]):
         fail("delivery_profile_drift")
 
 

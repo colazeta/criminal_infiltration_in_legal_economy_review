@@ -1,6 +1,6 @@
 {
-  "profile_version": "0.4.3",
-  "projection_version": "CILE-PUBLIC-INDEX-1",
+  "profile_version": "0.4.4",
+  "projection_version": "CILE-PUBLIC-INDEX-2",
   "schema": "schema/public-enrichment-index.schema.json",
   "schema_class": "PublicationState",
   "schema_field_slots": {
@@ -35,8 +35,18 @@
     "/properties/records/items/properties/reference_coverage/items/properties/returned_count": "enrichment_returned_count",
     "/properties/records/items/properties/reference_coverage/items/properties/provider_count": "enrichment_provider_count",
     "/properties/records/items/properties/reference_coverage/items/properties/observed_at": "enrichment_observed_at",
+    "/properties/records/items/properties/annotation_summary": "schema:hasPart",
+    "/properties/records/items/properties/annotation_summary/properties/count": "public_annotation_count",
+    "/properties/records/items/properties/annotation_summary/properties/conflicts": "public_annotation_conflicts",
+    "/properties/records/items/properties/annotation_summary/properties/revision": "schema:version",
+    "/properties/records/items/properties/classification": "extraction_framework",
+    "/properties/records/items/properties/classification/properties/primary": "extraction_primary",
+    "/properties/records/items/properties/classification/properties/secondary": "extraction_secondary",
+    "/properties/records/items/properties/classification/properties/alternative": "extraction_alternative",
+    "/properties/records/items/properties/classification/properties/has_conflict": "public_classification_conflict",
     "/properties/next_cursor": "cile:nextCursor"
   },
   "privacy_boundary": "Only already validated public identity, proposal stage and completion projection summaries; no source bodies or private identifiers.",
-  "snapshot_boundary": "Bounded pages share a revision derived from current input and append-only evidence/proposal/receipt/coverage state. Changed snapshots fail closed. No per-browser per-paper fetch for filtering."
+  "snapshot_boundary": "Bounded pages share a revision derived from current input and append-only evidence/proposal/receipt/coverage state. Changed snapshots fail closed. No per-browser per-paper fetch for filtering.",
+  "counting_boundary": "Every active candidate counts once in the chosen register perimeter and revision. Classification roles are sets of explicit current public proposals; alternatives are excluded from class filters. Multiple primary classes or incompatible primary/secondary roles are retained conflicts, never silently selected. Manual annotation coverage is independent of extraction and completion."
 }

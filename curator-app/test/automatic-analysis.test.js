@@ -122,6 +122,6 @@ test('all HTML menus and public footer links omit the AML tab; historical collec
 });
 
 test('entry assets use a new cache key and method explains automatic reading',()=>{
- for(const file of ['index.html','stats.html'])assert.match(fs.readFileSync(new URL('../../site/'+file,import.meta.url),'utf8'),/paper-register\.js\?v=frontend-20260917-nav2-status-auto/);
+ for(const file of ['index.html','stats.html'])assert.match(fs.readFileSync(new URL('../../site/'+file,import.meta.url),'utf8'),/paper-register\.js\?v=archive-20260919-v2/);
  assert.match(fs.readFileSync(new URL('../../site/method.html',import.meta.url),'utf8'),/caricate automaticamente all’apertura/);
 });

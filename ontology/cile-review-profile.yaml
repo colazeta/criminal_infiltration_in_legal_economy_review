@@ -1,7 +1,7 @@
 {
   "id": "https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/vocab/cile-review.ttl",
   "name": "cile-review-profile",
-  "version": "0.4.3",
+  "version": "0.4.4",
   "title": "CILE Review Ontology Profile",
   "description": "Application ontology for the Criminal Infiltration in the Legal Economy living systematic review. It profiles SLR Ontology, PROV-O, FaBiO/BIBO, Web Annotation, SKOS and RIPE-O while defining only the domain and governance concepts that are specific to this review.",
   "prefixes": {
@@ -1833,6 +1833,21 @@
       "range": "boolean",
       "slot_uri": "cile:annotationDisplayAuthorised",
       "description": "The captured author is the configured curator under the owner-authorised unreviewed reading-support display boundary. This is not scientific approval."
+    },
+    "public_annotation_count": {
+      "slot_uri": "cile:publicAnnotationCount",
+      "range": "integer",
+      "description": "Derived count of current, candidate-bound, display-authorised annotations, never studies or completed extractions."
+    },
+    "public_annotation_conflicts": {
+      "slot_uri": "cile:publicAnnotationConflicts",
+      "range": "integer",
+      "description": "Derived count of annotation source heads with conflicting revisions in the candidate scope."
+    },
+    "public_classification_conflict": {
+      "slot_uri": "cile:publicClassificationConflict",
+      "range": "boolean",
+      "description": "Derived flag for multiple explicit primary classes, incompatible primary/secondary roles, outside-framework disagreements or conflicting annotation revisions; does not resolve the scientific conflict."
     }
   },
   "enums": {

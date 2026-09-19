@@ -9,7 +9,7 @@ import {Hour40Schedule, iterationKey} from './enrichment-schedule.js';
 import { sha256 } from './review-v2.js';
 import { runEnrichment, handlePaperEnrichment, storeExtraction, normalizeExistingExtractions } from './paper-enrichment.js';
 import {completionPacket, importCalibrationApproval, importCompletionApproval} from './enrichment-adjudication.js';
-import {readPublicResearch, readPublicCompletion, publicResearchAudit, readPublicIndex} from './public-paper-research.js';
+import {readPublicResearch, readPublicCompletion, publicResearchAudit, publicAnnotationAudit, readPublicIndex} from './public-paper-research.js';
 import {readDevelopmentCheckpoint,writeDevelopmentCheckpoint} from './calibration-development-checkpoint.js';
 import {claimF1Retention,assertF1RetentionClaim,releaseF1RetentionClaim,abortF1RetentionClaim} from './frontier-retention-claim.js';
 import {auditArchitecture,architectureSchema} from './architecture-audit.js';
@@ -232,7 +232,7 @@ export class EnrichmentStoreCore {
       const allowedFields=['operation','expected_commit','target_id','proposal','run_key','calibration_id','pr_number','source','document','bibliography','document_id','checkpoint','backup','ingress'];
       if(!data||typeof data!=='object'||Array.isArray(data)||Object.keys(data).some(k=>!allowedFields.includes(k)))return json({error_code:'invalid_service_envelope'},422);
       const operations=['verify','activate','deactivate','status','run','packet','proposal','public-research-audit','architecture-audit','completion-packet','calibration-approval','completion-approval','source','document','documents','document-check','bibliography','provider-bibliography','development-checkpoint-get','development-checkpoint-put','document-retention-claim','source-claimed','document-claimed','document-retention-release','document-retention-abort'];
-      if(!operations.includes(data.operation)&&!['architecture-schema','architecture-backup','architecture-normalize','archive-annotation','archive-annotation-batch','annotation-audit','annotation-census'].includes(data.operation))return json({error_code:'unknown_service_operation'},422);
+      if(!operations.includes(data.operation)&&!['architecture-schema','architecture-backup','architecture-normalize','archive-annotation','archive-annotation-batch','annotation-audit','annotation-census','annotation-projection-audit'].includes(data.operation))return json({error_code:'unknown_service_operation'},422);
       if(data.expected_commit!==this.env.DEPLOY_COMMIT)return json({error_code:'stale_deployment'},409);
       if(data.operation==='verify')return json(await this.verify());
       if(data.operation==='activate'){await this.verify();await this.ctx.storage.put('activation:enrichment',{commit:this.env.DEPLOY_COMMIT,at:new Date(now).toISOString()});await this.schedule.start();return json(await this.aggregate())}
@@ -242,6 +242,11 @@ export class EnrichmentStoreCore {
         if(Object.keys(data).sort().join(',')!=='expected_commit,ingress,operation')return json({error_code:'invalid_service_envelope'},422);
         try{return json(await ingestAnnotation(await this.environment(),data.ingress))}
         catch{return json({error_code:'annotation_ingest_failed'},503)}
+      }
+      if(data.operation==='annotation-projection-audit'){
+        if(Object.keys(data).sort().join(',')!=='expected_commit,operation')return json({error_code:'invalid_service_envelope'},422);
+        try{return json(await publicAnnotationAudit(await this.environment()))}
+        catch{return json({error_code:'annotation_audit_failed'},503)}
       }
       if(data.operation==='annotation-audit'){
         if(Object.keys(data).sort().join(',')!=='expected_commit,operation')return json({error_code:'invalid_service_envelope'},422);

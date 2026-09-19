@@ -15,7 +15,7 @@
       "const": 1
     },
     "projection_version": {
-      "const": "CILE-PUBLIC-INDEX-1"
+      "const": "CILE-PUBLIC-INDEX-2"
     },
     "index_revision": {
       "type": "string",
@@ -40,7 +40,9 @@
           "classes",
           "research_revision",
           "completion",
-          "reference_coverage"
+          "reference_coverage",
+          "annotation_summary",
+          "classification"
         ],
         "properties": {
           "candidate": {
@@ -234,6 +236,86 @@
                   "type": "string",
                   "maxLength": 64
                 }
+              }
+            }
+          },
+          "annotation_summary": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "count",
+              "conflicts",
+              "revision"
+            ],
+            "properties": {
+              "count": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "conflicts": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "revision": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            }
+          },
+          "classification": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "primary",
+              "secondary",
+              "alternative",
+              "has_conflict"
+            ],
+            "properties": {
+              "primary": {
+                "type": "array",
+                "maxItems": 6,
+                "items": {
+                  "enum": [
+                    "aetiology",
+                    "diagnosis",
+                    "screening",
+                    "therapy",
+                    "prognosis",
+                    "prevention"
+                  ]
+                }
+              },
+              "secondary": {
+                "type": "array",
+                "maxItems": 6,
+                "items": {
+                  "enum": [
+                    "aetiology",
+                    "diagnosis",
+                    "screening",
+                    "therapy",
+                    "prognosis",
+                    "prevention"
+                  ]
+                }
+              },
+              "alternative": {
+                "type": "array",
+                "maxItems": 6,
+                "items": {
+                  "enum": [
+                    "aetiology",
+                    "diagnosis",
+                    "screening",
+                    "therapy",
+                    "prognosis",
+                    "prevention"
+                  ]
+                }
+              },
+              "has_conflict": {
+                "type": "boolean"
               }
             }
           }
