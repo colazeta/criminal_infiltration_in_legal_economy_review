@@ -4,7 +4,7 @@
 
 Il proprietario riferisce sul commit d7f84cc8ba9539b8e39b48e36a605c0beddb36ee: UNSUPPORTED_CONSTRUCT, `Process type 'ActivationInput' uses unsupported schema keyword 'nullable' on 'integer' schemas.`, __setup__, testCount=0. Nessuna delle 154 fixture e' stata eseguita. La precedente prova 63106891 aveva gia' respinto i type array. Entrambe le diagnostiche sono conservate come user-reported, non come risultati ottenuti dall'assistente.
 
-Non si propone un'altra unione. La CLI 0.13.0, `kora schema get process --json`, documenta type scalari integer/number e oggetti con properties e required. Il bundle usa gia' questi costrutti per active_wip_count e campi facoltativi come assessment_distance_to_f5/inconsistency_code. La rappresentazione scelta usa solo quel vocabolario, senza nuovi keyword: due proprieta' numeriche NON elencate in required. Non e' una deduzione del supporto Kora dall'accettazione di AJV. La prova nativa minima deve comunque verificarne il funzionamento sul server attuale.
+Non si propone un'altra unione. La CLI 0.13.0, `kora schema get process --json`, documenta type scalari integer/number e oggetti con properties e required. Il bundle usa gia' questi costrutti per active_wip_count e campi facoltativi come assessment_distance_to_f5/inconsistency_code. La rappresentazione scelta usa solo quel vocabolario, senza nuovi keyword: due proprieta' numeriche NON elencate in required. Non e' una deduzione del supporto Kora dall'accettazione di AJV. **La prova nativa minima ora ha confermato compilazione e gestione dell'omissione: 1/1, gatePassed=true.**
 
 In entrambi ActivationInput e ActivationWithFrontier:
 
@@ -62,7 +62,11 @@ kora test suite --workspace $workspace --environment production --org oltre --js
 
 La seconda chiamata seleziona tutte le 154 fixture sotto <checkout>/integrations/kora/control-plane/tests, senza --name o --release. L'archivio replay/history e' fuori dal bundle. Il wrapper consegnato negli outputs fissa il nuovo commit. Non viene modificato il checkout precedente del proprietario.
 
-L'assistente non ha eseguito il probe nativo ne' la suite completa: l'ambiente ha il precedente blocco di scrittura dello stato sessione Kora nel sandbox, senza percorso di escalation autorizzato. Non sono stati copiati token/sessioni, cancellati lock o aggirati dinieghi. **Il superamento del probe nativo e della suite completa resta da verificare tramite il comando manuale.** Gli esiti locali non lo sostituiscono.
+L'assistente ha tentato il percorso CLI ordinario senza alcuna modifica a sessione o permessi. Il precedente impedimento non ha bloccato questa chiamata. Il probe sul bundle del commit b9c052f77c528e67ab70c851884d4158ce30a5ef e' stato effettivamente eseguito: status=passed, testCount=1, gateable=gatePassing=1, gatePassed=true, output BLOCKED/undetermined/observe_only, side_effect_authorized=false. Evidenza sintetizzata senza identificatori di account in native-minimal-result.json.
+
+**Solo dopo tale successo e' stata avviata la suite completa.** La CLI e' terminata con exit 1 e `cli/error: fetch failed`, details.status=500, senza data.suite. Non e' noto quante delle 154 fixture il server abbia eseguito o quale sia il loro esito; testCount e gatePassed non sono disponibili. Non e' corretto affermare 0 test, 154 fallimenti, successo completo o diagnosticare un nuovo errore di schema. Non e' nemmeno provata una risposta HTTP 500 del server: 500 e' il valore dell'envelope CLI. Evidenza in native-full-result.json. Non e' stata ripetuta automaticamente la richiesta dall'esito server incerto.
+
+Il wrapper manuale conserva la stessa sequenza vincolata al commit finale. Il suo bundle control-plane e' identico a quello del commit b9c052f7 effettivamente sottoposto al probe; il commit successivo registra soltanto evidenze e rapporto. **Resta non verificato il superamento dell'intera suite nativa**. Nessun token/sessione copiato, lock cancellato, escalation o workaround browser. Gli esiti locali non sostituiscono il risultato nativo mancante.
 
 ## Separazione dagli altri problemi
 
