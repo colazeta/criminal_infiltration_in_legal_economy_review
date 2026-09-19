@@ -1,5 +1,5 @@
 {
-  "profile_version": "0.4.4",
+  "profile_version": "0.4.5",
   "runtime_verified": false,
   "migrations": [
     {
@@ -33,6 +33,10 @@
     {
       "path": "curator-app/migrations/0008_annotation_archive.sql",
       "sha256": "e0f389a82c0eb87406b3a9057b85e5be42f6686d524c38177506097c25017d48"
+    },
+    {
+      "path": "curator-app/migrations/0009_candidate_archive.sql",
+      "sha256": "149665cd8d7a4e8bf3ec6c9a33cf970b60583cbd1a6e2ea0c6ba85495444646f"
     }
   ],
   "tables": [
@@ -3530,6 +3534,1422 @@
         {
           "name": "enrichment_calibration_receipts_no_update",
           "sql": "CREATE TRIGGER enrichment_calibration_receipts_no_update BEFORE UPDATE ON enrichment_calibration_receipts BEGIN SELECT RAISE(ABORT,'append_only'); END"
+        }
+      ]
+    },
+    {
+      "table": "enrichment_candidate_abstract",
+      "concept": "AbstractCoverageAssessment",
+      "migration": "curator-app/migrations/0009_candidate_archive.sql",
+      "implementation_status": "configured_enrichment_sqlite",
+      "columns": [
+        {
+          "cid": 0,
+          "name": "revision_id",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "observed_title",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "observed_doi",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "coverage_status",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "abstract_source",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "article_url",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "match_type",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 7,
+          "name": "match_score",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 8,
+          "name": "provider_errors",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 9,
+          "name": "checked_at",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 10,
+          "name": "notes",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [
+        {
+          "id": 0,
+          "seq": 0,
+          "table": "enrichment_candidate_revisions",
+          "from": "revision_id",
+          "to": "revision_id",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        }
+      ],
+      "indexes": [
+        {
+          "seq": 0,
+          "name": "sqlite_autoindex_enrichment_candidate_abstract_1",
+          "unique": 1,
+          "origin": "pk",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 0,
+              "name": "revision_id"
+            }
+          ],
+          "sql": null
+        }
+      ],
+      "sql": "CREATE TABLE enrichment_candidate_abstract (\n revision_id TEXT NOT NULL PRIMARY KEY REFERENCES enrichment_candidate_revisions(revision_id),\n observed_title TEXT NOT NULL,\n observed_doi TEXT NOT NULL,\n coverage_status TEXT NOT NULL CHECK(coverage_status IN ('available','needs_web_search','unresolved','unavailable')),\n abstract_source TEXT NOT NULL,\n article_url TEXT NOT NULL,\n match_type TEXT NOT NULL,\n match_score TEXT NOT NULL,\n provider_errors TEXT NOT NULL,\n checked_at TEXT NOT NULL,\n notes TEXT NOT NULL\n)",
+      "triggers": [
+        {
+          "name": "candidate_abstract_scope",
+          "sql": "CREATE TRIGGER candidate_abstract_scope BEFORE INSERT ON enrichment_candidate_abstract WHEN NOT EXISTS(SELECT 1 FROM enrichment_candidate_revisions WHERE revision_id=NEW.revision_id AND domain='abstract') BEGIN SELECT RAISE(ABORT,'candidate_domain_mismatch'); END"
+        },
+        {
+          "name": "enrichment_candidate_abstract_no_delete",
+          "sql": "CREATE TRIGGER enrichment_candidate_abstract_no_delete BEFORE DELETE ON enrichment_candidate_abstract BEGIN SELECT RAISE(ABORT,'append_only'); END"
+        },
+        {
+          "name": "enrichment_candidate_abstract_no_update",
+          "sql": "CREATE TRIGGER enrichment_candidate_abstract_no_update BEFORE UPDATE ON enrichment_candidate_abstract BEGIN SELECT RAISE(ABORT,'append_only'); END"
+        }
+      ]
+    },
+    {
+      "table": "enrichment_candidate_access",
+      "concept": "AccessAssessment",
+      "migration": "curator-app/migrations/0009_candidate_archive.sql",
+      "implementation_status": "configured_enrichment_sqlite",
+      "columns": [
+        {
+          "cid": 0,
+          "name": "revision_id",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "observed_title",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "observed_doi",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "access_status",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "access_kind",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "access_url",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "evidence_source",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 7,
+          "name": "evidence_detail",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 8,
+          "name": "checked_at",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 9,
+          "name": "notes",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [
+        {
+          "id": 0,
+          "seq": 0,
+          "table": "enrichment_candidate_revisions",
+          "from": "revision_id",
+          "to": "revision_id",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        }
+      ],
+      "indexes": [
+        {
+          "seq": 0,
+          "name": "sqlite_autoindex_enrichment_candidate_access_1",
+          "unique": 1,
+          "origin": "pk",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 0,
+              "name": "revision_id"
+            }
+          ],
+          "sql": null
+        }
+      ],
+      "sql": "CREATE TABLE enrichment_candidate_access (\n revision_id TEXT NOT NULL PRIMARY KEY REFERENCES enrichment_candidate_revisions(revision_id),\n observed_title TEXT NOT NULL,\n observed_doi TEXT NOT NULL,\n access_status TEXT NOT NULL CHECK(access_status IN ('open','restricted','unknown')),\n access_kind TEXT NOT NULL,\n access_url TEXT NOT NULL,\n evidence_source TEXT NOT NULL,\n evidence_detail TEXT NOT NULL,\n checked_at TEXT NOT NULL,\n notes TEXT NOT NULL\n)",
+      "triggers": [
+        {
+          "name": "candidate_access_scope",
+          "sql": "CREATE TRIGGER candidate_access_scope BEFORE INSERT ON enrichment_candidate_access WHEN NOT EXISTS(SELECT 1 FROM enrichment_candidate_revisions WHERE revision_id=NEW.revision_id AND domain='access') BEGIN SELECT RAISE(ABORT,'candidate_domain_mismatch'); END"
+        },
+        {
+          "name": "enrichment_candidate_access_no_delete",
+          "sql": "CREATE TRIGGER enrichment_candidate_access_no_delete BEFORE DELETE ON enrichment_candidate_access BEGIN SELECT RAISE(ABORT,'append_only'); END"
+        },
+        {
+          "name": "enrichment_candidate_access_no_update",
+          "sql": "CREATE TRIGGER enrichment_candidate_access_no_update BEFORE UPDATE ON enrichment_candidate_access BEGIN SELECT RAISE(ABORT,'append_only'); END"
+        }
+      ]
+    },
+    {
+      "table": "enrichment_candidate_bibliography",
+      "concept": "CandidateRecord",
+      "migration": "curator-app/migrations/0009_candidate_archive.sql",
+      "implementation_status": "configured_enrichment_sqlite",
+      "columns": [
+        {
+          "cid": 0,
+          "name": "revision_id",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "title",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "doi",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "authors",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "year",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "venue",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "work_type",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 7,
+          "name": "source",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 8,
+          "name": "other_identifiers",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 9,
+          "name": "verification_status",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 10,
+          "name": "metadata_confidence",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 11,
+          "name": "intake_assessment",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 12,
+          "name": "intake_reason",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 13,
+          "name": "possible_duplicate",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 14,
+          "name": "metadata_conflict",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 15,
+          "name": "required_human_action",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 16,
+          "name": "origin",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 17,
+          "name": "legacy_scope_fit",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 18,
+          "name": "legacy_recommendation",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 19,
+          "name": "legacy_reason",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 20,
+          "name": "legacy_priority",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 21,
+          "name": "review_stage",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 22,
+          "name": "current_status",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 23,
+          "name": "current_decision",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 24,
+          "name": "exclusion_reason_code",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 25,
+          "name": "topic_code",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 26,
+          "name": "duplicate_target_id",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 27,
+          "name": "secondary_collection_code",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 28,
+          "name": "secondary_collection_rationale",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 29,
+          "name": "last_action_id",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 30,
+          "name": "materialised_at",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 31,
+          "name": "updated_at",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 32,
+          "name": "provenance",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [
+        {
+          "id": 0,
+          "seq": 0,
+          "table": "enrichment_candidate_revisions",
+          "from": "revision_id",
+          "to": "revision_id",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        }
+      ],
+      "indexes": [
+        {
+          "seq": 0,
+          "name": "sqlite_autoindex_enrichment_candidate_bibliography_1",
+          "unique": 1,
+          "origin": "pk",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 0,
+              "name": "revision_id"
+            }
+          ],
+          "sql": null
+        }
+      ],
+      "sql": "CREATE TABLE enrichment_candidate_bibliography (\n revision_id TEXT NOT NULL PRIMARY KEY REFERENCES enrichment_candidate_revisions(revision_id),\n title TEXT NOT NULL,\n doi TEXT NOT NULL,\n authors TEXT NOT NULL,\n year TEXT NOT NULL,\n venue TEXT NOT NULL,\n work_type TEXT NOT NULL,\n source TEXT NOT NULL,\n other_identifiers TEXT NOT NULL,\n verification_status TEXT NOT NULL,\n metadata_confidence TEXT NOT NULL,\n intake_assessment TEXT NOT NULL,\n intake_reason TEXT NOT NULL,\n possible_duplicate TEXT NOT NULL,\n metadata_conflict TEXT NOT NULL,\n required_human_action TEXT NOT NULL,\n origin TEXT NOT NULL,\n legacy_scope_fit TEXT NOT NULL,\n legacy_recommendation TEXT NOT NULL,\n legacy_reason TEXT NOT NULL,\n legacy_priority TEXT NOT NULL,\n review_stage TEXT NOT NULL CHECK(review_stage IN ('metadata_fix','manual_review','abstract_full_text_review','legacy_rejection_review','seed_validation','title_abstract','full_text','data_extraction','appraisal')),\n current_status TEXT NOT NULL CHECK(current_status IN ('pending','screened_eligible_core','screened_eligible_contextual','needs_full_text','screened_not_eligible','duplicate_confirmed','screened_not_academic','screened_not_retrievable')),\n current_decision TEXT NOT NULL,\n exclusion_reason_code TEXT NOT NULL,\n topic_code TEXT NOT NULL,\n duplicate_target_id TEXT NOT NULL,\n secondary_collection_code TEXT NOT NULL,\n secondary_collection_rationale TEXT NOT NULL,\n last_action_id TEXT NOT NULL,\n materialised_at TEXT NOT NULL,\n updated_at TEXT NOT NULL,\n provenance TEXT NOT NULL\n)",
+      "triggers": [
+        {
+          "name": "candidate_bibliography_scope",
+          "sql": "CREATE TRIGGER candidate_bibliography_scope BEFORE INSERT ON enrichment_candidate_bibliography WHEN NOT EXISTS(SELECT 1 FROM enrichment_candidate_revisions WHERE revision_id=NEW.revision_id AND domain='bibliography') BEGIN SELECT RAISE(ABORT,'candidate_domain_mismatch'); END"
+        },
+        {
+          "name": "enrichment_candidate_bibliography_no_delete",
+          "sql": "CREATE TRIGGER enrichment_candidate_bibliography_no_delete BEFORE DELETE ON enrichment_candidate_bibliography BEGIN SELECT RAISE(ABORT,'append_only'); END"
+        },
+        {
+          "name": "enrichment_candidate_bibliography_no_update",
+          "sql": "CREATE TRIGGER enrichment_candidate_bibliography_no_update BEFORE UPDATE ON enrichment_candidate_bibliography BEGIN SELECT RAISE(ABORT,'append_only'); END"
+        }
+      ]
+    },
+    {
+      "table": "enrichment_candidate_heads",
+      "concept": "CandidateRecord",
+      "migration": "curator-app/migrations/0009_candidate_archive.sql",
+      "implementation_status": "configured_enrichment_sqlite",
+      "columns": [
+        {
+          "cid": 0,
+          "name": "candidate_id",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "cycle_id",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 2
+        },
+        {
+          "cid": 2,
+          "name": "domain",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 3
+        },
+        {
+          "cid": 3,
+          "name": "revision_id",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "record_version",
+          "type": "INTEGER",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "state",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "updated_at",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [
+        {
+          "id": 0,
+          "seq": 0,
+          "table": "enrichment_candidate_revisions",
+          "from": "revision_id",
+          "to": "revision_id",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        },
+        {
+          "id": 0,
+          "seq": 1,
+          "table": "enrichment_candidate_revisions",
+          "from": "candidate_id",
+          "to": "candidate_id",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        },
+        {
+          "id": 0,
+          "seq": 2,
+          "table": "enrichment_candidate_revisions",
+          "from": "cycle_id",
+          "to": "cycle_id",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        },
+        {
+          "id": 0,
+          "seq": 3,
+          "table": "enrichment_candidate_revisions",
+          "from": "domain",
+          "to": "domain",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        }
+      ],
+      "indexes": [
+        {
+          "seq": 0,
+          "name": "sqlite_autoindex_enrichment_candidate_heads_1",
+          "unique": 1,
+          "origin": "pk",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 0,
+              "name": "candidate_id"
+            },
+            {
+              "seqno": 1,
+              "cid": 1,
+              "name": "cycle_id"
+            },
+            {
+              "seqno": 2,
+              "cid": 2,
+              "name": "domain"
+            }
+          ],
+          "sql": null
+        }
+      ],
+      "sql": "CREATE TABLE enrichment_candidate_heads (\n \n candidate_id TEXT NOT NULL, cycle_id TEXT NOT NULL, domain TEXT NOT NULL,\n revision_id TEXT NOT NULL, record_version INTEGER NOT NULL CHECK(record_version>=1),\n state TEXT NOT NULL CHECK(state IN ('active','withdrawn')), updated_at TEXT NOT NULL,\n PRIMARY KEY(candidate_id,cycle_id,domain),\n FOREIGN KEY(revision_id,candidate_id,cycle_id,domain)\n REFERENCES enrichment_candidate_revisions(revision_id,candidate_id,cycle_id,domain)\n)",
+      "triggers": [
+        {
+          "name": "candidate_head_cas",
+          "sql": "CREATE TRIGGER candidate_head_cas BEFORE UPDATE ON enrichment_candidate_heads WHEN NEW.candidate_id<>OLD.candidate_id OR NEW.cycle_id<>OLD.cycle_id OR NEW.domain<>OLD.domain OR NEW.record_version<>OLD.record_version+1 BEGIN SELECT RAISE(ABORT,'candidate_head_concurrency'); END"
+        },
+        {
+          "name": "candidate_no_republication",
+          "sql": "CREATE TRIGGER candidate_no_republication BEFORE UPDATE ON enrichment_candidate_heads WHEN OLD.state='withdrawn' BEGIN SELECT RAISE(ABORT,'candidate_restore_requires_reviewed_procedure'); END"
+        },
+        {
+          "name": "enrichment_candidate_heads_no_delete",
+          "sql": "CREATE TRIGGER enrichment_candidate_heads_no_delete BEFORE DELETE ON enrichment_candidate_heads BEGIN SELECT RAISE(ABORT,'append_only'); END"
+        }
+      ]
+    },
+    {
+      "table": "enrichment_candidate_receipts",
+      "concept": "ReviewEvent",
+      "migration": "curator-app/migrations/0009_candidate_archive.sql",
+      "implementation_status": "configured_enrichment_sqlite",
+      "columns": [
+        {
+          "cid": 0,
+          "name": "receipt_id",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "candidate_id",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "cycle_id",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "domain",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "revision_id",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "previous_revision_id",
+          "type": "TEXT",
+          "notnull": 0,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "action",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 7,
+          "name": "expected_version",
+          "type": "INTEGER",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 8,
+          "name": "persisted_at",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [
+        {
+          "id": 0,
+          "seq": 0,
+          "table": "enrichment_candidate_revisions",
+          "from": "previous_revision_id",
+          "to": "revision_id",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        },
+        {
+          "id": 1,
+          "seq": 0,
+          "table": "enrichment_candidate_revisions",
+          "from": "revision_id",
+          "to": "revision_id",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        },
+        {
+          "id": 1,
+          "seq": 1,
+          "table": "enrichment_candidate_revisions",
+          "from": "candidate_id",
+          "to": "candidate_id",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        },
+        {
+          "id": 1,
+          "seq": 2,
+          "table": "enrichment_candidate_revisions",
+          "from": "cycle_id",
+          "to": "cycle_id",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        },
+        {
+          "id": 1,
+          "seq": 3,
+          "table": "enrichment_candidate_revisions",
+          "from": "domain",
+          "to": "domain",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        }
+      ],
+      "indexes": [
+        {
+          "seq": 0,
+          "name": "sqlite_autoindex_enrichment_candidate_receipts_1",
+          "unique": 1,
+          "origin": "pk",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 0,
+              "name": "receipt_id"
+            }
+          ],
+          "sql": null
+        }
+      ],
+      "sql": "CREATE TABLE enrichment_candidate_receipts (\n \n receipt_id TEXT NOT NULL PRIMARY KEY, candidate_id TEXT NOT NULL, cycle_id TEXT NOT NULL,\n domain TEXT NOT NULL, revision_id TEXT NOT NULL, previous_revision_id TEXT,\n action TEXT NOT NULL CHECK(action IN ('initialise','observe','supersede','withdraw')),\n expected_version INTEGER NOT NULL CHECK(expected_version>=0), persisted_at TEXT NOT NULL,\n FOREIGN KEY(revision_id,candidate_id,cycle_id,domain)\n REFERENCES enrichment_candidate_revisions(revision_id,candidate_id,cycle_id,domain),\n FOREIGN KEY(previous_revision_id) REFERENCES enrichment_candidate_revisions(revision_id)\n)",
+      "triggers": [
+        {
+          "name": "enrichment_candidate_receipts_no_delete",
+          "sql": "CREATE TRIGGER enrichment_candidate_receipts_no_delete BEFORE DELETE ON enrichment_candidate_receipts BEGIN SELECT RAISE(ABORT,'append_only'); END"
+        },
+        {
+          "name": "enrichment_candidate_receipts_no_update",
+          "sql": "CREATE TRIGGER enrichment_candidate_receipts_no_update BEFORE UPDATE ON enrichment_candidate_receipts BEGIN SELECT RAISE(ABORT,'append_only'); END"
+        }
+      ]
+    },
+    {
+      "table": "enrichment_candidate_records",
+      "concept": "CandidateRecord",
+      "migration": "curator-app/migrations/0009_candidate_archive.sql",
+      "implementation_status": "configured_enrichment_sqlite",
+      "columns": [
+        {
+          "cid": 0,
+          "name": "candidate_id",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "cycle_id",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 2
+        },
+        {
+          "cid": 2,
+          "name": "created_at",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [],
+      "indexes": [
+        {
+          "seq": 0,
+          "name": "sqlite_autoindex_enrichment_candidate_records_1",
+          "unique": 1,
+          "origin": "pk",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 0,
+              "name": "candidate_id"
+            },
+            {
+              "seqno": 1,
+              "cid": 1,
+              "name": "cycle_id"
+            }
+          ],
+          "sql": null
+        }
+      ],
+      "sql": "CREATE TABLE enrichment_candidate_records (\n \n candidate_id TEXT NOT NULL, cycle_id TEXT NOT NULL, created_at TEXT NOT NULL,\n PRIMARY KEY(candidate_id,cycle_id)\n)",
+      "triggers": [
+        {
+          "name": "enrichment_candidate_records_no_delete",
+          "sql": "CREATE TRIGGER enrichment_candidate_records_no_delete BEFORE DELETE ON enrichment_candidate_records BEGIN SELECT RAISE(ABORT,'append_only'); END"
+        },
+        {
+          "name": "enrichment_candidate_records_no_update",
+          "sql": "CREATE TRIGGER enrichment_candidate_records_no_update BEFORE UPDATE ON enrichment_candidate_records BEGIN SELECT RAISE(ABORT,'append_only'); END"
+        }
+      ]
+    },
+    {
+      "table": "enrichment_candidate_retrieval",
+      "concept": "RetrievalActivity",
+      "migration": "curator-app/migrations/0009_candidate_archive.sql",
+      "implementation_status": "configured_enrichment_sqlite",
+      "columns": [
+        {
+          "cid": 0,
+          "name": "revision_id",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "observed_title",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "observed_doi",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "resolution_status",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "best_url",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "best_url_kind",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "full_text_url",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 7,
+          "name": "open_access_url",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 8,
+          "name": "landing_url",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 9,
+          "name": "doi_url",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 10,
+          "name": "resolved_doi",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 11,
+          "name": "match_method",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 12,
+          "name": "match_confidence",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 13,
+          "name": "checked_at",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 14,
+          "name": "notes",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [
+        {
+          "id": 0,
+          "seq": 0,
+          "table": "enrichment_candidate_revisions",
+          "from": "revision_id",
+          "to": "revision_id",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        }
+      ],
+      "indexes": [
+        {
+          "seq": 0,
+          "name": "sqlite_autoindex_enrichment_candidate_retrieval_1",
+          "unique": 1,
+          "origin": "pk",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 0,
+              "name": "revision_id"
+            }
+          ],
+          "sql": null
+        }
+      ],
+      "sql": "CREATE TABLE enrichment_candidate_retrieval (\n revision_id TEXT NOT NULL PRIMARY KEY REFERENCES enrichment_candidate_revisions(revision_id),\n observed_title TEXT NOT NULL,\n observed_doi TEXT NOT NULL,\n resolution_status TEXT NOT NULL,\n best_url TEXT NOT NULL,\n best_url_kind TEXT NOT NULL,\n full_text_url TEXT NOT NULL,\n open_access_url TEXT NOT NULL,\n landing_url TEXT NOT NULL,\n doi_url TEXT NOT NULL,\n resolved_doi TEXT NOT NULL,\n match_method TEXT NOT NULL,\n match_confidence TEXT NOT NULL,\n checked_at TEXT NOT NULL,\n notes TEXT NOT NULL\n)",
+      "triggers": [
+        {
+          "name": "candidate_retrieval_scope",
+          "sql": "CREATE TRIGGER candidate_retrieval_scope BEFORE INSERT ON enrichment_candidate_retrieval WHEN NOT EXISTS(SELECT 1 FROM enrichment_candidate_revisions WHERE revision_id=NEW.revision_id AND domain='retrieval') BEGIN SELECT RAISE(ABORT,'candidate_domain_mismatch'); END"
+        },
+        {
+          "name": "enrichment_candidate_retrieval_no_delete",
+          "sql": "CREATE TRIGGER enrichment_candidate_retrieval_no_delete BEFORE DELETE ON enrichment_candidate_retrieval BEGIN SELECT RAISE(ABORT,'append_only'); END"
+        },
+        {
+          "name": "enrichment_candidate_retrieval_no_update",
+          "sql": "CREATE TRIGGER enrichment_candidate_retrieval_no_update BEFORE UPDATE ON enrichment_candidate_retrieval BEGIN SELECT RAISE(ABORT,'append_only'); END"
+        }
+      ]
+    },
+    {
+      "table": "enrichment_candidate_revisions",
+      "concept": "MetadataAssertion",
+      "migration": "curator-app/migrations/0009_candidate_archive.sql",
+      "implementation_status": "configured_enrichment_sqlite",
+      "columns": [
+        {
+          "cid": 0,
+          "name": "revision_id",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "candidate_id",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 2,
+          "name": "cycle_id",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 3,
+          "name": "domain",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 4,
+          "name": "source_commit",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 5,
+          "name": "content_sha256",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 6,
+          "name": "storage_key",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        },
+        {
+          "cid": 7,
+          "name": "observed_at",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [
+        {
+          "id": 0,
+          "seq": 0,
+          "table": "enrichment_candidate_records",
+          "from": "candidate_id",
+          "to": "candidate_id",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        },
+        {
+          "id": 0,
+          "seq": 1,
+          "table": "enrichment_candidate_records",
+          "from": "cycle_id",
+          "to": "cycle_id",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        }
+      ],
+      "indexes": [
+        {
+          "seq": 0,
+          "name": "candidate_revision_identity",
+          "unique": 0,
+          "origin": "c",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 1,
+              "name": "candidate_id"
+            },
+            {
+              "seqno": 1,
+              "cid": 2,
+              "name": "cycle_id"
+            },
+            {
+              "seqno": 2,
+              "cid": 3,
+              "name": "domain"
+            }
+          ],
+          "sql": "CREATE INDEX candidate_revision_identity ON enrichment_candidate_revisions(candidate_id,cycle_id,domain)"
+        },
+        {
+          "seq": 1,
+          "name": "sqlite_autoindex_enrichment_candidate_revisions_3",
+          "unique": 1,
+          "origin": "u",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 0,
+              "name": "revision_id"
+            },
+            {
+              "seqno": 1,
+              "cid": 1,
+              "name": "candidate_id"
+            },
+            {
+              "seqno": 2,
+              "cid": 2,
+              "name": "cycle_id"
+            },
+            {
+              "seqno": 3,
+              "cid": 3,
+              "name": "domain"
+            }
+          ],
+          "sql": null
+        },
+        {
+          "seq": 2,
+          "name": "sqlite_autoindex_enrichment_candidate_revisions_2",
+          "unique": 1,
+          "origin": "u",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 6,
+              "name": "storage_key"
+            }
+          ],
+          "sql": null
+        },
+        {
+          "seq": 3,
+          "name": "sqlite_autoindex_enrichment_candidate_revisions_1",
+          "unique": 1,
+          "origin": "pk",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 0,
+              "name": "revision_id"
+            }
+          ],
+          "sql": null
+        }
+      ],
+      "sql": "CREATE TABLE enrichment_candidate_revisions (\n \n revision_id TEXT NOT NULL PRIMARY KEY, candidate_id TEXT NOT NULL, cycle_id TEXT NOT NULL,\n domain TEXT NOT NULL CHECK(domain IN ('bibliography','abstract','retrieval','access')),\n source_commit TEXT NOT NULL CHECK(length(source_commit)=40),\n content_sha256 TEXT NOT NULL CHECK(length(content_sha256)=64),\n storage_key TEXT NOT NULL UNIQUE, observed_at TEXT NOT NULL,\n UNIQUE(revision_id,candidate_id,cycle_id,domain),\n FOREIGN KEY(candidate_id,cycle_id) REFERENCES enrichment_candidate_records(candidate_id,cycle_id)\n)",
+      "triggers": [
+        {
+          "name": "enrichment_candidate_revisions_no_delete",
+          "sql": "CREATE TRIGGER enrichment_candidate_revisions_no_delete BEFORE DELETE ON enrichment_candidate_revisions BEGIN SELECT RAISE(ABORT,'append_only'); END"
+        },
+        {
+          "name": "enrichment_candidate_revisions_no_update",
+          "sql": "CREATE TRIGGER enrichment_candidate_revisions_no_update BEFORE UPDATE ON enrichment_candidate_revisions BEGIN SELECT RAISE(ABORT,'append_only'); END"
+        }
+      ]
+    },
+    {
+      "table": "enrichment_candidate_values",
+      "concept": "MetadataAssertion",
+      "migration": "curator-app/migrations/0009_candidate_archive.sql",
+      "implementation_status": "configured_enrichment_sqlite",
+      "columns": [
+        {
+          "cid": 0,
+          "name": "revision_id",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 1
+        },
+        {
+          "cid": 1,
+          "name": "field",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 2
+        },
+        {
+          "cid": 2,
+          "name": "position",
+          "type": "INTEGER",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 3
+        },
+        {
+          "cid": 3,
+          "name": "value",
+          "type": "TEXT",
+          "notnull": 1,
+          "dflt_value": null,
+          "pk": 0
+        }
+      ],
+      "foreign_keys": [
+        {
+          "id": 0,
+          "seq": 0,
+          "table": "enrichment_candidate_revisions",
+          "from": "revision_id",
+          "to": "revision_id",
+          "on_update": "NO ACTION",
+          "on_delete": "NO ACTION",
+          "match": "NONE"
+        }
+      ],
+      "indexes": [
+        {
+          "seq": 0,
+          "name": "sqlite_autoindex_enrichment_candidate_values_1",
+          "unique": 1,
+          "origin": "pk",
+          "partial": 0,
+          "columns": [
+            {
+              "seqno": 0,
+              "cid": 0,
+              "name": "revision_id"
+            },
+            {
+              "seqno": 1,
+              "cid": 1,
+              "name": "field"
+            },
+            {
+              "seqno": 2,
+              "cid": 2,
+              "name": "position"
+            }
+          ],
+          "sql": null
+        }
+      ],
+      "sql": "CREATE TABLE enrichment_candidate_values (\n \n revision_id TEXT NOT NULL REFERENCES enrichment_candidate_revisions(revision_id),\n field TEXT NOT NULL CHECK(field IN ('providers_tried','resolution_sources','source_links','source_query_id','source_urls')), position INTEGER NOT NULL CHECK(position>=0),\n value TEXT NOT NULL CHECK(length(value)>0), PRIMARY KEY(revision_id,field,position)\n)",
+      "triggers": [
+        {
+          "name": "enrichment_candidate_values_no_delete",
+          "sql": "CREATE TRIGGER enrichment_candidate_values_no_delete BEFORE DELETE ON enrichment_candidate_values BEGIN SELECT RAISE(ABORT,'append_only'); END"
+        },
+        {
+          "name": "enrichment_candidate_values_no_update",
+          "sql": "CREATE TRIGGER enrichment_candidate_values_no_update BEFORE UPDATE ON enrichment_candidate_values BEGIN SELECT RAISE(ABORT,'append_only'); END"
         }
       ]
     },

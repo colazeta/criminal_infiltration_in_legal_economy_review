@@ -1,0 +1,609 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "CILE-CANDIDATE-ARCHIVE-1",
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contract",
+        "action",
+        "domain",
+        "source_commit",
+        "expected_version",
+        "row"
+      ],
+      "properties": {
+        "contract": {
+          "const": "CILE-CANDIDATE-ARCHIVE-1"
+        },
+        "domain": {
+          "const": "bibliography"
+        },
+        "action": {
+          "enum": [
+            "initialise",
+            "observe",
+            "supersede",
+            "withdraw"
+          ]
+        },
+        "source_commit": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{40}$"
+        },
+        "expected_version": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "row": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "candidate_id",
+            "title",
+            "doi",
+            "authors",
+            "year",
+            "venue",
+            "work_type",
+            "source",
+            "source_links",
+            "other_identifiers",
+            "source_query_id",
+            "verification_status",
+            "metadata_confidence",
+            "intake_assessment",
+            "intake_reason",
+            "possible_duplicate",
+            "metadata_conflict",
+            "required_human_action",
+            "origin",
+            "legacy_scope_fit",
+            "legacy_recommendation",
+            "legacy_reason",
+            "legacy_priority",
+            "review_stage",
+            "current_status",
+            "current_decision",
+            "exclusion_reason_code",
+            "topic_code",
+            "duplicate_target_id",
+            "secondary_collection_code",
+            "secondary_collection_rationale",
+            "last_action_id",
+            "materialised_at",
+            "updated_at",
+            "provenance"
+          ],
+          "properties": {
+            "candidate_id": {
+              "type": "string",
+              "maxLength": 16000,
+              "minLength": 1,
+              "pattern": "^CAND-[A-Za-z0-9-]{1,100}$"
+            },
+            "title": {
+              "type": "string",
+              "maxLength": 16000,
+              "minLength": 1
+            },
+            "doi": {
+              "type": "string",
+              "maxLength": 16000
+            },
+            "authors": {
+              "type": "string",
+              "maxLength": 16000
+            },
+            "year": {
+              "type": "string",
+              "maxLength": 16000
+            },
+            "venue": {
+              "type": "string",
+              "maxLength": 16000
+            },
+            "work_type": {
+              "type": "string",
+              "maxLength": 16000
+            },
+            "source": {
+              "type": "string",
+              "maxLength": 16000
+            },
+            "source_links": {
+              "type": "string",
+              "maxLength": 16000
+            },
+            "other_identifiers": {
+              "type": "string",
+              "maxLength": 16000
+            },
+            "source_query_id": {
+              "type": "string",
+              "maxLength": 16000
+            },
+            "verification_status": {
+              "type": "string",
+              "maxLength": 16000
+            },
+            "metadata_confidence": {
+              "type": "string",
+              "maxLength": 16000
+            },
+            "intake_assessment": {
+              "type": "string",
+              "maxLength": 16000
+            },
+            "intake_reason": {
+              "type": "string",
+              "maxLength": 16000
+            },
+            "possible_duplicate": {
+              "type": "string",
+              "maxLength": 16000
+            },
+            "metadata_conflict": {
+              "type": "string",
+              "maxLength": 16000
+            },
+            "required_human_action": {
+              "type": "string",
+              "maxLength": 16000
+            },
+            "origin": {
+              "type": "string",
+              "maxLength": 16000,
+              "minLength": 1
+            },
+            "legacy_scope_fit": {
+              "type": "string",
+              "maxLength": 16000
+            },
+            "legacy_recommendation": {
+              "type": "string",
+              "maxLength": 16000
+            },
+            "legacy_reason": {
+              "type": "string",
+              "maxLength": 16000
+            },
+            "legacy_priority": {
+              "type": "string",
+              "maxLength": 16000
+            },
+            "review_stage": {
+              "type": "string",
+              "maxLength": 16000,
+              "minLength": 1,
+              "enum": [
+                "metadata_fix",
+                "manual_review",
+                "abstract_full_text_review",
+                "legacy_rejection_review",
+                "seed_validation",
+                "title_abstract",
+                "full_text",
+                "data_extraction",
+                "appraisal"
+              ]
+            },
+            "current_status": {
+              "type": "string",
+              "maxLength": 16000,
+              "minLength": 1,
+              "enum": [
+                "pending",
+                "screened_eligible_core",
+                "screened_eligible_contextual",
+                "needs_full_text",
+                "screened_not_eligible",
+                "duplicate_confirmed",
+                "screened_not_academic",
+                "screened_not_retrievable"
+              ]
+            },
+            "current_decision": {
+              "type": "string",
+              "maxLength": 16000
+            },
+            "exclusion_reason_code": {
+              "type": "string",
+              "maxLength": 16000
+            },
+            "topic_code": {
+              "type": "string",
+              "maxLength": 16000
+            },
+            "duplicate_target_id": {
+              "type": "string",
+              "maxLength": 16000
+            },
+            "secondary_collection_code": {
+              "type": "string",
+              "maxLength": 16000
+            },
+            "secondary_collection_rationale": {
+              "type": "string",
+              "maxLength": 16000
+            },
+            "last_action_id": {
+              "type": "string",
+              "maxLength": 16000
+            },
+            "materialised_at": {
+              "type": "string",
+              "maxLength": 16000
+            },
+            "updated_at": {
+              "type": "string",
+              "maxLength": 16000
+            },
+            "provenance": {
+              "type": "string",
+              "maxLength": 16000,
+              "minLength": 1
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contract",
+        "action",
+        "domain",
+        "source_commit",
+        "expected_version",
+        "row"
+      ],
+      "properties": {
+        "contract": {
+          "const": "CILE-CANDIDATE-ARCHIVE-1"
+        },
+        "domain": {
+          "const": "abstract"
+        },
+        "action": {
+          "enum": [
+            "initialise",
+            "observe",
+            "supersede",
+            "withdraw"
+          ]
+        },
+        "source_commit": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{40}$"
+        },
+        "expected_version": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "row": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "candidate_id",
+            "title",
+            "doi",
+            "coverage_status",
+            "abstract_source",
+            "article_url",
+            "providers_tried",
+            "match_type",
+            "match_score",
+            "provider_errors",
+            "checked_at",
+            "notes"
+          ],
+          "properties": {
+            "candidate_id": {
+              "type": "string",
+              "maxLength": 16000,
+              "minLength": 1,
+              "pattern": "^CAND-[A-Za-z0-9-]{1,100}$"
+            },
+            "title": {
+              "type": "string",
+              "maxLength": 16000
+            },
+            "doi": {
+              "type": "string",
+              "maxLength": 16000
+            },
+            "coverage_status": {
+              "type": "string",
+              "maxLength": 16000,
+              "minLength": 1,
+              "enum": [
+                "available",
+                "needs_web_search",
+                "unresolved",
+                "unavailable"
+              ]
+            },
+            "abstract_source": {
+              "type": "string",
+              "maxLength": 16000
+            },
+            "article_url": {
+              "type": "string",
+              "maxLength": 16000
+            },
+            "providers_tried": {
+              "type": "string",
+              "maxLength": 16000
+            },
+            "match_type": {
+              "type": "string",
+              "maxLength": 16000
+            },
+            "match_score": {
+              "type": "string",
+              "maxLength": 16000
+            },
+            "provider_errors": {
+              "type": "string",
+              "maxLength": 16000
+            },
+            "checked_at": {
+              "type": "string",
+              "maxLength": 16000,
+              "minLength": 1
+            },
+            "notes": {
+              "type": "string",
+              "maxLength": 16000
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contract",
+        "action",
+        "domain",
+        "source_commit",
+        "expected_version",
+        "row"
+      ],
+      "properties": {
+        "contract": {
+          "const": "CILE-CANDIDATE-ARCHIVE-1"
+        },
+        "domain": {
+          "const": "retrieval"
+        },
+        "action": {
+          "enum": [
+            "initialise",
+            "observe",
+            "supersede",
+            "withdraw"
+          ]
+        },
+        "source_commit": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{40}$"
+        },
+        "expected_version": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "row": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "candidate_id",
+            "title",
+            "doi",
+            "resolution_status",
+            "best_url",
+            "best_url_kind",
+            "full_text_url",
+            "open_access_url",
+            "landing_url",
+            "doi_url",
+            "source_urls",
+            "resolved_doi",
+            "resolution_sources",
+            "match_method",
+            "match_confidence",
+            "checked_at",
+            "notes"
+          ],
+          "properties": {
+            "candidate_id": {
+              "type": "string",
+              "maxLength": 16000,
+              "minLength": 1,
+              "pattern": "^CAND-[A-Za-z0-9-]{1,100}$"
+            },
+            "title": {
+              "type": "string",
+              "maxLength": 16000
+            },
+            "doi": {
+              "type": "string",
+              "maxLength": 16000
+            },
+            "resolution_status": {
+              "type": "string",
+              "maxLength": 16000,
+              "minLength": 1
+            },
+            "best_url": {
+              "type": "string",
+              "maxLength": 16000
+            },
+            "best_url_kind": {
+              "type": "string",
+              "maxLength": 16000,
+              "minLength": 1
+            },
+            "full_text_url": {
+              "type": "string",
+              "maxLength": 16000
+            },
+            "open_access_url": {
+              "type": "string",
+              "maxLength": 16000
+            },
+            "landing_url": {
+              "type": "string",
+              "maxLength": 16000
+            },
+            "doi_url": {
+              "type": "string",
+              "maxLength": 16000
+            },
+            "source_urls": {
+              "type": "string",
+              "maxLength": 16000
+            },
+            "resolved_doi": {
+              "type": "string",
+              "maxLength": 16000
+            },
+            "resolution_sources": {
+              "type": "string",
+              "maxLength": 16000
+            },
+            "match_method": {
+              "type": "string",
+              "maxLength": 16000
+            },
+            "match_confidence": {
+              "type": "string",
+              "maxLength": 16000
+            },
+            "checked_at": {
+              "type": "string",
+              "maxLength": 16000,
+              "minLength": 1
+            },
+            "notes": {
+              "type": "string",
+              "maxLength": 16000
+            }
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "contract",
+        "action",
+        "domain",
+        "source_commit",
+        "expected_version",
+        "row"
+      ],
+      "properties": {
+        "contract": {
+          "const": "CILE-CANDIDATE-ARCHIVE-1"
+        },
+        "domain": {
+          "const": "access"
+        },
+        "action": {
+          "enum": [
+            "initialise",
+            "observe",
+            "supersede",
+            "withdraw"
+          ]
+        },
+        "source_commit": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{40}$"
+        },
+        "expected_version": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "row": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "candidate_id",
+            "title",
+            "doi",
+            "access_status",
+            "access_kind",
+            "access_url",
+            "evidence_source",
+            "evidence_detail",
+            "checked_at",
+            "notes"
+          ],
+          "properties": {
+            "candidate_id": {
+              "type": "string",
+              "maxLength": 16000,
+              "minLength": 1,
+              "pattern": "^CAND-[A-Za-z0-9-]{1,100}$"
+            },
+            "title": {
+              "type": "string",
+              "maxLength": 16000
+            },
+            "doi": {
+              "type": "string",
+              "maxLength": 16000
+            },
+            "access_status": {
+              "type": "string",
+              "maxLength": 16000,
+              "minLength": 1,
+              "enum": [
+                "open",
+                "restricted",
+                "unknown"
+              ]
+            },
+            "access_kind": {
+              "type": "string",
+              "maxLength": 16000,
+              "minLength": 1
+            },
+            "access_url": {
+              "type": "string",
+              "maxLength": 16000
+            },
+            "evidence_source": {
+              "type": "string",
+              "maxLength": 16000
+            },
+            "evidence_detail": {
+              "type": "string",
+              "maxLength": 16000
+            },
+            "checked_at": {
+              "type": "string",
+              "maxLength": 16000,
+              "minLength": 1
+            },
+            "notes": {
+              "type": "string",
+              "maxLength": 16000
+            }
+          }
+        }
+      }
+    }
+  ]
+}

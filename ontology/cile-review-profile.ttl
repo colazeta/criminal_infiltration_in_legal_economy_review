@@ -17,7 +17,7 @@
     a owl:Ontology ;
     dcterms:title "CILE Review Ontology Profile" ;
     dcterms:description "Application ontology for the Criminal Infiltration in the Legal Economy living systematic review." ;
-    owl:versionInfo "0.4.4" ;
+    owl:versionInfo "0.4.5" ;
     dcterms:source <https://github.com/sensein/synthscholar> ,
                    <https://github.com/RIPE-Observatory/RIPE-O> .
 
@@ -312,7 +312,7 @@ oa:Annotation a owl:Class ;
     rdfs:label "Scoped analytical annotation" ;
     skos:definition "An explicitly scoped assertion with epistemic status, source or analyst origin, and evidence links; never a scientific decision." .
 
-# Derived projection measures (profile 0.4.4); no new scientific state.
+# Derived projection measures (profile 0.4.5); no new scientific state.
 cile:publicAnnotationCount a owl:DatatypeProperty .
 cile:publicAnnotationConflicts a owl:DatatypeProperty .
 cile:publicClassificationConflict a owl:DatatypeProperty .

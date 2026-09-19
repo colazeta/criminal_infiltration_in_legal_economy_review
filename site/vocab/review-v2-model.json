@@ -1,5 +1,5 @@
 {
-  "version": "0.4.4",
+  "version": "0.4.5",
   "entities": [
     {
       "table": "access_assessments_v2",
@@ -1830,6 +1830,840 @@
       "appendOnly": true,
       "constraints": [
         "Vincoli di dominio e integrità definiti dallo schema SQL versionato."
+      ]
+    },
+    {
+      "table": "enrichment_candidate_abstract",
+      "label": "enrichment_candidate_abstract",
+      "class": "AbstractCoverageAssessment",
+      "description": "AbstractCoverageAssessment",
+      "group": "review",
+      "fields": [
+        {
+          "name": "revision_id",
+          "description": "Immutable field assertion preserving conflicting source values. Field: assertion id.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:assertionId"
+        },
+        {
+          "name": "observed_title",
+          "description": "observed_title",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "dcterms:title"
+        },
+        {
+          "name": "observed_doi",
+          "description": "observed_doi",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "bibo:doi"
+        },
+        {
+          "name": "coverage_status",
+          "description": "coverage_status",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:abstractStatus"
+        },
+        {
+          "name": "abstract_source",
+          "description": "abstract_source",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:sourceName"
+        },
+        {
+          "name": "article_url",
+          "description": "article_url",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "dcterms:source"
+        },
+        {
+          "name": "match_type",
+          "description": "Historical cross-reference only, excluded from V2 deduplication and eligibility. Field: match basis.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:matchBasis"
+        },
+        {
+          "name": "match_score",
+          "description": "match_score",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:matchScore"
+        },
+        {
+          "name": "provider_errors",
+          "description": "provider_errors",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:providerErrors"
+        },
+        {
+          "name": "checked_at",
+          "description": "checked_at",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "prov:generatedAtTime"
+        },
+        {
+          "name": "notes",
+          "description": "notes",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:rationale"
+        }
+      ],
+      "implementationStatus": "configured_enrichment_sqlite",
+      "appendOnly": true,
+      "constraints": [
+        "revision_id → enrichment_candidate_revisions.revision_id"
+      ]
+    },
+    {
+      "table": "enrichment_candidate_access",
+      "label": "enrichment_candidate_access",
+      "class": "AccessAssessment",
+      "description": "AccessAssessment",
+      "group": "review",
+      "fields": [
+        {
+          "name": "revision_id",
+          "description": "Immutable field assertion preserving conflicting source values. Field: assertion id.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:assertionId"
+        },
+        {
+          "name": "observed_title",
+          "description": "observed_title",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "dcterms:title"
+        },
+        {
+          "name": "observed_doi",
+          "description": "observed_doi",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "bibo:doi"
+        },
+        {
+          "name": "access_status",
+          "description": "Accesso aperto verificato, limitato o ignoto.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:accessStatus"
+        },
+        {
+          "name": "access_kind",
+          "description": "access_kind",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:accessKind"
+        },
+        {
+          "name": "access_url",
+          "description": "access_url",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:accessUrl"
+        },
+        {
+          "name": "evidence_source",
+          "description": "evidence_source",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:sourceName"
+        },
+        {
+          "name": "evidence_detail",
+          "description": "evidence_detail",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:evidenceLocator"
+        },
+        {
+          "name": "checked_at",
+          "description": "checked_at",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "prov:generatedAtTime"
+        },
+        {
+          "name": "notes",
+          "description": "notes",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:rationale"
+        }
+      ],
+      "implementationStatus": "configured_enrichment_sqlite",
+      "appendOnly": true,
+      "constraints": [
+        "revision_id → enrichment_candidate_revisions.revision_id"
+      ]
+    },
+    {
+      "table": "enrichment_candidate_bibliography",
+      "label": "enrichment_candidate_bibliography",
+      "class": "CandidateRecord",
+      "description": "CandidateRecord",
+      "group": "review",
+      "fields": [
+        {
+          "name": "revision_id",
+          "description": "Immutable field assertion preserving conflicting source values. Field: assertion id.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:assertionId"
+        },
+        {
+          "name": "title",
+          "description": "Titolo attestato dalla fonte, senza completamenti inferiti.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "dcterms:title"
+        },
+        {
+          "name": "doi",
+          "description": "doi",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "bibo:doi"
+        },
+        {
+          "name": "authors",
+          "description": "authors",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "dcterms:creator"
+        },
+        {
+          "name": "year",
+          "description": "year",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "fabio:hasPublicationYear"
+        },
+        {
+          "name": "venue",
+          "description": "venue",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "dcterms:isPartOf"
+        },
+        {
+          "name": "work_type",
+          "description": "Tipo documentale: articolo, capitolo, libro, working paper, preprint, atti, rapporto o tesi.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:workType"
+        },
+        {
+          "name": "source",
+          "description": "source",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:sourceName"
+        },
+        {
+          "name": "other_identifiers",
+          "description": "other_identifiers",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "schema:value"
+        },
+        {
+          "name": "verification_status",
+          "description": "Proposto, verificato o contestato, con fonte conservata.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:verificationStatus"
+        },
+        {
+          "name": "metadata_confidence",
+          "description": "metadata_confidence",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:metadataConfidence"
+        },
+        {
+          "name": "intake_assessment",
+          "description": "intake_assessment",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:intakeAssessment"
+        },
+        {
+          "name": "intake_reason",
+          "description": "intake_reason",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:intakeReason"
+        },
+        {
+          "name": "possible_duplicate",
+          "description": "possible_duplicate",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:possibleDuplicate"
+        },
+        {
+          "name": "metadata_conflict",
+          "description": "metadata_conflict",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:metadataConflict"
+        },
+        {
+          "name": "required_human_action",
+          "description": "required_human_action",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:requiredHumanAction"
+        },
+        {
+          "name": "origin",
+          "description": "origin",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:origin"
+        },
+        {
+          "name": "legacy_scope_fit",
+          "description": "legacy_scope_fit",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:legacyScopeFit"
+        },
+        {
+          "name": "legacy_recommendation",
+          "description": "legacy_recommendation",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:legacyRecommendation"
+        },
+        {
+          "name": "legacy_reason",
+          "description": "legacy_reason",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:legacyReason"
+        },
+        {
+          "name": "legacy_priority",
+          "description": "legacy_priority",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:legacyPriority"
+        },
+        {
+          "name": "review_stage",
+          "description": "review_stage",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:reviewStage"
+        },
+        {
+          "name": "current_status",
+          "description": "current_status",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:candidateStatus"
+        },
+        {
+          "name": "current_decision",
+          "description": "current_decision",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:screeningDecision"
+        },
+        {
+          "name": "exclusion_reason_code",
+          "description": "exclusion_reason_code",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:exclusionReason"
+        },
+        {
+          "name": "topic_code",
+          "description": "topic_code",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:topicCode"
+        },
+        {
+          "name": "duplicate_target_id",
+          "description": "duplicate_target_id",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:duplicateTargetId"
+        },
+        {
+          "name": "secondary_collection_code",
+          "description": "secondary_collection_code",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:secondaryCollectionCode"
+        },
+        {
+          "name": "secondary_collection_rationale",
+          "description": "secondary_collection_rationale",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:secondaryCollectionRationale"
+        },
+        {
+          "name": "last_action_id",
+          "description": "last_action_id",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:lastActionId"
+        },
+        {
+          "name": "materialised_at",
+          "description": "materialised_at",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "prov:generatedAtTime"
+        },
+        {
+          "name": "updated_at",
+          "description": "Reported external revision time; never scientific approval time.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "dcterms:modified"
+        },
+        {
+          "name": "provenance",
+          "description": "provenance",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "prov:wasDerivedFrom"
+        }
+      ],
+      "implementationStatus": "configured_enrichment_sqlite",
+      "appendOnly": true,
+      "constraints": [
+        "revision_id → enrichment_candidate_revisions.revision_id"
+      ]
+    },
+    {
+      "table": "enrichment_candidate_heads",
+      "label": "enrichment_candidate_heads",
+      "class": "CandidateRecord",
+      "description": "CandidateRecord",
+      "group": "review",
+      "fields": [
+        {
+          "name": "candidate_id",
+          "description": "Record candidato in questa review, senza eleggibilità implicita.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:candidateId"
+        },
+        {
+          "name": "cycle_id",
+          "description": "cycle_id",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:reviewId"
+        },
+        {
+          "name": "domain",
+          "description": "domain",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "dcterms:type"
+        },
+        {
+          "name": "revision_id",
+          "description": "Immutable field assertion preserving conflicting source values. Field: assertion id.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:assertionId"
+        },
+        {
+          "name": "record_version",
+          "description": "Versione usata per rifiutare modifiche o approvazioni su dati superati.",
+          "type": "INTEGER",
+          "nullable": false,
+          "semantic": "cile:recordVersion"
+        },
+        {
+          "name": "state",
+          "description": "Current, withdrawn or conflicting observed annotation revision; independent of scientific acceptance.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:annotationVisibilityState"
+        },
+        {
+          "name": "updated_at",
+          "description": "Reported external revision time; never scientific approval time.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "dcterms:modified"
+        }
+      ],
+      "implementationStatus": "configured_enrichment_sqlite",
+      "appendOnly": false,
+      "constraints": [
+        "revision_id → enrichment_candidate_revisions.revision_id",
+        "candidate_id → enrichment_candidate_revisions.candidate_id",
+        "cycle_id → enrichment_candidate_revisions.cycle_id",
+        "domain → enrichment_candidate_revisions.domain"
+      ]
+    },
+    {
+      "table": "enrichment_candidate_receipts",
+      "label": "enrichment_candidate_receipts",
+      "class": "ReviewEvent",
+      "description": "ReviewEvent",
+      "group": "review",
+      "fields": [
+        {
+          "name": "receipt_id",
+          "description": "receipt_id",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:eventId"
+        },
+        {
+          "name": "candidate_id",
+          "description": "Record candidato in questa review, senza eleggibilità implicita.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:candidateId"
+        },
+        {
+          "name": "cycle_id",
+          "description": "cycle_id",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:reviewId"
+        },
+        {
+          "name": "domain",
+          "description": "domain",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "dcterms:type"
+        },
+        {
+          "name": "revision_id",
+          "description": "Immutable field assertion preserving conflicting source values. Field: assertion id.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:assertionId"
+        },
+        {
+          "name": "previous_revision_id",
+          "description": "previous_revision_id",
+          "type": "TEXT",
+          "nullable": true,
+          "semantic": "prov:wasRevisionOf"
+        },
+        {
+          "name": "action",
+          "description": "action",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "dcterms:type"
+        },
+        {
+          "name": "expected_version",
+          "description": "Membership in one review with optimistic concurrency; no inherited legacy decision. Field: record version.",
+          "type": "INTEGER",
+          "nullable": false,
+          "semantic": "cile:recordVersion"
+        },
+        {
+          "name": "persisted_at",
+          "description": "Verified human GitHub review of the exact proposal and head commit. Field: imported at.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:importedAt"
+        }
+      ],
+      "implementationStatus": "configured_enrichment_sqlite",
+      "appendOnly": true,
+      "constraints": [
+        "previous_revision_id → enrichment_candidate_revisions.revision_id",
+        "revision_id → enrichment_candidate_revisions.revision_id",
+        "candidate_id → enrichment_candidate_revisions.candidate_id",
+        "cycle_id → enrichment_candidate_revisions.cycle_id",
+        "domain → enrichment_candidate_revisions.domain"
+      ]
+    },
+    {
+      "table": "enrichment_candidate_records",
+      "label": "enrichment_candidate_records",
+      "class": "CandidateRecord",
+      "description": "CandidateRecord",
+      "group": "review",
+      "fields": [
+        {
+          "name": "candidate_id",
+          "description": "Record candidato in questa review, senza eleggibilità implicita.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:candidateId"
+        },
+        {
+          "name": "cycle_id",
+          "description": "cycle_id",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:reviewId"
+        },
+        {
+          "name": "created_at",
+          "description": "Data e ora della registrazione, distinta dalla data di pubblicazione.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "prov:generatedAtTime"
+        }
+      ],
+      "implementationStatus": "configured_enrichment_sqlite",
+      "appendOnly": true,
+      "constraints": [
+        "Vincoli di dominio e integrità definiti dallo schema SQL versionato."
+      ]
+    },
+    {
+      "table": "enrichment_candidate_retrieval",
+      "label": "enrichment_candidate_retrieval",
+      "class": "RetrievalActivity",
+      "description": "RetrievalActivity",
+      "group": "review",
+      "fields": [
+        {
+          "name": "revision_id",
+          "description": "Immutable field assertion preserving conflicting source values. Field: assertion id.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:assertionId"
+        },
+        {
+          "name": "observed_title",
+          "description": "observed_title",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "dcterms:title"
+        },
+        {
+          "name": "observed_doi",
+          "description": "observed_doi",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "bibo:doi"
+        },
+        {
+          "name": "resolution_status",
+          "description": "resolution_status",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:resolutionStatus"
+        },
+        {
+          "name": "best_url",
+          "description": "best_url",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "dcterms:source"
+        },
+        {
+          "name": "best_url_kind",
+          "description": "best_url_kind",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:accessKind"
+        },
+        {
+          "name": "full_text_url",
+          "description": "full_text_url",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "dcterms:source"
+        },
+        {
+          "name": "open_access_url",
+          "description": "open_access_url",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:accessUrl"
+        },
+        {
+          "name": "landing_url",
+          "description": "landing_url",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "dcterms:source"
+        },
+        {
+          "name": "doi_url",
+          "description": "doi_url",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "dcterms:source"
+        },
+        {
+          "name": "resolved_doi",
+          "description": "resolved_doi",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "bibo:doi"
+        },
+        {
+          "name": "match_method",
+          "description": "Historical cross-reference only, excluded from V2 deduplication and eligibility. Field: match basis.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:matchBasis"
+        },
+        {
+          "name": "match_confidence",
+          "description": "match_confidence",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:matchConfidence"
+        },
+        {
+          "name": "checked_at",
+          "description": "checked_at",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "prov:generatedAtTime"
+        },
+        {
+          "name": "notes",
+          "description": "notes",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:rationale"
+        }
+      ],
+      "implementationStatus": "configured_enrichment_sqlite",
+      "appendOnly": true,
+      "constraints": [
+        "revision_id → enrichment_candidate_revisions.revision_id"
+      ]
+    },
+    {
+      "table": "enrichment_candidate_revisions",
+      "label": "enrichment_candidate_revisions",
+      "class": "MetadataAssertion",
+      "description": "Immutable field assertion preserving conflicting source values.",
+      "group": "review",
+      "fields": [
+        {
+          "name": "revision_id",
+          "description": "Immutable field assertion preserving conflicting source values. Field: assertion id.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:assertionId"
+        },
+        {
+          "name": "candidate_id",
+          "description": "Record candidato in questa review, senza eleggibilità implicita.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:candidateId"
+        },
+        {
+          "name": "cycle_id",
+          "description": "cycle_id",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:reviewId"
+        },
+        {
+          "name": "domain",
+          "description": "domain",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "dcterms:type"
+        },
+        {
+          "name": "source_commit",
+          "description": "source_commit",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "prov:wasDerivedFrom"
+        },
+        {
+          "name": "content_sha256",
+          "description": "Impronta dei byte conservati per riconoscere cambiamenti e verificare il ripristino.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:contentSha256"
+        },
+        {
+          "name": "storage_key",
+          "description": "Riferimento interno al documento privato; non è un URL pubblico.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:storageKey"
+        },
+        {
+          "name": "observed_at",
+          "description": "Momento in cui la fonte è stata osservata.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:observedAt"
+        }
+      ],
+      "implementationStatus": "configured_enrichment_sqlite",
+      "appendOnly": true,
+      "constraints": [
+        "candidate_id → enrichment_candidate_records.candidate_id",
+        "cycle_id → enrichment_candidate_records.cycle_id"
+      ]
+    },
+    {
+      "table": "enrichment_candidate_values",
+      "label": "enrichment_candidate_values",
+      "class": "MetadataAssertion",
+      "description": "Immutable field assertion preserving conflicting source values.",
+      "group": "review",
+      "fields": [
+        {
+          "name": "revision_id",
+          "description": "Immutable field assertion preserving conflicting source values. Field: assertion id.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:assertionId"
+        },
+        {
+          "name": "field",
+          "description": "Immutable field assertion preserving conflicting source values. Field: field uri.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "cile:fieldUri"
+        },
+        {
+          "name": "position",
+          "description": "Ordine dichiarato nella pubblicazione; l’ordine degli autori viene conservato.",
+          "type": "INTEGER",
+          "nullable": false,
+          "semantic": "cile:position"
+        },
+        {
+          "name": "value",
+          "description": "Valore dell’identificatore; la sua uguaglianza non implica automaticamente identità fra opere.",
+          "type": "TEXT",
+          "nullable": false,
+          "semantic": "schema:value"
+        }
+      ],
+      "implementationStatus": "configured_enrichment_sqlite",
+      "appendOnly": true,
+      "constraints": [
+        "revision_id → enrichment_candidate_revisions.revision_id"
       ]
     },
     {

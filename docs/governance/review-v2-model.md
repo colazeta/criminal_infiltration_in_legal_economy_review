@@ -6,7 +6,7 @@ any scientific outcome. The existing corpus remains in its legacy namespace
 until the operational readiness conditions are satisfied.
 
 The original V2 specification used profile **0.2.0**. The current normative profile
-is `ontology/cile-review-profile.yaml` **0.4.4**. Its private
+is `ontology/cile-review-profile.yaml` **0.4.5**. Its private
 storage mapping is `ontology/modules/review-v2.json`; every SQL table and column
 must map to a declared class and slot. `scripts/ontology/validate_ontology.py`
 creates an isolated database, checks the mapping, append-only guards and empty
@@ -18,7 +18,8 @@ is a prepared implementation, not proof that those resources are active. Existin
 enrichment uses the isolated SQLite/KV Durable Object specified in
 `docs/operations/enrichment-storage-decision.md`. The generated
 [architecture dictionary](../architecture/README.md) distinguishes the 33 prepared
-V2 tables from the 46 configured enrichment tables (22 in the initial census)
+V2 tables from the 55 configured enrichment tables (22 in the initial census;
+46 in the last observed deployment before candidate migration 0009)
 and records the unresolved
 candidate/work cardinality mismatch. No scientific cutover is implied.
 

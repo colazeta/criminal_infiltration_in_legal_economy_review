@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "profile_version": "0.4.4",
+  "profile_version": "0.4.5",
   "protocols": [
     "CILE-ASSESSMENT-REFERENCE-1",
     "CILE-ASSESSMENT-COMPARISON-1"

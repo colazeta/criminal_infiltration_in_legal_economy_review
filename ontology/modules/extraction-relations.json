@@ -1,5 +1,5 @@
 {
-  "profile_version": "0.4.4",
+  "profile_version": "0.4.5",
   "contract": "CILE-EXTRACTION-RELATIONS-1",
   "migration": "curator-app/migrations/0007_extraction_relations.sql",
   "scope": "immutable proposal-scoped assertions; no automatic scientific acceptance",

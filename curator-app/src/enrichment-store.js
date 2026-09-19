@@ -1,3 +1,5 @@
+import candidateMigration from './candidate-archive-migration.json' with {type:'json'};
+import {ingestCandidateObservation,exportCandidateObservations} from './candidate-archive.js';
 /* SQLite/KV adapter for an isolated private Durable Object, not a D1 permission bypass.
    Both backends implement the same versioned enrichment contract; canonical tables are absent. */
 import deliveryMigration from './enrichment-delivery-migration.json' with {type:'json'};
@@ -30,8 +32,9 @@ const SAFE_READINESS_ERRORS=new Set([
   'delivery_migration_integrity','additive_delivery_migration_required','storage_readback_failed',
   'relations_migration_integrity','additive_relations_migration_required',
   'annotation_migration_integrity','additive_annotation_migration_required',
+  'candidate_migration_integrity','additive_candidate_migration_required',
 ]);
-const READINESS_PHASES=new Set(['sqlite','base_migration','schedule_migration','adjudication_migration','delivery_migration','relations_migration','annotation_migration','adapters','scheduler']);
+const READINESS_PHASES=new Set(['sqlite','base_migration','schedule_migration','adjudication_migration','delivery_migration','relations_migration','annotation_migration','candidate_migration','adapters','scheduler']);
 export function readinessErrorCode(error,phase){
   const code=typeof error?.message==='string'?error.message:'';
   if(SAFE_READINESS_ERRORS.has(code))return code;
@@ -133,6 +136,12 @@ export class EnrichmentStoreCore {
         const annotationApplied=await ctx.storage.get('schema:annotation-archive');
         if(annotationApplied&&annotationApplied!==annotationHash)throw Error('additive_annotation_migration_required');
         if(!annotationApplied)await ctx.storage.transaction(async tx=>{ctx.storage.sql.exec(annotationMigration.sql);await tx.put('schema:annotation-archive',annotationHash)});
+        phase='candidate_migration';
+        const candidateHash=await sha256(candidateMigration.sql);
+        if(candidateHash!==candidateMigration.sha256)throw Error('candidate_migration_integrity');
+        const candidateApplied=await ctx.storage.get('schema:candidate-archive');
+        if(candidateApplied&&candidateApplied!==candidateHash)throw Error('additive_candidate_migration_required');
+        if(!candidateApplied)await ctx.storage.transaction(async tx=>{ctx.storage.sql.exec(candidateMigration.sql);await tx.put('schema:candidate-archive',candidateHash)});
         phase='adapters';
         this.db=sqliteAdapter(ctx.storage); this.evidence=privateTextStore(ctx.storage);this.documents=privateBinaryStore(ctx.storage);
         phase='scheduler';
@@ -232,12 +241,20 @@ export class EnrichmentStoreCore {
       const allowedFields=['operation','expected_commit','target_id','proposal','run_key','calibration_id','pr_number','source','document','bibliography','document_id','checkpoint','backup','ingress'];
       if(!data||typeof data!=='object'||Array.isArray(data)||Object.keys(data).some(k=>!allowedFields.includes(k)))return json({error_code:'invalid_service_envelope'},422);
       const operations=['verify','activate','deactivate','status','run','packet','proposal','public-research-audit','architecture-audit','completion-packet','calibration-approval','completion-approval','source','document','documents','document-check','bibliography','provider-bibliography','development-checkpoint-get','development-checkpoint-put','document-retention-claim','source-claimed','document-claimed','document-retention-release','document-retention-abort'];
-      if(!operations.includes(data.operation)&&!['architecture-schema','architecture-backup','architecture-normalize','archive-annotation','archive-annotation-batch','annotation-audit','annotation-census','annotation-projection-audit'].includes(data.operation))return json({error_code:'unknown_service_operation'},422);
+      if(!operations.includes(data.operation)&&!['architecture-schema','architecture-backup','architecture-normalize','archive-annotation','archive-annotation-batch','annotation-audit','annotation-census','annotation-projection-audit','archive-candidate','candidate-export'].includes(data.operation))return json({error_code:'unknown_service_operation'},422);
       if(data.expected_commit!==this.env.DEPLOY_COMMIT)return json({error_code:'stale_deployment'},409);
       if(data.operation==='verify')return json(await this.verify());
       if(data.operation==='activate'){await this.verify();await this.ctx.storage.put('activation:enrichment',{commit:this.env.DEPLOY_COMMIT,at:new Date(now).toISOString()});await this.schedule.start();return json(await this.aggregate())}
       if(data.operation==='deactivate'){await this.ctx.storage.delete('activation:enrichment');return json(await this.aggregate())}
       if(data.operation==='status')return json(await this.aggregate());
+      if(data.operation==='archive-candidate'){
+        if(Object.keys(data).sort().join(',')!=='expected_commit,ingress,operation')return json({error_code:'invalid_service_envelope'},422);
+        return json(await ingestCandidateObservation(await this.environment(),data.ingress));
+      }
+      if(data.operation==='candidate-export'){
+        if(Object.keys(data).sort().join(',')!=='expected_commit,ingress,operation'||typeof data.ingress!=='string')return json({error_code:'invalid_service_envelope'},422);
+        return json(await exportCandidateObservations(await this.environment(),data.ingress));
+      }
       if(data.operation==='archive-annotation'){
         if(Object.keys(data).sort().join(',')!=='expected_commit,ingress,operation')return json({error_code:'invalid_service_envelope'},422);
         try{return json(await ingestAnnotation(await this.environment(),data.ingress))}

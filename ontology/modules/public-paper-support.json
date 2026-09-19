@@ -1,5 +1,5 @@
 {
-  "profile_version": "0.4.4",
+  "profile_version": "0.4.5",
   "authority": "Owner instruction, 2026-09-13: enriched abstracts and other metadata must be visible in public paper sheets.",
   "class": "CandidateRecord",
   "public_artifact": "site/paper-support.json",

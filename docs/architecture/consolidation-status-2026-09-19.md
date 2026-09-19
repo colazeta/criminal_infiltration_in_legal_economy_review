@@ -120,3 +120,26 @@ valutazioni, calibrazione e autorizzazioni alla pubblicazione/redistribuzione.
 I problemi di schema, servizio, migrazione e scrittura elencati sopra sono lavoro
 tecnico ancora da completare: non vengono trasformati in richieste di approvazione
 scientifica per giustificare una transizione incompleta.
+
+
+## Prosecuzione: bibliografia e coperture, commit sorgente 632eed2
+
+La revisione successiva conserva le correzioni di main fino a #807. Il profilo
+0.4.5 e la migrazione 0009 aggiungono nove relazioni nell'archivio SQLite esistente:
+identità dei candidati, revisioni bibliografiche e di copertura, valori ripetibili,
+stato corrente e ricevute transazionali. Nessuna opera o decisione viene creata.
+
+La prova completa acquisisce 294 bibliografie e 882 coperture attraverso lo stesso
+scrittore esposto dall'API privata, verifica replay e contenuti, ricostruisce 294
+target dal database e verifica un ripristino cifrato indipendente. Dettagli e
+vincoli sono in [candidate-archive.md](candidate-archive.md); la ricevuta aggregata
+è `candidate-preflight-2026-09-19.json`. Il dizionario corrente descrive 88 tabelle
+e 721 colonne: 55 configurate nello store e 33 preparate V2. Non equivale a 55
+tabelle osservate in produzione: l'ultima osservazione resta di 46.
+
+L'acquisizione delle annotazioni del 19 settembre alle 16:21 UTC, run 35454697113,
+job 105927822681, fallisce ancora con `annotation_ingress_gate_failed`. Quel log
+non stabilisce da solo la causa né prova che il precedente errore 503 sia risolto.
+La transizione degli scrittori, la migrazione produttiva e il cambio di autorità
+restano aperti. Non è stato aggirato il backup obbligatorio, alterato il piano del
+servizio o attribuita una decisione scientifica per sbloccare il rilascio.

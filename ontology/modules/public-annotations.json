@@ -1,5 +1,5 @@
 {
-  "profile_version": "0.4.4",
+  "profile_version": "0.4.5",
   "projection_version": "CILE-PUBLIC-ANNOTATIONS-1",
   "schema": "schema/public-annotations.schema.json",
   "schema_class": "AssistantRecommendation",
