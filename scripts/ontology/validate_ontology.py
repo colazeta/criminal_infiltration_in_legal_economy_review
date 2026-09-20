@@ -106,7 +106,7 @@ def enum_values(profile: dict[str, Any], enum_name: str) -> set[str]:
 
 
 def check_profile(profile: dict[str, Any], external: dict[str, Any]) -> None:
-    if profile.get("version") != "0.4.3":
+    if profile.get("version") != "0.4.4":
         fail(f"unexpected_profile_version:{profile.get('version')}")
     prefixes = profile.get("prefixes")
     classes = profile.get("classes")
@@ -270,7 +270,7 @@ def check_serialisations(profile: dict[str, Any]) -> None:
     if source != PUBLIC_TTL_PATH.read_text(encoding="utf-8"):
         fail("public_ontology_turtle_drift")
     for marker in (
-        'owl:versionInfo "0.4.3"', "cile:ScholarlyWork a owl:Class",
+        'owl:versionInfo "0.4.4"', "cile:ScholarlyWork a owl:Class",
         "cile:Manifestation a owl:Class", "cile:ScreeningDecision a owl:Class",
         "cile:AccessAssessment a owl:Class", "skos:relatedMatch fabio:Work",
         "skos:relatedMatch ripe:Answer",
@@ -629,6 +629,31 @@ def check_delivery_contract(profile: dict[str, Any]) -> None:
         fail("delivery_profile_drift")
 
 
+
+def check_document_repository(profile):
+    module = load_json(ROOT / 'ontology/modules/document-repository.json')
+    if module['profile_version'] != profile['version']:
+        fail('document_repository_profile_mismatch')
+    db = sqlite3.connect(':memory:')
+    for path in sorted((ROOT / 'curator-app/migrations').glob('*.sql')):
+        db.executescript(path.read_text())
+    for table, mapping in module['tables'].items():
+        if mapping['class'] not in profile['classes']:
+            fail('document_repository_class_unmapped')
+        fields = {r[1] for r in db.execute(f'PRAGMA table_info({table})')}
+        if fields != set(mapping['fields']) or set(mapping['fields'].values()) - set(profile['slots']):
+            fail('document_repository_field_unmapped:' + table)
+        if table != 'enrichment_catalogue_index':
+            for action in ['update', 'delete']:
+                if not db.execute("SELECT 1 FROM sqlite_master WHERE type='trigger' AND name=?", (f'{table}_no_{action}',)).fetchone():
+                    fail('document_repository_history_unprotected:' + table)
+    sql = (ROOT / module['migrations'][0]).read_text()
+    import hashlib
+    bundle = load_json(ROOT / 'curator-app/src/document-repository-migration.json')
+    if bundle['sql'] != sql or bundle['sha256'] != hashlib.sha256(sql.encode()).hexdigest():
+        fail('document_repository_bundle_mismatch')
+    db.close()
+
 def validate_all(*, quiet: bool = False) -> dict[str, int | str]:
     profile = load_json(PROFILE_PATH)
     external = load_json(EXTERNAL_PATH)
@@ -638,6 +663,7 @@ def validate_all(*, quiet: bool = False) -> dict[str, int | str]:
     check_enrichment_contract(profile)
     check_extraction_relations(profile)
     check_annotation_archive(profile)
+    check_document_repository(profile)
     check_public_research_contract(profile)
     check_delivery_contract(profile)
     check_surveillance_source_policy(profile)

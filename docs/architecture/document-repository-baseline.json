@@ -1,0 +1,54 @@
+{
+  "report_version": "CILE-DOCUMENT-BASELINE-1",
+  "baseline_commit": "ae28aa51a9cfe99e58cfbdfbd5f751fed2981d8a",
+  "observation_date": "2026-09-19",
+  "scope": "Public repository baseline; private retained bytes not observed",
+  "repository_counts": {
+    "registered_candidates": 294,
+    "canonical_works": 0,
+    "screening_decisions": 0,
+    "publication_records": 0
+  },
+  "access_observations": {
+    "status": {
+      "unknown": 173,
+      "open": 86,
+      "restricted": 35
+    },
+    "kind": {
+      "conflicting_full_text_evidence": 39,
+      "public_full_text": 29,
+      "open_access_location": 34,
+      "openalex_hybrid": 16,
+      "insufficient_evidence": 134,
+      "openalex_green": 5,
+      "openalex_diamond": 1,
+      "closed_metadata": 35,
+      "openalex_gold": 1
+    }
+  },
+  "private_inventory_observed": false,
+  "private_coverage": {
+    "assessment_completed": null,
+    "full_text_verified": null,
+    "pdf_acquired": null,
+    "text_extracted": null,
+    "publicly_rehostable": null,
+    "private_only": null,
+    "rights_unresolved": null,
+    "full_text_missing": null
+  },
+  "blockers": [
+    {
+      "code": "predeploy_backup_gate_failed",
+      "stage": "backup_transport",
+      "phase": "catalogue",
+      "http_status": 503,
+      "run_url": "https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/actions/runs/35451813075"
+    },
+    {
+      "code": "private_service_credential_unavailable_in_session"
+    }
+  ],
+  "interpretation": "Access URLs, seeds, manifests, local fixtures and configured bindings do not establish production retention or scientific assessment completion."
+}

@@ -38,7 +38,9 @@ export function validateShape(value, spec = schema, path = '$', root = schema) {
     }
   }
   if (type === 'array') {
+    if (spec.minItems !== undefined && value.length < spec.minItems) err('schema_array_minimum:' + path);
     if (spec.maxItems !== undefined && value.length > spec.maxItems) err('schema_array_limit:' + path);
+    if (spec.uniqueItems && new Set(value.map(v => canonicalJson(v))).size !== value.length) err('schema_array_unique:' + path);
     for (let i = 0; i < value.length; i++) validateShape(value[i], spec.items, path + '[' + i + ']', root);
   }
   if (type === 'string') {
@@ -46,6 +48,7 @@ export function validateShape(value, spec = schema, path = '$', root = schema) {
     if (spec.pattern && !new RegExp(spec.pattern).test(value)) err('schema_pattern:' + path);
   }
   if (type === 'number' && spec.minimum !== undefined && value < spec.minimum) err('schema_minimum:' + path);
+  if (type === 'number' && (!Number.isFinite(value) || spec.maximum !== undefined && value > spec.maximum)) err('schema_maximum:' + path);
   return value;
 }
 function uniqueIds(items, name) {
@@ -166,6 +169,15 @@ export async function syncTargets(env, payload, now) {
   }
   for (const old of existing.values()) statements.push(S(db,'UPDATE enrichment_targets SET active=0,updated_at=? WHERE target_id=?',iso(now),old.target_id));
   await batch(db,statements);
+  const indexStatements=[];
+  for(const r of records){
+    const record={id:r.id,title:r.title,doi:normalDoi(r.doi),sourceLinks:r.sourceLinks};
+    const hash=await sha256(canonicalJson(record)),target=await sha256(cycle.review_id+':candidate:'+r.id);
+    const c={authors:typeof r.authors==='string'?r.authors:null,year:Number.isSafeInteger(r.year)?r.year:null,venue:typeof r.venue==='string'?r.venue:null,status:typeof r.reviewStatus==='string'?r.reviewStatus:null};
+    indexStatements.push(S(db,'INSERT INTO enrichment_catalogue_index VALUES (?,?,?,?,?,?,?,?) ON CONFLICT(target_id) DO UPDATE SET input_sha256=excluded.input_sha256,authors=excluded.authors,publication_year=excluded.publication_year,venue=excluded.venue,review_status=excluded.review_status,projection_sha256=excluded.projection_sha256,observed_at=excluded.observed_at',target,hash,c.authors,c.year,c.venue,c.status,await sha256(canonicalJson(c)),iso(now)));
+  }
+  // Optional for the legacy D1 adapter until additive migration 0009 is provisioned.
+  if(env.REVIEW_DOCUMENTS)await batch(db,indexStatements);
   return { registered:records.length, changed_statements:statements.length };
 }
 export async function saveSource(env, target, { provider, source_url, evidence_kind, text, version_label = 'unspecified', language = null, retention_basis = 'Owner-authorised private research; no redistribution', licence_status = 'not_verified' }, now) {
@@ -280,7 +292,7 @@ export async function runEnrichment(env, {now=Date.now(),fetcher=fetchWithTimeou
   return receipt;
 }
 
-async function sourceContents(env,target,ids) {
+export async function sourceContents(env,target,ids) {
   const sources=[];
   for(const id of ids){
     const source=await S(env.REVIEW_DB,'SELECT * FROM enrichment_sources WHERE source_id=? AND target_id=? AND input_sha256=?',id,target.target_id,target.input_sha256).first();

@@ -17,7 +17,7 @@
     a owl:Ontology ;
     dcterms:title "CILE Review Ontology Profile" ;
     dcterms:description "Application ontology for the Criminal Infiltration in the Legal Economy living systematic review." ;
-    owl:versionInfo "0.4.3" ;
+    owl:versionInfo "0.4.4" ;
     dcterms:source <https://github.com/sensein/synthscholar> ,
                    <https://github.com/RIPE-Observatory/RIPE-O> .
 
@@ -311,3 +311,28 @@ oa:Annotation a owl:Class ;
     rdfs:subClassOf prov:Entity ;
     rdfs:label "Scoped analytical annotation" ;
     skos:definition "An explicitly scoped assertion with epistemic status, source or analyst origin, and evidence links; never a scientific decision." .
+
+cile:SourceDocument a owl:Class ;
+    rdfs:label "SourceDocument" ;
+    rdfs:comment "Retained source bytes and acquisition receipt, distinct from the manifestation and scholarly work." ;
+    rdfs:subClassOf prov:Entity .
+
+cile:ExtractedDocument a owl:Class ;
+    rdfs:label "ExtractedDocument" ;
+    rdfs:comment "Versioned exact text extraction bound to retained source bytes and a parser receipt." ;
+    rdfs:subClassOf prov:Entity .
+
+cile:DocumentPage a owl:Class ;
+    rdfs:label "DocumentPage" ;
+    rdfs:comment "Page partition of an extracted document with source UTF-16 character offsets." ;
+    rdfs:subClassOf prov:Entity .
+
+cile:DocumentChunk a owl:Class ;
+    rdfs:label "DocumentChunk" ;
+    rdfs:comment "Deterministic bounded page segment, a retrieval aid rather than scientific evidence." ;
+    rdfs:subClassOf prov:Entity .
+
+cile:RetrievalIndexEntry a owl:Class ;
+    rdfs:label "RetrievalIndexEntry" ;
+    rdfs:comment "Disposable lexical or bibliographic index, derived from authoritative retained entities." ;
+    rdfs:subClassOf prov:Entity .

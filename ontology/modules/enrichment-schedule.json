@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "profile_version": "0.4.3",
+  "profile_version": "0.4.4",
   "protocol": "CILE-HOUR40-1",
   "migration": "curator-app/migrations/0004_enrichment_schedule.sql",
   "classes": [

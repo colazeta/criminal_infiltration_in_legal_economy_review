@@ -1,0 +1,86 @@
+{
+  "profile_version": "0.4.4",
+  "contract": "CILE-DOCUMENT-REPOSITORY-1",
+  "migrations": [
+    "curator-app/migrations/0009_document_repository.sql"
+  ],
+  "tables": {
+    "enrichment_manifestations": {
+      "class": "Manifestation",
+      "fields": {
+        "manifestation_id": "manifestation_id",
+        "target_id": "enrichment_target_id",
+        "input_sha256": "enrichment_input_sha256",
+        "source_url": "source_url",
+        "version_label": "enrichment_version_label"
+      }
+    },
+    "enrichment_document_bindings": {
+      "class": "SourceDocument",
+      "fields": {
+        "document_id": "document_document_id",
+        "manifestation_id": "manifestation_id"
+      }
+    },
+    "enrichment_document_extractions": {
+      "class": "ExtractedDocument",
+      "fields": {
+        "extraction_id": "document_extraction_id",
+        "document_id": "document_document_id",
+        "source_id": "enrichment_source_id",
+        "text_sha256": "enrichment_content_sha256",
+        "text_length": "document_text_length",
+        "page_count": "document_page_count",
+        "method": "document_extraction_method",
+        "extractor_version": "document_extractor_version",
+        "offset_unit": "document_offset_unit",
+        "protocol_version": "enrichment_protocol_version",
+        "observed_at": "enrichment_observed_at"
+      }
+    },
+    "enrichment_document_pages": {
+      "class": "DocumentPage",
+      "fields": {
+        "extraction_id": "document_extraction_id",
+        "page_number": "document_page_number",
+        "start_offset": "extraction_start_offset",
+        "end_offset": "extraction_end_offset"
+      }
+    },
+    "enrichment_document_chunks": {
+      "class": "DocumentChunk",
+      "fields": {
+        "chunk_id": "document_chunk_id",
+        "extraction_id": "document_extraction_id",
+        "page_number": "document_page_number",
+        "start_offset": "extraction_start_offset",
+        "end_offset": "extraction_end_offset",
+        "text_sha256": "enrichment_content_sha256"
+      }
+    },
+    "enrichment_document_terms": {
+      "class": "RetrievalIndexEntry",
+      "fields": {
+        "term": "document_term",
+        "chunk_id": "document_chunk_id",
+        "occurrences": "document_term_occurrences"
+      }
+    },
+    "enrichment_catalogue_index": {
+      "class": "RetrievalIndexEntry",
+      "fields": {
+        "target_id": "enrichment_target_id",
+        "input_sha256": "enrichment_input_sha256",
+        "authors": "authors_text",
+        "publication_year": "publication_year",
+        "venue": "venue",
+        "review_status": "candidate_status",
+        "projection_sha256": "document_projection_sha256",
+        "observed_at": "enrichment_observed_at"
+      }
+    }
+  },
+  "privacy_boundary": "Original PDF/text, term postings and private evidence remain in the existing archive. Only a current independently verified public rights record permits public full-text delivery. Public document metadata never contains private storage keys.",
+  "identity_boundary": "Candidate-bound manifestations are not confirmed ScholarlyWorks. Existing source, proposal and document IDs remain unchanged; canonical work resolution is explicit and remains governed by the existing registry.",
+  "index_boundary": "Lexical postings and catalogue metadata are rebuildable retrieval projections; no scientific meaning or accepted decision is inferred."
+}
