@@ -220,11 +220,23 @@ async function main() {
         usage: response.usage,
       });
     } catch (error) {
+      const errorCode = error?.code || error?.message || "jev_stage1_candidate_failure";
       results.push({
         ...base,
         status: "failed",
-        error_code: error?.code || error?.message || "jev_stage1_candidate_failure",
+        error_code: errorCode,
       });
+      if ([
+        "api_key_missing",
+        "provider_unauthorized",
+        "provider_request_rejected",
+        "configuration_invalid",
+        "model_mismatch",
+        "provider_response_invalid",
+        "fetch_unavailable"
+      ].includes(errorCode)) {
+        break;
+      }
     }
   }
 
