@@ -1,0 +1,81 @@
+name: Jev stage-1 shadow benchmark
+
+on:
+  pull_request:
+    paths:
+      - "config/jev-validation.json"
+      - "config/jev-stage1-benchmark.json"
+      - "curator-app/src/jev-*.js"
+      - "curator-app/test/jev-*.test.js"
+      - "scripts/jev/**"
+      - ".github/workflows/jev-stage1-benchmark.yml"
+  push:
+    branches: [main]
+    paths:
+      - "config/jev-validation.json"
+      - "config/jev-stage1-benchmark.json"
+      - "curator-app/src/jev-*.js"
+      - "curator-app/test/jev-*.test.js"
+      - "scripts/jev/**"
+      - ".github/workflows/jev-stage1-benchmark.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: jev-stage1-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Set up Node
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
+        with:
+          node-version: '22'
+      - name: Validate Jev harness without provider calls
+        run: |
+          node --check curator-app/src/jev-client.js
+          node --check curator-app/src/jev-policy.js
+          node --check curator-app/src/jev-question-sets.js
+          node --check scripts/jev/run-shadow.mjs
+          node --check scripts/jev/run-stage1-benchmark.mjs
+          node --test curator-app/test/jev-client.test.js curator-app/test/jev-policy.test.js
+          node scripts/jev/run-stage1-benchmark.mjs --dry-run --output "$RUNNER_TEMP/jev-stage1-dry-run.json"
+
+  live-shadow:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      TYPESAFE_API_KEY: ${{ secrets.TYPESAFE_API_KEY }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - name: Set up Node
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
+        with:
+          node-version: '22'
+      - name: Require configured TypeSafe secret
+        shell: bash
+        run: |
+          if [ -z "$TYPESAFE_API_KEY" ]; then
+            echo "::error::TYPESAFE_API_KEY is not configured"
+            exit 1
+          fi
+      - name: Run non-authoritative Jev shadow benchmark
+        run: node scripts/jev/run-stage1-benchmark.mjs --output "$RUNNER_TEMP/jev-stage1-benchmark.json"
+      - name: Retain shadow judgments
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: jev-stage1-shadow-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/jev-stage1-benchmark.json
+          if-no-files-found: error
+          retention-days: 14
