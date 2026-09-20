@@ -1,0 +1,19 @@
+{
+  "contract": "CILE-JEV-SHADOW-1",
+  "mode": "shadow",
+  "provider": "TypeSafe Jev",
+  "endpoint": "https://api.typesafe.ai/v1/systemone",
+  "model": "jev-1.13.0",
+  "timeout_ms": 15000,
+  "max_attempts": 3,
+  "retry_statuses": [429, 529],
+  "authoritative_writes": false,
+  "scientific_authority": "none",
+  "canonical_identity_authority": "none",
+  "publication_authority": "none",
+  "input_boundary": "metadata_and_derived_support_only",
+  "allow_private_full_text": false,
+  "allow_verbatim_abstract": false,
+  "allow_private_source_body": false,
+  "persist_raw_state": false
+}
