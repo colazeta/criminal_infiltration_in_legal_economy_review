@@ -1,0 +1,19 @@
+{
+  "contract": "CILE-JEV-STAGE1-BENCHMARK-1",
+  "question_set": "candidate_screening_v1",
+  "purpose": "Technical and semantic smoke benchmark over heterogeneous CandidateRecords with existing authorised derived reading aids. No scientific authority.",
+  "candidates": [
+    "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-005",
+    "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-011",
+    "CAND-ACADEMIC-2026-09-09-EXTRA-85e203d4eb5a-008",
+    "CAND-ACADEMIC-2026-09-09-EXTRA-8e1caef4c376-003",
+    "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-001",
+    "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-003",
+    "CAND-ACADEMIC-2026-09-08-EXTRA-a6caf5d7567b-014",
+    "CAND-ACADEMIC-2026-09-09-013",
+    "CAND-ACADEMIC-2026-09-09-012",
+    "CAND-ACADEMIC-2026-09-09-001",
+    "CAND-ACADEMIC-2026-09-09-EXTRA-5e31cc756b0e-010",
+    "CAND-ACADEMIC-2026-09-09-EXTRA-85e203d4eb5a-002"
+  ]
+}
