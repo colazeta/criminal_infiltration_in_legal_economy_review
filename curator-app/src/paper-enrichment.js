@@ -6,6 +6,7 @@ import { fetchWithTimeout } from './network.js';
 import { retainedCrossrefReferences } from './crossref-references.js';
 import { iterationKey, dueSlot } from './enrichment-schedule.js';
 import {persistNormalized,readNormalizedExtraction} from './extraction-relations.js';
+import {listPrivateAnnotations,readPrivateAnnotation} from './annotation-archive.js';
 
 export const ENRICHMENT_PROTOCOL = 'CILE-ENRICH-1';
 const HOUR = 3600000, WEEK = 7 * 24 * HOUR;
@@ -341,6 +342,33 @@ export async function handlePaperEnrichment(request,env,session) {
     if(url.pathname.endsWith('/status')&&request.method==='GET')return json({enabled:env.PAPER_ENRICHMENT_ENABLED==='true',protocol:ENRICHMENT_PROTOCOL,scientific_extraction:'blocked_pending_calibration',jobs:await rows(db,'SELECT kind,status,COUNT(*) count FROM enrichment_jobs GROUP BY kind,status'),runs:await rows(db,'SELECT * FROM enrichment_runs ORDER BY started_at DESC LIMIT 24')});
     if(url.pathname.endsWith('/targets')&&request.method==='GET')return json({targets:await rows(db,'SELECT target_id,record_id,record_json,input_sha256 FROM enrichment_targets WHERE cycle_id=? AND active=1 ORDER BY first_seen_at,target_id LIMIT 500',cycle.review_id)});
     const target=await S(db,'SELECT * FROM enrichment_targets WHERE target_id=? AND cycle_id=? AND active=1',url.searchParams.get('id'),cycle.review_id).first();if(!target)err('target_not_found',404);
+    if(url.pathname.endsWith('/provenance')&&request.method==='GET'){
+      const inputs=await rows(db,'SELECT * FROM enrichment_inputs WHERE target_id=? ORDER BY observed_at,input_id',target.target_id);
+      const jobs=await rows(db,'SELECT * FROM enrichment_jobs WHERE target_id=? ORDER BY updated_at,job_id',target.target_id);
+      const attempts=await rows(db,'SELECT a.* FROM enrichment_attempts a JOIN enrichment_jobs j USING(job_id) WHERE j.target_id=? ORDER BY a.started_at,a.attempt_id',target.target_id);
+      const runs=await rows(db,`SELECT DISTINCT r.* FROM enrichment_runs r
+        LEFT JOIN enrichment_attempts a ON a.run_id=r.run_id
+        LEFT JOIN enrichment_jobs j ON j.job_id=COALESCE(a.job_id,r.selected_job_id)
+        WHERE j.target_id=? ORDER BY r.started_at,r.run_id`,target.target_id);
+      const sources=await rows(db,'SELECT * FROM enrichment_sources WHERE target_id=? ORDER BY observed_at,source_id',target.target_id);
+      const proposals=await rows(db,'SELECT * FROM enrichment_proposals WHERE target_id=? ORDER BY created_at,proposal_id',target.target_id);
+      const citation_coverage=await rows(db,'SELECT * FROM enrichment_citation_coverage WHERE target_id=? ORDER BY observed_at,coverage_id',target.target_id);
+      const citation_counts=await rows(db,'SELECT direction,COUNT(*) count,COUNT(DISTINCT citing_identifier||\'→\'||cited_identifier) distinct_edges FROM enrichment_citation_observations WHERE target_id=? GROUP BY direction',target.target_id);
+      const documents=await rows(db,'SELECT * FROM enrichment_documents WHERE target_id=? ORDER BY observed_at,document_id',target.target_id);
+      const bibliography=await rows(db,'SELECT * FROM enrichment_bibliography_snapshots WHERE target_id=? ORDER BY observed_at,bibliography_id',target.target_id);
+      const adjudication=await rows(db,'SELECT * FROM enrichment_adjudication_receipts WHERE target_id=? ORDER BY imported_at,receipt_id',target.target_id);
+      const calibration=await rows(db,`SELECT c.* FROM enrichment_calibration_receipts c
+        WHERE EXISTS(SELECT 1 FROM enrichment_adjudication_receipts a WHERE a.target_id=? AND a.calibration_id=c.calibration_id)
+        ORDER BY c.imported_at,c.calibration_id`,target.target_id);
+      const annotation_summary=await listPrivateAnnotations(env,target.target_id);
+      return json({target,inputs,jobs,attempts,runs,sources,proposals,citation_coverage,citation_counts,documents,bibliography,adjudication,calibration,annotations:annotation_summary.annotations,
+        transparency_scope:'Authenticated curator view over retained candidate-bound private provenance. Source/document bodies remain separately retrievable so this response stays bounded.'});
+    }
+    if(url.pathname.endsWith('/annotations')&&request.method==='GET')return json(await listPrivateAnnotations(env,target.target_id));
+    if(url.pathname.endsWith('/annotation')&&request.method==='GET'){
+      const annotationId=url.searchParams.get('annotation');
+      return json(await readPrivateAnnotation(env,target.target_id,annotationId));
+    }
     if(url.pathname.endsWith('/target')&&request.method==='GET'){
       const proposals=[];
       for(const proposal of await rows(db,'SELECT * FROM enrichment_proposals WHERE target_id=? ORDER BY created_at DESC LIMIT 20',target.target_id)){
