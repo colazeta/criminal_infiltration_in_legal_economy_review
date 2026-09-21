@@ -240,7 +240,7 @@ async function privateAnnotationDetail(env,annotation){
    transparency_note:'Credential-shaped strings are redacted from displayed source bodies; hashes and immutable receipts remain available for audit.'};
 }
 export async function listPrivateAnnotationArchive(env){
- const all=await rows(env.REVIEW_DB,`SELECT a.annotation_id,a.target_id,a.snapshot_id,a.issue_snapshot_id,a.binding_state,a.parser_version,a.imported_at,
+ const all=await rows(env.REVIEW_DB,`SELECT a.annotation_id,a.target_id,a.snapshot_id,a.issue_snapshot_id,a.binding_state,a.review_state,a.authorised_display,a.unparsed_lines,a.imported_at,
    s.source_url,s.source_created_at,s.source_updated_at,s.content_sha256,h.state AS head_state,h.record_version,h.updated_at AS head_updated_at,
    t.record_id AS candidate_id
    FROM enrichment_manual_annotations a
