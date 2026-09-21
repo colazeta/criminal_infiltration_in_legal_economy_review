@@ -119,6 +119,32 @@ proposal?id=...` validates `schema/paper-enrichment.schema.json` plus source sco
 hashes, spans, study/analysis relations and coding rules. Replays return the same
 proposal ID. New corrections create a new proposal, not an overwrite.
 
+## Owner full-provenance transparency — 21 September 2026
+
+The authenticated curator interface must permit the repository owner to inspect the
+retained private history for a candidate, not only the current public projection.
+This includes all retained candidate input versions; jobs, attempts, runs and error
+codes; private source metadata and separately retrieved source bodies; extraction
+proposal history; citation coverage; retained documents and bibliography snapshots;
+adjudication/calibration receipts; and every candidate-bound manual annotation
+revision, including current, superseded, conflicted and withdrawn history.
+
+Annotation inspection exposes the immutable source/issue capture, parsed graph,
+explicit class assertions, revision events and integrity receipt. Credential-shaped
+strings are redacted from displayed raw bodies while the immutable hashes and
+receipts remain visible. This is a curator-authenticated read-only transparency
+surface. It does not make private content public, create a new research store,
+change scientific state or authorise mutation of the retained history.
+
+The private endpoints are:
+- `GET /api/paper-enrichment/provenance?id=<target_id>` for the candidate-bound
+  operational/provenance envelope;
+- `GET /api/paper-enrichment/annotations?id=<target_id>` for all retained
+  candidate-bound annotation versions;
+- `GET /api/paper-enrichment/annotation?id=<target_id>&annotation=<annotation_id>`
+  for the integrity-checked original source/issue capture and parsed annotation
+  history.
+
 ## Monitoring and rollback
 
 Inspect runs **and** jobs. A functioning trigger with only blocked/exhausted jobs
