@@ -7,6 +7,7 @@ The entire public review website uses a deliberately utilitarian 1990s database-
 The contract applies to:
 
 - `site/index.html` — core archive;
+- `site/database.html` — read-only browser over the already governed public projections;
 - `site/aml.html` — broader AML collection;
 - `site/stats.html` — research statistics;
 - `site/method.html` — public methodology;
@@ -29,7 +30,8 @@ Required characteristics:
 - dense filters and tables;
 - publication records presented as database rows with expandable details;
 - the standalone methodology page presented as a plain linear HTML reference document: ordinary headings, paragraphs, numbered or bulleted lists, horizontal rules and underlined text links;
-- statistics presented as flat tables/panels, with charts retained only where they convey actual data.
+- statistics presented as flat tables/panels, with charts retained only where they convey actual data;
+- the database browser presented as a dense object explorer, grid and record inspector, with no marketing cards.
 
 The methodology page must not use a card grid, dashboard tiles, split hero, boxed criterion cards or repeated panel containers. It should resemble a basic university/project documentation page from the 1990s, while retaining the shared application header and navigation.
 
@@ -56,6 +58,8 @@ This is a presentational contract only. It does not alter:
 
 `styles.css` remains loaded first for existing structural compatibility. `classic-site.css` provides the shared public visual layer; `method.css` is a presentation-only extension for the standalone method document.
 
+The database browser is read-only presentation. It may consume only existing public static projections and the existing unauthenticated public research projection. It must not query private enrichment endpoints, machine routes, source bodies, private identifiers or reviewer material, and it must not create a parallel persistence layer.
+
 ## Curator consistency
 
 The curator remains a dedicated fullscreen workstation and does not load `classic-site.css`, avoiding conflicting layout systems. Its title/menu chrome follows the same classic navigation language.
@@ -72,5 +76,6 @@ The fullscreen contract and internal scrolling remain governed by the curator-sp
 - `method.html` remains a plain linear document and does not regress to cards, grids or split hero panels;
 - `method.css` remains free of grid/card/shadow styling;
 - statistics retain flat table/panel patterns;
+- the database browser remains read-only, uses text-node rendering, and is barred from private enrichment routes;
 - curator navigation follows the same application language without importing the public skin;
 - the 404 page is rendered as a classic application error window.
