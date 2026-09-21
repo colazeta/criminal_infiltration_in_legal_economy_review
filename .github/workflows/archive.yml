@@ -82,6 +82,7 @@ jobs:
           node --check scripts/abstracts/backfill_coverage.mjs
           node --check scripts/expansion/citation_frontier.mjs
           node --check site/app.js
+          node --check site/database.js
           node --check site/aml.js
           node --check site/stats.js
           node --check site/bibliometrics.js
