@@ -229,17 +229,39 @@ export async function listPrivateAnnotations(env,targetId){
  }
  return {contract:ANNOTATION_VERSION,target_id:targetId,annotations};
 }
-export async function readPrivateAnnotation(env,targetId,annotationId){
- if(typeof targetId!=='string'||!/^[a-f0-9]{64}$/.test(targetId)||typeof annotationId!=='string'||!/^[a-f0-9]{64}$/.test(annotationId))fail();
- const annotation=await S(env.REVIEW_DB,'SELECT * FROM enrichment_manual_annotations WHERE annotation_id=? AND target_id=?',annotationId,targetId).first();if(!annotation)fail();
+async function privateAnnotationDetail(env,annotation){
  const source=await verifiedSnapshot(env,annotation.snapshot_id),issue=await verifiedSnapshot(env,annotation.issue_snapshot_id);
- const receipt=await S(env.REVIEW_DB,'SELECT * FROM enrichment_annotation_receipts WHERE annotation_id=?',annotationId).first();if(!receipt)fail();
- const graph=await readAnnotationGraph(env.REVIEW_DB,annotationId);
+ const receipt=await S(env.REVIEW_DB,'SELECT * FROM enrichment_annotation_receipts WHERE annotation_id=?',annotation.annotation_id).first();if(!receipt)fail();
+ const graph=await readAnnotationGraph(env.REVIEW_DB,annotation.annotation_id);
  const external=source.snapshot.external_id;
  const head=await S(env.REVIEW_DB,'SELECT * FROM enrichment_annotation_heads WHERE external_id=?',external).first();
  const events=await rows(env.REVIEW_DB,'SELECT * FROM enrichment_annotation_events WHERE external_id=? ORDER BY observed_at,event_id',external);
- return {contract:ANNOTATION_VERSION,target_id:targetId,annotation,source,issue,head,receipt,graph,events,
+ return {contract:ANNOTATION_VERSION,target_id:annotation.target_id||null,annotation,source,issue,head,receipt,graph,events,
    transparency_note:'Credential-shaped strings are redacted from displayed source bodies; hashes and immutable receipts remain available for audit.'};
+}
+export async function listPrivateAnnotationArchive(env){
+ const all=await rows(env.REVIEW_DB,`SELECT a.annotation_id,a.target_id,a.snapshot_id,a.issue_snapshot_id,a.binding_state,a.review_state,a.authorised_display,a.unparsed_lines,a.imported_at,
+   s.source_url,s.source_created_at,s.source_updated_at,s.content_sha256,h.state AS head_state,h.record_version,h.updated_at AS head_updated_at,
+   t.record_id AS candidate_id
+   FROM enrichment_manual_annotations a
+   JOIN enrichment_ingress_snapshots s ON s.snapshot_id=a.snapshot_id
+   LEFT JOIN enrichment_annotation_heads h ON h.external_id=s.external_id
+   LEFT JOIN enrichment_targets t ON t.target_id=a.target_id
+   ORDER BY s.source_created_at,a.annotation_id`);
+ if(all.length>1000)fail();
+ const counts={candidate_bound:0,unresolved:0,conflict:0,unregistered:0};
+ for(const row of all){if(Object.hasOwn(counts,row.binding_state))counts[row.binding_state]++}
+ return {contract:ANNOTATION_VERSION,total:all.length,counts,annotations:all};
+}
+export async function readPrivateAnnotationById(env,annotationId){
+ if(typeof annotationId!=='string'||!/^[a-f0-9]{64}$/.test(annotationId))fail();
+ const annotation=await S(env.REVIEW_DB,'SELECT * FROM enrichment_manual_annotations WHERE annotation_id=?',annotationId).first();if(!annotation)fail();
+ return privateAnnotationDetail(env,annotation);
+}
+export async function readPrivateAnnotation(env,targetId,annotationId){
+ if(typeof targetId!=='string'||!/^[a-f0-9]{64}$/.test(targetId)||typeof annotationId!=='string'||!/^[a-f0-9]{64}$/.test(annotationId))fail();
+ const annotation=await S(env.REVIEW_DB,'SELECT * FROM enrichment_manual_annotations WHERE annotation_id=? AND target_id=?',annotationId,targetId).first();if(!annotation)fail();
+ return privateAnnotationDetail(env,annotation);
 }
 
 export async function readPublicAnnotations(env,candidateId){

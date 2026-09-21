@@ -30,3 +30,17 @@ test('full provenance remains curator-authenticated and includes retained operat
   const detail=await response.json();assert.match(detail.source.entity.body,/retained private note/);assert.equal(detail.source.entity.actor,'owner');assert.equal(detail.receipt.source_sha256.length,64);
   x.db.close();
 });
+
+test('global private annotation archive includes candidate-bound and unregistered retained annotations',async()=>{
+  const x=await fixture(),missing='CAND-PRIVATE-PROVENANCE-UNREGISTERED';
+  await ingestAnnotation(x.env,{action:'observe',
+    issue:{id:600,number:60,body:'<!-- curator-candidate:'+missing+' -->',html_url:repo+'/issues/60',created_at:'2026-09-20T02:00:00Z',updated_at:'2026-09-20T02:00:00Z',actor:'owner'},
+    comment:{id:601,body:'<!-- manual-scientific-enrichment:test:'+missing+' -->\n### Top-level scientific fields\n- summary: retained orphan note\n### Clinical-contribution framework — analyst proposal only\n- status: insufficient_evidence\n### Sources consulted\nhttps://example.org/orphan',html_url:repo+'/issues/60#issuecomment-601',created_at:'2026-09-20T03:00:00Z',updated_at:'2026-09-20T03:00:00Z',actor:'owner'}},now+1);
+  let response=await handlePaperEnrichment(request('annotation-archive'),x.env,null);assert.equal(response.status,401);
+  response=await handlePaperEnrichment(request('annotation-archive'),x.env,{login:'owner'});assert.equal(response.status,200);
+  const archive=await response.json();assert.equal(archive.total,2);assert.equal(archive.counts.candidate_bound,1);assert.equal(archive.counts.unregistered,1);
+  const orphan=archive.annotations.find(a=>a.binding_state==='unregistered');assert.ok(orphan);assert.equal(orphan.candidate_id,null);
+  response=await handlePaperEnrichment(request('annotation-global?annotation='+orphan.annotation_id),x.env,{login:'owner'});assert.equal(response.status,200);
+  const detail=await response.json();assert.equal(detail.target_id,null);assert.match(detail.source.entity.body,/retained orphan note/);assert.equal(detail.receipt.source_sha256.length,64);
+  x.db.close();
+});

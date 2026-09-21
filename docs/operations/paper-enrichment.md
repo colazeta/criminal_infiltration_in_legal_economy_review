@@ -144,6 +144,8 @@ The private endpoints are:
 - `GET /api/paper-enrichment/annotation?id=<target_id>&annotation=<annotation_id>`
   for the integrity-checked original source/issue capture and parsed annotation
   history.
+- `GET /api/paper-enrichment/annotation-archive` for the complete retained annotation inventory, including candidate-bound, unresolved, conflict and unregistered rows;
+- `GET /api/paper-enrichment/annotation-global?annotation=<annotation_id>` for integrity-checked inspection of any retained annotation even when no CandidateRecord target could be assigned.
 
 ## Monitoring and rollback
 

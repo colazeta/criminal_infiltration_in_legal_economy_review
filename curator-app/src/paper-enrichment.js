@@ -6,7 +6,7 @@ import { fetchWithTimeout } from './network.js';
 import { retainedCrossrefReferences } from './crossref-references.js';
 import { iterationKey, dueSlot } from './enrichment-schedule.js';
 import {persistNormalized,readNormalizedExtraction} from './extraction-relations.js';
-import {listPrivateAnnotations,readPrivateAnnotation} from './annotation-archive.js';
+import {listPrivateAnnotations,readPrivateAnnotation,listPrivateAnnotationArchive,readPrivateAnnotationById} from './annotation-archive.js';
 
 export const ENRICHMENT_PROTOCOL = 'CILE-ENRICH-1';
 const HOUR = 3600000, WEEK = 7 * 24 * HOUR;
@@ -341,6 +341,8 @@ export async function handlePaperEnrichment(request,env,session) {
     const url=new URL(request.url),db=env.REVIEW_DB;
     if(url.pathname.endsWith('/status')&&request.method==='GET')return json({enabled:env.PAPER_ENRICHMENT_ENABLED==='true',protocol:ENRICHMENT_PROTOCOL,scientific_extraction:'blocked_pending_calibration',jobs:await rows(db,'SELECT kind,status,COUNT(*) count FROM enrichment_jobs GROUP BY kind,status'),runs:await rows(db,'SELECT * FROM enrichment_runs ORDER BY started_at DESC LIMIT 24')});
     if(url.pathname.endsWith('/targets')&&request.method==='GET')return json({targets:await rows(db,'SELECT target_id,record_id,record_json,input_sha256 FROM enrichment_targets WHERE cycle_id=? AND active=1 ORDER BY first_seen_at,target_id LIMIT 500',cycle.review_id)});
+    if(url.pathname.endsWith('/annotation-archive')&&request.method==='GET')return json(await listPrivateAnnotationArchive(env));
+    if(url.pathname.endsWith('/annotation-global')&&request.method==='GET')return json(await readPrivateAnnotationById(env,url.searchParams.get('annotation')));
     const target=await S(db,'SELECT * FROM enrichment_targets WHERE target_id=? AND cycle_id=? AND active=1',url.searchParams.get('id'),cycle.review_id).first();if(!target)err('target_not_found',404);
     if(url.pathname.endsWith('/provenance')&&request.method==='GET'){
       const inputs=await rows(db,'SELECT * FROM enrichment_inputs WHERE target_id=? ORDER BY observed_at,input_id',target.target_id);

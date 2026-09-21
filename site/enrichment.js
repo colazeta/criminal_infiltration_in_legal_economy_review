@@ -32,6 +32,7 @@
   async function renderPrivateProvenance(pane,id,serial) {
     const section=el('section');section.className='full-provenance';section.append(el('h2','Trasparenza completa · archivio privato'));
     section.append(el('p','Vista autenticata e read-only di ciò che il sistema ha conservato o eseguito per questo CandidateRecord. Nessun elemento in questa sezione equivale a una decisione scientifica.'));
+    const globalLink=el('a','Apri l’archivio globale di tutte le annotazioni private');globalLink.href='/enrichment.html#annotation-archive';section.append(globalLink);
     const status=el('p','Caricamento della provenienza privata…');section.append(status);pane.append(section);
     try{
       const data=await api('provenance?id='+encodeURIComponent(id));if(serial!==generation)return;
@@ -62,6 +63,29 @@
       rawDetails(section,'Envelope completo restituito dal backend',data);
     }catch(e){status.textContent='Provenienza privata non verificabile: '+e.message;}
   }
+  async function renderGlobalAnnotationArchive(pane,serial) {
+    const section=el('section');section.id='annotation-archive';section.className='full-provenance';
+    section.append(el('h2','Archivio globale annotazioni private'));
+    const status=el('p','Caricamento dell’archivio completo…'),filter=el('input');filter.type='search';filter.placeholder='Filtra CandidateRecord, stato, URL o annotation ID';filter.autocomplete='off';
+    const tableWrap=el('div'),detail=el('div');section.append(status,filter,tableWrap,detail);pane.append(section);
+    try{
+      const data=await api('annotation-archive');if(serial!==generation)return;
+      status.textContent='Totale '+data.total+' · candidate-bound '+data.counts.candidate_bound+' · unresolved '+data.counts.unresolved+' · conflict '+data.counts.conflict+' · unregistered '+data.counts.unregistered+'.';
+      const render=()=>{
+        const q=filter.value.trim().toLowerCase(),rows=(data.annotations||[]).filter(a=>!q||JSON.stringify(a).toLowerCase().includes(q));
+        const t=el('table'),head=el('tr');for(const h of ['candidate_id','binding_state','source_created_at','annotation_id','head_state','source_url','azione'])head.append(el('th',h));t.append(head);
+        for(const a of rows){const tr=el('tr');
+          for(const key of ['candidate_id','binding_state','source_created_at','annotation_id','head_state','source_url'])tr.append(el('td',a[key]??'—'));
+          const td=el('td'),button=el('button','Apri');button.type='button';button.addEventListener('click',async()=>{
+            button.disabled=true;detail.replaceChildren(el('p','Caricamento originale…'));
+            try{const d=await api('annotation-global?annotation='+encodeURIComponent(a.annotation_id));if(serial!==generation)return;detail.replaceChildren(el('h3','Annotazione '+a.annotation_id));rawDetails(detail,'Commento originale conservato',d.source);rawDetails(detail,'Issue padre conservata',d.issue);rawDetails(detail,'Grafo parsato',d.graph);rawDetails(detail,'Receipt di integrità',d.receipt);rawDetails(detail,'Head corrente',d.head);dynamicTable(detail,d.events,'Storia eventi');detail.append(el('p',d.transparency_note||''));}
+            catch(e){detail.replaceChildren(el('p','Annotazione non verificabile: '+e.message));}finally{button.disabled=false}
+          });td.append(button);tr.append(td);t.append(tr);}
+        tableWrap.replaceChildren(el('p',rows.length+' righe visualizzate.'),t);
+      };
+      filter.addEventListener('input',render);render();
+    }catch(e){status.textContent='Archivio globale non verificabile: '+e.message;}
+  }
   function list() {
     const query=$("enrich-filter").value.toLowerCase();
     $("enrich-candidates").replaceChildren(...targets.filter(t=>t.record.title.toLowerCase().includes(query)).map(t=>{
@@ -82,6 +106,7 @@
         table(pane,state.scheduling.totals,['status','count']);
         table(pane,state.scheduling.iterations.map(r=>({...r,scheduled_at:new Date(r.scheduled_at).toISOString(),materialised_at:new Date(r.materialised_at).toISOString(),started_at:r.started_at?new Date(r.started_at).toISOString():'—',finished_at:r.finished_at?new Date(r.finished_at).toISOString():'—'})),['scheduled_at','materialised_at','started_at','finished_at','status','attempts','error_code']);}
       table(pane,state.jobs,['kind','status','count']);pane.append(el('h2','Ultime esecuzioni'));table(pane,state.runs,['scheduled_slot','status','selected_job_id','error_code']);
+      await renderGlobalAnnotationArchive(pane,serial);if(serial!==generation)return;
       message(targets.length+' paper nel registro privato. I dati delle lavorazioni non indicano l’inclusione nel corpus.');
     }catch(e){$("enrich-detail").replaceChildren(el('h1','Accesso o configurazione richiesti'),el('p','Accedi dalla console curatoriale. Un archivio privato non disponibile resta un blocco esplicito.'));message(e.message);}
   }
