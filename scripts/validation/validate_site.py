@@ -98,6 +98,7 @@ def validate_pages() -> None:
     pages = sorted(SITE.glob("*.html"))
     expected_languages = {
         "index.html": "en",
+        "database.html": "it",
         "aml.html": "en",
         "404.html": "en",
         "curate.html": "it",
@@ -222,6 +223,30 @@ def validate_pages() -> None:
     )
     if missing:
         fail(f"aml.html missing interface ID(s): {', '.join(missing)}")
+    database_ids = set(parsed[SITE / "database.html"].ids)
+    missing = sorted(
+        {
+            "database-workspace",
+            "database-table-list",
+            "database-current-table",
+            "database-current-source",
+            "database-controls",
+            "database-search",
+            "database-sort",
+            "database-status",
+            "database-head",
+            "database-body",
+            "database-record-json",
+            "database-research-json",
+            "database-load-research",
+            "database-open-console",
+            "database-download-json",
+            "database-download-csv",
+        }
+        - database_ids
+    )
+    if missing:
+        fail(f"database.html missing interface ID(s): {', '.join(missing)}")
     for path, parser in parsed.items():
         for reference in parser.references:
             check_reference(path, reference, set(parser.ids))
@@ -415,6 +440,45 @@ def validate_assets() -> None:
     ):
         if required not in css:
             fail(f"styles.css missing accessibility safeguard: {required}")
+
+    database_javascript = (SITE / "database.js").read_text(encoding="utf-8")
+    if re.search(r"\\.innerHTML\\s*=|insertAdjacentHTML", database_javascript):
+        fail("database.js must render public data through text nodes")
+    for required in (
+        "DATABASE_BROWSER_V1",
+        "CILE-PUBLIC-INDEX-1",
+        "./data/paper-register.json",
+        "./paper-support.json",
+        "./data/archive.json",
+        "./data/secondary-collections.json",
+        "./data/research-stats.json",
+        "./data/curator-stats.json",
+        "./data/curator-options.json",
+        'credentials: "omit"',
+        "replaceChildren",
+        "textContent",
+    ):
+        if required not in database_javascript:
+            fail(f"database.js missing public-browser safeguard: {required}")
+    for forbidden in (
+        "data/curation",
+        "/api/paper-enrichment",
+        "/machine",
+        "localStorage",
+        "document.cookie",
+    ):
+        if forbidden in database_javascript:
+            fail(f"database.js crosses the public database boundary: {forbidden}")
+
+    database_html = (SITE / "database.html").read_text(encoding="utf-8")
+    for required in (
+        "DATABASE_BROWSER_V1",
+        'id="database-workspace"',
+        'href="./database.css"',
+        'src="./database.js',
+    ):
+        if required not in database_html:
+            fail(f"database.html missing governed browser marker: {required}")
 
     curator = (SITE / "curate.html").read_text(encoding="utf-8")
     if re.search(r"<input\b[^>]*type=[\"']password[\"']", curator, re.I):
