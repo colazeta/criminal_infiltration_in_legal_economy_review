@@ -105,6 +105,7 @@ python3 scripts/curation/build_curator_options.py
 python3 scripts/validation/validate_archive.py
 python3 scripts/validation/validate_site.py
 node --check site/app.js
+node --check site/database.js
 node --check site/aml.js
 node --check site/stats.js
 node --check site/curator.js
