@@ -9,7 +9,7 @@ SITE = ROOT / "site"
 
 class ClassicSiteUiTests(unittest.TestCase):
     def test_public_pages_load_classic_styles_after_base_styles(self) -> None:
-        for filename in ("index.html", "aml.html", "stats.html", "method.html", "404.html"):
+        for filename in ("index.html", "database.html", "aml.html", "stats.html", "method.html", "404.html"):
             source = (SITE / filename).read_text(encoding="utf-8")
             with self.subTest(filename=filename):
                 self.assertIn('class="classic-site', source)
@@ -87,6 +87,44 @@ class ClassicSiteUiTests(unittest.TestCase):
         self.assertIn("background: #000080", source)
         self.assertNotIn('href="./classic-site.css"', source)
         self.assertIn("CURATOR_FULLSCREEN_SHELL_V1", source)
+
+    def test_database_browser_is_public_read_only_and_classic(self) -> None:
+        html = (SITE / "database.html").read_text(encoding="utf-8")
+        javascript = (SITE / "database.js").read_text(encoding="utf-8")
+        css = (SITE / "database.css").read_text(encoding="utf-8")
+        self.assertIn("DATABASE_BROWSER_V1", html)
+        self.assertIn('id="database-workspace"', html)
+        self.assertIn('href="./database.css"', html)
+        self.assertIn('src="./database.js', html)
+        self.assertIn("DATABASE_BROWSER_V1", javascript)
+        self.assertIn("CILE-PUBLIC-INDEX-1", javascript)
+        self.assertIn('credentials: "omit"', javascript)
+        self.assertIn("replaceChildren", javascript)
+        self.assertIn("textContent", javascript)
+        for required in (
+            "./data/paper-register.json",
+            "./paper-support.json",
+            "./data/archive.json",
+            "./data/secondary-collections.json",
+            "./data/research-stats.json",
+            "./data/curator-stats.json",
+            "./data/curator-options.json",
+        ):
+            self.assertIn(required, javascript)
+        for forbidden in (
+            "data/curation",
+            "/api/paper-enrichment",
+            "/machine",
+            "localStorage",
+            "document.cookie",
+            "innerHTML",
+            "insertAdjacentHTML",
+        ):
+            self.assertNotIn(forbidden, javascript)
+        self.assertIn("DATABASE_BROWSER_90S_V1", css)
+        self.assertNotIn("linear-gradient", css)
+        self.assertNotIn("radial-gradient", css)
+        self.assertNotIn("box-shadow", css)
 
     def test_404_is_classic_error_window(self) -> None:
         source = (SITE / "404.html").read_text(encoding="utf-8")
