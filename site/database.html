@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Browser read-only delle proiezioni pubbliche governate del database Criminal Infiltration."
+    />
+    <title>Database browser · Criminal Infiltration</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>▦</text></svg>" />
+    <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./classic-site.css" />
+    <link rel="stylesheet" href="./database.css" />
+    <script src="./database.js?v=database-browser-20260921" defer></script>
+  </head>
+  <body class="classic-site classic-database" lang="it">
+    <a class="skip-link" href="#database-workspace">Vai al browser del database</a>
+
+    <header class="site-header">
+      <div class="header-inner">
+        <a class="brand" href="./index.html" aria-label="Criminal Infiltration — archivio">
+          <span class="brand-mark" aria-hidden="true">CI</span>
+          <span><strong>Criminal Infiltration</strong><small>Literature review</small></span>
+        </a>
+        <nav class="app-nav" aria-label="Navigazione principale">
+          <a href="./index.html">Archivio</a>
+          <a href="./database.html" aria-current="page">Database</a>
+          <a href="./stats.html">Statistiche</a>
+          <a href="./method.html">Metodo</a>
+          <a href="./model.html">Modello</a>
+          <a href="./curate.html">Curatore</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="main-content">
+      <section class="intro database-intro" aria-labelledby="database-title">
+        <div>
+          <p class="eyebrow">PUBLIC_DB.EXE · READ ONLY</p>
+          <h1 id="database-title">Database browser</h1>
+          <p class="intro-copy">
+            Naviga le proiezioni pubbliche governate come tabelle: record bibliografici,
+            supporto di lettura, indice delle analisi, corpus, raccolte secondarie e statistiche.
+          </p>
+        </div>
+        <aside class="scope-note" aria-label="Confine del database">
+          <strong>Vista completa del database pubblico, non del datastore privato</strong>
+          <p>
+            Questa pagina non espone corpi delle fonti, note interne, credenziali, identificativi
+            privati o decisioni non pubblicabili. I dati restano derivati dalle stesse proiezioni
+            già usate dal sito e dal Worker pubblico.
+          </p>
+        </aside>
+      </section>
+
+      <section class="metrics database-metrics" aria-label="Stato del browser">
+        <article><span id="database-table-count">—</span><p>tabelle pubbliche disponibili</p></article>
+        <article><span id="database-row-count">—</span><p>righe nella tabella corrente</p></article>
+        <article><span id="database-selected-count">—</span><p>righe dopo il filtro</p></article>
+        <article><span id="database-research-count">—</span><p>analisi pubbliche caricate</p></article>
+      </section>
+
+      <section class="database-shell" id="database-workspace" aria-label="Browser relazionale pubblico">
+        <aside class="database-tree" aria-label="Tabelle disponibili">
+          <div class="database-titlebar">OBJECT EXPLORER</div>
+          <p class="database-tree-note">Tabelle / proiezioni</p>
+          <div id="database-table-list" class="database-table-list"></div>
+          <div class="database-legend">
+            <strong>Legenda</strong>
+            <p><code>STATIC</code> file generato su Pages</p>
+            <p><code>LIVE</code> proiezione pubblica del Worker</p>
+            <p><code>AGG</code> aggregato, non record scientifico</p>
+          </div>
+        </aside>
+
+        <div class="database-main-pane">
+          <div class="database-titlebar">
+            <span id="database-current-table">TABLE: —</span>
+            <span id="database-current-source">SOURCE: —</span>
+          </div>
+
+          <form class="database-controls" id="database-controls" role="search" aria-label="Filtra la tabella corrente">
+            <label>
+              <span>FIND</span>
+              <input id="database-search" type="search" autocomplete="off" placeholder="cerca in qualunque campo..." />
+            </label>
+            <label>
+              <span>SORT</span>
+              <select id="database-sort">
+                <option value="source">ordine sorgente</option>
+                <option value="id">ID</option>
+                <option value="title">titolo</option>
+                <option value="year_desc">anno ↓</option>
+                <option value="year_asc">anno ↑</option>
+              </select>
+            </label>
+            <button type="reset">RESET</button>
+            <button type="button" id="database-download-json">EXPORT JSON</button>
+            <button type="button" id="database-download-csv">EXPORT CSV</button>
+          </form>
+
+          <p id="database-status" class="database-status" role="status" aria-live="polite">Avvio del browser…</p>
+
+          <div class="database-table-scroll" tabindex="0" aria-label="Risultati tabella">
+            <table class="database-grid">
+              <caption class="visually-hidden">Righe della tabella pubblica selezionata</caption>
+              <thead id="database-head"></thead>
+              <tbody id="database-body"></tbody>
+            </table>
+          </div>
+
+          <section class="database-inspector" aria-labelledby="database-inspector-title">
+            <div class="database-titlebar">
+              <h2 id="database-inspector-title">RECORD INSPECTOR</h2>
+              <span id="database-record-key">nessun record selezionato</span>
+            </div>
+            <div class="database-inspector-toolbar">
+              <button type="button" id="database-load-research" hidden>LOAD PUBLIC RESEARCH</button>
+              <a id="database-open-console" class="button-link" href="./curate.html" hidden>OPEN CURATOR</a>
+              <a id="database-open-register" href="./index.html#register">OPEN REGISTER</a>
+            </div>
+            <div class="database-inspector-columns">
+              <div>
+                <h3>ROW JSON</h3>
+                <pre id="database-record-json">Seleziona una riga della tabella.</pre>
+              </div>
+              <div>
+                <h3>PUBLIC RESEARCH PROJECTION</h3>
+                <p id="database-research-status">Seleziona un CandidateRecord e usa LOAD PUBLIC RESEARCH.</p>
+                <pre id="database-research-json">—</pre>
+              </div>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <p class="database-footnote">
+        DATABASE_BROWSER_V1 · rendering esclusivamente client-side · nessuna scrittura · nessuna query SQL arbitraria ·
+        i valori assenti restano assenti e non vengono trasformati in zero.
+      </p>
+    </main>
+
+    <footer>
+      <div class="page-tools" aria-label="Dati e documentazione">
+        <a href="./data/paper-register.json">Registro · JSON</a>
+        <a href="./paper-support.json">Supporto schede · JSON</a>
+        <a href="./data/archive.json">Corpus · JSON</a>
+        <a href="./data/secondary-collections.json">Raccolte secondarie · JSON</a>
+        <a href="./method.html">Metodo</a>
+      </div>
+    </footer>
+  </body>
+</html>
