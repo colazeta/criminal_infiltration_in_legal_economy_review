@@ -20,7 +20,7 @@ async function fixture(){
 function request(path){return new Request('https://enrichment.internal/api/paper-enrichment/'+path);}
 
 test('full provenance remains curator-authenticated and includes retained operational and annotation history',async()=>{
-  const x=await fixture(),target=x.db.prepare('SELECT target_id FROM enrichment_targets WHERE record_id=?').bind(candidate).get().target_id;
+  const x=await fixture(),target=x.db.prepare('SELECT target_id FROM enrichment_targets WHERE record_id=?').get(candidate).target_id;
   let response=await handlePaperEnrichment(request('provenance?id='+target),x.env,null);assert.equal(response.status,401);
   response=await handlePaperEnrichment(request('provenance?id='+target),x.env,{login:'owner'});assert.equal(response.status,200);
   const data=await response.json();assert.equal(data.target.record_id,candidate);assert.equal(data.inputs.length,1);assert.equal(data.jobs.length,4);assert.equal(data.annotations.length,1);
