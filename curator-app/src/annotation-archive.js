@@ -194,6 +194,54 @@ export async function reconcileAnnotationCensus(env,census,now=Date.now()){
  return {contract:ANNOTATION_VERSION,observed_comments:present.size,withdrawn,deferred,source_sha256:census.source_sha256,history_deleted:false};
 }
 
+function redactCredentialText(value){
+ let redactions=0;
+ const replace=(pattern,label)=>{value=value.replace(pattern,()=>{redactions++;return '[REDACTED_'+label+']'});};
+ replace(/sk-(?:proj-)?[A-Za-z0-9_-]{20,}/g,'OPENAI_KEY');
+ replace(/gh[pousr]_[A-Za-z0-9]{20,}/g,'GITHUB_TOKEN');
+ replace(/Bearer\\s+[A-Za-z0-9._-]{12,}/gi,'BEARER_TOKEN');
+ replace(/-----BEGIN [^-]{1,40}PRIVATE KEY-----[\\s\\S]*?-----END [^-]{1,40}PRIVATE KEY-----/g,'PRIVATE_KEY');
+ return {value,redactions};
+}
+async function verifiedSnapshot(env,snapshotId){
+ const snapshot=await S(env.REVIEW_DB,'SELECT * FROM enrichment_ingress_snapshots WHERE snapshot_id=?',snapshotId).first();if(!snapshot)fail();
+ const object=await env.REVIEW_EVIDENCE.get(snapshot.storage_key);if(!object)fail();
+ const raw=await object.text();if(await sha256(raw)!==snapshot.content_sha256)fail();
+ let parsed;try{parsed=JSON.parse(raw)}catch{fail()}
+ const body=redactCredentialText(String(parsed.body||''));
+ return {snapshot:{...snapshot},entity:{...parsed,body:body.value},redactions_applied:body.redactions};
+}
+export async function listPrivateAnnotations(env,targetId){
+ if(typeof targetId!=='string'||!/^[a-f0-9]{64}$/.test(targetId))fail();
+ const all=await rows(env.REVIEW_DB,`SELECT a.*,s.source_url,s.source_created_at,s.source_updated_at,s.content_sha256,h.state AS head_state,h.record_version,h.updated_at AS head_updated_at
+   FROM enrichment_manual_annotations a
+   JOIN enrichment_ingress_snapshots s ON s.snapshot_id=a.snapshot_id
+   LEFT JOIN enrichment_annotation_heads h ON h.external_id=s.external_id
+   WHERE a.target_id=?
+   ORDER BY s.source_created_at,a.annotation_id`,targetId);
+ if(all.length>200)fail();
+ const annotations=[];
+ for(const row of all){
+   const receipt=await S(env.REVIEW_DB,'SELECT * FROM enrichment_annotation_receipts WHERE annotation_id=?',row.annotation_id).first();if(!receipt)fail();
+   const graph=await readAnnotationGraph(env.REVIEW_DB,row.annotation_id);
+   const events=await rows(env.REVIEW_DB,'SELECT * FROM enrichment_annotation_events WHERE external_id=(SELECT external_id FROM enrichment_ingress_snapshots WHERE snapshot_id=?) ORDER BY observed_at,event_id',row.snapshot_id);
+   annotations.push({...row,receipt,graph,events});
+ }
+ return {contract:ANNOTATION_VERSION,target_id:targetId,annotations};
+}
+export async function readPrivateAnnotation(env,targetId,annotationId){
+ if(typeof targetId!=='string'||!/^[a-f0-9]{64}$/.test(targetId)||typeof annotationId!=='string'||!/^[a-f0-9]{64}$/.test(annotationId))fail();
+ const annotation=await S(env.REVIEW_DB,'SELECT * FROM enrichment_manual_annotations WHERE annotation_id=? AND target_id=?',annotationId,targetId).first();if(!annotation)fail();
+ const source=await verifiedSnapshot(env,annotation.snapshot_id),issue=await verifiedSnapshot(env,annotation.issue_snapshot_id);
+ const receipt=await S(env.REVIEW_DB,'SELECT * FROM enrichment_annotation_receipts WHERE annotation_id=?',annotationId).first();if(!receipt)fail();
+ const graph=await readAnnotationGraph(env.REVIEW_DB,annotationId);
+ const external=source.snapshot.external_id;
+ const head=await S(env.REVIEW_DB,'SELECT * FROM enrichment_annotation_heads WHERE external_id=?',external).first();
+ const events=await rows(env.REVIEW_DB,'SELECT * FROM enrichment_annotation_events WHERE external_id=? ORDER BY observed_at,event_id',external);
+ return {contract:ANNOTATION_VERSION,target_id:targetId,annotation,source,issue,head,receipt,graph,events,
+   transparency_note:'Credential-shaped strings are redacted from displayed source bodies; hashes and immutable receipts remain available for audit.'};
+}
+
 export async function readPublicAnnotations(env,candidateId){
  if(!idPattern.test(candidateId))fail();
  const db=env.REVIEW_DB,all=await rows(db,`SELECT a.annotation_id,h.state,s.source_url,s.source_updated_at,s.storage_key,s.content_sha256 FROM enrichment_manual_annotations a JOIN enrichment_annotation_heads h USING(annotation_id) JOIN enrichment_ingress_snapshots s ON s.snapshot_id=a.snapshot_id JOIN enrichment_targets t ON t.target_id=a.target_id WHERE t.record_id=? AND t.cycle_id=? AND t.active=1 AND a.binding_state='candidate_bound' AND a.authorised_display=1 ORDER BY s.source_created_at,a.annotation_id`,candidateId,cycle.review_id);

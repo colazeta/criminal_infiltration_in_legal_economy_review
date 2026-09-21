@@ -167,6 +167,21 @@ and calibration gates are unchanged. No classification is invented to fill a
 missing sheet. Existing Worker/Pages delivery and observer own verification;
 no additional scheduler or parallel research data store is authorised here.
 
+## Owner full-provenance transparency — owner instruction, 2026-09-21
+
+The owner requires authenticated visibility into the complete retained history for
+each paper so that automated behaviour can be audited and corrected. The private
+curator surface may therefore display candidate-bound private annotations, all
+their retained revisions/conflicts/withdrawals, original preserved issue/comment
+captures, parsed fields/classes, integrity receipts, source/proposal history, input
+versions, jobs, attempts, runs/errors, citation coverage, documents, bibliography
+snapshots and scientific receipts. This is read-only transparency, not publication.
+It must remain behind the existing curator authentication boundary; Pages/public
+projections must not receive private bodies, reviewer/actor details or internal
+storage material. Credential-shaped strings in raw retained bodies must be redacted
+for display while preserving audit hashes/receipts. No scientific decision,
+identity reconciliation or new persistence authority follows from this display.
+
 ## Two-lane completion delivery — owner instructions, 2026-09-14 and 2026-09-15
 
 Apply `docs/operations/two-lane-delivery.md`. The current system has two hourly hybrid workers: Lane A at :10 and Lane B at :40. Both enrich by default; Lane A owns the 08:00–20:00 Europe/Rome AM scouting window and Lane B owns the 20:00–08:00 PM window. There are two project-wide scouting windows per day, not an additional discovery scheduler. Scheduled scouting uses Parallel Search by default; Exa is optional only when positively available and materially useful. Older daily-cadence, Exa-first and fixed candidate-count instructions are superseded by this owner amendment.
