@@ -17,6 +17,51 @@
     const t=el('table'),head=el('tr');for(const f of fields)head.append(el('th',f));t.append(head);
     for(const row of rows){const tr=el('tr');for(const f of fields)tr.append(el('td',row[f]??'—'));t.append(tr);}parent.append(t);
   }
+  function fieldsFor(rows){
+    const out=[];for(const row of rows||[]){if(!row||typeof row!=='object'||Array.isArray(row))continue;for(const key of Object.keys(row)){if(!out.includes(key))out.push(key);if(out.length>=16)return out;}}return out;
+  }
+  function dynamicTable(parent,rows,label) {
+    const wrap=el('details'),summary=el('summary',label+' · '+(rows?.length||0));wrap.append(summary);
+    if(!rows?.length){wrap.append(el('p','Nessuna riga conservata.'));parent.append(wrap);return;}
+    const fields=fieldsFor(rows),t=el('table'),head=el('tr');for(const f of fields)head.append(el('th',f));t.append(head);
+    for(const row of rows){const tr=el('tr');for(const f of fields){const value=row[f];tr.append(el('td',value&&typeof value==='object'?JSON.stringify(value):value??'—'));}t.append(tr);}wrap.append(t);parent.append(wrap);
+  }
+  function rawDetails(parent,label,value) {
+    const d=el('details'),h=el('summary',label),pre=el('pre',JSON.stringify(value,null,2));d.append(h,pre);parent.append(d);return d;
+  }
+  async function renderPrivateProvenance(pane,id,serial) {
+    const section=el('section');section.className='full-provenance';section.append(el('h2','Trasparenza completa · archivio privato'));
+    section.append(el('p','Vista autenticata e read-only di ciò che il sistema ha conservato o eseguito per questo CandidateRecord. Nessun elemento in questa sezione equivale a una decisione scientifica.'));
+    const status=el('p','Caricamento della provenienza privata…');section.append(status);pane.append(section);
+    try{
+      const data=await api('provenance?id='+encodeURIComponent(id));if(serial!==generation)return;
+      status.textContent='Provenienza privata caricata. Le assenze restano assenze registrate, non zeri.';
+      rawDetails(section,'Target corrente',data.target);
+      dynamicTable(section,data.inputs,'Input/versioni osservate');
+      dynamicTable(section,data.jobs,'Job pianificati o eseguiti');
+      dynamicTable(section,data.attempts,'Tentativi effettivi');
+      dynamicTable(section,data.runs,'Run collegate');
+      dynamicTable(section,data.sources,'Fonti conservate · metadati e storage');
+      dynamicTable(section,data.proposals,'Proposte di estrazione · payload originali');
+      dynamicTable(section,data.citation_coverage,'Copertura citazioni');
+      dynamicTable(section,data.citation_counts,'Conteggi citazioni');
+      dynamicTable(section,data.documents,'Documenti conservati');
+      dynamicTable(section,data.bibliography,'Snapshot bibliografici');
+      dynamicTable(section,data.adjudication,'Receipt di adjudication');
+      dynamicTable(section,data.calibration,'Receipt di calibrazione');
+      const annotations=el('details'),annotationSummary=el('summary','Annotazioni private · '+(data.annotations?.length||0));annotations.append(annotationSummary);
+      if(!data.annotations?.length)annotations.append(el('p','Nessuna annotazione privata candidate-bound è conservata per questo paper.'));
+      for(const a of data.annotations||[]){
+        const card=el('section');card.append(el('h3','Annotazione · '+a.annotation_id),el('p','binding='+a.binding_state+' · head='+String(a.head_state||'—')+' · versione='+String(a.record_version||'—')+' · importata '+a.imported_at));
+        rawDetails(card,'Grafo parsato',a.graph);dynamicTable(card,a.events,'Eventi di revisione');rawDetails(card,'Receipt di integrità',a.receipt);
+        const original=el('div'),button=el('button','Apri originale conservato');button.type='button';
+        button.addEventListener('click',async()=>{button.disabled=true;try{const detail=await api('annotation?id='+encodeURIComponent(id)+'&annotation='+encodeURIComponent(a.annotation_id));if(serial!==generation)return;original.replaceChildren();rawDetails(original,'Commento originale conservato',detail.source);rawDetails(original,'Issue padre conservata',detail.issue);rawDetails(original,'Head corrente',detail.head);dynamicTable(original,detail.events,'Storia eventi');original.append(el('p',detail.transparency_note||''));}catch(e){message(e.message)}finally{button.disabled=false}});
+        card.append(button,original);annotations.append(card);
+      }
+      section.append(annotations);
+      rawDetails(section,'Envelope completo restituito dal backend',data);
+    }catch(e){status.textContent='Provenienza privata non verificabile: '+e.message;}
+  }
   function list() {
     const query=$("enrich-filter").value.toLowerCase();
     $("enrich-candidates").replaceChildren(...targets.filter(t=>t.record.title.toLowerCase().includes(query)).map(t=>{
@@ -72,6 +117,7 @@
         card.append(el('h4','Posizionamento nel framework'),el('p',(proposal.framework.primary||proposal.framework.status)+' — '+value(proposal.framework.rationale)));
         const d=el('details'),h=el('summary','Dettagli tecnici e provenienza · '+p.proposal_id),pre=el('pre',JSON.stringify(proposal,null,2));d.append(h,pre);card.append(d);pane.append(card);
       }
+      await renderPrivateProvenance(pane,id,serial);if(serial!==generation)return;
       pane.append(el('h2','Relazioni di citazione'),el('p','Identificatori restituiti dal provider, non nuove pubblicazioni incluse. Ogni snapshot ha copertura separata; gli stessi collegamenti possono ricomparire in snapshot diversi.'));
       const graph=el('div'),more=el('button','Carica relazioni');let offset=0;
       more.addEventListener('click',async()=>{more.disabled=true;try{const d=await api('citations?id='+encodeURIComponent(id)+'&offset='+offset);if(serial!==generation)return;table(graph,d.edges,['direction','citing_identifier','cited_identifier','snapshot_id']);if(offset===0)table(graph,d.coverage,['direction','status','returned_count','provider_count','observed_at']);offset=d.next_offset;more.hidden=offset===null;}catch(e){message(e.message);}finally{more.disabled=false;}});pane.append(more,graph);message(data.target.record_id);
