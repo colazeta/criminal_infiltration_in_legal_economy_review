@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {isolatedStore,captureBackup} from '../../scripts/architecture/private-backup.mjs';
 import {archiveBackupPage} from '../src/archive-preservation.js';
 import {syncTargets} from '../src/paper-enrichment.js';
-import {ingestAnnotation,parseAnnotation,readPublicAnnotations,auditAnnotations,reconcileAnnotationCensus} from '../src/annotation-archive.js';
+import {ingestAnnotation,parseAnnotation,readPublicAnnotations,listPrivateAnnotations,readPrivateAnnotation,auditAnnotations,reconcileAnnotationCensus} from '../src/annotation-archive.js';
 import {serviceSignature} from '../src/enrichment-store.js';
 
 const now=Date.parse('2026-09-19T00:00:00Z'),secret='annotation-test-only-private-backup-key',commit='d'.repeat(40);
@@ -43,6 +43,17 @@ test('original ingress, scoped annotation and explicit classes are saved once un
  for(const privateText of ['PRIVATE REVIEWER','PRIVATE INTERNAL NOTE','storage_key','actor'])assert.ok(!JSON.stringify(out).includes(privateText));
  assert.equal(x.db.prepare('SELECT COUNT(*) n FROM enrichment_proposals').get().n,0);
  assert.deepEqual((await auditAnnotations(x.env)).binding_states,{candidate_bound:1,unresolved:0,conflict:0,unregistered:0});x.db.close();
+});
+test('authenticated private provenance exposes every retained annotation version and original source with integrity metadata',async()=>{
+ const x=await fixture(),data=input();await ingestAnnotation(x.env,data,now);
+ const revised=structuredClone(data);revised.comment.updated_at='2026-09-03T00:00:00Z';revised.comment.body=revised.comment.body.replace('primary: diagnosis','primary: screening');await ingestAnnotation(x.env,revised,now+1);
+ const target=x.db.prepare('SELECT target_id FROM enrichment_targets WHERE record_id=?').bind(candidate).get().target_id;
+ const listing=await listPrivateAnnotations(x.env,target);assert.equal(listing.annotations.length,2);
+ assert.ok(listing.annotations.every(a=>a.receipt?.source_sha256&&a.graph?.sections?.length));
+ const detail=await readPrivateAnnotation(x.env,target,listing.annotations[0].annotation_id);
+ assert.equal(detail.source.entity.actor,'PRIVATE REVIEWER');assert.match(detail.source.entity.body,/PRIVATE INTERNAL NOTE/);
+ assert.equal(detail.issue.entity.body,'<!-- curator-candidate:'+candidate+' -->');assert.ok(detail.events.length>=1);
+ assert.equal(detail.source.redactions_applied,0);assert.match(detail.transparency_note,/Credential-shaped strings/);x.db.close();
 });
 test('conflicting markers are retained privately without inventing a candidate association',async()=>{
  const x=await fixture(),data=input();data.issue.body='<!-- curator-candidate:CAND-DIFFERENT -->';
