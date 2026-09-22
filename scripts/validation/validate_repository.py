@@ -807,7 +807,7 @@ def check_governance_copy() -> None:
         "Tasso di nuovi candidati",
         "Completezza delle fonti",
         "non vengono trasformati in zero",
-        "esclusivamente Exa",
+        "normalmente Parallel Search",
         "relativi totali sono `null`",
         "non entra nella regola di arresto",
         "ledger GitHub #30",
