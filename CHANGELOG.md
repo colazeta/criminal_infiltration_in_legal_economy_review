@@ -32,6 +32,14 @@ follow semantic versioning while the project is in prerelease.
 
 ## Unreleased
 
+### Changed — Parallel-Search-first single-worker surveillance, 2026-09-22
+
+- Protocol 1.3 makes Parallel Search the default scheduled W1–W7 provider; Exa is optional only when positively available and materially useful.
+- The single scheduled :10 living-review worker owns both 08:00–20:00 and 20:00–08:00 Europe/Rome scouting windows; the former :40 scheduler remains retired.
+- Q1 is the breadth-first minimum rather than a saturation stop: known-heavy result heads continue with materially different Q2/Q3/... variants under the governed novelty-depth stopping rules.
+- Historical runs retain their original Exa/fallback provenance. Scientific scope, eligibility, identity, E1–E3 expansion and saturation criteria are unchanged.
+
+
 ### Changed — Exa-limit continuity fallback, 2026-09-09
 
 - Protocol 1.2 / CILE-DAILY-v5 keeps Exa as the primary living-surveillance provider and authorises Parallel Search only after a documented Exa credit, quota, rate or provider-cap limit.
