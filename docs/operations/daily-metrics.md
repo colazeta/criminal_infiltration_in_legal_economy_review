@@ -34,11 +34,10 @@ flowchart TD
 Il [ledger GitHub #30](https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/issues/30)
 contiene un commento strutturato per ogni batch `ACADEMIC-YYYY-MM-DD`. La
 pubblicazione giornaliera accetta soltanto commenti dell'autore autorizzato e
-conformi a [`schema/surveillance-run.schema.json`](../../schema/surveillance-run.schema.json),
-versione 2 per Exa. Il marker corrente è `<!-- surveillance-run:v2 -->`.
-Lo storico v1 conserva Consensus ed Exa e il proprio esito; non viene riscritto
-né proiettato nel ciclo OA. La versione dello schema del run è distinta dalla
-versione 2 dell’export pubblico con calendario.
+conformi a [`schema/surveillance-run.schema.json`](../../schema/surveillance-run.schema.json).
+Le nuove finestre usano il contratto run v3 e il marker `<!-- surveillance-run:v3 -->`;
+v1/v2 restano storico immutabile con la propria provenance. La versione dello
+schema del run è distinta dalla versione dell’export pubblico con calendario.
 Ogni commento usa un involucro canonico composto da una sola riga tecnica,
 marker e oggetto JSON: testo aggiuntivo non viene accettato, così il ledger non
 diventa accidentalmente una seconda copia dei metadati dei candidati.
@@ -55,16 +54,18 @@ esplicito:
 - `failed`: la fonte non ha prodotto un risultato utilizzabile;
 - `not_run`: la fonte non è stata avviata.
 
-Lo stato complessivo è:
+Lo stato complessivo del contratto corrente dipende dal singolo provider finale
+selezionato per il batch:
 
-- `completed` se Exa ha completato tutte le query pianificate;
-- `partial` se Exa ha completato almeno una query, ma non tutte;
+- `completed` se il provider finale ha completato tutte le query pianificate;
+- `partial` se ha completato almeno una query, ma non tutte;
 - `failed` se nessuna query è completa.
 
-La fonte Exa resta `failed` finché la sua esecuzione è incompleta, conservando
-il numero effettivo di query completate; `not_run` indica nessun avvio. Nel
-contratto storico v1 lo stato globale resta invece determinato dalla completezza
-delle due fonti, senza reinterpretazioni retroattive.
+Nel v3 il provider finale è normalmente Parallel Search; Exa può essere scelto
+solo quando positivamente disponibile e materialmente utile. Un tentativo
+incompleto di un provider diverso resta provenance diagnostica e non viene
+reinterpretato come zero. I contratti storici v1/v2 conservano invece la propria
+semantica originaria senza reinterpretazioni retroattive.
 
 Solo una giornata `completed` alimenta i conteggi di volume e novità. In una
 giornata parziale o fallita, i totali sono `null`: non vengono trasformati in
@@ -108,8 +109,9 @@ metadati. Sono indicatori di cautela, non paper aggiuntivi.
 
 ## Confronto tra le fonti
 
-Il contratto corrente accetta esclusivamente Exa. L’istruzione del proprietario
-dell’8 settembre 2026 ha rimosso Consensus dal processo. Una fonte aggiuntiva
+Il contratto v3 corrente registra esattamente un provider finale per batch:
+normalmente Parallel Search, oppure Exa quando positivamente disponibile e
+materialmente utile. Consensus resta escluso dal processo. Una fonte aggiuntiva
 richiede prima una modifica revisionata di governance, schema e validazione. Per ciascuna fonte vengono registrati:
 
 - query pianificate e completate;
@@ -119,9 +121,9 @@ richiede prima una modifica revisionata di governance, schema e validazione. Per
 - candidati trovati soltanto da quella fonte;
 - limiti, cap, errori e codice del fallimento.
 
-Con Exa come unica fonte, candidati intercettati, candidati esclusivi e totale
-persistito devono coincidere. Questo non misura un contributo marginale rispetto
-a una seconda fonte. Nel solo storico a due fonti, i candidati condivisi possono
+Con un solo provider finale nel v3, candidati intercettati, candidati esclusivi
+e totale persistito devono coincidere. Questo non misura un contributo marginale
+rispetto a una seconda fonte. Nel solo storico a due fonti, i candidati condivisi possono
 comparire in entrambe le righe. Nella tabella pubblica, esecuzioni e query descrivono la salute
 tecnica della fonte anche nelle giornate parziali; occorrenze, risultati e
 candidati vengono invece sommati soltanto per giornate interamente complete.
