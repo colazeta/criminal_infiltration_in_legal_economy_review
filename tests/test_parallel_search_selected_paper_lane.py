@@ -8,12 +8,12 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class ParallelSearchSelectedPaperLaneTests(unittest.TestCase):
-    def test_governance_distinguishes_daily_fallback_from_selected_paper_lane(self):
+    def test_governance_distinguishes_scheduled_discovery_from_selected_paper_lane(self):
         sources = (ROOT / "docs/governance/sources.md").read_text(encoding="utf-8")
         web = (ROOT / "docs/governance/web-capabilities.md").read_text(encoding="utf-8")
         targeted = (ROOT / "docs/operations/targeted-reading-retrieval.md").read_text(encoding="utf-8")
         self.assertIn("Parallel Search selected-paper OA lane", sources)
-        self.assertIn("does not change the Exa-primary W1–W7 rule", sources)
+        self.assertIn("Parallel Search is also the scheduled default discovery provider", sources)
         self.assertIn("final publisher/repository/document URL", sources)
         self.assertIn("Connector-side Parallel Search lane", web)
         self.assertIn("not a Cloudflare Worker runtime provider", web)
