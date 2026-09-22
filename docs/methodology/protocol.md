@@ -1,6 +1,6 @@
 # Living literature review protocol
 
-**Protocol version:** 1.2  
+**Protocol version:** 1.3  
 **Status:** active  
 **Product:** living curated evidence map and publication archive
 
@@ -33,14 +33,12 @@ participation, influence, control or embeddedness in the legal economy.
 5. New unique works are screened and coded; complete E1–E3 cycles are repeated.
 6. Living surveillance continues even after an initial saturation judgement.
 
-Daily living surveillance uses **Exa as the primary discovery provider**. If Exa cannot
-complete the governed W1-W7 search because of a documented provider limit (for example
-credit/quota exhaustion, rate limiting after the bounded retry, or an exposed provider
-result-cap limit), the run may switch to **Parallel Search as the sole automatic fallback**.
-Fallback is a clean restart: Parallel Search reruns W1-W7 from W1 and the completed batch
-uses only the fallback rerun for its final counts, deduplication and CandidateRecord intake.
-The incomplete Exa attempt remains diagnostic provenance in the run notes and is never
-reinterpreted as a zero-result search. Consensus remains excluded.
+Scheduled living surveillance uses **Parallel Search as the default discovery provider**.
+Exa is optional only when it is positively available and materially useful for recall or
+verification. A completed v3 batch records one final provider; any incomplete optional
+provider attempt remains diagnostic provenance and is never reinterpreted as a zero-result
+search. W1-W7 adaptive depth, durable query checkpoints, identity resolution and intake
+rules are unchanged. Consensus remains excluded.
 
 Retrieval preserves the exact strategy, source/platform, date, result occurrence
 and failure status. Screening never overwrites decision history. A current
@@ -76,11 +74,18 @@ deduplication or prioritisation is declared in the execution record.
 
 ### 2026-09-09 — Exa-limit fallback
 
-Protocol 1.2 authorises Parallel Search only as a failover for a documented Exa provider
-limit in living surveillance. The scientific scope, four-part eligibility construct,
-canonical-identity rules, E1-E3 formal expansion and saturation criteria are unchanged.
-Earlier runs require no reassessment because the amendment changes discovery continuity,
-not screening or coding. New operational runs follow CILE-DAILY-v5.
+Protocol 1.2 authorised Parallel Search as a failover for a documented Exa provider limit
+in living surveillance. This remains historical provenance for runs executed under that
+contract.
+
+### 2026-09-22 — Parallel-Search-first scheduled surveillance
+
+Protocol 1.3 makes Parallel Search the default scheduled W1-W7 provider and makes Exa
+optional when positively available and materially useful. It does not change scientific
+scope, the four-part eligibility construct, canonical-identity rules, formal E1-E3
+expansion or saturation criteria. Earlier runs retain their original provider provenance
+and require no reassessment because the amendment changes surveillance operations, not
+screening or coding.
 
 Material changes to scope, eligibility, sources, selection, coding or stop rules
 increment the protocol version, update `CHANGELOG.md`, and state whether earlier
