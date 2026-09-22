@@ -13,7 +13,7 @@ labels, duplicate reconciliation and the assessed corpus remain governed.
 
 ## Intake contract
 
-New discovery uses operational protocol CILE-DAILY-v5, run and both intake manifests version 3, Exa primary with the governed full Parallel Search fallback after an evidenced provider limit, and the
+New discovery uses the current living-surveillance contract, run and both intake manifests version 3, Parallel Search as the scheduled default provider with Exa optional only when positively available and materially useful, and the
 existing W1–W7, immutable ledger, active-cycle and idempotency rules. The marker
 is `<!-- surveillance-run:v3 -->`; envelope and aggregate fields are unchanged.
 The normative current schema is `schema/surveillance-run.schema.json`; the explicit v3 copy is `schema/surveillance-run-v3.schema.json`. The previous Exa contract is retained in `schema/surveillance-run-v2.schema.json`.
