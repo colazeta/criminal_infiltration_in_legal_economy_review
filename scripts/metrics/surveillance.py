@@ -248,7 +248,7 @@ def validate_run(run: dict[str, Any]) -> dict[str, Any]:
     if version == 3:
         if len(expected_sources) != 1 or expected_sources[0] not in ACTIVE_SOURCES:
             raise MetricsError(
-                "run: v3 expected_sources must select Exa or governed Parallel Search fallback"
+                "run: v3 expected_sources must select Parallel Search or Exa"
             )
     elif set(expected_sources) != SOURCE_SETS[version]:
         raise MetricsError(
@@ -443,13 +443,6 @@ def validate_run(run: dict[str, Any]) -> dict[str, Any]:
             raise MetricsError("run.intake_issue: incomplete run cannot create intake")
 
     notes = safe_text_list(run["notes"], "run.notes", 10, 280)
-    if version == 3 and expected_sources == [FALLBACK_SOURCE]:
-        fallback_notes = [note.lower() for note in notes if note.lower().startswith("exa fallback:")]
-        limit_terms = ("credit", "quota", "rate", "limit", "budget", "capacity", "provider cap")
-        if not fallback_notes or not any(any(term in note for term in limit_terms) for note in fallback_notes):
-            raise MetricsError(
-                "run.notes: Parallel Search requires a documented Exa provider-limit fallback"
-            )
     return {
         "schema_version": version,
         "batch_id": batch_id,

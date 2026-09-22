@@ -6,17 +6,19 @@ Owner mandate: 15 September 2026. This document is the **current operational sou
 
 ## Cadence and roles
 
-- Lane A runs hourly at minute `:10` and is the normal paper-production worker.
-- Lane B runs hourly at minute `:40` and is the only lane authorised for shared throughput/persistence/calibration engineering.
-- Lane A owns the AM scouting window 08:00–20:00 Europe/Rome.
-- Lane B owns the PM scouting window 20:00–08:00 Europe/Rome, labelled by opening date.
-- There are exactly two project-wide scouting windows per day. Hourly activations are primarily enrichment/recovery activations, not hourly full scouting cycles.
+- The single scheduled ChatGPT living-review worker runs hourly at minute `:10`.
+- The former scheduled `:40` Lane B is retired and must not be recreated.
+- The `:10` worker owns both project-wide scouting windows: AM 08:00–20:00 Europe/Rome and PM 20:00–08:00 Europe/Rome, with the PM window labelled by its opening date.
+- There are exactly two project-wide scouting windows per day. The worker scouts at the first eligible activation in an unsatisfied window; other hourly activations are primarily persistence, enrichment, resolution or metadata-maintenance activations.
+- Existing private service namespaces or historical lane identifiers may remain for compatibility, but they do not create a second scheduled worker or own a scouting window. Shared persistence/calibration engineering belongs to the repository-designated maintenance owner/lane, not to a research scheduler.
 
 ## Provider order
 
 Scheduled scouting uses **Parallel Search by default**. Exa is optional only when it is positively known to be available and materially improves recall or verification. A known exhausted Exa quota must not be probed on every window. Consensus and Scite are not scheduled-surveillance providers.
 
 The W1–W7 coverage objectives, adaptive depth, query rotation, checkpoint/readback, v3 intake, retry/backoff and anti-saturation language remain governed. Historical Exa-primary/fallback-only wording is superseded for scheduled scouting.
+
+Q1 is the breadth-first minimum, not an automatic stopping point. When Q1 is dominated by known exact works/known manifestations or otherwise has low marginal unseen yield, continue with materially different Q2/Q3/... variants under the governed novelty-depth stopping rules. A provider top-10 cap for one query is a per-query limitation, not evidence that the scouting window is saturated or complete.
 
 ## Work router
 
@@ -27,8 +29,9 @@ Priority outside a due scouting window:
 1. `PERSIST` — already verified work can be durably written now;
 2. `ENRICH` — an owned CandidateRecord has an executable next stage and authorised persistence path;
 3. `RESOLVE` — pending discovery-identity debt can be advanced under CILE-IDENTITY-RESOLUTION-2;
-4. Lane B only: `ENGINEER` — a demonstrated shared blocker or mandatory gate prevents corpus progress;
-5. `NOOP` — nothing safe and executable remains.
+4. `NOOP` — nothing safe and executable remains.
+
+Shared engineering is not a normal route for the scheduled research worker; demonstrated shared persistence/calibration blockers are handed to the repository-designated maintenance owner/lane.
 
 `SCOUT` pre-empts that order only when the lane's owned AM/PM scouting window is genuinely due and unsatisfied under the existing terminal/retry/backoff/idempotency rules.
 
@@ -66,7 +69,7 @@ No validated branch may remain without a PR for more than one subsequent automat
 
 ## Calibration failure clusters
 
-Lane B must follow `docs/operations/calibration-trace-audit.md`. Once a failure cluster crosses its stop threshold, do not patch the next exception or rerun unchanged inference. Use the bounded private structural trace audit and require a reviewed class-level conclusion before a further production calibration activation.
+The repository-designated maintenance owner/lane must follow `docs/operations/calibration-trace-audit.md` for shared calibration failure clusters. Once a failure cluster crosses its stop threshold, do not patch the next exception or rerun unchanged inference. Use the bounded private structural trace audit and require a reviewed class-level conclusion before a further production calibration activation.
 
 ## Soft runtime close
 

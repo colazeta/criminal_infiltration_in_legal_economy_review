@@ -26,10 +26,12 @@ class DeliveryContractTests(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, 'redistribution_not_authorised'):
             validate_manifest(data)
 
-    def test_hourly_hybrid_lanes_reuse_existing_scheduler_and_persistence_first_contract(self):
+    def test_single_worker_reuses_existing_schedule_and_persistence_first_contract(self):
         runbook = (ROOT / 'docs/operations/two-lane-delivery.md').read_text()
         current = (ROOT / 'docs/operations/hourly-hybrid-v4.md').read_text()
-        self.assertIn('Lane A runs at :10 and Lane B at :40', runbook)
+        self.assertIn('single scheduled ChatGPT living-review worker runs at :10', runbook)
+        self.assertIn('former scheduled :40 Lane B is retired', runbook)
+        self.assertIn('owns both project-wide scouting windows', runbook)
         self.assertIn('exactly two project-wide scouting windows per day', runbook)
         self.assertIn('Parallel Search is the default discovery provider', runbook)
         self.assertIn('CILE-HOUR40-1', runbook)

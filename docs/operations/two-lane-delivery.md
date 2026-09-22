@@ -10,11 +10,11 @@ Owner implementation mandate: 14 September 2026; persistence-first/identity-reso
 
 Until the public projection/UI is migrated, any legacy `completed=true` field that still means accepted adjudication must be described as a legacy validation/acceptance field and must not be used as the operational Completed KPI.
 
-## Hourly hybrid lanes and scouting windows
+## Consolidated hourly worker and scouting windows
 
-Lane A runs at :10 and Lane B at :40. Both are assessment/enrichment workers by default; scouting is bounded inside them. Lane A owns 08:00–20:00 Europe/Rome; Lane B owns 20:00–08:00. There are exactly two project-wide scouting windows per day.
+As of the owner consolidation on 22 September 2026, the single scheduled ChatGPT living-review worker runs at :10 and owns both project-wide scouting windows: 08:00–20:00 Europe/Rome and 20:00–08:00 Europe/Rome. The former scheduled :40 Lane B is retired and must not be recreated. There are exactly two project-wide scouting windows per day, and the :10 worker scouts only when the currently open window is due and unsatisfied.
 
-Keep the existing `CILE-HOUR40-1` private enrichment service, namespace, claims, fencing, catch-up semantics and immutable attempts. Candidate ownership remains stable by SHA256 modulo 2; timestamps and hash assignment are not locks.
+The existing `CILE-HOUR40-1` private enrichment service, namespace, claims, fencing, catch-up semantics and immutable attempts may remain where required for compatibility with persisted history. They are not a second scheduled ChatGPT worker and do not own the PM scouting window. Candidate ownership and historical attempts remain stable; timestamps and hash assignment are not locks.
 
 For scheduled scouting, **Parallel Search is the default discovery provider**. Exa is optional only when positively available and materially useful. Consensus and Scite are excluded from scheduled surveillance.
 
@@ -26,8 +26,9 @@ A due owned scouting window selects `SCOUT`. Otherwise resume unfinished safe wr
 2. `COMPLETE` — advance the deepest owned paper toward `F5_ASSESSMENT_COMPLETE`;
 3. `CALIBRATION_CASE` — advance validation/calibration evidence without displacing executable assessment-completion work;
 4. `RESOLVE` — advance required CILE-IDENTITY-RESOLUTION-2 debt;
-5. Lane B only: `ENGINEER` — remove a demonstrated blocker to an assessment gate or the separate validation track;
-6. `NOOP`.
+5. `NOOP`.
+
+Shared persistence/calibration engineering is owned by the repository-designated maintenance owner/lane, not by a second scheduled research worker.
 
 Identity debt keeps the v4 starvation guard.
 
@@ -61,11 +62,11 @@ Validated branch recovery remains mandatory. The v4 `cile-validated-branch-recov
 
 ## Engineering discipline
 
-Lane A does not open shared engineering. Lane B owns shared engineering only after higher-priority completion work is unavailable.
+The scheduled living-review worker does not open shared persistence/calibration engineering. The repository-designated maintenance owner/lane owns that work when a demonstrated blocker requires it.
 
 Engineering itself counts zero assessment completion. A shared engineering change must demonstrate at least one downstream F0–F5 gate transition within the next two eligible activations or be recorded as unproven engineering debt.
 
-If Lane A lacks an authorised ordinary completion writer/claim in two consecutive eligible activations, Lane B treats that as a shared blocker before unrelated optimisation.
+If the scheduled living-review worker lacks an authorised ordinary completion writer/claim in two consecutive eligible activations, the maintenance owner/lane treats that as a shared blocker before unrelated optimisation.
 
 Failure clusters continue to follow `calibration-trace-audit.md`; no unchanged retries or exception-by-exception patching.
 

@@ -8,12 +8,11 @@ Scientific protocol, eligibility, rights, canonical identity and human acceptanc
 
 Scheduled surveillance identifies plausibly relevant scholarly works conservatively and persists them through the governed v3 intake/recovery path. It supports, but never replaces, the formal E1–E3 expansion process.
 
-There are two hourly workers, not a separate discovery worker:
+There is one scheduled ChatGPT living-review worker, not a separate discovery worker:
 
-- Lane A `:10`, owning the 08:00–20:00 Europe/Rome AM scouting window;
-- Lane B `:40`, owning the 20:00–08:00 PM scouting window.
+- the `:10` worker owns both the 08:00–20:00 Europe/Rome AM scouting window and the 20:00–08:00 PM scouting window.
 
-Each lane enriches/reconciles by default and scouts only when its owned window is due and unsatisfied. See `hourly-hybrid-v4.md` for routing and runtime closeout.
+The former `:40` scheduler is retired and must not be recreated. The single worker enriches/reconciles by default and scouts only when the currently open window is due and unsatisfied. See `hourly-hybrid-v4.md` for routing and runtime closeout.
 
 ## Scheduled provider rule
 
