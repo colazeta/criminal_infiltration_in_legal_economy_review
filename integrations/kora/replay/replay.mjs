@@ -1,0 +1,35 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import {fileURLToPath,pathToFileURL} from 'node:url';
+import {createRequire} from 'node:module';
+import {isDeepStrictEqual} from 'node:util';
+const require=createRequire(import.meta.url),YAML=require('yaml'),Ajv=require('ajv');
+const root=path.dirname(fileURLToPath(import.meta.url));
+const pilot=fs.existsSync(path.join(root,'pilot'))?path.join(root,'pilot'):path.join(root,'../control-plane');
+const {evaluateFrontier}=await import(pathToFileURL(path.join(pilot,'scripts/frontier-core.mjs')));
+const {routeActivation}=await import(pathToFileURL(path.join(pilot,'scripts/router-core.mjs')));
+const processDoc=YAML.parse(fs.readFileSync(path.join(pilot,'processes/cile-hourly-control-plane.yaml'),'utf8'));
+const ajv=new Ajv({allErrors:true,strict:false});
+const validate=ajv.compile(processDoc.types.ActivationInput);
+const validateFrontier=ajv.compile(processDoc.types.FrontierStatus);
+const validateRoute=ajv.compile(processDoc.types.RouteDecision);
+const cases=JSON.parse(fs.readFileSync(path.join(root,'cases.json'),'utf8'));
+const selected=process.argv.includes('--starvation')?cases.filter(c=>c.id.includes('-starvation-')):process.argv.includes('--targeted')?cases.filter(c=>['validated-without-ready','validated-stale-versions','frontier-f5','frontier-f6','frontier-f7'].includes(c.id)||(c.kind==='pipeline'&&/collision|inconsistent-(scout|persist)|independent|wrong-attestation/.test(c.id))):cases;
+const results=selected.map(c=>{
+ const before=JSON.stringify(c.input);const valid=validate(c.input);
+ let actual,frontier;
+ if(c.kind==='schema-rejection')actual={valid};
+ else if(!valid)actual={schemaErrors:structuredClone(validate.errors)};
+ else {frontier=evaluateFrontier(structuredClone(c.input));actual=c.kind==='frontier'?frontier:routeActivation({...structuredClone(c.input),...frontier});}
+ const mismatches=Object.entries(c.expected).filter(([key,v])=>!isDeepStrictEqual(actual[key],v)).map(([key,expected])=>({key,expected,actual:actual[key]}));
+ if(frontier&&!validateFrontier(frontier))mismatches.push({key:'frontier_schema',errors:structuredClone(validateFrontier.errors)});
+ if(c.kind==='pipeline'&&!validateRoute(actual))mismatches.push({key:'route_schema',errors:structuredClone(validateRoute.errors)});
+ if(JSON.stringify(c.input)!==before)mismatches.push({key:'input_mutation',expected:false,actual:true});
+ return {id:c.id,origin:c.origin,kind:c.kind,classification:c.classification||'contract_assertion',passed:mismatches.length===0,contract:c.contract,note:c.note,expected:c.expected,actual,frontier,mismatches};
+});
+const historical=results.filter(r=>r.classification==='underspecified_historical');
+const assertions=results.filter(r=>r.classification!=='underspecified_historical');
+const report={executedAt:new Date().toISOString(),scope:'Local pure-function chain plus schema rejection; no live workflow execution',total:results.length,passed:results.filter(r=>r.passed).length,failed:results.filter(r=>!r.passed).length,classification:{contractAssertions:assertions.length,contractAssertionsPassed:assertions.filter(r=>r.passed).length,contractAssertionsFailed:assertions.filter(r=>!r.passed).length,underspecifiedHistorical:historical.length,historicalMismatches:historical.filter(r=>!r.passed).length},results};
+fs.writeFileSync(path.join(root,process.argv.includes('--starvation')?'starvation-results.json':process.argv.includes('--targeted')?'targeted-results.json':'local-results.json'),JSON.stringify(report,null,2)+'\n');
+console.log(JSON.stringify({total:report.total,passed:report.passed,failed:report.failed,classification:report.classification,failures:results.filter(r=>!r.passed).map(({id,mismatches})=>({id,mismatches}))},null,2));
+process.exitCode=report.failed?1:0;
