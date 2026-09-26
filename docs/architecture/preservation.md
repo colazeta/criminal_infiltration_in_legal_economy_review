@@ -1,6 +1,6 @@
 # Private archive preservation and isolated restoration
 
-`CILE-PRIVATE-ARCHIVE-BACKUP-1` is a transport representation of the existing
+`CILE-PRIVATE-ARCHIVE-BACKUP-2` is a transport representation of the existing
 `LegacySnapshot` concept. It preserves a named revision, not a second current
 research database. It supplies no identity reconciliation or scientific decision.
 
@@ -59,6 +59,15 @@ backup, never a truncated successful one. The runner decrypts only in memory.
 Its file is ciphertext with mode 0600; Actions retains ciphertext only for 90 days.
 Logs contain aggregate hashes/counts and closed failure codes, no original bytes,
 SQL rows, reviewer identities, notes, raw errors or credentials.
+
+Version 2 uses indexed rowid continuation for SQL pages instead of increasingly
+expensive OFFSET scans. Rowids are transport cursors only; the stored entity IDs
+remain the identities. Nonpositive rowids and gaps are retained, and repeated or
+out-of-order cursors fail. Per-table counts/digests and both full SQL-state checks
+still cover the entire population. Version 1 encrypted transports remain readable;
+pages from different protocol versions cannot be mixed. Historical schemas still
+require their exact compatible commit, as enforced by the pre-deployment runner.
+This optimisation is not evidence that a blocked live backup has succeeded.
 
 ## Restore rehearsal and recovery procedure
 

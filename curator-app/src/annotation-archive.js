@@ -4,6 +4,8 @@ import contract from '../../ontology/modules/annotation-archive.json' with {type
 import cycle from '../../config/archive-cycle.json' with {type:'json'};
 import {canonicalJson,sha256} from './review-v2.js';
 import {safeResearchUrl} from './public-paper-research.js';
+import publicSchema from '../../schema/public-annotations.schema.json' with {type:'json'};
+import {validateShape} from './paper-enrichment.js';
 
 export const ANNOTATION_VERSION='CILE-ANNOTATION-ARCHIVE-1';
 const REPO='https://github.com/colazeta/criminal_infiltration_in_legal_economy_review';
@@ -89,7 +91,7 @@ async function capture(env,kind,entity,now){
 const graphStatements=(db,id)=>[
  S(db,'SELECT section_id,scope,group_label,position FROM enrichment_annotation_sections WHERE annotation_id=? ORDER BY position',id),
  S(db,'SELECT f.* FROM enrichment_annotation_fields f JOIN enrichment_annotation_sections s USING(section_id) WHERE s.annotation_id=? ORDER BY s.position,f.position',id),
- S(db,'SELECT c.* FROM enrichment_annotation_classes c JOIN enrichment_annotation_fields f USING(field_id) JOIN enrichment_annotation_sections s ON s.section_id=f.section_id WHERE c.annotation_id=? ORDER BY s.position,f.position,c.category',id),
+ S(db,'SELECT c.* FROM enrichment_annotation_sections s CROSS JOIN enrichment_annotation_fields f ON f.section_id=s.section_id CROSS JOIN enrichment_annotation_classes c ON c.field_id=f.field_id AND c.annotation_id=s.annotation_id WHERE s.annotation_id=? ORDER BY s.position,f.position,c.category',id),
  S(db,'SELECT unparsed_lines FROM enrichment_manual_annotations WHERE annotation_id=?',id),
 ];
 function rebuild(results){
@@ -266,7 +268,7 @@ export async function readPrivateAnnotation(env,targetId,annotationId){
 
 export async function readPublicAnnotations(env,candidateId){
  if(!idPattern.test(candidateId))fail();
- const db=env.REVIEW_DB,all=await rows(db,`SELECT a.annotation_id,h.state,s.source_url,s.source_updated_at,s.storage_key,s.content_sha256 FROM enrichment_manual_annotations a JOIN enrichment_annotation_heads h USING(annotation_id) JOIN enrichment_ingress_snapshots s ON s.snapshot_id=a.snapshot_id JOIN enrichment_targets t ON t.target_id=a.target_id WHERE t.record_id=? AND t.cycle_id=? AND t.active=1 AND a.binding_state='candidate_bound' AND a.authorised_display=1 ORDER BY s.source_created_at,a.annotation_id`,candidateId,cycle.review_id);
+ const db=env.REVIEW_DB,all=await rows(db,`SELECT a.annotation_id,h.state,s.source_url,s.source_updated_at,s.storage_key,s.content_sha256 FROM enrichment_manual_annotations a JOIN enrichment_ingress_snapshots s ON s.snapshot_id=a.snapshot_id JOIN enrichment_annotation_heads h ON h.external_id=s.external_id AND h.annotation_id=a.annotation_id JOIN enrichment_targets t ON t.target_id=a.target_id WHERE t.record_id=? AND t.cycle_id=? AND t.active=1 AND a.binding_state='candidate_bound' AND a.authorised_display=1 ORDER BY s.source_created_at,a.annotation_id`,candidateId,cycle.review_id);
  if(all.length>100)fail();
  const annotations=[];let conflicts=0;
  for(const row of all){if(row.state==='conflict'){conflicts++;continue}if(row.state!=='current')continue;
@@ -274,5 +276,18 @@ export async function readPublicAnnotations(env,candidateId){
   const graph=await readAnnotationGraph(db,row.annotation_id);for(const section of graph.sections)for(const field of section.fields)if(unsafe(field.value))fail();
   annotations.push({annotation_id:row.annotation_id,assessment_state:'unreviewed_manual_support',source_url:row.source_url,updated_at:row.source_updated_at,sections:graph.sections,classes:graph.classes.map(({category,role})=>({category,role})),unparsed_lines:graph.unparsed_lines});
  }
- const out={schema_version:1,projection_version:'CILE-PUBLIC-ANNOTATIONS-1',candidate_id:candidateId,annotations,conflicts};out.revision=await sha256(canonicalJson(out));return out;
+ const out={schema_version:1,projection_version:'CILE-PUBLIC-ANNOTATIONS-1',candidate_id:candidateId,annotations,conflicts};out.revision=await sha256(canonicalJson(out));return validatePublicAnnotations(out);
+}
+
+export function validatePublicAnnotations(value){
+ validateShape(value,publicSchema,'$',publicSchema);
+ const seen=new Set();
+ for(const annotation of value.annotations){
+  if(seen.has(annotation.annotation_id)||!annotation.source_url.startsWith(REPO+'/issues/')||!safeResearchUrl(annotation.source_url)||!Number.isFinite(Date.parse(annotation.updated_at)))fail();
+  seen.add(annotation.annotation_id);
+  for(const section of annotation.sections)for(const field of section.fields){
+   if(!contract.field_names[section.scope]?.includes(field.field_name)||unsafe(field.value))fail();
+  }
+ }
+ return value;
 }

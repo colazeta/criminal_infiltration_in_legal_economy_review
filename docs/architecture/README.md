@@ -6,6 +6,10 @@ implemented code, configured storage, observed runtime and the required target.
 The normative concepts remain in `ontology/cile-review-profile.yaml`; this document
 does not create alternative scientific entities or supply missing decisions.
 
+The dated [implementation status](consolidation-status-2026-09-19.md) records
+executed migrations, protected receipts, the blocked deployment, preserved input
+identities and the remaining authority changes. Read it before claiming cutover.
+
 ## Conceptual relationships
 
 ```mermaid
@@ -71,14 +75,14 @@ does not establish assessment completion, acceptance or corpus membership.
 
 Run `python3 scripts/architecture/catalogue.py` to regenerate:
 
-- `physical-schema.json`: all 79 implemented SQL table definitions, columns,
+- `physical-schema.json`: all 88 implemented SQL table definitions, columns,
   foreign keys, unique/partial indexes, checks in original DDL, append-only
   triggers and source migrations;
-- `traceability.csv`: all 621 columns mapped to existing ontology classes/slots,
+- `traceability.csv`: all 721 columns mapped to existing ontology classes/slots,
   SQL types, primary-key positions, effective nullability and implementation status.
 
 These are schema inventories built in an isolated SQLite database, not claims
-that 79 tables are deployed. The configured enrichment Durable Object uses 46;
+that 88 tables are deployed. The configured enrichment Durable Object configures 55 (46 in the last observed deployment);
 the other 33 belong to prepared V2 storage. Actual counts and schema integrity
 require the authenticated, commit-bound runtime receipt.
 
@@ -142,6 +146,11 @@ GitHub/CSV processes then become governed ingress or are disabled. They must not
 continue to supply independently authoritative current states. Public reading files
 are rebuilt exclusively from the same accepted archive revision, never by merging
 GitHub comments, CSVs and a live API in the browser or a build-time aggregator.
+
+Migration 0009 stages typed candidate bibliography and coverage in the same
+store, with source preservation, CAS updates and whole-population restoration.
+See [candidate-archive.md](candidate-archive.md). Its isolated rehearsal is not
+a production migration or an authority switch.
 
 ## Counting contract
 

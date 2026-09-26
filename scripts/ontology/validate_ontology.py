@@ -106,7 +106,7 @@ def enum_values(profile: dict[str, Any], enum_name: str) -> set[str]:
 
 
 def check_profile(profile: dict[str, Any], external: dict[str, Any]) -> None:
-    if profile.get("version") != "0.4.3":
+    if profile.get("version") != "0.4.5":
         fail(f"unexpected_profile_version:{profile.get('version')}")
     prefixes = profile.get("prefixes")
     classes = profile.get("classes")
@@ -270,7 +270,7 @@ def check_serialisations(profile: dict[str, Any]) -> None:
     if source != PUBLIC_TTL_PATH.read_text(encoding="utf-8"):
         fail("public_ontology_turtle_drift")
     for marker in (
-        'owl:versionInfo "0.4.3"', "cile:ScholarlyWork a owl:Class",
+        'owl:versionInfo "0.4.5"', "cile:ScholarlyWork a owl:Class",
         "cile:Manifestation a owl:Class", "cile:ScreeningDecision a owl:Class",
         "cile:AccessAssessment a owl:Class", "skos:relatedMatch fabio:Work",
         "skos:relatedMatch ripe:Answer",
@@ -456,6 +456,31 @@ def check_annotation_archive(profile: dict[str, Any]) -> None:
     connection.close()
 
 
+def check_candidate_archive(profile: dict[str, Any]) -> None:
+    module = load_json(ROOT / 'ontology/modules/candidate-archive.json')
+    if module['profile_version'] != profile['version']:
+        fail('candidate_archive_profile_mismatch')
+    connection = sqlite3.connect(':memory:')
+    for path in sorted((ROOT / 'curator-app/migrations').glob('*.sql')):
+        connection.executescript(path.read_text())
+    for table, mapping in module['tables'].items():
+        fields = {r[1] for r in connection.execute(f'PRAGMA table_info({table})')}
+        if mapping['class'] not in profile['classes'] or fields != set(mapping['fields']):
+            fail('candidate_archive_mapping_incomplete:' + table)
+        if not all(semantic_target_valid(v, profile) for v in mapping['fields'].values()):
+            fail('candidate_archive_slot_unmapped:' + table)
+        for action in ['update', 'delete']:
+            if table == 'enrichment_candidate_heads' and action == 'update':
+                continue
+            if not connection.execute("SELECT 1 FROM sqlite_master WHERE type='trigger' AND name=?", (f'{table}_no_{action}',)).fetchone():
+                fail('candidate_archive_history_unprotected:' + table)
+    for domain, spec in module['domains'].items():
+        fields, _ = read_csv(ROOT / spec['path'])
+        if fields != spec['fields'] or set(spec['slots']) != set(fields):
+            fail('candidate_archive_ingress_unmapped:' + domain)
+    connection.close()
+
+
 def check_surveillance_source_policy(profile: dict[str, Any]) -> None:
     """Version source restrictions without changing any scientific concept."""
     module = load_json(ROOT / "ontology/modules/daily-calendar.json")
@@ -595,6 +620,7 @@ def check_delivery_contract(profile: dict[str, Any]) -> None:
         return result
     assets = load_json(ROOT / "ontology/modules/enrichment-delivery-assets.json")
     index = load_json(ROOT / "ontology/modules/public-enrichment-index.json")
+    annotations = load_json(ROOT / "ontology/modules/public-annotations.json")
     with sqlite3.connect(":memory:") as db:
         for migration in assets["migrations"]:
             db.executescript((ROOT / migration).read_text())
@@ -607,7 +633,7 @@ def check_delivery_contract(profile: dict[str, Any]) -> None:
             for action in ("update", "delete"):
                 if not db.execute("SELECT 1 FROM sqlite_master WHERE type='trigger' AND name=?", (f"{table}_no_{action}",)).fetchone():
                     fail("delivery_mutable_history:" + table)
-    mappings = {**assets["schemas"], index["schema"]: index}
+    mappings = {**assets["schemas"], index["schema"]: index, annotations["schema"]: annotations}
     for path, contract in mappings.items():
         fields = schema_fields(load_json(ROOT / path))
         if fields != set(contract["schema_field_slots"]) or not all(valid_slot(v) for v in contract["schema_field_slots"].values()):
@@ -625,7 +651,7 @@ def check_delivery_contract(profile: dict[str, Any]) -> None:
     from scripts.query_checkpoint import FIELDS, ROW, ISSUE
     if checkpoint["class"] not in profile["classes"] or checkpoint["checkpoint_issue"] != ISSUE or not (FIELDS | ROW) <= set(checkpoint["fields"]):
         fail("delivery_checkpoint_mapping")
-    if any(module["profile_version"] != profile["version"] for module in [assets, index, policy, checkpoint]):
+    if any(module["profile_version"] != profile["version"] for module in [assets, index, annotations, policy, checkpoint]):
         fail("delivery_profile_drift")
 
 
@@ -638,6 +664,7 @@ def validate_all(*, quiet: bool = False) -> dict[str, int | str]:
     check_enrichment_contract(profile)
     check_extraction_relations(profile)
     check_annotation_archive(profile)
+    check_candidate_archive(profile)
     check_public_research_contract(profile)
     check_delivery_contract(profile)
     check_surveillance_source_policy(profile)

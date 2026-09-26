@@ -189,3 +189,25 @@ Apply `docs/operations/two-lane-delivery.md`. As of the 22 September owner conso
 The operational objective is durable paper-stage progress. Before substantial candidate research, establish the authorised persistence path for the intended next stage. Do not build large read-only cohorts when the writer/claim/dispatch path is unavailable, and do not repeat an unchanged zero-persistence strategy until its recorded prerequisite changes. Shared throughput/persistence/calibration engineering remains with the repository-designated maintenance owner/lane; engineering activity is reported separately and does not count as paper enrichment until it causes real persisted paper-stage transitions.
 
 Durable non-decisional query checkpoint fragments may be appended to the single existing operational issue #696 before terminal intake. This is a narrow write-boundary extension, not candidate registration or a completed run. The same mandate authorises original-byte retention in the existing private enrichment store and public reading only for independently verified reusable rights. Private evidence, scientific acceptance and historical decisions remain protected. CILE-COMPLETION-POLICY-2 permits independently accepted grounded framework non-applicability and explicitly distinguishes mandatory/optional facts. No acceptance is inferred from this engineering mandate.
+
+## Archive architecture — owner instruction, 2026-09-19
+
+Apply `docs/architecture/README.md`, the source-authority inventory and the dated
+implementation status before changing a data writer or declaring consolidation.
+The required chain is ontology concept, logical relation, physical structure,
+governed write, closed API/export and public consumer. A matching frontend count,
+a new table or an aggregate JSON alone does not establish completion.
+
+Preserve source CandidateRecord identifiers and unresolved associations. Keep
+annotations, extraction proposals, scientific decisions, completion and corpus
+inclusion distinct. GitHub is an ingress/audit channel; ordinary reading must
+use an acquired archive projection after its verified release. Before new
+substantive enrichment, establish the operational writer and durable readback;
+a comment, response or log alone is not a saved result.
+
+Keep existing domain authorities explicitly identified until their replacement
+has passed preservation, full-population migration/readback and recovery gates.
+Then retire competing writers in that same controlled transition. The present
+service incident and remaining bibliographic authority work are technical
+blockers, not missing scientific permission. No identity, acceptance, calibration
+or document redistribution approval is supplied by this engineering mandate.

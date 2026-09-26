@@ -18,6 +18,7 @@
   const FRAMEWORK_STATUS = new Set(['proposed', 'insufficient_evidence', 'outside_framework']);
   const STATE_LABELS = {
     classified: 'Categoria proposta',
+    conflict: 'Proposte discordanti — da verificare',
     insufficient_evidence: 'Evidenza insufficiente per classificare',
     outside_framework: 'Contributo proposto come esterno al framework',
     not_assessed: 'Estrazione non ancora disponibile',
@@ -27,6 +28,64 @@
     not_in_index: 'Record non presente nell’indice analitico pubblico',
   };
 
+  const yearOf = (record) => {
+    const value = Number(record?.year);
+    return Number.isInteger(value) && value > 0 ? value : null;
+  };
+
+  function aggregate(records, rows) {
+    const categories = new Map(CLASS_ENTRIES.map(([key, label]) => [key, { key, label, primary: 0, secondary: 0, any: 0 }]));
+    const states = new Map(Object.keys(STATE_LABELS).map((key) => [key, 0]));
+    const combinations = new Map();
+    const yearly = new Map();
+    let classified = 0;
+    let multi = 0;
+
+    for (const record of records) {
+      const row = rows.get(record.id);
+      const c=row?.candidate,normal=value=>String(value||'').trim().replace(/^https?:\/\/(?:dx\.)?doi\.org\//i,'').toLowerCase();
+      const mismatched=c&&(c.title!==record.title||normal(c.doi)!==normal(record.doi)||JSON.stringify([...(c.sourceLinks||[])].sort())!==JSON.stringify([...(record.sourceLinks||[])].sort()));
+      if (!row || mismatched) {
+        states.set('not_in_index', states.get('not_in_index') + 1);
+        continue;
+      }
+      if(!row.primary.length&&!row.secondary.length){
+        const state=row.conflict?'conflict':row.availability==='available'?row.frameworkStatus:row.availability;
+        states.set(state,(states.get(state)||0)+1);continue;
+      }
+      classified++;
+      const state=row.conflict?'conflict':'classified';states.set(state,states.get(state)+1);
+      const primary=[...row.primary].sort(),secondary=[...row.secondary].sort();
+      for(const key of primary)categories.get(key).primary++;
+      for(const key of secondary)categories.get(key).secondary++;
+      for(const key of new Set([...primary,...secondary]))categories.get(key).any++;
+      if (secondary.length) multi++;
+
+      const combinationKey = `${primary.join(',')}|${secondary.join(',')}`;
+      if (!combinations.has(combinationKey)) combinations.set(combinationKey, { primary, secondary, count: 0 });
+      combinations.get(combinationKey).count++;
+
+      const year = yearOf(record);
+      if (year !== null) {
+        if (!yearly.has(year)) yearly.set(year, new Map(CLASS_ENTRIES.map(([key]) => [key, 0])));
+        for(const key of primary)yearly.get(year).set(key,yearly.get(year).get(key)+1);
+      }
+    }
+
+    return {
+      total: records.length,
+      classified,
+      multi,
+      represented: [...categories.values()].filter((row) => row.primary > 0).length,
+      categories: [...categories.values()],
+      states: [...states.entries()].map(([state, count]) => ({ state, count })),
+      combinations: [...combinations.values()].sort((a, b) => b.count - a.count || a.primary.join(',').localeCompare(b.primary.join(','), 'it')),
+      years: [...yearly.keys()].sort((a, b) => a - b),
+      yearly,
+    };
+  }
+
+  globalThis.CILECategorisationStatistics = {aggregate,validateIndexRow};
   const anchor = document.querySelector('#author-evolution-title')?.closest('article');
   if (!anchor) return;
 
@@ -37,10 +96,6 @@
   };
   const format = new Intl.NumberFormat('it-IT', { maximumFractionDigits: 1 });
   const pct = (value, denominator) => denominator ? `${format.format((value / denominator) * 100)}%` : '—';
-  const yearOf = (record) => {
-    const value = Number(record?.year);
-    return Number.isInteger(value) && value > 0 ? value : null;
-  };
 
   const host = el('section');
   host.id = 'categorisation-statistics';
@@ -101,7 +156,7 @@
   categoryPanel.className = 'bibliometric-panel';
   categoryPanel.append(
     el('h4', 'Distribuzione delle sei classi'),
-    el('p', 'Ogni paper classificato contribuisce una volta alla colonna “Primaria”. Le classi secondarie sono contate separatamente; per questo il totale “Primaria o secondaria” può superare il numero di paper classificati.'),
+    el('p', 'Ogni paper è contato una volta per categoria e ruolo. Proposte primarie discordanti restano visibili: la somma delle categorie può superare i paper classificati. Le alternative non entrano nei conteggi.'),
   );
   const categoryTableHost = el('div');
   categoryTableHost.className = 'table-scroll';
@@ -145,22 +200,15 @@
     const id = row?.candidate?.id;
     if (typeof id !== 'string' || !/^CAND-[A-Za-z0-9-]{1,100}$/.test(id)) throw Error('invalid_index_identity');
     if (!AVAILABILITY.has(row.availability)) throw Error('invalid_index_availability');
-    if (!Array.isArray(row.classes) || row.classes.some((key) => !CLASS_KEYS.has(key))) throw Error('invalid_index_classes');
-    if (new Set(row.classes).size !== row.classes.length) throw Error('duplicate_index_class');
-    if (row.availability === 'available') {
-      if (!FRAMEWORK_STATUS.has(row.framework_status)) throw Error('invalid_framework_status');
-      if (row.framework_status === 'proposed' && row.classes.length === 0) throw Error('missing_primary_class');
-      if (row.framework_status !== 'proposed' && row.classes.length !== 0) throw Error('unexpected_classes');
-    } else if (row.framework_status !== null || row.classes.length !== 0) {
-      throw Error('invalid_missingness');
-    }
+    const classification=globalThis.CILEPaperProcessing.classificationState(row);
     return {
       id,
       candidate: row.candidate,
       availability: row.availability,
       frameworkStatus: row.framework_status,
-      primary: row.classes[0] || null,
-      secondary: row.classes.slice(1),
+      primary: classification.primary,
+      secondary: classification.secondary,
+      conflict: classification.has_conflict,
     };
   }
 
@@ -185,7 +233,7 @@
         do {
           const url = API + '?view=index&cursor=' + cursor + (revision ? '&revision=' + revision : '');
           const page = await readJSON(url);
-          if (page?.schema_version !== 1 || page.projection_version !== 'CILE-PUBLIC-INDEX-1') throw Error('invalid_index_projection');
+          if (page?.schema_version !== 1 || page.projection_version !== 'CILE-PUBLIC-INDEX-2') throw Error('invalid_index_projection');
           if (!/^[a-f0-9]{64}$/.test(page.index_revision || '') || !Number.isSafeInteger(page.total) || page.total < 0 || page.total > 10000) throw Error('invalid_index_header');
           if (!Array.isArray(page.records) || page.records.length > 50) throw Error('invalid_index_page');
           if (revision && revision !== page.index_revision) throw Object.assign(Error('index_changed'), { status: 409 });
@@ -206,71 +254,6 @@
       }
     }
     throw Error('index_changed');
-  }
-
-  function aggregate(records, rows) {
-    const categories = new Map(CLASS_ENTRIES.map(([key, label]) => [key, { key, label, primary: 0, secondary: 0, any: 0 }]));
-    const states = new Map(Object.keys(STATE_LABELS).map((key) => [key, 0]));
-    const combinations = new Map();
-    const yearly = new Map();
-    let classified = 0;
-    let multi = 0;
-
-    for (const record of records) {
-      const row = rows.get(record.id);
-      const c=row?.candidate,normal=value=>String(value||'').trim().replace(/^https?:\/\/(?:dx\.)?doi\.org\//i,'').toLowerCase();
-      const mismatched=c&&(c.title!==record.title||normal(c.doi)!==normal(record.doi)||JSON.stringify([...(c.sourceLinks||[])].sort())!==JSON.stringify([...(record.sourceLinks||[])].sort()));
-      if (!row || mismatched) {
-        states.set('not_in_index', states.get('not_in_index') + 1);
-        continue;
-      }
-      if (row.availability !== 'available') {
-        states.set(row.availability, (states.get(row.availability) || 0) + 1);
-        continue;
-      }
-      if (row.frameworkStatus === 'insufficient_evidence') {
-        states.set('insufficient_evidence', states.get('insufficient_evidence') + 1);
-        continue;
-      }
-      if (row.frameworkStatus === 'outside_framework') {
-        states.set('outside_framework', states.get('outside_framework') + 1);
-        continue;
-      }
-
-      classified++;
-      states.set('classified', states.get('classified') + 1);
-      const primary = row.primary;
-      const secondary = [...row.secondary].sort((a, b) => CLASS_ENTRIES.findIndex(([key]) => key === a) - CLASS_ENTRIES.findIndex(([key]) => key === b));
-      categories.get(primary).primary++;
-      categories.get(primary).any++;
-      for (const key of secondary) {
-        categories.get(key).secondary++;
-        categories.get(key).any++;
-      }
-      if (secondary.length) multi++;
-
-      const combinationKey = `${primary}|${secondary.join(',')}`;
-      if (!combinations.has(combinationKey)) combinations.set(combinationKey, { primary, secondary, count: 0 });
-      combinations.get(combinationKey).count++;
-
-      const year = yearOf(record);
-      if (year !== null) {
-        if (!yearly.has(year)) yearly.set(year, new Map(CLASS_ENTRIES.map(([key]) => [key, 0])));
-        yearly.get(year).set(primary, yearly.get(year).get(primary) + 1);
-      }
-    }
-
-    return {
-      total: records.length,
-      classified,
-      multi,
-      represented: [...categories.values()].filter((row) => row.primary > 0).length,
-      categories: [...categories.values()],
-      states: [...states.entries()].map(([state, count]) => ({ state, count })),
-      combinations: [...combinations.values()].sort((a, b) => b.count - a.count || CLASS_LABELS[a.primary].localeCompare(CLASS_LABELS[b.primary], 'it')),
-      years: [...yearly.keys()].sort((a, b) => a - b),
-      yearly,
-    };
   }
 
   function renderCategoryTable(data) {
@@ -351,7 +334,7 @@
     const body = el('tbody');
     for (const row of data.combinations) {
       const tr = el('tr');
-      const primary = el('th', CLASS_LABELS[row.primary]);
+      const primary = el('th', row.primary.length?row.primary.map(key=>CLASS_LABELS[key]).join(', '):'Nessuna');
       primary.scope = 'row';
       tr.append(primary, el('td', row.secondary.length ? row.secondary.map((key) => CLASS_LABELS[key]).join(', ') : 'Nessuna'), el('td', String(row.count)), el('td', pct(row.count, data.classified)));
       body.append(tr);
@@ -451,5 +434,4 @@
   globalThis.addEventListener('cile:bibliometric-view', () => update(globalThis.CILEBibliometricView));
   update(globalThis.CILEBibliometricView || []);
 
-  globalThis.CILECategorisationStatistics = { aggregate };
 })();

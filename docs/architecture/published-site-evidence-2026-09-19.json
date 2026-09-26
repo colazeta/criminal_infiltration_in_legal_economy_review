@@ -1,0 +1,40 @@
+{
+  "contract": "CILE-PUBLISHED-SITE-EVIDENCE-1",
+  "workflow_commit": "c9c909eb8310a2ec111c7725566a29d3e3e1c86d",
+  "workflow_run": "https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/actions/runs/35449990984",
+  "job_id": 105915701466,
+  "receipt": {
+    "attempt": 1,
+    "changed_records": 0,
+    "expected_payload_sha256": "3e3c9071e033c582b30111ad1cd0a7e07dd4d1a3761e0c0a3ced021cb6cf7626",
+    "expected_records": 294,
+    "missing_records": 0,
+    "paper_sheet_support": {
+      "abstract_availability_verified": 175,
+      "access_assessments": 294,
+      "changed_records": 0,
+      "expected_records": 294,
+      "missing_records": 0,
+      "reading_aids": 119,
+      "renderer_assets": {
+        "index.html": "682b02d5e1fdceed7d7f61b660299b7e01d47df94ce0d49d71ff61a5b5c76faa",
+        "paper-register.js": "1be2757afe672a9a693ded91f41e4bd04bd4d05697d79b40d3eb7e64614e7c5d",
+        "paper-sheet-research.js": "df8bb9b1e88a84d4b9d7680946955d89e1b35dc0f2ee126d2a680883c58583a5",
+        "paper-sheet-support.js": "741d7c5e75f7e8ecaef0cfea7ca9510a46154706c61e77d0976a81ecb28c07e6",
+        "styles.css": "eec09156b96c3402aab780805c404f94637b212d878ad856d9c64c893040ffd6"
+      },
+      "retrieval_metadata": 294,
+      "served_bytes_sha256": "a9532c26d3d455be2e871d2e6e29b756d4be75660fba1b77b792659ac6613652",
+      "served_records": 294
+    },
+    "scope": "provisional_bibliography_and_public_reading_support",
+    "served_bytes_sha256": "1c656dd94b372afd2e1f0daddae2a4bc9d445e3fe1cb009348cc2de39b5abe98",
+    "served_records": 294,
+    "url": "https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/data/paper-register.json",
+    "verified_at": "2026-09-19T14:55:08.306858+00:00",
+    "workflow_run_id": "35449990984"
+  },
+  "daily_statistics_validated": false,
+  "draft_archive_projection_published": false,
+  "authority_cutover_ready": false
+}

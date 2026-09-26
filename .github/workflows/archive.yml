@@ -10,7 +10,7 @@ on:
   issue_comment:
     types: [created]
   workflow_run:
-    workflows: ["Recover intake backlog", "Resolve curator paper access", "Backfill curator abstract coverage"]
+    workflows: ["Recover intake backlog", "Resolve curator paper access", "Backfill curator abstract coverage", "Deploy curator Worker"]
     types: [completed]
     branches: [main]
 
@@ -233,6 +233,9 @@ jobs:
 
       - name: Configure Pages
         uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5
+
+      - name: Require the archive annotation API contract before publishing its consumers
+        run: python3 -m scripts.architecture.check_annotation_projection --compatibility-only
 
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3

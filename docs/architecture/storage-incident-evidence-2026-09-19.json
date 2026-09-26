@@ -1,0 +1,41 @@
+{
+  "contract": "CILE-STORAGE-INCIDENT-EVIDENCE-1",
+  "observed_at": "2026-09-19T14:36:17Z",
+  "workflow_run": "https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/actions/runs/35449240717",
+  "workflow_commit": "c9c909eb8310a2ec111c7725566a29d3e3e1c86d",
+  "scope": "account_aggregate",
+  "utc_day": "2026-09-19",
+  "measurements": [
+    {
+      "aggregate": "sum",
+      "dataset": "durableObjectsPeriodicGroups",
+      "metrics": {
+        "rowsRead": 9759627,
+        "rowsWritten": 65474
+      },
+      "status": "measured"
+    },
+    {
+      "aggregate": "max",
+      "dataset": "durableObjectsSqlStorageGroups",
+      "metrics": {
+        "storedBytes": 35905536
+      },
+      "status": "measured"
+    },
+    {
+      "aggregate": "max",
+      "dataset": "durableObjectsStorageGroups",
+      "status": "no_measurement"
+    }
+  ],
+  "signed_archive_status": {
+    "http_status": 503,
+    "code": "service_auth_nonce_get_unavailable"
+  },
+  "account_plan_observed": false,
+  "quota_exhaustion_confirmed": false,
+  "billing_changed": false,
+  "live_46_table_backup_succeeded": false,
+  "authority_cutover_ready": false
+}

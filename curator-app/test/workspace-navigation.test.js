@@ -46,7 +46,7 @@ test('public pages keep the same Method destination and explicit workspace loadi
     const html=fs.readFileSync(new URL('../../site/'+page+'.html',import.meta.url),'utf8');
     assert.match(html,/<nav[\s\S]*?method\.html/);
     if(['index','stats'].includes(page)) {
-      assert.ok(html.indexOf('workspace.js?v=1')<html.indexOf('paper-register.js?v=frontend-20260917-nav2'));
+      assert.ok(html.indexOf('workspace.js?v=1')<html.indexOf('paper-register.js?v=archive-20260919-v2'));
       assert.ok(html.includes('workspace.js?v=1'));
     }
   }
