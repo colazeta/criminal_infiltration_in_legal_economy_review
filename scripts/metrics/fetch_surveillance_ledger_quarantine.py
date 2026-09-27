@@ -22,6 +22,7 @@ terminal still fails immediately.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import re
 from urllib.error import HTTPError, URLError
@@ -82,6 +83,20 @@ QUARANTINED_LEDGER_COMMENTS = {
     # The original remains immutable; replacement 5726594101 preserves telemetry
     # and records the observed Exa HTTP 402 provider-limit recovery probe.
     5726128694: "ACADEMIC-2026-09-18",
+    # Audit 2026-09-27: bounded-text violations (19/22 September) and an
+    # edited terminal (23 September). No intake/candidate originated in these
+    # three batches. Originals remain evidence; no replacement counts are inferred.
+    5739910343: "ACADEMIC-2026-09-19",
+    5784336676: "ACADEMIC-2026-09-22-EXTRA-ce155a5f6d3d",
+    5790164542: "ACADEMIC-2026-09-23",
+}
+
+# New quarantine entries bind the exact audited UTF-8 body, so an edit cannot
+# silently expand the exception. Older reviewed entries keep their original rule.
+QUARANTINED_BODY_SHA256 = {
+    5739910343: "4b1695e7e237ceb077ea426a3d79555eea704b532d706e7c16fdafd6a2b54e81",
+    5784336676: "7c145dcf64772ceb9ef5f18299b1592bcd7acd7f2d1b5734b83513837f03758b",
+    5790164542: "ee7cbe6e768b9b80f58a1dcf89073581ec22fe6b40630ce35e66b60034bb8a98",
 }
 
 # These batches are not merely superseded malformed terminals: the audited run
@@ -180,6 +195,9 @@ def _quarantine_api_get(url: str, token: str):
                 kept.append(item)
                 continue
             body = str(item.get("body") or "")
+            expected_hash = QUARANTINED_BODY_SHA256.get(comment_id)
+            if expected_hash and hashlib.sha256(body.encode("utf-8")).hexdigest() != expected_hash:
+                raise _base.MetricsError(f"quarantined ledger comment {comment_id} body changed since audit")
             if expected_batch not in body:
                 raise _base.MetricsError(
                     "quarantined ledger comment identity disagrees with recovery record"

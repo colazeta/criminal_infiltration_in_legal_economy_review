@@ -23,6 +23,10 @@ pr_url=""
 head_sha=""
 pending() {
   echo "::error::Support persistence is pending: $1"
+  if [ "$1" = "pr_creation_blocked" ]; then
+    echo "Repository owner: Settings > Actions > General > Workflow permissions > Allow GitHub Actions to create and approve pull requests."
+    echo "Keep the reviewed PR and exact-head quality gates; do not substitute a direct-main push or stronger credential."
+  fi
   {
     echo "## Recoverable selected-support checkpoint"
     echo "Status: persistence_pending; not published and not scientifically approved."
@@ -117,13 +121,18 @@ else
   create_checkpoint_pr
 fi
 
-# PRs created with the repository GITHUB_TOKEN do not recursively trigger a PR
-# workflow. workflow_dispatch is the supported exception. Evaluate only the most
+# PRs created with GITHUB_TOKEN may leave their PR workflow awaiting approval.
+# workflow_dispatch supplies unattended exact-head checks. Evaluate only the most
 # recent exact-head quality check: historical failures/action_required outcomes
 # remain audit evidence but must not permanently poison a reusable checkpoint.
+quality_ignored_ids='[]'
+quality_checks() {
+  gh api --paginate --slurp "repos/$GITHUB_REPOSITORY/commits/$head_sha/check-runs?per_page=100" --jq '
+    [.[].check_runs[] | select(.name == "quality" and .app.slug == "github-actions")]'
+}
 latest_quality_state() {
-  gh api "repos/$GITHUB_REPOSITORY/commits/$head_sha/check-runs" --jq '
-    [.check_runs[] | select(.name == "quality" and .app.slug == "github-actions")]
+  quality_checks | jq -r --argjson ignored "$quality_ignored_ids" '
+    [.[] | select(.id as $id | $ignored | index($id) | not)]
     | sort_by(.started_at // .created_at // "")
     | if length == 0 then "missing"
       else last
@@ -136,6 +145,9 @@ latest_quality_state() {
 }
 quality_state="$(latest_quality_state)" || pending "quality_read_failed"
 if [ "$quality_state" = "missing" ] || [ "$quality_state" = "blocked" ]; then
+  # A fresh dispatch is asynchronous. Ignore existing checks while awaiting
+  # its new check ID, otherwise the old failure aborts before the rerun starts.
+  quality_ignored_ids="$(quality_checks | jq -c '[.[].id]')" || pending "quality_read_failed"
   gh workflow run archive.yml --ref "$branch" || pending "quality_dispatch_failed"
   echo "Dispatched replacement exact-head quality validation for retained checkpoint." >> "$GITHUB_STEP_SUMMARY"
 fi

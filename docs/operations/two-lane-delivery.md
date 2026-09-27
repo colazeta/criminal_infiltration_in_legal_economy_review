@@ -72,6 +72,13 @@ Failure clusters continue to follow `calibration-trace-audit.md`; no unchanged r
 
 ## Soft close and anti-repeat
 
+Before writing a terminal to ledger #30, validate the exact prospective body with
+`scripts/metrics/validate_terminal.py --body <file> --expected-batch <batch>`.
+This checks the existing bounded-text/schema and same-day timestamp contract;
+it does not replace remote idempotency, provenance or persistence readback.
+Never edit a submitted terminal. Use the existing audited recovery path for
+invalid history. See [the 27 September reliability audit](github-reliability-audit-2026-09-27.md).
+
 At roughly 20 minutes, enter **soft-close**: open no new paper cohort, search family, engineering branch or external workflow. Finish/persist/read back in-flight work or leave exact recoverable state. Do not poll long jobs to fill the activation.
 
 Do not repeat an unchanged zero-progress retrieval/selection/inference strategy until its prerequisite changes.

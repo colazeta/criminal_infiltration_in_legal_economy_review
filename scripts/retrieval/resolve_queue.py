@@ -456,10 +456,27 @@ def preserve_selected_paper_resolution(
     """
     if not previous or SELECTED_PAPER_NOTE not in str(previous.get("notes") or ""):
         return resolved
-    if not same_identity(row, previous):
+    # An explicitly recorded queue DOI may have been reconciled since the
+    # previous retrieval. Retain evidence only when it matches the previously
+    # resolved DOI for this exact candidate/title; no new identity is inferred.
+    promoted_doi = (
+        not normalise_doi(previous.get("doi"))
+        and bool(normalise_doi(row.get("doi")))
+        and normalise_doi(row.get("doi")) == normalise_doi(previous.get("resolved_doi"))
+        and clean(row.get("title")) == clean(previous.get("title"))
+    )
+    if row.get("candidate_id") != previous.get("candidate_id"):
+        return resolved
+    if not same_identity(row, previous) and not promoted_doi:
+        return resolved
+    old_resolved_doi = normalise_doi(previous.get("resolved_doi"))
+    new_resolved_doi = normalise_doi(resolved.get("resolved_doi"))
+    if old_resolved_doi and new_resolved_doi and old_resolved_doi != new_resolved_doi:
         return resolved
 
     result = dict(resolved)
+    if not new_resolved_doi and old_resolved_doi:
+        result["resolved_doi"] = previous["resolved_doi"]
     previous_full_text = safe_url(previous.get("full_text_url"))
     if (
         result.get("resolution_status") != "full_text"

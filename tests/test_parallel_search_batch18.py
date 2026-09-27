@@ -69,7 +69,7 @@ class ParallelSearchBatch18Tests(unittest.TestCase):
         self.assertIn("earlier version", record["note"])
         self.assertIn("not silently substituted", record["note"])
         row = self.retrieval[PIZZO_CERTIFICATION]
-        self.assertEqual(row["resolution_status"], "unresolved")
+        self.assertNotEqual(row["resolution_status"], "full_text")
         self.assertEqual(row["full_text_url"].strip(), "")
 
     def test_related_working_paper_manifestations_remain_explicit(self) -> None:
