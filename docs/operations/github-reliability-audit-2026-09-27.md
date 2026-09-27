@@ -99,3 +99,31 @@ bodies, DOI-promotion regression and asynchronous replacement-check sequence.
 Candidate IDs, canonical works, scientific decisions, ontology profile and
 publication approvals are unchanged. No bibliographic search was performed;
 GitHub records/logs and the already retained support checkpoint are the evidence.
+
+
+## Post-merge runtime follow-up
+
+PR #823 passed remote quality and was merged as
+`b574e9c1118fcf7aa48d0c989885811dd912e2d7`. The subsequent full retrieval refresh
+(`36342425970`) exposed one further historical test assumption: the CEPR reading
+aid's `abstract_only` basis was incorrectly treated as a permanent prohibition
+on an independent provider finding a full-text locator. The follow-up keeps the
+reading aid and its evidence basis unchanged, requires separate provider provenance
+for a later full-text locator and verifies that the abstract bridge neither
+promotes an abstract nor erases independently obtained full text. No retrieval
+record or scientific decision is changed by this test correction.
+
+The same post-merge deployment (`36342425967`) successfully fetched all 93 runs,
+including remote ancestry, author, intake and source checks. Its build exposed
+two frontend tests that loaded the generated publication data and assumed it was
+always empty. They now use a deterministic empty fixture and continue to test
+both empty and populated states. The full Node suite is also exercised against
+an artifact built from the 93 validated runs, matching the deployment path.
+
+Follow-up validation passes 786 Python tests and 411 Node tests, with zero skips.
+The populated artifact also passes all 411 Node tests, archive/site validation
+and selected-paper consistency checks. Its public projection contains nine
+completed scheduled days through 22 September and 76 extra runs; other ledger
+entries are not silently converted to successful public iterations. The later
+calendar gaps remain unknown. All 294 candidate identities and both support
+coverage tables remain complete.

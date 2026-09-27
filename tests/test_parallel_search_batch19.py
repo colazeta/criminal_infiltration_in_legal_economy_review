@@ -70,8 +70,20 @@ class ParallelSearchBatch19Tests(unittest.TestCase):
         self.assertEqual(self.abstracts[CAPTURE]["coverage_status"], "available")
         self.assertEqual(self.abstracts[CAPTURE]["article_url"], CAPTURE_CEPR)
         self.assertEqual(self.abstracts[CAPTURE]["match_type"], "verified_abstract_source")
-        self.assertNotEqual(self.retrieval[CAPTURE]["resolution_status"], "full_text")
-        self.assertEqual(self.retrieval[CAPTURE]["full_text_url"].strip(), "")
+        # The reading aid remains abstract-only. An independent provider may
+        # subsequently locate full text without changing the aid's evidence basis.
+        from scripts.retrieval.apply_verified_reading_locators import eligible_overrides
+        self.assertNotIn(CAPTURE, {item["candidate_id"] for item in eligible_overrides(OVERRIDES)})
+        retrieval = self.retrieval[CAPTURE]
+        if retrieval["resolution_status"] == "full_text":
+            self.assertNotEqual(retrieval["full_text_url"], CAPTURE_CEPR)
+            self.assertTrue(retrieval["full_text_url"].startswith("https://"))
+            self.assertEqual(retrieval["best_url_kind"], "full_text")
+            self.assertTrue({"OpenAlex", "Crossref", "Unpaywall"}.intersection(
+                part.strip() for part in retrieval["resolution_sources"].split(";")))
+            self.assertNotEqual(retrieval["match_method"], "reading_aid_override:full_text_intro")
+        else:
+            self.assertEqual(retrieval["full_text_url"].strip(), "")
 
     def test_extortion_working_paper_remains_a_distinct_manifestation(self) -> None:
         note = self.overrides[EXTORTION]["note"]

@@ -4,7 +4,9 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 import {createDocument} from './frontend-dom-fixture.js';
 const code=fs.readFileSync(new URL('../../site/stats.js',import.meta.url),'utf8');
-const baseline=JSON.parse(fs.readFileSync(new URL('../../site/data/research-stats.json',import.meta.url),'utf8'));
+// Deploy builds replace site/data/research-stats.json with the live ledger.
+// Test empty and populated states from a fixed fixture, independent of that build.
+const baseline=JSON.parse(fs.readFileSync(new URL('./fixtures/empty-research-stats.json',import.meta.url),'utf8'));
 const ids=['statistics-notice','statistics-notice-title','latest-execution','statistics-notice-impact','research-statistics-state','statistics-retry','research-kpis','metrics-empty','metrics-content','metrics-error','run-status','daily-chart','daily-chart-title','chart-note','source-table-body','daily-table-body','extra-runs','extra-runs-body','new-candidates-7','all-time-candidates','unique-results-7','source-completion-30','data-through'];
 function setup(fetcher,state='idle',timers={setTimeout,clearTimeout}) {
   const document=createDocument(); document.createElementNS=(_ns,tag)=>document.createElement(tag);
