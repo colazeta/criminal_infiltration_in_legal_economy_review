@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 3,
+  "ledgerIssue": {
+    "number": 30,
+    "url": "https://github.com/colazeta/criminal_infiltration_in_legal_economy_review/issues/30"
+  },
+  "dataThrough": null,
+  "dateRange": {"first": null, "last": null},
+  "summary": {
+    "runDays": 0,
+    "completedRuns": 0,
+    "partialRuns": 0,
+    "failedRuns": 0,
+    "lastRunStatus": null,
+    "last7Days": {
+      "completedRuns": 0,
+      "uniqueResults": null,
+      "knownMatches": null,
+      "newCandidates": null
+    },
+    "last30Days": {
+      "loggedRuns": 0,
+      "completedRuns": 0,
+      "partialRuns": 0,
+      "failedRuns": 0,
+      "sourceCompletionRate": null,
+      "uniqueResults": null,
+      "knownMatches": null,
+      "newCandidates": null,
+      "metadataConflicts": null
+    },
+    "allTime": {"newCandidates": null}
+  },
+  "definitions": {},
+  "daily": [],
+  "sources": [],
+  "extraRuns": []
+}

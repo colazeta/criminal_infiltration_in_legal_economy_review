@@ -104,6 +104,26 @@ class VerifiedReadingLocatorSyncTests(unittest.TestCase):
             self.assertEqual(rerun_row["notes"].count("Curator-verified full-text locator synchronised"), 1)
             self.assertEqual(MODULE.apply(coverage, overrides, check=True)["eligible_overrides"], 1)
 
+    def test_abstract_only_override_neither_promotes_nor_erases_independent_full_text(self):
+        with tempfile.TemporaryDirectory() as folder:
+            folder = Path(folder)
+            coverage = folder / "retrieval.csv"
+            overrides = folder / "overrides.json"
+            overrides.write_text(json.dumps({"schemaVersion": 1, "records": [{
+                "candidateId": "CAND-ABSTRACT", "kind": "verified_abstract_source",
+                "sourceUrl": "https://publisher.example/abstract", "checkedAt": "2026-09-27",
+                "note": "Evidence basis: abstract_only."}]}))
+            for status, full_text in [("landing_page", ""), ("full_text", "https://repository.example/paper.pdf")]:
+                row = {"candidate_id": "CAND-ABSTRACT", "resolution_status": status,
+                       "full_text_url": full_text, "source_urls": "https://publisher.example/abstract"}
+                with coverage.open("w", newline="") as handle:
+                    writer = csv.DictWriter(handle, fieldnames=list(row))
+                    writer.writeheader()
+                    writer.writerow(row)
+                before = coverage.read_bytes()
+                self.assertEqual(MODULE.apply(coverage, overrides), {"eligible_overrides": 0, "changed": 0})
+                self.assertEqual(before, coverage.read_bytes())
+
     def test_existing_full_text_is_preserved_and_locator_is_added(self):
         with tempfile.TemporaryDirectory() as tmp:
             tmp = Path(tmp)
