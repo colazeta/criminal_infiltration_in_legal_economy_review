@@ -4796,6 +4796,22 @@
       "accessStatus": "unknown",
       "registeredAt": "2026-09-18",
       "topicCode": ""
+    },
+    {
+      "id": "CAND-ACADEMIC-2026-09-27-EXTRA-4cf7a1d20b6e-001",
+      "title": "Essays on Organized Crime, Perceived Insecurity, and Mobility in Italy",
+      "authors": "Vincenzo Sessa",
+      "year": 2026,
+      "venue": "Università degli Studi di Salerno",
+      "doi": "",
+      "sourceLinks": [
+        "https://hdl.handle.net/20.500.14242/364729"
+      ],
+      "metadataStatus": "metadata_verified",
+      "reviewStatus": "pending",
+      "accessStatus": "unknown",
+      "registeredAt": "2026-09-27",
+      "topicCode": ""
     }
   ]
 }
