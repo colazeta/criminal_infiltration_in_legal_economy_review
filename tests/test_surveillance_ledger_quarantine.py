@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import sys
+import json
+import hashlib
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -15,11 +17,12 @@ import fetch_surveillance_ledger_quarantine as quarantine  # noqa: E402
 class SurveillanceLedgerQuarantineTests(unittest.TestCase):
     def test_exact_invalid_terminals_are_filtered(self) -> None:
         rows = [{"id": 1, "body": "ordinary"}]
+        fixtures = {row["id"]: row for row in json.loads((ROOT / "tests/fixtures/github-ledger-audit-20260927.json").read_text())}
         for comment_id, batch_id in quarantine.QUARANTINED_LEDGER_COMMENTS.items():
             rows.append(
                 {
                     "id": comment_id,
-                    "body": f"Daily surveillance batch {batch_id}: completed.",
+                    "body": fixtures.get(comment_id, {}).get("body", f"Daily surveillance batch {batch_id}: completed."),
                 }
             )
         with patch.object(quarantine, "_RAW_API_GET", return_value=(rows, None)):
@@ -37,6 +40,25 @@ class SurveillanceLedgerQuarantineTests(unittest.TestCase):
                     quarantine._quarantine_api_get(
                         "https://api.github.com/repos/x/y/issues/30/comments?per_page=100", "token"
                     )
+
+    def test_audited_invalid_bodies_are_pinned_and_have_no_intake(self) -> None:
+        rows = json.loads((ROOT / "tests/fixtures/github-ledger-audit-20260927.json").read_text())
+        for item in rows:
+            self.assertEqual(hashlib.sha256(item["body"].encode()).hexdigest(),
+                             quarantine.QUARANTINED_BODY_SHA256[item["id"]])
+            if item["id"] != 5790164542:
+                with self.assertRaisesRegex(Exception, "invalid text value"):
+                    quarantine._base.extract_run(item["body"])
+            else:
+                run = quarantine._base.extract_run(item["body"])
+                self.assertFalse(run["intake_issue"]["created"])
+                self.assertEqual(run["totals"]["intake_candidates"], 0)
+                with self.assertRaisesRegex(Exception, "unedited daily run"):
+                    quarantine._RAW_VERIFY_LEDGER_COMMENT_TIME(run, item)
+            edited = dict(item, body=item["body"] + "\n")
+            with patch.object(quarantine, "_RAW_API_GET", return_value=([edited], None)):
+                with self.assertRaisesRegex(Exception, "body changed since audit"):
+                    quarantine._quarantine_api_get("https://api.github.com/repos/x/y/issues/30/comments", "token")
 
     def test_non_ledger_calls_are_unchanged(self) -> None:
         rows = [{"id": 5644330070, "body": "different batch"}]

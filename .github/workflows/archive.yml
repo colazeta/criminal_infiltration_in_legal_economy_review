@@ -10,7 +10,8 @@ on:
   issue_comment:
     types: [created]
   workflow_run:
-    workflows: ["Recover intake backlog", "Resolve curator paper access", "Backfill curator abstract coverage"]
+    # Intake recovery already dispatches this workflow after verified readback.
+    workflows: ["Resolve curator paper access", "Backfill curator abstract coverage"]
     types: [completed]
     branches: [main]
 

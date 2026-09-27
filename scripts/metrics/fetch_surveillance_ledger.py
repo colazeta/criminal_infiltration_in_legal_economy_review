@@ -550,7 +550,10 @@ def fetch_validated_runs(repository, ledger_issue, allowed_author, token, cycle=
             continue
         if boundary and parse_datetime(comment.get("created_at"), "ledger created_at") < boundary:
             continue
-        run = extract_run(body)
+        try:
+            run = extract_run(body)
+        except MetricsError as exc:
+            raise MetricsError(f"ledger comment {comment.get('id')}: {exc}") from exc
         if run is None:
             continue
         if cycle:
@@ -562,7 +565,10 @@ def fetch_validated_runs(repository, ledger_issue, allowed_author, token, cycle=
             raise MetricsError("ledger contains a duplicate batch")
         if cycle and run["schema_version"] not in (2, 3):
             raise MetricsError("Active cycle requires the Exa-only v2 run contract")
-        verify_ledger_comment_time(run, comment)
+        try:
+            verify_ledger_comment_time(run, comment)
+        except MetricsError as exc:
+            raise MetricsError(f"ledger comment {comment.get('id')}: {exc}") from exc
         if repository_issues is None:
             repository_issues = []
             issues_url = (

@@ -122,6 +122,27 @@ class RetrievalEnrichmentPreservationTests(unittest.TestCase):
         self.assertIn("https://repository.example/paper.pdf", result["source_urls"])
         self.assertIn("Repository via Parallel Search", result["resolution_sources"])
 
+    def test_recorded_queue_doi_promotion_retains_original_full_text_and_identity_evidence(self):
+        previous = self.selected_previous()
+        previous["resolved_doi"] = "10.1234/exact-work"
+        row = dict(self.queue_row(), doi="10.1234/exact-work")
+        fresh = dict(previous, doi=row["doi"], resolved_doi="", resolution_status="doi_only",
+                     best_url="https://doi.org/10.1234/exact-work", best_url_kind="doi",
+                     full_text_url="", resolution_sources="DOI", match_method="DOI:registered",
+                     notes="", source_urls=row["source_links"])
+        result = MODULE.preserve_selected_paper_resolution(row, previous, fresh)
+        self.assertEqual(result["full_text_url"], previous["full_text_url"])
+        self.assertEqual(result["resolved_doi"], previous["resolved_doi"])
+        self.assertIn("Parallel Search:exact_title_authors_year", result["match_method"])
+        self.assertTrue(MODULE.should_refresh(row, previous, "2026-09-13", 30))
+        # A different DOI, candidate, title or provider conflict supplies no
+        # authority to carry evidence into the changed identity.
+        for changed in [dict(row, doi="10.1234/other"), dict(row, candidate_id="OTHER"),
+                        dict(row, title="Other work")]:
+            self.assertEqual(MODULE.preserve_selected_paper_resolution(changed, previous, fresh), fresh)
+        conflict = dict(fresh, resolved_doi="10.1234/other")
+        self.assertEqual(MODULE.preserve_selected_paper_resolution(row, previous, conflict), conflict)
+
     def test_identity_change_disables_preservation(self):
         row = self.queue_row()
         row["title"] = "Different Work"

@@ -32,7 +32,9 @@ class AutomaticRegisterTests(unittest.TestCase):
     def test_successful_persistence_refreshes_pages_independently_of_bot_push(self):
         workflow=(ROOT/'.github/workflows/archive.yml').read_text()
         self.assertIn('workflow_run:',workflow)
-        self.assertIn('Recover intake backlog',workflow)
+        recovery=(ROOT/'.github/workflows/recover-intake-backlog.yml').read_text()
+        self.assertIn('gh workflow run archive.yml --ref main', recovery)
+        self.assertNotIn('workflows: ["Recover intake backlog"', workflow)
         self.assertIn('Resolve curator paper access',workflow)
         self.assertIn('Backfill curator abstract coverage',workflow)
         self.assertIn('types: [completed]',workflow)

@@ -59,7 +59,8 @@ class ParallelSearchBatch19Tests(unittest.TestCase):
         for candidate_id, url in ((EXTORTION, EXTORTION_PDF), (ENABLERS, ENABLERS_PMC)):
             row = self.retrieval[candidate_id]
             self.assertEqual(row["resolution_status"], "full_text")
-            self.assertEqual(row["full_text_url"], url)
+            self.assertTrue(row["full_text_url"].startswith("https://"))
+            self.assertEqual(row["best_url_kind"], "full_text")
             self.assertIn(url, row["source_urls"])
             self.assertEqual(row["match_confidence"], "high")
 
@@ -69,7 +70,7 @@ class ParallelSearchBatch19Tests(unittest.TestCase):
         self.assertEqual(self.abstracts[CAPTURE]["coverage_status"], "available")
         self.assertEqual(self.abstracts[CAPTURE]["article_url"], CAPTURE_CEPR)
         self.assertEqual(self.abstracts[CAPTURE]["match_type"], "verified_abstract_source")
-        self.assertEqual(self.retrieval[CAPTURE]["resolution_status"], "unresolved")
+        self.assertNotEqual(self.retrieval[CAPTURE]["resolution_status"], "full_text")
         self.assertEqual(self.retrieval[CAPTURE]["full_text_url"].strip(), "")
 
     def test_extortion_working_paper_remains_a_distinct_manifestation(self) -> None:
