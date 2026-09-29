@@ -2,11 +2,13 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
-const version = 'frontend-20260917-nav2-status-auto';
+const version = 'reader-20260929';
 test('the entry documents invalidate earlier register bundle cache keys', () => {
   for (const page of ['index.html', 'stats.html']) {
     const html=fs.readFileSync(new URL('../../site/'+page,import.meta.url),'utf8');
     assert.ok(html.includes('paper-register.js?v='+version+'"'));
+    assert.ok(html.includes('workspace.js?v='+version+'"'));
+    assert.ok(html.includes('application.css?v='+version+'"'));
     assert.doesNotMatch(html,/paper-register\.js\?v=(?:delivery-002|(?:research|processing|completion)-001)/);
   }
 });

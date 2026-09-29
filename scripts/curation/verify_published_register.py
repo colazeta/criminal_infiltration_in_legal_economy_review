@@ -19,6 +19,8 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from scripts.curation.build_paper_register import FIELDS
 from scripts.curation.build_paper_support import validate_payload as support_index
 MAX_BYTES = 16 * 1024 * 1024
+RENDERER_ASSETS = ('paper-register.js', 'paper-sheet-support.js', 'paper-sheet-research.js',
+                   'workspace.js', 'index.html', 'styles.css', 'classic-site.css', 'application.css')
 
 def record_index(payload: dict) -> dict[str, dict]:
     if not isinstance(payload, dict) or payload.get('schemaVersion') != 1:
@@ -87,7 +89,7 @@ def verify_sheet_support(register_url: str, expected_register: Path) -> dict:
     receipt = compare_support(expected, json.loads(body))
     receipt['served_bytes_sha256'] = hashlib.sha256(body).hexdigest()
     receipt['renderer_assets'] = {}
-    for name in ('paper-register.js', 'paper-sheet-support.js', 'paper-sheet-research.js', 'index.html', 'styles.css'):
+    for name in RENDERER_ASSETS:
         local = (site / name).read_bytes()
         served = public_bytes(base_url + '/' + name)
         if served != local:

@@ -11,7 +11,7 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>◫</text></svg>" />
     <link rel="stylesheet" href="./styles.css" />
     <link rel="stylesheet" href="./classic-site.css" />
-    <link rel="stylesheet" href="./application.css" />
+    <link rel="stylesheet" href="./application.css?v=reader-20260929" />
     <script src="./app.js?v=oa-032" defer></script>
   </head>
   <body class="classic-site classic-home" lang="it">
@@ -49,10 +49,11 @@
         <div class="section-heading"><h2 id="register-title">Registro dei paper</h2></div>
         <form class="controls register-controls" id="register-controls" role="search" aria-label="Cerca nel registro">
           <div class="register-search-row">
-            <label class="search-field"><span>Cerca titolo, autore, rivista o DOI</span><input id="register-search" type="search" autocomplete="off" placeholder="Ad esempio: procurement, Varese, 10.1111…"></label>
+            <label class="search-field"><span>Cerca titolo, autore, rivista, DOI o ID</span><input id="register-search" type="search" maxlength="600" aria-describedby="register-search-help" autocomplete="off" placeholder="Ad esempio: mafia imprese, Varese, 10.1111…"></label>
             <label><span>Ordina</span><select id="register-sort-order"><option value="newest">Più recenti</option><option value="oldest">Meno recenti</option><option value="title">Titolo A–Z</option></select></label>
             <button type="reset">Azzera filtri</button>
           </div>
+          <p id="register-search-help" class="register-search-help">Cerca tutte le parole, anche in campi diversi. Accenti e maiuscole non cambiano i risultati.</p>
           <details class="filter-drawer" id="register-filter-panel">
             <summary>Filtri avanzati <span id="register-active-filters"></span></summary>
             <div class="register-filter-grid">
@@ -163,7 +164,7 @@
       </details>
     </footer>
     <script src="./paper-sheet-manual.js?v=status-20260917" defer></script>
-    <script src="./workspace.js?v=1" defer></script>
-    <script src="./paper-register.js?v=frontend-20260917-nav2-status-auto" defer></script>
+    <script src="./workspace.js?v=reader-20260929" defer></script>
+    <script src="./paper-register.js?v=reader-20260929" defer></script>
   </body>
 </html>

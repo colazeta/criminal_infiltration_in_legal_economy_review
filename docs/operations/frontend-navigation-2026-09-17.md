@@ -1,5 +1,8 @@
 # Archive navigation and paper sharing — 17 September 2026
 
+For the current continuous reader, multiword search, visible filters and section
+index, see the [29 September extension](research-reader-2026-09-29.md).
+
 Maintenance follow-up to #767, authorised by the owner. The existing visual language, public projections, scientific gates and source datasets are unchanged.
 
 ## Delivered behaviour
