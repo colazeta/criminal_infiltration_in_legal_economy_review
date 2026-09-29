@@ -115,3 +115,11 @@ The fullscreen contract and internal scrolling remain governed by the curator-sp
 Maintenance changes no candidate, metadata, source, document, annotation, proposal,
 completion, validation or corpus record. No ontology concept or persistence path
 is introduced.
+
+
+The deployed visual check also tests document overflow against
+`document.documentElement.clientWidth` (the usable viewport, excluding its
+scrollbar). The method's main pane must retain its gutter-subtracting width:
+its component selector includes both `classic-site` and `classic-method`, so
+the later shared default cannot restore `width: 100%` on top of outer margins.
+This preserves the linear document without a page-wide horizontal scrollbar.
