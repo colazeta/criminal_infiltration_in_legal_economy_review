@@ -11,7 +11,7 @@ class PlainMethodLayoutTests(unittest.TestCase):
     def test_method_is_linear_document_not_card_layout(self) -> None:
         html = (SITE / "method.html").read_text(encoding="utf-8")
         self.assertIn('class="classic-site classic-method"', html)
-        self.assertIn('href="./method.css"', html)
+        self.assertRegex(html, r'href="\./method\.css(?:\?[^"]*)?"')
         self.assertGreaterEqual(html.count("<hr"), 7)
         self.assertGreaterEqual(html.count("<ol>"), 3)
         self.assertGreaterEqual(html.count("<ul>"), 3)

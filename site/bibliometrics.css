@@ -1,10 +1,11 @@
 body.classic-site .bibliometric-controls {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 12px;
   padding: 8px 10px;
-  border: 1px solid #777;
-  background: #eee;
+  border: 1px solid var(--classic-border);
+  background: var(--classic-subhead);
   margin: 8px 0 12px;
 }
 body.classic-site .bibliometric-controls label {
@@ -12,6 +13,8 @@ body.classic-site .bibliometric-controls label {
   align-items: center;
   gap: 6px;
   font-weight: 700;
+  min-height: 32px;
+  cursor: pointer;
 }
 body.classic-site .bibliometric-controls input { margin: 0; }
 body.classic-site .bibliometric-grid {
@@ -20,9 +23,9 @@ body.classic-site .bibliometric-grid {
   gap: 10px;
 }
 body.classic-site .bibliometric-panel {
-  border: 1px solid #777;
-  background: #fff;
-  padding: 8px;
+  border: 1px solid var(--classic-border);
+  background: var(--classic-panel);
+  padding: 12px;
 }
 body.classic-site .bibliometric-panel h3 { margin-top: 0; }
 body.classic-site .bibliometric-bar-track {
@@ -31,7 +34,7 @@ body.classic-site .bibliometric-bar-track {
   min-width: 120px;
   height: 12px;
   border: 1px solid #999;
-  background: #fff;
+  background: var(--classic-panel);
 }
 body.classic-site .bibliometric-bar-fill {
   display: block;
@@ -43,7 +46,7 @@ body.classic-site .bibliometric-matrix th:first-child {
   position: sticky;
   left: 0;
   z-index: 1;
-  background: #eee;
+  background: var(--classic-subhead);
   min-width: 220px;
 }
 body.classic-site .matrix-count { text-align: center; font-family: "Courier New", monospace; }

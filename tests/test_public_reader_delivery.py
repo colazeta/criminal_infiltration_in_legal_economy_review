@@ -28,12 +28,12 @@ class PublicReaderDeliveryTests(unittest.TestCase):
     def test_receipt_attests_navigation_and_layout_bytes(self):
         with patch('scripts.curation.verify_published_register.public_bytes', self.served):
             receipt = verify_sheet_support(URL, self.site / 'data/paper-register.json')
-        for name in ('workspace.js', 'application.css', 'classic-site.css'):
+        for name in RENDERER_ASSETS:
             self.assertEqual(receipt['renderer_assets'][name],
                              hashlib.sha256((ROOT / 'site' / name).read_bytes()).hexdigest())
 
     def test_old_navigation_or_layout_cannot_pass_as_delivered(self):
-        for name in ('workspace.js', 'application.css', 'classic-site.css'):
+        for name in RENDERER_ASSETS:
             def stale(url):
                 return b'older release' if url.endswith('/' + name) else self.served(url)
             with self.subTest(name=name), patch('scripts.curation.verify_published_register.public_bytes', stale):

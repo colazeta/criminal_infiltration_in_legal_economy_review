@@ -279,7 +279,7 @@
     state.selected = null;
     ui.recordKey.textContent = "nessun record selezionato";
     ui.recordJson.textContent = "Seleziona una riga della tabella.";
-    ui.researchStatus.textContent = "Seleziona un CandidateRecord e usa LOAD PUBLIC RESEARCH.";
+    ui.researchStatus.textContent = "Seleziona un CandidateRecord e usa Carica analisi pubblica.";
     ui.researchJson.textContent = "—";
     ui.loadResearch.hidden = true;
     ui.openConsole.hidden = true;
@@ -346,12 +346,12 @@
     });
 
     clearInspector();
-    setStatus("TABLE " + table.label + " · " + state.filtered.length + " / " + sourceRows.length + " righe visibili · doppio clic/Invio su un CandidateRecord per caricare la proiezione di ricerca.");
+    setStatus("Tabella " + table.label + " · " + state.filtered.length + " / " + sourceRows.length + " righe visibili · doppio clic/Invio su un CandidateRecord per caricare la proiezione di ricerca.");
   }
 
   async function ensureTable(table) {
     if (state.cache.has(table.id)) return state.cache.get(table.id);
-    setStatus("LOAD " + table.label + " FROM " + table.source + " …");
+    setStatus("Caricamento " + table.label + " da " + table.source + " …");
     const rows = await table.load();
     if (!Array.isArray(rows)) throw new Error("table loader did not return rows");
     state.cache.set(table.id, rows);
@@ -368,8 +368,8 @@
     ui.sort.value = "source";
     renderTableList();
     const table = currentDefinition();
-    ui.currentTable.textContent = "TABLE: " + table.label;
-    ui.currentSource.textContent = "SOURCE: " + table.source;
+    ui.currentTable.textContent = "Tabella: " + table.label;
+    ui.currentSource.textContent = "Fonte: " + table.source;
     clearInspector();
     try {
       await ensureTable(table);
@@ -387,7 +387,7 @@
     const id = candidateId(state.selected);
     if (!id) return;
     ui.loadResearch.disabled = true;
-    ui.researchStatus.textContent = "LOAD PUBLIC RESEARCH " + id + " …";
+    ui.researchStatus.textContent = "Carica analisi pubblica " + id + " …";
     ui.researchJson.textContent = "—";
     try {
       const url = new URL(RESEARCH_ENDPOINT);
