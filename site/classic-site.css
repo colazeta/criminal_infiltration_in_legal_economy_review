@@ -816,18 +816,7 @@ body.classic-site footer p {
   margin: 0;
 }
 
-/* 404: classic modal-like error window */
-body.classic-site.classic-404 {
-  min-height: 100vh;
-  display: grid;
-  place-items: center;
-}
-
-body.classic-site.classic-404 main {
-  width: min(520px, calc(100% - 20px));
-  padding: 0;
-}
-
+/* 404 content; application.css owns the shared page frame. */
 body.classic-site.classic-404 .error-window {
   border: 1px solid #000;
   background: #fff;
