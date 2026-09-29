@@ -33,6 +33,9 @@ not CandidateRecord identity, research projections, completion or publication ga
   that content is present, accepted, complete or reusable. No private data request,
   additional research store or additional fetch is introduced by the reader.
 - Print omits navigation and retains the existing disclosure expansion/restoration.
+  On screen the window has a stable viewport-bound height: asynchronous sections
+  cannot move the previous/next/close controls by re-centring a growing dialog.
+  Print retains automatic height.
 
 ## Delivery and regression checks
 

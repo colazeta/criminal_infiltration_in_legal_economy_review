@@ -8,7 +8,7 @@ test('the entry documents invalidate earlier register bundle cache keys', () => 
     const html=fs.readFileSync(new URL('../../site/'+page,import.meta.url),'utf8');
     assert.ok(html.includes('paper-register.js?v='+version+'"'));
     assert.ok(html.includes('workspace.js?v='+version+'"'));
-    assert.ok(html.includes('application.css?v='+version+'"'));
+    assert.ok(html.includes('application.css?v='+version+'-2"'));
     assert.doesNotMatch(html,/paper-register\.js\?v=(?:delivery-002|(?:research|processing|completion)-001)/);
   }
 });
