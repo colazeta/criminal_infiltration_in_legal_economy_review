@@ -1,6 +1,11 @@
 name: Observe hour-40 enrichment
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/enrichment-observer.yml'
+      - 'scripts/metrics/enrichment_execution_health.py'
   schedule:
     - cron: '45 * * * *'
   workflow_run:
@@ -36,6 +41,7 @@ jobs:
           import json, time
           from scripts.enrichment.service_client import current_commit
           from scripts.enrichment.deployment_check import check
+          from scripts.metrics.enrichment_execution_health import execution_health
           state = check(current_commit(), activate=False)
           print(json.dumps(state, indent=2))
           if not state.get('enabled'):
@@ -46,6 +52,10 @@ jobs:
           now = int(time.time() * 1000)
           if schedule['next_slot'] < now - 300000:
               raise SystemExit('enrichment_schedule_watermark_stalled')
+          health = execution_health(state['scheduling'], now)
+          print(json.dumps({'execution_health': health}, indent=2))
+          if health['error_code']:
+              raise SystemExit(health['error_code'])
           print('Observer only: no paper job, model inference, activation or scientific approval performed.')
           PY
 
@@ -67,7 +77,7 @@ jobs:
       - name: Audit the entire private store without exporting source bodies
         # Full-population certification is mandatory after deployments and on
         # explicit audits. Repeating it hourly can exhaust storage read quotas.
-        if: always() && github.event_name != 'schedule'
+        if: always() && (github.event_name == 'workflow_dispatch' || github.event_name == 'workflow_run')
         env:
           CURATOR_SESSION_SECRET: ${{ secrets.CURATOR_SESSION_SECRET }}
         run: python3 -m scripts.enrichment.architecture_check
