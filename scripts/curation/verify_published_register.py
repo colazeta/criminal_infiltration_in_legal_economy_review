@@ -20,7 +20,12 @@ from scripts.curation.build_paper_register import FIELDS
 from scripts.curation.build_paper_support import validate_payload as support_index
 MAX_BYTES = 16 * 1024 * 1024
 RENDERER_ASSETS = ('paper-register.js', 'paper-sheet-support.js', 'paper-sheet-research.js',
-                   'workspace.js', 'index.html', 'styles.css', 'classic-site.css', 'application.css')
+                   'workspace.js', 'index.html', 'styles.css', 'classic-site.css', 'application.css',
+                   'database.html', 'database.css', 'database.js', 'stats.html',
+                   'bibliometrics.css', 'statistics-notice.css', 'method.html', 'method.css',
+                   'model.html', 'model.css', 'curate.html', 'curator-shell.css',
+                   'curator-reading.css', 'curator-queue.css', 'enrichment.html',
+                   'review-v2.html', 'aml.html', '404.html')
 
 def record_index(payload: dict) -> dict[str, dict]:
     if not isinstance(payload, dict) or payload.get('schemaVersion') != 1:
@@ -78,7 +83,8 @@ def public_bytes(url: str) -> bytes:
 
 def verify_sheet_support(register_url: str, expected_register: Path) -> dict:
     # The existing archive workflow calls this verifier after its normal build.
-    # Missing generated support or an old renderer is now a failed publication.
+    # Missing support or stale entry documents/styles fail publication verification.
+    # Pages attests static private-console shells only, never Worker/authenticated state.
     site = expected_register.parent.parent
     suffix = '/data/paper-register.json'
     if not register_url.endswith(suffix):

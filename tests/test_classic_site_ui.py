@@ -2,9 +2,27 @@ from __future__ import annotations
 
 from pathlib import Path
 import unittest
+from html.parser import HTMLParser
+from urllib.parse import urlsplit
 
 ROOT = Path(__file__).resolve().parents[1]
 SITE = ROOT / "site"
+
+
+class Styles(HTMLParser):
+    def __init__(self, source):
+        super().__init__()
+        self.names = []
+        self.feed(source)
+
+    def handle_starttag(self, tag, attrs):
+        attrs = dict(attrs)
+        if tag == 'link' and attrs.get('rel') == 'stylesheet':
+            self.names.append(urlsplit(attrs['href']).path.rsplit('/', 1)[-1])
+
+
+def page_styles(source):
+    return Styles(source).names
 
 
 class ClassicSiteUiTests(unittest.TestCase):
@@ -13,8 +31,8 @@ class ClassicSiteUiTests(unittest.TestCase):
             source = (SITE / filename).read_text(encoding="utf-8")
             with self.subTest(filename=filename):
                 self.assertIn('class="classic-site', source)
-                self.assertIn('href="./classic-site.css"', source)
-                self.assertLess(source.index('href="./styles.css"'), source.index('href="./classic-site.css"'))
+                styles = page_styles(source)
+                self.assertLess(styles.index("styles.css"), styles.index("classic-site.css"))
 
     def test_classic_design_system_is_flat_and_full_width(self) -> None:
         source = (SITE / "classic-site.css").read_text(encoding="utf-8")
@@ -22,7 +40,7 @@ class ClassicSiteUiTests(unittest.TestCase):
         self.assertIn("body.classic-site main", source)
         self.assertIn("width: 100%;", source)
         self.assertIn("max-width: none;", source)
-        self.assertIn("--classic-blue: #000080", source)
+        self.assertIn("--classic-blue: #000080", (SITE / "application.css").read_text())
         self.assertNotIn("linear-gradient", source)
         self.assertNotIn("radial-gradient", source)
         self.assertNotIn("translateY", source)
@@ -51,7 +69,7 @@ class ClassicSiteUiTests(unittest.TestCase):
         self.assertGreaterEqual(source.count("<hr"), 7)
         self.assertIn("<ol>", source)
         self.assertIn("<ul>", source)
-        self.assertIn('href="./method.css"', source)
+        self.assertIn("method.css", page_styles(source))
         for section_id in (
             "method-overview",
             "method-scope",
@@ -94,7 +112,7 @@ class ClassicSiteUiTests(unittest.TestCase):
         css = (SITE / "database.css").read_text(encoding="utf-8")
         self.assertIn("DATABASE_BROWSER_V1", html)
         self.assertIn('id="database-workspace"', html)
-        self.assertIn('href="./database.css"', html)
+        self.assertIn("database.css", page_styles(html))
         self.assertIn('src="./database.js', html)
         self.assertIn("DATABASE_BROWSER_V1", javascript)
         self.assertIn("CILE-PUBLIC-INDEX-1", javascript)

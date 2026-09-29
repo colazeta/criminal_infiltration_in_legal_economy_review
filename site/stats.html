@@ -11,9 +11,9 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>◫</text></svg>" />
     <link rel="stylesheet" href="./styles.css" />
     <link rel="stylesheet" href="./classic-site.css" />
-    <link rel="stylesheet" href="./application.css?v=reader-20260929-2" />
-    <link rel="stylesheet" href="./bibliometrics.css" />
+    <link rel="stylesheet" href="./bibliometrics.css?v=sections-20260929" />
     <link rel="stylesheet" href="./statistics-notice.css?v=20260918" />
+    <link rel="stylesheet" href="./application.css?v=sections-20260929" />
     <script src="./stats.js?v=notices-20260918" defer></script>
     <script src="./workspace.js?v=reader-20260929" defer></script>
     <script src="./paper-register.js?v=reader-20260929" defer></script>
@@ -32,8 +32,6 @@
       </div></header>
 
     <main id="main-content">
-      <div class="page-tools" lang="it"><a href="#literature-statistics">Letteratura</a><a href="#enrichment-statistics">Analisi dei paper</a><a href="#research-statistics">Ricerche bibliografiche</a><a href="#definitions-title">Come leggere i dati</a></div>
-
       <section class="intro" aria-labelledby="stats-page-title">
         <div>
           <p class="eyebrow">Bibliometria + audit della living review</p>
@@ -57,6 +55,8 @@
           </div>
         </aside>
       </section>
+
+      <div class="page-tools" lang="it"><a href="#literature-statistics">Letteratura</a><a href="#enrichment-statistics">Analisi dei paper</a><a href="#research-statistics">Ricerche bibliografiche</a><a href="#definitions-title">Come leggere i dati</a></div>
 
       <section class="statistics-section" id="literature-statistics" aria-labelledby="literature-statistics-title">
         <div class="section-heading">
@@ -133,7 +133,7 @@
         </div>
       </section>
 
-      <section class="definitions-section" id="enrichment-statistics"><h2>Avanzamento dell’arricchimento</h2><p role="status" id="enrichment-statistics-status">Caricamento dello stato delle analisi…</p><p>Il completamento dell’arricchimento non equivale all’inclusione nel corpus. <a href="./method.html#reading-status">Come leggere gli stati</a>.</p><button type="button" id="enrichment-statistics-refresh" hidden>Riprova caricamento</button></section>
+      <section class="definitions-section" id="enrichment-statistics"><div class="section-heading"><h2>Avanzamento dell’arricchimento</h2></div><p role="status" id="enrichment-statistics-status">Caricamento dello stato delle analisi…</p><p>Il completamento dell’arricchimento non equivale all’inclusione nel corpus. <a href="./method.html#reading-status">Come leggere gli stati</a>.</p><button type="button" id="enrichment-statistics-refresh" hidden>Riprova caricamento</button></section>
 
       <details class="operations-disclosure" id="research-statistics">
         <summary>Ricerche bibliografiche <span id="research-statistics-state">· Dati da caricare</span></summary>

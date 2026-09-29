@@ -12,9 +12,13 @@ The contract applies to:
 - `site/stats.html` — research statistics;
 - `site/method.html` — public methodology;
 - `site/404.html` — not-found surface;
-- `site/curate.html` — authenticated curator workstation.
+- `site/curate.html` — authenticated curator workstation;
+- `site/model.html` — scientific model explorer;
+- `site/enrichment.html` and `site/review-v2.html` — authenticated research workspaces.
 
-The public static pages share `site/classic-site.css`. The methodology page adds the narrowly scoped `site/method.css` after the shared styles only to enforce its deliberately plain document layout. The curator keeps its dedicated fullscreen CSS because it has stronger application-layout requirements, while its title/menu chrome follows the same visual language.
+All ten entry documents load the same versioned `site/application.css` **last**. It owns the palette, typography, spacing, controls, focus treatment and application navigation. Component styles load first and own only their specialised structure. Do not redefine `--classic-*` tokens in a component stylesheet.
+
+Public pages retain `styles.css` and `classic-site.css` for structural compatibility. `database.css`, `bibliometrics.css` and `method.css` retain their table/chart/document layouts; `model.css` retains the index/detail split. The curator retains its dedicated fullscreen CSS and internal scrolling, without importing the public skin.
 
 ## Visual rules
 
@@ -56,7 +60,7 @@ This is a presentational contract only. It does not alter:
 - curator authentication, retrieval or decision workflows;
 - ontology, registry or publication state.
 
-`styles.css` remains loaded first for existing structural compatibility. `classic-site.css` provides the shared public visual layer; `method.css` is a presentation-only extension for the standalone method document.
+`styles.css` remains loaded first where required for structural compatibility; `application.css` is the final visual authority. Use its tokens for component typography and borders. Native checkboxes/radios retain their intrinsic dimensions and must not inherit the minimum height or width of text fields. Statistics grids accommodate their actual number of indicators, without empty decorative cells.
 
 The database browser is read-only presentation. It may consume only existing public static projections and the existing unauthenticated public research projection. It must not query private enrichment endpoints, machine routes, source bodies, private identifiers or reviewer material, and it must not create a parallel persistence layer.
 
@@ -79,3 +83,35 @@ The fullscreen contract and internal scrolling remain governed by the curator-sp
 - the database browser remains read-only, uses text-node rendering, and is barred from private enrichment routes;
 - curator navigation follows the same application language without importing the public skin;
 - the 404 page is rendered as a classic application error window.
+
+
+## Cross-section delivery contract — 2026-09-29
+
+- Use the same six destinations, in order: Archivio, Database, Statistiche,
+  Metodo, Modello, Curatore. The active destination has `aria-current="page"`.
+  The retained AML and 404 routes do not invent a selected main section.
+- Private workspaces link public destinations to the Pages origin; Curatore
+  stays on the current console origin. Adding navigation does not grant access
+  to private data. Authentication and the Worker asset allowlist are unchanged.
+- Title bars use navy, section headings use grey, content panes use white.
+  Compact table density may differ from long-form reading, but type, borders,
+  control states and outer gutters use the shared contract.
+- Place page identity before local section shortcuts. The methodology remains a
+  linear document, with ordinary headings and horizontal rules.
+- All entrypoints use one explicit `application.css` cache revision. Update it
+  together; changed component styles receive the same revision.
+- The 404 document uses absolute public resource and recovery URLs so that its
+  chrome still works at nested missing paths; it requires no JavaScript redirect.
+- `tests/test_shared_application_design.py` checks the common stylesheet, palette
+  ownership, menu completeness, private/public navigation origins and delivery
+  coverage. Existing reader, fullscreen, model, database and scientific-boundary
+  regressions remain required.
+- The existing post-Pages `verify_published_register.py` receipt now compares all
+  ten entry documents and their static styles, as well as the reader and database
+  renderer bytes. A stale section fails verification instead of silently passing
+  because the home page was current. This is **Pages shell delivery** only: it
+  cannot attest Worker deployment, authentication or private research readback.
+
+Maintenance changes no candidate, metadata, source, document, annotation, proposal,
+completion, validation or corpus record. No ontology concept or persistence path
+is introduced.

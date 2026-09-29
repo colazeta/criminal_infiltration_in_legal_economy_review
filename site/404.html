@@ -2,29 +2,32 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
+    <!-- Absolute public paths also work for nested missing Pages URLs. -->
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Page not found · Criminal Infiltration Literature Archive</title>
-    <link rel="stylesheet" href="./styles.css" />
-    <link rel="stylesheet" href="./classic-site.css" />
-    <link rel="stylesheet" href="./application.css" />
+    <link rel="stylesheet" href="https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/styles.css" />
+    <link rel="stylesheet" href="https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/classic-site.css" />
+    <link rel="stylesheet" href="https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/application.css?v=sections-20260929" />
   </head>
   <body class="classic-site classic-404">
-    <main>
+    <a class="skip-link" href="#main-content">Skip to content</a>
+    <header class="site-header"><div class="header-inner">
+        <a class="brand" href="https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/index.html" aria-label="Criminal Infiltration — archivio">
+          <span class="brand-mark" aria-hidden="true">CI</span>
+          <span><strong>Criminal Infiltration</strong><small>Literature review</small></span>
+        </a>
+        <nav class="app-nav" aria-label="Navigazione principale" lang="it"><a href="https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/index.html">Archivio</a><a href="https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/database.html">Database</a><a href="https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/stats.html">Statistiche</a><a href="https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/method.html">Metodo</a><a href="https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/model.html">Modello</a><a href="https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/curate.html">Curatore</a></nav>
+      </div></header>
+    <main id="main-content">
       <section class="error-window" role="alert" aria-labelledby="error-title">
         <div class="error-titlebar">CRIMINAL INFILTRATION · ERROR 404</div>
         <div class="error-body">
           <p class="eyebrow">HTTP 404</p>
           <h1 id="error-title">Page not found</h1>
           <p>The requested resource is not available in this archive.</p>
-          <p><a id="home-link" href="/">Return to the publication archive</a>.</p>
+          <p><a id="home-link" href="https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/index.html">Return to the publication archive</a>.</p>
         </div>
       </section>
     </main>
-    <script>
-      const root = location.hostname.endsWith("github.io")
-        ? "/criminal_infiltration_in_legal_economy_review/"
-        : "/";
-      document.querySelector("#home-link").href = root;
-    </script>
   </body>
 </html>

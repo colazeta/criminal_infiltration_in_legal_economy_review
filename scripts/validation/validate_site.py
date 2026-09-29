@@ -29,6 +29,7 @@ class PageParser(HTMLParser):
     def __init__(self) -> None:
         super().__init__()
         self.references: list[str] = []
+        self.stylesheets: list[str] = []
         self.ids: list[str] = []
         self.h1_count = 0
         self.main_count = 0
@@ -36,6 +37,8 @@ class PageParser(HTMLParser):
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         values = dict(attrs)
+        if tag == "link" and values.get("rel") == "stylesheet":
+            self.stylesheets.append(urlsplit(values.get("href") or "").path)
         if tag == "html":
             self.lang = values.get("lang") or ""
         if tag == "h1":
@@ -474,11 +477,15 @@ def validate_assets() -> None:
     for required in (
         "DATABASE_BROWSER_V1",
         'id="database-workspace"',
-        'href="./database.css"',
         'src="./database.js',
     ):
         if required not in database_html:
             fail(f"database.html missing governed browser marker: {required}")
+
+    database_page = PageParser()
+    database_page.feed(database_html)
+    if "./database.css" not in database_page.stylesheets:
+        fail("database.html missing governed browser stylesheet")
 
     curator = (SITE / "curate.html").read_text(encoding="utf-8")
     if re.search(r"<input\b[^>]*type=[\"']password[\"']", curator, re.I):

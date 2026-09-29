@@ -4,17 +4,6 @@
   No cards, pills, shadows, gradients, marketing copy or dashboard chrome.
 */
 
-:root {
-  --classic-bg: #c0c0c0;
-  --classic-panel: #ffffff;
-  --classic-header: #d4d0c8;
-  --classic-subhead: #eeeeee;
-  --classic-border: #707070;
-  --classic-grid: #a0a0a0;
-  --classic-blue: #000080;
-  --classic-text: #000000;
-}
-
 .curator-page,
 .curator-page * {
   box-sizing: border-box;
