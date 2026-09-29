@@ -23,6 +23,23 @@ payloads and credentials remain excluded. Missing run diagnostics are null,
 not an empty history. This identifies which mechanical stage failed without
 executing work inside readiness or reclassifying an old failed receipt.
 
+The extraction normalization gate also performs this same read-only exact-private-
+commit check before its first write and its required zero-write replay. Public
+`/version` readiness alone cannot authorise private normalization: propagation to
+the Durable Object may lag. Only the verification operation has the bounded
+stale-deployment retry; normalization errors, malformed receipts and failed replay
+remain fatal without automatic write retries. Failure output retains a closed
+HTTP/error category or a generic operation failure, never exception payloads.
+
+Deployment run `36521020978` (29 September 2026, commit
+`ce4e3f5c361a1d986bd4486714e0c921cb3da49d`) passed backup/restore and public health,
+then stopped at `normalization_gate_failed`. Its historical diagnostic does not
+establish the exact cause. The following observer `36521213636` verified private
+integrity and both retained normalization receipts, but correctly reported the
+new runtime inactive because activation had not been reached. The readiness
+barrier closes the unguarded public-to-private transition without bypassing
+normalization, replay or activation gates.
+
 Cloudflare documents short-lived version skew between Workers and globally unique Durable Objects during eventually consistent code updates: https://developers.cloudflare.com/durable-objects/platform/known-issues/#code-updates . This is consistent with the first observation, not proof of an otherwise unobserved account configuration.
 
 ## Verification boundaries
