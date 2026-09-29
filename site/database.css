@@ -111,8 +111,11 @@ body.classic-database .database-controls {
 
 body.classic-database .database-controls label {
   display: grid;
+  min-width: 0;
   gap: 4px;
 }
+
+body.classic-database .database-controls :is(input, select) { width: 100%; min-width: 0; }
 
 body.classic-database .database-controls label span {
   font: bold 11px var(--ui-font);

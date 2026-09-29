@@ -144,8 +144,7 @@ body.curator-page :is(input:where(:not([type="checkbox"]):not([type="radio"])), 
   font: 13px/1.4 var(--ui-font);
   box-shadow: none;
 }
-body :is(button, .classic-button, .button-link) { background: var(--classic-header); }
-body :is(.classic-button, .button-link, .secondary-link) { color: var(--classic-blue); }
+body:is(.classic-site, .model-page, .curator-page) :is(button, .classic-button, .button-link, .secondary-link) { background: var(--classic-header); color: var(--classic-blue); }
 body :is(button, .classic-button, .button-link):not(:disabled):hover { cursor: pointer; }
 body :is(input[type="checkbox"], input[type="radio"]) {
   appearance: auto;
@@ -157,7 +156,7 @@ body :is(input[type="checkbox"], input[type="radio"]) {
   margin: 0;
   accent-color: var(--classic-blue);
 }
-body :is(button, input, select):disabled { cursor: default; color: #5d5d59; background: #efeee9; }
+body:is(.classic-site, .model-page, .curator-page) :is(button, input, select):disabled { cursor: default; color: #5d5d59; background: #efeee9; }
 body .page-tools {
   display: flex;
   flex-wrap: wrap;
