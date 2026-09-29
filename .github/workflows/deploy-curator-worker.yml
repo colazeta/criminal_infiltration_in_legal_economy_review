@@ -168,6 +168,7 @@ jobs:
           TAVILY_API_KEY: ${{ secrets.TAVILY_API_KEY }}
           SEMANTIC_SCHOLAR_API_KEY: ${{ secrets.SEMANTIC_SCHOLAR_API_KEY }}
           CORE_API_KEY: ${{ secrets.CORE_API_KEY }}
+          OPENALEX_API_KEY: ${{ secrets.OPENALEX_API_KEY }}
           UNPAYWALL_EMAIL: ${{ secrets.UNPAYWALL_EMAIL }}
           SERPER_DEDICATED_FREE_ACCOUNT: ${{ vars.SERPER_DEDICATED_FREE_ACCOUNT }}
           EXA_DEDICATED_STARTER_ACCOUNT: ${{ vars.EXA_DEDICATED_STARTER_ACCOUNT }}
@@ -228,6 +229,13 @@ jobs:
             echo "Unpaywall free API enabled." >> "$GITHUB_STEP_SUMMARY"
           else
             echo "UNPAYWALL_EMAIL not configured: Unpaywall is skipped without affecting the other free providers." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+          if [ -n "$OPENALEX_API_KEY" ]; then
+            printf '%s' "$OPENALEX_API_KEY" | npx --yes wrangler@4.128.0 secret put OPENALEX_API_KEY --config wrangler.generated.jsonc
+            echo "Existing OpenAlex API key configured for bounded mechanical enrichment." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "OPENALEX_API_KEY not supplied by GitHub; existing Worker configuration is preserved and keyless access remains supported." >> "$GITHUB_STEP_SUMMARY"
           fi
 
       - name: Deploy Worker and public assets

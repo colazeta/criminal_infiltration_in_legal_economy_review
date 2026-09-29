@@ -1580,7 +1580,7 @@
         },
         {
           "name": "error_code",
-          "description": "Enrichment error code; governed by CILE-ENRICH-1.",
+          "description": "Bounded operational enrichment error under CILE-ENRICH-1; crossref_rate_limited, openalex_rate_limited and registry_rate_limited identify HTTP 429 origin. Historical rate_limited remains valid with provider unspecified. No provider response body or credential is retained here.",
           "type": "TEXT",
           "nullable": true,
           "semantic": "cile:errorCode"
@@ -2774,7 +2774,7 @@
         },
         {
           "name": "error_code",
-          "description": "Enrichment error code; governed by CILE-ENRICH-1.",
+          "description": "Bounded operational enrichment error under CILE-ENRICH-1; crossref_rate_limited, openalex_rate_limited and registry_rate_limited identify HTTP 429 origin. Historical rate_limited remains valid with provider unspecified. No provider response body or credential is retained here.",
           "type": "TEXT",
           "nullable": true,
           "semantic": "cile:errorCode"
@@ -2873,7 +2873,7 @@
         },
         {
           "name": "error_code",
-          "description": "Enrichment error code; governed by CILE-ENRICH-1.",
+          "description": "Bounded operational enrichment error under CILE-ENRICH-1; crossref_rate_limited, openalex_rate_limited and registry_rate_limited identify HTTP 429 origin. Historical rate_limited remains valid with provider unspecified. No provider response body or credential is retained here.",
           "type": "TEXT",
           "nullable": true,
           "semantic": "cile:errorCode"
@@ -2936,21 +2936,21 @@
         },
         {
           "name": "failure_streak",
-          "description": "Enrichment failure streak; governed by CILE-ENRICH-1.",
+          "description": "Consecutive non-quota enrichment failures, exhausted at three under CILE-ENRICH-1. HTTP 429 preserves the existing streak; success resets it. Historical values are not rewritten.",
           "type": "INTEGER",
           "nullable": false,
           "semantic": "cile:failureStreak"
         },
         {
           "name": "attempts_total",
-          "description": "Enrichment attempts total; governed by CILE-ENRICH-1.",
+          "description": "Total claimed enrichment attempts, including unsuccessful provider-quota attempts retained in append-only receipts; governed by CILE-ENRICH-1.",
           "type": "INTEGER",
           "nullable": false,
           "semantic": "cile:attemptsTotal"
         },
         {
           "name": "due_at",
-          "description": "Enrichment due at; governed by CILE-ENRICH-1.",
+          "description": "Earliest eligible enrichment retry or refresh time under CILE-ENRICH-1. A future provider-qualified quota retry also pauses other jobs of that provider kind, without creating a scientific assessment state.",
           "type": "TEXT",
           "nullable": true,
           "semantic": "cile:dueAt"
@@ -2978,7 +2978,7 @@
         },
         {
           "name": "error_code",
-          "description": "Enrichment error code; governed by CILE-ENRICH-1.",
+          "description": "Bounded operational enrichment error under CILE-ENRICH-1; crossref_rate_limited, openalex_rate_limited and registry_rate_limited identify HTTP 429 origin. Historical rate_limited remains valid with provider unspecified. No provider response body or credential is retained here.",
           "type": "TEXT",
           "nullable": true,
           "semantic": "cile:errorCode"
@@ -3373,7 +3373,7 @@
         },
         {
           "name": "error_code",
-          "description": "Enrichment error code; governed by CILE-ENRICH-1.",
+          "description": "Bounded operational enrichment error under CILE-ENRICH-1; crossref_rate_limited, openalex_rate_limited and registry_rate_limited identify HTTP 429 origin. Historical rate_limited remains valid with provider unspecified. No provider response body or credential is retained here.",
           "type": "TEXT",
           "nullable": true,
           "semantic": "cile:errorCode"

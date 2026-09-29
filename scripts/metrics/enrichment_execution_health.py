@@ -12,6 +12,7 @@ FAILURE_THRESHOLD = 3
 TERMINAL_MAX_AGE = 3 * HOUR
 SCHEDULE_ID = 'cile-hour40-v1'
 SAFE_ERROR_CODES = frozenset({
+    'crossref_rate_limited', 'openalex_rate_limited', 'registry_rate_limited',
     'rate_limited', 'provider_record_not_found', 'provider_authentication_required',
     'identifier_resolution_required', 'identity_conflict', 'provider_unavailable',
     'provider_timeout', 'invalid_provider_json', 'operation_failed', 'lease_expired',

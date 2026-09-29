@@ -16,6 +16,13 @@ The following random mechanical paper job failed with `identifier_resolution_req
 
 A readiness success means the versioned runtime and schedule are ready, not that a paper, reference list or scientific extraction is complete. The authenticated console and independent runtime/pilot receipts retain their individual failures. The existing service CLI continues to exit unsuccessfully when a requested `run` reports failure; that safeguard is unchanged.
 
+Operational readback now includes the bounded recent run IDs, selected job IDs,
+job kinds, CandidateRecord IDs, terminal codes and timestamps. It projects only
+those fields from the existing authenticated status response; source bodies,
+payloads and credentials remain excluded. Missing run diagnostics are null,
+not an empty history. This identifies which mechanical stage failed without
+executing work inside readiness or reclassifying an old failed receipt.
+
 Cloudflare documents short-lived version skew between Workers and globally unique Durable Objects during eventually consistent code updates: https://developers.cloudflare.com/durable-objects/platform/known-issues/#code-updates . This is consistent with the first observation, not proof of an otherwise unobserved account configuration.
 
 ## Verification boundaries

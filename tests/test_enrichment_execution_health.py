@@ -34,6 +34,13 @@ class ExecutionHealthTests(unittest.TestCase):
         self.assertEqual(result['consecutive_failed_in_sample'], 0)
         self.assertNotIn('assessment_completed', result)
 
+    def test_provider_identity_survives_the_closed_error_projection(self):
+        for receipt in self.scheduling['iterations']:
+            if receipt['status'] == 'failed':
+                receipt['error_code'] = 'openalex_rate_limited'
+        result = execution_health(self.scheduling, NOW)
+        self.assertEqual(result['failure_codes_in_streak'], {'openalex_rate_limited': 18})
+
     def test_one_or_two_failures_do_not_raise_cluster_alarm(self):
         for count in [1, 2]:
             with self.subTest(count=count):

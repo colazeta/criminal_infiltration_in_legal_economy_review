@@ -45,6 +45,9 @@ def check(expected_commit, *, activate=False, attempts=19, delay=10):
             'enabled': state.get('enabled'), 'storage_backend': state.get('storage_backend'),
             'scientific_extraction': state.get('scientific_extraction'),
             'counts': state.get('counts'), 'jobs': state.get('jobs'), 'scheduling': schedule,
+            'recent_runs': [{key: row.get(key) for key in
+                ('run_id', 'selected_job_id', 'kind', 'record_id', 'status', 'error_code', 'started_at', 'finished_at')}
+                for row in state['runs']] if isinstance(state.get('runs'), list) else None,
             'paper_work_executed_by_check': False}
 
 
