@@ -1,0 +1,303 @@
+{
+  "observed_at": "2026-09-29T02:45:49Z",
+  "evidence_run": "36514098501",
+  "scheduling": {
+    "schedule": {
+      "schedule_id": "cile-hour40-v1",
+      "protocol_version": "CILE-HOUR40-1",
+      "first_slot": 1789144800000,
+      "next_slot": 1790653200000,
+      "created_at": 1789144113381
+    },
+    "iterations": [
+      {
+        "schedule_id": "cile-hour40-v1",
+        "scheduled_at": 1790649600000,
+        "status": "failed",
+        "error_code": "rate_limited"
+      },
+      {
+        "schedule_id": "cile-hour40-v1",
+        "scheduled_at": 1790646000000,
+        "status": "failed",
+        "error_code": "rate_limited"
+      },
+      {
+        "schedule_id": "cile-hour40-v1",
+        "scheduled_at": 1790642400000,
+        "status": "failed",
+        "error_code": "rate_limited"
+      },
+      {
+        "schedule_id": "cile-hour40-v1",
+        "scheduled_at": 1790638800000,
+        "status": "failed",
+        "error_code": "rate_limited"
+      },
+      {
+        "schedule_id": "cile-hour40-v1",
+        "scheduled_at": 1790635200000,
+        "status": "failed",
+        "error_code": "rate_limited"
+      },
+      {
+        "schedule_id": "cile-hour40-v1",
+        "scheduled_at": 1790631600000,
+        "status": "failed",
+        "error_code": "rate_limited"
+      },
+      {
+        "schedule_id": "cile-hour40-v1",
+        "scheduled_at": 1790628000000,
+        "status": "failed",
+        "error_code": "rate_limited"
+      },
+      {
+        "schedule_id": "cile-hour40-v1",
+        "scheduled_at": 1790624400000,
+        "status": "failed",
+        "error_code": "rate_limited"
+      },
+      {
+        "schedule_id": "cile-hour40-v1",
+        "scheduled_at": 1790620800000,
+        "status": "failed",
+        "error_code": "rate_limited"
+      },
+      {
+        "schedule_id": "cile-hour40-v1",
+        "scheduled_at": 1790617200000,
+        "status": "failed",
+        "error_code": "rate_limited"
+      },
+      {
+        "schedule_id": "cile-hour40-v1",
+        "scheduled_at": 1790613600000,
+        "status": "failed",
+        "error_code": "rate_limited"
+      },
+      {
+        "schedule_id": "cile-hour40-v1",
+        "scheduled_at": 1790610000000,
+        "status": "failed",
+        "error_code": "rate_limited"
+      },
+      {
+        "schedule_id": "cile-hour40-v1",
+        "scheduled_at": 1790606400000,
+        "status": "failed",
+        "error_code": "rate_limited"
+      },
+      {
+        "schedule_id": "cile-hour40-v1",
+        "scheduled_at": 1790602800000,
+        "status": "failed",
+        "error_code": "rate_limited"
+      },
+      {
+        "schedule_id": "cile-hour40-v1",
+        "scheduled_at": 1790599200000,
+        "status": "failed",
+        "error_code": "rate_limited"
+      },
+      {
+        "schedule_id": "cile-hour40-v1",
+        "scheduled_at": 1790595600000,
+        "status": "failed",
+        "error_code": "rate_limited"
+      },
+      {
+        "schedule_id": "cile-hour40-v1",
+        "scheduled_at": 1790592000000,
+        "status": "failed",
+        "error_code": "rate_limited"
+      },
+      {
+        "schedule_id": "cile-hour40-v1",
+        "scheduled_at": 1790588400000,
+        "status": "failed",
+        "error_code": "rate_limited"
+      },
+      {
+        "schedule_id": "cile-hour40-v1",
+        "scheduled_at": 1790584800000,
+        "status": "completed",
+        "error_code": null
+      },
+      {
+        "schedule_id": "cile-hour40-v1",
+        "scheduled_at": 1790581200000,
+        "status": "completed",
+        "error_code": null
+      },
+      {
+        "schedule_id": "cile-hour40-v1",
+        "scheduled_at": 1790577600000,
+        "status": "completed",
+        "error_code": null
+      },
+      {
+        "schedule_id": "cile-hour40-v1",
+        "scheduled_at": 1790574000000,
+        "status": "completed",
+        "error_code": null
+      },
+      {
+        "schedule_id": "cile-hour40-v1",
+        "scheduled_at": 1790570400000,
+        "status": "completed",
+        "error_code": null
+      },
+      {
+        "schedule_id": "cile-hour40-v1",
+        "scheduled_at": 1790566800000,
+        "status": "completed",
+        "error_code": null
+      },
+      {
+        "schedule_id": "cile-hour40-v1",
+        "scheduled_at": 1790563200000,
+        "status": "completed",
+        "error_code": null
+      },
+      {
+        "schedule_id": "cile-hour40-v1",
+        "scheduled_at": 1790559600000,
+        "status": "completed",
+        "error_code": null
+      },
+      {
+        "schedule_id": "cile-hour40-v1",
+        "scheduled_at": 1790556000000,
+        "status": "completed",
+        "error_code": null
+      },
+      {
+        "schedule_id": "cile-hour40-v1",
+        "scheduled_at": 1790552400000,
+        "status": "completed",
+        "error_code": null
+      },
+      {
+        "schedule_id": "cile-hour40-v1",
+        "scheduled_at": 1790548800000,
+        "status": "completed",
+        "error_code": null
+      },
+      {
+        "schedule_id": "cile-hour40-v1",
+        "scheduled_at": 1790545200000,
+        "status": "completed",
+        "error_code": null
+      },
+      {
+        "schedule_id": "cile-hour40-v1",
+        "scheduled_at": 1790541600000,
+        "status": "completed",
+        "error_code": null
+      },
+      {
+        "schedule_id": "cile-hour40-v1",
+        "scheduled_at": 1790538000000,
+        "status": "completed",
+        "error_code": null
+      },
+      {
+        "schedule_id": "cile-hour40-v1",
+        "scheduled_at": 1790534400000,
+        "status": "completed",
+        "error_code": null
+      },
+      {
+        "schedule_id": "cile-hour40-v1",
+        "scheduled_at": 1790530800000,
+        "status": "completed",
+        "error_code": null
+      },
+      {
+        "schedule_id": "cile-hour40-v1",
+        "scheduled_at": 1790527200000,
+        "status": "failed",
+        "error_code": "rate_limited"
+      },
+      {
+        "schedule_id": "cile-hour40-v1",
+        "scheduled_at": 1790523600000,
+        "status": "failed",
+        "error_code": "provider_record_not_found"
+      },
+      {
+        "schedule_id": "cile-hour40-v1",
+        "scheduled_at": 1790520000000,
+        "status": "completed",
+        "error_code": null
+      },
+      {
+        "schedule_id": "cile-hour40-v1",
+        "scheduled_at": 1790516400000,
+        "status": "completed",
+        "error_code": null
+      },
+      {
+        "schedule_id": "cile-hour40-v1",
+        "scheduled_at": 1790512800000,
+        "status": "completed",
+        "error_code": null
+      },
+      {
+        "schedule_id": "cile-hour40-v1",
+        "scheduled_at": 1790509200000,
+        "status": "completed",
+        "error_code": null
+      },
+      {
+        "schedule_id": "cile-hour40-v1",
+        "scheduled_at": 1790505600000,
+        "status": "completed",
+        "error_code": null
+      },
+      {
+        "schedule_id": "cile-hour40-v1",
+        "scheduled_at": 1790502000000,
+        "status": "completed",
+        "error_code": null
+      },
+      {
+        "schedule_id": "cile-hour40-v1",
+        "scheduled_at": 1790498400000,
+        "status": "completed",
+        "error_code": null
+      },
+      {
+        "schedule_id": "cile-hour40-v1",
+        "scheduled_at": 1790494800000,
+        "status": "completed",
+        "error_code": null
+      },
+      {
+        "schedule_id": "cile-hour40-v1",
+        "scheduled_at": 1790491200000,
+        "status": "completed",
+        "error_code": null
+      },
+      {
+        "schedule_id": "cile-hour40-v1",
+        "scheduled_at": 1790487600000,
+        "status": "completed",
+        "error_code": null
+      },
+      {
+        "schedule_id": "cile-hour40-v1",
+        "scheduled_at": 1790484000000,
+        "status": "completed",
+        "error_code": null
+      },
+      {
+        "schedule_id": "cile-hour40-v1",
+        "scheduled_at": 1790480400000,
+        "status": "completed",
+        "error_code": null
+      }
+    ]
+  }
+}

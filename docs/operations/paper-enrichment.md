@@ -155,6 +155,25 @@ new source count, pending/blocked/exhausted work and citation coverage separatel
 The interface reports these private metrics; it does not equate an HTTP response
 with scientific completion. No monitoring notification service is configured.
 
+The read-only observer separately evaluates the existing 48-ticket status sample.
+Three consecutive **terminal** failures make its execution check fail with
+`enrichment_recent_iterations_failed`, even when deployment verification and the
+schedule watermark pass. Pending/running tickets cannot clear that sequence.
+A terminal receipt older than three hours (or no terminal receipt three hours
+after the schedule's first slot) fails as `enrichment_terminal_receipt_stalled`.
+Missing/malformed history is unavailable, with null diagnostic counts, not zero
+failures. Counts of consecutive failures are bounded by the returned sample;
+they are not a lifetime total. Diagnostics contain only bounded error codes.
+
+A completed ticket may represent partial or empty processor work. Absence of a
+failure cluster therefore proves neither productive enrichment nor assessment
+completion. Provider quotas, retry limits, scheduler ownership and scientific
+gates are unchanged. This check neither retries failures nor activates execution;
+deployment readiness remains separate so an old provider incident cannot block
+deployment of a repair. The existing hourly observer and deployment/explicit
+audit triggers remain; a main push changing the observer also runs this read-only
+check, without a full-store audit or an additional scheduled worker.
+
 Pause with `PAPER_ENRICHMENT_ENABLED=false` and redeploy. Preserve the selected SQL/private object store and all
 receipts. Revert software through a normal reviewed revert; never run destructive
 migration rollback. Profile 0.3.0 scientific records remain supported by the
