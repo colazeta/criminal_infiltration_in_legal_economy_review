@@ -125,7 +125,9 @@ test('section navigation opens and focuses a disclosure; async additions keep un
   const source=t.make('details');source.append(t.make('summary','Accesso al testo'));support.append(source);
   t.reader.sheetUpdated();
   const nav=t.dialog.querySelector('.sheet-contents');
-  const button=nav.querySelectorAll('button').find(n=>n.textContent==='Metodi e dati');button.fire('click');
+  let button=nav.querySelectorAll('button').find(n=>n.textContent==='Metodi e dati');
+  button.focus();t.reader.sheetUpdated();button=nav.querySelectorAll('button').find(n=>n.textContent==='Metodi e dati');
+  assert.equal(t.document.activeElement,button,'late section refresh retains keyboard position');button.fire('click');
   assert.equal(disclosure.open,true);assert.equal(t.document.activeElement,summary);assert.equal(disclosure.scrolled,true);
   assert.doesNotMatch(nav.textContent,/Unavailable placeholder/);assert.equal(research.id,researchId);
   const ids=t.dialog.querySelectorAll('*').map(n=>n.id).filter(Boolean);assert.equal(new Set(ids).size,ids.length);

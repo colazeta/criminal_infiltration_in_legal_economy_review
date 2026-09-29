@@ -94,6 +94,7 @@
     }
     select.addEventListener('change',()=>go(targets.find(item=>item.node.id===select.value)?.node));
     function refresh() {
+      const focusedId=[...list.querySelectorAll('button')].find(button=>button===document.activeElement)?.getAttribute('aria-controls');
       targets=[{node:body.querySelector('#paper-sheet-title'),label:'Titolo e riferimento'}];
       for(const [selector,label] of [['.paper-support','Abstract e sintesi'],['.paper-research','Contesto della ricerca']]) {
         const node=body.querySelector(selector);if(!node)continue;
@@ -111,6 +112,7 @@
         const option=el('option',label);option.value=node.id;select.append(option);
       });
       select.value=targets.some(item=>item.node.id===selected)?selected:'';
+      if(focusedId)[...list.querySelectorAll('button')].find(button=>button.getAttribute('aria-controls')===focusedId)?.focus({preventScroll:true});
     }
     refresh();return refresh;
   }

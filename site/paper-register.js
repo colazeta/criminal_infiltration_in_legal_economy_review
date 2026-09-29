@@ -463,8 +463,8 @@
     dialog.append(bar, body);
     if (!dialog.open) dialog.showModal();
     dialog.scrollTop=0;
-    title.focus();
     workspace?.sheetOpened(record);
+    title.focus({preventScroll:true});
     const isCurrent = () => dialog.open && sequence === sheetSequence;
     import("./paper-sheet-research.js?v=status-20260917")
       .then(() => globalThis.CILEPaperResearch.load(research, record, isCurrent))
