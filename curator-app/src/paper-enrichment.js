@@ -11,6 +11,7 @@ import {listPrivateAnnotations,readPrivateAnnotation,listPrivateAnnotationArchiv
 export const ENRICHMENT_PROTOCOL = 'CILE-ENRICH-1';
 const HOUR = 3600000, WEEK = 7 * 24 * HOUR;
 const REGISTRY = 'https://colazeta.github.io/criminal_infiltration_in_legal_economy_review/data/paper-register.json';
+const RATE_LIMIT_CODES = new Set(['crossref_rate_limited', 'openalex_rate_limited', 'registry_rate_limited']);
 const TYPES = ['metadata', 'citations', 'extraction', 'classification'];
 const S = (db, sql, ...values) => db.prepare(sql).bind(...values);
 const rows = async (db, sql, ...v) => (await S(db, sql, ...v).all()).results;
@@ -116,24 +117,33 @@ export function validateRegistry(payload) {
   }
   return payload.records;
 }
-async function fetchJSON(url, fetcher, now) {
+async function fetchJSON(url, fetcher, now, env = {}) {
   const controller=new AbortController(); let timer;
   try {
     return await Promise.race([
-      fetchJSONBody(url,fetcher,now,controller.signal),
+      fetchJSONBody(url,fetcher,now,controller.signal,env),
       new Promise((resolve,reject)=>{timer=setTimeout(()=>{controller.abort();reject(new EnrichmentError('provider_timeout',503));},12000);})
     ]);
   } finally { clearTimeout(timer); controller.abort(); }
 }
-async function fetchJSONBody(url, fetcher, now, signal) {
+async function fetchJSONBody(url, fetcher, now, signal, env) {
   const u = new URL(url);
   if (!['api.crossref.org','api.openalex.org','colazeta.github.io'].includes(u.hostname) || u.protocol !== 'https:') err('provider_not_authorised');
-  const response = await fetcher(url, { redirect: 'manual', signal, headers: { Accept: 'application/json', 'User-Agent': 'cile-enrichment-service/1.0' } }, 10000);
+  const headers = { Accept: 'application/json', 'User-Agent': 'cile-enrichment-service/1.0' };
+  // Credentials never enter source/provenance URLs or cross a redirect/host boundary.
+  if (u.hostname === 'api.openalex.org' && typeof env.OPENALEX_API_KEY === 'string' && env.OPENALEX_API_KEY.trim())
+    headers.Authorization = 'Bearer ' + env.OPENALEX_API_KEY.trim();
+  const response = await fetcher(url, { redirect: 'manual', signal, headers }, 10000);
   if (response.status >= 300 && response.status < 400) err('provider_redirect_refused', 503);
   if (response.status === 429) {
     const retry = response.headers.get('Retry-After');
     const time = /^\d+$/.test(retry || '') ? now + Number(retry) * 1000 : Date.parse(retry || '');
-    throw new EnrichmentError('rate_limited', 503, Number.isFinite(time) ? time : now + HOUR);
+    const reset = response.headers.get('X-RateLimit-Reset');
+    const dailyReset = u.hostname === 'api.openalex.org' && response.headers.get('X-RateLimit-Remaining') === '0'
+      && /^\d+$/.test(reset || '') ? now + Number(reset) * 1000 : NaN;
+    const usable = [time, dailyReset].filter(t => Number.isSafeInteger(t) && t > now && t <= 8640000000000000);
+    const provider = {'api.crossref.org':'crossref','api.openalex.org':'openalex','colazeta.github.io':'registry'}[u.hostname];
+    throw new EnrichmentError(provider + '_rate_limited', 503, Math.max(now + HOUR, ...usable));
   }
   if ([401,403].includes(response.status)) err('provider_authentication_required', 503);
   if (response.status === 404) err('provider_record_not_found', 404);
@@ -188,7 +198,7 @@ function matched(record, doi, title) {
 }
 async function metadata(env, target, checkpoint, now, fetcher) {
   const record=JSON.parse(target.record_json); if(!validDoi(record.doi))err('identifier_resolution_required',409);
-  const url='https://api.crossref.org/works/'+encodeURIComponent(record.doi), response=await fetchJSON(url,fetcher,now), m=response.message;
+  const url='https://api.crossref.org/works/'+encodeURIComponent(record.doi), response=await fetchJSON(url,fetcher,now,env), m=response.message;
   matched(record,m?.DOI,m?.title?.[0]);
   await saveSource(env,target,{provider:'Crossref',source_url:url,evidence_kind:'metadata',text:canonicalJson(m)},now);
   let abstractSource=null;
@@ -208,7 +218,7 @@ async function citations(env,target,checkpoint,now,fetcher,job,token) {
   }
   if(!cp.snapshot_id) {
     const url='https://api.openalex.org/works/https://doi.org/'+encodeURIComponent(record.doi)+'?select=id,doi,title,referenced_works,cited_by_count';
-    const work=await fetchJSON(url,fetcher,now);matched(record,work.doi,work.title);
+    const work=await fetchJSON(url,fetcher,now,env);matched(record,work.doi,work.title);
     if(!/^https:\/\/openalex\.org\/W\d+$/.test(work.id)||!Array.isArray(work.referenced_works)||work.referenced_works.length>20000||work.referenced_works.some(x=>!/^https:\/\/openalex\.org\/W\d+$/.test(x)))err('invalid_citation_payload');
     cp={...cp,snapshot_id:iso(now), work_id:work.id, outgoing:work.referenced_works, outgoing_offset:0, cursor:'*', provider_count:Number.isInteger(work.cited_by_count)?work.cited_by_count:null};
     const saved=await S(env.REVIEW_DB,"UPDATE enrichment_jobs SET checkpoint_json=? WHERE job_id=? AND lease_token=? AND status='running'",canonicalJson(cp),job.job_id,token).run();
@@ -226,7 +236,7 @@ async function citations(env,target,checkpoint,now,fetcher,job,token) {
     await batch(env.REVIEW_DB,statements);return{complete:false,due:now+HOUR,checkpoint:cp};
   }
   const url='https://api.openalex.org/works?filter=cites:'+cp.work_id.split('/').at(-1)+'&per-page=50&select=id,doi,title&cursor='+encodeURIComponent(cp.cursor);
-  const data=await fetchJSON(url,fetcher,now);
+  const data=await fetchJSON(url,fetcher,now,env);
   if(!Array.isArray(data.results)||data.results.length>50||!data.meta||!Object.hasOwn(data.meta,'next_cursor')||!(data.meta.next_cursor===null||bounded(data.meta.next_cursor,4000)))err('invalid_citation_page');
   if(data.meta.next_cursor!==null&&data.meta.next_cursor===cp.cursor)err('citation_cursor_not_advancing');
   for(const work of data.results){if(!/^https:\/\/openalex\.org\/W\d+$/.test(work.id))err('invalid_citation_identifier');await edge('incoming',work.id,cp.work_id,url);}
@@ -251,7 +261,16 @@ export async function runEnrichment(env, {now=Date.now(),fetcher=fetchWithTimeou
   try {
     await S(db,"UPDATE enrichment_jobs SET failure_streak=MIN(failure_streak+1,3),status=CASE WHEN failure_streak>=2 THEN 'exhausted' ELSE 'pending' END,due_at=?,lease_until=NULL,lease_token=NULL,error_code='lease_expired',updated_at=? WHERE status='running' AND lease_until<=?",stamp,stamp,stamp).run();
     try{await syncTargets(env,registry||await fetchJSON(REGISTRY,fetcher,now),now);}catch(e){syncError=e.code||'registry_unavailable';}
-    job=await S(db,"SELECT j.* FROM enrichment_jobs j JOIN enrichment_targets t USING(target_id) WHERE t.active=1 AND t.cycle_id=? AND t.input_sha256=j.input_sha256 AND j.status IN ('pending','completed') AND j.due_at<=? ORDER BY CASE WHEN json_extract(t.record_json,'$.doi')<>'' THEN 0 ELSE 1 END,j.due_at,j.target_id,CASE j.kind WHEN 'metadata' THEN 0 ELSE 1 END LIMIT 1",cycle.review_id,stamp).first();
+    // A provider cooldown is shared by its jobs. Reuse persisted due_at/error_code;
+    // do not claim another paper merely to repeat the same provider refusal.
+    job=await S(db,`SELECT j.* FROM enrichment_jobs j JOIN enrichment_targets t USING(target_id)
+      WHERE t.active=1 AND t.cycle_id=? AND t.input_sha256=j.input_sha256
+        AND j.status IN ('pending','completed') AND j.due_at<=?
+        AND NOT EXISTS (SELECT 1 FROM enrichment_jobs paused WHERE paused.due_at>?
+          AND ((j.kind='metadata' AND paused.error_code='crossref_rate_limited')
+            OR (j.kind='citations' AND paused.error_code='openalex_rate_limited')))
+      ORDER BY CASE WHEN json_extract(t.record_json,'$.doi')<>'' THEN 0 ELSE 1 END,
+        j.due_at,j.target_id,CASE j.kind WHEN 'metadata' THEN 0 ELSE 1 END LIMIT 1`,cycle.review_id,stamp,stamp).first();
     if(job){
       token=crypto.randomUUID();
       const claim=await S(db,"UPDATE enrichment_jobs SET status='running',lease_until=?,lease_token=?,attempts_total=attempts_total+1,updated_at=? WHERE job_id=? AND status IN ('pending','completed')",iso(now+10*60000),token,stamp,job.job_id).run();
@@ -269,7 +288,8 @@ export async function runEnrichment(env, {now=Date.now(),fetcher=fetchWithTimeou
     code=e.code||'operation_failed';outcome='failed';
     if(job&&token){
       const blocked=['identity_conflict','identifier_resolution_required','provider_authentication_required','model_calibration_required','provider_record_not_found'].includes(code);
-      const streak=Math.min(job.failure_streak+1,3),status=blocked?'blocked':streak>=3?'exhausted':'pending';
+      const limited=RATE_LIMIT_CODES.has(code);
+      const streak=limited?job.failure_streak:Math.min(job.failure_streak+1,3),status=limited?'pending':blocked?'blocked':streak>=3?'exhausted':'pending';
       await S(db,'UPDATE enrichment_jobs SET status=?,failure_streak=?,due_at=?,lease_until=NULL,lease_token=NULL,error_code=?,updated_at=? WHERE job_id=? AND lease_token=?',status,streak,status==='pending'?iso(Math.max(now+HOUR*2**(streak-1),e.retryAt||0)):null,code,iso(clock()),job.job_id,token).run();
       await S(db,'INSERT OR IGNORE INTO enrichment_attempts VALUES (?,?,?,?,?,?,?)',token,job.job_id,runId,stamp,iso(clock()),status,code).run();
     }
@@ -339,7 +359,7 @@ export async function handlePaperEnrichment(request,env,session) {
     if(!session||session.login!==env.CURATOR_LOGIN)err('authentication_required',401);
     if(!env.REVIEW_DB||!env.REVIEW_EVIDENCE)return json({enabled:false,status:'blocked',error_code:'private_storage_required'},503);
     const url=new URL(request.url),db=env.REVIEW_DB;
-    if(url.pathname.endsWith('/status')&&request.method==='GET')return json({enabled:env.PAPER_ENRICHMENT_ENABLED==='true',protocol:ENRICHMENT_PROTOCOL,scientific_extraction:'blocked_pending_calibration',jobs:await rows(db,'SELECT kind,status,COUNT(*) count FROM enrichment_jobs GROUP BY kind,status'),runs:await rows(db,'SELECT * FROM enrichment_runs ORDER BY started_at DESC LIMIT 24')});
+    if(url.pathname.endsWith('/status')&&request.method==='GET')return json({enabled:env.PAPER_ENRICHMENT_ENABLED==='true',protocol:ENRICHMENT_PROTOCOL,scientific_extraction:'blocked_pending_calibration',jobs:await rows(db,'SELECT kind,status,COUNT(*) count FROM enrichment_jobs GROUP BY kind,status'),runs:await rows(db,'SELECT r.*,j.kind,t.record_id FROM enrichment_runs r LEFT JOIN enrichment_jobs j ON j.job_id=r.selected_job_id LEFT JOIN enrichment_targets t ON t.target_id=j.target_id ORDER BY r.started_at DESC LIMIT 24')});
     if(url.pathname.endsWith('/targets')&&request.method==='GET')return json({targets:await rows(db,'SELECT target_id,record_id,record_json,input_sha256 FROM enrichment_targets WHERE cycle_id=? AND active=1 ORDER BY first_seen_at,target_id LIMIT 500',cycle.review_id)});
     if(url.pathname.endsWith('/annotation-archive')&&request.method==='GET')return json(await listPrivateAnnotationArchive(env));
     if(url.pathname.endsWith('/annotation-global')&&request.method==='GET')return json(await readPrivateAnnotationById(env,url.searchParams.get('annotation')));

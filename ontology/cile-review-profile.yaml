@@ -1077,17 +1077,17 @@
     "enrichment_failure_streak": {
       "range": "integer",
       "slot_uri": "cile:failureStreak",
-      "description": "Enrichment failure streak; governed by CILE-ENRICH-1."
+      "description": "Consecutive non-quota enrichment failures, exhausted at three under CILE-ENRICH-1. HTTP 429 preserves the existing streak; success resets it. Historical values are not rewritten."
     },
     "enrichment_attempts_total": {
       "range": "integer",
       "slot_uri": "cile:attemptsTotal",
-      "description": "Enrichment attempts total; governed by CILE-ENRICH-1."
+      "description": "Total claimed enrichment attempts, including unsuccessful provider-quota attempts retained in append-only receipts; governed by CILE-ENRICH-1."
     },
     "enrichment_due_at": {
       "range": "string",
       "slot_uri": "cile:dueAt",
-      "description": "Enrichment due at; governed by CILE-ENRICH-1."
+      "description": "Earliest eligible enrichment retry or refresh time under CILE-ENRICH-1. A future provider-qualified quota retry also pauses other jobs of that provider kind, without creating a scientific assessment state."
     },
     "enrichment_lease_until": {
       "range": "string",
@@ -1107,7 +1107,7 @@
     "enrichment_error_code": {
       "range": "string",
       "slot_uri": "cile:errorCode",
-      "description": "Enrichment error code; governed by CILE-ENRICH-1."
+      "description": "Bounded operational enrichment error under CILE-ENRICH-1; crossref_rate_limited, openalex_rate_limited and registry_rate_limited identify HTTP 429 origin. Historical rate_limited remains valid with provider unspecified. No provider response body or credential is retained here."
     },
     "enrichment_run_id": {
       "range": "string",

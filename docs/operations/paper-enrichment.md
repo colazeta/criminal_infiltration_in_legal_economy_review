@@ -60,8 +60,33 @@ it. This first capacity limit is intentionally conservative, not a throughput cl
 
 Crossref refreshes after 30 days; completed citation snapshots after seven days.
 Incomplete citation pages are due after an hour, subject to older queued jobs.
-Three consecutive transient failures exhaust a job, with exponential backoff and
-`Retry-After` respected. Identity conflicts, missing DOI, authentication refusal
+Three consecutive non-quota transient failures exhaust a job, with exponential backoff.
+HTTP 429 preserves the job as pending, its checkpoint and its existing failure
+streak; it still appends an unsuccessful attempt and failed run receipt. The
+provider-qualified error (`crossref_rate_limited` or `openalex_rate_limited`) and
+the existing `due_at` impose a shared cooldown across that provider's job kind,
+including other candidates and superseded inputs. The other provider remains
+eligible. Citation jobs conservatively pause as a group, including their local
+reference stages. An empty run during this pause is not paper progress.
+
+The next attempt waits at least one hour and respects a later valid `Retry-After`
+(seconds or HTTP date). When OpenAlex reports zero remaining credits, its
+`X-RateLimit-Reset` is interpreted as seconds until reset and also respected.
+Malformed/overflowing/past values cannot invalidate the job timestamp. No quota
+response can spend the three-failure budget. Existing generic `rate_limited`
+history and already exhausted jobs are not rewritten or automatically reopened;
+their recovery requires a separately evidenced current provider prerequisite.
+
+An existing optional `OPENALEX_API_KEY` is sent only as an Authorization bearer
+header to `api.openalex.org`, never in URLs, source receipts or another host's
+requests; redirects remain refused. Deployment provisions this binding only if
+the existing GitHub secret is supplied and otherwise preserves Worker settings.
+Keyless requests remain supported. This follows the provider's current
+[authentication](https://help.openalex.org/api/authentication/) and
+[error](https://help.openalex.org/api/errors/) contracts; it does not authorise a
+paid plan, additional provider, new credential or increased hourly capacity.
+
+Identity conflicts, missing DOI, authentication refusal
 and absent provider records block only that job. They do not become empty success.
 No paid fallback, credential creation or unrestricted crawl is authorised.
 
@@ -105,7 +130,8 @@ Until then, the interface must continue to display the block.
 ## Authenticated API
 
 All endpoints share `/api/paper-enrichment/` and the existing curator session and
-CSRF controls. `GET status` gives execution counts and remaining blocks; `GET
+CSRF controls. `GET status` gives execution counts and remaining blocks, with the
+24 most recent runs joined to their selected job kind and CandidateRecord ID; `GET
  targets` lists up to 500 active targets. `GET target?id=...` shows jobs, source
 metadata and proposal history; `GET source?id=...&source=...` verifies and returns
 private source text. `GET citations?id=...&offset=...` returns 100 directed
@@ -167,8 +193,8 @@ they are not a lifetime total. Diagnostics contain only bounded error codes.
 
 A completed ticket may represent partial or empty processor work. Absence of a
 failure cluster therefore proves neither productive enrichment nor assessment
-completion. Provider quotas, retry limits, scheduler ownership and scientific
-gates are unchanged. This check neither retries failures nor activates execution;
+completion. This check does not alter provider quotas, retry policy, scheduler
+ownership or scientific gates. It neither retries failures nor activates execution;
 deployment readiness remains separate so an old provider incident cannot block
 deployment of a repair. The existing hourly observer and deployment/explicit
 audit triggers remain; a main push changing the observer also runs this read-only

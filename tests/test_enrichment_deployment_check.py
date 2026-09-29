@@ -55,3 +55,21 @@ class DeploymentCheckTests(unittest.TestCase):
         with patch.object(module, 'call') as call:
             with self.assertRaisesRegex(RuntimeError, 'invalid_expected'): module.check('main', activate=True)
             call.assert_not_called()
+
+    def test_operational_readback_retains_job_identity_without_private_payloads(self):
+        state = copy.deepcopy(STATE)
+        state['runs'] = [{'run_id': 'run', 'selected_job_id': 'job', 'kind': 'citations',
+                          'record_id': 'CAND-SYNTHETIC-001', 'status': 'failed',
+                          'error_code': 'openalex_rate_limited', 'started_at': 'start',
+                          'finished_at': 'finish', 'payload_json': 'private', 'credential': 'secret'}]
+        with patch.object(module, 'call', side_effect=[VERIFY, state]):
+            result = module.check(SHA)
+        self.assertEqual(result['recent_runs'][0]['record_id'], 'CAND-SYNTHETIC-001')
+        self.assertEqual(result['recent_runs'][0]['kind'], 'citations')
+        self.assertNotIn('payload_json', result['recent_runs'][0])
+        self.assertNotIn('credential', result['recent_runs'][0])
+
+    def test_unavailable_run_diagnostics_are_not_an_empty_history(self):
+        with patch.object(module, 'call', side_effect=[VERIFY, STATE]):
+            result = module.check(SHA)
+        self.assertIsNone(result['recent_runs'])

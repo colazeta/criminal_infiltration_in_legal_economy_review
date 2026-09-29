@@ -86,7 +86,7 @@ test('existing references persist when the next independent provider is rate lim
   let result=await runEnrichment(f.env,{now,registry,fetcher});
   assert.equal(result.status,'partial');assert.equal(calls,0);
   result=await runEnrichment(f.env,{now:now+3600000,registry,fetcher});
-  assert.equal(result.status,'failed');assert.equal(result.error_code,'rate_limited');assert.equal(calls,1);
+  assert.equal(result.status,'failed');assert.equal(result.error_code,'openalex_rate_limited');assert.equal(calls,1);
   assert.equal(f.sqlite.prepare('SELECT COUNT(*) n FROM enrichment_citation_observations').get().n,1);
   assert.equal(JSON.parse(f.sqlite.prepare("SELECT checkpoint_json FROM enrichment_jobs WHERE kind='citations'").get().checkpoint_json).crossref_done,true);
 });
