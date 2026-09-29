@@ -374,13 +374,9 @@
   }
 
   function filteredRecords() {
-    const query = state.query.trim().toLocaleLowerCase("it");
     const found = records.filter((record) => {
-      const haystack = [record.title, record.authors, record.doi, record.year, record.venue, record.topicCode]
-        .join(" ")
-        .toLocaleLowerCase("it");
       return (
-        (!query || haystack.includes(query)) &&
+        globalThis.CILEWorkspace.searchMatches(record,state.query) &&
         (state.year === "all" || String(record.year) === state.year) &&
         (state.author === "all" || splitAuthors(record.authors).includes(state.author)) &&
         (state.venue === "all" || String(record.venue || "").trim() === state.venue) &&
@@ -428,6 +424,7 @@
     body.className = "paper-sheet-body";
     const title = el("h2", record.title);
     title.id = "paper-sheet-title";
+    title.tabIndex = -1;
     body.append(title);
     const citation=el('p',[record.authors,record.year,record.venue].filter(Boolean).join(' · ')); citation.className='sheet-citation'; body.append(citation);
     const boundary=el('p','Revisione scientifica: '+(reviewLabels[record.reviewStatus]||'Da verificare')+'. Le analisi proposte non equivalgono all’inclusione nel corpus.'); boundary.className='sheet-boundary'; body.append(boundary);
@@ -466,17 +463,18 @@
     dialog.append(bar, body);
     if (!dialog.open) dialog.showModal();
     dialog.scrollTop=0;
-    close.focus();
     workspace?.sheetOpened(record);
+    title.focus({preventScroll:true});
     const isCurrent = () => dialog.open && sequence === sheetSequence;
     import("./paper-sheet-research.js?v=status-20260917")
       .then(() => globalThis.CILEPaperResearch.load(research, record, isCurrent))
-      .catch(() => { if (isCurrent()) research.textContent = "Il pannello di ricerca non è disponibile; non è una conferma dell’assenza di analisi."; });
+      .catch(() => { if (isCurrent()) research.textContent = "Il pannello di ricerca non è disponibile; non è una conferma dell’assenza di analisi."; })
+      .finally(() => { if(isCurrent())workspace?.sheetUpdated(); });
     import("./paper-sheet-support.js?v=frontend-20260917")
       .then(() => globalThis.CILEPaperSheetSupport.load(support, record, isCurrent))
       .catch(() => {
         if (isCurrent()) support.textContent = "Il pannello dei dati arricchiti non è disponibile. Ricarica la pagina; non è una conferma dell’assenza dell’abstract.";
-      });
+      }).finally(() => { if(isCurrent())workspace?.sheetUpdated(); });
   }
 
   const pager=document.createElement('div');pager.className='register-pagination';pager.setAttribute('role','group');pager.setAttribute('aria-label','Paginazione del registro');pager.hidden=true;
@@ -493,6 +491,7 @@
   function render() {
     const found = filteredRecords();
     const page=globalThis.CILEPaperProcessing.pageRecords(found,currentPage,pageSize);
+    currentPage=page.page;
     const {pages,start,rows:visible}=page;
     const filterStatus=processing?.filterStatus()||'ready';
     count.textContent=['idle','loading','error'].includes(filterStatus)?(processing?.emptyMessage()||'Caricamento dei dati…'):
@@ -529,6 +528,8 @@
       cell.colSpan=4;cell.className='register-empty';row.append(cell);fragment.append(row);
     }
     list.replaceChildren(fragment);list.setAttribute('aria-busy','false');
+    workspace?.refreshFilters();
+    workspace?.refreshResults();
   }
 
   elements.search.addEventListener("input", (event) => { state.query = event.target.value; currentPage=1; clearTimeout(searchTimer); searchTimer=setTimeout(render,120); });
@@ -549,7 +550,15 @@
   function connectWorkspace() {
     if(!globalThis.CILEWorkspace)return;
     workspace=globalThis.CILEWorkspace.attach({
-      controls,pager,dialog,getRecords:()=>records,
+      controls,pager,dialog,getRecords:()=>records,getResults:filteredRecords,
+      resultScope:()=>processing?.filterStatus()==='partial'?' · dati parziali':'',
+      revealPaper:id=>{
+        const index=filteredRecords().findIndex(record=>record.id===id);
+        if(index>=0){currentPage=Math.floor(index/pageSize)+1;render();}
+        const target=[...list.querySelectorAll('button[data-record-id]')].find(button=>button.dataset.recordId===id);
+        (target||elements.search).focus({preventScroll:true});
+        target?.scrollIntoView({block:'nearest'});
+      },
       getState:()=>({...state,page:currentPage,size:pageSize,
         content:document.getElementById('register-processing-filter')?.value||'all',
         category:document.getElementById('register-framework-filter')?.value||'all'}),

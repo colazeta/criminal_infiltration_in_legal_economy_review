@@ -4,6 +4,7 @@ import subprocess
 import unittest
 from html.parser import HTMLParser
 from pathlib import Path
+from urllib.parse import urlsplit
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -61,7 +62,7 @@ assert.equal(records.length,292);
         self.assertTrue({'./data/paper-register.json','./data/archive.csv','./data/archive.json'} <= hrefs)
 
     def test_existing_style_stack_does_not_grow(self):
-        styles = [attrs['href'] for tag, attrs in Page('index.html').elements if tag=='link' and attrs.get('rel')=='stylesheet']
+        styles = [urlsplit(attrs['href']).path for tag, attrs in Page('index.html').elements if tag=='link' and attrs.get('rel')=='stylesheet']
         self.assertEqual(styles, ['./styles.css','./classic-site.css','./application.css'])
 
     def test_statistics_keep_operational_data_available(self):
