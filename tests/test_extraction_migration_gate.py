@@ -16,9 +16,10 @@ class ExtractionMigrationGateTest(unittest.TestCase):
                     private_content_exported=False, cutover_ready=False)
 
     def execute(self, receipts):
-        with patch.dict(os.environ, {'GITHUB_SHA': 'c' * 40}), patch.object(
+        with patch.dict(os.environ, {'GITHUB_SHA': 'c' * 40}), patch.object(migration, 'check') as check, patch.object(
                 migration, 'call', side_effect=receipts) as call:
             result = migration.migrate()
+            check.assert_called_once_with('c' * 40, activate=False)
             self.assertEqual(call.call_count, 2)
             for args in call.call_args_list:
                 self.assertEqual(args.args, ('architecture-normalize',))
@@ -44,6 +45,41 @@ class ExtractionMigrationGateTest(unittest.TestCase):
     def test_second_write_is_not_certified_as_idempotent(self):
         with self.assertRaisesRegex(RuntimeError, 'normalization_receipt_invalid'):
             self.execute([self.receipt(), copy.deepcopy(self.receipt())])
+
+    def test_unready_private_version_cannot_start_normalization(self):
+        with patch.dict(os.environ, {'GITHUB_SHA': 'c' * 40}), patch.object(
+                migration, 'check', side_effect=RuntimeError('enrichment_service_http_409:stale_deployment')) as check, patch.object(migration, 'call') as call:
+            with self.assertRaisesRegex(RuntimeError, 'stale_deployment'):
+                migration.migrate()
+            check.assert_called_once_with('c' * 40, activate=False)
+            call.assert_not_called()
+
+    def test_readiness_precedes_writes_and_normalization_failure_is_not_retried(self):
+        events = []
+        def ready(expected, **kwargs):
+            events.append(('verified', expected))
+        def normalize(operation, **kwargs):
+            events.append((operation, kwargs['expected_commit']))
+            raise RuntimeError('enrichment_service_http_500:architecture_normalization_failed')
+        with patch.dict(os.environ, {'GITHUB_SHA': 'c' * 40}), patch.object(
+                migration, 'check', side_effect=ready), patch.object(migration, 'call', side_effect=normalize):
+            with self.assertRaisesRegex(RuntimeError, 'architecture_normalization_failed'):
+                migration.migrate()
+        self.assertEqual(events, [('verified', 'c' * 40), ('architecture-normalize', 'c' * 40)])
+
+    def test_failure_diagnostics_retain_safe_cause_without_exception_payload(self):
+        for code in ['enrichment_service_http_409:stale_deployment',
+                     'enrichment_service_http_401:service_authentication_required',
+                     'enrichment_service_http_500:architecture_normalization_failed',
+                     'normalization_receipt_invalid']:
+            self.assertEqual(migration.failure_code(RuntimeError(code)), code)
+        for text in ['private source body and secret',
+                     'enrichment_service_http_500:secret=private',
+                     'enrichment_service_http_500:private_credential']:
+            safe = migration.failure_code(RuntimeError(text))
+            self.assertNotIn('private', safe)
+            self.assertNotIn('secret', safe)
+            self.assertNotIn('credential', safe)
 
     def test_deployment_backs_up_before_schema_and_migrates_before_activation(self):
         root = Path(__file__).resolve().parents[1]
