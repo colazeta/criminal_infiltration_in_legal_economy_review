@@ -123,3 +123,7 @@ scrollbar). The method's main pane must retain its gutter-subtracting width:
 its component selector includes both `classic-site` and `classic-method`, so
 the later shared default cannot restore `width: 100%` on top of outer margins.
 This preserves the linear document without a page-wide horizontal scrollbar.
+
+The retired centred-grid 404 body/main layout is removed from `classic-site.css`.
+Its residual `place-items: center` must not shrink the shared application header;
+404 page geometry now belongs to `application.css` alone.
