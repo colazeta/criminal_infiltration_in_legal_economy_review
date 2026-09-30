@@ -1,0 +1,11 @@
+apiVersion: kora/v1
+kind: Operation
+metadata:
+  name: route-activation
+spec:
+  description: Apply the completion-first two-lane router without performing external side effects.
+  script:
+    command: node
+    args:
+      - scripts/route-activation.mjs
+    parseStdoutAsJson: true

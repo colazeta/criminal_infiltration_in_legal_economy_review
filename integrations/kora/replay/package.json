@@ -1,0 +1,1 @@
+{"private":true,"type":"module","scripts":{"generate":"node prepare.mjs","replay":"node replay.mjs"},"dependencies":{"yaml":"2.9.1","ajv":"8.20.0"}}

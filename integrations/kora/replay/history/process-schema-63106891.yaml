@@ -1,0 +1,300 @@
+apiVersion: kora/v1
+kind: Process
+metadata:
+  name: cile-hourly-control-plane
+  description: Observe-only mirror of the CILE two-lane completion-first routing contract.
+evidence: full
+types:
+  ActivationInput:
+    type: object
+    additionalProperties: false
+    properties:
+      activation_id:
+        type: string
+        minLength: 1
+      lane:
+        type: string
+        enum: [A, B]
+      scheduled_at:
+        type: string
+        minLength: 1
+      scouting_due:
+        type: boolean
+      unfinished_safe_write:
+        type: boolean
+      active_wip_count:
+        type: integer
+        minimum: 0
+      candidate_present:
+        type: boolean
+      metadata_source_ready:
+        type: boolean
+      fulltext_ready:
+        type: boolean
+      proposal_persisted:
+        type: boolean
+      mandatory_fields_accounted:
+        type: boolean
+      framework_assessed:
+        type: boolean
+      independent_comparison_ready:
+        type: boolean
+      references_ready:
+        type: boolean
+      limitations_caveats_ready:
+        type: boolean
+      version_guards_match:
+        type: boolean
+      validation_ready:
+        type: boolean
+      validated:
+        type: boolean
+      writer_ready:
+        type: boolean
+      calibration_case_ready:
+        type: boolean
+      identity_preflight_evidence:
+        type: object
+        additionalProperties: false
+        properties:
+          pending_observation_count: {type: [integer, 'null'], minimum: 0}
+          oldest_pending_age_seconds: {type: [number, 'null'], minimum: 0}
+          activity_kind: {type: string, enum: [new_research, in_progress, non_research, unknown]}
+          evidence_ref: {type: string, minLength: 1}
+      identity_debt_due:
+        type: boolean
+      engineering_blocker:
+        type: boolean
+      repeat_without_changed_prerequisite:
+        type: boolean
+      scout_independent_of_frontier_and_wip:
+        type: boolean
+      persist_independent_of_frontier_and_wip:
+        type: boolean
+    required:
+      - activation_id
+      - lane
+      - scheduled_at
+      - scouting_due
+      - unfinished_safe_write
+      - active_wip_count
+      - candidate_present
+      - metadata_source_ready
+      - fulltext_ready
+      - proposal_persisted
+      - mandatory_fields_accounted
+      - framework_assessed
+      - independent_comparison_ready
+      - references_ready
+      - limitations_caveats_ready
+      - version_guards_match
+      - validation_ready
+      - validated
+      - writer_ready
+      - calibration_case_ready
+      - identity_debt_due
+      - engineering_blocker
+      - repeat_without_changed_prerequisite
+  FrontierStatus:
+    type: object
+    additionalProperties: false
+    properties:
+      frontier_gate:
+        type: string
+        enum:
+          - NONE
+          - F0_METADATA_SOURCE
+          - F1_FULLTEXT_READY
+          - F2_PROPOSAL_PERSISTED
+          - F3_INDEPENDENT_COMPARISON
+          - F4_REFERENCES_READY
+          - F5_ASSESSMENT_COMPLETE
+          - F6_VALIDATION_READY
+          - F7_VALIDATED
+      next_gate:
+        type: string
+        enum:
+          - F0_METADATA_SOURCE
+          - F1_FULLTEXT_READY
+          - F2_PROPOSAL_PERSISTED
+          - F3_INDEPENDENT_COMPARISON
+          - F4_REFERENCES_READY
+          - F5_ASSESSMENT_COMPLETE
+          - F6_VALIDATION_READY
+          - F7_VALIDATED
+          - NONE
+      frontier_consistent:
+        type: boolean
+      assessment_completed:
+        type: boolean
+      validation_accepted:
+        type: boolean
+      assessment_distance_to_f5:
+        type: integer
+        minimum: 0
+        maximum: 5
+      inconsistency_code:
+        type: string
+        minLength: 1
+    required:
+      - frontier_gate
+      - next_gate
+      - frontier_consistent
+      - assessment_completed
+      - validation_accepted
+  ActivationWithFrontier:
+    type: object
+    additionalProperties: false
+    properties:
+      activation_id: {type: string, minLength: 1}
+      lane: {type: string, enum: [A, B]}
+      scheduled_at: {type: string, minLength: 1}
+      scouting_due: {type: boolean}
+      unfinished_safe_write: {type: boolean}
+      active_wip_count: {type: integer, minimum: 0}
+      candidate_present: {type: boolean}
+      metadata_source_ready: {type: boolean}
+      fulltext_ready: {type: boolean}
+      proposal_persisted: {type: boolean}
+      mandatory_fields_accounted: {type: boolean}
+      framework_assessed: {type: boolean}
+      independent_comparison_ready: {type: boolean}
+      references_ready: {type: boolean}
+      limitations_caveats_ready: {type: boolean}
+      version_guards_match: {type: boolean}
+      validation_ready: {type: boolean}
+      validated: {type: boolean}
+      writer_ready: {type: boolean}
+      calibration_case_ready: {type: boolean}
+      identity_preflight_evidence:
+        type: object
+        additionalProperties: false
+        properties:
+          pending_observation_count: {type: [integer, 'null'], minimum: 0}
+          oldest_pending_age_seconds: {type: [number, 'null'], minimum: 0}
+          activity_kind: {type: string, enum: [new_research, in_progress, non_research, unknown]}
+          evidence_ref: {type: string, minLength: 1}
+      identity_debt_due: {type: boolean}
+      engineering_blocker: {type: boolean}
+      repeat_without_changed_prerequisite: {type: boolean}
+      scout_independent_of_frontier_and_wip: {type: boolean}
+      persist_independent_of_frontier_and_wip: {type: boolean}
+      frontier_gate:
+        type: string
+        enum: [NONE, F0_METADATA_SOURCE, F1_FULLTEXT_READY, F2_PROPOSAL_PERSISTED, F3_INDEPENDENT_COMPARISON, F4_REFERENCES_READY, F5_ASSESSMENT_COMPLETE, F6_VALIDATION_READY, F7_VALIDATED]
+      next_gate:
+        type: string
+        enum: [F0_METADATA_SOURCE, F1_FULLTEXT_READY, F2_PROPOSAL_PERSISTED, F3_INDEPENDENT_COMPARISON, F4_REFERENCES_READY, F5_ASSESSMENT_COMPLETE, F6_VALIDATION_READY, F7_VALIDATED, NONE]
+      frontier_consistent: {type: boolean}
+      assessment_completed: {type: boolean}
+      validation_accepted: {type: boolean}
+      assessment_distance_to_f5: {type: integer, minimum: 0, maximum: 5}
+      inconsistency_code: {type: string, minLength: 1}
+    required:
+      - activation_id
+      - lane
+      - scheduled_at
+      - scouting_due
+      - unfinished_safe_write
+      - active_wip_count
+      - candidate_present
+      - metadata_source_ready
+      - fulltext_ready
+      - proposal_persisted
+      - mandatory_fields_accounted
+      - framework_assessed
+      - independent_comparison_ready
+      - references_ready
+      - limitations_caveats_ready
+      - version_guards_match
+      - validation_ready
+      - validated
+      - writer_ready
+      - calibration_case_ready
+      - identity_debt_due
+      - engineering_blocker
+      - repeat_without_changed_prerequisite
+      - frontier_gate
+      - next_gate
+      - frontier_consistent
+      - assessment_completed
+      - validation_accepted
+  RouteDecision:
+    type: object
+    additionalProperties: false
+    properties:
+      identity_starvation_status:
+        type: string
+        enum: [required, not_required, undetermined]
+      identity_starvation_reason:
+        type: string
+        minLength: 1
+      route:
+        type: string
+        enum: [SCOUT, PERSIST, COMPLETE, CALIBRATION_CASE, RESOLVE, ENGINEER, NOOP, BLOCKED]
+      reason:
+        type: string
+        minLength: 1
+      priority:
+        type: integer
+        minimum: 0
+        maximum: 7
+      side_effect_authorized:
+        type: boolean
+      pilot_mode:
+        type: string
+        enum: [observe_only]
+    required: [route, reason, priority, side_effect_authorized, pilot_mode, identity_starvation_status, identity_starvation_reason]
+start:
+  - type: message
+    name: cile-activation-observed
+    input: ActivationInput
+    goto: evaluate-frontier
+flow:
+  - id: evaluate-frontier
+    type: service
+    operation: evaluate-frontier
+    input: ActivationInput
+    output: FrontierStatus
+    next: route-activation
+  - id: route-activation
+    type: service
+    operation: route-activation
+    input: ActivationWithFrontier
+    output: RouteDecision
+    next: route
+  - id: route
+    type: gateway.exclusive
+    paths:
+      - condition: route == "SCOUT"
+        goto: scout
+      - condition: route == "PERSIST"
+        goto: persist
+      - condition: route == "COMPLETE"
+        goto: complete
+      - condition: route == "CALIBRATION_CASE"
+        goto: calibration-case
+      - condition: route == "RESOLVE"
+        goto: resolve
+      - condition: route == "ENGINEER"
+        goto: engineer
+      - condition: route == "BLOCKED"
+        goto: blocked
+      - default: true
+        goto: noop
+  - id: scout
+    type: none
+  - id: persist
+    type: none
+  - id: complete
+    type: none
+  - id: calibration-case
+    type: none
+  - id: resolve
+    type: none
+  - id: engineer
+    type: none
+  - id: blocked
+    type: none
+  - id: noop
+    type: none

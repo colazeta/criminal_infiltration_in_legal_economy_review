@@ -1,0 +1,6 @@
+apiVersion: kora/v1
+kind: Organization
+metadata:
+  name: cile-review
+spec:
+  teams: []

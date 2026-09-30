@@ -1,0 +1,7 @@
+apiVersion: kora/v1
+kind: Assignments
+metadata:
+  name: cile-review-assignments
+  version: 1
+spec:
+  roles: {}

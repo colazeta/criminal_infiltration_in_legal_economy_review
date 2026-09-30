@@ -1,0 +1,16 @@
+apiVersion: kora/v1
+kind: Project
+metadata:
+  description: Oltre
+  name: oltre
+spec:
+  machineExecution:
+    defaults:
+      limits:
+        maxBudgetUsd: 5
+        maxDurationMs: 900000
+        maxTurns: 24
+      sandbox:
+        network:
+          defaultAction: allow
+          inheritManaged: true
