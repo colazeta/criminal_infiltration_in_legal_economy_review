@@ -1,0 +1,176 @@
+# Agent contract
+
+This file governs every automated or semi-automated action in the repository.
+
+## Mission
+
+Maintain a trustworthy public literature archive while preserving a strict
+boundary between discovery, editorial judgement and publication.
+
+## Non-negotiable rules
+
+1. Never invent or silently repair metadata, identifiers, abstracts, citations,
+   evidence or screening outcomes.
+2. Never assign scientific eligibility or canonical identity automatically. The owner-authorised operational register publishes the closed bibliographic candidate projection before individual review; this is not scientific inclusion.
+3. Never expose reviewer identity, internal notes, evidence quotations, secrets or copyrighted full text. Candidate bibliography may appear only in the closed operational register authorised by the owner; it must retain unverified metadata/access and pending review states.
+4. Never use an unapproved source, connector or returned domain. Check
+   `docs/governance/sources.md` before retrieval.
+5. Never overwrite decision history. Add a new decision and retire the former
+   current row in the same reviewed change.
+6. Never auto-merge a canonical-work registry or scientific publication change. The owner explicitly authorises automatic mechanical persistence and visibility of the provisional CandidateRecord register, without per-paper acceptance.
+7. When the owner has granted continuing maintenance authority, complete
+   documentation, software, test, CI and site work through validation and merge
+   without waiting for an extra ad-hoc approval. This authority never supplies a
+   missing scientific judgement or curator instruction.
+8. Treat `ontology/cile-review-profile.yaml` as the normative semantic contract.
+   Never add a governed table, field concept, decision/access/review state,
+   identity relation or domain concept unless the same reviewed change maps it in
+   `ontology/` and passes the ontology validator. A `ScholarlyWork` is not a DOI,
+   URL, PDF or repository copy: alternative identifiers and manifestations must
+   be reconciled around one canonical work whenever identity is established.
+9. Preserve every governed CandidateRecord across stage boundaries. Before new
+   discovery, check for completed intake batches whose candidates are not yet
+   represented or explicitly reconciled downstream. Such backlog is operational
+   debt and takes priority over additional recall: trigger/verify the governed
+   recovery path first. A discovery run, intake issue or successful search is not
+   sufficient evidence of preservation. The invariant is that no candidate from a
+   valid completed intake may remain orphaned solely because a downstream workflow
+   raced, failed or was skipped. Recovery is mechanical only and never supplies a
+   scientific eligibility or canonical-identity decision.
+
+## Task routing and write boundaries
+
+| Role | May write | Must not write |
+|---|---|---|
+| Discovery/intake | One structured intake issue when needed and one aggregate metrics-ledger comment per batch | Repository files, branches, PRs, registries, publication state |
+| Metadata verifier | Candidate issue or reviewed metadata PR | Eligibility decisions, public relevance claims |
+| Screener | Reviewed decision/evidence PR | Publication manifest unless the task explicitly includes curation |
+| Curator | Registry and publication-manifest PR | Unverified metadata, automatic merge |
+| Release maintainer | Site, release metadata, changelog and deployment | Scientific decisions not already recorded |
+| Maintenance agent | Docs, tests and CI within assigned scope | Bibliographic retrieval unless explicitly assigned |
+
+If a task spans roles, keep the stages distinguishable and preserve the explicit
+curator decision before publication. Routine maintenance may proceed
+autonomously when the owner has already granted that authority.
+
+## Candidate-to-public flow
+
+1. Search tools create an intake issue using the candidate template.
+2. Metadata are verified and duplicates/identifier variants are resolved.
+3. Screening records a versioned current decision with evidence basis.
+4. A curator adds or updates the canonical work, identifiers, discovery event and
+   approved public annotation together.
+5. CI rebuilds the site and applies the full publication gate.
+6. CI validates the visible change. Canonical/scientific publication changes remain
+   unmerged until an authorised curator or reviewer accepts them; provisional candidate registration is already authorised by the owner; validated
+   maintenance changes may be merged under continuing owner authority.
+
+Intake assessments use `plausible_core`, `plausible_contextual` or `uncertain`.
+Only governed screening decisions may use `eligible_core` or
+`eligible_contextual`.
+
+## Required reading by task
+
+- Any registry/publication/data-model change: `ontology/README.md`,
+  `ontology/cile-review-profile.yaml`, `docs/governance/data-model.md` and
+  `docs/methodology/eligibility.md`.
+- Retrieval or intake: `docs/methodology/discovery.md`,
+  `docs/methodology/expansion.md`, the relevant sections of
+  `docs/methodology/expansion-reference.md`, `docs/governance/sources.md` and
+  `docs/operations/automation.md`. Daily surveillance also requires
+  `docs/operations/daily-metrics.md`.
+- Curator-console action: `docs/operations/curation.md`,
+  `docs/operations/github-app.md`, `ontology/README.md`,
+  `docs/governance/data-model.md` and `docs/methodology/eligibility.md`.
+- Saturation work: `docs/methodology/saturation.md`.
+- Release/deployment: `docs/operations/release.md` and
+  `docs/operations/github-pages.md`.
+
+Do not require unrelated documents merely to make a small maintenance change.
+
+## Mandatory validation
+
+Run the smallest relevant subset, and run the full set for registry, site or
+workflow changes:
+
+```bash
+python3 scripts/validation/validate_repository.py
+python3 scripts/ontology/validate_ontology.py
+python3 scripts/ontology/build_model_browser.py
+python3 -m unittest discover -s tests -p 'test_*.py'
+python3 scripts/build_archive.py
+python3 scripts/build_secondary_collections.py
+python3 scripts/curation/build_curator_stats.py
+python3 scripts/curation/build_curator_options.py
+python3 scripts/validation/validate_archive.py
+python3 scripts/validation/validate_site.py
+node --check site/app.js
+node --check site/aml.js
+node --check site/stats.js
+node --check site/curator.js
+node --check site/curator-config.js
+node --check site/curator-guided.js
+node --check site/model.js
+node --check site/review-v2.js
+node --check curator-app/src/index.js
+node --check curator-app/src/worker.js
+node --test curator-app/test/*.test.js
+python3 scripts/report_saturation.py
+```
+
+The PR body must list changed files, commands and results, record counts,
+external retrieval performed, unresolved human decisions and any ontology
+profile/contract change required by the data change.
+
+## Fail-closed behaviour
+
+Stop without writing when authentication, source authorisation, identity
+resolution, evidence, ontology conformance, issue idempotency or the publication
+gate cannot be verified. A failed request is not a zero-result search. An
+incomplete E1–E3 cycle is not an assessable saturation cycle.
+
+## Automatic operational registration — owner instruction, 2026-09-08
+
+Read docs/operations/paper-register.md. New surveillance uses run/intake v3. Register newly discovered plausible scholarly records before individual review, even when OA verification is pending. Do not fabricate missing metadata or an OA receipt. Use existing CandidateRecord and pending status; canonical identity, controlled labels and scientific decisions remain separate. The owner authorises reviewed maintenance and mechanical persistence of this provisional register.
+
+## Publication accountability — owner maintenance instruction, 2026-09-13
+
+Apply docs/operations/candidate-pipeline-audit.md. Distinguish intake, verified
+main persistence, served provisional publication and scientific inclusion.
+Valid completed intake/publication debt has priority over new discovery. In a
+separately identified maintenance step, the task may reopen the existing exact-title
+[MAINTENANCE][INTAKE-RECOVERY] request, creating it only when absent, and verify the
+repository-owned recovery. This limited exception does not permit discovery to
+edit repository files, registries or scientific decisions. Validate the actual
+terminal before writing; immutable evidence must not be edited to conceal failure.
+
+## Maintenance retrigger clarification — 2026-09-13
+
+The canonical recovery request is issue #362. When recovery is needed and no
+actual recovery job is queued or in progress, the owner may comment exactly
+`/recover-intake` on that issue to activate the existing sole writer. Do not treat
+an open maintenance issue as an active lease or create a duplicate request.
+See docs/operations/residual-intake-recovery.md. Evidence-pinned historical
+occurrence reconciliation cannot create candidates or fabricate a run terminal.
+
+## Public research-sheet scope — owner instruction, 2026-09-13
+
+Apply `docs/operations/public-research-sheets.md` and the closed
+`ontology/modules/public-paper-research.json` projection for issue #597. The owner
+requests existing recorded research context, including the six-class framework,
+in the public sheet **as explicitly unreviewed proposals**. This is an authorised
+display boundary, not a scientific acceptance or canonical-publication decision.
+Raw private source/proposal APIs, reviewer identities, internal working notes and
+original source bodies remain private. Source validation, historical decisions
+and calibration gates are unchanged. No classification is invented to fill a
+missing sheet. Existing Worker/Pages delivery and observer own verification;
+no additional scheduler or parallel research data store is authorised here.
+
+## Two-lane completion delivery — owner instructions, 2026-09-14 and 2026-09-15
+
+Apply `docs/operations/two-lane-delivery.md`. The current system has two hourly hybrid workers: Lane A at :10 and Lane B at :40. Both enrich by default; Lane A owns the 08:00–20:00 Europe/Rome AM scouting window and Lane B owns the 20:00–08:00 PM window. There are two project-wide scouting windows per day, not an additional discovery scheduler. Scheduled scouting uses Parallel Search by default; Exa is optional only when positively available and materially useful. Older daily-cadence, Exa-first and fixed candidate-count instructions are superseded by this owner amendment.
+
+The operational objective is durable paper-stage progress. Before substantial candidate research, establish the authorised persistence path for the intended next stage. Do not build large read-only cohorts when the writer/claim/dispatch path is unavailable, and do not repeat an unchanged zero-persistence strategy until its recorded prerequisite changes. Lane B alone owns shared throughput/persistence/calibration engineering; engineering activity is reported separately and does not count as paper enrichment until it causes real persisted paper-stage transitions.
+
+Durable non-decisional query checkpoint fragments may be appended to the single existing operational issue #696 before terminal intake. This is a narrow write-boundary extension, not candidate registration or a completed run. The same mandate authorises original-byte retention in the existing private enrichment store and public reading only for independently verified reusable rights. Private evidence, scientific acceptance and historical decisions remain protected. CILE-COMPLETION-POLICY-2 permits independently accepted grounded framework non-applicability and explicitly distinguishes mandatory/optional facts. No acceptance is inferred from this engineering mandate.
+

@@ -1,0 +1,60 @@
+"apiVersion": "kora/v1"
+"kind": "Test"
+"metadata":
+  "name": "replay-frontier-f7"
+"spec":
+  "target":
+    "workflow": "cile-hourly-control-plane"
+    "node": "evaluate-frontier"
+  "input":
+    "inline":
+      "activation_id": "synthetic-frontier-f7"
+      "lane": "A"
+      "scheduled_at": "2026-09-19T09:10:00+02:00"
+      "scouting_due": false
+      "unfinished_safe_write": false
+      "active_wip_count": 3
+      "candidate_present": true
+      "metadata_source_ready": true
+      "fulltext_ready": true
+      "proposal_persisted": true
+      "mandatory_fields_accounted": true
+      "framework_assessed": true
+      "independent_comparison_ready": true
+      "references_ready": true
+      "limitations_caveats_ready": true
+      "version_guards_match": true
+      "validation_ready": true
+      "validated": true
+      "writer_ready": false
+      "calibration_case_ready": false
+      "identity_debt_due": false
+      "engineering_blocker": false
+      "repeat_without_changed_prerequisite": false
+  "checks":
+    - "type": "schema"
+      "gate": true
+    - "type": "exact"
+      "gate": true
+      "path": "$.frontier_gate"
+      "expected": "F7_VALIDATED"
+    - "type": "exact"
+      "gate": true
+      "path": "$.next_gate"
+      "expected": "NONE"
+    - "type": "exact"
+      "gate": true
+      "path": "$.frontier_consistent"
+      "expected": true
+    - "type": "exact"
+      "gate": true
+      "path": "$.assessment_completed"
+      "expected": true
+    - "type": "exact"
+      "gate": true
+      "path": "$.validation_accepted"
+      "expected": true
+    - "type": "exact"
+      "gate": true
+      "path": "$.assessment_distance_to_f5"
+      "expected": 0
