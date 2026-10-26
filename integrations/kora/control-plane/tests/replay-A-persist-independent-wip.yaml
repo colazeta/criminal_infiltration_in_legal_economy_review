@@ -1,0 +1,54 @@
+"apiVersion": "kora/v1"
+"kind": "Test"
+"metadata":
+  "name": "replay-A-persist-independent-wip"
+"spec":
+  "target":
+    "workflow": "cile-hourly-control-plane"
+    "node": "route-activation"
+  "input":
+    "inline":
+      "activation_id": "synthetic-A-persist-independent-wip"
+      "lane": "A"
+      "scheduled_at": "2026-09-19T09:10:00+02:00"
+      "scouting_due": false
+      "unfinished_safe_write": true
+      "active_wip_count": 7
+      "candidate_present": false
+      "metadata_source_ready": false
+      "fulltext_ready": false
+      "proposal_persisted": false
+      "mandatory_fields_accounted": false
+      "framework_assessed": false
+      "independent_comparison_ready": false
+      "references_ready": false
+      "limitations_caveats_ready": false
+      "version_guards_match": false
+      "validation_ready": false
+      "validated": false
+      "writer_ready": false
+      "calibration_case_ready": false
+      "identity_debt_due": false
+      "engineering_blocker": false
+      "repeat_without_changed_prerequisite": false
+      "persist_independent_of_frontier_and_wip": true
+      "frontier_gate": "NONE"
+      "next_gate": "F0_METADATA_SOURCE"
+      "frontier_consistent": true
+      "assessment_completed": false
+      "validation_accepted": false
+  "checks":
+    - "type": "schema"
+      "gate": true
+    - "type": "exact"
+      "gate": true
+      "path": "$.route"
+      "expected": "PERSIST"
+    - "type": "exact"
+      "gate": true
+      "path": "$.side_effect_authorized"
+      "expected": false
+    - "type": "exact"
+      "gate": true
+      "path": "$.pilot_mode"
+      "expected": "observe_only"

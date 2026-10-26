@@ -1,0 +1,25 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import crypto from 'node:crypto';
+import {fileURLToPath} from 'node:url';
+import {createRequire} from 'node:module';
+import {isDeepStrictEqual} from 'node:util';
+const require=createRequire(import.meta.url),YAML=require('yaml');
+const root=path.dirname(fileURLToPath(import.meta.url));
+const local=process.argv[2];
+if(!local)throw Error('Provide local control-plane source directory for read-only comparison');
+const hash=f=>crypto.createHash('sha256').update(fs.readFileSync(f)).digest('hex');
+const walk=d=>fs.readdirSync(d,{withFileTypes:true}).flatMap(e=>e.isDirectory()?walk(path.join(d,e.name)):[path.join(d,e.name)]);
+const files=walk(path.join(root,'pilot')).filter(f=>!path.basename(f).startsWith('replay-')).map(f=>{
+ const relative=path.relative(path.join(root,'pilot'),f),prior=path.join(local,relative);
+ return {path:relative,proposedSha256:hash(f),localSha256:fs.existsSync(prior)?hash(prior):null,sameBytes:fs.existsSync(prior)&&hash(f)===hash(prior),sameYamlMeaning:f.endsWith('.yaml')&&fs.existsSync(prior)?isDeepStrictEqual(YAML.parse(fs.readFileSync(f,'utf8')),YAML.parse(fs.readFileSync(prior,'utf8'))):null};
+});
+fs.writeFileSync(path.join(root,'source-comparison.json'),JSON.stringify(files,null,2)+'\n');
+const p=YAML.parse(fs.readFileSync(path.join(root,'pilot/processes/cile-hourly-control-plane.yaml'),'utf8'));
+const evidence=JSON.parse(fs.readFileSync(path.join(root,'evidence/reconstructed-cases.json'),'utf8'));
+const completeness=evidence.cases.map(c=>({id:c.id,missingRequired:p.types.ActivationInput.required.filter(k=>!Object.hasOwn(c.known_input,k)),executed:false}));
+fs.writeFileSync(path.join(root,'evidence/completeness-audit.json'),JSON.stringify(completeness,null,2)+'\n');
+const cases=JSON.parse(fs.readFileSync(path.join(root,'cases.json'),'utf8'));
+const coverage={synthetic:cases.length,reconstructedComplete:0,reconstructedPartial:completeness.length,byKind:Object.fromEntries(['pipeline','frontier','schema-rejection'].map(k=>[k,cases.filter(c=>c.kind===k).length])),expectedRoutesByLane:Object.fromEntries(['A','B'].map(lane=>[lane,[...new Set(cases.filter(c=>c.kind==='pipeline'&&c.input.lane===lane).map(c=>c.expected.route))].sort()])),nativeFixtureCount:walk(path.join(root,'pilot/tests')).length};
+fs.writeFileSync(path.join(root,'coverage.json'),JSON.stringify(coverage,null,2)+'\n');
+console.log(JSON.stringify({semanticDifferences:files.filter(f=>f.sameYamlMeaning===false).map(f=>f.path),coverage,completeness},null,2));
