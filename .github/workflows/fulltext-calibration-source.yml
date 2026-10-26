@@ -34,7 +34,7 @@ jobs:
     timeout-minutes: 12
     steps:
       - name: Checkout reviewed code without retained credentials
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           persist-credentials: false
       - name: Set up Node for recipient encryption
@@ -85,7 +85,7 @@ jobs:
       complete: ${{ steps.run-development.outputs.complete }}
     steps:
       - name: Checkout the same reviewed code without retained credentials
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           persist-credentials: false
       - name: Set up Node for native validation and checkpoint encryption
@@ -180,7 +180,7 @@ jobs:
     outputs:
       complete: ${{ steps.run-development.outputs.complete }}
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           persist-credentials: false
       - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
@@ -236,7 +236,7 @@ jobs:
     outputs:
       complete: ${{ steps.run-development.outputs.complete }}
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           persist-credentials: false
       - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
@@ -292,7 +292,7 @@ jobs:
     outputs:
       complete: ${{ steps.run-development.outputs.complete }}
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           persist-credentials: false
       - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
@@ -348,7 +348,7 @@ jobs:
     outputs:
       complete: ${{ steps.run-development.outputs.complete }}
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           persist-credentials: false
       - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
