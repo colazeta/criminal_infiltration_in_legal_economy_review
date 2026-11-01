@@ -6,6 +6,7 @@ import migration from '../src/enrichment-migration.json' with {type:'json'};
 import adjudicationMigration from '../src/enrichment-adjudication-migration.json' with {type:'json'};
 import {EnrichmentStoreCore,sqliteAdapter,privateTextStore,serviceSignature,enrichmentStore,readinessErrorCode} from '../src/enrichment-store.js';
 import {sha256} from '../src/review-v2.js';
+import {syncTargets} from '../src/paper-enrichment.js';
 const secret='test-only-secret-never-used-in-production-0123456789';
 export function setup(){
  const db=new DatabaseSync(':memory:');db.exec('PRAGMA foreign_keys=ON');const kv=new Map();let alarm=null;
@@ -56,4 +57,68 @@ test('public research audit is authenticated, read-only and independent of activ
  assert.equal((await publicResponse.json()).availability,'not_registered');
  const completion=await core.fetch(new Request('https://enrichment.internal/public-completion?id=CAND-UNKNOWN'));
  const projected=await completion.json();assert.equal(projected.completed,false);assert.equal(projected.status,'not_registered');
+});
+test('public index memoises its SQL fingerprint and invalidates after a write',async()=>{
+ const {core,storage}=setup();await core.ready;
+ const original=storage.sql.exec;let fingerprints=0;
+ storage.sql.exec=function(sql,...args){
+   if(sql.startsWith('SELECT record_id,input_sha256,record_json FROM enrichment_targets WHERE active=1'))fingerprints++;
+   return original.call(this,sql,...args);
+ };
+ const url='https://enrichment.internal/public-index?cursor=0';
+ const first=await core.fetch(new Request(url));assert.equal(first.status,200);
+ const originalIndex=await first.json();assert.equal(originalIndex.total,0);
+ assert.equal(fingerprints,1);
+ const repeated=await core.fetch(new Request(url));assert.equal(repeated.status,200);
+ assert.equal((await repeated.json()).index_revision,originalIndex.index_revision);
+ assert.equal(fingerprints,1);
+ await syncTargets(await core.environment(),{schemaVersion:1,records:[
+   {id:'CAND-CACHE-TEST',title:'Synthetic index cache record',doi:'10.1234/cache',sourceLinks:['https://example.org/fixture']}
+ ]},Date.now());
+ const stale=await core.fetch(new Request(url+'&revision='+originalIndex.index_revision));
+ assert.equal(stale.status,409);
+ assert.deepEqual(await stale.json(),{error_code:'index_changed'});
+ assert.equal(fingerprints,2);
+ const latest=await core.fetch(new Request(url));assert.equal(latest.status,200);
+ const freshIndex=await latest.json();
+ assert.equal(freshIndex.total,1);
+ assert.notEqual(freshIndex.index_revision,originalIndex.index_revision);
+ assert.equal(fingerprints,2);
+});
+
+test('public index refuses to cache a snapshot if SQL changes during construction',async()=>{
+ const {core,storage}=setup();await core.ready;
+ await syncTargets(await core.environment(),{schemaVersion:1,records:[
+   {id:'CAND-CACHE-RACE',title:'Synthetic concurrency record',doi:'10.1234/race',sourceLinks:['https://example.org/fixture']}
+ ]},Date.now());
+ const original=storage.sql.exec;let changed=false;
+ storage.sql.exec=function(sql,...args){
+   const result=original.call(this,sql,...args);
+   if(!changed&&sql.includes('SELECT COUNT(*) n,MAX(receipt_id) last FROM enrichment_normalization_receipts')){
+     changed=true;
+     original.call(this,"UPDATE enrichment_targets SET updated_at='concurrent-test' WHERE active=1").toArray();
+   }
+   return result;
+ };
+ const url='https://enrichment.internal/public-index?cursor=0';
+ const unstable=await core.fetch(new Request(url));
+ assert.equal(unstable.status,409);
+ assert.deepEqual(await unstable.json(),{error_code:'index_changed'});
+ assert.equal(changed,true);
+ const stable=await core.fetch(new Request(url));
+ assert.equal(stable.status,200);
+ assert.equal((await stable.json()).total,1);
+});
+
+test('an unsupported SQLite change counter falls back to uncached consistent reads',async()=>{
+ const {core,storage}=setup();await core.ready;
+ const original=storage.sql.exec;let fingerprints=0;
+ storage.sql.exec=function(sql,...args){
+   if(sql==='SELECT total_changes() AS n')throw Error('unsupported_sql_function');
+   if(sql.startsWith('SELECT record_id,input_sha256,record_json FROM enrichment_targets WHERE active=1'))fingerprints++;
+   return original.call(this,sql,...args);
+ };
+ const url='https://enrichment.internal/public-index?cursor=0';
+ for(let i=0;i<2;i++)assert.equal((await core.fetch(new Request(url))).status,200);
+ assert.equal(fingerprints,4);
 });
