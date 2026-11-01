@@ -9,7 +9,7 @@ import {Hour40Schedule, iterationKey} from './enrichment-schedule.js';
 import { sha256 } from './review-v2.js';
 import { runEnrichment, handlePaperEnrichment, storeExtraction, normalizeExistingExtractions } from './paper-enrichment.js';
 import {completionPacket, importCalibrationApproval, importCompletionApproval} from './enrichment-adjudication.js';
-import {readPublicResearch, readPublicCompletion, publicResearchAudit, readPublicIndex} from './public-paper-research.js';
+import {readPublicResearch, readPublicCompletion, publicResearchAudit, readPublicIndex, publicIndexSnapshot} from './public-paper-research.js';
 import {readDevelopmentCheckpoint,writeDevelopmentCheckpoint} from './calibration-development-checkpoint.js';
 import {claimF1Retention,assertF1RetentionClaim,releaseF1RetentionClaim,abortF1RetentionClaim} from './frontier-retention-claim.js';
 import {auditArchitecture,architectureSchema} from './architecture-audit.js';
@@ -92,7 +92,7 @@ export function privateTextStore(storage) {
 
 export class EnrichmentStoreCore {
   constructor(ctx,env) {
-    this.ctx=ctx; this.env=env; this.readinessError=null;
+    this.ctx=ctx; this.env=env; this.readinessError=null; this.publicIndexCache=null; this.publicIndexPending=null;
     this.ready=ctx.blockConcurrencyWhile(async()=>{
       let phase='sqlite';
       try{
@@ -154,6 +154,39 @@ export class EnrichmentStoreCore {
     const activation=await this.ctx.storage.get('activation:enrichment');
     return {...this.env, REVIEW_DB:this.db, REVIEW_EVIDENCE:this.evidence, REVIEW_DOCUMENTS:this.documents,
       PAPER_ENRICHMENT_ENABLED:this.env.PAPER_ENRICHMENT_ENABLED==='true'&&activation?.commit===this.env.DEPLOY_COMMIT?'true':'false'};
+  }
+  // This object's SQLite connection is the only SQL writer for its private database.
+  // total_changes() is constant-time and includes writes performed by the scheduler.
+  // A new object instance starts with an empty cache, even after an eviction or deploy.
+  indexSqlGeneration() {
+    try {
+      const n=this.ctx.storage.sql.exec('SELECT total_changes() AS n').toArray()[0]?.n;
+      return Number.isSafeInteger(n)&&n>=0?n:null;
+    } catch {
+      // If the runtime cannot expose this SQLite function, keep the original
+      // uncached index path rather than risk serving an unverified revision.
+      return null;
+    }
+  }
+  async cachedPublicIndexSnapshot(env) {
+    const generation=this.indexSqlGeneration();
+    if(generation===null)return publicIndexSnapshot(env);
+    if(this.publicIndexCache?.generation===generation&&this.publicIndexCache.commit===env.DEPLOY_COMMIT)
+      return this.publicIndexCache.snapshot;
+    if(this.publicIndexPending?.generation===generation&&this.publicIndexPending.commit===env.DEPLOY_COMMIT)
+      return this.publicIndexPending.promise;
+    const promise=(async()=>{
+      const snapshot=await publicIndexSnapshot(env);
+      // An intervening SQL write may change the projection while an await is
+      // pending. Refuse a mixed version; callers retain their existing 409 retry.
+      if(this.indexSqlGeneration()!==generation)
+        throw Object.assign(Error('index_changed'),{status:409});
+      this.publicIndexCache={generation,commit:env.DEPLOY_COMMIT,snapshot};
+      return snapshot;
+    })();
+    this.publicIndexPending={generation,commit:env.DEPLOY_COMMIT,promise};
+    try{return await promise}
+    finally{if(this.publicIndexPending?.promise===promise)this.publicIndexPending=null}
   }
   async aggregate() {
     const env=await this.environment(),counts={};
@@ -324,7 +357,12 @@ export class EnrichmentStoreCore {
     if(url.pathname==='/machine')return this.machine(request);
     await this.requireReady();
     const env=await this.environment();
-    if(url.pathname==='/public-index'&&request.method==='GET'){try{return json(await readPublicIndex(env,Number(url.searchParams.get('cursor')||0),url.searchParams.get('revision')))}catch(error){return json({error_code:error.message},error.status||503)}}
+    if(url.pathname==='/public-index'&&request.method==='GET'){
+      try{
+        const indexEnv={...env,PUBLIC_INDEX_SNAPSHOT:()=>this.cachedPublicIndexSnapshot(env)};
+        return json(await readPublicIndex(indexEnv,Number(url.searchParams.get('cursor')||0),url.searchParams.get('revision')));
+      }catch(error){return json({error_code:error.message},error.status||503)}
+    }
     if(url.pathname==='/public-assets'&&['GET','HEAD'].includes(request.method)){
       try{const candidate=url.searchParams.get('id'),doc=url.searchParams.get('document');if(doc){const t=await this.db.prepare('SELECT target_id FROM enrichment_targets WHERE record_id=? AND active=1').bind(candidate).first();if(!t)return json({error:'not_found'},404);return await documentResponse(env,t.target_id,doc,request,{publicOnly:true})}return json(await publicAssets(env,candidate,Number(url.searchParams.get('offset')||0),url.searchParams.get('revision')))}catch(e){return json({error:e.code||'assets_unavailable'},e.status||503)}
     }
