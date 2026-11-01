@@ -219,7 +219,8 @@ export async function mapBounded(values,limit,mapper){
 }
 export async function readPublicIndex(env,cursor=0,revision=null) {
   if(!Number.isSafeInteger(cursor)||cursor<0||cursor>10000||cursor>0&&!/^[a-f0-9]{64}$/.test(revision||''))throw indexError('invalid_index_cursor',400);
-  const snapshot=await publicIndexSnapshot(env);
+  const snapshotForRequest=typeof env.PUBLIC_INDEX_SNAPSHOT==='function'?env.PUBLIC_INDEX_SNAPSHOT:()=>publicIndexSnapshot(env);
+  const snapshot=await snapshotForRequest();
   if(revision!==null&&revision!==snapshot.revision)throw indexError('index_changed');
   if(cursor>snapshot.targets.length)throw indexError('index_changed');
   const pageTargets=snapshot.targets.slice(cursor,cursor+INDEX_PAGE_SIZE);
@@ -230,7 +231,7 @@ export async function readPublicIndex(env,cursor=0,revision=null) {
       classes:r?.framework.status==='proposed'?[r.framework.primary,...r.framework.secondary.map(s=>s.category)]:[],
       research_revision:out.revision,completion:Object.fromEntries(['status','completed','completed_at','protocol_version','codebook_version','research_revision','revision'].map(k=>[k,done[k]])),reference_coverage:done.reference_coverage};
   });
-  if((await publicIndexSnapshot(env)).revision!==snapshot.revision)throw indexError('index_changed');
+  if((await snapshotForRequest()).revision!==snapshot.revision)throw indexError('index_changed');
   return validatePublicIndex({schema_version:1,projection_version:'CILE-PUBLIC-INDEX-1',index_revision:snapshot.revision,total:snapshot.targets.length,records,
     next_cursor:cursor+records.length<snapshot.targets.length?cursor+records.length:null});
 }
