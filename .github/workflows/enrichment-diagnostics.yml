@@ -13,7 +13,7 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: Checkout public source
-        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
       - name: Read-only dependency checks with redacted output
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
