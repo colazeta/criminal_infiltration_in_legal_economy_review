@@ -92,7 +92,7 @@ export function privateTextStore(storage) {
 
 export class EnrichmentStoreCore {
   constructor(ctx,env) {
-    this.ctx=ctx; this.env=env; this.readinessError=null; this.publicIndexCache=null; this.publicIndexPending=null;
+    this.ctx=ctx; this.env=env; this.readinessError=null; this.publicIndexCache=null; this.publicIndexPending=null; this.backupPagination=new Map(); this.aggregateCountsCache=null; this.aggregateCountsPending=null;
     this.ready=ctx.blockConcurrencyWhile(async()=>{
       let phase='sqlite';
       try{
@@ -188,9 +188,28 @@ export class EnrichmentStoreCore {
     try{return await promise}
     finally{if(this.publicIndexPending?.promise===promise)this.publicIndexPending=null}
   }
+  async aggregateCounts() {
+    const generation=this.indexSqlGeneration(),commit=this.env.DEPLOY_COMMIT;
+    if(generation!==null&&this.aggregateCountsCache?.generation===generation&&this.aggregateCountsCache.commit===commit)
+      return this.aggregateCountsCache.counts;
+    if(generation!==null&&this.aggregateCountsPending?.generation===generation&&this.aggregateCountsPending.commit===commit)
+      return this.aggregateCountsPending.promise;
+    const promise=(async()=>{
+      const counts={};
+      for(const table of ['targets','sources','citation_observations','proposals','calibration_receipts','adjudication_receipts','documents','bibliography_snapshots'])counts[table]=Number((await this.db.prepare(`SELECT COUNT(*) n FROM enrichment_${table}`).first()).n);
+      Object.freeze(counts);
+      if(generation!==null){
+        if(this.indexSqlGeneration()!==generation)throw Object.assign(Error('aggregate_changed'),{status:409});
+        this.aggregateCountsCache={generation,commit,counts};
+      }
+      return counts;
+    })();
+    this.aggregateCountsPending={generation,commit,promise};
+    try{return await promise}
+    finally{if(this.aggregateCountsPending?.promise===promise)this.aggregateCountsPending=null}
+  }
   async aggregate() {
-    const env=await this.environment(),counts={};
-    for(const table of ['targets','sources','citation_observations','proposals','calibration_receipts','adjudication_receipts','documents','bibliography_snapshots'])counts[table]=Number((await this.db.prepare(`SELECT COUNT(*) n FROM enrichment_${table}`).first()).n);
+    const env=await this.environment(),counts=await this.aggregateCounts();
     const response=await handlePaperEnrichment(new Request('https://enrichment.internal/api/paper-enrichment/status'),env,{login:env.CURATOR_LOGIN});
     return {...await response.json(),storage_backend:'durable_object_sqlite',counts,scheduling:this.schedule.status(),commit:this.env.DEPLOY_COMMIT};
   }
@@ -302,7 +321,7 @@ export class EnrichmentStoreCore {
       }
       if(data.operation==='architecture-backup'){
         if(Object.keys(data).sort().join(',')!=='backup,expected_commit,operation')return json({error_code:'invalid_service_envelope'},422);
-        try{return json(await archiveBackupPage(await this.environment(),this.ctx.storage,data.backup))}
+        try{return json(await archiveBackupPage(await this.environment(),this.ctx.storage,data.backup,this.backupPagination))}
         catch{return json({error_code:'architecture_backup_failed'},503)}
       }
       if(data.operation==='architecture-schema'){

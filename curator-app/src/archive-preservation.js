@@ -46,7 +46,7 @@ export async function openBackupPage(page,secret,commit,snapshot_id){
   return JSON.parse(dec.decode(raw));
 }
 
-export async function archiveBackupPage(env,storage,request){
+export async function archiveBackupPage(env,storage,request,pagination=new Map()){
   if(!request||!/^[-a-f0-9]{36}$/.test(request.snapshot_id||''))fail();
   const {snapshot_id,...parts}=request;request=parts;
   if(!request||typeof request!=='object'||Array.isArray(request)||Object.keys(request).some(k=>!['part','table','offset','after'].includes(k)))fail();
@@ -59,9 +59,24 @@ export async function archiveBackupPage(env,storage,request){
       other_stores_included:false,alarm:await storage.getAlarm()};
   }else if(request.part==='sql'){
     if(Object.keys(request).sort().join(',')!=='offset,part,table'||!ARCHIVE_TABLES.includes(request.table)||!Number.isSafeInteger(request.offset)||request.offset<0||request.offset>100000)fail();
-    // All governed tables currently have rowid. No arbitrary identifier or SQL.
-    const values=(await env.REVIEW_DB.prepare(`SELECT * FROM ${request.table} ORDER BY rowid LIMIT 100 OFFSET ?`).bind(request.offset).all()).results;
-    page={part:'sql',table:request.table,offset:request.offset,rows:values};
+    // Retain the existing encrypted page contract for deployed backup clients.
+    // Sequential pages seek from the last rowid instead of rescanning the prefix.
+    // Eviction, retry or out-of-order requests use the original exact OFFSET path.
+    // Only bounded opaque cursors are retained; no private row bodies are cached.
+    const key=snapshot_id+':'+request.table,cursor=pagination.get(key);
+    const seek=cursor?.offset===request.offset;
+    const sql=seek?
+      `SELECT *,CAST(rowid AS TEXT) AS __cile_backup_rowid FROM ${request.table} WHERE rowid > ? ORDER BY rowid LIMIT 100`:
+      `SELECT *,CAST(rowid AS TEXT) AS __cile_backup_rowid FROM ${request.table} ORDER BY rowid LIMIT 100 OFFSET ?`;
+    const values=(await env.REVIEW_DB.prepare(sql).bind(seek?cursor.rowid:request.offset).all()).results;
+    const rowid=values.at(-1)?.__cile_backup_rowid;
+    pagination.delete(key);
+    if(values.length===100&&typeof rowid==='string'&&/^-?\d{1,19}$/.test(rowid)){
+      pagination.set(key,{offset:request.offset+values.length,rowid});
+      if(pagination.size>64)pagination.delete(pagination.keys().next().value);
+    }
+    page={part:'sql',table:request.table,offset:request.offset,
+      rows:values.map(({__cile_backup_rowid,...row})=>row)};
   }else if(request.part==='kv'){
     if(Object.keys(request).sort().join(',')!=='after,part'||typeof request.after!=='string'||request.after.length>2048)fail();
     const entries=await storage.list({limit:16,...(request.after?{startAfter:request.after}:{})});

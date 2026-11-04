@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {isolatedStore,captureBackup,restoreBackup} from '../../scripts/architecture/private-backup.mjs';
-import {archiveBackupPage,encodeStored,decodeStored} from '../src/archive-preservation.js';
+import {archiveBackupPage,encodeStored,decodeStored,openBackupPage} from '../src/archive-preservation.js';
 import {syncTargets,saveSource} from '../src/paper-enrichment.js';
 import {serviceSignature} from '../src/enrichment-store.js';
 
@@ -13,7 +13,7 @@ async function fixture(){
  const source={provider:'Fixture',source_url:'https://example.org/0',evidence_kind:'abstract',text:'PRIVATE SOURCE NEVER STORED IN AN ARTIFACT'};
  await saveSource(x.env,target,source,Date.now());await saveSource(x.env,target,source,Date.now());
  x.kv.set('unattached:retained-bytes',new Uint8Array([0,1,2,255]));x.kv.set('nonce:excluded','transient');
- x.call=request=>archiveBackupPage(x.env,x.storage,request);
+ x.call=request=>archiveBackupPage(x.env,x.storage,request,x.core.backupPagination);
  return x;
 }
 test('encrypted complete-store backup restores all 294 identities and retained bytes without publishing',async()=>{
@@ -54,4 +54,46 @@ test('backup operation requires a signed exact deployment and a closed fixed rea
  const ts=String(Date.now()),nonce=crypto.randomUUID();const request=new Request('https://enrichment.internal/machine',{method:'POST',body,headers:{'Content-Type':'application/json','X-Enrichment-Timestamp':ts,'X-Enrichment-Nonce':nonce,'X-Enrichment-Signature':await serviceSignature(secret,ts,nonce,body)}});
  const response=await x.core.machine(request);assert.equal(response.status,200);assert.ok((await response.json()).ciphertext);
  await assert.rejects(x.call({part:'sql',table:'sqlite_master',offset:0,snapshot_id:crypto.randomUUID()}));x.db.close();
+});
+
+test('sequential backup pages seek sparse rowids and preserve the existing encrypted row contract',async()=>{
+ const x=await fixture();
+ try{
+  // Exercise SQLite rowids beyond JavaScript's safe integer range without rounding.
+  x.db.exec('UPDATE enrichment_targets SET rowid=rowid+9007199254740992');
+  const expected=x.db.prepare('SELECT * FROM enrichment_targets ORDER BY rowid').all().map(r=>({...r}));
+  const sql=[],original=x.env.REVIEW_DB.prepare;
+  x.env.REVIEW_DB.prepare=query=>{sql.push(query);return original(query)};
+  const snapshot_id=crypto.randomUUID(),actual=[];
+  for(let offset=0;offset<expected.length;offset+=100){
+   const page=await openBackupPage(await x.call({part:'sql',table:'enrichment_targets',offset,snapshot_id}),secret,commit,snapshot_id);
+   assert.deepEqual(Object.keys(page).sort(),['offset','part','rows','table']);
+   assert.equal(page.offset,offset);actual.push(...page.rows);
+  }
+  assert.deepEqual(actual,expected);
+  assert.equal(sql.filter(s=>s.includes('OFFSET')).length,1);
+  assert.equal(sql.filter(s=>s.includes('WHERE rowid > ?')).length,2);
+  const plan=x.db.prepare('EXPLAIN QUERY PLAN SELECT * FROM enrichment_targets WHERE rowid > ? ORDER BY rowid LIMIT 100').all('9007199254740992');
+  assert.ok(plan.some(p=>/SEARCH.*INTEGER PRIMARY KEY/.test(p.detail)));
+ }finally{x.db.close()}
+});
+
+test('backup retries, interleaved tables, new snapshots and cache eviction never skip rows',async()=>{
+ const x=await fixture();
+ try{
+  x.db.exec('UPDATE enrichment_targets SET rowid=-rowid*3-1000');
+  const snapshot_id=crypto.randomUUID(),table='enrichment_targets';
+  const page=async(offset,id=snapshot_id)=>openBackupPage(await x.call({part:'sql',table,offset,snapshot_id:id}),secret,commit,id);
+  const expected=offset=>x.db.prepare('SELECT * FROM enrichment_targets ORDER BY rowid LIMIT 100 OFFSET ?').all(offset).map(r=>({...r}));
+  assert.deepEqual((await page(0)).rows,expected(0));
+  assert.deepEqual((await page(0)).rows,expected(0));
+  await x.call({part:'sql',table:'enrichment_inputs',offset:0,snapshot_id});
+  assert.deepEqual((await page(100)).rows,expected(100));
+  assert.deepEqual((await page(100,crypto.randomUUID())).rows,expected(100));
+  assert.deepEqual((await page(0)).rows,expected(0));
+  for(let i=0;i<65;i++)await page(0,crypto.randomUUID());
+  assert.equal(x.core.backupPagination.size,64);
+  assert.deepEqual((await page(100)).rows,expected(100));
+  assert.deepEqual((await page(250)).rows,expected(250));
+ }finally{x.db.close()}
 });
