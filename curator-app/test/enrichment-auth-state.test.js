@@ -70,3 +70,31 @@ test('replay remains an authentication failure rather than a storage diagnostic'
   }};
   await assert.rejects(core.recordNonce(crypto.randomUUID(),Date.now()),/service_replay/);
 });
+
+test('nonce cleanup is bounded while every request still reserves and rejects replay',async()=>{
+  const core=Object.create(EnrichmentStoreCore.prototype),values=new Map();let lists=0,reads=0;
+  core.ctx={storage:{
+    async transaction(fn){return fn({async get(k){reads++;return values.get(k)},async put(k,v){values.set(k,v)}})},
+    async list(){lists++;return new Map()},async delete(){},
+  }};
+  await core.recordNonce('first',1000000);
+  await core.recordNonce('second',1000001);
+  assert.equal(lists,1);assert.equal(reads,2);
+  await assert.rejects(core.recordNonce('first',1000002),/service_replay/);
+  await core.recordNonce('third',1060000);assert.equal(lists,2);
+});
+
+test('nonce cleanup advances beyond a full prefix page and retries failed cleanup',async()=>{
+  const core=Object.create(EnrichmentStoreCore.prototype),pages=[];let fail=true;
+  const entries=new Map(Array.from({length:128},(_,i)=>['nonce:'+String(i).padStart(3,'0'),1]));
+  core.ctx={storage:{
+    async transaction(fn){return fn({async get(){},async put(){}})},
+    async list(options){pages.push(options);return options.startAfter?new Map():entries},
+    async delete(){if(fail)throw Error('unavailable')},
+  }};
+  await assert.rejects(core.recordNonce('a',1000000),e=>e.code==='service_auth_nonce_delete_unavailable');
+  fail=false;await core.recordNonce('b',1000001);
+  await core.recordNonce('c',1060001);
+  assert.equal(pages[1].startAfter,undefined);assert.equal(pages[2].startAfter,'nonce:127');
+  assert.equal(core.nonceSweepAfter,null);
+});

@@ -223,10 +223,14 @@ export class EnrichmentStoreCore {
         await tx.put(key,now);
         phase='commit';
       });
+      // Reservation above always runs; only garbage collection is throttled.
+      if(Number.isFinite(this.nonceSweepAt)&&now>=this.nonceSweepAt&&now-this.nonceSweepAt<60000)return;
       phase='list';
-      const entries=await this.ctx.storage.list({prefix:'nonce:',limit:128}),expired=[];
+      const entries=await this.ctx.storage.list({prefix:'nonce:',limit:128,...(this.nonceSweepAfter?{startAfter:this.nonceSweepAfter}:{})}),expired=[];
       for(const[key,time]of entries)if(now-time>300000)expired.push(key);
       if(expired.length){phase='delete';await this.ctx.storage.delete(expired)}
+      this.nonceSweepAfter=entries.size===128?[...entries.keys()].at(-1):null;
+      this.nonceSweepAt=now;
     }catch(error){
       if(error?.message==='service_replay')throw error;
       const code=`service_auth_nonce_${phase}_unavailable`,unavailable=Error(code);unavailable.code=code;unavailable.status=503;throw unavailable;
