@@ -122,3 +122,52 @@ test('an unsupported SQLite change counter falls back to uncached consistent rea
  for(let i=0;i<2;i++)assert.equal((await core.fetch(new Request(url))).status,200);
  assert.equal(fingerprints,4);
 });
+
+test('unchanged aggregate counts share one scan and invalidate after writes and deploy changes',async()=>{
+ const {core,db,storage,env}=setup();await core.ready;
+ try{
+  const original=storage.sql.exec;let counts=0;
+  storage.sql.exec=function(sql,...args){if(/^SELECT COUNT\(\*\) n FROM enrichment_/.test(sql))counts++;return original.call(this,sql,...args)};
+  const first=await Promise.all([core.aggregateCounts(),core.aggregateCounts()]);
+  assert.equal(counts,8);assert.equal(first[0].targets,0);assert.ok(Object.isFrozen(first[0]));
+  assert.deepEqual(await core.aggregateCounts(),first[0]);assert.equal(counts,8);
+  await syncTargets(await core.environment(),{schemaVersion:1,records:[{id:'CAND-COUNTS',title:'Synthetic count record',doi:'',sourceLinks:['https://example.org/fixture']}]},Date.now());
+  assert.equal((await core.aggregateCounts()).targets,1);assert.equal(counts,16);
+  env.DEPLOY_COMMIT='new';await core.aggregateCounts();assert.equal(counts,24);
+  // Scheduler state is always live, independent of the cached SQL counts.
+  let reads=0;core.schedule.status=()=>({probe:++reads});
+  assert.equal((await core.aggregate()).scheduling.probe,1);
+  assert.equal((await core.aggregate()).scheduling.probe,2);assert.equal(counts,24);
+ }finally{db.close()}
+});
+
+test('aggregate counts reject a mixed generation and retry without caching it',async()=>{
+ const {core,db,storage}=setup();await core.ready;
+ try{
+  const original=storage.sql.exec;let changed=false;
+  storage.sql.exec=function(sql,...args){
+   const result=original.call(this,sql,...args);
+   if(!changed&&sql==='SELECT COUNT(*) n FROM enrichment_sources'){
+    changed=true;original.call(this,"INSERT INTO enrichment_targets VALUES ('test','cycle','candidate','record',?,'{}',1,'now','now')",'a'.repeat(64));
+   }
+   return result;
+  };
+  await assert.rejects(core.aggregateCounts(),e=>e.message==='aggregate_changed'&&e.status===409);
+  assert.equal(core.aggregateCountsCache,null);
+  assert.equal((await core.aggregateCounts()).targets,1);
+ }finally{db.close()}
+});
+
+test('aggregate counts fall back to fresh reads if the SQLite generation is unavailable',async()=>{
+ const {core,db,storage}=setup();await core.ready;
+ try{
+  const original=storage.sql.exec;let counts=0;
+  storage.sql.exec=function(sql,...args){
+   if(sql==='SELECT total_changes() AS n')throw Error('unsupported');
+   if(/^SELECT COUNT\(\*\) n FROM enrichment_/.test(sql))counts++;
+   return original.call(this,sql,...args);
+  };
+  await core.aggregateCounts();await core.aggregateCounts();assert.equal(counts,16);
+  assert.equal(core.aggregateCountsCache,null);
+ }finally{db.close()}
+});

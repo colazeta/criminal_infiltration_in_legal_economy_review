@@ -27,3 +27,22 @@ Cloudflare Durable Objects SQLite storage API: https://developers.cloudflare.com
 Cloudflare Durable Objects limits: https://developers.cloudflare.com/durable-objects/platform/limits/
 
 The service is bounded to the project's existing Workers plan. No paid AI endpoint or account upgrade is introduced by this adapter. These statements are not a guarantee about aggregate account billing from unrelated workloads.
+
+## Read-budget maintenance — 2026-11-04
+
+SQL backup pages retain the existing encrypted request/response contract and all
+catalogue digests and isolated-restore checks. Within one live object, sequential
+pages use a rowid seek instead of repeatedly scanning the OFFSET prefix. A bounded
+64-entry cache holds only the next offset and an exact decimal rowid, keyed by
+snapshot and allowlisted table. Rowids are kept as text to avoid JavaScript integer
+rounding. Retries, out-of-order pages, new snapshots and object/cache eviction fall
+back to the original OFFSET read. Neither catalogue pass is cached: concurrent SQL
+or KV changes still prevent certification.
+
+The eight aggregate table counts share an in-flight read and are reused only for
+the same SQLite `total_changes()` generation and deployment. Writes invalidate the
+cache, a write during counting returns a retryable conflict, and runtimes without
+the generation function perform fresh reads. Scheduling receipts and recent runs
+are still read live. These optimisations do not raise the account quota, certify
+an unavailable backup, or establish a measured production saving; verify quota
+usage after deployment and reset.
