@@ -400,7 +400,7 @@ export default {
       superviseDays(env, controller.scheduledTime),
       enrichmentStore(env) ? enrichmentStore(env).fetch(new Request("https://enrichment.internal/tick")) : runEnrichment(env, { now: controller.scheduledTime }),
     ]);
-    if (outcomes.some(o => o.status === "rejected")) throw new Error("scheduled_component_failed");
+    if (outcomes.some(o => o.status === "rejected" || (o.value instanceof Response && !o.value.ok))) throw new Error("scheduled_component_failed");
     return outcomes.map(o => o.value);
   },
   async queue(batch, env) { return consumeDays(batch, env); },

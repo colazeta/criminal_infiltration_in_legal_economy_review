@@ -34,7 +34,13 @@ jobs:
       - name: Capture encrypted pages, verify all hashes and restore in isolation
         env:
           CURATOR_SESSION_SECRET: ${{ secrets.CURATOR_SESSION_SECRET }}
-        run: node scripts/architecture/private-backup.mjs capture "$RUNNER_TEMP/cile-private-archive.encrypted.json"
+        run: |
+          python3 - <<'PYBACKUP'
+          import os
+          from pathlib import Path
+          from scripts.architecture.predeploy_backup import preserve
+          preserve(Path(os.environ['RUNNER_TEMP']) / 'cile-private-archive.encrypted.json')
+          PYBACKUP
       - name: Retain ciphertext only
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
