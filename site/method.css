@@ -2,7 +2,7 @@
    The method page is intentionally a linear, document-like 1990s reference page.
    No cards, grids, hero split, shadows or decorative containers. */
 
-body.classic-method main {
+body.classic-site.classic-method main {
   width: calc(100% - 2 * var(--ui-gutter));
   margin: 10px var(--ui-gutter) var(--ui-section-gap);
   padding: var(--ui-pane-padding);
